@@ -1,1051 +1,708 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Rolli gRolling With Slipping Top Spin</title>
-  <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
-  <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spinning Ball — Rolling with Slipping</title>
+    <style>
+        body {
+            background-color: #0a0e1a;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #title {
+            text-align: center;
+            font-size: 1.7em;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 5px;
+            margin-top: 0.7em;
+        }
+
+        #control-panel {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 12px;
+            padding: 1em;
+            margin: 0.7em 1em;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        #simulation-container {
+            display: flex;
+            flex-grow: 1;
+            margin: 0 1em 1em 1em;
+        }
+
+        #simulation-canvas {
+            flex: 5;
+            border-radius: 10px;
+        }
+
+        #graph-canvas {
+            flex: 3;
+            border-radius: 10px;
+        }
+
+        #equations-panel {
+            width: 230px;
+            border-radius: 10px;
+            padding: 1em;
+            box-sizing: border-box;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0.5em;
+        }
+
+        .slider-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 0.3em;
+        }
+
+        .slider {
+            width: 140px;
+        }
+
+        .slider-value {
+            font-family: 'Consolas', monospace;
+            color: #90caf9;
+            width: 45px;
+            text-align: center;
+        }
+
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+            margin: 0.5em;
+        }
+
+        .checkbox-label {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.4);
+            margin-bottom: 0.3em;
+        }
+
+        .checkbox {
+            color: #b0b0b0;
+            font-size: 0.8em;
+            margin: 0.2em 0;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            margin: 0.5em;
+        }
+
+        .button {
+            background: #1b5e20;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 0.5em 1em;
+            margin: 0.3em 0;
+            letter-spacing: 1px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #2e7d32;
+        }
+
+        .button:disabled {
+            background: rgba(255, 255, 255, 0.03);
+            color: rgba(255, 255, 255, 0.12);
+            cursor: not-allowed;
+        }
+
+        #slow-motion {
+            margin-top: 0.5em;
+            font-size: 0.8em;
+        }
+
+        .equations-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1em;
+            box-sizing: border-box;
+        }
+
+        .equations-card h3 {
+            font-size: 1.1em;
+            color: #64b5f6;
+            margin-bottom: 0.5em;
+        }
+
+        .equations-card p {
+            font-family: 'Consolas', monospace;
+            font-size: 0.8em;
+            color: #d0d0d0;
+            margin: 0.3em 0;
+        }
+    </style>
 </head>
 <body>
-  <py-config>
-packages = []
-</py-config>
-  <div id="simulation-output"></div>
-  <script type="py">
-#!/usr/bin/env python3
-"""
-Spinning Ball Dropped on Surface — Rolling Physics Simulation
-PyQt6 — Fixed alignment, no scrolling ground, ball moves right off-screen.
-
-Physics (solid sphere, I = 2/5 mR²):
-  Ball spins clockwise (ω₀ > 0), dropped with v_cm = 0.
-  Bottom moves LEFT → friction RIGHT → v_cm increases from 0.
-  ω decreases but stays CW.  Pure rolling at t_r = 2Rω₀/(7μg).
-  v_r = 2Rω₀/7,  ω_r = 2ω₀/7.
-"""
-
-import sys, math, time, random
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QGridLayout, QLabel, QPushButton, QFrame, QSlider, QCheckBox,
-    QGraphicsDropShadowEffect
-)
-from PyQt6.QtCore import Qt, QTimer, QRectF, QPointF
-from PyQt6.QtGui import (
-    QPainter, QColor, QFont, QLinearGradient, QRadialGradient,
-    QPen, QBrush, QPainterPath, QPalette
-)
-
-
-# ═══════════════════════════ PHYSICS ═══════════════════════════
-
-class BallPhysics:
-    def __init__(self):
-        self.R = 40.0
-        self.mass = 1.0
-        self.g = 400.0
-        self.mu = 0.35
-        self.omega_0 = 15.0
-        self.reset()
-
-    def reset(self):
-        self.t = 0.0
-        self.omega = self.omega_0
-        self.v_cm = 0.0
-        self.theta = 0.0
-        self.x_cm = 0.0       # horizontal displacement from drop point
-        self.phase = "hovering"
-
-        # Drop
-        self.drop_start_y = 0.0
-        self.y_cm = 0.0
-        self.y_target = 0.0
-        self.drop_v = 0.0
-        self.hover_elapsed = 0.0
-
-        # Fixed drop x position (set by canvas)
-        self.drop_x = 0.0
-
-        self.recalc_analytical()
-
-        self.hist_t = []
-        self.hist_v = []
-        self.hist_omega = []
-        self.hist_Romega = []
-        self.hist_vcontact = []
-
-    def recalc_analytical(self):
-        d = 7.0 * self.mu * self.g
-        if d < 1e-9:
-            self.t_r = float('inf')
-            self.v_r = 0.0
-            self.omega_r = 0.0
-        else:
-            self.t_r = 2.0 * self.R * self.omega_0 / d
-            self.v_r = 2.0 * self.R * self.omega_0 / 7.0
-            self.omega_r = 2.0 * self.omega_0 / 7.0
-
-    def step(self, dt: float):
-        if self.phase == "hovering":
-            self.theta += self.omega * dt
-            self.hover_elapsed += dt
-            if self.hover_elapsed >= 1.8:
-                self.phase = "falling"
-                self.drop_v = 0.0
-            return
-
-        if self.phase == "falling":
-            self.drop_v += 650.0 * dt
-            self.y_cm += self.drop_v * dt
-            self.theta += self.omega * dt
-            if self.y_cm >= self.y_target:
-                self.y_cm = self.y_target
-                self.drop_v = 0.0
-                self.phase = "slipping"
-                self.t = 0.0
-                self.v_cm = 0.0
-            return
-
-        if self.phase == "slipping":
-            self.t += dt
-            a_cm = self.mu * self.g
-            alpha = -5.0 * self.mu * self.g / (2.0 * self.R)
-            self.v_cm += a_cm * dt
-            self.omega += alpha * dt
-            if self.omega < 0:
-                self.omega = 0.0
-            if self.v_cm >= self.R * self.omega:
-                self.v_cm = self.v_r
-                self.omega = self.omega_r
-                self.t = self.t_r
-                self.phase = "rolling"
-
-        if self.phase == "rolling":
-            if self.t < self.t_r:
-                self.t = self.t_r
-            self.t += dt
-
-        self.x_cm += self.v_cm * dt
-        self.theta += self.omega * dt
-
-        Rw = self.R * self.omega
-        vc = self.v_cm - Rw
-        self.hist_t.append(self.t)
-        self.hist_v.append(self.v_cm)
-        self.hist_omega.append(self.omega)
-        self.hist_Romega.append(Rw)
-        self.hist_vcontact.append(vc)
-
-
-# ═══════════════════════════ CANVAS ═══════════════════════════
-
-class SimCanvas(QWidget):
-    GROUND_FRAC = 0.72
-
-    def __init__(self, phy: BallPhysics, parent=None):
-        super().__init__(parent)
-        self.phy = phy
-        self.setMinimumSize(750, 420)
-        self.show_vcm = True
-        self.show_Rw = True
-        self.show_friction = True
-        self.show_weight = False
-        self.show_normal = False
-        self.sparks: list[list[float]] = []
-
-    def ground_y(self) -> int:
-        return int(self.height() * self.GROUND_FRAC)
-
-    def paintEvent(self, ev):
-        p = QPainter(self)
-        p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.setRenderHint(QPainter.RenderHint.TextAntialiasing)
-        w, h = self.width(), self.height()
-        gy = self.ground_y()
-        R = self.phy.R
-        phy = self.phy
-
-        # ── Sky ──
-        sky = QLinearGradient(0, 0, 0, gy)
-        sky.setColorAt(0.0, QColor("#0b1120"))
-        sky.setColorAt(1.0, QColor("#141e30"))
-        p.fillRect(0, 0, w, gy, QBrush(sky))
-
-        # ── Ground (static, no scrolling) ──
-        gnd = QLinearGradient(0, gy, 0, h)
-        gnd.setColorAt(0.0, QColor("#1a1a2e"))
-        gnd.setColorAt(1.0, QColor("#0f0f1a"))
-        p.fillRect(0, gy, w, h - gy, QBrush(gnd))
-
-        # Ground line glow
-        for i in range(5):
-            a = max(5, 80 - i * 16)
-            p.setPen(QPen(QColor(100, 200, 255, a), 2.5 - i * 0.4))
-            p.drawLine(0, gy + i, w, gy + i)
-
-        # Static hatching (no scroll offset)
-        p.setPen(QPen(QColor(255, 255, 255, 18), 1))
-        for xi in range(0, w + 28, 28):
-            p.drawLine(xi, gy + 3, xi - 18, gy + 24)
-
-        # ── Compute ball screen position ──
-        # drop_x is the fixed x where the ball hovers and falls
-        # After contact, ball moves right: screen_x = drop_x + x_cm
-        # Ball can go off-screen — no camera, no scrolling
-        drop_x = w * 0.18
-        rest_y = gy - R  # ball centre y when on ground (bottom touching ground line)
-
-        if phy.phase == "hovering":
-            bx = drop_x
-            by = rest_y - 180  # hovering above ground
-        elif phy.phase == "falling":
-            bx = drop_x
-            by = phy.y_cm
-        else:
-            # Ball moves right from drop point
-            bx = drop_x + phy.x_cm
-            by = rest_y
-
-        # ── Drop point marker ──
-        if phy.phase in ("slipping", "rolling") and phy.x_cm > 5:
-            p.setPen(QPen(QColor(255, 255, 255, 30), 1, Qt.PenStyle.DotLine))
-            p.drawLine(int(drop_x), gy - 50, int(drop_x), gy)
-            p.setFont(QFont("Segoe UI", 8))
-            p.setPen(QColor(255, 255, 255, 40))
-            p.drawText(QPointF(drop_x + 4, gy - 54), "drop")
-
-            # Distance line
-            if bx > drop_x and bx < w + 200:
-                ruler_y = gy + 28
-                draw_bx = min(bx, w - 5)
-                p.setPen(QPen(QColor(255, 255, 255, 40), 1))
-                p.drawLine(QPointF(drop_x, ruler_y), QPointF(draw_bx, ruler_y))
-                p.drawLine(QPointF(drop_x, ruler_y - 4), QPointF(drop_x, ruler_y + 4))
-                p.drawLine(QPointF(draw_bx, ruler_y - 4), QPointF(draw_bx, ruler_y + 4))
-                p.setFont(QFont("Segoe UI", 8))
-                p.setPen(QColor(255, 255, 255, 55))
-                mid = (drop_x + draw_bx) / 2
-                p.drawText(QPointF(mid - 20, ruler_y - 6), f"{phy.x_cm:.0f} px")
-
-        # If ball is off-screen right, show indicator
-        if bx > w + R:
-            p.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
-            p.setPen(QColor("#42a5f5"))
-            p.drawText(QPointF(w - 180, rest_y),
-                        f"→ ball at x = {phy.x_cm:.0f} px →")
-            # Still draw graphs and HUD, just skip ball rendering
-            if phy.phase in ("slipping", "rolling"):
-                self._hud(p, w, h)
-            p.end()
-            return
-
-        # ── Shadow ──
-        if phy.phase in ("hovering", "falling"):
-            dist = max(1, rest_y - by)
-            st = max(0.1, 1.0 - dist / 250)
-        else:
-            st = 1.0
-        p.setBrush(QColor(0, 0, 0, int(80 * st)))
-        p.setPen(Qt.PenStyle.NoPen)
-        # Shadow directly below ball on ground line
-        p.drawEllipse(QPointF(bx, gy + 3), R * 1.5 * st, 4.5 * st)
-
-        # ── Ball colour ──
-        bg = QRadialGradient(bx - R * 0.3, by - R * 0.3, R * 1.6)
-        if phy.phase in ("hovering", "falling"):
-            bg.setColorAt(0.0, QColor("#fff59d"))
-            bg.setColorAt(0.4, QColor("#fdd835"))
-            bg.setColorAt(1.0, QColor("#f9a825"))
-            gc = QColor(253, 216, 53, 40)
-        elif phy.phase == "slipping":
-            bg.setColorAt(0.0, QColor("#ff8a65"))
-            bg.setColorAt(0.4, QColor("#e53935"))
-            bg.setColorAt(1.0, QColor("#7f0000"))
-            gc = QColor(255, 60, 30, 50)
-        else:
-            bg.setColorAt(0.0, QColor("#81d4fa"))
-            bg.setColorAt(0.4, QColor("#1e88e5"))
-            bg.setColorAt(1.0, QColor("#0d47a1"))
-            gc = QColor(30, 136, 229, 40)
-
-        # Outer glow
-        glow = QRadialGradient(bx, by, R * 2.0)
-        glow.setColorAt(0.4, gc)
-        glow.setColorAt(1.0, QColor(0, 0, 0, 0))
-        p.setBrush(QBrush(glow))
-        p.setPen(Qt.PenStyle.NoPen)
-        p.drawEllipse(QPointF(bx, by), R * 2, R * 2)
-
-        # Ball body
-        p.setBrush(QBrush(bg))
-        p.setPen(QPen(QColor(255, 255, 255, 50), 1.5))
-        p.drawEllipse(QPointF(bx, by), R, R)
-
-        # ── Spokes (clockwise: +sin in y-down) ──
-        n_spokes = 8
-        p.setPen(QPen(QColor(255, 255, 255, 50), 1.2))
-        for i in range(n_spokes):
-            a = phy.theta + i * (2 * math.pi / n_spokes)
-            sx = bx + R * 0.82 * math.cos(a)
-            sy = by + R * 0.82 * math.sin(a)
-            p.drawLine(QPointF(bx, by), QPointF(sx, sy))
-
-        # Thick radius line
-        ra = phy.theta
-        rx = bx + R * 0.9 * math.cos(ra)
-        ry = by + R * 0.9 * math.sin(ra)
-        p.setPen(QPen(QColor(255, 255, 255, 140), 2.2))
-        p.drawLine(QPointF(bx, by), QPointF(rx, ry))
-
-        # "r" label
-        p.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
-        p.setPen(QColor(255, 255, 255, 110))
-        p.drawText(QPointF(bx + R * 0.45 * math.cos(ra) + 6,
-                             by + R * 0.45 * math.sin(ra) - 6), "r")
-
-        # Centre dot
-        p.setBrush(QColor(255, 255, 255, 160))
-        p.setPen(Qt.PenStyle.NoPen)
-        p.drawEllipse(QPointF(bx, by), 3.5, 3.5)
-
-        # ── Omega arc ──
-        if phy.omega > 0.2:
-            self._omega_arc(p, bx, by, R, phy.omega)
-
-        # ── Contact point (exactly at ball bottom = ground line) ──
-        if phy.phase in ("slipping", "rolling"):
-            cpx = bx          # directly below centre
-            cpy = by + R      # = gy (ground line)
-            cpc = QColor("#ff1744") if phy.phase == "slipping" else QColor("#00e676")
-            cg = QRadialGradient(cpx, cpy, 12)
-            cg.setColorAt(0.0, QColor(cpc.red(), cpc.green(), cpc.blue(), 90))
-            cg.setColorAt(1.0, QColor(0, 0, 0, 0))
-            p.setBrush(QBrush(cg))
-            p.setPen(Qt.PenStyle.NoPen)
-            p.drawEllipse(QPointF(cpx, cpy), 12, 12)
-            p.setBrush(cpc)
-            p.drawEllipse(QPointF(cpx, cpy), 4, 4)
-
-        # ── VECTORS ──
-        if phy.phase in ("slipping", "rolling"):
-            scale = 1.8
-            Rw = phy.R * phy.omega
-
-            # v_cm (green) at centre
-            if self.show_vcm and phy.v_cm > 0.3:
-                self._arrow(p, bx, by, bx + phy.v_cm * scale, by,
-                             QColor("#66bb6a"), 3.0, f"v_cm = {phy.v_cm:.1f}")
-
-            # Rω (purple) at top, bottom, centre
-            if self.show_Rw and Rw > 0.3:
-                # Top → right (CW: top surface moves right)
-                self._arrow(p, bx, by - R, bx + Rw * scale, by - R,
-                             QColor("#ce93d8"), 2.5, f"Rω = {Rw:.1f} →")
-                # Bottom → left
-                self._arrow(p, bx, by + R, bx - Rw * scale, by + R,
-                             QColor("#ce93d8"), 2.5, f"Rω = {Rw:.1f} ←")
-                # Centre label
-                p.setFont(QFont("Segoe UI", 8))
-                p.setPen(QColor("#ce93d8"))
-                p.drawText(QPointF(bx - R - 55, by + 4), "Rω = 0 (CM)")
-
-            # Friction (gold) rightward during slipping only
-            if self.show_friction and phy.phase == "slipping":
-                f_mag = phy.mu * phy.mass * phy.g
-                f_len = f_mag * 0.28
-                fy = by + R + 14
-                self._arrow(p, bx - 10, fy, bx - 10 + f_len, fy,
-                             QColor("#ffd740"), 3.5, f"f = μmg = {f_mag:.0f} →")
-
-            if self.show_weight:
-                self._arrow(p, bx, by, bx, by + 50, QColor(180, 180, 180, 120), 2, "mg")
-
-            if self.show_normal:
-                self._arrow(p, bx, by + R, bx, by + R - 55, QColor(100, 220, 255, 120), 2, "N")
-
-        # v_contact text
-        if phy.phase == "slipping":
-            vc = phy.v_cm - phy.R * phy.omega
-            p.setFont(QFont("Consolas", 9, QFont.Weight.Bold))
-            p.setPen(QColor("#ff5252"))
-            p.drawText(QPointF(bx + R + 10, by + R + 8),
-                        f"v_contact = {vc:.1f}")
-
-        # ── Sparks ──
-        if phy.phase == "slipping" and phy.omega > 0.3:
-            for _ in range(3):
-                self.sparks.append([
-                    bx + random.uniform(-5, 5),
-                    gy - random.uniform(0, 3),
-                    random.uniform(-60, -10),
-                    random.uniform(-110, -30),
-                    1.0
-                ])
-        alive = []
-        for sp in self.sparks:
-            sp[0] += sp[2] * 0.016
-            sp[1] += sp[3] * 0.016
-            sp[3] += 280 * 0.016
-            sp[4] -= 0.04
-            if sp[4] > 0:
-                a = int(255 * sp[4])
-                c = QColor(255, 200, 50, a) if sp[4] > 0.4 else QColor(255, 100, 30, a)
-                p.setBrush(c)
-                p.setPen(Qt.PenStyle.NoPen)
-                p.drawEllipse(QPointF(sp[0], sp[1]), 3 * sp[4], 3 * sp[4])
-                alive.append(sp)
-        self.sparks = alive
-
-        # ── Pure rolling label ──
-        if phy.phase == "rolling":
-            p.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
-            p.setPen(QColor("#69f0ae"))
-            p.drawText(QPointF(bx - 70, by - R - 38),
-                        "v_cm = Rω  ✓  Pure Rolling!")
-            p.setFont(QFont("Consolas", 10))
-            p.setPen(QColor("#69f0ae"))
-            p.drawText(QPointF(bx - 70, by - R - 20),
-                        f"v_cm = Rω = {phy.v_r:.1f} px/s")
-
-        # ── Phase badge ──
-        badges = {
-            "hovering": ("SPINNING CLOCKWISE IN AIR", "#fdd835"),
-            "falling":  ("FALLING (still spinning CW)", "#fdd835"),
-            "slipping": ("SLIPPING → sliding RIGHT", "#ff5252"),
-            "rolling":  ("PURE ROLLING (CW)", "#69f0ae"),
-        }
-        bt, bc = badges.get(phy.phase, ("", "#fff"))
-        p.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
-        fm = p.fontMetrics()
-        bw_ = fm.horizontalAdvance(bt) + 30
-        bh_ = 34
-        br = QRectF(w - bw_ - 12, 10, bw_, bh_)
-        p.setBrush(QColor(0, 0, 0, 150))
-        p.setPen(QPen(QColor(bc), 1.5))
-        p.drawRoundedRect(br, 8, 8)
-        p.setPen(QColor(bc))
-        p.drawText(br, Qt.AlignmentFlag.AlignCenter, bt)
-
-        # ── HUD ──
-        if phy.phase in ("slipping", "rolling"):
-            self._hud(p, w, h)
-
-        p.end()
-
-    def _arrow(self, p, x1, y1, x2, y2, color, width, label):
-        dx, dy = x2 - x1, y2 - y1
-        ln = math.hypot(dx, dy)
-        if ln < 2:
-            return
-        p.setPen(QPen(color, width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-        p.drawLine(QPointF(x1, y1), QPointF(x2, y2))
-        ang = math.atan2(dy, dx)
-        hl = min(14, ln * 0.35)
-        for s in (1, -1):
-            ha = ang + math.pi + s * 0.4
-            p.drawLine(QPointF(x2, y2), QPointF(x2 + hl * math.cos(ha), y2 + hl * math.sin(ha)))
-        if label:
-            p.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-            p.setPen(color)
-            p.drawText(QPointF((x1 + x2) / 2 - 25, min(y1, y2) - 8), label)
-
-    def _omega_arc(self, p, cx, cy, R, omega):
-        ar = R * 1.35
-        span = min(300, omega * 18)
-        c = QColor("#ffab40")
-        c.setAlpha(160)
-        p.setPen(QPen(c, 2.2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-        p.setBrush(Qt.BrushStyle.NoBrush)
-        rect = QRectF(cx - ar, cy - ar, ar * 2, ar * 2)
-        p.drawArc(rect, int(90 * 16), int(-span * 16))
-        end_deg = 90 - span
-        end_rad = math.radians(end_deg)
-        tx_ = cx + ar * math.cos(end_rad)
-        ty_ = cy - ar * math.sin(end_rad)
-        tang_dx = math.sin(end_rad)
-        tang_dy = math.cos(end_rad)
-        for s in (0.4, -0.4):
-            hx = tx_ - 10 * (tang_dx * math.cos(s) - tang_dy * math.sin(s))
-            hy = ty_ + 10 * (tang_dx * math.sin(s) + tang_dy * math.cos(s))
-            p.drawLine(QPointF(tx_, ty_), QPointF(hx, hy))
-        mid_rad = math.radians(90 - span / 2)
-        lx = cx + (ar + 16) * math.cos(mid_rad)
-        ly = cy - (ar + 16) * math.sin(mid_rad)
-        p.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
-        p.setPen(QColor("#ffab40"))
-        p.drawText(QPointF(lx - 4, ly + 5), "ω")
-
-    def _hud(self, p, w, h):
-        bw, bh = 285, 148
-        bx_, by_ = 10, h - bh - 10
-        p.setBrush(QColor(0, 0, 0, 170))
-        p.setPen(QPen(QColor(255, 255, 255, 20), 1))
-        p.drawRoundedRect(QRectF(bx_, by_, bw, bh), 10, 10)
-        phy = self.phy
-        Rw = phy.R * phy.omega
-        lines = [
-            f"t = {phy.t:.3f} s    t_r = {phy.t_r:.3f} s",
-            f"v_cm = {phy.v_cm:.1f} px/s  (rightward)",
-            f"ω = {phy.omega:.2f} rad/s  (clockwise)",
-            f"Rω = {Rw:.1f} px/s",
-            f"v_contact = v_cm − Rω = {phy.v_cm - Rw:.2f}",
-            f"x = {phy.x_cm:.0f} px   phase: {phy.phase}",
-        ]
-        p.setFont(QFont("Consolas", 9))
-        p.setPen(QColor(220, 220, 220, 200))
-        for i, ln in enumerate(lines):
-            p.drawText(QPointF(bx_ + 10, by_ + 20 + i * 20), ln)
-
-
-# ═══════════════════════════ REAL-TIME GRAPHS ═══════════════════════════
-
-class RealTimeGraphs(QWidget):
-    def __init__(self, phy: BallPhysics, parent=None):
-        super().__init__(parent)
-        self.phy = phy
-        self.setMinimumSize(370, 340)
-
-    def paintEvent(self, ev):
-        p = QPainter(self)
-        p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.setRenderHint(QPainter.RenderHint.TextAntialiasing)
-        w, h = self.width(), self.height()
-        p.fillRect(0, 0, w, h, QColor("#0d1117"))
-        ml, mr, mt, mb = 55, 14, 22, 14
-        gap = 42
-        gh = (h - mt - mb - gap) / 2
-        self._graph_top(p, ml, mt, w - ml - mr, gh)
-        self._graph_bot(p, ml, mt + gh + gap, w - ml - mr, gh)
-        p.end()
-
-    def _graph_top(self, p, gx, gy, gw, gh):
-        p.setBrush(QColor(255, 255, 255, 6))
-        p.setPen(QPen(QColor(255, 255, 255, 20), 1))
-        p.drawRoundedRect(QRectF(gx, gy, gw, gh), 6, 6)
-        p.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
-        p.setPen(QColor(255, 255, 255, 140))
-        p.drawText(QPointF(gx + 6, gy - 5), "v_cm (↑ green)   Rω (↓ purple)   vs time")
-
-        phy = self.phy
-        if len(phy.hist_t) < 2:
-            p.setFont(QFont("Segoe UI", 11))
-            p.setPen(QColor(255, 255, 255, 35))
-            p.drawText(QRectF(gx, gy, gw, gh), Qt.AlignmentFlag.AlignCenter,
-                        "Drop ball to see real-time data")
-            return
-
-        t_max = max(phy.hist_t[-1] * 1.2, 0.3)
-        Rw0 = phy.R * phy.omega_0
-        v_max = max(Rw0 * 1.1, 10)
-
-        def tx(t): return gx + (t / t_max) * gw
-        def ty(v): return gy + gh - (v / v_max) * gh
-
-        # Grid
-        p.setPen(QPen(QColor(255, 255, 255, 10), 0.5))
-        for i in range(5):
-            p.drawLine(QPointF(gx, gy + gh * i / 4), QPointF(gx + gw, gy + gh * i / 4))
-
-        # Axis labels
-        p.setFont(QFont("Segoe UI", 8))
-        p.setPen(QColor(255, 255, 255, 60))
-        p.drawText(QPointF(gx - 50, gy + 12), f"{v_max:.0f}")
-        p.drawText(QPointF(gx - 16, gy + gh + 4), "0")
-
-        # Plot v_cm
-        self._plot(p, phy.hist_t, phy.hist_v, t_max, v_max, gx, gy, gw, gh,
-                    QColor("#66bb6a"), 3.0)
-        # Plot Rω
-        self._plot(p, phy.hist_t, phy.hist_Romega, t_max, v_max, gx, gy, gw, gh,
-                    QColor("#ce93d8"), 3.0)
-
-        # Live dots
-        cx_ = tx(phy.hist_t[-1])
-        p.setBrush(QColor("#66bb6a"))
-        p.setPen(Qt.PenStyle.NoPen)
-        p.drawEllipse(QPointF(cx_, ty(phy.hist_v[-1])), 5, 5)
-        p.setBrush(QColor("#ce93d8"))
-        p.drawEllipse(QPointF(cx_, ty(phy.hist_Romega[-1])), 5, 5)
-
-        # Rolling convergence
-        if phy.phase == "rolling" and phy.t_r < t_max:
-            tr_x = tx(phy.t_r)
-            p.setPen(QPen(QColor("#69f0ae"), 1.5, Qt.PenStyle.DashLine))
-            p.drawLine(QPointF(tr_x, gy), QPointF(tr_x, gy + gh))
-            conv_y = ty(phy.v_r)
-            p.setBrush(QColor("#69f0ae"))
-            p.setPen(Qt.PenStyle.NoPen)
-            p.drawEllipse(QPointF(tr_x, conv_y), 6, 6)
-            p.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-            p.setPen(QColor("#69f0ae"))
-            p.drawText(QPointF(tr_x + 5, gy + 14), f"t_r = {phy.t_r:.3f}s")
-            p.drawText(QPointF(tr_x + 5, conv_y - 6), f"v_r = {phy.v_r:.1f}")
-
-            # Region labels
-            p.setFont(QFont("Segoe UI", 9))
-            p.setPen(QColor(255, 100, 100, 60))
-            p.drawText(QPointF(gx + 8, gy + gh - 6), "SLIPPING")
-            p.setPen(QColor(100, 240, 170, 60))
-            p.drawText(QPointF(tr_x + 8, gy + gh - 6), "ROLLING")
-        elif phy.phase == "slipping":
-            p.setFont(QFont("Segoe UI", 9))
-            p.setPen(QColor(255, 100, 100, 60))
-            p.drawText(QPointF(gx + 8, gy + gh - 6), "SLIPPING")
-
-        # Legend
-        p.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-        lx = gx + gw - 100
-        p.setPen(QColor("#66bb6a"))
-        p.drawText(QPointF(lx, gy + 16), "── v_cm ↑")
-        p.setPen(QColor("#ce93d8"))
-        p.drawText(QPointF(lx, gy + 32), "── Rω ↓")
-
-    def _graph_bot(self, p, gx, gy, gw, gh):
-        p.setBrush(QColor(255, 255, 255, 6))
-        p.setPen(QPen(QColor(255, 255, 255, 20), 1))
-        p.drawRoundedRect(QRectF(gx, gy, gw, gh), 6, 6)
-        p.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
-        p.setPen(QColor(255, 255, 255, 140))
-        p.drawText(QPointF(gx + 6, gy - 5), "v_contact = v_cm − Rω  (→ 0 at pure rolling)")
-
-        phy = self.phy
-        if len(phy.hist_t) < 2:
-            p.setFont(QFont("Segoe UI", 11))
-            p.setPen(QColor(255, 255, 255, 35))
-            p.drawText(QRectF(gx, gy, gw, gh), Qt.AlignmentFlag.AlignCenter,
-                        "Drop ball to see real-time data")
-            return
-
-        t_max = max(phy.hist_t[-1] * 1.2, 0.3)
-        Rw0 = phy.R * phy.omega_0
-        vc_min = -Rw0 * 1.1
-        vc_max = Rw0 * 0.12
-        vc_range = vc_max - vc_min
-        if vc_range < 1:
-            vc_range = 1
-
-        def tx(t): return gx + (t / t_max) * gw
-        def ty(v): return gy + gh - ((v - vc_min) / vc_range) * gh
-
-        # Grid
-        p.setPen(QPen(QColor(255, 255, 255, 10), 0.5))
-        for i in range(5):
-            p.drawLine(QPointF(gx, gy + gh * i / 4), QPointF(gx + gw, gy + gh * i / 4))
-
-        # Zero line
-        zy = ty(0)
-        p.setPen(QPen(QColor("#69f0ae"), 1, Qt.PenStyle.DashLine))
-        p.drawLine(QPointF(gx, zy), QPointF(gx + gw, zy))
-        p.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
-        p.setPen(QColor("#69f0ae"))
-        p.drawText(QPointF(gx - 14, zy + 4), "0")
-
-        p.setFont(QFont("Segoe UI", 8))
-        p.setPen(QColor(255, 255, 255, 55))
-        p.drawText(QPointF(gx - 52, ty(vc_min) + 4), f"{vc_min:.0f}")
-
-        # Plot
-        self._plot(p, phy.hist_t, phy.hist_vcontact, t_max, vc_max,
-                    gx, gy, gw, gh, QColor("#ff5252"), 3.0,
-                    y_min=vc_min, y_range=vc_range)
-
-        # Live dot
-        cx_ = tx(phy.hist_t[-1])
-        cy_ = ty(phy.hist_vcontact[-1])
-        p.setBrush(QColor("#ff5252"))
-        p.setPen(Qt.PenStyle.NoPen)
-        p.drawEllipse(QPointF(cx_, cy_), 5, 5)
-
-        # Convergence
-        if phy.phase == "rolling" and phy.t_r < t_max:
-            tr_x = tx(phy.t_r)
-            p.setPen(QPen(QColor("#69f0ae"), 1.5, Qt.PenStyle.DashLine))
-            p.drawLine(QPointF(tr_x, gy), QPointF(tr_x, gy + gh))
-            p.setBrush(QColor("#69f0ae"))
-            p.setPen(Qt.PenStyle.NoPen)
-            p.drawEllipse(QPointF(tr_x, zy), 6, 6)
-            p.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-            p.setPen(QColor("#69f0ae"))
-            p.drawText(QPointF(tr_x + 5, zy - 8), "v_contact = 0")
-
-        p.setFont(QFont("Segoe UI", 9, QFont.Weight.Bold))
-        p.setPen(QColor("#ff5252"))
-        p.drawText(QPointF(gx + gw - 105, gy + 16), "── v_contact")
-
-    def _plot(self, p, t_data, y_data, t_max, y_max,
-               gx, gy, gw, gh, color, width,
-               y_min=0.0, y_range=None):
-        if len(t_data) < 2:
-            return
-        if y_range is None:
-            y_range = y_max
-            y_min = 0.0
-        path = QPainterPath()
-        first = True
-        step = max(1, len(t_data) // 2000)
-        for i in range(0, len(t_data), step):
-            px = gx + (t_data[i] / t_max) * gw
-            py = gy + gh - ((y_data[i] - y_min) / y_range) * gh
-            px = max(gx, min(gx + gw, px))
-            py = max(gy, min(gy + gh, py))
-            if first:
-                path.moveTo(px, py)
-                first = False
-            else:
-                path.lineTo(px, py)
-        p.setPen(QPen(color, width, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
-        p.setBrush(Qt.BrushStyle.NoBrush)
-        p.drawPath(path)
-
-
-# ═══════════════════════════ EQUATIONS ═══════════════════════════
-
-class EquationsPanel(QWidget):
-    def __init__(self, phy: BallPhysics, parent=None):
-        super().__init__(parent)
-        self.phy = phy
-        self.setFixedWidth(260)
-
-    def paintEvent(self, ev):
-        p = QPainter(self)
-        p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.setRenderHint(QPainter.RenderHint.TextAntialiasing)
-        w, h = self.width(), self.height()
-        p.fillRect(0, 0, w, h, QColor("#0d1117"))
-        p.setBrush(QColor(255, 255, 255, 6))
-        p.setPen(QPen(QColor(255, 255, 255, 15), 1))
-        p.drawRoundedRect(QRectF(8, 8, w - 16, h - 16), 10, 10)
-
-        x0, y, lh = 18, 28, 18
-
-        def head(text, c="#64b5f6"):
-            nonlocal y
-            p.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
-            p.setPen(QColor(c))
-            p.drawText(QPointF(x0, y), text)
-            y += lh + 5
-
-        def ln(text, c="#d0d0d0"):
-            nonlocal y
-            p.setFont(QFont("Consolas", 9))
-            p.setPen(QColor(c))
-            p.drawText(QPointF(x0 + 4, y), text)
-            y += lh
-
-        phy = self.phy
-        Rw0 = phy.R * phy.omega_0
-
-        head("Solid Sphere  I = ²⁄₅mR²")
-        ln(f"R = {phy.R:.0f},  μ = {phy.mu:.2f},  g = {phy.g:.0f}")
-        ln(f"ω₀ = {phy.omega_0:.1f} rad/s  (CW)")
-        ln(f"Rω₀ = {Rw0:.1f} px/s")
-        y += 5
-
-        head("Before Contact", "#fdd835")
-        ln("v_cm = 0   (dropped gently)")
-        ln("ω = ω₀     (spinning CW)")
-        y += 5
-
-        head("Slipping (t < t_r)", "#ff8a65")
-        ln("Bottom → LEFT, f → RIGHT")
-        ln("v_cm(t) = μg·t         (↑)")
-        ln("ω(t) = ω₀ − 5μg/(2R)·t  (↓)")
-        ln("Ball accelerates RIGHT")
-        y += 5
-
-        head("Pure Rolling  v_cm = Rω", "#69f0ae")
-        ln(f"t_r = 2Rω₀/(7μg)")
-        ln(f"   = {phy.t_r:.4f} s")
-        ln(f"v_r = 2Rω₀/7 = {phy.v_r:.2f}")
-        ln(f"ω_r = 2ω₀/7  = {phy.omega_r:.2f}")
-        y += 5
-
-        head("After t_r", "#42a5f5")
-        ln("No sliding friction")
-        ln("v_cm, ω both constant")
-        ln("Still CW, rolling right")
-        y += 5
-
-        head("Key Insight", "#ffd740")
-        ln("v_r = 2Rω₀/7")
-        ln("Independent of μ !")
-
-        p.end()
-
-
-# ═══════════════════════════ GLASS CARD ═══════════════════════════
-
-class GlassCard(QFrame):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setStyleSheet("""
-            GlassCard {
-                background: rgba(255,255,255,6);
-                border: 1px solid rgba(255,255,255,12);
-                border-radius: 12px;
+    <div id="title">SPINNING  BALL  DROPPED  ON  SURFACE</div>
+
+    <div id="control-panel">
+        <div class="slider-container">
+            <div class="slider-label">ω₀ (rad/s)</div>
+            <input type="range" min="1" max="50" value="15" class="slider" id="omega_0">
+            <div class="slider-value" id="omega_0_value">15.00</div>
+        </div>
+
+        <div class="slider-container">
+            <div class="slider-label">μ (friction)</div>
+            <input type="range" min="5" max="95" value="35" class="slider" id="mu">
+            <div class="slider-value" id="mu_value">0.35</div>
+        </div>
+
+        <div class="slider-container">
+            <div class="slider-label">R (radius)</div>
+            <input type="range" min="20" max="80" value="40" class="slider" id="R">
+            <div class="slider-value" id="R_value">40</div>
+        </div>
+
+        <div class="slider-container">
+            <div class="slider-label">g (gravity)</div>
+            <input type="range" min="100" max="900" value="400" class="slider" id="g">
+            <div class="slider-value" id="g_value">400</div>
+        </div>
+
+        <div class="checkbox-container">
+            <div class="checkbox-label">Show Vectors</div>
+            <label class="checkbox"><input type="checkbox" id="show_vcm" checked> v_cm (green)</label>
+            <label class="checkbox"><input type="checkbox" id="show_Rw" checked> Rω (purple)</label>
+            <label class="checkbox"><input type="checkbox" id="show_friction" checked> Friction (gold)</label>
+            <label class="checkbox"><input type="checkbox" id="show_weight"> Weight (gray)</label>
+            <label class="checkbox"><input type="checkbox" id="show_normal"> Normal (cyan)</label>
+        </div>
+
+        <div class="button-container">
+            <button class="button" id="drop_button">▶  DROP BALL</button>
+            <button class="button" id="pause_button" disabled>⏸  PAUSE</button>
+            <button class="button" id="reset_button">↺  RESET</button>
+            <label class="checkbox" id="slow-motion"><input type="checkbox" id="slow_motion"> Slow-motion (0.12×)</label>
+        </div>
+    </div>
+
+    <div id="simulation-container">
+        <canvas id="simulation-canvas" width="750" height="420"></canvas>
+        <canvas id="graph-canvas" width="370" height="340"></canvas>
+        <div id="equations-panel" class="equations-card">
+            <div class="equations-card">
+                <h3>Solid Sphere  I = ²⁄₅mR²</h3>
+                <p id="eq_r"></p>
+                <p id="eq_mu"></p>
+                <p id="eq_omega0"></p>
+                <p id="eq_r_omega0"></p>
+                <br>
+                <h3>Before Contact</h3>
+                <p>v_cm = 0   (dropped gently)</p>
+                <p>ω = ω₀     (spinning CW)</p>
+                <br>
+                <h3>Slipping (t < t_r)</h3>
+                <p>Bottom → LEFT, f → RIGHT</p>
+                <p>v_cm(t) = μg·t         (↑)</p>
+                <p>ω(t) = ω₀ − 5μg/(2R)·t  (↓)</p>
+                <p>Ball accelerates RIGHT</p>
+                <br>
+                <h3>Pure Rolling  v_cm = Rω</h3>
+                <p id="eq_tr"></p>
+                <p id="eq_vr"></p>
+                <p id="eq_omegar"></p>
+                <br>
+                <h3>After t_r</h3>
+                <p>No sliding friction</p>
+                <p>v_cm, ω both constant</p>
+                <p>Still CW, rolling right</p>
+                <br>
+                <h3>Key Insight</h3>
+                <p>v_r = 2Rω₀/7</p>
+                <p>Independent of μ !</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════ PHYSICS ═══════════════════════════
+
+        class BallPhysics {
+            constructor() {
+                this.R = 40.0;
+                this.mass = 1.0;
+                this.g = 400.0;
+                this.mu = 0.35;
+                this.omega_0 = 15.0;
+                this.reset();
             }
-        """)
-        sh = QGraphicsDropShadowEffect(self)
-        sh.setBlurRadius(24)
-        sh.setOffset(0, 3)
-        sh.setColor(QColor(0, 0, 0, 80))
-        self.setGraphicsEffect(sh)
 
+            reset() {
+                this.t = 0.0;
+                this.omega = this.omega_0;
+                this.v_cm = 0.0;
+                this.theta = 0.0;
+                this.x_cm = 0.0;       // horizontal displacement from drop point
+                this.phase = "hovering";
 
-# ═══════════════════════════ MAIN WINDOW ═══════════════════════════
+                // Drop
+                this.drop_start_y = 0.0;
+                this.y_cm = 0.0;
+                this.y_target = 0.0;
+                this.drop_v = 0.0;
+                this.hover_elapsed = 0.0;
 
-class MainWindow(QMainWindow):
-    BG = "#0a0e1a"
+                // Fixed drop x position (set by canvas)
+                this.drop_x = 0.0;
 
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Spinning Ball — Rolling with Slipping")
-        self.setMinimumSize(1360, 820)
-        self.setStyleSheet(f"""
-            QMainWindow {{ background: {self.BG}; }}
-            QWidget {{ background: transparent; color: #e0e0e0; }}
-            QLabel {{ color: #e0e0e0; }}
-            QSlider::groove:horizontal {{
-                background: rgba(255,255,255,15); height: 6px; border-radius: 3px;
-            }}
-            QSlider::handle:horizontal {{
-                background: #64b5f6; width: 16px; height: 16px;
-                margin: -5px 0; border-radius: 8px;
-            }}
-            QSlider::handle:horizontal:hover {{ background: #90caf9; }}
-            QCheckBox {{
-                color: #b0b0b0; font-size: 12px; spacing: 6px;
-            }}
-            QCheckBox::indicator {{
-                width: 16px; height: 16px; border-radius: 3px;
-                border: 2px solid rgba(255,255,255,25); background: rgba(255,255,255,6);
-            }}
-            QCheckBox::indicator:checked {{ background: #7c4dff; border-color: #7c4dff; }}
-        """)
+                this.recalc_analytical();
 
-        self.phy = BallPhysics()
-        self.sim_running = False
-        self.paused = False
-        self.slow = False
-        self.last_time = 0.0
+                this.hist_t = [];
+                this.hist_v = [];
+                this.hist_omega = [];
+                this.hist_Romega = [];
+                this.hist_vcontact = [];
+            }
 
-        self._build_ui()
+            recalc_analytical() {
+                let d = 7.0 * this.mu * this.g;
+                if (d < 1e-9) {
+                    this.t_r = Infinity;
+                    this.v_r = 0.0;
+                    this.omega_r = 0.0;
+                } else {
+                    this.t_r = 2.0 * this.R * this.omega_0 / d;
+                    this.v_r = 2.0 * this.R * this.omega_0 / 7.0;
+                    this.omega_r = 2.0 * this.omega_0 / 7.0;
+                }
+            }
 
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self._tick)
-        self.timer.setInterval(16)
+            step(dt) {
+                if (this.phase === "hovering") {
+                    this.theta += this.omega * dt;
+                    this.hover_elapsed += dt;
+                    if (this.hover_elapsed >= 1.8) {
+                        this.phase = "falling";
+                        this.drop_v = 0.0;
+                    }
+                    return;
+                }
 
-    def _build_ui(self):
-        central = QWidget()
-        self.setCentralWidget(central)
-        root = QVBoxLayout(central)
-        root.setContentsMargins(14, 10, 14, 10)
-        root.setSpacing(10)
+                if (this.phase === "falling") {
+                    this.drop_v += 650.0 * dt;
+                    this.y_cm += this.drop_v * dt;
+                    this.theta += this.omega * dt;
+                    if (this.y_cm >= this.y_target) {
+                        this.y_cm = this.y_target;
+                        this.drop_v = 0.0;
+                        this.phase = "slipping";
+                        this.t = 0.0;
+                        this.v_cm = 0.0;
+                    }
+                    return;
+                }
 
-        t = QLabel("SPINNING  BALL  DROPPED  ON  SURFACE")
-        t.setFont(QFont("Segoe UI", 17, QFont.Weight.Bold))
-        t.setStyleSheet("color: rgba(255,255,255,155); letter-spacing: 5px;")
-        t.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        root.addWidget(t)
+                if (this.phase === "slipping") {
+                    this.t += dt;
+                    let a_cm = this.mu * this.g;
+                    let alpha = -5.0 * this.mu * this.g / (2.0 * this.R);
+                    this.v_cm += a_cm * dt;
+                    this.omega += alpha * dt;
+                    if (this.omega < 0) {
+                        this.omega = 0.0;
+                    }
+                    if (this.v_cm >= this.R * this.omega) {
+                        this.v_cm = this.v_r;
+                        this.omega = this.omega_r;
+                        this.t = this.t_r;
+                        this.phase = "rolling";
+                    }
+                }
 
-        ctrl = GlassCard()
-        cl = QHBoxLayout(ctrl)
-        cl.setContentsMargins(14, 10, 14, 10)
-        cl.setSpacing(16)
+                if (this.phase === "rolling") {
+                    if (this.t < this.t_r) {
+                        this.t = this.t_r;
+                    }
+                    this.t += dt;
+                }
 
-        sg = QGridLayout()
-        sg.setSpacing(5)
-        self.sliders = {}
-        for row, (lbl, attr, lo, hi, dflt, div) in enumerate([
-            ("ω₀ (rad/s)", "omega_0", 1, 50, 15, 1),
-            ("μ (friction)", "mu", 5, 95, 35, 100),
-            ("R (radius)", "R", 20, 80, 40, 1),
-            ("g (gravity)", "g", 100, 900, 400, 1),
-        ]):
-            l = QLabel(lbl)
-            l.setFont(QFont("Segoe UI", 10))
-            l.setStyleSheet("color: rgba(255,255,255,85);")
-            sg.addWidget(l, row, 0)
-            s = QSlider(Qt.Orientation.Horizontal)
-            s.setRange(lo, hi)
-            s.setValue(dflt)
-            s.setFixedWidth(140)
-            sg.addWidget(s, row, 1)
-            vl = QLabel(f"{dflt / div:.2f}" if div > 1 else str(dflt))
-            vl.setFont(QFont("Consolas", 10))
-            vl.setFixedWidth(45)
-            vl.setStyleSheet("color: #90caf9;")
-            sg.addWidget(vl, row, 2)
-            self.sliders[attr] = (s, vl, div)
-            s.valueChanged.connect(lambda v, a=attr: self._slider(a))
-        cl.addLayout(sg)
+                this.x_cm += this.v_cm * dt;
+                this.theta += this.omega * dt;
 
-        cl.addWidget(self._vdiv())
+                let Rw = this.R * this.omega;
+                let vc = this.v_cm - Rw;
+                this.hist_t.push(this.t);
+                this.hist_v.push(this.v_cm);
+                this.hist_omega.push(this.omega);
+                this.hist_Romega.push(Rw);
+                this.hist_vcontact.push(vc);
+            }
+        }
 
-        vl_ = QVBoxLayout()
-        vl_.setSpacing(3)
-        vl_.addWidget(self._slbl("Show Vectors"))
-        self.cb_vcm = QCheckBox("v_cm (green)")
-        self.cb_vcm.setChecked(True)
-        self.cb_rw = QCheckBox("Rω (purple)")
-        self.cb_rw.setChecked(True)
-        self.cb_fric = QCheckBox("Friction (gold)")
-        self.cb_fric.setChecked(True)
-        self.cb_wt = QCheckBox("Weight (gray)")
-        self.cb_wt.setChecked(False)
-        self.cb_norm = QCheckBox("Normal (cyan)")
-        self.cb_norm.setChecked(False)
-        for cb in (self.cb_vcm, self.cb_rw, self.cb_fric, self.cb_wt, self.cb_norm):
-            vl_.addWidget(cb)
-            cb.toggled.connect(self._sync_cb)
-        cl.addLayout(vl_)
+        // ═══════════════════════════ CANVAS ═══════════════════════════
 
-        cl.addWidget(self._vdiv())
+        class SimCanvas {
+            constructor(canvas, phy) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.phy = phy;
+                this.GROUND_FRAC = 0.72;
+                this.show_vcm = true;
+                this.show_Rw = true;
+                this.show_friction = true;
+                this.show_weight = false;
+                this.show_normal = false;
+                this.sparks = [];
+            }
 
-        bl = QVBoxLayout()
-        bl.setSpacing(6)
-        self.drop_btn = self._btn("▶  DROP BALL", "#1b5e20", "#2e7d32")
-        self.drop_btn.clicked.connect(self._on_drop)
-        bl.addWidget(self.drop_btn)
-        self.pause_btn = self._btn("⏸  PAUSE", "#e65100", "#f57c00")
-        self.pause_btn.clicked.connect(self._on_pause)
-        self.pause_btn.setEnabled(False)
-        bl.addWidget(self.pause_btn)
-        self.reset_btn = self._btn("↺  RESET", "#b71c1c", "#d32f2f")
-        self.reset_btn.clicked.connect(self._on_reset)
-        bl.addWidget(self.reset_btn)
-        self.slow_cb = QCheckBox("Slow-motion (0.12×)")
-        self.slow_cb.toggled.connect(lambda c: setattr(self, 'slow', c))
-        bl.addWidget(self.slow_cb)
-        cl.addLayout(bl)
+            ground_y() {
+                return this.canvas.height * this.GROUND_FRAC;
+            }
 
-        root.addWidget(ctrl)
+            paintEvent() {
+                let p = this.ctx;
+                let w = this.canvas.width;
+                let h = this.canvas.height;
+                let gy = this.ground_y();
+                let R = this.phy.R;
+                let phy = this.phy;
 
-        main = QHBoxLayout()
-        main.setSpacing(10)
-        self.canvas = SimCanvas(self.phy)
-        main.addWidget(self.canvas, stretch=5)
-        self.graphs = RealTimeGraphs(self.phy)
-        main.addWidget(self.graphs, stretch=3)
-        self.eqs = EquationsPanel(self.phy)
-        main.addWidget(self.eqs)
-        root.addLayout(main, stretch=1)
+                // ── Sky ──
+                let sky = p.createLinearGradient(0, 0, 0, gy);
+                sky.addColorStop(0.0, "#0b1120");
+                sky.addColorStop(1.0, "#141e30");
+                p.fillStyle = sky;
+                p.fillRect(0, 0, w, gy);
 
-    def _vdiv(self):
-        d = QFrame()
-        d.setFrameShape(QFrame.Shape.VLine)
-        d.setFixedWidth(1)
-        d.setStyleSheet("background: rgba(255,255,255,15); border: none;")
-        return d
+                // ── Ground (static, no scrolling) ──
+                let gnd = p.createLinearGradient(0, gy, 0, h);
+                gnd.addColorStop(0.0, "#1a1a2e");
+                gnd.addColorStop(1.0, "#0f0f1a");
+                p.fillStyle = gnd;
+                p.fillRect(0, gy, w, h - gy);
 
-    def _slbl(self, text):
-        l = QLabel(text)
-        l.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
-        l.setStyleSheet("color: rgba(255,255,255,105);")
-        return l
+                // Ground line glow
+                for (let i = 0; i < 5; i++) {
+                    let a = Math.max(5, 80 - i * 16);
+                    p.strokeStyle = `rgba(100, 200, 255, ${a / 255})`;
+                    p.lineWidth = 2.5 - i * 0.4;
+                    p.beginPath();
+                    p.moveTo(0, gy + i);
+                    p.lineTo(w, gy + i);
+                    p.stroke();
+                }
 
-    def _btn(self, text, bg, hover):
-        b = QPushButton(text)
-        b.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
-        b.setStyleSheet(f"""
-            QPushButton {{
-                background: {bg}; color: #fff; border: none;
-                border-radius: 8px; padding: 8px 20px; letter-spacing: 1px;
-            }}
-            QPushButton:hover {{ background: {hover}; }}
-            QPushButton:disabled {{ background: rgba(255,255,255,8); color: rgba(255,255,255,30); }}
-        """)
-        return b
+                // Static hatching (no scroll offset)
+                p.strokeStyle = "rgba(255, 255, 255, 0.07)";
+                p.lineWidth = 1;
+                for (let xi = 0; xi <= w + 28; xi += 28) {
+                    p.beginPath();
+                    p.moveTo(xi, gy + 3);
+                    p.lineTo(xi - 18, gy + 24);
+                    p.stroke();
+                }
 
-    def _slider(self, attr):
-        s, vl, div = self.sliders[attr]
-        raw = s.value()
-        val = raw / div if div > 1 else float(raw)
-        vl.setText(f"{val:.2f}" if div > 1 else str(raw))
-        setattr(self.phy, attr, val)
-        self.phy.recalc_analytical()
-        self.eqs.update()
+                // ── Compute ball screen position ──
+                // drop_x is the fixed x where the ball hovers and falls
+                // After contact, ball moves right: screen_x = drop_x + x_cm
+                // Ball can go off-screen — no camera, no scrolling
+                let drop_x = w * 0.18;
+                let rest_y = gy - R;  // ball centre y when on ground (bottom touching ground line)
 
-    def _sync_cb(self):
-        c = self.canvas
-        c.show_vcm = self.cb_vcm.isChecked()
-        c.show_Rw = self.cb_rw.isChecked()
-        c.show_friction = self.cb_fric.isChecked()
-        c.show_weight = self.cb_wt.isChecked()
-        c.show_normal = self.cb_norm.isChecked()
+                if (phy.phase === "hovering") {
+                    var bx = drop_x;
+                    var by = rest_y - 180;  // hovering above ground
+                } else if (phy.phase === "falling") {
+                    var bx = drop_x;
+                    var by = phy.y_cm;
+                } else {
+                    // Ball moves right from drop point
+                    var bx = drop_x + phy.x_cm;
+                    var by = rest_y;
+                }
 
-    def _on_drop(self):
-        self.phy.reset()
-        self.phy.recalc_analytical()
-        gy = self.canvas.ground_y()
-        R = self.phy.R
-        rest_y = gy - R
-        self.phy.y_cm = rest_y - 180  # start 180 px above resting position
-        self.phy.y_target = rest_y
-        self.phy.phase = "hovering"
-        self.canvas.sparks.clear()
+                // ── Drop point marker ──
+                if (phy.phase === "slipping" || phy.phase === "rolling" && phy.x_cm > 5) {
+                    p.strokeStyle = "rgba(255, 255, 255, 0.12)";
+                    p.lineWidth = 1;
+                    p.setLineDash([1, 2]);
+                    p.beginPath();
+                    p.moveTo(drop_x, gy - 50);
+                    p.lineTo(drop_x, gy);
+                    p.stroke();
+                    p.setLineDash([]);
 
-        self.sim_running = True
-        self.paused = False
-        self.last_time = time.time()
-        self.drop_btn.setEnabled(False)
-        self.pause_btn.setEnabled(True)
-        self.pause_btn.setText("⏸  PAUSE")
-        self.timer.start()
+                    p.font = "8pt Segoe UI";
+                    p.fillStyle = "rgba(255, 255, 255, 0.16)";
+                    p.fillText("drop", drop_x + 4, gy - 54);
 
-    def _on_pause(self):
-        self.paused = not self.paused
-        if not self.paused:
-            self.last_time = time.time()
-        self.pause_btn.setText("▶  RESUME" if self.paused else "⏸  PAUSE")
+                    // Distance line
+                    if (bx > drop_x && bx < w + 200) {
+                        let ruler_y = gy + 28;
+                        let draw_bx = Math.min(bx, w - 5);
+                        p.strokeStyle = "rgba(255, 255, 255, 0.16)";
+                        p.lineWidth = 1;
+                        p.beginPath();
+                        p.moveTo(drop_x, ruler_y);
+                        p.lineTo(draw_bx, ruler_y);
+                        p.stroke();
+                        p.beginPath();
+                        p.moveTo(drop_x, ruler_y - 4);
+                        p.lineTo(drop_x, ruler_y + 4);
+                        p.stroke();
+                        p.beginPath();
+                        p.moveTo(draw_bx, ruler_y - 4);
+                        p.lineTo(draw_bx, ruler_y + 4);
+                        p.stroke();
 
-    def _on_reset(self):
-        self.timer.stop()
-        self.sim_running = False
-        self.paused = False
-        self.phy.reset()
-        self.phy.recalc_analytical()
-        self.canvas.sparks.clear()
-        self.drop_btn.setEnabled(True)
-        self.pause_btn.setEnabled(False)
-        self.pause_btn.setText("⏸  PAUSE")
-        self.canvas.update()
-        self.graphs.update()
-        self.eqs.update()
+                        p.font = "8pt Segoe UI";
+                        p.fillStyle = "rgba(255, 255, 255, 0.22)";
+                        let mid = (drop_x + draw_bx) / 2;
+                        p.fillText(`${phy.x_cm.toFixed(0)} px`, mid - 20, ruler_y - 6);
+                    }
+                }
 
-    def _tick(self):
-        if not self.sim_running or self.paused:
-            return
-        now = time.time()
-        dt = min(now - self.last_time, 0.05)
-        self.last_time = now
-        if self.slow:
-            dt *= 0.12
-        self.phy.step(dt)
-        self.canvas.update()
-        self.graphs.update()
-        self.eqs.update()
+                // If ball is off-screen right, show indicator
+                if (bx > w + R) {
+                    p.font = "bold 12pt Segoe UI";
+                    p.fillStyle = "#42a5f5";
+                    p.fillText(`→ ball at x = ${phy.x_cm.toFixed(0)} px →`, w - 180, rest_y);
+                    // Still draw graphs and HUD, just skip ball rendering
+                    if (phy.phase === "slipping" || phy.phase === "rolling") {
+                        this._hud(p, w, h);
+                    }
+                    return;
+                }
 
+                // ── Shadow ──
+                if (phy.phase === "hovering" || phy.phase === "falling") {
+                    let dist = Math.max(1, rest_y - by);
+                    var st = Math.max(0.1, 1.0 - dist / 250);
+                } else {
+                    var st = 1.0;
+                }
+                p.fillStyle = `rgba(0, 0, 0, ${80 * st / 255})`;
+                p.beginPath();
+                p.ellipse(bx, gy + 3, R * 1.5 * st, 4.5 * st, 0, 0, 2 * Math.PI);
+                p.fill();
 
-# ═══════════════════════════ ENTRY ═══════════════════════════
+                // ── Ball colour ──
+                let bg = p.createRadialGradient(bx - R * 0.3, by - R * 0.3, R * 0.0, bx - R * 0.3, by - R * 0.3, R * 1.6);
+                let gc;
+                if (phy.phase === "hovering" || phy.phase === "falling") {
+                    bg.addColorStop(0.0, "#fff59d");
+                    bg.addColorStop(0.4, "#fdd835");
+                    bg.addColorStop(1.0, "#f9a825");
+                    gc = "rgba(253, 216, 53, 0.16)";
+                } else if (phy.phase === "slipping") {
+                    bg.addColorStop(0.0, "#ff8a65");
+                    bg.addColorStop(0.4, "#e53935");
+                    bg.addColorStop(1.0, "#7f0000");
+                    gc = "rgba(255, 60, 30, 0.2)";
+                } else {
+                    bg.addColorStop(0.0, "#81d4fa");
+                    bg.addColorStop(0.4, "#1e88e5");
+                    bg.addColorStop(1.0, "#0d47a1");
+                    gc = "rgba(30, 136, 229, 0.16)";
+                }
 
-def main():
-    app = QApplication(sys.argv)
-    pal = QPalette()
-    for r in (QPalette.ColorRole.Window, QPalette.ColorRole.Base, QPalette.ColorRole.Button):
-        pal.setColor(r, QColor("#0a0e1a"))
-    for r in (QPalette.ColorRole.WindowText, QPalette.ColorRole.Text, QPalette.ColorRole.ButtonText):
-        pal.setColor(r, QColor("#e0e0e0"))
-    app.setPalette(pal)
-    w = MainWindow()
-    w.show()
-    sys.exit(app.exec())
+                // Outer glow
+                let glow = p.createRadialGradient(bx, by, R * 0.0, bx, by, R * 2.0);
+                glow.addColorStop(0.4, gc);
+                glow.addColorStop(1.0, "rgba(0, 0, 0, 0)");
+                p.fillStyle = glow;
+                p.beginPath();
+                p.ellipse(bx, by, R * 2, R * 2, 0, 0, 2 * Math.PI);
+                p.fill();
 
+                // Ball body
+                p.fillStyle = bg;
+                p.strokeStyle = "rgba(255, 255, 255, 0.2)";
+                p.lineWidth = 1.5;
+                p.beginPath();
+                p.ellipse(bx, by, R, R, 0, 0, 2 * Math.PI);
+                p.fill();
+                p.stroke();
 
-if __name__ == "__main__":
-    main()
+                // ── Spokes (clockwise: +sin in y-down) ──
+                let n_spokes = 8;
+                p.strokeStyle = "rgba(255, 255, 255, 0.2)";
+                p.lineWidth = 1.2;
+                for (let i = 0; i < n_spokes; i++) {
+                    let a = phy.theta + i * (2 * Math.PI / n_spokes);
+                    let sx = bx + R * 0.82 * Math.cos(a);
+                    let sy = by + R * 0.82 * Math.sin(a);
+                    p.beginPath();
+                    p.moveTo(bx, by);
+                    p.lineTo(sx, sy);
+                    p.stroke();
+                }
 
-  </script>
-</body>
-</html>
+                // Thick radius line
+                let ra = phy.theta;
+                let rx = bx + R * 0.9 * Math.cos(ra);
+                let ry = by + R * 0.9 * Math.sin(ra);
+                p.strokeStyle = "rgba(255, 255, 255, 0.55)";
+                p.lineWidth = 2.2;
+                p.beginPath();
+                p.moveTo(bx, by);
+                p.lineTo(rx, ry);
+                p.stroke();
+
+                // "r" label
+                p.font = "bold 10pt Segoe UI";
+                p.fillStyle = "rgba(255, 255, 255, 0.43)";
+                p.fillText("r", bx + R * 0.45 * Math.cos(ra) + 6, by + R * 0.45 * Math.sin(ra) - 6);
+
+                // Centre dot
+                p.fillStyle = "rgba(255, 255, 255, 0.63)";
+                p.beginPath();
+                p.ellipse(bx, by, 3.5, 3.5, 0, 0, 2 * Math.PI);
+                p.fill();
+
+                // ── Omega arc ──
+                if (phy.omega > 0.2) {
+                    this._omega_arc(p, bx, by, R, phy.omega);
+                }
+
+                // ── Contact point (exactly at ball bottom = ground line) ──
+                if (phy.phase === "slipping" || phy.phase === "rolling") {
+                    let cpx = bx;          // directly below centre
+                    let cpy = by + R;      // = gy (ground line)
+                    let cpc = phy.phase === "slipping" ? "#ff1744" : "#00e676";
+                    let cg = p.createRadialGradient(cpx, cpy, 0, cpx, cpy, 12);
+                    cg.addColorStop(0.0, `rgba(${parseInt(cpc.slice(1, 3), 16)}, ${parseInt(cpc.slice(3, 5), 16)}, ${parseInt(cpc.slice(5, 7), 16)}, 0.35)`);
+                    cg.addColorStop(1.0, "rgba(0, 0, 0, 0)");
+                    p.fillStyle = cg;
+                    p.beginPath();
+                    p.ellipse(cpx, cpy, 12, 12, 0, 0, 2 * Math.PI);
+                    p.fill();
+                    p.fillStyle = cpc;
+                    p.beginPath();
+                    p.ellipse(cpx, cpy, 4, 4, 0, 0, 2 * Math.PI);
+                    p.fill();
+                }
+
+                // ── VECTORS ──
+                if (phy.phase === "slipping" || phy.phase === "rolling") {
+                    let scale = 1.8;
+                    let Rw = phy.R * phy.omega;
+
+                    // v_cm (green) at centre
+                    if (this.show_vcm && phy.v_cm > 0.3) {
+                        this._arrow(p, bx, by, bx + phy.v_cm * scale, by,
+                            "#66bb6a", 3.0, `v_cm = ${phy.v_cm.toFixed(1)}`);
+                    }
+
+                    // Rω (purple) at top, bottom, centre
+                    if (this.show_Rw && Rw > 0.3) {
+                        // Top → right (CW: top surface moves right)
+                        this._arrow(p, bx, by - R, bx + Rw * scale, by - R,
+                            "#ce93d8", 2.5, `Rω = ${Rw.toFixed(1)} →`);
+                        // Bottom → left
+                        this._arrow(p, bx, by + R, bx - Rw * scale, by + R,
+                            "#ce93d8", 2.5, `Rω = ${Rw.toFixed(1)} ←`);
+                        // Centre label
+                        p.font = "8pt Segoe UI";
+                        p.fillStyle = "#ce93d8";
+                        p.fillText("Rω = 0 (CM)", bx - R - 55, by + 4);
+                    }
+
+                    // Friction (gold) rightward during slipping only
+                    if (this.show_friction && phy.phase === "slipping") {
+                        let f_mag = phy.mu * phy.mass * phy.g;
+                        let f_len = f_mag * 0.28;
+                        let fy = by + R + 14;
+                        this._arrow(p, bx - 10, fy, bx - 10 + f_len, fy,
+                            "#ffd740", 3.5, `f = μmg = ${f_mag.toFixed(0)} →`);
+                    }
+
+                    if (this.show_weight) {
+                        this._arrow(p, bx, by, bx, by + 50, "rgba(180, 180, 180, 0.47)", 2, "mg");
+                    }
+
+                    if (this.show_normal) {
+                        this._arrow(p, bx, by + R, bx, by + R - 55, "rgba(100, 220, 255, 0.47)", 2, "N");
+                    }
+                }
+
+                // v_contact text
+                if (phy.phase === "slipping") {
+                    let vc = phy.v_cm - phy.R * phy.omega;
+                    p.font = "bold 9pt Consolas";
+                    p.fillStyle = "#ff5252";
+                    p.fillText(`v_contact = ${vc.toFixed(1)}`, bx + R + 10, by + R + 8);
+                }
+
+                // ── Sparks ──
+                if (phy.phase === "slipping" && phy.omega > 0.3) {
+                    for (let _i = 0; _i < 3; _i++) {
+                        this.sparks.push([
+                            bx + Math.random() * 10 - 5,
+                            gy - Math.random() * 3,
+                            Math.random() * -50 - 10,
+                            Math.random() * -80 - 30,
+                            1.0
+                        ]);
+                    }
+                }
+                let alive = [];
+                for (let sp of this.sparks) {
+                    sp[0] += sp[2] * 0.016;
+                    sp[1] += sp[3] * 0.016;
+                    sp[3] += 280 * 0.016;
+                    sp[4] -= 0.04;
+                    if (sp[4] > 0) {
+                        let a = parseInt(255 * sp[4]);
+                        let c = sp[4] > 0.4 ? `rgba(255, 200, 50, ${a / 255})` : `rgba(255, 100, 30, ${a / 255})`;
+                        p.fillStyle = c;
+                        p.beginPath();
+                        p.ellipse(sp[0], sp[1], 3 * sp[4], 3 * sp[4], 0, 0, 2 * Math.PI);
+                        p.fill();
+                        alive.push(sp);
+                    }
+                }
+                this.sparks = alive;
+
+                // ── Pure rolling label ──
+                if (phy.phase === "rolling") {
+                    p.font = "bold 14pt Segoe UI";
+                    p.fillStyle = "#69f0ae";
+                    p.fillText("v_cm = Rω  ✓  Pure Rolling!", bx - 70, by - R - 38);
+                    p.font = "10pt Consolas";
+                    p.fillStyle = "#69f0ae";
+                    p.fillText(`v_cm = Rω = ${phy.v_r.toFixed(1)} px/s`, bx - 70, by - R - 20);
+                }
+
+                // ── Phase badge ──
+                let badges = {
+                    "hovering": ["SPINNING CLOCKWISE IN AIR", "#fdd835"],
+                    "falling": ["FALLING (still spinning CW)", "#fdd835"],
+                    "slipping": ["SLIPPING → sliding RIGHT", "#ff5252"],
+                    "rolling": ["PURE ROLLING (CW)", "#69f0ae"],
+                };
+                let [bt, bc] = badges[phy.phase] || ["", "#fff"];
+                p.font = "bold 12pt Segoe UI";
+                let bw_ = p.measureText(bt).width + 30;
+                let bh_ = 34;
+                let br_x = w - bw_ - 12;
+                let br_y = 10;
