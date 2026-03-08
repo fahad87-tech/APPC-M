@@ -186,6 +186,8 @@ class SimCanvas {
         let R = this.phy.R;
         let phy = this.phy;
 
+        ctx.clearRect(0, 0, w, h);
+
         // Sky
         let sky = ctx.createLinearGradient(0, 0, 0, gy);
         sky.addColorStop(0.0, "#0b1120");
@@ -214,12 +216,12 @@ class SimCanvas {
         // Static hatching
         ctx.strokeStyle = "rgba(255, 255, 255, 0.07)";
         ctx.lineWidth = 1;
-        ctx.beginPath();
         for (let xi = 0; xi <= w + 28; xi += 28) {
+            ctx.beginPath();
             ctx.moveTo(xi, gy + 3);
             ctx.lineTo(xi - 18, gy + 24);
+            ctx.stroke();
         }
-        ctx.stroke();
 
         // Compute ball screen position
         let drop_x = w * 0.18;
@@ -295,8 +297,8 @@ class SimCanvas {
         ctx.ellipse(bx, gy + 3, R * 1.5 * st, 4.5 * st, 0, 0, 2 * Math.PI);
         ctx.fill();
 
-        // Ball color
-        let bg = ctx.createRadialGradient(bx - R * 0.3, by - R * 0.3, R * 0.0, bx - R * 0.3, by - R * 0.3, R * 1.6);
+        // Ball colour
+        let bg = ctx.createRadialGradient(bx - R * 0.3, by - R * 0.3, 0, bx - R * 0.3, by - R * 0.3, R * 1.6);
         let gc;
         if (phy.phase === "hovering" || phy.phase === "falling") {
             bg.addColorStop(0.0, "#fff59d");
@@ -337,15 +339,15 @@ class SimCanvas {
         let n_spokes = 8;
         ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
         ctx.lineWidth = 1.2;
-        ctx.beginPath();
         for (let i = 0; i < n_spokes; i++) {
             let a = phy.theta + i * (2 * Math.PI / n_spokes);
             let sx = bx + R * 0.82 * Math.cos(a);
             let sy = by + R * 0.82 * Math.sin(a);
+            ctx.beginPath();
             ctx.moveTo(bx, by);
             ctx.lineTo(sx, sy);
+            ctx.stroke();
         }
-        ctx.stroke();
 
         // Thick radius line
         let ra = phy.theta;
@@ -449,8 +451,7 @@ class SimCanvas {
             }
         }
         let alive = [];
-        for (let i = 0; i < this.sparks.length; i++) {
-            let sp = this.sparks[i];
+        for (let sp of this.sparks) {
             sp[0] += sp[2] * 0.016;
             sp[1] += sp[3] * 0.016;
             sp[3] += 280 * 0.016;
@@ -489,7 +490,6 @@ class SimCanvas {
         let bh_ = 34;
         let br_x = w - bw_ - 12;
         let br_y = 10;
-
         ctx.fillStyle = "rgba(0, 0, 0, 0.66)";
         ctx.strokeStyle = bc;
         ctx.lineWidth = 1.5;
@@ -571,7 +571,6 @@ class SimCanvas {
         let ty_ = cy - ar * Math.sin(end_rad);
         let tang_dx = Math.sin(end_rad);
         let tang_dy = Math.cos(end_rad);
-
         for (let s of [0.4, -0.4]) {
             let hx = tx_ - 10 * (tang_dx * Math.cos(s) - tang_dy * Math.sin(s));
             let hy = ty_ + 10 * (tang_dx * Math.sin(s) + tang_dy * Math.cos(s));
@@ -592,7 +591,6 @@ class SimCanvas {
     _hud(ctx, w, h) {
         let bw = 285, bh = 148;
         let bx_ = 10, by_ = h - bh - 10;
-
         ctx.fillStyle = "rgba(0, 0, 0, 0.67)";
         ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
         ctx.lineWidth = 1;
@@ -608,7 +606,6 @@ class SimCanvas {
             `v_contact = v_cm − Rω = ${(phy.v_cm - Rw).toFixed(2)}`,
             `x = ${phy.x_cm.toFixed(0)} px   phase: ${phy.phase}`,
         ];
-
         ctx.font = "9pt Consolas";
         ctx.fillStyle = "rgba(220, 220, 220, 0.78)";
         for (let i = 0; i < lines.length; i++) {
@@ -685,12 +682,12 @@ class RealTimeGraphs {
         // Grid
         ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
         ctx.lineWidth = 0.5;
-        ctx.beginPath();
         for (let i = 0; i < 5; i++) {
+            ctx.beginPath();
             ctx.moveTo(gx, gy + gh * i / 4);
             ctx.lineTo(gx + gw, gy + gh * i / 4);
+            ctx.stroke();
         }
-        ctx.stroke();
 
         // Axis labels
         ctx.font = "8pt Segoe UI";
@@ -699,7 +696,8 @@ class RealTimeGraphs {
         ctx.fillText("0", gx - 16, gy + gh + 4);
 
         // Plot v_cm
-        this._plot(ctx, phy.hist_t, phy.hist_v, t_max, v_max, gx, gy, gw, gh, "#66bb6a",
+        this._plot(ctx, phy.hist_t, phy.hist_v, t_max, v_max, gx, gy, gw, gh, "#66bb6a", 3.0);
+        // Plot R
 </script>
 </body>
 </html>
