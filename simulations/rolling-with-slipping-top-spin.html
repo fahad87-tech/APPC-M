@@ -188,7 +188,7 @@ function ground_y() {
     return simCanvas.height * GROUND_FRAC;
 }
 
-function drawSim() {
+function drawSimCanvas() {
     let w = simCanvas.width;
     let h = simCanvas.height;
     let gy = ground_y();
@@ -250,8 +250,8 @@ function drawSim() {
         if (phy.x_cm > 5) {
             simCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
             simCtx.lineWidth = 1;
-            simCtx.setLineDash([1, 2]);
             simCtx.beginPath();
+            simCtx.setLineDash([1, 2]);
             simCtx.moveTo(drop_x, gy - 50);
             simCtx.lineTo(drop_x, gy);
             simCtx.stroke();
@@ -271,10 +271,12 @@ function drawSim() {
                 simCtx.moveTo(drop_x, ruler_y);
                 simCtx.lineTo(draw_bx, ruler_y);
                 simCtx.stroke();
+
                 simCtx.beginPath();
                 simCtx.moveTo(drop_x, ruler_y - 4);
                 simCtx.lineTo(drop_x, ruler_y + 4);
                 simCtx.stroke();
+
                 simCtx.beginPath();
                 simCtx.moveTo(draw_bx, ruler_y - 4);
                 simCtx.lineTo(draw_bx, ruler_y + 4);
@@ -300,30 +302,35 @@ function drawSim() {
     }
 
     // Shadow
-    let st = 1.0;
+    let st;
     if (phy.phase === "hovering" || phy.phase === "falling") {
         let dist = Math.max(1, rest_y - by);
         st = Math.max(0.1, 1.0 - dist / 250);
+    } else {
+        st = 1.0;
     }
     simCtx.fillStyle = `rgba(0, 0, 0, ${80 * st / 255})`;
     simCtx.beginPath();
-    simCtx.ellipse(bx, gy + 3, 1.5 * R * st, 4.5 * st, 0, 0, 2 * Math.PI);
+    simCtx.ellipse(bx, gy + 3, R * 1.5 * st, 4.5 * st, 0, 0, 2 * Math.PI);
     simCtx.fill();
 
     // Ball color
-    let bg = simCtx.createRadialGradient(bx - R * 0.3, by - R * 0.3, R * 0.0, bx - R * 0.3, by - R * 0.3, R * 1.6);
+    let bg;
     let gc;
     if (phy.phase === "hovering" || phy.phase === "falling") {
+        bg = simCtx.createRadialGradient(bx - R * 0.3, by - R * 0.3, 0, bx - R * 0.3, by - R * 0.3, R * 1.6);
         bg.addColorStop(0.0, "#fff59d");
         bg.addColorStop(0.4, "#fdd835");
         bg.addColorStop(1.0, "#f9a825");
         gc = "rgba(253, 216, 53, 0.16)";
     } else if (phy.phase === "slipping") {
+        bg = simCtx.createRadialGradient(bx - R * 0.3, by - R * 0.3, 0, bx - R * 0.3, by - R * 0.3, R * 1.6);
         bg.addColorStop(0.0, "#ff8a65");
         bg.addColorStop(0.4, "#e53935");
         bg.addColorStop(1.0, "#7f0000");
         gc = "rgba(255, 60, 30, 0.2)";
     } else {
+        bg = simCtx.createRadialGradient(bx - R * 0.3, by - R * 0.3, 0, bx - R * 0.3, by - R * 0.3, R * 1.6);
         bg.addColorStop(0.0, "#81d4fa");
         bg.addColorStop(0.4, "#1e88e5");
         bg.addColorStop(1.0, "#0d47a1");
@@ -345,8 +352,8 @@ function drawSim() {
     simCtx.lineWidth = 1.5;
     simCtx.beginPath();
     simCtx.ellipse(bx, by, R, R, 0, 0, 2 * Math.PI);
-    simCtx.stroke();
     simCtx.fill();
+    simCtx.stroke();
 
     // Spokes
     let n_spokes = 8;
@@ -401,6 +408,7 @@ function drawSim() {
         simCtx.beginPath();
         simCtx.ellipse(cpx, cpy, 12, 12, 0, 0, 2 * Math.PI);
         simCtx.fill();
+
         simCtx.fillStyle = cpc;
         simCtx.beginPath();
         simCtx.ellipse(cpx, cpy, 4, 4, 0, 0, 2 * Math.PI);
@@ -421,6 +429,7 @@ function drawSim() {
         if (show_Rw && Rw > 0.3) {
             _arrow(simCtx, bx, by - R, bx + Rw * scale, by - R, "#ce93d8", 2.5, `Rω = ${Rw.toFixed(1)} →`);
             _arrow(simCtx, bx, by + R, bx - Rw * scale, by + R, "#ce93d8", 2.5, `Rω = ${Rw.toFixed(1)} ←`);
+
             simCtx.font = "8pt Segoe UI";
             simCtx.fillStyle = "#ce93d8";
             simCtx.fillText("Rω = 0 (CM)", bx - R - 55, by + 4);
@@ -464,8 +473,7 @@ function drawSim() {
         }
     }
     let alive = [];
-    for (let i = 0; i < sparks.length; i++) {
-        let sp = sparks[i];
+    for (let sp of sparks) {
         sp[0] += sp[2] * 0.016;
         sp[1] += sp[3] * 0.016;
         sp[3] += 280 * 0.016;
@@ -488,7 +496,6 @@ function drawSim() {
         simCtx.fillStyle = "#69f0ae";
         simCtx.fillText("v_cm = Rω  ✓  Pure Rolling!", bx - 70, by - R - 38);
         simCtx.font = "10pt Consolas";
-        simCtx.fillStyle = "#69f0ae";
         simCtx.fillText(`v_cm = Rω = ${phy.v_r.toFixed(1)} px/s`, bx - 70, by - R - 20);
     }
 
@@ -505,7 +512,8 @@ function drawSim() {
     let bh_ = 34;
     let br_x = w - bw_ - 12;
     let br_y = 10;
-    simCtx.fillStyle = "rgba(0, 0, 0, 0.66)";
+
+    simCtx.fillStyle = "rgba(0, 0, 0, 0.6)";
     simCtx.strokeStyle = bc;
     simCtx.lineWidth = 1.5;
     roundRect(simCtx, br_x, br_y, bw_, bh_, 8);
@@ -536,6 +544,7 @@ function _arrow(ctx, x1, y1, x2, y2, color, width, label) {
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.stroke();
+
     let ang = Math.atan2(dy, dx);
     let hl = Math.min(14, ln * 0.35);
     for (let s of [1, -1]) {
@@ -545,11 +554,13 @@ function _arrow(ctx, x1, y1, x2, y2, color, width, label) {
         ctx.lineTo(x2 + hl * Math.cos(ha), y2 + hl * Math.sin(ha));
         ctx.stroke();
     }
+
     if (label) {
         ctx.font = "bold 9pt Segoe UI";
         ctx.fillStyle = color;
         ctx.fillText(label, (x1 + x2) / 2 - 25, Math.min(y1, y2) - 8);
     }
+    ctx.lineCap = "butt";
 }
 
 function _omega_arc(ctx, cx, cy, R, omega) {
@@ -562,12 +573,14 @@ function _omega_arc(ctx, cx, cy, R, omega) {
     ctx.beginPath();
     ctx.arc(cx, cy, ar, Math.PI / 2, Math.PI / 2 - span * Math.PI / 180, true);
     ctx.stroke();
+
     let end_deg = 90 - span;
     let end_rad = end_deg * Math.PI / 180;
     let tx_ = cx + ar * Math.cos(end_rad);
     let ty_ = cy - ar * Math.sin(end_rad);
     let tang_dx = Math.sin(end_rad);
     let tang_dy = Math.cos(end_rad);
+
     for (let s of [0.4, -0.4]) {
         let hx = tx_ - 10 * (tang_dx * Math.cos(s) - tang_dy * Math.sin(s));
         let hy = ty_ + 10 * (tang_dx * Math.sin(s) + tang_dy * Math.cos(s));
@@ -576,12 +589,14 @@ function _omega_arc(ctx, cx, cy, R, omega) {
         ctx.lineTo(hx, hy);
         ctx.stroke();
     }
+
     let mid_rad = (90 - span / 2) * Math.PI / 180;
     let lx = cx + (ar + 16) * Math.cos(mid_rad);
     let ly = cy - (ar + 16) * Math.sin(mid_rad);
     ctx.font = "bold 12pt Segoe UI";
     ctx.fillStyle = "rgba(255, 171, 64, 1)";
     ctx.fillText("ω", lx - 4, ly + 5);
+    ctx.lineCap = "butt";
 }
 
 function _hud(ctx, w, h) {
@@ -589,10 +604,12 @@ function _hud(ctx, w, h) {
     let bh = 148;
     let bx_ = 10;
     let by_ = h - bh - 10;
+
     ctx.fillStyle = "rgba(0, 0, 0, 0.67)";
     ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
     ctx.lineWidth = 1;
     roundRect(ctx, bx_, by_, bw, bh, 10);
+
     let Rw = phy.R * phy.omega;
     let lines = [
         `t = ${phy.t.toFixed(3)} s    t_r = ${phy.t_r.toFixed(3)} s`,
@@ -602,21 +619,23 @@ function _hud(ctx, w, h) {
         `v_contact = v_cm − Rω = ${(phy.v_cm - Rw).toFixed(2)}`,
         `x = ${phy.x_cm.toFixed(0)} px   phase: ${phy.phase}`,
     ];
+
     ctx.font = "9pt Consolas";
     ctx.fillStyle = "rgba(220, 220, 220, 0.78)";
-    ctx.textAlign = "start";
-    ctx.textBaseline = "alphabetic";
     for (let i = 0; i < lines.length; i++) {
         ctx.fillText(lines[i], bx_ + 10, by_ + 20 + i * 20);
     }
 }
 
-function drawGraphs() {
+function drawGraphCanvas() {
     let w = graphCanvas.width;
     let h = graphCanvas.height;
     graphCtx.fillStyle = "#0d1117";
     graphCtx.fillRect(0, 0, w, h);
-    let ml = 55, mr = 14, mt = 22, mb = 14;
+    let ml = 55;
+    let mr = 14;
+    let mt = 22;
+    let mb = 14;
     let gap = 42;
     let gh = (h - mt - mb - gap) / 2;
     _graph_top(graphCtx, ml, mt, w - ml - mr, gh);
@@ -628,6 +647,7 @@ function _graph_top(ctx, gx, gy, gw, gh) {
     ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
     ctx.lineWidth = 1;
     roundRect(ctx, gx, gy, gw, gh, 6);
+
     ctx.font = "bold 10pt Segoe UI";
     ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
     ctx.fillText("v_cm (↑ green)   Rω (↓ purple)   vs time", gx + 6, gy - 5);
@@ -668,6 +688,7 @@ function _graph_top(ctx, gx, gy, gw, gh) {
 
     // Plot v_cm
     _plot(ctx, phy.hist_t, phy.hist_v, t_max, v_max, gx, gy, gw, gh, "#66bb6a", 3.0);
+
     // Plot Rω
     _plot(ctx, phy.hist_t, phy.hist_Romega, t_max, v_max, gx, gy, gw, gh, "#ce93d8", 3.0);
 
@@ -677,14 +698,9 @@ function _graph_top(ctx, gx, gy, gw, gh) {
     ctx.beginPath();
     ctx.ellipse(cx_, ty(phy.hist_v[phy.hist_v.length - 1]), 5, 5, 0, 0, 2 * Math.PI);
     ctx.fill();
-    ctx.fillStyle = "#ce93d8";
-    ctx.beginPath();
-    ctx.ellipse(cx_, ty(phy.hist_Romega[phy.hist_Romega.length - 1]), 5, 5, 0, 0, 2 * Math.PI);
-    ctx.fill();
 
-    // Rolling convergence
-    if (phy.phase === "rolling" && phy.t_r < t_max) {
-        let tr_x = tx(phy.t_r);
+    ctx.fillStyle = "#ce93d8";
+    ctx.
 </script>
 </body>
 </html>
