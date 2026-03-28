@@ -54,7 +54,7 @@
     </div>
     
     <div class="canvas-wrapper" id="kinematics-wrapper">
-        <div class="plot-title">Kinematics (Velocity vs Pressure)</div>
+        <div class="plot-title">Kinematics (Dual Axis)</div>
         <div class="legend">
             <div class="legend-item"><div class="legend-color" style="background: var(--accent-cyan)"></div> Velocity v(x)</div>
             <div class="legend-item"><div class="legend-color" style="background: var(--accent-red)"></div> Pressure P(x)</div>
@@ -238,17 +238,16 @@ const cvsGeom = document.getElementById('canvas-geom'); const ctxGeom = cvsGeom.
 const cvsKin = document.getElementById('canvas-kin'); const ctxKin = cvsKin.getContext('2d');
 const cvsEng = document.getElementById('canvas-eng'); const ctxEng = cvsEng.getContext('2d');
 
-// --- CROSSHAIR STATE ---
+// Global Layout Padding (Widened padR to fit dual Y-axes)
+const padL = 60, padR = 60, padT = 35, padB = 30;
 let hover = { active: false, x: 0, idx: 0 };
-const padL = 55, padR = 20, padT = 35, padB = 30;
 
 function handleMouseHover(e) {
     const rect = e.target.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
-    const w = e.target.width;
-    const plotW = w - padL - padR;
+    const plotW = e.target.width - padL - padR;
 
-    if (mouseX >= padL && mouseX <= w - padR) {
+    if (mouseX >= padL && mouseX <= e.target.width - padR) {
         hover.active = true;
         hover.x = mouseX;
         let dataX = -5 + ((mouseX - padL) / plotW) * 10;
@@ -283,25 +282,40 @@ function formatAxisNumber(val) {
     return val.toFixed(0);
 }
 
-function drawGraphAxes(ctx, w, h, xMin, xMax, yMin, yMax) {
+// Upgraded drawGraphAxes to support Dual Y-Axes seamlessly
+function drawGraphAxes(ctx, w, h, xMin, xMax, yMin, yMax, rightYMin=null, rightYMax=null, rightColor='#FF3B30', leftColor='#E0E0E0') {
     let plotW = w - padL - padR;
     let plotH = h - padB - padT;
 
     ctx.strokeStyle = 'rgba(255,255,255,0.15)'; 
-    ctx.fillStyle = '#E0E0E0';                  
     ctx.font = 'bold 12px sans-serif';          
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
 
+    // Y-axis ticks & grid
     for(let i=0; i<=4; i++) {
-        let yVal = yMin + (yMax - yMin) * (i/4);
         let yPos = padT + plotH - (i/4)*plotH;
+        
         ctx.beginPath(); ctx.moveTo(padL, yPos); ctx.lineTo(w-padR, yPos); ctx.stroke();
+        
+        // Left Axis
+        let yVal = yMin + (yMax - yMin) * (i/4);
+        ctx.fillStyle = leftColor;
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
         ctx.fillText(formatAxisNumber(yVal), padL - 8, yPos);
+
+        // Right Axis (Optional)
+        if(rightYMin !== null && rightYMax !== null) {
+            let ryVal = rightYMin + (rightYMax - rightYMin) * (i/4);
+            ctx.fillStyle = rightColor;
+            ctx.textAlign = 'left';
+            ctx.fillText(formatAxisNumber(ryVal), w - padR + 8, yPos);
+        }
     }
 
+    // X-axis ticks & grid
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
+    ctx.fillStyle = '#E0E0E0';
     for(let i=0; i<=4; i++) {
         let xVal = xMin + (xMax - xMin) * (i/4);
         let xPos = padL + (i/4)*plotW;
@@ -309,9 +323,10 @@ function drawGraphAxes(ctx, w, h, xMin, xMax, yMin, yMax) {
         ctx.fillText(xVal.toFixed(1) + "m", xPos, h - padB + 8);
     }
     
+    // Solid Axis bounding box
     ctx.strokeStyle = 'rgba(255,255,255,0.6)';
     ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, h-padB); ctx.lineTo(w-padR, h-padB); ctx.stroke();
+    ctx.beginPath(); ctx.rect(padL, padT, plotW, plotH); ctx.stroke();
 }
 
 function drawTooltip(ctx, x, y, lines) {
@@ -367,7 +382,6 @@ function render() {
 
     drawGraphAxes(ctxGeom, w, h, -5, 5, centerZ - rangeY, centerZ + rangeY);
 
-    // CLIPPING ENFORCED FOR PHYSICS GRAPHICS
     ctxGeom.save();
     ctxGeom.beginPath(); ctxGeom.rect(padL, padT, plotW, plotH); ctxGeom.clip();
 
@@ -388,7 +402,7 @@ function render() {
     for(let i=0; i<particles.num; i++) {
         ctxGeom.beginPath(); ctxGeom.arc(mapXG(particles.px[i]), mapYG(particles.py[i]), 2, 0, Math.PI*2); ctxGeom.fill();
     }
-    ctxGeom.restore(); // END CLIP
+    ctxGeom.restore();
 
     if (hover.active) {
         ctxGeom.strokeStyle = 'rgba(255,255,255,0.4)'; ctxGeom.lineWidth = 1; ctxGeom.beginPath(); ctxGeom.moveTo(hover.x, padT); ctxGeom.lineTo(hover.x, h - padB); ctxGeom.stroke();
@@ -400,42 +414,44 @@ function render() {
     }
 
     // ----------------------------------------
-    // 2. KINEMATICS
+    // 2. KINEMATICS (Now perfectly Dual-Axis!)
     // ----------------------------------------
     ctxKin.clearRect(0, 0, cvsKin.width, cvsKin.height); w = cvsKin.width; h = cvsKin.height;
     
-    let minK = Infinity, maxK = -Infinity;
+    let minV = Infinity, maxV = -Infinity, minP = Infinity, maxP = -Infinity;
     for(let i=0; i<core.pts; i++) {
-        if(core.v[i] > maxK) maxK = core.v[i]; if(core.P[i] > maxK) maxK = core.P[i];
-        if(core.v[i] < minK) minK = core.v[i]; if(core.P[i] < minK) minK = core.P[i];
+        if(core.v[i] > maxV) maxV = core.v[i]; if(core.v[i] < minV) minV = core.v[i];
+        if(core.P[i] > maxP) maxP = core.P[i]; if(core.P[i] < minP) minP = core.P[i];
     }
-    let rangeK = (maxK - minK) || 1; let padK = rangeK * 0.15; 
+    let rangeV = (maxV - minV) || 1; let padV = rangeV * 0.15; 
+    let rangeP = (maxP - minP) || 1; let padP = rangeP * 0.15;
     
     plotW = w - padL - padR; plotH = h - padB - padT;
     const mapXK = (x) => padL + ((x + 5) / 10) * plotW;
-    const mapYKin = (val) => padT + plotH - ((val - (minK - padK)) / (rangeK + 2*padK)) * plotH;
+    const mapYV = (val) => padT + plotH - ((val - (minV - padV)) / (rangeV + 2*padV)) * plotH;
+    const mapYP = (val) => padT + plotH - ((val - (minP - padP)) / (rangeP + 2*padP)) * plotH;
 
-    drawGraphAxes(ctxKin, w, h, -5, 5, minK - padK, maxK + padK);
+    // Draw Dual Axes
+    drawGraphAxes(ctxKin, w, h, -5, 5, minV - padV, maxV + padV, minP - padP, maxP + padP, '#FF3B30', '#00E5FF');
 
-    // CLIPPING ENFORCED FOR PHYSICS GRAPHICS
     ctxKin.save();
     ctxKin.beginPath(); ctxKin.rect(padL, padT, plotW, plotH); ctxKin.clip();
 
     ctxKin.strokeStyle = '#00E5FF'; ctxKin.lineWidth = 3; ctxKin.beginPath();
-    for(let i=0; i<core.pts; i++) { let x = mapXK(core.x[i]); if(i===0) ctxKin.moveTo(x, mapYKin(core.v[i])); else ctxKin.lineTo(x, mapYKin(core.v[i])); }
+    for(let i=0; i<core.pts; i++) { let x = mapXK(core.x[i]); if(i===0) ctxKin.moveTo(x, mapYV(core.v[i])); else ctxKin.lineTo(x, mapYV(core.v[i])); }
     ctxKin.stroke();
 
     ctxKin.strokeStyle = '#FF3B30'; ctxKin.beginPath();
-    for(let i=0; i<core.pts; i++) { let x = mapXK(core.x[i]); if(i===0) ctxKin.moveTo(x, mapYKin(core.P[i])); else ctxKin.lineTo(x, mapYKin(core.P[i])); }
+    for(let i=0; i<core.pts; i++) { let x = mapXK(core.x[i]); if(i===0) ctxKin.moveTo(x, mapYP(core.P[i])); else ctxKin.lineTo(x, mapYP(core.P[i])); }
     ctxKin.stroke();
     
-    ctxKin.restore(); // END CLIP
+    ctxKin.restore(); 
 
     if (hover.active) {
         ctxKin.strokeStyle = 'rgba(255,255,255,0.4)'; ctxKin.lineWidth = 1; ctxKin.beginPath(); ctxKin.moveTo(hover.x, padT); ctxKin.lineTo(hover.x, h - padB); ctxKin.stroke();
         
-        ctxKin.fillStyle = '#00E5FF'; ctxKin.beginPath(); ctxKin.arc(hover.x, mapYKin(core.v[hover.idx]), 5, 0, Math.PI*2); ctxKin.fill();
-        ctxKin.fillStyle = '#FF3B30'; ctxKin.beginPath(); ctxKin.arc(hover.x, mapYKin(core.P[hover.idx]), 5, 0, Math.PI*2); ctxKin.fill();
+        ctxKin.fillStyle = '#00E5FF'; ctxKin.beginPath(); ctxKin.arc(hover.x, mapYV(core.v[hover.idx]), 5, 0, Math.PI*2); ctxKin.fill();
+        ctxKin.fillStyle = '#FF3B30'; ctxKin.beginPath(); ctxKin.arc(hover.x, mapYP(core.P[hover.idx]), 5, 0, Math.PI*2); ctxKin.fill();
 
         drawTooltip(ctxKin, hover.x, padT + 20, [
             {text: `Distance: ${core.x[hover.idx].toFixed(2)} m`},
@@ -463,7 +479,6 @@ function render() {
 
     drawGraphAxes(ctxEng, w, h, -5, 5, minE - padE, maxE + padE);
 
-    // CLIPPING ENFORCED FOR PHYSICS GRAPHICS
     ctxEng.save();
     ctxEng.beginPath(); ctxEng.rect(padL, padT, plotW, plotH); ctxEng.clip();
 
@@ -474,8 +489,7 @@ function render() {
     };
 
     drawLine(core.Pdyn, '#32D74B'); drawLine(core.Ppot, '#BF5AF2'); drawLine(core.P, '#FFD60A'); drawLine(core.Ptot, '#FFFFFF', true);
-    
-    ctxEng.restore(); // END CLIP
+    ctxEng.restore(); 
 
     if (hover.active) {
         ctxEng.strokeStyle = 'rgba(255,255,255,0.4)'; ctxEng.lineWidth = 1; ctxEng.setLineDash([]); ctxEng.beginPath(); ctxEng.moveTo(hover.x, padT); ctxEng.lineTo(hover.x, h - padB); ctxEng.stroke();
