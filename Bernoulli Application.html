@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Fluid Dynamics | Venturi & Bernoulli</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0A0A0C;
+            --panel-bg: #121216;
+            --accent: #00E5FF;
+            --text: #E0E0E0;
+            --border: #2C2C35;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar Style --- */
+        #sidebar {
+            width: 400px;
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        h1 { font-size: 1.5rem; font-weight: 900; color: white; letter-spacing: 1px; margin-bottom: 10px; }
+        
+        .group-box {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+            margin-top: 10px;
+        }
+
+        .group-title {
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            background: var(--panel-bg);
+            padding: 0 5px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        label { display: block; font-size: 0.75rem; color: #A0A0B0; margin: 8px 0 4px; }
+        
+        select, input {
+            width: 100%;
+            background: #1C1C22;
+            border: 1px solid #333;
+            color: white;
+            padding: 8px;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .slider-row {
+            display: grid;
+            grid-template-columns: 1fr 100px 60px;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        input[type="range"] { accent-color: var(--accent); }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 20px; }
+        
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        #play-btn { background: #0A84FF; color: white; }
+        #export-btn { background: #333; color: white; border: 1px solid #555; }
+
+        /* --- Main Content --- */
+        #main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .chart-container {
+            flex: 1;
+            background: #0A0A0C;
+            border-radius: 8px;
+            position: relative;
+            min-height: 0;
+        }
+
+        canvas#particleCanvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <h1>FLUID DYNAMICS</h1>
+    
+    <div class="group-box">
+        <div class="group-title">1. Environment & Setup</div>
+        <label>Fluid Medium</label>
+        <select id="medium-select">
+            <option value="1000">Water (ρ = 1000)</option>
+            <option value="1.225">Air (ρ = 1.225)</option>
+            <option value="13600">Mercury (ρ = 13600)</option>
+        </select>
+        
+        <label>Pipe Configuration</label>
+        <select id="pipe-select">
+            <option value="0">Horizontal Venturi Tube</option>
+            <option value="1">Uphill Incline (Ramp)</option>
+            <option value="2">Inclined Venturi</option>
+            <option value="3">Downward Siphon Drop</option>
+        </select>
+    </div>
+
+    <div class="group-box">
+        <div class="group-title">2. Custom Math Profiles</div>
+        <label>Tube Radius R(x)</label>
+        <input type="text" id="req-input" value="2 - (2 - 0.5) * Math.exp(-x*x)">
+        <label>Elevation Z(x)</label>
+        <input type="text" id="zeq-input" value="0">
+    </div>
+
+    <div class="group-box">
+        <div class="group-title">3. Physical Parameters</div>
+        
+        <div class="slider-row">
+            <label>R1 (Inlet)</label>
+            <input type="range" id="r1-slider" min="0.5" max="5" step="0.1" value="2">
+            <input type="number" id="r1-num" value="2">
+        </div>
+
+        <div class="slider-row">
+            <label>R2 (Con)</label>
+            <input type="range" id="r2-slider" min="0.1" max="5" step="0.1" value="0.5">
+            <input type="number" id="r2-num" value="0.5">
+        </div>
+
+        <div class="slider-row">
+            <label>v1 (m/s)</label>
+            <input type="range" id="v1-slider" min="0.1" max="50" step="1" value="10">
+            <input type="number" id="v1-num" value="10">
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <button id="play-btn">Pause Flow</button>
+        <button id="export-btn">CSV Export</button>
+    </div>
+</div>
+
+<div id="main-content">
+    <div class="chart-container" style="flex: 2;">
+        <canvas id="particleCanvas"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="kinematicsChart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="energyChart"></canvas>
+    </div>
+</div>
+
+<script>
+    // --- Physics Core Implementation ---
+    class VenturiPhysics {
+        constructor() {
+            this.x = Array.from({length: 200}, (_, i) => -5 + i * 0.05);
+            this.rho = 1000;
+            this.g = 9.81;
+            this.data = { R: [], Z: [], v: [], P: [], P_dyn: [], P_pot: [], P_tot: [] };
+        }
+
+        calculate(rEq, zEq, r1, r2, v1, p1, rho) {
+            this.rho = rho;
+            const safeEval = (eq, xVal) => {
+                try {
+                    // Replace numpy/python functions with Math equivalents
+                    let parsed = eq.replace(/np\./g, 'Math.')
+                                   .replace(/exp/g, 'Math.exp')
+                                   .replace(/tanh/g, 'Math.tanh')
+                                   .replace(/x/g, `(${xVal})`)
+                                   .replace(/R1/g, r1)
+                                   .replace(/R2/g, r2);
+                    return eval(parsed);
+                } catch(e) { return 1; }
+            };
+
+            this.data = { R: [], Z: [], v: [], P: [], P_dyn: [], P_pot: [], P_tot: [] };
+            const A1 = Math.PI * Math.pow(r1, 2);
+
+            this.x.forEach((xv, i) => {
+                const r = Math.max(0.1, safeEval(rEq, xv));
+                const z = safeEval(zEq, xv);
+                const a = Math.PI * Math.pow(r, 2);
+                
+                const v = v1 * (A1 / a);
+                const p_dyn = 0.5 * rho * v * v;
+                const p_pot = rho * this.g * z;
+                
+                // Bernoulli: P1 + dyn1 + pot1 = Px + dynX + potX
+                const p1_dyn = 0.5 * rho * v1 * v1;
+                const p1_pot = rho * this.g * safeEval(zEq, -5);
+                const p = p1 + p1_dyn + p1_pot - p_dyn - p_pot;
+
+                this.data.R.push(r);
+                this.data.Z.push(z);
+                this.data.v.push(v);
+                this.data.P.push(p);
+                this.data.P_dyn.push(p_dyn);
+                this.data.P_pot.push(p_pot);
+                this.data.P_tot.push(p + p_dyn + p_pot);
+            });
+        }
+    }
+
+    // --- Particle System ---
+    class ParticleSystem {
+        constructor(count) {
+            this.particles = Array.from({length: count}, () => ({
+                x: Math.random() * 10 - 5,
+                rNorm: Math.random() * 1.9 - 0.95
+            }));
+        }
+
+        update(physics) {
+            this.particles.forEach(p => {
+                // Find nearest index in physics data
+                const idx = Math.floor((p.x + 5) * 20);
+                if (idx >= 0 && idx < 200) {
+                    const v = physics.data.v[idx];
+                    p.x += v * 0.002; // dt
+                }
+                if (p.x > 5) {
+                    p.x = -5;
+                    p.rNorm = Math.random() * 1.9 - 0.95;
+                }
+            });
+        }
+    }
+
+    // --- Controller & UI ---
+    const physics = new VenturiPhysics();
+    const system = new ParticleSystem(400);
+    let isPlaying = true;
+
+    // Charts
+    const ctxKin = document.getElementById('kinematicsChart').getContext('2d');
+    const kinChart = new Chart(ctxKin, {
+        type: 'line',
+        data: {
+            labels: physics.x,
+            datasets: [
+                { label: 'Velocity %', borderColor: '#00E5FF', data: [], borderWidth: 2, pointRadius: 0 },
+                { label: 'Pressure %', borderColor: '#FF3B30', data: [], borderWidth: 2, pointRadius: 0 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } } }
+    });
+
+    const ctxEng = document.getElementById('energyChart').getContext('2d');
+    const engChart = new Chart(ctxEng, {
+        type: 'line',
+        data: {
+            labels: physics.x,
+            datasets: [
+                { label: 'Dynamic', borderColor: '#32D74B', data: [], borderWidth: 1, pointRadius: 0 },
+                { label: 'Potential', borderColor: '#BF5AF2', data: [], borderWidth: 1, pointRadius: 0 },
+                { label: 'Total', borderColor: '#FFF', borderDash: [5,5], data: [], borderWidth: 2, pointRadius: 0 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+
+    const pCanvas = document.getElementById('particleCanvas');
+    const pCtx = pCanvas.getContext('2d');
+
+    function updateAll() {
+        const r1 = parseFloat(document.getElementById('r1-num').value);
+        const r2 = parseFloat(document.getElementById('r2-num').value);
+        const v1 = parseFloat(document.getElementById('v1-num').value);
+        const rho = parseFloat(document.getElementById('medium-select').value);
+        
+        physics.calculate(
+            document.getElementById('req-input').value,
+            document.getElementById('zeq-input').value,
+            r1, r2, v1, 101325, rho
+        );
+
+        // Update Charts
+        const maxV = Math.max(...physics.data.v);
+        const maxP = Math.max(...physics.data.P);
+        kinChart.data.datasets[0].data = physics.data.v.map(v => (v/maxV)*100);
+        kinChart.data.datasets[1].data = physics.data.P.map(p => (p/maxP)*100);
+        kinChart.update('none');
+
+        engChart.data.datasets[0].data = physics.data.P_dyn;
+        engChart.data.datasets[1].data = physics.data.P_pot;
+        engChart.data.datasets[2].data = physics.data.P_tot;
+        engChart.update('none');
+    }
+
+    function animate() {
+        if (isPlaying) {
+            system.update(physics);
+            
+            // Draw Pipe & Particles
+            pCanvas.width = pCanvas.offsetWidth;
+            pCanvas.height = pCanvas.offsetHeight;
+            const w = pCanvas.width;
+            const h = pCanvas.height;
+            const scaleX = w / 10;
+            const scaleY = h / 10;
+
+            pCtx.clearRect(0, 0, w, h);
+            
+            // Draw Fluid Area
+            pCtx.beginPath();
+            pCtx.fillStyle = 'rgba(0, 100, 200, 0.2)';
+            physics.x.forEach((xv, i) => {
+                let screenX = (xv + 5) * scaleX;
+                let screenY = h/2 - (physics.data.Z[i] + physics.data.R[i]) * scaleY;
+                i === 0 ? pCtx.moveTo(screenX, screenY) : pCtx.lineTo(screenX, screenY);
+            });
+            for(let i = physics.x.length - 1; i >= 0; i--) {
+                let screenX = (physics.x[i] + 5) * scaleX;
+                let screenY = h/2 - (physics.data.Z[i] - physics.data.R[i]) * scaleY;
+                pCtx.lineTo(screenX, screenY);
+            }
+            pCtx.fill();
+
+            // Draw Particles
+            pCtx.fillStyle = '#00E5FF';
+            system.particles.forEach(p => {
+                const idx = Math.floor((p.x + 5) * 20);
+                if (idx >= 0 && idx < 200) {
+                    let py = physics.data.Z[idx] + (p.rNorm * physics.data.R[idx]);
+                    pCtx.beginPath();
+                    pCtx.arc((p.x+5)*scaleX, h/2 - py*scaleY, 2, 0, Math.PI*2);
+                    pCtx.fill();
+                }
+            });
+        }
+        requestAnimationFrame(animate);
+    }
+
+    // Event Listeners
+    document.querySelectorAll('input').forEach(el => el.addEventListener('input', (e) => {
+        if(e.target.type === 'range') document.getElementById(e.target.id.replace('slider', 'num')).value = e.target.value;
+        if(e.target.type === 'number') document.getElementById(e.target.id.replace('num', 'slider')).value = e.target.value;
+        updateAll();
+    }));
+
+    document.getElementById('pipe-select').addEventListener('change', (e) => {
+        const i = parseInt(e.target.value);
+        if(i==0) { document.getElementById('req-input').value = "R1 - (R1 - R2) * Math.exp(-x*x)"; document.getElementById('zeq-input').value = "0"; }
+        if(i==1) { document.getElementById('req-input').value = "R1"; document.getElementById('zeq-input').value = "1.5 * Math.tanh(x) + 1.5"; }
+        if(i==2) { document.getElementById('req-input').value = "R1 - (R1 - R2) * Math.exp(-x*x)"; document.getElementById('zeq-input').value = "1.5 * Math.tanh(x) + 1.5"; }
+        if(i==3) { document.getElementById('req-input').value = "R1"; document.getElementById('zeq-input').value = "-2.0 * Math.tanh(x) - 2.0"; }
+        updateAll();
+    });
+
+    document.getElementById('play-btn').onclick = () => {
+        isPlaying = !isPlaying;
+        document.getElementById('play-btn').innerText = isPlaying ? "Pause Flow" : "Play Flow";
+    };
+
+    updateAll();
+    animate();
+</script>
+</body>
+</html>
