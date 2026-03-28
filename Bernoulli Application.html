@@ -11,9 +11,9 @@
         
         /* VISUALIZATION */
         #visual-container { flex: 6; display: flex; flex-direction: column; background: #111; border-right: 1px solid var(--border); padding: 10px; gap: 10px; }
-        .canvas-wrapper { position: relative; background: #000; border: 1px solid #333; border-radius: 8px; overflow: hidden; cursor: crosshair; }
+        .canvas-wrapper { position: relative; background: #000; border: 1px solid #333; border-radius: 8px; overflow: hidden; cursor: crosshair; min-height: 0; }
         #geom-wrapper { flex: 2; } #kinematics-wrapper { flex: 1; } #energy-wrapper { flex: 1.2; }
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { position: absolute; top: 0; left: 0; display: block; width: 100%; height: 100%; }
         
         .plot-title { position: absolute; top: 10px; left: 15px; font-size: 14px; font-weight: 700; color: #FFF; text-shadow: 1px 1px 2px #000; pointer-events: none; }
         .legend { position: absolute; top: 10px; right: 15px; font-size: 12px; font-weight: 600; background: rgba(0,0,0,0.8); padding: 8px 12px; border-radius: 4px; border: 1px solid #555; display: flex; flex-direction: column; gap: 6px; pointer-events: none; z-index: 5; }
@@ -257,7 +257,7 @@ function handleMouseHover(e) {
     } else {
         hover.active = false;
     }
-    if (!isPlaying) render(); // Force redraw if paused to show tooltip
+    if (!isPlaying) render(); 
 }
 
 [cvsGeom, cvsKin, cvsEng].forEach(cvs => {
@@ -314,7 +314,6 @@ function drawGraphAxes(ctx, w, h, xMin, xMax, yMin, yMax) {
     ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, h-padB); ctx.lineTo(w-padR, h-padB); ctx.stroke();
 }
 
-// Draw Tooltip Box
 function drawTooltip(ctx, x, y, lines) {
     ctx.font = '13px sans-serif';
     let boxW = 0;
@@ -324,7 +323,6 @@ function drawTooltip(ctx, x, y, lines) {
     });
     let boxH = lines.length * 18 + 12;
     
-    // Auto-flip tooltip to left side if too close to right edge
     let drawX = x + 15;
     if (drawX + boxW > ctx.canvas.width) drawX = x - boxW - 15;
     let drawY = Math.max(10, Math.min(y, ctx.canvas.height - boxH - 10));
@@ -367,7 +365,11 @@ function render() {
     const mapXG = (x) => padL + ((x + 5) / 10) * plotW;
     const mapYG = (y) => padT + plotH/2 - ((y - centerZ) / rangeY) * (plotH/2);
 
-    drawGraphAxes(ctxGeom, w, h, centerZ - rangeY, centerZ + rangeY);
+    drawGraphAxes(ctxGeom, w, h, -5, 5, centerZ - rangeY, centerZ + rangeY);
+
+    // CLIPPING ENFORCED FOR PHYSICS GRAPHICS
+    ctxGeom.save();
+    ctxGeom.beginPath(); ctxGeom.rect(padL, padT, plotW, plotH); ctxGeom.clip();
 
     ctxGeom.fillStyle = 'rgba(0, 229, 255, 0.15)'; ctxGeom.beginPath();
     ctxGeom.moveTo(mapXG(core.x[0]), mapYG(core.Z[0] + core.R[0]));
@@ -386,6 +388,7 @@ function render() {
     for(let i=0; i<particles.num; i++) {
         ctxGeom.beginPath(); ctxGeom.arc(mapXG(particles.px[i]), mapYG(particles.py[i]), 2, 0, Math.PI*2); ctxGeom.fill();
     }
+    ctxGeom.restore(); // END CLIP
 
     if (hover.active) {
         ctxGeom.strokeStyle = 'rgba(255,255,255,0.4)'; ctxGeom.lineWidth = 1; ctxGeom.beginPath(); ctxGeom.moveTo(hover.x, padT); ctxGeom.lineTo(hover.x, h - padB); ctxGeom.stroke();
@@ -408,10 +411,15 @@ function render() {
     }
     let rangeK = (maxK - minK) || 1; let padK = rangeK * 0.15; 
     
+    plotW = w - padL - padR; plotH = h - padB - padT;
     const mapXK = (x) => padL + ((x + 5) / 10) * plotW;
     const mapYKin = (val) => padT + plotH - ((val - (minK - padK)) / (rangeK + 2*padK)) * plotH;
 
     drawGraphAxes(ctxKin, w, h, -5, 5, minK - padK, maxK + padK);
+
+    // CLIPPING ENFORCED FOR PHYSICS GRAPHICS
+    ctxKin.save();
+    ctxKin.beginPath(); ctxKin.rect(padL, padT, plotW, plotH); ctxKin.clip();
 
     ctxKin.strokeStyle = '#00E5FF'; ctxKin.lineWidth = 3; ctxKin.beginPath();
     for(let i=0; i<core.pts; i++) { let x = mapXK(core.x[i]); if(i===0) ctxKin.moveTo(x, mapYKin(core.v[i])); else ctxKin.lineTo(x, mapYKin(core.v[i])); }
@@ -420,6 +428,8 @@ function render() {
     ctxKin.strokeStyle = '#FF3B30'; ctxKin.beginPath();
     for(let i=0; i<core.pts; i++) { let x = mapXK(core.x[i]); if(i===0) ctxKin.moveTo(x, mapYKin(core.P[i])); else ctxKin.lineTo(x, mapYKin(core.P[i])); }
     ctxKin.stroke();
+    
+    ctxKin.restore(); // END CLIP
 
     if (hover.active) {
         ctxKin.strokeStyle = 'rgba(255,255,255,0.4)'; ctxKin.lineWidth = 1; ctxKin.beginPath(); ctxKin.moveTo(hover.x, padT); ctxKin.lineTo(hover.x, h - padB); ctxKin.stroke();
@@ -447,9 +457,15 @@ function render() {
         if(core.Pdyn[i] > maxE) maxE = core.Pdyn[i]; if(core.Ptot[i] > maxE) maxE = core.Ptot[i];
     }
     let rangeE = (maxE - minE) || 1; let padE = rangeE * 0.15;
+    
+    plotW = w - padL - padR; plotH = h - padB - padT;
     const mapYEng = (val) => padT + plotH - ((val - (minE - padE)) / (rangeE + 2*padE)) * plotH;
 
     drawGraphAxes(ctxEng, w, h, -5, 5, minE - padE, maxE + padE);
+
+    // CLIPPING ENFORCED FOR PHYSICS GRAPHICS
+    ctxEng.save();
+    ctxEng.beginPath(); ctxEng.rect(padL, padT, plotW, plotH); ctxEng.clip();
 
     const drawLine = (arr, color, dash = false) => {
         ctxEng.strokeStyle = color; ctxEng.lineWidth = dash ? 4 : 2.5; ctxEng.setLineDash(dash ? [8, 6] : []); ctxEng.beginPath();
@@ -458,6 +474,8 @@ function render() {
     };
 
     drawLine(core.Pdyn, '#32D74B'); drawLine(core.Ppot, '#BF5AF2'); drawLine(core.P, '#FFD60A'); drawLine(core.Ptot, '#FFFFFF', true);
+    
+    ctxEng.restore(); // END CLIP
 
     if (hover.active) {
         ctxEng.strokeStyle = 'rgba(255,255,255,0.4)'; ctxEng.lineWidth = 1; ctxEng.setLineDash([]); ctxEng.beginPath(); ctxEng.moveTo(hover.x, padT); ctxEng.lineTo(hover.x, h - padB); ctxEng.stroke();
@@ -531,6 +549,20 @@ document.getElementById('sel-pipe').addEventListener('change', e => {
 document.getElementById('btn-play').addEventListener('click', e => {
     isPlaying = !isPlaying; e.target.innerText = isPlaying ? "⏸ Pause Flow" : "▶ Play Flow"; e.target.classList.toggle('paused', !isPlaying);
     if(!isPlaying) render();
+});
+
+document.getElementById('btn-csv').addEventListener('click', () => {
+    let csvContent = "data:text/csv;charset=utf-8,Distance_x,Radius_R,Elevation_Z,Velocity_v,Pressure_P,Dynamic_P,Potential_P,Total_Energy\n";
+    for(let i=0; i<core.pts; i++) {
+        csvContent += `${core.x[i].toFixed(3)},${core.R[i].toFixed(3)},${core.Z[i].toFixed(3)},${core.v[i].toFixed(3)},${core.P[i].toFixed(1)},${core.Pdyn[i].toFixed(1)},${core.Ppot[i].toFixed(1)},${core.Ptot[i].toFixed(1)}\n`;
+    }
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "venturi_bernoulli.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 });
 
 let lastTime = performance.now();
