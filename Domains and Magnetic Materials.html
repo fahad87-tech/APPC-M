@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magnetic Domains & Polarity Exhibit</title>
+    <style>
+        :root {
+            --bg-page: #050505;
+            --bg-panel: #141414;
+            --border: #333333;
+            --text-main: #EEEEEE;
+            --text-muted: #888888;
+            --accent-blue: #0A84FF;
+            --accent-red: #FF3B30;
+            --accent-cyan: #00FFCC;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Layout */
+        #app { display: flex; width: 100%; height: 100%; }
+        
+        #canvas-container {
+            flex: 6;
+            position: relative;
+            background: radial-gradient(circle at center, #1a1a1d 0%, #050505 100%);
+            border-right: 1px solid var(--border);
+            cursor: grab;
+            overflow: hidden;
+        }
+
+        #canvas-container:active { cursor: grabbing; }
+        
+        canvas { display: block; width: 100%; height: 100%; }
+
+        /* Overlay UI on Canvas */
+        .canvas-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            pointer-events: none;
+        }
+        
+        .title { font-size: 24px; font-weight: 800; letter-spacing: 1px; color: #FFF; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .subtitle { font-size: 14px; color: var(--accent-cyan); font-weight: 600; text-transform: uppercase; letter-spacing: 2px; }
+        
+        .zoom-hints {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border: 1px solid #333;
+            pointer-events: none;
+        }
+
+        /* Right Dashboard */
+        #dashboard {
+            flex: 4;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-panel);
+            min-width: 400px;
+            max-width: 500px;
+            z-index: 10;
+        }
+
+        .panel-section {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Educational Text */
+        #edu-box {
+            background-color: #1A1A1E;
+            border-left: 4px solid var(--accent-cyan);
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 110px;
+        }
+        #edu-box b { color: #FFF; font-size: 15px; display: block; margin-bottom: 5px; }
+
+        /* Controls */
+        h3 { font-size: 12px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px; margin-bottom: 15px; }
+        
+        .control-group { margin-bottom: 15px; }
+        .control-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        .val-readout { color: var(--accent-cyan); font-variant-numeric: tabular-nums; }
+        
+        select {
+            width: 100%; padding: 10px; background: #222; color: #FFF;
+            border: 1px solid #444; border-radius: 6px; font-size: 14px; font-weight: 600;
+            outline: none; cursor: pointer; appearance: none;
+        }
+        select:focus { border-color: var(--accent-cyan); }
+
+        /* Sliders */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: var(--accent-cyan); cursor: pointer; margin-top: -6px;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.4);
+        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: #444; border-radius: 2px; }
+        input[type=range]:disabled::-webkit-slider-thumb { background: #555; box-shadow: none; }
+
+        /* Buttons */
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        button {
+            padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 13px;
+            cursor: pointer; color: #FFF; transition: all 0.2s;
+        }
+        .btn-flip { background: linear-gradient(90deg, var(--accent-red) 50%, var(--accent-blue) 50%); border: 1px solid #555; }
+        .btn-flip:hover { filter: brightness(1.2); }
+        .btn-scramble { background-color: #E74C3C; }
+        .btn-scramble:hover { background-color: #FF5E4D; }
+        .btn-reset { background-color: #333; grid-column: span 2; }
+        .btn-reset:hover { background-color: #444; }
+
+        /* Graph */
+        #graph-section { flex: 1; display: flex; flex-direction: column; padding: 20px; }
+        .graph-wrapper { flex: 1; position: relative; background: #111; border: 1px solid #333; border-radius: 6px; overflow: hidden; }
+        #graph-canvas { width: 100%; height: 100%; display: block; }
+        .graph-label { position: absolute; top: 10px; left: 10px; font-size: 11px; color: var(--text-muted); font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="canvas-container">
+        <canvas id="sim-canvas"></canvas>
+        <div class="canvas-overlay">
+            <div class="subtitle">Interactive Physics</div>
+            <div class="title">Magnetic Domains & Polarity</div>
+        </div>
+        <div class="zoom-hints">
+            <b>Scroll</b> to Zoom into Atoms &nbsp;|&nbsp; <b>Click & Drag</b> to Pan
+        </div>
+    </div>
+
+    <div id="dashboard">
+        
+        <div class="panel-section">
+            <div id="edu-box">Loading...</div>
+        </div>
+
+        <div class="panel-section">
+            <h3>Laboratory Controls</h3>
+            
+            <div class="control-group">
+                <select id="mat-select">
+                    <option value="ferro">Ferromagnetic (Iron)</option>
+                    <option value="para">Paramagnetic (Aluminum)</option>
+                    <option value="dia">Diamagnetic (Bismuth)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <div class="control-header"><span>Magnet Distance</span> <span class="val-readout" id="val-dist">100 mm</span></div>
+                <input type="range" id="sl-dist" min="15" max="350" value="100">
+            </div>
+
+            <div class="control-group">
+                <div class="control-header"><span>Magnet Strength</span> <span class="val-readout" id="val-str">60%</span></div>
+                <input type="range" id="sl-str" min="0" max="100" value="60">
+            </div>
+
+            <div class="control-group">
+                <div class="control-header"><span>Heat (Thermal Agitation)</span> <span class="val-readout" id="val-heat">10°</span></div>
+                <input type="range" id="sl-heat" min="0" max="100" value="10">
+            </div>
+
+            <div class="control-group">
+                <div class="control-header"><span>Domain Stickiness</span> <span class="val-readout" id="val-stick">80</span></div>
+                <input type="range" id="sl-stick" min="0" max="100" value="80">
+            </div>
+
+            <div class="btn-grid">
+                <button class="btn-flip" id="btn-flip">🔄 Flip Magnet</button>
+                <button class="btn-scramble" id="btn-scramble">🔥 Heat Shock</button>
+                <button class="btn-reset" id="btn-reset">🎯 Recenter Camera</button>
+            </div>
+        </div>
+
+        <div id="graph-section">
+            <h3 style="margin-bottom: 10px;">Macroscopic Force vs. Time</h3>
+            <div class="graph-wrapper">
+                <div class="graph-label">Force (N)</div>
+                <canvas id="graph-canvas"></canvas>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 1. PHYSICS ENGINE (Vectorized JS Approximation)
+// ==========================================
+class PhysicsEngine {
+    constructor(N = 14) {
+        this.N = N;
+        this.theta = Array.from({length: N}, () => Array.from({length: N}, () => (Math.random() * 2 - 1) * Math.PI));
+        
+        // Macro
+        this.pend_angle = 0.0;
+        this.pend_vel = 0.0;
+        this.L = 1.0;
+        this.mass = 1.0;
+        this.g = 9.81;
+        
+        // Params
+        this.chi = 60.0;
+        this.J = 1.0;
+        this.T = 0.5;
+        this.magnet_dist = 1.0;
+        this.magnet_strength = 6.0;
+        this.magnet_polarity = 1; // 1 = N left, -1 = S left
+        
+        this.current_force = 0.0;
+    }
+
+    // Gaussian noise generator (Box-Muller)
+    randn() {
+        let u = 0, v = 0;
+        while(u === 0) u = Math.random();
+        while(v === 0) v = Math.random();
+        return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    step(dt) {
+        // 1. Macro Physics (Pendulum)
+        let block_x = this.L * Math.sin(this.pend_angle);
+        let r = Math.max(0.05, this.magnet_dist - block_x);
+        
+        // Force ~ M * grad(B). Direction depends solely on chi.
+        this.current_force = (this.chi * this.magnet_strength) / Math.pow(r, 3) * 0.001;
+        
+        let torque = -this.mass * this.g * this.L * Math.sin(this.pend_angle) + 
+                      this.current_force * this.L * Math.cos(this.pend_angle);
+        
+        let alpha = torque / (this.mass * this.L * this.L);
+        this.pend_vel += alpha * dt;
+        this.pend_vel *= 0.98; // Air resistance / Damping
+        this.pend_angle += this.pend_vel * dt;
+        this.pend_angle = Math.max(-1.2, Math.min(1.2, this.pend_angle)); // Clamp
+        
+        // 2. Micro Physics (Langevin Dynamics)
+        let B_ext = this.magnet_polarity * (this.magnet_strength / (r * r)) * Math.sign(this.chi);
+        if(this.chi === 0) B_ext = 0;
+        
+        let new_theta = Array.from({length: this.N}, () => new Float32Array(this.N));
+        let noise_mag = Math.sqrt(2 * Math.max(this.T, 0.001) * dt);
+
+        for(let i=0; i<this.N; i++) {
+            for(let j=0; j<this.N; j++) {
+                let Sx = Math.cos(this.theta[i][j]);
+                let Sy = Math.sin(this.theta[i][j]);
+                
+                // Periodic boundary neighbors
+                let Sx_up = Math.cos(this.theta[(i - 1 + this.N) % this.N][j]);
+                let Sx_dn = Math.cos(this.theta[(i + 1) % this.N][j]);
+                let Sx_lf = Math.cos(this.theta[i][(j - 1 + this.N) % this.N]);
+                let Sx_rt = Math.cos(this.theta[i][(j + 1) % this.N]);
+                
+                let Sy_up = Math.sin(this.theta[(i - 1 + this.N) % this.N][j]);
+                let Sy_dn = Math.sin(this.theta[(i + 1) % this.N][j]);
+                let Sy_lf = Math.sin(this.theta[i][(j - 1 + this.N) % this.N]);
+                let Sy_rt = Math.sin(this.theta[i][(j + 1) % this.N]);
+                
+                let sum_Sx = Sx_up + Sx_dn + Sx_lf + Sx_rt;
+                let sum_Sy = Sy_up + Sy_dn + Sy_lf + Sy_rt;
+                
+                let Beff_x = B_ext + this.J * sum_Sx;
+                let Beff_y = 0.0   + this.J * sum_Sy;
+                
+                let spin_torque = Sx * Beff_y - Sy * Beff_x;
+                let noise = this.randn() * noise_mag;
+                
+                let next_th = this.theta[i][j] + spin_torque * dt * 5.0 + noise;
+                // Wrap to [-pi, pi]
+                new_theta[i][j] = ((next_th + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+            }
+        }
+        this.theta = new_theta;
+    }
+}
+
+// ==========================================
+// 2. RENDERER & INTERACTION CONTROLLER
+// ==========================================
+const simCanvas = document.getElementById('sim-canvas');
+const ctx = simCanvas.getContext('2d');
+const graphCanvas = document.getElementById('graph-canvas');
+const gCtx = graphCanvas.getContext('2d');
+
+let phys = new PhysicsEngine(14);
+let time = 0;
+let forceHistory = [];
+
+// Camera State
+let cam = { x: 0, y: 100, zoom: 1 };
+let isDragging = false;
+let dragStart = { x: 0, y: 0 };
+
+function resize() {
+    simCanvas.width = simCanvas.parentElement.clientWidth;
+    simCanvas.height = simCanvas.parentElement.clientHeight;
+    graphCanvas.width = graphCanvas.parentElement.clientWidth;
+    graphCanvas.height = graphCanvas.parentElement.clientHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// Mouse Controls
+simCanvas.addEventListener('mousedown', e => {
+    isDragging = true;
+    dragStart = { x: e.clientX - cam.x, y: e.clientY - cam.y };
+});
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+    if(!isDragging) return;
+    cam.x = e.clientX - dragStart.x;
+    cam.y = e.clientY - dragStart.y;
+});
+simCanvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+    const mouseX = e.clientX - simCanvas.getBoundingClientRect().left;
+    const mouseY = e.clientY - simCanvas.getBoundingClientRect().top;
+    
+    // Zoom toward mouse
+    cam.x = mouseX - (mouseX - cam.x) * zoomFactor;
+    cam.y = mouseY - (mouseY - cam.y) * zoomFactor;
+    cam.zoom *= zoomFactor;
+});
+
+function resetCamera() {
+    cam.x = simCanvas.width / 2;
+    cam.y = 50;
+    cam.zoom = 1.0;
+}
+
+// ==========================================
+// 3. DRAWING ROUTINES
+// ==========================================
+function drawCompass(ctx, length, width) {
+    // North (Red)
+    ctx.fillStyle = '#FF3B30';
+    ctx.beginPath();
+    ctx.moveTo(length/2, 0);
+    ctx.lineTo(0, width/2);
+    ctx.lineTo(0, -width/2);
+    ctx.fill();
+    // South (White)
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.moveTo(-length/2, 0);
+    ctx.lineTo(0, width/2);
+    ctx.lineTo(0, -width/2);
+    ctx.fill();
+    // Outline
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+}
+
+function render() {
+    // Clear
+    ctx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+    
+    ctx.save();
+    // Apply Camera
+    ctx.translate(cam.x, cam.y);
+    ctx.scale(cam.zoom, cam.zoom);
+
+    // Pivot & Ceiling
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.moveTo(-300, 0); ctx.lineTo(300, 0); ctx.stroke();
+    ctx.fillStyle = '#CCC';
+    ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI*2); ctx.fill();
+
+    // Pendulum Math
+    let string_L = 300;
+    let px = string_L * Math.sin(phys.pend_angle);
+    let py = string_L * Math.cos(phys.pend_angle);
+
+    // Thread
+    ctx.strokeStyle = '#888';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(px, py); ctx.stroke();
+
+    // --- MATERIAL BLOCK ---
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.rotate(phys.pend_angle);
+    
+    let blockSize = 140;
+    // Background
+    ctx.fillStyle = '#111';
+    ctx.fillRect(-blockSize/2, -blockSize/2, blockSize, blockSize);
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-blockSize/2, -blockSize/2, blockSize, blockSize);
+
+    // Compasses
+    let cellW = blockSize / phys.N;
+    let cLen = cellW * 0.85;
+    let cWid = cellW * 0.35;
+    
+    for(let i=0; i<phys.N; i++) {
+        for(let j=0; j<phys.N; j++) {
+            ctx.save();
+            ctx.translate(-blockSize/2 + (j+0.5)*cellW, -blockSize/2 + (i+0.5)*cellW);
+            ctx.rotate(phys.theta[i][j]);
+            drawCompass(ctx, cLen, cWid);
+            ctx.restore();
+        }
+    }
+    
+    // Label
+    ctx.fillStyle = '#00FFCC';
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText("Material", -30, -blockSize/2 - 10);
+    ctx.restore();
+
+    // --- MAGNET ---
+    let mx = phys.magnet_dist * 300;
+    let magW = 140, magH = 70;
+    
+    ctx.save();
+    ctx.translate(mx + magW/2, string_L); // align centers
+    
+    // Glow effect
+    ctx.shadowColor = phys.magnet_polarity === 1 ? 'rgba(255, 59, 48, 0.4)' : 'rgba(10, 132, 255, 0.4)';
+    ctx.shadowBlur = 20;
+
+    let leftColor = phys.magnet_polarity === 1 ? '#FF3B30' : '#0A84FF';
+    let rightColor = phys.magnet_polarity === 1 ? '#0A84FF' : '#FF3B30';
+    let leftTxt = phys.magnet_polarity === 1 ? 'N' : 'S';
+    let rightTxt = phys.magnet_polarity === 1 ? 'S' : 'N';
+
+    ctx.fillStyle = leftColor;
+    ctx.fillRect(-magW/2, -magH/2, magW/2, magH);
+    ctx.fillStyle = rightColor;
+    ctx.fillRect(0, -magH/2, magW/2, magH);
+    
+    ctx.shadowBlur = 0; // Turn off glow for outline/text
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+    ctx.strokeRect(-magW/2, -magH/2, magW, magH);
+    
+    ctx.fillStyle = '#FFF';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(leftTxt, -magW/4, 0);
+    ctx.fillText(rightTxt, magW/4, 0);
+    
+    ctx.font = 'bold 14px Arial';
+    ctx.fillText("External Magnet", 0, -magH/2 - 15);
+    ctx.restore();
+
+    ctx.restore();
+}
+
+function renderGraph() {
+    gCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+    if(forceHistory.length < 2) return;
+
+    let w = graphCanvas.width;
+    let h = graphCanvas.height;
+    
+    // Grid line at Force = 0
+    gCtx.strokeStyle = '#333';
+    gCtx.beginPath(); gCtx.moveTo(0, h/2); gCtx.lineTo(w, h/2); gCtx.stroke();
+
+    gCtx.strokeStyle = '#00FFCC';
+    gCtx.lineWidth = 2;
+    gCtx.beginPath();
+    
+    // Auto-scale Y based on max absolute force
+    let maxF = 0.05; // Base scale
+    for(let f of forceHistory) if(Math.abs(f) > maxF) maxF = Math.abs(f);
+    maxF *= 1.2; // padding
+
+    for(let i=0; i<forceHistory.length; i++) {
+        let x = (i / 200) * w;
+        let y = h/2 - (forceHistory[i] / maxF) * (h/2);
+        if(i===0) gCtx.moveTo(x, y);
+        else gCtx.lineTo(x, y);
+    }
+    gCtx.stroke();
+}
+
+// ==========================================
+// 4. UI BINDINGS & LOGIC
+// ==========================================
+const uiDist = document.getElementById('sl-dist');
+const uiStr = document.getElementById('sl-str');
+const uiHeat = document.getElementById('sl-heat');
+const uiStick = document.getElementById('sl-stick');
+const eduBox = document.getElementById('edu-box');
+
+function updateEduText() {
+    let mat = document.getElementById('mat-select').value;
+    let pole = phys.magnet_polarity === 1 ? "North" : "South";
+    let txt = "";
+
+    if(mat === "ferro") {
+        if(phys.T > 2.0) {
+            txt = "<b>Curie Temperature Reached!</b>The heat is causing so much thermal shaking that the atoms can no longer stick together to form domains.";
+        } else if(phys.magnet_dist < 0.6) {
+            txt = `<b>Domains Aligning!</b>Notice how groups of compasses snap together to face the ${pole} pole. Try clicking 'Flip Magnet'—the compasses will flip 180°, but the block remains ATTRACTED!`;
+        } else {
+            txt = "<b>Permanent Magnetism</b>Even though the magnet is far away, the compasses 'remember' their direction because they are sticky (Exchange Coupling).";
+        }
+    } else if(mat === "para") {
+        txt = `<b>Paramagnetism</b>Aluminum atoms act alone. They weakly try to point toward the ${pole} pole, but room-temperature heat scrambles them when the magnet moves away.`;
+    } else {
+        txt = `<b>Diamagnetism</b>Bismuth is a rebel. Zoom in closely—the compass needles actively point their Red (North) tips AWAY from the ${pole} pole! This pushes the pendulum backward.`;
+    }
+    eduBox.innerHTML = txt;
+}
+
+document.getElementById('mat-select').addEventListener('change', e => {
+    forceHistory = [];
+    if(e.target.value === "ferro") {
+        phys.chi = 60.0;
+        uiStick.value = 85; uiStick.disabled = false;
+        uiHeat.value = 8;
+    } else if(e.target.value === "para") {
+        phys.chi = 25.0;
+        uiStick.value = 0; uiStick.disabled = true;
+        uiHeat.value = 35;
+    } else {
+        phys.chi = -15.0;
+        uiStick.value = 0; uiStick.disabled = true;
+        uiHeat.value = 5;
+    }
+    document.getElementById('val-stick').innerText = uiStick.value;
+    document.getElementById('val-heat').innerText = uiHeat.value;
+    updateEduText();
+});
+
+[
+    {el: uiDist, target: 'magnet_dist', mult: 0.01, unit: ' mm'},
+    {el: uiStr, target: 'magnet_strength', mult: 0.1, unit: '%'},
+    {el: uiHeat, target: 'T', mult: 0.05, unit: '°'},
+    {el: uiStick, target: 'J', mult: 0.05, unit: ''}
+].forEach(bind => {
+    bind.el.addEventListener('input', e => {
+        phys[bind.target] = parseFloat(e.target.value) * bind.mult;
+        document.getElementById(`val-${bind.el.id.split('-')[1]}`).innerText = e.target.value + bind.unit;
+    });
+});
+
+document.getElementById('btn-flip').addEventListener('click', () => {
+    phys.magnet_polarity *= -1;
+    updateEduText();
+});
+
+document.getElementById('btn-scramble').addEventListener('click', () => {
+    phys.theta = Array.from({length: phys.N}, () => Array.from({length: phys.N}, () => (Math.random() * 2 - 1) * Math.PI));
+});
+
+document.getElementById('btn-reset').addEventListener('click', resetCamera);
+
+// Initialize
+setTimeout(resetCamera, 100);
+
+// Main Loop
+function loop() {
+    let dt = 0.03;
+    phys.step(dt);
+    time += dt;
+
+    forceHistory.push(phys.current_force);
+    if(forceHistory.length > 200) forceHistory.shift();
+
+    if(Math.floor(time * 100) % 50 === 0) updateEduText();
+
+    render();
+    renderGraph();
+    requestAnimationFrame(loop);
+}
+
+// Start
+updateEduText();
+loop();
+
+</script>
+</body>
+</html>
