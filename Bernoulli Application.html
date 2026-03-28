@@ -11,7 +11,7 @@
         
         /* VISUALIZATION */
         #visual-container { flex: 6; display: flex; flex-direction: column; background: #111; border-right: 1px solid var(--border); padding: 10px; gap: 10px; }
-        .canvas-wrapper { position: relative; background: #000; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
+        .canvas-wrapper { position: relative; background: #000; border: 1px solid #333; border-radius: 8px; overflow: hidden; cursor: crosshair; }
         #geom-wrapper { flex: 2; } #kinematics-wrapper { flex: 1; } #energy-wrapper { flex: 1.2; }
         canvas { display: block; width: 100%; height: 100%; }
         
@@ -228,7 +228,7 @@ class Particles {
 }
 
 // ==========================================
-// RENDERER & DYNAMIC GRAPHING
+// RENDERER & INTERACTIVE HOVER STATE
 // ==========================================
 const core = new VenturiCore();
 const particles = new Particles(800);
@@ -238,15 +238,43 @@ const cvsGeom = document.getElementById('canvas-geom'); const ctxGeom = cvsGeom.
 const cvsKin = document.getElementById('canvas-kin'); const ctxKin = cvsKin.getContext('2d');
 const cvsEng = document.getElementById('canvas-eng'); const ctxEng = cvsEng.getContext('2d');
 
+// --- CROSSHAIR STATE ---
+let hover = { active: false, x: 0, idx: 0 };
+const padL = 55, padR = 20, padT = 35, padB = 30;
+
+function handleMouseHover(e) {
+    const rect = e.target.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const w = e.target.width;
+    const plotW = w - padL - padR;
+
+    if (mouseX >= padL && mouseX <= w - padR) {
+        hover.active = true;
+        hover.x = mouseX;
+        let dataX = -5 + ((mouseX - padL) / plotW) * 10;
+        hover.idx = Math.round(((dataX + 5) / 10) * (core.pts - 1));
+        hover.idx = Math.max(0, Math.min(core.pts - 1, hover.idx));
+    } else {
+        hover.active = false;
+    }
+    if (!isPlaying) render(); // Force redraw if paused to show tooltip
+}
+
+[cvsGeom, cvsKin, cvsEng].forEach(cvs => {
+    cvs.addEventListener('mousemove', handleMouseHover);
+    cvs.addEventListener('touchmove', e => handleMouseHover(e.touches[0]));
+    cvs.addEventListener('mouseleave', () => { hover.active = false; if(!isPlaying) render(); });
+});
+
 function resize() {
     [cvsGeom, cvsKin, cvsEng].forEach(c => { 
         c.width = c.parentElement.clientWidth; 
         c.height = c.parentElement.clientHeight; 
     });
+    if(!isPlaying) render();
 }
 window.addEventListener('resize', resize); resize();
 
-// Smart number formatter for crisp labels
 function formatAxisNumber(val) {
     if (Math.abs(val) >= 1000000) return (val/1000000).toFixed(1) + 'M';
     if (Math.abs(val) >= 10000) return (val/1000).toFixed(0) + 'k';
@@ -255,50 +283,69 @@ function formatAxisNumber(val) {
     return val.toFixed(0);
 }
 
-// Universal Graphing Axis Function
-function drawGraphAxes(ctx, w, h, xMin, xMax, yMin, yMax, padL, padR, padT, padB) {
+function drawGraphAxes(ctx, w, h, xMin, xMax, yMin, yMax) {
     let plotW = w - padL - padR;
     let plotH = h - padB - padT;
 
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; // Brighter gridlines
-    ctx.fillStyle = '#E0E0E0';                  // Bright white text
-    ctx.font = 'bold 12px sans-serif';          // Larger, bolder font
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; 
+    ctx.fillStyle = '#E0E0E0';                  
+    ctx.font = 'bold 12px sans-serif';          
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';
 
-    // Y-axis ticks & grid
     for(let i=0; i<=4; i++) {
         let yVal = yMin + (yMax - yMin) * (i/4);
         let yPos = padT + plotH - (i/4)*plotH;
-        
         ctx.beginPath(); ctx.moveTo(padL, yPos); ctx.lineTo(w-padR, yPos); ctx.stroke();
         ctx.fillText(formatAxisNumber(yVal), padL - 8, yPos);
     }
 
-    // X-axis ticks & grid
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
     for(let i=0; i<=4; i++) {
         let xVal = xMin + (xMax - xMin) * (i/4);
         let xPos = padL + (i/4)*plotW;
-        
         ctx.beginPath(); ctx.moveTo(xPos, padT); ctx.lineTo(xPos, h-padB); ctx.stroke();
         ctx.fillText(xVal.toFixed(1) + "m", xPos, h - padB + 8);
     }
     
-    // Draw solid Axis bounding box
     ctx.strokeStyle = 'rgba(255,255,255,0.6)';
     ctx.lineWidth = 1.5;
-    ctx.beginPath(); 
-    ctx.moveTo(padL, padT); ctx.lineTo(padL, h-padB); // Y axis
-    ctx.lineTo(w-padR, h-padB); // X axis
-    ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(padL, padT); ctx.lineTo(padL, h-padB); ctx.lineTo(w-padR, h-padB); ctx.stroke();
+}
+
+// Draw Tooltip Box
+function drawTooltip(ctx, x, y, lines) {
+    ctx.font = '13px sans-serif';
+    let boxW = 0;
+    lines.forEach(l => {
+        let w = ctx.measureText(l.text).width + 30; 
+        if (w > boxW) boxW = w;
+    });
+    let boxH = lines.length * 18 + 12;
+    
+    // Auto-flip tooltip to left side if too close to right edge
+    let drawX = x + 15;
+    if (drawX + boxW > ctx.canvas.width) drawX = x - boxW - 15;
+    let drawY = Math.max(10, Math.min(y, ctx.canvas.height - boxH - 10));
+
+    ctx.fillStyle = 'rgba(20, 20, 25, 0.95)';
+    ctx.strokeStyle = '#555';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(drawX, drawY, boxW, boxH, 6); ctx.fill(); ctx.stroke();
+
+    lines.forEach((l, i) => {
+        let ty = drawY + 18 + i * 18;
+        if (l.color) {
+            ctx.fillStyle = l.color; ctx.fillRect(drawX + 10, ty - 9, 10, 10);
+            ctx.fillStyle = '#FFF'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(l.text, drawX + 28, ty - 4);
+        } else {
+            ctx.fillStyle = '#CCC'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(l.text, drawX + 10, ty - 4);
+        }
+    });
 }
 
 function render() {
-    // Shared Padding for clear text
-    let padL = 55, padR = 20, padT = 35, padB = 30;
-
     // ----------------------------------------
     // 1. GEOMETRY
     // ----------------------------------------
@@ -312,27 +359,22 @@ function render() {
         if(core.Z[i] < minZ) minZ = core.Z[i];
     }
     
-    // Find perfect center and pad
-    let topEdge = maxZ + maxR;
-    let botEdge = minZ - maxR;
+    let topEdge = maxZ + maxR, botEdge = minZ - maxR;
     let centerZ = (topEdge + botEdge) / 2;
     let rangeY = Math.max(Math.abs(topEdge - centerZ), Math.abs(botEdge - centerZ)) * 1.3 || 1;
-    
     let plotW = w - padL - padR, plotH = h - padB - padT;
+    
     const mapXG = (x) => padL + ((x + 5) / 10) * plotW;
     const mapYG = (y) => padT + plotH/2 - ((y - centerZ) / rangeY) * (plotH/2);
 
-    drawGraphAxes(ctxGeom, w, h, -5, 5, centerZ - rangeY, centerZ + rangeY, padL, padR, padT, padB);
+    drawGraphAxes(ctxGeom, w, h, centerZ - rangeY, centerZ + rangeY);
 
-    // Fluid Fill
-    ctxGeom.fillStyle = 'rgba(0, 229, 255, 0.15)'; 
-    ctxGeom.beginPath();
+    ctxGeom.fillStyle = 'rgba(0, 229, 255, 0.15)'; ctxGeom.beginPath();
     ctxGeom.moveTo(mapXG(core.x[0]), mapYG(core.Z[0] + core.R[0]));
     for(let i=1; i<core.pts; i++) ctxGeom.lineTo(mapXG(core.x[i]), mapYG(core.Z[i] + core.R[i]));
     for(let i=core.pts-1; i>=0; i--) ctxGeom.lineTo(mapXG(core.x[i]), mapYG(core.Z[i] - core.R[i]));
     ctxGeom.fill();
 
-    // Walls
     ctxGeom.strokeStyle = '#FFF'; ctxGeom.lineWidth = 2.5; ctxGeom.beginPath();
     for(let i=0; i<core.pts; i++) { let x = mapXG(core.x[i]), y = mapYG(core.Z[i] + core.R[i]); if(i===0) ctxGeom.moveTo(x, y); else ctxGeom.lineTo(x, y); }
     ctxGeom.stroke();
@@ -340,71 +382,74 @@ function render() {
     for(let i=0; i<core.pts; i++) { let x = mapXG(core.x[i]), y = mapYG(core.Z[i] - core.R[i]); if(i===0) ctxGeom.moveTo(x, y); else ctxGeom.lineTo(x, y); }
     ctxGeom.stroke();
 
-    // Particles
     ctxGeom.fillStyle = '#00E5FF';
     for(let i=0; i<particles.num; i++) {
         ctxGeom.beginPath(); ctxGeom.arc(mapXG(particles.px[i]), mapYG(particles.py[i]), 2, 0, Math.PI*2); ctxGeom.fill();
     }
 
+    if (hover.active) {
+        ctxGeom.strokeStyle = 'rgba(255,255,255,0.4)'; ctxGeom.lineWidth = 1; ctxGeom.beginPath(); ctxGeom.moveTo(hover.x, padT); ctxGeom.lineTo(hover.x, h - padB); ctxGeom.stroke();
+        drawTooltip(ctxGeom, hover.x, padT + 20, [
+            {text: `Distance: ${core.x[hover.idx].toFixed(2)} m`},
+            {text: `Radius: ${core.R[hover.idx].toFixed(2)} m`, color: '#00E5FF'},
+            {text: `Elevation: ${core.Z[hover.idx].toFixed(2)} m`, color: '#FFF'}
+        ]);
+    }
+
     // ----------------------------------------
     // 2. KINEMATICS
     // ----------------------------------------
-    ctxKin.clearRect(0, 0, cvsKin.width, cvsKin.height); 
-    w = cvsKin.width; h = cvsKin.height;
-    plotW = w - padL - padR; plotH = h - padB - padT;
+    ctxKin.clearRect(0, 0, cvsKin.width, cvsKin.height); w = cvsKin.width; h = cvsKin.height;
     
-    // Dynamic Scaler
     let minK = Infinity, maxK = -Infinity;
     for(let i=0; i<core.pts; i++) {
-        if(core.v[i] > maxK) maxK = core.v[i];
-        if(core.P[i] > maxK) maxK = core.P[i];
-        if(core.v[i] < minK) minK = core.v[i];
-        if(core.P[i] < minK) minK = core.P[i];
+        if(core.v[i] > maxK) maxK = core.v[i]; if(core.P[i] > maxK) maxK = core.P[i];
+        if(core.v[i] < minK) minK = core.v[i]; if(core.P[i] < minK) minK = core.P[i];
     }
-    let rangeK = (maxK - minK) || 1;
-    let padK = rangeK * 0.15; // 15% padding so lines never clip
+    let rangeK = (maxK - minK) || 1; let padK = rangeK * 0.15; 
     
     const mapXK = (x) => padL + ((x + 5) / 10) * plotW;
     const mapYKin = (val) => padT + plotH - ((val - (minK - padK)) / (rangeK + 2*padK)) * plotH;
 
-    drawGraphAxes(ctxKin, w, h, -5, 5, minK - padK, maxK + padK, padL, padR, padT, padB);
+    drawGraphAxes(ctxKin, w, h, -5, 5, minK - padK, maxK + padK);
 
-    // Velocity
     ctxKin.strokeStyle = '#00E5FF'; ctxKin.lineWidth = 3; ctxKin.beginPath();
     for(let i=0; i<core.pts; i++) { let x = mapXK(core.x[i]); if(i===0) ctxKin.moveTo(x, mapYKin(core.v[i])); else ctxKin.lineTo(x, mapYKin(core.v[i])); }
     ctxKin.stroke();
 
-    // Pressure
     ctxKin.strokeStyle = '#FF3B30'; ctxKin.beginPath();
     for(let i=0; i<core.pts; i++) { let x = mapXK(core.x[i]); if(i===0) ctxKin.moveTo(x, mapYKin(core.P[i])); else ctxKin.lineTo(x, mapYKin(core.P[i])); }
     ctxKin.stroke();
 
+    if (hover.active) {
+        ctxKin.strokeStyle = 'rgba(255,255,255,0.4)'; ctxKin.lineWidth = 1; ctxKin.beginPath(); ctxKin.moveTo(hover.x, padT); ctxKin.lineTo(hover.x, h - padB); ctxKin.stroke();
+        
+        ctxKin.fillStyle = '#00E5FF'; ctxKin.beginPath(); ctxKin.arc(hover.x, mapYKin(core.v[hover.idx]), 5, 0, Math.PI*2); ctxKin.fill();
+        ctxKin.fillStyle = '#FF3B30'; ctxKin.beginPath(); ctxKin.arc(hover.x, mapYKin(core.P[hover.idx]), 5, 0, Math.PI*2); ctxKin.fill();
+
+        drawTooltip(ctxKin, hover.x, padT + 20, [
+            {text: `Distance: ${core.x[hover.idx].toFixed(2)} m`},
+            {text: `Velocity: ${core.v[hover.idx].toFixed(2)} m/s`, color: '#00E5FF'},
+            {text: `Pressure: ${formatAxisNumber(core.P[hover.idx])} Pa`, color: '#FF3B30'}
+        ]);
+    }
+
     // ----------------------------------------
     // 3. ENERGY
     // ----------------------------------------
-    ctxEng.clearRect(0, 0, cvsEng.width, cvsEng.height); 
-    w = cvsEng.width; h = cvsEng.height;
-    plotW = w - padL - padR; plotH = h - padB - padT;
+    ctxEng.clearRect(0, 0, cvsEng.width, cvsEng.height); w = cvsEng.width; h = cvsEng.height;
     
-    // Dynamic Scaler
     let minE = Infinity, maxE = -Infinity;
     for(let i=0; i<core.pts; i++) {
-        if(core.P[i] < minE) minE = core.P[i];
-        if(core.Ppot[i] < minE) minE = core.Ppot[i];
-        if(core.Pdyn[i] < minE) minE = core.Pdyn[i];
-        if(core.Ptot[i] < minE) minE = core.Ptot[i];
-        
-        if(core.P[i] > maxE) maxE = core.P[i];
-        if(core.Ppot[i] > maxE) maxE = core.Ppot[i];
-        if(core.Pdyn[i] > maxE) maxE = core.Pdyn[i];
-        if(core.Ptot[i] > maxE) maxE = core.Ptot[i];
+        if(core.P[i] < minE) minE = core.P[i]; if(core.Ppot[i] < minE) minE = core.Ppot[i];
+        if(core.Pdyn[i] < minE) minE = core.Pdyn[i]; if(core.Ptot[i] < minE) minE = core.Ptot[i];
+        if(core.P[i] > maxE) maxE = core.P[i]; if(core.Ppot[i] > maxE) maxE = core.Ppot[i];
+        if(core.Pdyn[i] > maxE) maxE = core.Pdyn[i]; if(core.Ptot[i] > maxE) maxE = core.Ptot[i];
     }
-    let rangeE = (maxE - minE) || 1; 
-    let padE = rangeE * 0.15;
-    
+    let rangeE = (maxE - minE) || 1; let padE = rangeE * 0.15;
     const mapYEng = (val) => padT + plotH - ((val - (minE - padE)) / (rangeE + 2*padE)) * plotH;
 
-    drawGraphAxes(ctxEng, w, h, -5, 5, minE - padE, maxE + padE, padL, padR, padT, padB);
+    drawGraphAxes(ctxEng, w, h, -5, 5, minE - padE, maxE + padE);
 
     const drawLine = (arr, color, dash = false) => {
         ctxEng.strokeStyle = color; ctxEng.lineWidth = dash ? 4 : 2.5; ctxEng.setLineDash(dash ? [8, 6] : []); ctxEng.beginPath();
@@ -412,10 +457,24 @@ function render() {
         ctxEng.stroke();
     };
 
-    drawLine(core.Pdyn, '#32D74B'); 
-    drawLine(core.Ppot, '#BF5AF2'); 
-    drawLine(core.P, '#FFD60A'); 
-    drawLine(core.Ptot, '#FFFFFF', true);
+    drawLine(core.Pdyn, '#32D74B'); drawLine(core.Ppot, '#BF5AF2'); drawLine(core.P, '#FFD60A'); drawLine(core.Ptot, '#FFFFFF', true);
+
+    if (hover.active) {
+        ctxEng.strokeStyle = 'rgba(255,255,255,0.4)'; ctxEng.lineWidth = 1; ctxEng.setLineDash([]); ctxEng.beginPath(); ctxEng.moveTo(hover.x, padT); ctxEng.lineTo(hover.x, h - padB); ctxEng.stroke();
+        
+        ctxEng.fillStyle = '#32D74B'; ctxEng.beginPath(); ctxEng.arc(hover.x, mapYEng(core.Pdyn[hover.idx]), 5, 0, Math.PI*2); ctxEng.fill();
+        ctxEng.fillStyle = '#BF5AF2'; ctxEng.beginPath(); ctxEng.arc(hover.x, mapYEng(core.Ppot[hover.idx]), 5, 0, Math.PI*2); ctxEng.fill();
+        ctxEng.fillStyle = '#FFD60A'; ctxEng.beginPath(); ctxEng.arc(hover.x, mapYEng(core.P[hover.idx]), 5, 0, Math.PI*2); ctxEng.fill();
+        ctxEng.fillStyle = '#FFFFFF'; ctxEng.beginPath(); ctxEng.arc(hover.x, mapYEng(core.Ptot[hover.idx]), 5, 0, Math.PI*2); ctxEng.fill();
+
+        drawTooltip(ctxEng, hover.x, padT + 20, [
+            {text: `Distance: ${core.x[hover.idx].toFixed(2)} m`},
+            {text: `Dynamic: ${formatAxisNumber(core.Pdyn[hover.idx])} Pa`, color: '#32D74B'},
+            {text: `Potential: ${formatAxisNumber(core.Ppot[hover.idx])} Pa`, color: '#BF5AF2'},
+            {text: `Static: ${formatAxisNumber(core.P[hover.idx])} Pa`, color: '#FFD60A'},
+            {text: `Total: ${formatAxisNumber(core.Ptot[hover.idx])} Pa`, color: '#FFFFFF'}
+        ]);
+    }
 }
 
 // ==========================================
@@ -436,7 +495,7 @@ function updatePhysics() {
 
         core.computeSteadyState(inReq.value, inZeq.value);
         inReq.classList.remove('input-error'); inZeq.classList.remove('input-error');
-        render(); 
+        if (!isPlaying) render(); 
     } catch(e) {
         inReq.classList.add('input-error'); inZeq.classList.add('input-error');
     }
@@ -471,9 +530,9 @@ document.getElementById('sel-pipe').addEventListener('change', e => {
 
 document.getElementById('btn-play').addEventListener('click', e => {
     isPlaying = !isPlaying; e.target.innerText = isPlaying ? "⏸ Pause Flow" : "▶ Play Flow"; e.target.classList.toggle('paused', !isPlaying);
+    if(!isPlaying) render();
 });
 
-// Main Loop
 let lastTime = performance.now();
 function loop(now) {
     let dt = (now - lastTime) / 1000.0; lastTime = now;
