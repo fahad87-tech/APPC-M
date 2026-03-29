@@ -4,6 +4,35 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Physics Simulations Dashboard</title>
+<script>
+  const WEBSITE_TARGET_HASH = "648c5e122a82fc77988447556f3094ef788abe09f5b2d3d2eaf41e8ec2e43044";
+
+  async function verifyWebsiteAccess() {
+    document.documentElement.style.display = "none";
+
+    const userInput = prompt("Website password required:");
+
+    if (userInput === null) {
+      window.location.replace("about:blank");
+      return;
+    }
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userInput);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+    if (hashHex === WEBSITE_TARGET_HASH) {
+      document.documentElement.style.display = "block";
+    } else {
+      alert("Incorrect password. Access denied.");
+      window.location.replace("about:blank");
+    }
+  }
+
+  verifyWebsiteAccess();
+</script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
