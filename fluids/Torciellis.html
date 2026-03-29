@@ -70,8 +70,10 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            min-height: 0;
             overflow-y: auto;
             padding-right: 4px;
+            padding-bottom: 16px;
         }
 
         h1 {
@@ -104,6 +106,7 @@
 
         #prompt-panel {
             min-height: 320px;
+            flex-shrink: 0;
         }
 
         .prompt-head {
@@ -256,7 +259,7 @@
         .button-row {
             display: flex;
             gap: 12px;
-            margin-top: auto;
+            flex-shrink: 0;
         }
 
         button {
