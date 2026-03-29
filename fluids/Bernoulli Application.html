@@ -4,6 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Fluid Dynamics Simulator</title>
+    <script>
+        const PAGE_ACCESS_KEY = "physics-sim-access";
+        const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+        async function verifyPageAccess() {
+            if (sessionStorage.getItem(PAGE_ACCESS_KEY) === TARGET_HASH) {
+                document.documentElement.style.display = "";
+                return;
+            }
+
+            const userInput = prompt("Classroom password required for this simulation:");
+
+            if (userInput === null) {
+                window.location.href = "../index.html";
+                return;
+            }
+
+            const encoder = new TextEncoder();
+            const data = encoder.encode(userInput);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+            if (hashHex === TARGET_HASH) {
+                sessionStorage.setItem(PAGE_ACCESS_KEY, TARGET_HASH);
+                document.documentElement.style.display = "";
+            } else {
+                alert("Incorrect password. Access denied.");
+                window.location.href = "../index.html";
+            }
+        }
+
+        document.documentElement.style.display = "none";
+        verifyPageAccess();
+    </script>
     <style>
         :root { --bg-page: #0a0a0c; --bg-panel: rgba(22, 22, 26, 0.85); --border: rgba(255, 255, 255, 0.1); --text-main: #f0f0f5; --accent-cyan: #00E5FF; --accent-red: #FF3B30; --accent-green: #32D74B; --accent-purple: #BF5AF2; --accent-yellow: #FFD60A; }
         * { box-sizing: border-box; margin: 0; padding: 0; }

@@ -4,6 +4,41 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Angular Momentum — Ball ↔ Rod Collision</title>
+<script>
+  const PAGE_ACCESS_KEY = "physics-sim-access";
+  const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+  async function verifyPageAccess() {
+    if (sessionStorage.getItem(PAGE_ACCESS_KEY) === TARGET_HASH) {
+      document.documentElement.style.display = "";
+      return;
+    }
+
+    const userInput = prompt("Classroom password required for this simulation:");
+
+    if (userInput === null) {
+      window.location.href = "../index.html";
+      return;
+    }
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userInput);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+    if (hashHex === TARGET_HASH) {
+      sessionStorage.setItem(PAGE_ACCESS_KEY, TARGET_HASH);
+      document.documentElement.style.display = "";
+    } else {
+      alert("Incorrect password. Access denied.");
+      window.location.href = "../index.html";
+    }
+  }
+
+  document.documentElement.style.display = "none";
+  verifyPageAccess();
+</script>
 <style>
   /* ── Reset & Base ────────────────────────────────────── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
