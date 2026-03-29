@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Fluid Dynamics Simulator</title>
     <script>
-        const PAGE_ACCESS_KEY = "physics-sim-access";
         const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
 
         async function verifyPageAccess() {
-            if (sessionStorage.getItem(PAGE_ACCESS_KEY) === TARGET_HASH) {
-                document.documentElement.style.display = "";
+            document.documentElement.style.display = "none";
+
+            if (sessionStorage.getItem("physicsUnlocked") === "true") {
+                document.documentElement.style.display = "block";
                 return;
             }
 
@@ -28,15 +29,14 @@
             const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
 
             if (hashHex === TARGET_HASH) {
-                sessionStorage.setItem(PAGE_ACCESS_KEY, TARGET_HASH);
-                document.documentElement.style.display = "";
+                sessionStorage.setItem("physicsUnlocked", "true");
+                document.documentElement.style.display = "block";
             } else {
                 alert("Incorrect password. Access denied.");
                 window.location.href = "../index.html";
             }
         }
 
-        document.documentElement.style.display = "none";
         verifyPageAccess();
     </script>
     <style>

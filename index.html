@@ -254,27 +254,28 @@
   // --- PASSWORD LOGIC (HASHING) ---
   // The string below is the SHA-256 hash for the password "physicsrocks"
   const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4"; 
-  const PAGE_ACCESS_KEY = "physics-sim-access";
 
   async function checkPassword(targetUrl) {
+    if (sessionStorage.getItem("physicsUnlocked") === "true") {
+      window.location.href = targetUrl;
+      return;
+    }
+
     const userInput = prompt("Please enter the password to view this simulation:");
     
-    // Stop if the user clicks "Cancel"
     if (userInput === null) return; 
 
-    // Convert the user's input into a secure SHA-256 hash using built-in browser cryptography
     const encoder = new TextEncoder();
     const data = encoder.encode(userInput);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Compare the user's scrambled guess with our saved scramble
     if (hashHex === TARGET_HASH) {
-      sessionStorage.setItem(PAGE_ACCESS_KEY, TARGET_HASH);
-      window.location.href = targetUrl; // Success! Go to the simulation
+      sessionStorage.setItem("physicsUnlocked", "true");
+      window.location.href = targetUrl;
     } else {
-      alert("Incorrect password. Access denied."); // Failure
+      alert("Incorrect password. Access denied.");
     }
   }
 
