@@ -39,6 +39,8 @@
 
         verifyPageAccess();
     </script>
+    <script src="https://unpkg.com/docx@8.2.4/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <style>
         :root {
             --bg-main: #0a0e17;
@@ -68,6 +70,8 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            overflow-y: auto;
+            padding-right: 4px;
         }
 
         h1 {
@@ -99,11 +103,18 @@
         }
 
         #prompt-panel {
-            min-height: 132px;
+            min-height: 320px;
+        }
+
+        .prompt-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
         #prompt-stage {
-            align-self: flex-start;
             padding: 5px 10px;
             border-radius: 999px;
             background: rgba(0, 229, 255, 0.12);
@@ -114,17 +125,89 @@
             text-transform: uppercase;
         }
 
-        #prompt-text {
+        #prompt-counter {
+            color: var(--text-dim);
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        #prompt-question {
             color: #f2f6ff;
             font-size: 14px;
             line-height: 1.55;
         }
 
-        #prompt-meta {
+        #prompt-answer-label {
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+
+        #prompt-answer {
+            width: 100%;
+            min-height: 110px;
+            resize: vertical;
+            border-radius: 10px;
+            border: 1px solid #263149;
+            background: #0d121c;
+            color: var(--text-main);
+            padding: 12px;
+            font: inherit;
+            line-height: 1.5;
+            box-sizing: border-box;
+        }
+
+        #prompt-answer:focus {
+            outline: none;
+            border-color: rgba(0, 229, 255, 0.6);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.08);
+        }
+
+        #prompt-status {
             color: var(--text-dim);
             font-size: 11px;
             letter-spacing: 0.5px;
-            text-transform: uppercase;
+            line-height: 1.5;
+            min-height: 32px;
+        }
+
+        #prompt-status.is-error {
+            color: #ff9b9b;
+        }
+
+        #prompt-status.is-success {
+            color: #8df0c7;
+        }
+
+        .prompt-btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .prompt-btn-row button {
+            flex: 1;
+        }
+
+        .prompt-btn-secondary {
+            background: #283247;
+        }
+
+        .prompt-btn-primary {
+            background: linear-gradient(90deg, #007cf0, #00dfd8);
+        }
+
+        .prompt-btn-accent {
+            background: linear-gradient(90deg, #7b61ff, #00b7ff);
+        }
+
+        .prompt-btn-row button:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            filter: none;
         }
 
         /* --- Sliders --- */
@@ -264,10 +347,23 @@
         </div>
 
         <div class="group-box" id="prompt-panel">
-            <div class="group-title">5E Prompt</div>
-            <div id="prompt-stage">Engage</div>
-            <div id="prompt-text">Which hole depth should produce the fastest jet?</div>
-            <div id="prompt-meta">Updates after each meaningful action</div>
+            <div class="group-title">Guided Reflection</div>
+            <div class="prompt-head">
+                <div id="prompt-stage">Engage</div>
+                <div id="prompt-counter">Prompt 1 of 11</div>
+            </div>
+            <div id="prompt-question">Which hole depth should produce the fastest jet?</div>
+            <label id="prompt-answer-label" for="prompt-answer">Student Answer</label>
+            <textarea id="prompt-answer" placeholder="Type your answer for this prompt here..."></textarea>
+            <div id="prompt-status">Answers save locally in this browser.</div>
+            <div class="prompt-btn-row">
+                <button id="btn-prompt-back" class="prompt-btn-secondary" type="button">← BACK</button>
+                <button id="btn-prompt-next" class="prompt-btn-primary" type="button">NEXT →</button>
+            </div>
+            <div class="prompt-btn-row">
+                <button id="btn-save-answer" class="prompt-btn-secondary" type="button">SAVE ANSWER</button>
+                <button id="btn-export-docx" class="prompt-btn-accent" type="button">EXPORT .DOCX</button>
+            </div>
         </div>
 
         <div class="button-row">
@@ -387,274 +483,263 @@ class FluidPhysics {
 // ==========================================
 const phys = new FluidPhysics();
 let zoomFactor = 1.0;
-let zoomPromptTimer = null;
-
 const promptStageEl = document.getElementById('prompt-stage');
-const promptTextEl = document.getElementById('prompt-text');
-const promptBank = {
-    engage: {
-        load: [
-            "Which hole depth should produce the fastest jet?",
-            "Before you start, predict which control will change the range most."
-        ],
-        reset: [
-            "The tank is reset. What will you test first this time?",
-            "With a fresh tank, what is your next prediction?"
-        ],
-        default: [
-            "Make a prediction before your next change.",
-            "What do you expect to happen before you test it?"
-        ]
-    },
-    explore: {
-        water_level: [
-            "Raise the water level. Watch the jet speed.",
-            "Lower the water level. Compare the landing point."
-        ],
-        spout_height: [
-            "Move the spout higher. Watch time in the air.",
-            "Drop the spout lower. Compare the flight path."
-        ],
-        container_height: [
-            "Raise the tank wall. What does it let you test?",
-            "Lower the tank wall. Notice the new limit on water level."
-        ],
-        tank_width: [
-            "Make the tank wider. Watch how fast the level falls.",
-            "Use a narrow tank. Compare the drain rate."
-        ],
-        spout_diameter: [
-            "Widen the opening. Watch the outflow and drain rate.",
-            "Make the opening smaller. What changes first?"
-        ],
-        density: [
-            "Change density. Compare the spray path in air.",
-            "Increase density. Watch the particle motion."
-        ],
-        gravity: [
-            "Raise gravity. Watch speed and drop together.",
-            "Lower gravity. Compare the arc to Earth-like gravity."
-        ],
-        discharge_coeff: [
-            "Reduce Cd. Watch exit speed respond.",
-            "Push Cd toward 1. What looks more ideal?"
-        ],
-        start: [
-            "Start the flow and track the first second.",
-            "Run it once. Watch where the jet lands."
-        ],
-        pause: [
-            "Pause and inspect the graph trend.",
-            "Freeze the motion. What pattern already appears?"
-        ],
-        zoom: [
-            "Zoom in and inspect the jet near the outlet.",
-            "Zoom out and compare the full trajectory."
-        ],
-        default: [
-            "Change one variable only. Watch one effect.",
-            "Test a single control and compare before versus after."
-        ]
-    },
-    explain: {
-        water_level: [
-            "More water above the hole means more pressure head.",
-            "Higher water level increases the effective head."
-        ],
-        spout_height: [
-            "The hole position changes both head and flight time.",
-            "A higher hole reduces head but can increase air time."
-        ],
-        container_height: [
-            "Tank height matters only if it changes the available head.",
-            "The wall itself is not the driver; the head difference is."
-        ],
-        tank_width: [
-            "Tank width mainly changes how quickly the level drops.",
-            "A wider tank drains more slowly because its area is larger."
-        ],
-        spout_diameter: [
-            "A larger opening drains the tank faster.",
-            "The hole size affects flow rate more than pressure head."
-        ],
-        density: [
-            "In this model, density mainly changes how drag influences the spray.",
-            "Denser fluid resists the air-drag term differently here."
-        ],
-        gravity: [
-            "Gravity sets both the exit-speed formula and the projectile drop.",
-            "Stronger gravity increases speed and downward acceleration together."
-        ],
-        discharge_coeff: [
-            "Cd captures real losses at the opening.",
-            "Cd below 1 means the real jet is slower than the ideal one."
-        ],
-        start: [
-            "The graph links water height to exit speed over time.",
-            "As the tank drains, the head falls and the jet slows."
-        ],
-        pause: [
-            "The frozen frame helps connect the graph to the picture.",
-            "Use the pause to match the curve with the current jet."
-        ],
-        zoom: [
-            "Zoom helps you inspect shape, not change the physics.",
-            "The physics stays the same; only your view changes."
-        ],
-        default: [
-            "Tie the visual change to one physical cause.",
-            "Name the variable that directly caused what you saw."
-        ]
-    },
-    elaborate: {
-        water_level: [
-            "Try two different water levels with the same hole height.",
-            "Can you find a level that doubles the range?"
-        ],
-        spout_height: [
-            "Compare a low hole and a high hole with the same water level.",
-            "Which hole height gives the best compromise between head and airtime?"
-        ],
-        container_height: [
-            "Use the taller tank to test more extreme heads.",
-            "How does a taller container expand your experiment range?"
-        ],
-        tank_width: [
-            "Keep the hole fixed and compare narrow versus wide tanks.",
-            "Which tank gives the longer steady stream?"
-        ],
-        spout_diameter: [
-            "Compare large and small openings at the same head.",
-            "Which opening empties the tank faster, and why?"
-        ],
-        density: [
-            "Try density changes while keeping gravity fixed.",
-            "Which path difference seems physical and which seems model-based?"
-        ],
-        gravity: [
-            "Compare Moon-like and Earth-like gravity settings.",
-            "Which effect of gravity is easier to notice first?"
-        ],
-        discharge_coeff: [
-            "Compare ideal-like flow with a lossy opening.",
-            "How does Cd change the graph as well as the jet?"
-        ],
-        start: [
-            "Run a second trial with only one variable changed.",
-            "Can you reproduce the same pattern twice?"
-        ],
-        pause: [
-            "Pause at two different times and compare the states.",
-            "What changes more quickly: height or speed?"
-        ],
-        zoom: [
-            "Use zoom to compare near-hole motion and full-range motion.",
-            "What detail becomes visible only when you zoom in?"
-        ],
-        default: [
-            "Now compare two settings, not just one.",
-            "Extend the test by changing one more variable."
-        ]
-    },
-    evaluate: {
-        water_level: [
-            "Why does a deeper hole usually produce a faster jet?",
-            "Can you explain the range change using pressure head?"
-        ],
-        spout_height: [
-            "Why can a lower hole travel farther even with less airtime?",
-            "What is the trade-off when you move the hole upward?"
-        ],
-        container_height: [
-            "Did changing the wall height alone change the physics?",
-            "Which variable matters more here: wall height or head?"
-        ],
-        tank_width: [
-            "Why does tank width affect drain time more than exit speed?",
-            "Can you explain the role of tank cross-sectional area?"
-        ],
-        spout_diameter: [
-            "Why does a bigger hole empty the tank faster?",
-            "Which quantity changes because the opening area changed?"
-        ],
-        density: [
-            "What did density change in this model, and what stayed similar?",
-            "Can you separate drag effects from Torricelli effects?"
-        ],
-        gravity: [
-            "How does gravity influence both parts of the motion?",
-            "Why does gravity appear twice in what you observe?"
-        ],
-        discharge_coeff: [
-            "What does Cd tell you about ideal versus real flow?",
-            "Why is Cd equal to 1 a special case?"
-        ],
-        start: [
-            "What evidence shows that the jet slows as the tank drains?",
-            "How do the graph and animation confirm the same idea?"
-        ],
-        pause: [
-            "Can you state the main relationship you just observed?",
-            "What would you tell another student to watch for?"
-        ],
-        zoom: [
-            "Did zoom reveal new physics or just clearer evidence?",
-            "What conclusion stayed the same after zooming?"
-        ],
-        default: [
-            "What claim can you now support with evidence?",
-            "State the physics idea in one clear sentence."
-        ]
+const promptCounterEl = document.getElementById('prompt-counter');
+const promptQuestionEl = document.getElementById('prompt-question');
+const promptAnswerEl = document.getElementById('prompt-answer');
+const promptStatusEl = document.getElementById('prompt-status');
+const promptBackBtn = document.getElementById('btn-prompt-back');
+const promptNextBtn = document.getElementById('btn-prompt-next');
+const promptSaveBtn = document.getElementById('btn-save-answer');
+const promptExportBtn = document.getElementById('btn-export-docx');
+const PROMPT_STORAGE_KEY = 'torciellis-qna-v1';
+const promptSequence = [
+    { id: 'engage-1', stage: 'Engage', question: 'Which hole depth should produce the fastest jet, and why do you think so?' },
+    { id: 'engage-2', stage: 'Engage', question: 'Before starting the flow, which control do you predict will change the range the most?' },
+    { id: 'explore-1', stage: 'Explore', question: 'Raise the water level and describe what changes in the jet speed and landing point.' },
+    { id: 'explore-2', stage: 'Explore', question: 'Move the spout higher or lower. What changes in the path of the water?' },
+    { id: 'explore-3', stage: 'Explore', question: 'Change the spout diameter. What do you notice first about the flow and draining?' },
+    { id: 'explain-1', stage: 'Explain', question: 'Explain how effective head affects the exit velocity in this simulation.' },
+    { id: 'explain-2', stage: 'Explain', question: 'Explain why tank width changes drain time more than the immediate exit speed.' },
+    { id: 'elaborate-1', stage: 'Elaborate', question: 'Compare two different settings that produce noticeably different ranges. What is your comparison?' },
+    { id: 'elaborate-2', stage: 'Elaborate', question: 'Try a different gravity value. How does it change both the launch and the fall of the jet?' },
+    { id: 'evaluate-1', stage: 'Evaluate', question: 'What evidence from the graph and the animation supports Torricelli’s law?' },
+    { id: 'evaluate-2', stage: 'Evaluate', question: 'State the main physics idea you learned from this simulation in one clear sentence.' }
+];
+let promptSaveTimer = null;
+const hasLocalStorage = storageAvailable();
+const promptState = loadPromptState();
+
+function storageAvailable() {
+    try {
+        const testKey = '__torciellis_storage_test__';
+        window.localStorage.setItem(testKey, 'ok');
+        window.localStorage.removeItem(testKey);
+        return true;
+    } catch (error) {
+        return false;
     }
-};
-const promptState = {
-    interactionCount: 0,
-    lastText: "",
-    indices: {}
-};
-
-function getPromptStage(step) {
-    if (step <= 0) return 'engage';
-    if (step <= 2) return 'explore';
-    if (step <= 4) return 'explain';
-    if (step <= 6) return 'elaborate';
-    if (step <= 8) return 'evaluate';
-    const cycle = ['explore', 'explain', 'elaborate', 'evaluate'];
-    return cycle[(step - 9) % cycle.length];
 }
 
-function pickPrompt(stage, source) {
-    const stageBank = promptBank[stage];
-    const sourceKey = stageBank[source] ? source : 'default';
-    const options = stageBank[sourceKey];
-    const stateKey = `${stage}:${sourceKey}`;
-    let index = promptState.indices[stateKey] || 0;
-    let text = options[index % options.length];
-    if (text === promptState.lastText && options.length > 1) {
-        index += 1;
-        text = options[index % options.length];
+function createDefaultPromptState() {
+    return {
+        currentIndex: 0,
+        answers: {},
+        studentName: ''
+    };
+}
+
+function loadPromptState() {
+    if (!hasLocalStorage) {
+        return createDefaultPromptState();
     }
-    promptState.indices[stateKey] = index + 1;
-    promptState.lastText = text;
-    return text;
+
+    try {
+        const raw = window.localStorage.getItem(PROMPT_STORAGE_KEY);
+        if (!raw) return createDefaultPromptState();
+        const parsed = JSON.parse(raw);
+        return {
+            currentIndex: Number.isInteger(parsed.currentIndex) ? Math.min(Math.max(parsed.currentIndex, 0), promptSequence.length - 1) : 0,
+            answers: parsed.answers && typeof parsed.answers === 'object' ? parsed.answers : {},
+            studentName: typeof parsed.studentName === 'string' ? parsed.studentName : ''
+        };
+    } catch (error) {
+        return createDefaultPromptState();
+    }
 }
 
-function showPrompt(stage, source) {
-    promptStageEl.textContent = stage;
-    promptTextEl.textContent = pickPrompt(stage, source);
+function isQuotaError(error) {
+    return error && (
+        error.name === 'QuotaExceededError' ||
+        error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+        error.code === 22 ||
+        error.code === 1014
+    );
 }
 
-function recordInteraction(source) {
-    promptState.interactionCount += 1;
-    showPrompt(getPromptStage(promptState.interactionCount), source);
+function setPromptStatus(message, tone = 'info') {
+    promptStatusEl.textContent = message;
+    promptStatusEl.classList.remove('is-error', 'is-success');
+    if (tone === 'error') promptStatusEl.classList.add('is-error');
+    if (tone === 'success') promptStatusEl.classList.add('is-success');
 }
 
-function resetPromptCycle(source = 'reset') {
-    promptState.interactionCount = 0;
-    showPrompt('engage', source);
+function persistPromptState(successMessage = '') {
+    if (!hasLocalStorage) {
+        if (successMessage) {
+            setPromptStatus('Local storage is unavailable in this browser. Responses stay in memory until you leave the page.', 'error');
+        }
+        return false;
+    }
+
+    try {
+        window.localStorage.setItem(PROMPT_STORAGE_KEY, JSON.stringify(promptState));
+        if (successMessage) setPromptStatus(successMessage, 'success');
+        return true;
+    } catch (error) {
+        if (isQuotaError(error)) {
+            setPromptStatus('Local storage is full. Shorten answers or clear browser data before saving again.', 'error');
+        } else {
+            setPromptStatus('Could not save responses in this browser.', 'error');
+        }
+        return false;
+    }
 }
 
-resetPromptCycle('load');
+function getCurrentPrompt() {
+    return promptSequence[promptState.currentIndex];
+}
+
+function saveCurrentAnswer(showMessage = false) {
+    const currentPrompt = getCurrentPrompt();
+    const answer = promptAnswerEl.value.trim();
+    if (answer) {
+        promptState.answers[currentPrompt.id] = answer;
+    } else {
+        delete promptState.answers[currentPrompt.id];
+    }
+    return persistPromptState(showMessage ? 'Answer saved locally.' : '');
+}
+
+function renderPrompt() {
+    const currentPrompt = getCurrentPrompt();
+    promptStageEl.textContent = currentPrompt.stage;
+    promptCounterEl.textContent = `Prompt ${promptState.currentIndex + 1} of ${promptSequence.length}`;
+    promptQuestionEl.textContent = currentPrompt.question;
+    promptAnswerEl.value = promptState.answers[currentPrompt.id] || '';
+    promptBackBtn.disabled = promptState.currentIndex === 0;
+    promptNextBtn.disabled = promptState.currentIndex === promptSequence.length - 1;
+
+    if (!hasLocalStorage) {
+        setPromptStatus('Local storage is unavailable in this browser. Responses are temporary until export.', 'error');
+    } else if (promptAnswerEl.value.trim()) {
+        setPromptStatus('Saved response loaded from this browser.', 'success');
+    } else {
+        setPromptStatus('Answers save locally in this browser.', 'info');
+    }
+}
+
+function goToPrompt(index) {
+    saveCurrentAnswer(false);
+    promptState.currentIndex = Math.min(Math.max(index, 0), promptSequence.length - 1);
+    persistPromptState('');
+    renderPrompt();
+}
+
+function sanitizeFileName(value) {
+    return value.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_');
+}
+
+function downloadBlob(blob, fileName) {
+    if (typeof window.saveAs === 'function') {
+        window.saveAs(blob, fileName);
+        return;
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+}
+
+async function exportPromptResponses() {
+    saveCurrentAnswer(false);
+
+    const existingName = promptState.studentName || '';
+    const enteredName = window.prompt('Enter your name for the exported document:', existingName);
+    if (enteredName === null) {
+        setPromptStatus('Export cancelled.', 'info');
+        return;
+    }
+
+    const studentName = enteredName.trim();
+    if (!studentName) {
+        setPromptStatus('Student name is required before exporting.', 'error');
+        window.alert('Please enter your name before exporting the .docx file.');
+        return;
+    }
+
+    promptState.studentName = studentName;
+    persistPromptState('');
+
+    if (!window.docx || !window.docx.Document || !window.docx.Packer) {
+        setPromptStatus('The document export library did not load. Check your internet connection and try again.', 'error');
+        window.alert('The .docx export library is unavailable right now.');
+        return;
+    }
+
+    try {
+        const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } = window.docx;
+        const generatedAt = new Date().toLocaleString();
+        const children = [
+            new Paragraph({
+                text: 'Torricelli Simulation Responses',
+                heading: HeadingLevel.TITLE,
+                alignment: AlignmentType.CENTER
+            }),
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: `Student: ${studentName}`, bold: true })]
+            }),
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: `Generated: ${generatedAt}` })]
+            }),
+            new Paragraph({ text: '' })
+        ];
+
+        promptSequence.forEach((prompt, index) => {
+            const answer = promptState.answers[prompt.id] || 'No answer entered.';
+            children.push(
+                new Paragraph({
+                    text: `${index + 1}. ${prompt.stage}: ${prompt.question}`,
+                    heading: HeadingLevel.HEADING_2
+                }),
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: answer,
+                            italics: !promptState.answers[prompt.id]
+                        })
+                    ]
+                }),
+                new Paragraph({ text: '' })
+            );
+        });
+
+        const documentFile = new Document({
+            sections: [
+                {
+                    properties: {},
+                    children
+                }
+            ]
+        });
+
+        const blob = await Packer.toBlob(documentFile);
+        const safeName = sanitizeFileName(studentName) || 'student';
+        downloadBlob(blob, `${safeName}_torcielli_responses.docx`);
+        setPromptStatus('The .docx file was generated and sent to your browser download location.', 'success');
+    } catch (error) {
+        setPromptStatus('Export failed. Please try again after checking your browser storage and network access.', 'error');
+        window.alert('The .docx export failed. Please try again.');
+    }
+}
+
+promptBackBtn.addEventListener('click', () => goToPrompt(promptState.currentIndex - 1));
+promptNextBtn.addEventListener('click', () => goToPrompt(promptState.currentIndex + 1));
+promptSaveBtn.addEventListener('click', () => saveCurrentAnswer(true));
+promptExportBtn.addEventListener('click', exportPromptResponses);
+promptAnswerEl.addEventListener('input', () => {
+    clearTimeout(promptSaveTimer);
+    promptSaveTimer = window.setTimeout(() => saveCurrentAnswer(true), 250);
+});
+
+renderPrompt();
 
 const params = [
     { id: 'container_height', label: 'Container Height', min: 5, max: 50, val: 25, unit: 'm', step: 0.1 },
@@ -699,7 +784,6 @@ params.forEach(p => {
         }
         if (p.id === 'water_level' && !phys.running) phys.reset();
     });
-    input.addEventListener('change', () => recordInteraction(p.id));
 });
 
 // Update UI from Physics Engine periodically
@@ -720,7 +804,6 @@ document.getElementById('btn-start').addEventListener('click', (e) => {
         e.target.innerText = "▶ RESUME SIMULATION";
         e.target.classList.remove('paused');
     }
-    recordInteraction(phys.running ? 'start' : 'pause');
 });
 
 document.getElementById('btn-reset').addEventListener('click', resetSim);
@@ -733,7 +816,6 @@ function resetSim() {
     let btn = document.getElementById('btn-start');
     btn.innerText = "▶ START SIMULATION";
     btn.classList.remove('paused');
-    resetPromptCycle('reset');
 }
 
 // Mouse Wheel Zoom
@@ -743,8 +825,6 @@ document.getElementById('anim-container').addEventListener('wheel', (e) => {
     else zoomFactor /= 1.15;
     zoomFactor = Math.max(0.1, Math.min(zoomFactor, 15.0));
     document.getElementById('zoom-label').innerText = `Zoom: ${zoomFactor.toFixed(2)}x`;
-    clearTimeout(zoomPromptTimer);
-    zoomPromptTimer = window.setTimeout(() => recordInteraction('zoom'), 150);
 });
 
 // ==========================================
