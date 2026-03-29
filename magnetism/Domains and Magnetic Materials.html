@@ -105,13 +105,12 @@
         .dashboard-content {
             flex: 1;
             min-height: 0;
-            overflow-y: auto;
-            overflow-x: hidden;
         }
 
         .dashboard-pane {
-            height: auto;
-            min-height: 100%;
+            height: 100%;
+            min-height: 0;
+            overflow-y: auto;
         }
 
         .hidden {
@@ -1000,23 +999,19 @@ document.getElementById('mat-select').addEventListener('change', e => {
     
     if(val === "ferro") {
         phys.chi = 60.0;
-        uiStick.value = 85; uiStick.disabled = false;
-        uiHeat.value = 10;
-        phys.J = 85 * 0.015;
-        phys.T = 10 * 0.05;
+        uiStick.disabled = false;
     } else if(val === "para") {
         phys.chi = 25.0;
-        uiStick.value = 0; uiStick.disabled = true;
-        uiHeat.value = 35;
-        phys.J = 0;
-        phys.T = 35 * 0.05;
+        uiStick.disabled = true;
     } else {
         phys.chi = -15.0;
-        uiStick.value = 0; uiStick.disabled = true;
-        uiHeat.value = 5;
-        phys.J = 0;
-        phys.T = 5 * 0.05;
+        uiStick.disabled = true;
     }
+    
+    uiStick.value = 0;
+    uiHeat.value = 10;
+    phys.J = 0;
+    phys.T = 10 * 0.05;
     
     document.getElementById('val-stick').innerText = uiStick.value;
     document.getElementById('val-heat').innerText = uiHeat.value + "°";
