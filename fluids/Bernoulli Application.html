@@ -39,6 +39,8 @@
 
         verifyPageAccess();
     </script>
+    <script src="https://unpkg.com/docx@8.2.4/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <style>
         :root { --bg-page: #0a0a0c; --bg-panel: rgba(22, 22, 26, 0.85); --border: rgba(255, 255, 255, 0.1); --text-main: #f0f0f5; --accent-cyan: #00E5FF; --accent-red: #FF3B30; --accent-green: #32D74B; --accent-purple: #BF5AF2; --accent-yellow: #FFD60A; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -56,7 +58,26 @@
         .legend-color { width: 14px; height: 4px; border-radius: 2px; }
 
         /* DASHBOARD */
-        #dashboard { flex: 4; display: flex; flex-direction: column; background: var(--bg-panel); min-width: 420px; max-width: 480px; overflow-y: auto; border-left: 1px solid #000;}
+        #dashboard { flex: 4; display: flex; flex-direction: column; background: var(--bg-panel); min-width: 420px; max-width: 480px; min-height: 0; overflow: hidden; border-left: 1px solid #000;}
+        .dashboard-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px 18px 0; }
+        .dashboard-tab {
+            padding: 11px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: #b9c4da;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        .dashboard-tab.active {
+            background: rgba(0, 229, 255, 0.16);
+            border-color: rgba(0, 229, 255, 0.38);
+            color: #fff;
+        }
+        .dashboard-content { flex: 1; min-height: 0; }
+        .dashboard-pane { height: 100%; min-height: 0; overflow-y: auto; }
+        .hidden { display: none !important; }
         .panel-section { padding: 18px; border-bottom: 1px solid var(--border); }
         .header { font-size: 22px; font-weight: 900; letter-spacing: 1.5px; color: #FFF; margin-bottom: 4px; }
         .subheader { font-size: 12px; color: var(--accent-cyan); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
@@ -78,6 +99,86 @@
         button { padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; color: #FFF; transition: 0.2s; }
         .btn-pause { background: #32D74B; } .btn-pause.paused { background: #FF3B30; }
         .btn-export { background: #333; border: 1px solid #555; } .btn-export:hover { background: #444; }
+
+        .qa-shell { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+        .qa-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .qa-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .qa-stage {
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(0, 229, 255, 0.12);
+            color: var(--accent-cyan);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .qa-counter {
+            color: #9aa;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+        .qa-question {
+            color: #f6f8ff;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .qa-label {
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+        .qa-textarea, .qa-name-input {
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: 10px;
+            border: 1px solid #39445e;
+            background: #121721;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        .qa-name-input:focus, .qa-textarea:focus {
+            border-color: rgba(0, 229, 255, 0.55);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.08);
+        }
+        .qa-textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+        .qa-status {
+            min-height: 32px;
+            color: #9aa;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+        .qa-status.is-error { color: #ff9b9b; }
+        .qa-status.is-success { color: #8df0c7; }
+        .qa-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .qa-btn-secondary { background: #30384d; }
+        .qa-btn-primary { background: linear-gradient(90deg, #007cf0, #00dfd8); }
+        .qa-btn-accent { background: linear-gradient(90deg, #7b61ff, #00b7ff); }
+        .qa-btn-row button:disabled { opacity: 0.45; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -114,66 +215,102 @@
         <div class="header">FLUID DYNAMICS</div>
         <div class="subheader">Venturi, Siphons & Bernoulli</div>
     </div>
-
-    <div class="panel-section">
-        <h3>1. Environment & Setup</h3>
-        <div class="control-group">
-            <div class="control-label">Fluid Medium</div>
-            <select id="sel-medium">
-                <option value="1000">Water (ρ = 1000)</option>
-                <option value="1.225">Air (ρ = 1.225)</option>
-                <option value="13600">Mercury (ρ = 13600)</option>
-            </select>
-        </div>
-        <div class="control-group">
-            <div class="control-label">Pipe Configuration</div>
-            <select id="sel-pipe">
-                <option value="0">Horizontal Venturi Tube</option>
-                <option value="1">Uphill Incline (Ramp)</option>
-                <option value="2">Inclined Venturi</option>
-                <option value="3">Downward Siphon Drop</option>
-            </select>
-        </div>
+    <div class="dashboard-tabs">
+        <button id="tab-controls" class="dashboard-tab active" type="button">Simulation</button>
+        <button id="tab-qa" class="dashboard-tab" type="button">Q / A Prompts</button>
     </div>
+    <div class="dashboard-content">
+        <div id="pane-controls" class="dashboard-pane">
+            <div class="panel-section">
+                <h3>1. Environment & Setup</h3>
+                <div class="control-group">
+                    <div class="control-label">Fluid Medium</div>
+                    <select id="sel-medium">
+                        <option value="1000">Water (ρ = 1000)</option>
+                        <option value="1.225">Air (ρ = 1.225)</option>
+                        <option value="13600">Mercury (ρ = 13600)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Pipe Configuration</div>
+                    <select id="sel-pipe">
+                        <option value="0">Horizontal Venturi Tube</option>
+                        <option value="1">Uphill Incline (Ramp)</option>
+                        <option value="2">Inclined Venturi</option>
+                        <option value="3">Downward Siphon Drop</option>
+                    </select>
+                </div>
+            </div>
 
-    <div class="panel-section">
-        <h3>2. Custom Math Profiles</h3>
-        <div class="control-group">
-            <div class="control-label">Tube Radius R(x):</div>
-            <input type="text" id="in-req" value="R1 - (R1 - R2) * Math.exp(-(x*x))">
-        </div>
-        <div class="control-group">
-            <div class="control-label">Elevation Z(x):</div>
-            <input type="text" id="in-zeq" value="0">
-        </div>
-    </div>
+            <div class="panel-section">
+                <h3>2. Custom Math Profiles</h3>
+                <div class="control-group">
+                    <div class="control-label">Tube Radius R(x):</div>
+                    <input type="text" id="in-req" value="R1 - (R1 - R2) * Math.exp(-(x*x))">
+                </div>
+                <div class="control-group">
+                    <div class="control-label">Elevation Z(x):</div>
+                    <input type="text" id="in-zeq" value="0">
+                </div>
+            </div>
 
-    <div class="panel-section">
-        <h3>3. Physical Parameters</h3>
-        <div class="control-group">
-            <div class="control-label"><span>Density ρ (kg/m³)</span> <span id="val-rho" class="val-readout">1000.0</span></div>
-            <input type="range" id="sl-rho" min="0.1" max="15000" step="0.1" value="1000">
-        </div>
-        <div class="control-group">
-            <div class="control-label"><span>Inlet Radius R1 (m)</span> <span id="val-R1" class="val-readout">2.00</span></div>
-            <input type="range" id="sl-R1" min="0.5" max="5.0" step="0.01" value="2.0">
-        </div>
-        <div class="control-group">
-            <div class="control-label"><span>Constriction R2 (m)</span> <span id="val-R2" class="val-readout">0.50</span></div>
-            <input type="range" id="sl-R2" min="0.1" max="5.0" step="0.01" value="0.5">
-        </div>
-        <div class="control-group">
-            <div class="control-label"><span>Inlet Velocity v1 (m/s)</span> <span id="val-v1" class="val-readout">10.0</span></div>
-            <input type="range" id="sl-v1" min="0.1" max="50.0" step="0.1" value="10.0">
-        </div>
-        <div class="control-group">
-            <div class="control-label"><span>Base Pressure P1 (Pa)</span> <span id="val-P1" class="val-readout">101325</span></div>
-            <input type="range" id="sl-P1" min="-100000" max="500000" step="100" value="101325">
+            <div class="panel-section">
+                <h3>3. Physical Parameters</h3>
+                <div class="control-group">
+                    <div class="control-label"><span>Density ρ (kg/m³)</span> <span id="val-rho" class="val-readout">1000.0</span></div>
+                    <input type="range" id="sl-rho" min="0.1" max="15000" step="0.1" value="1000">
+                </div>
+                <div class="control-group">
+                    <div class="control-label"><span>Inlet Radius R1 (m)</span> <span id="val-R1" class="val-readout">2.00</span></div>
+                    <input type="range" id="sl-R1" min="0.5" max="5.0" step="0.01" value="2.0">
+                </div>
+                <div class="control-group">
+                    <div class="control-label"><span>Constriction R2 (m)</span> <span id="val-R2" class="val-readout">0.50</span></div>
+                    <input type="range" id="sl-R2" min="0.1" max="5.0" step="0.01" value="0.5">
+                </div>
+                <div class="control-group">
+                    <div class="control-label"><span>Inlet Velocity v1 (m/s)</span> <span id="val-v1" class="val-readout">10.0</span></div>
+                    <input type="range" id="sl-v1" min="0.1" max="50.0" step="0.1" value="10.0">
+                </div>
+                <div class="control-group">
+                    <div class="control-label"><span>Base Pressure P1 (Pa)</span> <span id="val-P1" class="val-readout">101325</span></div>
+                    <input type="range" id="sl-P1" min="-100000" max="500000" step="100" value="101325">
+                </div>
+
+                <div class="btn-grid">
+                    <button id="btn-play" class="btn-pause">⏸ Pause Flow</button>
+                    <button id="btn-csv" class="btn-export">📥 Export Data</button>
+                </div>
+            </div>
         </div>
 
-        <div class="btn-grid">
-            <button id="btn-play" class="btn-pause">⏸ Pause Flow</button>
-            <button id="btn-csv" class="btn-export">📥 Export Data</button>
+        <div id="pane-qa" class="dashboard-pane hidden">
+            <div class="qa-shell">
+                <div class="qa-card">
+                    <h3>Student Information</h3>
+                    <label class="qa-label" for="qa-student-name">Student Name</label>
+                    <input id="qa-student-name" class="qa-name-input" type="text" placeholder="Enter your name before exporting">
+                </div>
+
+                <div class="qa-card">
+                    <div class="qa-head">
+                        <div id="qa-stage" class="qa-stage">Engage</div>
+                        <div id="qa-counter" class="qa-counter">Prompt 1 of 10</div>
+                    </div>
+                    <div id="qa-question" class="qa-question">Where in this tube do you predict the fluid will move fastest?</div>
+                    <label class="qa-label" for="qa-answer">Student Answer</label>
+                    <textarea id="qa-answer" class="qa-textarea" placeholder="Type your answer for this Bernoulli prompt here..."></textarea>
+                    <div id="qa-status" class="qa-status">Responses save locally in this browser.</div>
+                    <div class="qa-btn-row">
+                        <button id="btn-qa-back" class="qa-btn-secondary" type="button">← Back</button>
+                        <button id="btn-qa-next" class="qa-btn-primary" type="button">Next →</button>
+                    </div>
+                    <div class="qa-btn-row">
+                        <button id="btn-qa-save" class="qa-btn-secondary" type="button">Save Answer</button>
+                        <button id="btn-qa-export" class="qa-btn-accent" type="button">Export .docx</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -548,6 +685,283 @@ function render() {
 // UI BINDINGS
 // ==========================================
 const inReq = document.getElementById('in-req'); const inZeq = document.getElementById('in-zeq');
+const tabControls = document.getElementById('tab-controls');
+const tabQa = document.getElementById('tab-qa');
+const paneControls = document.getElementById('pane-controls');
+const paneQa = document.getElementById('pane-qa');
+const qaStageEl = document.getElementById('qa-stage');
+const qaCounterEl = document.getElementById('qa-counter');
+const qaQuestionEl = document.getElementById('qa-question');
+const qaAnswerEl = document.getElementById('qa-answer');
+const qaStatusEl = document.getElementById('qa-status');
+const qaStudentNameEl = document.getElementById('qa-student-name');
+const qaBackBtn = document.getElementById('btn-qa-back');
+const qaNextBtn = document.getElementById('btn-qa-next');
+const qaSaveBtn = document.getElementById('btn-qa-save');
+const qaExportBtn = document.getElementById('btn-qa-export');
+const QA_STORAGE_KEY = 'bernoulli-qa-v1';
+const qaPrompts = [
+    { id: 'engage-1', stage: 'Engage', question: 'Where in this tube do you predict the fluid will move fastest?' },
+    { id: 'engage-2', stage: 'Engage', question: 'Before changing anything, where do you expect the pressure to be lowest?' },
+    { id: 'explore-1', stage: 'Explore', question: 'Narrow the constriction and describe what happens to velocity through the tightest region.' },
+    { id: 'explore-2', stage: 'Explore', question: 'Change the inlet velocity. What happens to both the pressure graph and the velocity graph?' },
+    { id: 'explore-3', stage: 'Explore', question: 'Switch between pipe configurations. What changes when elevation is no longer constant?' },
+    { id: 'explain-1', stage: 'Explain', question: 'Explain why a smaller tube radius changes the speed of the fluid in this model.' },
+    { id: 'explain-2', stage: 'Explain', question: 'Explain how Bernoulli’s relation connects pressure, velocity, and elevation here.' },
+    { id: 'elaborate-1', stage: 'Elaborate', question: 'Compare a horizontal Venturi tube and an uphill incline. How does elevation reshape the energy balance?' },
+    { id: 'elaborate-2', stage: 'Elaborate', question: 'Describe one setup where dynamic pressure grows while static pressure drops. What settings create it?' },
+    { id: 'evaluate-1', stage: 'Evaluate', question: 'What evidence from the kinematics and energy plots supports Bernoulli’s principle?' },
+    { id: 'evaluate-2', stage: 'Evaluate', question: 'State the main fluid-dynamics idea you learned from this simulation in one clear sentence.' }
+];
+let qaSaveTimer = null;
+const qaStorageEnabled = checkQaStorageAvailability();
+const qaState = loadQaState();
+
+function checkQaStorageAvailability() {
+    try {
+        const testKey = '__bernoulli_qa_storage_test__';
+        window.localStorage.setItem(testKey, 'ok');
+        window.localStorage.removeItem(testKey);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function createDefaultQaState() {
+    return {
+        currentIndex: 0,
+        answers: {},
+        studentName: ''
+    };
+}
+
+function loadQaState() {
+    if (!qaStorageEnabled) {
+        return createDefaultQaState();
+    }
+
+    try {
+        const raw = window.localStorage.getItem(QA_STORAGE_KEY);
+        if (!raw) return createDefaultQaState();
+        const parsed = JSON.parse(raw);
+        return {
+            currentIndex: Number.isInteger(parsed.currentIndex) ? Math.min(Math.max(parsed.currentIndex, 0), qaPrompts.length - 1) : 0,
+            answers: parsed.answers && typeof parsed.answers === 'object' ? parsed.answers : {},
+            studentName: typeof parsed.studentName === 'string' ? parsed.studentName : ''
+        };
+    } catch (error) {
+        return createDefaultQaState();
+    }
+}
+
+function isQaQuotaError(error) {
+    return error && (
+        error.name === 'QuotaExceededError' ||
+        error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+        error.code === 22 ||
+        error.code === 1014
+    );
+}
+
+function setQaStatus(message, tone = 'info') {
+    qaStatusEl.textContent = message;
+    qaStatusEl.classList.remove('is-error', 'is-success');
+    if (tone === 'error') qaStatusEl.classList.add('is-error');
+    if (tone === 'success') qaStatusEl.classList.add('is-success');
+}
+
+function persistQaState(successMessage = '') {
+    qaState.studentName = qaStudentNameEl.value.trim();
+
+    if (!qaStorageEnabled) {
+        if (successMessage) {
+            setQaStatus('Local storage is unavailable in this browser. Responses stay only for this session.', 'error');
+        }
+        return false;
+    }
+
+    try {
+        window.localStorage.setItem(QA_STORAGE_KEY, JSON.stringify(qaState));
+        if (successMessage) setQaStatus(successMessage, 'success');
+        return true;
+    } catch (error) {
+        if (isQaQuotaError(error)) {
+            setQaStatus('Local storage is full. Shorten answers or clear saved browser data before saving again.', 'error');
+        } else {
+            setQaStatus('Could not save Bernoulli responses in this browser.', 'error');
+        }
+        return false;
+    }
+}
+
+function getCurrentQaPrompt() {
+    return qaPrompts[qaState.currentIndex];
+}
+
+function saveCurrentQaAnswer(showMessage = false) {
+    const currentPrompt = getCurrentQaPrompt();
+    const answer = qaAnswerEl.value.trim();
+    if (answer) {
+        qaState.answers[currentPrompt.id] = answer;
+    } else {
+        delete qaState.answers[currentPrompt.id];
+    }
+    return persistQaState(showMessage ? 'Answer saved locally.' : '');
+}
+
+function renderQaPrompt() {
+    const currentPrompt = getCurrentQaPrompt();
+    qaStageEl.textContent = currentPrompt.stage;
+    qaCounterEl.textContent = `Prompt ${qaState.currentIndex + 1} of ${qaPrompts.length}`;
+    qaQuestionEl.textContent = currentPrompt.question;
+    qaAnswerEl.value = qaState.answers[currentPrompt.id] || '';
+    qaStudentNameEl.value = qaState.studentName || '';
+    qaBackBtn.disabled = qaState.currentIndex === 0;
+    qaNextBtn.disabled = qaState.currentIndex === qaPrompts.length - 1;
+
+    if (!qaStorageEnabled) {
+        setQaStatus('Local storage is unavailable in this browser. Responses are temporary until export.', 'error');
+    } else if (qaAnswerEl.value.trim()) {
+        setQaStatus('Saved response loaded from this browser.', 'success');
+    } else {
+        setQaStatus('Responses save locally in this browser.', 'info');
+    }
+}
+
+function goToQaPrompt(index) {
+    saveCurrentQaAnswer(false);
+    qaState.currentIndex = Math.min(Math.max(index, 0), qaPrompts.length - 1);
+    persistQaState('');
+    renderQaPrompt();
+}
+
+function setActiveDashboardTab(mode) {
+    const showQa = mode === 'qa';
+    tabControls.classList.toggle('active', !showQa);
+    tabQa.classList.toggle('active', showQa);
+    paneControls.classList.toggle('hidden', showQa);
+    paneQa.classList.toggle('hidden', !showQa);
+}
+
+function sanitizeQaFileName(value) {
+    return value.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_');
+}
+
+function downloadQaBlob(blob, fileName) {
+    if (typeof window.saveAs === 'function') {
+        window.saveAs(blob, fileName);
+        return;
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+}
+
+async function exportQaResponses() {
+    saveCurrentQaAnswer(false);
+
+    const enteredName = window.prompt('Enter your name for the exported Bernoulli document:', qaStudentNameEl.value.trim());
+    if (enteredName === null) {
+        setQaStatus('Export cancelled.', 'info');
+        return;
+    }
+
+    const studentName = enteredName.trim();
+    if (!studentName) {
+        setQaStatus('Student name is required before exporting.', 'error');
+        window.alert('Please enter your name before exporting the .docx file.');
+        return;
+    }
+
+    qaStudentNameEl.value = studentName;
+    qaState.studentName = studentName;
+    persistQaState('');
+
+    if (!window.docx || !window.docx.Document || !window.docx.Packer) {
+        setQaStatus('The document export library did not load. Check your internet connection and try again.', 'error');
+        window.alert('The .docx export library is unavailable right now.');
+        return;
+    }
+
+    try {
+        const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } = window.docx;
+        const generatedAt = new Date().toLocaleString();
+        const children = [
+            new Paragraph({
+                text: 'Bernoulli Application Responses',
+                heading: HeadingLevel.TITLE,
+                alignment: AlignmentType.CENTER
+            }),
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: `Student: ${studentName}`, bold: true })]
+            }),
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: `Generated: ${generatedAt}` })]
+            }),
+            new Paragraph({ text: '' })
+        ];
+
+        qaPrompts.forEach((prompt, index) => {
+            const answer = qaState.answers[prompt.id] || 'No answer entered.';
+            children.push(
+                new Paragraph({
+                    text: `${index + 1}. ${prompt.stage}: ${prompt.question}`,
+                    heading: HeadingLevel.HEADING_2
+                }),
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: answer,
+                            italics: !qaState.answers[prompt.id]
+                        })
+                    ]
+                }),
+                new Paragraph({ text: '' })
+            );
+        });
+
+        const documentFile = new Document({
+            sections: [
+                {
+                    properties: {},
+                    children
+                }
+            ]
+        });
+
+        const blob = await Packer.toBlob(documentFile);
+        const safeName = sanitizeQaFileName(studentName) || 'student';
+        downloadQaBlob(blob, `${safeName}_bernoulli_responses.docx`);
+        setQaStatus('The .docx file was generated and sent to your browser download location.', 'success');
+    } catch (error) {
+        setQaStatus('Export failed. Please try again after checking your browser storage and network access.', 'error');
+        window.alert('The .docx export failed. Please try again.');
+    }
+}
+
+tabControls.addEventListener('click', () => setActiveDashboardTab('controls'));
+tabQa.addEventListener('click', () => setActiveDashboardTab('qa'));
+qaBackBtn.addEventListener('click', () => goToQaPrompt(qaState.currentIndex - 1));
+qaNextBtn.addEventListener('click', () => goToQaPrompt(qaState.currentIndex + 1));
+qaSaveBtn.addEventListener('click', () => saveCurrentQaAnswer(true));
+qaExportBtn.addEventListener('click', exportQaResponses);
+qaStudentNameEl.addEventListener('input', () => persistQaState(''));
+qaAnswerEl.addEventListener('input', () => {
+    clearTimeout(qaSaveTimer);
+    qaSaveTimer = window.setTimeout(() => saveCurrentQaAnswer(true), 250);
+});
+
+renderQaPrompt();
+setActiveDashboardTab('controls');
 
 function updatePhysics() {
     try {
