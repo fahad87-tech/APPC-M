@@ -39,6 +39,8 @@
 
         verifyPageAccess();
     </script>
+    <script src="https://unpkg.com/docx@8.2.4/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
     <style>
         :root {
             --bg-page: #050508;
@@ -79,7 +81,46 @@
             border: 1px solid var(--border); border-radius: 12px;
             display: flex; flex-direction: column;
             box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            max-height: calc(100vh - 40px); overflow-y: auto;
+            max-height: calc(100vh - 40px); min-height: 0; overflow: hidden;
+        }
+
+        .dashboard-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding: 16px 20px 0;
+        }
+
+        .dashboard-tab {
+            padding: 11px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.04);
+            color: #b9c4da;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .dashboard-tab.active {
+            background: rgba(0, 229, 255, 0.16);
+            border-color: rgba(0, 229, 255, 0.38);
+            color: #fff;
+        }
+
+        .dashboard-content {
+            flex: 1;
+            min-height: 0;
+        }
+
+        .dashboard-pane {
+            height: 100%;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .hidden {
+            display: none !important;
         }
 
         .panel-section { padding: 20px; border-bottom: 1px solid var(--border); }
@@ -132,6 +173,86 @@
         .graph-wrapper { flex: 1; position: relative; background: rgba(0,0,0,0.5); border: 1px solid #333; border-radius: 8px; overflow: hidden; }
         #graph-canvas { width: 100%; height: 100%; display: block; }
         .graph-label { position: absolute; top: 10px; left: 10px; font-size: 11px; color: var(--text-muted); font-weight: bold; }
+
+        .qa-shell { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+        .qa-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .qa-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .qa-stage {
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(0, 229, 255, 0.12);
+            color: var(--accent-cyan);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .qa-counter {
+            color: #9aa;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+        .qa-question {
+            color: #f6f8ff;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .qa-label {
+            color: #fff;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+        }
+        .qa-textarea, .qa-name-input {
+            width: 100%;
+            padding: 11px 12px;
+            border-radius: 10px;
+            border: 1px solid #39445e;
+            background: #121721;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            font-family: inherit;
+        }
+        .qa-name-input:focus, .qa-textarea:focus {
+            border-color: rgba(0, 229, 255, 0.55);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.08);
+        }
+        .qa-textarea {
+            min-height: 150px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+        .qa-status {
+            min-height: 32px;
+            color: #9aa;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+        .qa-status.is-error { color: #ff9b9b; }
+        .qa-status.is-success { color: #8df0c7; }
+        .qa-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .qa-btn-secondary { background: #30384d; }
+        .qa-btn-primary { background: linear-gradient(90deg, #007cf0, #00dfd8); }
+        .qa-btn-accent { background: linear-gradient(90deg, #7b61ff, #00b7ff); }
+        .qa-btn-row button:disabled { opacity: 0.45; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -146,59 +267,95 @@
             <div class="title">Magnetic Domains</div>
             <div class="hint-text"><b>Scroll</b> to Zoom into Atoms &nbsp;|&nbsp; <b>Drag</b> to Pan</div>
         </div>
-
-        <div class="panel-section" style="border-bottom: none; padding-top: 15px; padding-bottom: 0;">
-            <div id="edu-box">Loading...</div>
+        <div class="dashboard-tabs">
+            <button id="tab-controls" class="dashboard-tab active" type="button">Simulation</button>
+            <button id="tab-qa" class="dashboard-tab" type="button">Q / A Prompts</button>
         </div>
+        <div class="dashboard-content">
+            <div id="pane-controls" class="dashboard-pane">
+                <div class="panel-section" style="border-bottom: none; padding-top: 15px; padding-bottom: 0;">
+                    <div id="edu-box">Loading...</div>
+                </div>
 
-        <div class="panel-section">
-            <h3>Laboratory Controls</h3>
-            
-            <div class="control-group">
-                <select id="mat-select">
-                    <option value="ferro">Ferromagnetic (Iron)</option>
-                    <option value="para">Paramagnetic (Aluminum)</option>
-                    <option value="dia">Diamagnetic (Bismuth)</option>
-                </select>
-                
-                <label class="checkbox-container">
-                    <input type="checkbox" id="cb-color" checked>
-                    <span class="checkbox-label">Show Color-Coded Alignment Background</span>
-                </label>
+                <div class="panel-section">
+                    <h3>Laboratory Controls</h3>
+                    
+                    <div class="control-group">
+                        <select id="mat-select">
+                            <option value="ferro">Ferromagnetic (Iron)</option>
+                            <option value="para">Paramagnetic (Aluminum)</option>
+                            <option value="dia">Diamagnetic (Bismuth)</option>
+                        </select>
+                        
+                        <label class="checkbox-container">
+                            <input type="checkbox" id="cb-color" checked>
+                            <span class="checkbox-label">Show Color-Coded Alignment Background</span>
+                        </label>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-header"><span>Magnet Distance</span> <span class="val-readout" id="val-dist">150 mm</span></div>
+                        <input type="range" id="sl-dist" min="15" max="350" value="150">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-header"><span>Magnet Strength</span> <span class="val-readout" id="val-str">80%</span></div>
+                        <input type="range" id="sl-str" min="0" max="100" value="80">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-header"><span>Heat (Thermal Agitation)</span> <span class="val-readout" id="val-heat">10°</span></div>
+                        <input type="range" id="sl-heat" min="0" max="100" value="10">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-header"><span>Domain Stickiness (J)</span> <span class="val-readout" id="val-stick">85</span></div>
+                        <input type="range" id="sl-stick" min="0" max="100" value="85">
+                    </div>
+
+                    <div class="btn-grid">
+                        <button class="btn-flip" id="btn-flip">🔄 Flip Polarity</button>
+                        <button class="btn-scramble" id="btn-scramble">🔥 Heat Shock</button>
+                        <button class="btn-reset" id="btn-reset">🎯 Recenter Camera</button>
+                    </div>
+                </div>
+
+                <div id="graph-section">
+                    <h3 style="margin-bottom: 10px;">Force vs. Time</h3>
+                    <div class="graph-wrapper">
+                        <div class="graph-label">Force (N)</div>
+                        <canvas id="graph-canvas"></canvas>
+                    </div>
+                </div>
             </div>
 
-            <div class="control-group">
-                <div class="control-header"><span>Magnet Distance</span> <span class="val-readout" id="val-dist">150 mm</span></div>
-                <input type="range" id="sl-dist" min="15" max="350" value="150">
-            </div>
+            <div id="pane-qa" class="dashboard-pane hidden">
+                <div class="qa-shell">
+                    <div class="qa-card">
+                        <h3>Student Information</h3>
+                        <label class="qa-label" for="qa-student-name">Student Name</label>
+                        <input id="qa-student-name" class="qa-name-input" type="text" placeholder="Enter your name before exporting">
+                    </div>
 
-            <div class="control-group">
-                <div class="control-header"><span>Magnet Strength</span> <span class="val-readout" id="val-str">80%</span></div>
-                <input type="range" id="sl-str" min="0" max="100" value="80">
-            </div>
-
-            <div class="control-group">
-                <div class="control-header"><span>Heat (Thermal Agitation)</span> <span class="val-readout" id="val-heat">10°</span></div>
-                <input type="range" id="sl-heat" min="0" max="100" value="10">
-            </div>
-
-            <div class="control-group">
-                <div class="control-header"><span>Domain Stickiness (J)</span> <span class="val-readout" id="val-stick">85</span></div>
-                <input type="range" id="sl-stick" min="0" max="100" value="85">
-            </div>
-
-            <div class="btn-grid">
-                <button class="btn-flip" id="btn-flip">🔄 Flip Polarity</button>
-                <button class="btn-scramble" id="btn-scramble">🔥 Heat Shock</button>
-                <button class="btn-reset" id="btn-reset">🎯 Recenter Camera</button>
-            </div>
-        </div>
-
-        <div id="graph-section">
-            <h3 style="margin-bottom: 10px;">Force vs. Time</h3>
-            <div class="graph-wrapper">
-                <div class="graph-label">Force (N)</div>
-                <canvas id="graph-canvas"></canvas>
+                    <div class="qa-card">
+                        <div class="qa-head">
+                            <div id="qa-stage" class="qa-stage">Engage</div>
+                            <div id="qa-counter" class="qa-counter">Prompt 1 of 10</div>
+                        </div>
+                        <div id="qa-question" class="qa-question">What do you think happens inside a ferromagnetic material when a nearby magnet is brought closer?</div>
+                        <label class="qa-label" for="qa-answer">Student Answer</label>
+                        <textarea id="qa-answer" class="qa-textarea" placeholder="Type your answer for this magnetism prompt here..."></textarea>
+                        <div id="qa-status" class="qa-status">Responses save locally in this browser.</div>
+                        <div class="qa-btn-row">
+                            <button id="btn-qa-back" class="qa-btn-secondary" type="button">← Back</button>
+                            <button id="btn-qa-next" class="qa-btn-primary" type="button">Next →</button>
+                        </div>
+                        <div class="qa-btn-row">
+                            <button id="btn-qa-save" class="qa-btn-secondary" type="button">Save Answer</button>
+                            <button id="btn-qa-export" class="qa-btn-accent" type="button">Export .docx</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -535,6 +692,283 @@ const uiHeat = document.getElementById('sl-heat');
 const uiStick = document.getElementById('sl-stick');
 const eduBox = document.getElementById('edu-box');
 const colorToggle = document.getElementById('cb-color');
+const tabControls = document.getElementById('tab-controls');
+const tabQa = document.getElementById('tab-qa');
+const paneControls = document.getElementById('pane-controls');
+const paneQa = document.getElementById('pane-qa');
+const qaStageEl = document.getElementById('qa-stage');
+const qaCounterEl = document.getElementById('qa-counter');
+const qaQuestionEl = document.getElementById('qa-question');
+const qaAnswerEl = document.getElementById('qa-answer');
+const qaStatusEl = document.getElementById('qa-status');
+const qaStudentNameEl = document.getElementById('qa-student-name');
+const qaBackBtn = document.getElementById('btn-qa-back');
+const qaNextBtn = document.getElementById('btn-qa-next');
+const qaSaveBtn = document.getElementById('btn-qa-save');
+const qaExportBtn = document.getElementById('btn-qa-export');
+const QA_STORAGE_KEY = 'magnetic-domains-qa-v1';
+const qaPrompts = [
+    { id: 'engage-1', stage: 'Engage', question: 'What do you think happens inside a ferromagnetic material when a nearby magnet is brought closer?' },
+    { id: 'engage-2', stage: 'Engage', question: 'Before testing, which material do you predict will respond most strongly to the magnet?' },
+    { id: 'explore-1', stage: 'Explore', question: 'Move the magnet closer and describe what happens to the domain alignment pattern.' },
+    { id: 'explore-2', stage: 'Explore', question: 'Flip the magnet polarity. What changes in the domains and what does not change?' },
+    { id: 'explore-3', stage: 'Explore', question: 'Apply a heat shock or raise the heat slider. What changes in the domain order?' },
+    { id: 'explain-1', stage: 'Explain', question: 'Explain why ferromagnetic materials form visible aligned regions called domains.' },
+    { id: 'explain-2', stage: 'Explain', question: 'Explain why paramagnetic and diamagnetic materials behave differently from ferromagnetic materials here.' },
+    { id: 'elaborate-1', stage: 'Elaborate', question: 'Compare ferromagnetic, paramagnetic, and diamagnetic behavior under the same magnet strength. What are the biggest differences?' },
+    { id: 'elaborate-2', stage: 'Elaborate', question: 'Describe how heat and stickiness together affect whether ordered domains survive.' },
+    { id: 'evaluate-1', stage: 'Evaluate', question: 'What evidence from the simulation supports the idea that domains are collective, not purely individual, behavior?' },
+    { id: 'evaluate-2', stage: 'Evaluate', question: 'State the main idea you learned about magnetic materials in one clear sentence.' }
+];
+let qaSaveTimer = null;
+const qaStorageEnabled = checkQaStorageAvailability();
+const qaState = loadQaState();
+
+function checkQaStorageAvailability() {
+    try {
+        const testKey = '__magnetic_domains_qa_storage_test__';
+        window.localStorage.setItem(testKey, 'ok');
+        window.localStorage.removeItem(testKey);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
+
+function createDefaultQaState() {
+    return {
+        currentIndex: 0,
+        answers: {},
+        studentName: ''
+    };
+}
+
+function loadQaState() {
+    if (!qaStorageEnabled) {
+        return createDefaultQaState();
+    }
+
+    try {
+        const raw = window.localStorage.getItem(QA_STORAGE_KEY);
+        if (!raw) return createDefaultQaState();
+        const parsed = JSON.parse(raw);
+        return {
+            currentIndex: Number.isInteger(parsed.currentIndex) ? Math.min(Math.max(parsed.currentIndex, 0), qaPrompts.length - 1) : 0,
+            answers: parsed.answers && typeof parsed.answers === 'object' ? parsed.answers : {},
+            studentName: typeof parsed.studentName === 'string' ? parsed.studentName : ''
+        };
+    } catch (error) {
+        return createDefaultQaState();
+    }
+}
+
+function isQaQuotaError(error) {
+    return error && (
+        error.name === 'QuotaExceededError' ||
+        error.name === 'NS_ERROR_DOM_QUOTA_REACHED' ||
+        error.code === 22 ||
+        error.code === 1014
+    );
+}
+
+function setQaStatus(message, tone = 'info') {
+    qaStatusEl.textContent = message;
+    qaStatusEl.classList.remove('is-error', 'is-success');
+    if (tone === 'error') qaStatusEl.classList.add('is-error');
+    if (tone === 'success') qaStatusEl.classList.add('is-success');
+}
+
+function persistQaState(successMessage = '') {
+    qaState.studentName = qaStudentNameEl.value.trim();
+
+    if (!qaStorageEnabled) {
+        if (successMessage) {
+            setQaStatus('Local storage is unavailable in this browser. Responses stay only for this session.', 'error');
+        }
+        return false;
+    }
+
+    try {
+        window.localStorage.setItem(QA_STORAGE_KEY, JSON.stringify(qaState));
+        if (successMessage) setQaStatus(successMessage, 'success');
+        return true;
+    } catch (error) {
+        if (isQaQuotaError(error)) {
+            setQaStatus('Local storage is full. Shorten answers or clear saved browser data before saving again.', 'error');
+        } else {
+            setQaStatus('Could not save magnetism responses in this browser.', 'error');
+        }
+        return false;
+    }
+}
+
+function getCurrentQaPrompt() {
+    return qaPrompts[qaState.currentIndex];
+}
+
+function saveCurrentQaAnswer(showMessage = false) {
+    const currentPrompt = getCurrentQaPrompt();
+    const answer = qaAnswerEl.value.trim();
+    if (answer) {
+        qaState.answers[currentPrompt.id] = answer;
+    } else {
+        delete qaState.answers[currentPrompt.id];
+    }
+    return persistQaState(showMessage ? 'Answer saved locally.' : '');
+}
+
+function renderQaPrompt() {
+    const currentPrompt = getCurrentQaPrompt();
+    qaStageEl.textContent = currentPrompt.stage;
+    qaCounterEl.textContent = `Prompt ${qaState.currentIndex + 1} of ${qaPrompts.length}`;
+    qaQuestionEl.textContent = currentPrompt.question;
+    qaAnswerEl.value = qaState.answers[currentPrompt.id] || '';
+    qaStudentNameEl.value = qaState.studentName || '';
+    qaBackBtn.disabled = qaState.currentIndex === 0;
+    qaNextBtn.disabled = qaState.currentIndex === qaPrompts.length - 1;
+
+    if (!qaStorageEnabled) {
+        setQaStatus('Local storage is unavailable in this browser. Responses are temporary until export.', 'error');
+    } else if (qaAnswerEl.value.trim()) {
+        setQaStatus('Saved response loaded from this browser.', 'success');
+    } else {
+        setQaStatus('Responses save locally in this browser.', 'info');
+    }
+}
+
+function goToQaPrompt(index) {
+    saveCurrentQaAnswer(false);
+    qaState.currentIndex = Math.min(Math.max(index, 0), qaPrompts.length - 1);
+    persistQaState('');
+    renderQaPrompt();
+}
+
+function setActiveDashboardTab(mode) {
+    const showQa = mode === 'qa';
+    tabControls.classList.toggle('active', !showQa);
+    tabQa.classList.toggle('active', showQa);
+    paneControls.classList.toggle('hidden', showQa);
+    paneQa.classList.toggle('hidden', !showQa);
+}
+
+function sanitizeQaFileName(value) {
+    return value.replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '_');
+}
+
+function downloadQaBlob(blob, fileName) {
+    if (typeof window.saveAs === 'function') {
+        window.saveAs(blob, fileName);
+        return;
+    }
+
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+}
+
+async function exportQaResponses() {
+    saveCurrentQaAnswer(false);
+
+    const enteredName = window.prompt('Enter your name for the exported magnetism document:', qaStudentNameEl.value.trim());
+    if (enteredName === null) {
+        setQaStatus('Export cancelled.', 'info');
+        return;
+    }
+
+    const studentName = enteredName.trim();
+    if (!studentName) {
+        setQaStatus('Student name is required before exporting.', 'error');
+        window.alert('Please enter your name before exporting the .docx file.');
+        return;
+    }
+
+    qaStudentNameEl.value = studentName;
+    qaState.studentName = studentName;
+    persistQaState('');
+
+    if (!window.docx || !window.docx.Document || !window.docx.Packer) {
+        setQaStatus('The document export library did not load. Check your internet connection and try again.', 'error');
+        window.alert('The .docx export library is unavailable right now.');
+        return;
+    }
+
+    try {
+        const { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } = window.docx;
+        const generatedAt = new Date().toLocaleString();
+        const children = [
+            new Paragraph({
+                text: 'Magnetic Domains and Materials Responses',
+                heading: HeadingLevel.TITLE,
+                alignment: AlignmentType.CENTER
+            }),
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: `Student: ${studentName}`, bold: true })]
+            }),
+            new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: `Generated: ${generatedAt}` })]
+            }),
+            new Paragraph({ text: '' })
+        ];
+
+        qaPrompts.forEach((prompt, index) => {
+            const answer = qaState.answers[prompt.id] || 'No answer entered.';
+            children.push(
+                new Paragraph({
+                    text: `${index + 1}. ${prompt.stage}: ${prompt.question}`,
+                    heading: HeadingLevel.HEADING_2
+                }),
+                new Paragraph({
+                    children: [
+                        new TextRun({
+                            text: answer,
+                            italics: !qaState.answers[prompt.id]
+                        })
+                    ]
+                }),
+                new Paragraph({ text: '' })
+            );
+        });
+
+        const documentFile = new Document({
+            sections: [
+                {
+                    properties: {},
+                    children
+                }
+            ]
+        });
+
+        const blob = await Packer.toBlob(documentFile);
+        const safeName = sanitizeQaFileName(studentName) || 'student';
+        downloadQaBlob(blob, `${safeName}_magnetic_domains_responses.docx`);
+        setQaStatus('The .docx file was generated and sent to your browser download location.', 'success');
+    } catch (error) {
+        setQaStatus('Export failed. Please try again after checking your browser storage and network access.', 'error');
+        window.alert('The .docx export failed. Please try again.');
+    }
+}
+
+tabControls.addEventListener('click', () => setActiveDashboardTab('controls'));
+tabQa.addEventListener('click', () => setActiveDashboardTab('qa'));
+qaBackBtn.addEventListener('click', () => goToQaPrompt(qaState.currentIndex - 1));
+qaNextBtn.addEventListener('click', () => goToQaPrompt(qaState.currentIndex + 1));
+qaSaveBtn.addEventListener('click', () => saveCurrentQaAnswer(true));
+qaExportBtn.addEventListener('click', exportQaResponses);
+qaStudentNameEl.addEventListener('input', () => persistQaState(''));
+qaAnswerEl.addEventListener('input', () => {
+    clearTimeout(qaSaveTimer);
+    qaSaveTimer = window.setTimeout(() => saveCurrentQaAnswer(true), 250);
+});
+
+renderQaPrompt();
+setActiveDashboardTab('controls');
 
 function updateEduText() {
     let mat = document.getElementById('mat-select').value;
