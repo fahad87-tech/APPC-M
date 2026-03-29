@@ -188,7 +188,7 @@
 
   <h2 class="section-title">Classical Mechanics</h2>
   <div class="grid">
-    <a class="card" href="mechanics/rolling-with-slipping-top-spin.html">
+    <a class="card" style="cursor: pointer;" onclick="checkPassword('mechanics/rolling-with-slipping-top-spin.html')">
       <div class="card-icon">🎱</div>
       <div class="card-title">Rolling With Slipping — Top Spin</div>
       <div class="card-subtitle">Kinematics & Friction</div>
@@ -196,7 +196,7 @@
       <span class="card-tag">Simulation</span>
     </a>
 
-    <a class="card" href="mechanics/angular-momentum-3-scenarios.html">
+    <a class="card" style="cursor: pointer;" onclick="checkPassword('mechanics/angular-momentum-3-scenarios.html')">
       <div class="card-icon">🔄</div>
       <div class="card-title">Angular Momentum — 3 Scenarios</div>
       <div class="card-subtitle">Collisions & Rotations</div>
@@ -207,7 +207,7 @@
 
   <h2 class="section-title">Waves & Oscillations</h2>
   <div class="grid">
-    <a class="card" href="oscillations/shm-ucm-relation.html">
+    <a class="card" style="cursor: pointer;" onclick="checkPassword('oscillations/shm-ucm-relation.html')">
       <div class="card-icon">〰️</div>
       <div class="card-title">UCM + SHM Visualization</div>
       <div class="card-subtitle">Harmonic Motion</div>
@@ -218,10 +218,10 @@
 
   <h2 class="section-title">Magnetism</h2>
   <div class="grid">
-    <a class="card" href="Domains and Magnetic Materials.html">
-      <div class="card-icon">〰️</div>
+    <a class="card" style="cursor: pointer;" onclick="checkPassword('magnetism/domains-and-magnetic-materials.html')">
+      <div class="card-icon">🧲</div>
       <div class="card-title">Domains and Magnetic Materials</div>
-      <div class="card-subtitle">Ferro, Para, Diamagnetic Materialsn</div>
+      <div class="card-subtitle">Ferro, Para, Diamagnetic Materials</div>
       <div class="card-desc">How does magnetism penetrate different materials</div>
       <span class="card-tag">Simulation</span>
     </a>
@@ -229,22 +229,21 @@
 
   <h2 class="section-title">Fluid Dynamics</h2>
   <div class="grid">
-    <a class="card" href="fluids/torricellis-law.html">
+    <a class="card" style="cursor: pointer;" onclick="checkPassword('fluids/torricellis-law.html')">
       <div class="card-icon">💧</div>
       <div class="card-title">Torricelli's Law</div>
       <div class="card-subtitle">Fluid Velocity</div>
       <div class="card-desc">Observe water flow from a container. Analyze how depth impacts fluid velocity and the resulting trajectory of the water stream.</div>
       <span class="card-tag">Simulation</span>
     </a>
-<div class="grid">
-    <a class="card" href="Bernoulli Application.html">
-      <div class="card-icon">🎱</div>
+
+    <a class="card" style="cursor: pointer;" onclick="checkPassword('fluids/bernoulli-application.html')">
+      <div class="card-icon">🌪️</div>
       <div class="card-title">Bernoulli Application</div>
       <div class="card-subtitle">Venturi Tube</div>
       <div class="card-desc">See how pressure changes in different parts of a tube</div>
       <span class="card-tag">Simulation</span>
     </a>
-
   </div>
 
 </div>
@@ -252,6 +251,32 @@
 <footer>Physics Simulations — Powered by GitHub Pages</footer>
 
 <script>
+  // --- PASSWORD LOGIC (HASHING) ---
+  // The string below is the SHA-256 hash for the password "physicsrocks"
+  const TARGET_HASH = "7a382dc3f72153eb2684803db15ee0424decebebcda8c3dc51eb2e00e8b1e4f4"; 
+
+  async function checkPassword(targetUrl) {
+    const userInput = prompt("Please enter the password to view this simulation:");
+    
+    // Stop if the user clicks "Cancel"
+    if (userInput === null) return; 
+
+    // Convert the user's input into a secure SHA-256 hash using built-in browser cryptography
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userInput);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+    // Compare the user's scrambled guess with our saved scramble
+    if (hashHex === TARGET_HASH) {
+      window.location.href = targetUrl; // Success! Go to the simulation
+    } else {
+      alert("Incorrect password. Access denied."); // Failure
+    }
+  }
+
+  // --- SEARCH BAR LOGIC ---
   const searchInput = document.getElementById('searchInput');
   const cards = document.querySelectorAll('.card');
   const sections = document.querySelectorAll('.section-title');
@@ -268,7 +293,7 @@
       }
     });
 
-    // Hide empty section titles
+    // Hide empty section titles when searching
     sections.forEach(section => {
       const grid = section.nextElementSibling;
       const visibleCards = grid.querySelectorAll('.card:not(.hidden)');
