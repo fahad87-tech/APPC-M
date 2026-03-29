@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UCM ↔ SHM Simulation</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #06060f 0%, #0d0d2b 50%, #0a1628 100%);
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .header { text-align: center; padding: 28px 20px 10px; }
+  .header h1 {
+    font-size: 2.6rem; font-weight: 800;
+    background: linear-gradient(90deg, #00e5ff, #aa80ff, #ff6ec7);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: 1px;
+  }
+  .header p { font-size: 1.15rem; color: #99aacc; margin-top: 6px; }
+
+  /* ── Centred cross layout ── */
+  .sim-wrapper {
+    max-width: 1200px;
+    margin: 18px auto;
+    padding: 0 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+
+  /* Top row: V-SHM | UCM circle side by side, centred */
+  .top-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+  }
+
+  /* Bottom row: horizontal SHM, centred, same width as circle card */
+  .bottom-row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px; padding: 18px;
+    backdrop-filter: blur(12px);
+  }
+  .card h2 {
+    font-size: 1.1rem; font-weight: 700; color: #ffffff;
+    margin-bottom: 12px; text-align: center;
+    text-transform: uppercase; letter-spacing: 2px;
+  }
+
+  .card-v { flex-shrink: 0; }
+  .card-circle { flex-shrink: 0; }
+  .card-h { width: 100%; max-width: 530px; }
+
+  .canvas-wrap { display: flex; justify-content: center; align-items: center; }
+  canvas { border-radius: 14px; display: block; }
+
+  #circleCanvas {
+    box-shadow: 0 0 30px rgba(0,229,255,0.15), 0 0 60px rgba(0,229,255,0.06);
+    cursor: grab;
+  }
+  #circleCanvas:active { cursor: grabbing; }
+  #vCanvas { box-shadow: 0 0 24px rgba(170,128,255,0.15); }
+  #hCanvas { box-shadow: 0 0 24px rgba(255,110,199,0.15); }
+
+  .controls-section {
+    max-width: 1200px; margin: 10px auto; padding: 0 24px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;
+  }
+  .ctrl-card {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 16px 20px;
+  }
+  .ctrl-card label {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 1.05rem; font-weight: 600; color: #ccdae8; margin-bottom: 8px;
+  }
+  .ctrl-card label span.val {
+    color: #00e5ff; font-size: 1.1rem; font-weight: 700; min-width: 50px; text-align: right;
+  }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 8px;
+    border-radius: 4px; background: rgba(255,255,255,0.1); outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; width: 22px; height: 22px;
+    border-radius: 50%; background: #00e5ff; cursor: pointer; box-shadow: 0 0 8px #00e5ff;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%; background: #00e5ff;
+    cursor: pointer; border: none; box-shadow: 0 0 8px #00e5ff;
+  }
+
+  .btn-row {
+    display: flex; gap: 14px; justify-content: center; margin: 14px auto 0;
+    max-width: 1200px; padding: 0 24px; flex-wrap: wrap;
+  }
+  .btn {
+    font-size: 1.1rem; font-weight: 700; padding: 12px 36px; border: none;
+    border-radius: 12px; cursor: pointer; letter-spacing: 1px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-play {
+    background: linear-gradient(135deg, #00e5ff, #007cf0); color: #000;
+    box-shadow: 0 0 18px rgba(0,229,255,0.4);
+  }
+  .btn-reset {
+    background: linear-gradient(135deg, #ff6ec7, #ff3c7d); color: #fff;
+    box-shadow: 0 0 18px rgba(255,110,199,0.3);
+  }
+
+  .wave-section { max-width: 1200px; margin: 22px auto; padding: 0 24px; }
+  #waveCanvas { width: 100%; border-radius: 14px; box-shadow: 0 0 24px rgba(0,229,255,0.1); }
+
+  .theory { max-width: 1200px; margin: 22px auto 40px; padding: 0 24px; }
+  .theory .card { padding: 28px 32px; }
+  .theory h2 {
+    font-size: 1.5rem; margin-bottom: 16px;
+    background: linear-gradient(90deg, #00e5ff, #aa80ff);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .theory p, .theory li { font-size: 1.08rem; line-height: 1.75; color: #bcc8d8; }
+  .theory ul { list-style: none; padding-left: 0; margin: 12px 0; }
+  .theory li::before { content: '▹ '; color: #00e5ff; font-weight: bold; }
+  .theory .eq {
+    display: block; text-align: center; font-size: 1.25rem; color: #ffffff;
+    background: rgba(0,229,255,0.07); border-left: 3px solid #00e5ff;
+    padding: 12px 20px; margin: 14px 0; border-radius: 8px;
+    font-family: 'Courier New', monospace; font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .top-row { flex-direction: column; }
+    .card-h { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Uniform Circular Motion &harr; Simple Harmonic Motion</h1>
+  <p>See how the projections of circular motion create sinusoidal oscillations</p>
+</div>
+
+<!-- ════════════ SIMULATION PANELS ════════════ -->
+<div class="sim-wrapper">
+
+  <!-- Top row: Vertical SHM + UCM circle, side by side, centred -->
+  <div class="top-row">
+    <div class="card card-v">
+      <h2 style="color:#aa80ff;">Vertical SHM<br>(Y = A sin &theta;)</h2>
+      <div class="canvas-wrap">
+        <canvas id="vCanvas" width="180" height="460"></canvas>
+      </div>
+    </div>
+
+    <div class="card card-circle">
+      <h2 style="color:#00e5ff;">Unit Circle &mdash; UCM</h2>
+      <div class="canvas-wrap">
+        <canvas id="circleCanvas" width="460" height="460"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom row: Horizontal SHM centred beneath the circle -->
+  <div class="bottom-row">
+    <div class="card card-h">
+      <h2 style="color:#ff6ec7;">Horizontal SHM &nbsp;(X = A cos &theta;)</h2>
+      <div class="canvas-wrap">
+        <canvas id="hCanvas" width="490" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════ CONTROLS ════════════ -->
+<div class="controls-section">
+  <div class="ctrl-card">
+    <label>Amplitude (A) <span class="val" id="valA">1.00</span></label>
+    <input type="range" id="sliderA" min="0.3" max="1.0" step="0.01" value="1.0">
+  </div>
+  <div class="ctrl-card">
+    <label>Angular Freq (&omega; rad/s) <span class="val" id="valW">2.00</span></label>
+    <input type="range" id="sliderW" min="0.2" max="8.0" step="0.1" value="2.0">
+  </div>
+  <div class="ctrl-card">
+    <label>Phase Offset (&phi; rad) <span class="val" id="valP">0.00</span></label>
+    <input type="range" id="sliderP" min="0" max="6.28" step="0.01" value="0">
+  </div>
+  <div class="ctrl-card">
+    <label>Playback Speed <span class="val" id="valS">1.0&times;</span></label>
+    <input type="range" id="sliderS" min="0.1" max="3.0" step="0.1" value="1.0">
+  </div>
+</div>
+
+<div class="btn-row">
+  <button class="btn btn-play" id="btnPlay">&#9654;&ensp;Play</button>
+  <button class="btn btn-reset" id="btnReset">&#8634;&ensp;Reset</button>
+</div>
+
+<!-- ════════════ WAVEFORM ════════════ -->
+<div class="wave-section">
+  <div class="card">
+    <h2 style="color:#00e5ff;">Live Waveform Trace</h2>
+    <canvas id="waveCanvas" width="1200" height="260"></canvas>
+  </div>
+</div>
+
+<!-- ════════════ THEORY ════════════ -->
+<div class="theory">
+  <div class="card">
+    <h2>How UCM Connects to SHM</h2>
+    <p>
+      Imagine a point mass moving at constant speed around a circle of radius <strong>A</strong>
+      (the amplitude). Its angle at any time is &theta;(t) = &omega;t + &phi;, where &omega; is
+      the angular frequency and &phi; is the initial phase.
+    </p>
+    <span class="eq">x(t) = A &middot; cos(&omega;t + &phi;) &nbsp;&nbsp;&nbsp;&nbsp; y(t) = A &middot; sin(&omega;t + &phi;)</span>
+    <p>
+      If you shine a light from above and watch the shadow on the floor, that shadow
+      oscillates left and right &mdash; that's <strong>Simple Harmonic Motion</strong>. The
+      horizontal projection gives <em>x = A cos &theta;</em> and the vertical projection gives
+      <em>y = A sin &theta;</em>.
+    </p>
+    <span class="eq">SHM is the 1-D projection of Uniform Circular Motion</span>
+    <p><strong>Top &amp; Bottom of the circle:</strong></p>
+    <ul>
+      <li><strong>Top (&theta; = &pi;/2):</strong> y = +A (max displacement in vertical SHM), x = 0 (equilibrium in horizontal SHM). The vertical oscillator is at its peak; the horizontal one passes through the centre at maximum speed.</li>
+      <li><strong>Bottom (&theta; = 3&pi;/2):</strong> y = &minus;A (min displacement in vertical SHM), x = 0 again. The vertical oscillator is at its lowest point; the horizontal one again passes through equilibrium.</li>
+      <li><strong>Right (&theta; = 0):</strong> x = +A, y = 0 &mdash; horizontal SHM at max displacement, vertical SHM at equilibrium.</li>
+      <li><strong>Left (&theta; = &pi;):</strong> x = &minus;A, y = 0 &mdash; horizontal SHM at min displacement, vertical SHM at equilibrium.</li>
+    </ul>
+    <span class="eq">Period &nbsp; T = 2&pi; / &omega; &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp; Frequency &nbsp; f = &omega; / 2&pi;</span>
+    <p>
+      Adjusting <strong>A</strong> scales the circle (and oscillation amplitude). Adjusting
+      <strong>&omega;</strong> changes how fast the mass orbits (and oscillation frequency).
+      Adjusting <strong>&phi;</strong> rotates the starting position. Drag the mass on the
+      circle to set any angle manually, or let it auto-run and watch the projections trace
+      perfect sine and cosine waves.
+    </p>
+  </div>
+</div>
+
+<!-- ════════════ JAVASCRIPT ════════════ -->
+<script>
+(() => {
+  const cCirc = document.getElementById('circleCanvas');
+  const cV    = document.getElementById('vCanvas');
+  const cH    = document.getElementById('hCanvas');
+  const cW    = document.getElementById('waveCanvas');
+  const ctxC  = cCirc.getContext('2d');
+  const ctxV  = cV.getContext('2d');
+  const ctxH  = cH.getContext('2d');
+  const ctxW  = cW.getContext('2d');
+
+  function hdpi(canvas, ctx, w, h) {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width  = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width  = w + 'px';
+    canvas.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  const CIRC = 460;
+  const V_W = 180, V_H = 460;
+  const H_W = 490, H_H = 160;
+  const W_W = 1200, W_H = 260;
+
+  hdpi(cCirc, ctxC, CIRC, CIRC);
+  hdpi(cV, ctxV, V_W, V_H);
+  hdpi(cH, ctxH, H_W, H_H);
+  hdpi(cW, ctxW, W_W, W_H);
+
+  const S = {
+    theta: 0, A: 1.0, omega: 2.0, phi: 0, speed: 1.0,
+    playing: false, dragging: false, trail: []
+  };
+  let lastTime = null;
+  const TRAIL_SEC = 8;
+
+  /* Sliders */
+  const sA = document.getElementById('sliderA');
+  const sW = document.getElementById('sliderW');
+  const sP = document.getElementById('sliderP');
+  const sS = document.getElementById('sliderS');
+  const vA = document.getElementById('valA');
+  const vW = document.getElementById('valW');
+  const vP = document.getElementById('valP');
+  const vS = document.getElementById('valS');
+  sA.addEventListener('input', () => { S.A = +sA.value; vA.textContent = S.A.toFixed(2); });
+  sW.addEventListener('input', () => { S.omega = +sW.value; vW.textContent = S.omega.toFixed(2); });
+  sP.addEventListener('input', () => { S.phi = +sP.value; vP.textContent = S.phi.toFixed(2); });
+  sS.addEventListener('input', () => { S.speed = +sS.value; vS.textContent = S.speed.toFixed(1)+'\u00d7'; });
+
+  /* Buttons */
+  const btnPlay  = document.getElementById('btnPlay');
+  const btnReset = document.getElementById('btnReset');
+  btnPlay.addEventListener('click', () => {
+    S.playing = !S.playing;
+    btnPlay.innerHTML = S.playing ? '&#9646;&#9646;&ensp;Pause' : '&#9654;&ensp;Play';
+    if (S.playing) lastTime = performance.now();
+  });
+  btnReset.addEventListener('click', () => { S.theta = 0; S.trail = []; lastTime = null; });
+
+  /* Drag */
+  const circCX = CIRC/2, circCY = CIRC/2;
+  function canvasXY(e, canvas) {
+    const r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+  cCirc.addEventListener('mousedown', e => {
+    S.dragging = true; S.playing = false;
+    btnPlay.innerHTML = '&#9654;&ensp;Play'; updateDrag(e);
+  });
+  window.addEventListener('mousemove', e => { if (S.dragging) updateDrag(e); });
+  window.addEventListener('mouseup', () => { S.dragging = false; });
+  cCirc.addEventListener('touchstart', e => {
+    e.preventDefault(); S.dragging = true; S.playing = false;
+    btnPlay.innerHTML = '&#9654;&ensp;Play'; updateDrag(e.touches[0]);
+  }, { passive: false });
+  window.addEventListener('touchmove', e => {
+    if (S.dragging) { e.preventDefault(); updateDrag(e.touches[0]); }
+  }, { passive: false });
+  window.addEventListener('touchend', () => { S.dragging = false; });
+
+  function updateDrag(e) {
+    const p = canvasXY(e, cCirc);
+    S.theta = Math.atan2(-(p.y - circCY), p.x - circCX);
+  }
+
+  const CYAN = '#00e5ff', PURPLE = '#aa80ff', PINK = '#ff6ec7';
+  const DIM = 'rgba(255,255,255,0.08)';
+
+  /* ══════════ Unit Circle ══════════ */
+  function drawCircle() {
+    const W = CIRC, H = CIRC, cx = W/2, cy = H/2, ctx = ctxC;
+    ctx.clearRect(0, 0, W, H);
+    const R = (W/2 - 40) * S.A;
+    const angle = S.theta + S.phi;
+    const mx = cx + R*Math.cos(angle);
+    const my = cy - R*Math.sin(angle);
+
+    /* Grid */
+    ctx.strokeStyle = DIM; ctx.lineWidth = 1;
+    const gm = Math.floor((W/2-40)/50)*50;
+    for (let i = -gm; i <= gm; i += 50) {
+      ctx.beginPath(); ctx.moveTo(cx+i,30); ctx.lineTo(cx+i,H-30); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(30,cy+i); ctx.lineTo(W-30,cy+i); ctx.stroke();
+    }
+
+    /* Axes */
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(20,cy); ctx.lineTo(W-20,cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx,20); ctx.lineTo(cx,H-20); ctx.stroke();
+    ctx.font = 'bold 14px Segoe UI'; ctx.textAlign = 'center';
+    ctx.fillStyle = PINK;   ctx.fillText('+x (cos)', W-46, cy-8);
+    ctx.fillStyle = PURPLE; ctx.fillText('+y (sin)', cx+36, 38);
+
+    /* Circle */
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2);
+    ctx.strokeStyle = 'rgba(0,229,255,0.25)'; ctx.lineWidth = 2; ctx.stroke();
+
+    /* Angle arc */
+    ctx.beginPath(); ctx.arc(cx,cy,36,0,-angle,angle>0);
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2; ctx.stroke();
+    const la = angle/2;
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 16px Segoe UI'; ctx.textBaseline = 'middle';
+    ctx.fillText('θ', cx+50*Math.cos(-la), cy+50*Math.sin(-la));
+
+    /* Radius */
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(mx,my);
+    ctx.strokeStyle = CYAN; ctx.lineWidth = 3; ctx.stroke();
+
+    /* Dashed projections */
+    ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(mx,my); ctx.lineTo(cx,my);
+    ctx.strokeStyle = PURPLE; ctx.lineWidth = 2; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(mx,my); ctx.lineTo(mx,cy);
+    ctx.strokeStyle = PINK; ctx.lineWidth = 2; ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* Projection dots */
+    ctx.beginPath(); ctx.arc(cx,my,6,0,Math.PI*2); ctx.fillStyle = PURPLE; ctx.fill();
+    ctx.beginPath(); ctx.arc(mx,cy,6,0,Math.PI*2); ctx.fillStyle = PINK;   ctx.fill();
+
+    /* Mass */
+    ctx.shadowColor = CYAN; ctx.shadowBlur = 28;
+    ctx.beginPath(); ctx.arc(mx,my,12,0,Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.arc(mx,my,12,0,Math.PI*2);
+    ctx.strokeStyle = CYAN; ctx.lineWidth = 3; ctx.stroke();
+
+    /* Readouts */
+    ctx.font = 'bold 13px Courier New'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    const normA = ((angle%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+    const deg = normA*180/Math.PI;
+    ctx.fillStyle = '#fff';
+    ctx.fillText(`θ = ${normA.toFixed(2)} rad  (${deg.toFixed(1)}°)`, 10, H-56);
+    ctx.fillStyle = PINK;   ctx.fillText(`cos θ = ${Math.cos(angle).toFixed(3)}`, 10, H-38);
+    ctx.fillStyle = PURPLE; ctx.fillText(`sin θ = ${Math.sin(angle).toFixed(3)}`, 10, H-20);
+
+    /* Quadrant labels */
+    ctx.font = 'bold 11px Segoe UI'; ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(170,128,255,0.6)';
+    ctx.fillText('TOP (θ=π/2, y=+A)', cx, cy-R-12);
+    ctx.fillText('BOTTOM (θ=3π/2, y=−A)', cx, cy+R+18);
+    ctx.fillStyle = 'rgba(255,110,199,0.6)';
+    ctx.fillText('θ=0, x=+A', cx+R+6, cy+16);
+    ctx.fillText('θ=π, x=−A', cx-R-6, cy+16);
+  }
+
+  /* ══════════ Vertical SHM ══════════ */
+  function drawVertical() {
+    const W = V_W, H = V_H, ctx = ctxV;
+    ctx.clearRect(0, 0, W, H);
+    const midX = W/2, midY = H/2;
+    const R = (H/2-40)*S.A;
+    const angle = S.theta + S.phi;
+    const disp = R*Math.sin(angle);
+    const massY = midY - disp;
+
+    ctx.strokeStyle = 'rgba(170,128,255,0.2)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(midX,30); ctx.lineTo(midX,H-30); ctx.stroke();
+
+    ctx.setLineDash([5,5]); ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath(); ctx.moveTo(midX-40,midY); ctx.lineTo(midX+40,midY); ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* Spring */
+    const sTop = 36, coils = 14;
+    const segH = (massY-16-sTop)/coils;
+    ctx.beginPath(); ctx.moveTo(midX, sTop);
+    for (let i = 0; i < coils; i++) {
+      ctx.lineTo(midX+((i%2===0)?1:-1)*16, sTop+segH*(i+0.5));
+    }
+    ctx.lineTo(midX, massY-16);
+    ctx.strokeStyle = 'rgba(170,128,255,0.6)'; ctx.lineWidth = 2.5; ctx.stroke();
+
+    ctx.fillStyle = 'rgba(170,128,255,0.4)';
+    ctx.fillRect(midX-24, sTop-7, 48, 7);
+
+    ctx.shadowColor = PURPLE; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.arc(midX,massY,16,0,Math.PI*2);
+    ctx.fillStyle = '#fff'; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.strokeStyle = PURPLE; ctx.lineWidth = 3; ctx.stroke();
+
+    const dy = midY-massY;
+    if (Math.abs(dy) > 6) {
+      ctx.beginPath(); ctx.moveTo(midX+32,midY); ctx.lineTo(midX+32,massY);
+      ctx.strokeStyle = PURPLE; ctx.lineWidth = 2; ctx.stroke();
+      const d = dy>0?-1:1;
+      ctx.beginPath(); ctx.moveTo(midX+32,massY);
+      ctx.lineTo(midX+27,massY+d*8); ctx.lineTo(midX+37,massY+d*8);
+      ctx.closePath(); ctx.fillStyle = PURPLE; ctx.fill();
+    }
+
+    ctx.strokeStyle = 'rgba(170,128,255,0.3)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(midX-8,midY-R); ctx.lineTo(midX+8,midY-R); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(midX-8,midY+R); ctx.lineTo(midX+8,midY+R); ctx.stroke();
+    ctx.font = '12px Segoe UI'; ctx.fillStyle = 'rgba(170,128,255,0.5)'; ctx.textAlign = 'right';
+    ctx.fillText('+A', midX-12, midY-R+4); ctx.fillText('−A', midX-12, midY+R+4);
+
+    ctx.font = 'bold 13px Segoe UI'; ctx.textAlign = 'center'; ctx.fillStyle = PURPLE;
+    ctx.fillText('y = A sin θ', midX, H-24);
+    ctx.fillText(`${(S.A*Math.sin(angle)).toFixed(2)}`, midX, H-8);
+  }
+
+  /* ══════════ Horizontal SHM (truly horizontal) ══════════ */
+  function drawHorizontal() {
+    const W = H_W, H = H_H, ctx = ctxH;
+    ctx.clearRect(0, 0, W, H);
+    const midX = W/2, midY = H/2;
+    const R = (W/2-40)*S.A;
+    const angle = S.theta + S.phi;
+    const disp = R*Math.cos(angle);
+    const massX = midX + disp;
+
+    ctx.strokeStyle = 'rgba(255,110,199,0.2)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(30,midY); ctx.lineTo(W-30,midY); ctx.stroke();
+
+    ctx.setLineDash([5,5]); ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.beginPath(); ctx.moveTo(midX,midY-30); ctx.lineTo(midX,midY+30); ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* Horizontal spring */
+    const sLeft = 36, coils = 16;
+    const segW = (massX-16-sLeft)/coils;
+    ctx.beginPath(); ctx.moveTo(sLeft, midY);
+    for (let i = 0; i < coils; i++) {
+      ctx.lineTo(sLeft+segW*(i+0.5), midY+((i%2===0)?1:-1)*14);
+    }
+    ctx.lineTo(massX-16, midY);
+    ctx.strokeStyle = 'rgba(255,110,199,0.6)'; ctx.lineWidth = 2.5; ctx.stroke();
+
+    ctx.fillStyle = 'rgba(255,110,199,0.4)';
+    ctx.fillRect(sLeft-7, midY-20, 7, 40);
+
+    ctx.shadowColor = PINK; ctx.shadowBlur = 20;
+    ctx.beginPath(); ctx.arc(massX,midY,16,0,Math.PI*2);
+    ctx.fillStyle = '#fff'; ctx.fill(); ctx.shadowBlur = 0;
+    ctx.strokeStyle = PINK; ctx.lineWidth = 3; ctx.stroke();
+
+    const dx = massX - midX;
+    if (Math.abs(dx) > 6) {
+      ctx.beginPath(); ctx.moveTo(midX,midY+28); ctx.lineTo(massX,midY+28);
+      ctx.strokeStyle = PINK; ctx.lineWidth = 2; ctx.stroke();
+      const d = dx>0?1:-1;
+      ctx.beginPath(); ctx.moveTo(massX,midY+28);
+      ctx.lineTo(massX-d*8,midY+23); ctx.lineTo(massX-d*8,midY+33);
+      ctx.closePath(); ctx.fillStyle = PINK; ctx.fill();
+    }
+
+    ctx.strokeStyle = 'rgba(255,110,199,0.3)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(midX-R,midY-8); ctx.lineTo(midX-R,midY+8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(midX+R,midY-8); ctx.lineTo(midX+R,midY+8); ctx.stroke();
+    ctx.font = '12px Segoe UI'; ctx.fillStyle = 'rgba(255,110,199,0.5)'; ctx.textAlign = 'center';
+    ctx.fillText('−A', midX-R, midY-14); ctx.fillText('+A', midX+R, midY-14);
+
+    ctx.font = 'bold 13px Segoe UI'; ctx.textAlign = 'center'; ctx.fillStyle = PINK;
+    ctx.fillText(`x = A cos θ = ${(S.A*Math.cos(angle)).toFixed(2)}`, midX, H-10);
+  }
+
+  /* ══════════ Waveform ══════════ */
+  function drawWave() {
+    const W = W_W, H = W_H, ctx = ctxW;
+    ctx.clearRect(0, 0, W, H);
+    const midY = H/2, ampPx = 100;
+
+    ctx.strokeStyle = DIM; ctx.lineWidth = 1;
+    for (let y = midY-100; y <= midY+100; y += 50) {
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0,midY); ctx.lineTo(W,midY); ctx.stroke();
+
+    ctx.font = 'bold 13px Segoe UI'; ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.fillText('+A', W-8, midY-ampPx+4);
+    ctx.fillText('−A', W-8, midY+ampPx+4);
+    ctx.fillText('0',  W-8, midY+4);
+
+    const trail = S.trail;
+    if (trail.length < 2) return;
+    const tEnd = trail[trail.length-1].t;
+    function xPos(t) { return W-((tEnd-t)/TRAIL_SEC)*W; }
+
+    ctx.beginPath(); let started = false;
+    for (const pt of trail) {
+      if (pt.t < tEnd-TRAIL_SEC) continue;
+      const px = xPos(pt.t), py = midY-pt.y*ampPx;
+      if (!started) { ctx.moveTo(px,py); started=true; } else ctx.lineTo(px,py);
+    }
+    ctx.strokeStyle = PURPLE; ctx.lineWidth = 3;
+    ctx.shadowColor = PURPLE; ctx.shadowBlur = 10; ctx.stroke(); ctx.shadowBlur = 0;
+
+    ctx.beginPath(); started = false;
+    for (const pt of trail) {
+      if (pt.t < tEnd-TRAIL_SEC) continue;
+      const px = xPos(pt.t), py = midY-pt.x*ampPx;
+      if (!started) { ctx.moveTo(px,py); started=true; } else ctx.lineTo(px,py);
+    }
+    ctx.strokeStyle = PINK; ctx.lineWidth = 3;
+    ctx.shadowColor = PINK; ctx.shadowBlur = 10; ctx.stroke(); ctx.shadowBlur = 0;
+
+    ctx.font = 'bold 15px Segoe UI'; ctx.textAlign = 'left';
+    ctx.fillStyle = PURPLE; ctx.fillText('── y = A sin(ωt + φ)', 16, 24);
+    ctx.fillStyle = PINK;   ctx.fillText('── x = A cos(ωt + φ)', 16, 46);
+    ctx.fillStyle = 'rgba(255,255,255,0.3)'; ctx.font = '13px Segoe UI';
+    ctx.fillText('← time', 16, H-12);
+  }
+
+  /* ══════════ Loop ══════════ */
+  let wallTime = 0;
+  function tick(now) {
+    if (lastTime === null) lastTime = now;
+    const dt = (now-lastTime)/1000;
+    lastTime = now;
+
+    if (S.playing) {
+      S.theta += S.omega*S.speed*dt;
+      wallTime += dt*S.speed;
+    }
+
+    const angle = S.theta+S.phi;
+    const sinVal = Math.sin(angle)*S.A;
+    const cosVal = Math.cos(angle)*S.A;
+
+    if (S.playing || S.dragging) {
+      if (S.dragging) wallTime += dt*S.speed;
+      S.trail.push({ t: wallTime, y: sinVal/S.A, x: cosVal/S.A });
+      const cutoff = wallTime-TRAIL_SEC-1;
+      while (S.trail.length > 0 && S.trail[0].t < cutoff) S.trail.shift();
+    }
+
+    drawCircle();
+    drawVertical();
+    drawHorizontal();
+    drawWave();
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+</body>
+</html>
