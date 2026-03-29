@@ -105,12 +105,13 @@
         .dashboard-content {
             flex: 1;
             min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         .dashboard-pane {
-            height: 100%;
-            min-height: 0;
-            overflow-y: auto;
+            height: auto;
+            min-height: 100%;
         }
 
         .hidden {
@@ -288,8 +289,8 @@
                     </div>
 
                     <div class="control-group">
-                        <div class="control-header"><span>Magnet Distance</span> <span class="val-readout" id="val-dist">200 mm</span></div>
-                        <input type="range" id="sl-dist" min="15" max="350" value="200">
+                        <div class="control-header"><span>Magnet Distance</span> <span class="val-readout" id="val-dist">202 mm</span></div>
+                        <input type="range" id="sl-dist" min="15" max="350" value="202">
                     </div>
 
                     <div class="control-group">
@@ -303,8 +304,8 @@
                     </div>
 
                     <div class="control-group">
-                        <div class="control-header"><span>Domain Stickiness (J)</span> <span class="val-readout" id="val-stick">5</span></div>
-                        <input type="range" id="sl-stick" min="0" max="100" value="5">
+                        <div class="control-header"><span>Domain Stickiness (J)</span> <span class="val-readout" id="val-stick">0</span></div>
+                        <input type="range" id="sl-stick" min="0" max="100" value="0">
                     </div>
 
                     <div class="btn-grid">
@@ -372,10 +373,10 @@ class PhysicsEngine {
         this.g = 9.81;
         
         this.chi = 60.0;
-        this.J = 1.2;
-        this.T = 0.5;
-        this.magnet_dist = 1.5;
-        this.magnet_strength = 8.0;
+        this.J = 0; 
+        this.T = 0.5; 
+        this.magnet_dist = 2.02; 
+        this.magnet_strength = 1.0; 
         this.magnet_polarity = 1; 
         
         this.current_force = 0.0;
