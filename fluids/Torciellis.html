@@ -98,6 +98,35 @@
             margin-bottom: 4px;
         }
 
+        #prompt-panel {
+            min-height: 132px;
+        }
+
+        #prompt-stage {
+            align-self: flex-start;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(0, 229, 255, 0.12);
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        #prompt-text {
+            color: #f2f6ff;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        #prompt-meta {
+            color: var(--text-dim);
+            font-size: 11px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
         /* --- Sliders --- */
         .slider-container {
             display: flex;
@@ -234,6 +263,13 @@
             </div>
         </div>
 
+        <div class="group-box" id="prompt-panel">
+            <div class="group-title">5E Prompt</div>
+            <div id="prompt-stage">Engage</div>
+            <div id="prompt-text">Which hole depth should produce the fastest jet?</div>
+            <div id="prompt-meta">Updates after each meaningful action</div>
+        </div>
+
         <div class="button-row">
             <button id="btn-start">▶ START SIMULATION</button>
             <button id="btn-reset">↺ REFILL</button>
@@ -351,6 +387,274 @@ class FluidPhysics {
 // ==========================================
 const phys = new FluidPhysics();
 let zoomFactor = 1.0;
+let zoomPromptTimer = null;
+
+const promptStageEl = document.getElementById('prompt-stage');
+const promptTextEl = document.getElementById('prompt-text');
+const promptBank = {
+    engage: {
+        load: [
+            "Which hole depth should produce the fastest jet?",
+            "Before you start, predict which control will change the range most."
+        ],
+        reset: [
+            "The tank is reset. What will you test first this time?",
+            "With a fresh tank, what is your next prediction?"
+        ],
+        default: [
+            "Make a prediction before your next change.",
+            "What do you expect to happen before you test it?"
+        ]
+    },
+    explore: {
+        water_level: [
+            "Raise the water level. Watch the jet speed.",
+            "Lower the water level. Compare the landing point."
+        ],
+        spout_height: [
+            "Move the spout higher. Watch time in the air.",
+            "Drop the spout lower. Compare the flight path."
+        ],
+        container_height: [
+            "Raise the tank wall. What does it let you test?",
+            "Lower the tank wall. Notice the new limit on water level."
+        ],
+        tank_width: [
+            "Make the tank wider. Watch how fast the level falls.",
+            "Use a narrow tank. Compare the drain rate."
+        ],
+        spout_diameter: [
+            "Widen the opening. Watch the outflow and drain rate.",
+            "Make the opening smaller. What changes first?"
+        ],
+        density: [
+            "Change density. Compare the spray path in air.",
+            "Increase density. Watch the particle motion."
+        ],
+        gravity: [
+            "Raise gravity. Watch speed and drop together.",
+            "Lower gravity. Compare the arc to Earth-like gravity."
+        ],
+        discharge_coeff: [
+            "Reduce Cd. Watch exit speed respond.",
+            "Push Cd toward 1. What looks more ideal?"
+        ],
+        start: [
+            "Start the flow and track the first second.",
+            "Run it once. Watch where the jet lands."
+        ],
+        pause: [
+            "Pause and inspect the graph trend.",
+            "Freeze the motion. What pattern already appears?"
+        ],
+        zoom: [
+            "Zoom in and inspect the jet near the outlet.",
+            "Zoom out and compare the full trajectory."
+        ],
+        default: [
+            "Change one variable only. Watch one effect.",
+            "Test a single control and compare before versus after."
+        ]
+    },
+    explain: {
+        water_level: [
+            "More water above the hole means more pressure head.",
+            "Higher water level increases the effective head."
+        ],
+        spout_height: [
+            "The hole position changes both head and flight time.",
+            "A higher hole reduces head but can increase air time."
+        ],
+        container_height: [
+            "Tank height matters only if it changes the available head.",
+            "The wall itself is not the driver; the head difference is."
+        ],
+        tank_width: [
+            "Tank width mainly changes how quickly the level drops.",
+            "A wider tank drains more slowly because its area is larger."
+        ],
+        spout_diameter: [
+            "A larger opening drains the tank faster.",
+            "The hole size affects flow rate more than pressure head."
+        ],
+        density: [
+            "In this model, density mainly changes how drag influences the spray.",
+            "Denser fluid resists the air-drag term differently here."
+        ],
+        gravity: [
+            "Gravity sets both the exit-speed formula and the projectile drop.",
+            "Stronger gravity increases speed and downward acceleration together."
+        ],
+        discharge_coeff: [
+            "Cd captures real losses at the opening.",
+            "Cd below 1 means the real jet is slower than the ideal one."
+        ],
+        start: [
+            "The graph links water height to exit speed over time.",
+            "As the tank drains, the head falls and the jet slows."
+        ],
+        pause: [
+            "The frozen frame helps connect the graph to the picture.",
+            "Use the pause to match the curve with the current jet."
+        ],
+        zoom: [
+            "Zoom helps you inspect shape, not change the physics.",
+            "The physics stays the same; only your view changes."
+        ],
+        default: [
+            "Tie the visual change to one physical cause.",
+            "Name the variable that directly caused what you saw."
+        ]
+    },
+    elaborate: {
+        water_level: [
+            "Try two different water levels with the same hole height.",
+            "Can you find a level that doubles the range?"
+        ],
+        spout_height: [
+            "Compare a low hole and a high hole with the same water level.",
+            "Which hole height gives the best compromise between head and airtime?"
+        ],
+        container_height: [
+            "Use the taller tank to test more extreme heads.",
+            "How does a taller container expand your experiment range?"
+        ],
+        tank_width: [
+            "Keep the hole fixed and compare narrow versus wide tanks.",
+            "Which tank gives the longer steady stream?"
+        ],
+        spout_diameter: [
+            "Compare large and small openings at the same head.",
+            "Which opening empties the tank faster, and why?"
+        ],
+        density: [
+            "Try density changes while keeping gravity fixed.",
+            "Which path difference seems physical and which seems model-based?"
+        ],
+        gravity: [
+            "Compare Moon-like and Earth-like gravity settings.",
+            "Which effect of gravity is easier to notice first?"
+        ],
+        discharge_coeff: [
+            "Compare ideal-like flow with a lossy opening.",
+            "How does Cd change the graph as well as the jet?"
+        ],
+        start: [
+            "Run a second trial with only one variable changed.",
+            "Can you reproduce the same pattern twice?"
+        ],
+        pause: [
+            "Pause at two different times and compare the states.",
+            "What changes more quickly: height or speed?"
+        ],
+        zoom: [
+            "Use zoom to compare near-hole motion and full-range motion.",
+            "What detail becomes visible only when you zoom in?"
+        ],
+        default: [
+            "Now compare two settings, not just one.",
+            "Extend the test by changing one more variable."
+        ]
+    },
+    evaluate: {
+        water_level: [
+            "Why does a deeper hole usually produce a faster jet?",
+            "Can you explain the range change using pressure head?"
+        ],
+        spout_height: [
+            "Why can a lower hole travel farther even with less airtime?",
+            "What is the trade-off when you move the hole upward?"
+        ],
+        container_height: [
+            "Did changing the wall height alone change the physics?",
+            "Which variable matters more here: wall height or head?"
+        ],
+        tank_width: [
+            "Why does tank width affect drain time more than exit speed?",
+            "Can you explain the role of tank cross-sectional area?"
+        ],
+        spout_diameter: [
+            "Why does a bigger hole empty the tank faster?",
+            "Which quantity changes because the opening area changed?"
+        ],
+        density: [
+            "What did density change in this model, and what stayed similar?",
+            "Can you separate drag effects from Torricelli effects?"
+        ],
+        gravity: [
+            "How does gravity influence both parts of the motion?",
+            "Why does gravity appear twice in what you observe?"
+        ],
+        discharge_coeff: [
+            "What does Cd tell you about ideal versus real flow?",
+            "Why is Cd equal to 1 a special case?"
+        ],
+        start: [
+            "What evidence shows that the jet slows as the tank drains?",
+            "How do the graph and animation confirm the same idea?"
+        ],
+        pause: [
+            "Can you state the main relationship you just observed?",
+            "What would you tell another student to watch for?"
+        ],
+        zoom: [
+            "Did zoom reveal new physics or just clearer evidence?",
+            "What conclusion stayed the same after zooming?"
+        ],
+        default: [
+            "What claim can you now support with evidence?",
+            "State the physics idea in one clear sentence."
+        ]
+    }
+};
+const promptState = {
+    interactionCount: 0,
+    lastText: "",
+    indices: {}
+};
+
+function getPromptStage(step) {
+    if (step <= 0) return 'engage';
+    if (step <= 2) return 'explore';
+    if (step <= 4) return 'explain';
+    if (step <= 6) return 'elaborate';
+    if (step <= 8) return 'evaluate';
+    const cycle = ['explore', 'explain', 'elaborate', 'evaluate'];
+    return cycle[(step - 9) % cycle.length];
+}
+
+function pickPrompt(stage, source) {
+    const stageBank = promptBank[stage];
+    const sourceKey = stageBank[source] ? source : 'default';
+    const options = stageBank[sourceKey];
+    const stateKey = `${stage}:${sourceKey}`;
+    let index = promptState.indices[stateKey] || 0;
+    let text = options[index % options.length];
+    if (text === promptState.lastText && options.length > 1) {
+        index += 1;
+        text = options[index % options.length];
+    }
+    promptState.indices[stateKey] = index + 1;
+    promptState.lastText = text;
+    return text;
+}
+
+function showPrompt(stage, source) {
+    promptStageEl.textContent = stage;
+    promptTextEl.textContent = pickPrompt(stage, source);
+}
+
+function recordInteraction(source) {
+    promptState.interactionCount += 1;
+    showPrompt(getPromptStage(promptState.interactionCount), source);
+}
+
+function resetPromptCycle(source = 'reset') {
+    promptState.interactionCount = 0;
+    showPrompt('engage', source);
+}
+
+resetPromptCycle('load');
 
 const params = [
     { id: 'container_height', label: 'Container Height', min: 5, max: 50, val: 25, unit: 'm', step: 0.1 },
@@ -395,6 +699,7 @@ params.forEach(p => {
         }
         if (p.id === 'water_level' && !phys.running) phys.reset();
     });
+    input.addEventListener('change', () => recordInteraction(p.id));
 });
 
 // Update UI from Physics Engine periodically
@@ -415,6 +720,7 @@ document.getElementById('btn-start').addEventListener('click', (e) => {
         e.target.innerText = "▶ RESUME SIMULATION";
         e.target.classList.remove('paused');
     }
+    recordInteraction(phys.running ? 'start' : 'pause');
 });
 
 document.getElementById('btn-reset').addEventListener('click', resetSim);
@@ -427,6 +733,7 @@ function resetSim() {
     let btn = document.getElementById('btn-start');
     btn.innerText = "▶ START SIMULATION";
     btn.classList.remove('paused');
+    resetPromptCycle('reset');
 }
 
 // Mouse Wheel Zoom
@@ -436,6 +743,8 @@ document.getElementById('anim-container').addEventListener('wheel', (e) => {
     else zoomFactor /= 1.15;
     zoomFactor = Math.max(0.1, Math.min(zoomFactor, 15.0));
     document.getElementById('zoom-label').innerText = `Zoom: ${zoomFactor.toFixed(2)}x`;
+    clearTimeout(zoomPromptTimer);
+    zoomPromptTimer = window.setTimeout(() => recordInteraction('zoom'), 150);
 });
 
 // ==========================================
