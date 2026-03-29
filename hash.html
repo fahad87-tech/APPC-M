@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hash Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; background: #222; color: #fff; }
+    input, button { padding: 10px; font-size: 16px; margin-top: 10px; }
+    #result { margin-top: 20px; color: #64b5f6; font-family: monospace; word-break: break-all; }
+  </style>
+</head>
+<body>
+
+  <h2>🔒 Secret Hash Generator</h2>
+  <p>Type your new password below to get the SHA-256 hash for your GitHub dashboard.</p>
+  
+  <input type="text" id="newPassword" placeholder="Enter new password...">
+  <button onclick="generateHash()">Generate Hash</button>
+
+  <h3 id="result"></h3>
+
+  <script>
+    async function generateHash() {
+      const userInput = document.getElementById('newPassword').value;
+      if (!userInput) return;
+
+      const encoder = new TextEncoder();
+      const data = encoder.encode(userInput);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      
+      document.getElementById('result').innerText = hashHex;
+    }
+  </script>
+
+</body>
+</html>
