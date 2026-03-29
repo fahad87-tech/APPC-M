@@ -188,7 +188,7 @@
 
   <h2 class="section-title">Classical Mechanics</h2>
   <div class="grid">
-    <a class="card" style="cursor: pointer;" onclick="checkPassword('mechanics/Rolling with Slipping - Top Spin.html')">
+    <a class="card" href="mechanics/Rolling with Slipping - Top Spin.html">
       <div class="card-icon">🎱</div>
       <div class="card-title">Rolling With Slipping — Top Spin</div>
       <div class="card-subtitle">Kinematics & Friction</div>
@@ -196,7 +196,7 @@
       <span class="card-tag">Simulation</span>
     </a>
 
-    <a class="card" style="cursor: pointer;" onclick="checkPassword('mechanics/Angular Momentum - 3 Scenarios.html')">
+    <a class="card" href="mechanics/Angular Momentum - 3 Scenarios.html">
       <div class="card-icon">🔄</div>
       <div class="card-title">Angular Momentum — 3 Scenarios</div>
       <div class="card-subtitle">Collisions & Rotations</div>
@@ -207,7 +207,7 @@
 
   <h2 class="section-title">Waves & Oscillations</h2>
   <div class="grid">
-    <a class="card" style="cursor: pointer;" onclick="checkPassword('oscillations/SHM.html')">
+    <a class="card" href="oscillations/SHM.html">
       <div class="card-icon">〰️</div>
       <div class="card-title">UCM + SHM Visualization</div>
       <div class="card-subtitle">Harmonic Motion</div>
@@ -218,7 +218,7 @@
 
   <h2 class="section-title">Magnetism</h2>
   <div class="grid">
-    <a class="card" style="cursor: pointer;" onclick="checkPassword('magnetism/Domains and Magnetic Materials.html')">
+    <a class="card" href="magnetism/Domains and Magnetic Materials.html">
       <div class="card-icon">🧲</div>
       <div class="card-title">Domains and Magnetic Materials</div>
       <div class="card-subtitle">Ferro, Para, Diamagnetic Materials</div>
@@ -229,7 +229,7 @@
 
   <h2 class="section-title">Fluid Dynamics</h2>
   <div class="grid">
-    <a class="card" style="cursor: pointer;" onclick="checkPassword('fluids/Torciellis.html')">
+    <a class="card" href="fluids/Torciellis.html">
       <div class="card-icon">💧</div>
       <div class="card-title">Torricelli's Law</div>
       <div class="card-subtitle">Fluid Velocity</div>
@@ -237,7 +237,7 @@
       <span class="card-tag">Simulation</span>
     </a>
 
-    <a class="card" style="cursor: pointer;" onclick="checkPassword('fluids/Bernoulli Application.html')">
+    <a class="card" href="fluids/Bernoulli Application.html">
       <div class="card-icon">🌪️</div>
       <div class="card-title">Bernoulli Application</div>
       <div class="card-subtitle">Venturi Tube</div>
@@ -251,34 +251,6 @@
 <footer>Physics Simulations — Powered by GitHub Pages</footer>
 
 <script>
-  // --- PASSWORD LOGIC (HASHING) ---
-  // The string below is the SHA-256 hash for the password "physicsrocks"
-  const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4"; 
-
-  async function checkPassword(targetUrl) {
-    if (sessionStorage.getItem("physicsUnlocked") === "true") {
-      window.location.href = targetUrl;
-      return;
-    }
-
-    const userInput = prompt("Please enter the password to view this simulation:");
-    
-    if (userInput === null) return; 
-
-    const encoder = new TextEncoder();
-    const data = encoder.encode(userInput);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-    if (hashHex === TARGET_HASH) {
-      sessionStorage.setItem("physicsUnlocked", "true");
-      window.location.href = targetUrl;
-    } else {
-      alert("Incorrect password. Access denied.");
-    }
-  }
-
   // --- SEARCH BAR LOGIC ---
   const searchInput = document.getElementById('searchInput');
   const cards = document.querySelectorAll('.card');
