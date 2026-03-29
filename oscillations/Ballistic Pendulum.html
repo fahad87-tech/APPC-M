@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics C: Advanced Ballistic Pendulum</title>
+    <script>
+        const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+        async function verifyPageAccess() {
+            document.documentElement.style.display = "none";
+
+            const userInput = prompt("Classroom password required for this simulation:");
+
+            if (userInput === null) {
+                window.location.href = "../index.html";
+                return;
+            }
+
+            const encoder = new TextEncoder();
+            const data = encoder.encode(userInput);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+            if (hashHex === TARGET_HASH) {
+                document.documentElement.style.display = "block";
+            } else {
+                alert("Incorrect password. Access denied.");
+                window.location.href = "../index.html";
+            }
+        }
+
+        verifyPageAccess();
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Supercharged Colorful CSS */
+        body {
+            background-color: #0D0D12;
+            color: #E0E0E0;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+        
+        .splitter {
+            display: flex;
+            width: 100%;
+            gap: 15px;
+        }
+
+        .left-panel {
+            width: 480px;
+            display: flex;
+            flex-direction: column;
+            background: #121218;
+            border-radius: 6px;
+        }
+
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #121218;
+            border-radius: 6px;
+            padding: 10px;
+            min-width: 0;
+        }
+
+        /* Tabs */
+        .tab-header {
+            display: flex;
+            background: #1A1A24;
+            border-bottom: 1px solid #333344;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: #1A1A24;
+            color: #888;
+            padding: 12px 25px;
+            border: 1px solid #333344;
+            border-bottom: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+        }
+        .tab-btn.active { background: #00E5FF; color: #000; }
+        .tab-btn:hover:not(.active) { background: #2D2D3A; color: #FFF; }
+        .tab-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #333344;
+            border-top: none;
+            flex: 1;
+            overflow-y: auto;
+        }
+        .tab-content.active { display: block; }
+
+        /* Group Boxes */
+        fieldset {
+            border: 1px solid #333344;
+            border-radius: 8px;
+            margin-top: 15px;
+            padding: 15px;
+        }
+        legend {
+            font-weight: bold; font-size: 13px; color: #00E5FF;
+            background-color: #121218; padding: 0 6px;
+        }
+
+        /* Inputs & Controls */
+        select, input[type="text"], textarea {
+            background-color: #1A1A24; border: 1px solid #444; padding: 8px;
+            border-radius: 4px; color: #FFF; font-size: 13px; width: 100%;
+            box-sizing: border-box; margin-bottom: 10px;
+        }
+        
+        .slider-row {
+            display: grid; grid-template-columns: 140px 1fr 70px;
+            align-items: center; gap: 10px; margin-bottom: 12px; font-size: 13px;
+        }
+        input[type="number"] {
+            background-color: #1A1A24; color: #00E5FF; border: 1px solid #444;
+            padding: 6px; font-weight: bold; width: 100%; box-sizing: border-box;
+        }
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type="range"]::-webkit-slider-runnable-track { height: 6px; background: #333344; border-radius: 3px; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 8px;
+            background: #FF2A6D; margin-top: -5px; cursor: pointer;
+        }
+
+        /* Buttons */
+        button {
+            background: linear-gradient(to right, #007ACC, #005A9E); color: white;
+            padding: 10px; border: none; border-radius: 5px; font-weight: bold;
+            font-size: 14px; cursor: pointer; width: 100%;
+        }
+        button:hover { background: linear-gradient(to right, #0099FF, #007ACC); }
+        button:disabled { background: #444 !important; color: #888 !important; cursor: not-allowed; }
+        
+        .btn-launch { background: linear-gradient(to right, #FF2A6D, #D32F2F); }
+        .btn-launch:hover { background: linear-gradient(to right, #ff4d85, #FF2A6D); }
+        .btn-export { background: linear-gradient(to right, #00FF7F, #388E3C); color: #000; }
+        .btn-export:hover { background: linear-gradient(to right, #33ff99, #00FF7F); }
+
+        .btn-row { display: flex; gap: 10px; margin-top: 10px; margin-bottom: 10px; }
+
+        /* Inquiry Lab Specifics */
+        .stage-lbl { color: #FF2A6D; font-weight: 900; font-size: 16px; margin: 10px 0; }
+        .prompt-lbl { font-style: italic; font-size: 14px; margin-bottom: 10px; color: #FFF; }
+        textarea { height: 150px; resize: none; }
+
+        /* FIXED: Graphs & Visualization Proportions */
+        .vis-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            gap: 10px;
+        }
+        .canvas-wrapper {
+            flex: 5; /* This ensures the visualization is massive */
+            border: 1px solid #333344;
+            border-radius: 6px;
+            position: relative;
+            background: #16161E;
+            overflow: hidden;
+            cursor: grab; /* Shows pan is available */
+        }
+        .canvas-wrapper:active { cursor: grabbing; }
+        
+        .canvas-title {
+            position: absolute; top: 5px; left: 10px;
+            font-size: 12px; font-weight: bold; color: #888; pointer-events: none;
+        }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        .graphs-row {
+            flex: 1.5; /* Keeps graphs proportional but smaller */
+            display: flex;
+            gap: 10px;
+            min-height: 150px;
+        }
+        .graph-wrapper {
+            flex: 1; border: 1px solid #333344; border-radius: 6px;
+            background: #16161E; padding: 5px; position: relative;
+        }
+        .graph-wrapper.full {
+            flex: 1.5; min-height: 150px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="splitter">
+    <div class="left-panel">
+        <div class="tab-header">
+            <div class="tab-btn active" onclick="switchTab('controls')">⚙️ Physics Controls</div>
+            <div class="tab-btn" onclick="switchTab('inquiry')">📝 5E Inquiry Lab</div>
+        </div>
+
+        <div id="tab-controls" class="tab-content active">
+            <fieldset>
+                <legend>System Configuration</legend>
+                <select id="combo-ptype" onchange="togglePendulumType()">
+                    <option value="0">Simple Pendulum (Point Mass & String)</option>
+                    <option value="1">Physical Pendulum (Solid Uniform Rod)</option>
+                </select>
+            </fieldset>
+
+            <fieldset>
+                <legend>Physical Parameters</legend>
+                <div id="sliders-container"></div>
+                
+                <div class="btn-row">
+                    <button id="btn-launch" class="btn-launch" onclick="triggerLaunch()">🚀 Launch</button>
+                    <button id="btn-pause" onclick="togglePause()" disabled style="background: linear-gradient(to right, #FF8C00, #E65100);">⏸ Pause</button>
+                    <button id="btn-reset" onclick="triggerReset()">Reset Engine</button>
+                </div>
+                <div style="font-size: 12px; color: #888; text-align: center; margin-top: 10px;">
+                    <i>Hint: Click and drag to pan schematic. Scroll wheel to zoom.</i>
+                </div>
+            </fieldset>
+        </div>
+
+        <div id="tab-inquiry" class="tab-content">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                <label style="white-space: nowrap; font-size: 13px;">Student Name:</label>
+                <input type="text" id="in-name" style="margin: 0;" onkeyup="updateName(this.value)">
+            </div>
+            
+            <div class="stage-lbl" id="lbl-stage">Stage</div>
+            <div class="prompt-lbl" id="lbl-prompt">Prompt text</div>
+            
+            <textarea id="txt-answer" placeholder="Enter your rigorous scientific analysis here..."></textarea>
+            
+            <div class="btn-row">
+                <button id="btn-back" onclick="prevPrompt()">◀ Back</button>
+                <button id="btn-next" onclick="nextPrompt()">Next ▶</button>
+            </div>
+            <div class="btn-row">
+                <button onclick="saveInquiry()">💾 Save Progress</button>
+                <button class="btn-export" onclick="exportDocx()">📄 Export to Word</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="vis-container">
+            <div class="canvas-wrapper">
+                <div class="canvas-title">System Schematic (Live Visualization)</div>
+                <canvas id="simCanvas"></canvas>
+            </div>
+            
+            <div class="graphs-row">
+                <div class="graph-wrapper"><canvas id="chartTraj"></canvas></div>
+                <div class="graph-wrapper"><canvas id="chartAngle"></canvas></div>
+            </div>
+            
+            <div class="graph-wrapper full">
+                <canvas id="chartEnergy"></canvas>
+            </div>
+        </div>
+        <div>
+            <button onclick="exportCSV()" style="width: auto; padding: 5px 15px; float: right;">Export Graphs to CSV</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==========================================
+// 1. NUMERICAL CORE & INTEGRATOR
+// ==========================================
+class BallisticEngine {
+    constructor(max_steps=10000) {
+        this.IDLE = 0; this.PROJECTILE = 1; this.PENDULUM = 2;
+        
+        this.v0 = 15.0; this.theta0 = 45.0;  
+        this.m = 0.1; this.target_val = 1.0; 
+        this.L = 2.0; this.g = 9.81;       
+        this.c = 0.1; this.pend_type = 0; 
+        
+        this.max_steps = max_steps;
+        this.resetState();
+    }
+
+    resetState() {
+        this.state = this.IDLE;
+        this.t = 0.0; this.dt = 0.01; 
+        this.step_idx = 0;
+
+        this.x_target = 0.0; this.y_target = 0.0; this.t_target = 0.0;
+        this.I_sys = 1.0; this.L_cm = 1.0; this.total_mass = 1.0;
+        this.impact_dart_angle = 0.0;
+        
+        this.dart_x = 0.0; this.dart_y = 0.0; this.dart_angle = 0.0;
+        this.pend_theta = 0.0; this.pend_omega = 0.0;
+
+        this.hist_t = []; this.hist_dart_x = []; this.hist_dart_y = [];
+        this.hist_theta = []; this.hist_ke = []; this.hist_pe = []; this.hist_te = [];
+    }
+
+    launch() {
+        this.state = this.PROJECTILE;
+        this.t = 0.0; this.step_idx = 0;
+        this.dart_x = 0.0; this.dart_y = 0.0;
+        this.pend_theta = 0.0; this.pend_omega = 0.0;
+
+        let rad = this.theta0 * Math.PI / 180;
+        let v_y0 = this.v0 * Math.sin(rad);
+        let v_x0 = this.v0 * Math.cos(rad);
+        
+        this.t_target = v_y0 / this.g;
+        this.x_target = v_x0 * this.t_target;
+        this.y_target = v_y0 * this.t_target - 0.5 * this.g * Math.pow(this.t_target, 2);
+        
+        this._record_state();
+    }
+
+    step() {
+        if (this.state === this.IDLE || this.step_idx >= this.max_steps - 1) return;
+
+        this.t += this.dt;
+
+        if (this.state === this.PROJECTILE) {
+            if (this.t >= this.t_target) {
+                this.t = this.t_target;
+                this._compute_projectile(this.t);
+                this._trigger_collision();
+            } else {
+                this._compute_projectile(this.t);
+            }
+        } else if (this.state === this.PENDULUM) {
+            this._rk4_step();
+        }
+
+        this.step_idx++;
+        this._record_state();
+    }
+
+    _compute_projectile(current_t) {
+        let rad = this.theta0 * Math.PI / 180;
+        let v_x = this.v0 * Math.cos(rad);
+        let v_y = this.v0 * Math.sin(rad) - this.g * current_t;
+        
+        this.dart_x = v_x * current_t;
+        this.dart_y = this.v0 * Math.sin(rad) * current_t - 0.5 * this.g * Math.pow(current_t, 2);
+        this.dart_angle = Math.atan2(v_y, v_x) * 180 / Math.PI;
+    }
+
+    _trigger_collision() {
+        this.state = this.PENDULUM;
+        this.dart_x = this.x_target; this.dart_y = this.y_target;
+        this.impact_dart_angle = this.dart_angle; 
+        
+        let v_x0 = this.v0 * Math.cos(this.theta0 * Math.PI / 180);
+        let angular_momentum_initial = this.m * v_x0 * this.L;
+        
+        if (this.pend_type === 0) {
+            let M_block = this.target_val;
+            this.total_mass = this.m + M_block;
+            this.I_sys = this.total_mass * Math.pow(this.L, 2);
+            this.L_cm = this.L;
+        } else {
+            let I_rod = this.target_val;
+            let M_rod = 3.0 * I_rod / Math.pow(this.L, 2);
+            this.total_mass = this.m + M_rod;
+            this.I_sys = I_rod + this.m * Math.pow(this.L, 2);
+            this.L_cm = (this.m * this.L + M_rod * (this.L / 2.0)) / this.total_mass;
+        }
+
+        this.pend_omega = angular_momentum_initial / this.I_sys;
+        this.pend_theta = 0.0;
+    }
+
+    _rk4_step() {
+        let _this = this;
+        function derivs(th, om) {
+            let dth = om;
+            let dom = -((_this.total_mass) * _this.g * _this.L_cm / _this.I_sys) * Math.sin(th) - (_this.c / _this.I_sys) * om;
+            return [dth, dom];
+        }
+
+        let th = this.pend_theta; let om = this.pend_omega; let dt = this.dt;
+        let [k1_th, k1_om] = derivs(th, om);
+        let [k2_th, k2_om] = derivs(th + 0.5 * dt * k1_th, om + 0.5 * dt * k1_om);
+        let [k3_th, k3_om] = derivs(th + 0.5 * dt * k2_th, om + 0.5 * dt * k2_om);
+        let [k4_th, k4_om] = derivs(th + dt * k3_th, om + dt * k3_om);
+
+        this.pend_theta += (dt / 6.0) * (k1_th + 2*k2_th + 2*k3_th + k4_th);
+        this.pend_omega += (dt / 6.0) * (k1_om + 2*k2_om + 2*k3_om + k4_om);
+    }
+
+    _record_state() {
+        this.hist_t.push(this.t);
+        this.hist_dart_x.push(this.dart_x);
+        this.hist_dart_y.push(this.dart_y);
+        this.hist_theta.push(this.pend_theta * 180 / Math.PI);
+
+        if (this.state === this.PENDULUM) {
+            let ke = 0.5 * this.I_sys * Math.pow(this.pend_omega, 2);
+            let pe = this.total_mass * this.g * this.L_cm * (1 - Math.cos(this.pend_theta));
+            this.hist_ke.push(ke);
+            this.hist_pe.push(pe);
+            this.hist_te.push(ke + pe);
+        } else {
+            this.hist_ke.push(0); this.hist_pe.push(0); this.hist_te.push(0);
+        }
+    }
+}
+
+// ==========================================
+// 2. GUIDED INQUIRY & EXPORT LAYER
+// ==========================================
+class InquiryManager {
+    constructor() {
+        this.PROMPTS_SIMPLE = [
+            ["Engage", "Predict: How will a heavier dart affect the maximum height of the simple pendulum swing?"],
+            ["Explore", "Adjust dart velocity and angle. How does this change the exact visual point where the collision occurs?"],
+            ["Explain", "Linear momentum is conserved, but kinetic energy is lost. Where does the 'lost' energy go?"],
+            ["Elaborate", "How does changing the string length L affect the period of the point-mass swing?"],
+            ["Evaluate", "Summarize how air drag (damping coefficient c) affects the total energy decay over multiple swings."]
+        ];
+        this.PROMPTS_PHYSICAL = [
+            ["Engage", "Predict: How does the solid rod's distributed mass change the way it swings compared to a simple string?"],
+            ["Explore", "Adjust the Rod Inertia. How does increasing the moment of inertia affect the pendulum's maximum swing angle?"],
+            ["Explain", "In a physical pendulum, we strictly use Angular Momentum conservation during collision. Why?"],
+            ["Elaborate", "When the dart embeds in the rod, the center of mass shifts. How does this shift affect the gravitational torque on the system?"],
+            ["Evaluate", "With damping enabled, describe the energy decay. Does a higher inertia rod lose energy faster or slower? Why?"]
+        ];
+        this.student_name = ""; this.current_idx = 0; this.mode = 0; 
+        this.answers_simple = {0:"", 1:"", 2:"", 3:"", 4:""};
+        this.answers_physical = {0:"", 1:"", 2:"", 3:"", 4:""};
+        this.load_state();
+    }
+
+    set_mode(mode) { this.mode = mode; this.current_idx = 0; }
+    get_current_prompt() { return (this.mode === 1 ? this.PROMPTS_PHYSICAL : this.PROMPTS_SIMPLE)[this.current_idx]; }
+    get_current_answer() { return (this.mode === 1 ? this.answers_physical : this.answers_simple)[this.current_idx] || ""; }
+    set_current_answer(text) { (this.mode === 1 ? this.answers_physical : this.answers_simple)[this.current_idx] = text; }
+
+    load_state() {
+        let data = localStorage.getItem("Ballistic5E");
+        if (data) {
+            try {
+                let parsed = JSON.parse(data);
+                this.student_name = parsed.student_name || "";
+                Object.assign(this.answers_simple, parsed.answers_simple);
+                Object.assign(this.answers_physical, parsed.answers_physical);
+            } catch(e) {}
+        }
+    }
+
+    save_state() {
+        localStorage.setItem("Ballistic5E", JSON.stringify({
+            student_name: this.student_name, answers_simple: this.answers_simple, answers_physical: this.answers_physical
+        }));
+    }
+
+    export_to_docx() {
+        let htmlContent = `<html><head><title>Ballistic Lab</title></head><body>`;
+        htmlContent += `<h1>Ballistic Pendulum Simulation Lab</h1>`;
+        htmlContent += `<p><strong>Student:</strong> ${this.student_name}</p>`;
+        htmlContent += `<p><strong>Date:</strong> ${new Date().toLocaleString()}</p>`;
+        
+        let mode_str = this.mode === 1 ? "Physical Pendulum" : "Simple Pendulum";
+        htmlContent += `<h2>Lab Mode: ${mode_str}</h2>`;
+        
+        let prompts = this.mode === 1 ? this.PROMPTS_PHYSICAL : this.PROMPTS_SIMPLE;
+        let ans_dict = this.mode === 1 ? this.answers_physical : this.answers_simple;
+        
+        for (let i = 0; i < 5; i++) {
+            htmlContent += `<h3>${i+1}. ${prompts[i][0]}</h3>`;
+            htmlContent += `<i>${prompts[i][1]}</i>`;
+            htmlContent += `<p>${ans_dict[i] || "[No answer provided]"}</p>`;
+        }
+        htmlContent += `</body></html>`;
+
+        let blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url; a.download = `Ballistic_Lab_${this.student_name.replace(/ /g, '_')}.doc`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+}
+
+// ==========================================
+// 3. GUI & PLOTTING LAYER
+// ==========================================
+const engine = new BallisticEngine();
+const inquiry = new InquiryManager();
+
+// Rendering & App Globals (PAN, ZOOM, FPS FIX)
+let animFrame = null;
+let isPaused = false;
+let scalePx = 40;
+let offsetX = 100;
+let offsetY = 350;
+let zoom = 1.0;
+let isDragging = false;
+let lastMouseX = 0, lastMouseY = 0;
+
+// Charts
+let chartTraj, chartAngle, chartEnergy;
+
+const paramConfig = [
+    { id: 'v0', label: 'Dart Speed v0 (m/s)', min: 1.0, max: 30.0, default: 15.0 },
+    { id: 'th', label: 'Launch Angle (deg)', min: 10.0, max: 85.0, default: 45.0 },
+    { id: 'm', label: 'Dart Mass m (kg)', min: 0.01, max: 0.50, default: 0.1 },
+    { id: 'tar', label: 'Target Mass M (kg)', min: 0.05, max: 5.0, default: 1.0 },
+    { id: 'L', label: 'Pendulum Length L (m)', min: 0.5, max: 5.0, default: 2.0 },
+    { id: 'c', label: 'Drag Coefficient c', min: 0.0, max: 2.0, default: 0.1 }
+];
+
+function initUI() {
+    const container = document.getElementById('sliders-container');
+    paramConfig.forEach(cfg => {
+        container.innerHTML += `
+            <div class="slider-row">
+                <label id="lbl-${cfg.id}">${cfg.label}</label>
+                <input type="range" id="sl-${cfg.id}" min="0" max="1000" value="${((cfg.default-cfg.min)/(cfg.max-cfg.min))*1000}">
+                <input type="number" id="sp-${cfg.id}" min="${cfg.min}" max="${cfg.max}" step="0.01" value="${cfg.default}">
+            </div>
+        `;
+    });
+
+    paramConfig.forEach(cfg => {
+        let sl = document.getElementById(`sl-${cfg.id}`);
+        let sp = document.getElementById(`sp-${cfg.id}`);
+        sl.oninput = (e) => {
+            if (engine.state !== engine.IDLE) triggerReset();
+            sp.value = (cfg.min + (e.target.value / 1000) * (cfg.max - cfg.min)).toFixed(2);
+            updatePhysicsParams();
+        };
+        sp.oninput = (e) => {
+            if (engine.state !== engine.IDLE) triggerReset();
+            sl.value = ((parseFloat(e.target.value) || cfg.default) - cfg.min) / (cfg.max - cfg.min) * 1000;
+            updatePhysicsParams();
+        };
+    });
+
+    initCharts();
+    initCanvasEvents();
+    syncInquiryUI();
+    document.getElementById('in-name').value = inquiry.student_name;
+    
+    // Auto-frame initial canvas size
+    const canvas = document.getElementById('simCanvas');
+    offsetY = canvas.parentElement.clientHeight - 80;
+    
+    updatePhysicsParams();
+}
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(`tab-${tab}`).classList.add('active');
+}
+
+// --- CANVAS PAN & ZOOM LISTENERS ---
+function initCanvasEvents() {
+    const canvas = document.getElementById('simCanvas');
+
+    canvas.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        offsetX += (e.clientX - lastMouseX);
+        offsetY += (e.clientY - lastMouseY);
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+        renderVisuals(engine.state === engine.PROJECTILE || engine.state === engine.IDLE);
+    });
+
+    canvas.addEventListener('mouseup', () => isDragging = false);
+    canvas.addEventListener('mouseleave', () => isDragging = false);
+
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const zoomFactor = e.deltaY < 0 ? 1.1 : (1 / 1.1);
+        
+        // Adjust offsets to zoom exactly onto cursor
+        offsetX = mouseX - (mouseX - offsetX) * zoomFactor;
+        offsetY = mouseY - (mouseY - offsetY) * zoomFactor;
+        zoom *= zoomFactor;
+        
+        renderVisuals(engine.state === engine.PROJECTILE || engine.state === engine.IDLE);
+    });
+}
+
+// --- SIMULATION CONTROL ---
+function togglePendulumType() {
+    let mode = parseInt(document.getElementById('combo-ptype').value);
+    inquiry.set_mode(mode); syncInquiryUI();
+    
+    let lbl = document.getElementById('lbl-tar');
+    let sp = document.getElementById('sp-tar');
+    if (mode === 1) {
+        lbl.innerText = "Rod Inertia I (kg·m²)";
+        sp.value = (engine.target_val * Math.pow(engine.L, 2) / 3.0).toFixed(2); 
+    } else {
+        lbl.innerText = "Target Mass M (kg)";
+    }
+    triggerReset();
+}
+
+function updatePhysicsParams() {
+    if (engine.state === engine.IDLE) {
+        engine.pend_type = parseInt(document.getElementById('combo-ptype').value);
+        engine.v0 = parseFloat(document.getElementById('sp-v0').value);
+        engine.theta0 = parseFloat(document.getElementById('sp-th').value);
+        engine.m = parseFloat(document.getElementById('sp-m').value);
+        engine.target_val = parseFloat(document.getElementById('sp-tar').value);
+        engine.L = parseFloat(document.getElementById('sp-L').value);
+        engine.c = parseFloat(document.getElementById('sp-c').value);
+        drawIdleState();
+    }
+}
+
+function triggerLaunch() {
+    updatePhysicsParams();
+    engine.launch();
+    
+    document.getElementById('btn-launch').disabled = true;
+    document.getElementById('combo-ptype').disabled = true;
+    
+    // Reset Pause Button State
+    let btnPause = document.getElementById('btn-pause');
+    btnPause.disabled = false;
+    btnPause.innerText = "⏸ Pause";
+    btnPause.style.background = "linear-gradient(to right, #FF8C00, #E65100)";
+    isPaused = false;
+    
+    // Start ultra-smooth animation frame loop
+    if (animFrame) cancelAnimationFrame(animFrame);
+    animFrame = requestAnimationFrame(gameLoop);
+}
+
+function togglePause() {
+    isPaused = !isPaused;
+    let btn = document.getElementById('btn-pause');
+    if (isPaused) {
+        btn.innerText = "▶ Resume";
+        btn.style.background = "linear-gradient(to right, #4CAF50, #2E7D32)";
+    } else {
+        btn.innerText = "⏸ Pause";
+        btn.style.background = "linear-gradient(to right, #FF8C00, #E65100)";
+        animFrame = requestAnimationFrame(gameLoop);
+    }
+}
+
+function triggerReset() {
+    if (animFrame) cancelAnimationFrame(animFrame);
+    engine.resetState();
+    
+    document.getElementById('btn-launch').disabled = false;
+    document.getElementById('combo-ptype').disabled = false;
+    
+    let btnPause = document.getElementById('btn-pause');
+    btnPause.disabled = true;
+    btnPause.innerText = "⏸ Pause";
+    btnPause.style.background = "linear-gradient(to right, #FF8C00, #E65100)";
+    isPaused = false;
+    
+    drawIdleState();
+    
+    chartTraj.data.datasets[0].data = [];
+    chartAngle.data.datasets[0].data = [];
+    chartEnergy.data.datasets[0].data = []; 
+    chartEnergy.data.datasets[1].data = []; 
+    chartEnergy.data.datasets[2].data = []; 
+    chartTraj.update('none'); chartAngle.update('none'); chartEnergy.update('none');
+}
+
+function gameLoop() {
+    if (isPaused) return;
+
+    for (let i=0; i<2; i++) engine.step();
+    updatePlots();
+    
+    if (engine.step_idx < engine.max_steps - 1) {
+        animFrame = requestAnimationFrame(gameLoop);
+    } else {
+        document.getElementById('btn-pause').disabled = true;
+    }
+}
+
+// --- RENDERING CANVAS ---
+function mapX(x) { return offsetX + (x * scalePx * zoom); }
+function mapY(y) { return offsetY - (y * scalePx * zoom); }
+
+function drawPolygon(ctx, base_points, x_off, y_off, angle_deg, fill_color, pen_color) {
+    let rad = angle_deg * Math.PI / 180;
+    let c = Math.cos(rad), s = Math.sin(rad);
+    
+    ctx.beginPath();
+    for (let i = 0; i < base_points.length; i++) {
+        let px = base_points[i][0], py = base_points[i][1];
+        let rx = px * c - py * s;
+        let ry = px * s + py * c;
+        
+        let screenX = mapX(x_off + rx);
+        let screenY = mapY(y_off + ry);
+        
+        if (i === 0) ctx.moveTo(screenX, screenY);
+        else ctx.lineTo(screenX, screenY);
+    }
+    ctx.closePath();
+    ctx.fillStyle = fill_color; ctx.fill();
+    ctx.strokeStyle = pen_color; ctx.lineWidth = 1; ctx.stroke();
+}
+
+function renderVisuals(is_projectile) {
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Dynamic panning grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.beginPath();
+    let gridSize = scalePx * zoom;
+    let startX = offsetX % gridSize;
+    let startY = offsetY % gridSize;
+    for(let i=startX; i<canvas.width; i+=gridSize) { ctx.moveTo(i,0); ctx.lineTo(i,canvas.height); }
+    for(let i=startY; i<canvas.height; i+=gridSize) { ctx.moveTo(0,i); ctx.lineTo(canvas.width,i); }
+    ctx.stroke();
+
+    // Cannon Barrel
+    let cl = 1.0, cw = 0.4;
+    let c_pts = [[0, -cw/2], [cl, -cw/2], [cl, cw/2], [0, cw/2]];
+    drawPolygon(ctx, c_pts, 0, 0, engine.theta0, '#555', '#888');
+
+    // Dart Shape
+    let dart_pts = [[0, 0], [-0.6, 0.15], [-0.4, 0], [-0.6, -0.15]];
+    if (is_projectile) {
+        drawPolygon(ctx, dart_pts, engine.dart_x, engine.dart_y, engine.dart_angle, '#05D5FF', '#FFF');
+    } else {
+        let bx = engine.x_target + engine.L * Math.sin(engine.pend_theta);
+        let by = (engine.y_target + engine.L) - engine.L * Math.cos(engine.pend_theta);
+        let combined_angle = engine.impact_dart_angle + engine.pend_theta * 180 / Math.PI;
+        drawPolygon(ctx, dart_pts, bx, by, combined_angle, '#05D5FF', '#FFF');
+    }
+
+    // Pendulum Body
+    let px = engine.x_target, py = engine.y_target + engine.L;
+    let rod_angle_base = -90 + (engine.pend_theta * 180 / Math.PI);
+
+    if (engine.pend_type === 1) { // Solid Rod
+        let rw = 0.35;
+        let rod_pts = [[0, -rw/2], [engine.L, -rw/2], [engine.L, rw/2], [0, rw/2]];
+        drawPolygon(ctx, rod_pts, px, py, rod_angle_base, '#D4AF37', '#FFF');
+    } else { // Simple (Rope + Block)
+        let sw = 0.08;
+        let string_pts = [[0, -sw/2], [engine.L, -sw/2], [engine.L, sw/2], [0, sw/2]];
+        drawPolygon(ctx, string_pts, px, py, rod_angle_base, '#AAAAAA', '#888');
+        
+        let s = 0.5;
+        let block_pts = [[-s/2, -s/2], [s/2, -s/2], [s/2, s/2], [-s/2, s/2]];
+        let bx = px + engine.L * Math.cos(rod_angle_base * Math.PI / 180);
+        let by = py + engine.L * Math.sin(rod_angle_base * Math.PI / 180);
+        drawPolygon(ctx, block_pts, bx, by, 0, '#FF2A6D', '#FFF');
+    }
+
+    // Pivot Point
+    ctx.beginPath();
+    ctx.arc(mapX(px), mapY(py), 6, 0, 2*Math.PI);
+    ctx.fillStyle = '#FFF'; ctx.fill();
+    ctx.strokeStyle = '#000'; ctx.stroke();
+}
+
+function drawIdleState() {
+    let rad = engine.theta0 * Math.PI / 180;
+    let v_y0 = engine.v0 * Math.sin(rad);
+    let v_x0 = engine.v0 * Math.cos(rad);
+    let t_p = v_y0 / engine.g;
+    
+    engine.x_target = v_x0 * t_p;
+    engine.y_target = v_y0 * t_p - 0.5 * engine.g * Math.pow(t_p, 2);
+    engine.dart_x = 0; engine.dart_y = 0;
+    engine.dart_angle = engine.theta0;
+    engine.pend_theta = 0.0;
+    
+    renderVisuals(true);
+}
+
+// --- CHARTS (Chart.js) WITH PERFORMANCE FIX ---
+function initCharts() {
+    Chart.defaults.color = '#888';
+    Chart.defaults.font.family = "'Segoe UI', sans-serif";
+    
+    const commonOpt = {
+        responsive: true, maintainAspectRatio: false,
+        animation: false, // Critical for performance
+        parsing: false,   // Bypasses internal loops since we feed raw {x,y}
+        elements: { point: { radius: 0 }, line: { borderWidth: 2 } },
+        scales: {
+            x: { type: 'linear', grid: {color: '#333344'} },
+            y: { grid: {color: '#333344'} }
+        },
+        plugins: { legend: {display: false} }
+    };
+
+    chartTraj = new Chart(document.getElementById('chartTraj'), {
+        type: 'line', data: { datasets: [{ borderColor: '#05D5FF', data: [] }] },
+        options: { ...commonOpt, scales: { x: { ...commonOpt.scales.x, title:{display:true, text:'X (m)'}}, y: { ...commonOpt.scales.y, title:{display:true, text:'Y (m)'}} } }
+    });
+    
+    chartAngle = new Chart(document.getElementById('chartAngle'), {
+        type: 'line', data: { datasets: [{ borderColor: '#FF2A6D', data: [] }] },
+        options: { ...commonOpt, scales: { x: { ...commonOpt.scales.x, title:{display:true, text:'Time (s)'}}, y: { ...commonOpt.scales.y, title:{display:true, text:'Angle (deg)'}} } }
+    });
+    
+    chartEnergy = new Chart(document.getElementById('chartEnergy'), {
+        type: 'line',
+        data: { datasets: [
+            { label: 'Kinetic', borderColor: '#00FF7F', data: [] },
+            { label: 'Potential', borderColor: '#BF5AF2', data: [] },
+            { label: 'Total', borderColor: '#FFF', borderDash: [5,5], data: [] }
+        ]},
+        options: { ...commonOpt, plugins: {legend:{display:true, labels:{color:'#FFF'}}}, scales: { x: { ...commonOpt.scales.x, title:{display:true, text:'Time (s)'}}, y: { ...commonOpt.scales.y, title:{display:true, text:'Energy (J)'}} } }
+    });
+}
+
+function updatePlots() {
+    renderVisuals(engine.state === engine.PROJECTILE);
+    
+    // UI thread protection: Only update graphs every 10 physics ticks
+    if (engine.step_idx % 10 !== 0 && engine.state !== engine.IDLE) return; 
+
+    // DATA DECIMATION: We restrict the arrays passed to Chart.js to ~500 points 
+    // This allows it to graph infinitely without freezing after the collision.
+    let trajData = [], angData = [], keData = [], peData = [], teData = [];
+    let stride = Math.max(1, Math.floor(engine.hist_t.length / 500)); 
+    
+    for (let i = 0; i < engine.hist_t.length; i += stride) {
+        let t = engine.hist_t[i];
+        trajData.push({x: engine.hist_dart_x[i], y: engine.hist_dart_y[i]});
+        angData.push({x: t, y: engine.hist_theta[i]});
+        keData.push({x: t, y: engine.hist_ke[i]});
+        peData.push({x: t, y: engine.hist_pe[i]});
+        teData.push({x: t, y: engine.hist_te[i]});
+    }
+
+    // Always push the very last recorded tick to keep lines anchored to present moment
+    let last = engine.hist_t.length - 1;
+    if (last >= 0 && (last % stride !== 0)) {
+        let t = engine.hist_t[last];
+        trajData.push({x: engine.hist_dart_x[last], y: engine.hist_dart_y[last]});
+        angData.push({x: t, y: engine.hist_theta[last]});
+        keData.push({x: t, y: engine.hist_ke[last]});
+        peData.push({x: t, y: engine.hist_pe[last]});
+        teData.push({x: t, y: engine.hist_te[last]});
+    }
+
+    chartTraj.data.datasets[0].data = trajData;
+    chartAngle.data.datasets[0].data = angData;
+    chartEnergy.data.datasets[0].data = keData;
+    chartEnergy.data.datasets[1].data = peData;
+    chartEnergy.data.datasets[2].data = teData;
+
+    // 'none' mode disables all hidden DOM reflows inside Chart.js
+    chartTraj.update('none'); 
+    chartAngle.update('none'); 
+    chartEnergy.update('none');
+}
+
+// --- 5E INQUIRY ---
+function syncInquiryUI() {
+    let [stage, prompt] = inquiry.get_current_prompt();
+    document.getElementById('lbl-stage').innerText = `${inquiry.current_idx+1}/5: ${stage}`;
+    document.getElementById('lbl-prompt').innerText = prompt;
+    document.getElementById('txt-answer').value = inquiry.get_current_answer();
+    document.getElementById('btn-back').disabled = (inquiry.current_idx === 0);
+    document.getElementById('btn-next').disabled = (inquiry.current_idx === 4);
+}
+
+function updateName(val) { inquiry.student_name = val; }
+function saveCurrentAnswer() { inquiry.set_current_answer(document.getElementById('txt-answer').value); }
+function prevPrompt() { saveCurrentAnswer(); inquiry.current_idx--; syncInquiryUI(); }
+function nextPrompt() { saveCurrentAnswer(); inquiry.current_idx++; syncInquiryUI(); }
+
+function saveInquiry() { saveCurrentAnswer(); inquiry.save_state(); alert("Progress saved locally."); }
+function exportDocx() {
+    saveCurrentAnswer();
+    if (!inquiry.student_name.trim()) { alert("Please enter a Student Name before exporting."); return; }
+    inquiry.export_to_docx();
+}
+
+function exportCSV() {
+    let csv = "Time(s),DartX(m),DartY(m),Angle(deg),Kinetic(J),Potential(J),TotalEnergy(J)\n";
+    for(let i=0; i<engine.hist_t.length; i++) {
+        csv += `${engine.hist_t[i]},${engine.hist_dart_x[i]},${engine.hist_dart_y[i]},${engine.hist_theta[i]},${engine.hist_ke[i]},${engine.hist_pe[i]},${engine.hist_te[i]}\n`;
+    }
+    let blob = new Blob([csv], { type: 'text/csv' });
+    let url = URL.createObjectURL(blob);
+    let a = document.createElement('a'); a.href = url; a.download = 'ballistic_data.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+
+window.onload = initUI;
+window.onresize = () => { if(engine.state === engine.IDLE) drawIdleState(); else renderVisuals(engine.state === engine.PROJECTILE); };
+</script>
+</body>
+</html>
