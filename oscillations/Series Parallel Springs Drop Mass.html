@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics: Advanced SHM Laboratory</title>
+    <script>
+        const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+        document.documentElement.classList.add("password-locked");
+
+        const passwordGateStyle = document.createElement("style");
+        passwordGateStyle.textContent = `
+            html.password-locked body { overflow: hidden; }
+            html.password-locked body > * { visibility: hidden; }
+            #password-gate {
+                position: fixed;
+                inset: 0;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                background: rgba(5, 9, 18, 0.88);
+                padding: 24px;
+                z-index: 9999;
+            }
+            html.password-locked #password-gate { display: flex; visibility: visible; }
+            #password-gate-card {
+                width: min(100%, 420px);
+                background: #101625;
+                border: 1px solid rgba(100,181,246,0.28);
+                border-radius: 18px;
+                padding: 24px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+                color: #e7edf7;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+            #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+            #password-gate-input {
+                width: 100%;
+                padding: 12px 14px;
+                border-radius: 12px;
+                border: 1px solid rgba(100,181,246,0.35);
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 16px;
+                outline: none;
+                margin-bottom: 16px;
+                box-sizing: border-box;
+            }
+            #password-gate-input:focus {
+                border-color: #64b5f6;
+                box-shadow: 0 0 0 3px rgba(100,181,246,0.16);
+            }
+            #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+            .password-gate-button {
+                border: none;
+                border-radius: 10px;
+                padding: 10px 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+            #password-gate-submit { background: #64b5f6; color: #08101c; }
+        `;
+        document.head.appendChild(passwordGateStyle);
+
+        function requestPassword(title, message) {
+            return new Promise(resolve => {
+                const existingGate = document.getElementById("password-gate");
+                if (existingGate) existingGate.remove();
+                const gate = document.createElement("div");
+                gate.id = "password-gate";
+                gate.innerHTML = `
+                    <div id="password-gate-card">
+                        <div id="password-gate-title">${title}</div>
+                        <div id="password-gate-message">${message}</div>
+                        <input id="password-gate-input" type="password" autocomplete="current-password">
+                        <div id="password-gate-actions">
+                            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+                            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(gate);
+                const input = document.getElementById("password-gate-input");
+                const cancelButton = document.getElementById("password-gate-cancel");
+                const submitButton = document.getElementById("password-gate-submit");
+                const finish = value => { gate.remove(); resolve(value); };
+                cancelButton.addEventListener("click", () => finish(null));
+                submitButton.addEventListener("click", () => finish(input.value));
+                input.addEventListener("keydown", event => {
+                    if (event.key === "Enter") finish(input.value);
+                    if (event.key === "Escape") finish(null);
+                });
+                window.requestAnimationFrame(() => input.focus());
+            });
+        }
+
+        async function verifyPageAccess() {
+            const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+            if (userInput === null) { window.location.href = "../index.html"; return; }
+            const encoder = new TextEncoder();
+            const data = encoder.encode(userInput);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+            if (hashHex === TARGET_HASH) {
+                document.documentElement.classList.remove("password-locked");
+            } else {
+                alert("Incorrect password. Access denied.");
+                window.location.href = "../index.html";
+            }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+        } else {
+            verifyPageAccess();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        :root {
+            --bg-deep: #050508;
+            --glass-bg: rgba(18, 18, 22, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --accent-cyan: #00E5FF;
+            --accent-red: #FF3B30;
+            --accent-green: #32d74b;
+            --accent-yellow: #FFCC00;
+            --text-main: #f0f0f5;
+            --text-muted: #9aa;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-deep); color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden; user-select: none;
+        }
+
+        #simCanvas { position: absolute; top: 0; left: 0; z-index: 0; }
+
+        /* Left Panel: Live Telemetry */
+        #telemetry-panel {
+            position: absolute; top: 20px; left: 20px; width: 400px; height: calc(100vh - 40px);
+            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            display: flex; flex-direction: column; z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); padding: 15px; box-sizing: border-box; gap: 10px;
+        }
+        
+        .chart-wrapper {
+            flex: 1; background: rgba(0,0,0,0.5); border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.05); padding: 5px; position: relative;
+        }
+
+        /* Right Panel: Controls & Notebook */
+        #controls-panel {
+            position: absolute; top: 20px; right: 20px; width: 440px; max-height: calc(100vh - 40px);
+            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            display: flex; flex-direction: column; z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); overflow: hidden;
+        }
+
+        .tabs { display: flex; border-bottom: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
+        .tab.active { color: var(--accent-cyan); border-bottom: 2px solid var(--accent-cyan); background: rgba(0, 229, 255, 0.05); }
+
+        .panel { padding: 20px; overflow-y: auto; display: none; flex-direction: column; gap: 15px; }
+        .panel.active { display: flex; }
+
+        h2, h3 { margin: 0; font-weight: 600; font-size: 1.1em;}
+        .subtitle { color: var(--text-muted); font-size: 0.85em; display: block; }
+
+        .control-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px; }
+        .control-group label { font-size: 0.9em; display: flex; justify-content: space-between; font-weight: 500;}
+        .val-display { color: var(--accent-cyan); font-family: monospace; font-size: 1.05em;}
+        .val-red { color: var(--accent-red); }
+        
+        select {
+            background: rgba(0,0,0,0.5); color: var(--text-main); border: 1px solid var(--glass-border);
+            padding: 8px; border-radius: 6px; font-family: inherit; font-weight: 500; outline: none;
+        }
+
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: var(--accent-cyan); cursor: pointer; margin-top: -5px; box-shadow: 0 0 8px var(--accent-cyan);
+        }
+
+        /* Buttons & Toggles */
+        .btn-row { display: flex; gap: 10px; margin-top: 5px; }
+        button {
+            flex: 1; background: #2A2A35; color: white; border: 1px solid var(--glass-border);
+            padding: 10px; border-radius: 6px; font-size: 0.95em; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        button:hover { background: #3A3A45; }
+        
+        button#btn-play { background: linear-gradient(135deg, #28a745, #1e7e34); border: none; }
+        button#btn-play.paused { background: linear-gradient(135deg, #ffc107, #d39e00); color: #000;}
+        
+        .action-drop { background: linear-gradient(135deg, #FF3B30, #b3241d); border: none; font-size: 0.85em; padding: 12px;}
+        .action-drop.armed { background: #fff; color: #FF3B30; box-shadow: 0 0 15px rgba(255, 59, 48, 0.5); }
+
+        .toggles { 
+            display: flex; justify-content: space-between; background: rgba(0,0,0,0.2); 
+            padding: 10px; border-radius: 6px; font-size: 0.85em; border: 1px solid var(--glass-border); 
+        }
+        .toggles label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main); }
+
+        /* QA Panel */
+        #qaTab textarea {
+            width: 100%; height: 200px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
+            color: var(--text-main); border-radius: 6px; padding: 10px; font-family: inherit; resize: vertical; box-sizing: border-box;
+        }
+        #qaTab textarea:focus { outline: none; border-color: var(--accent-cyan); }
+        #status-msg { font-size: 0.8em; color: var(--accent-green); height: 15px; text-align: right;}
+    </style>
+</head>
+<body>
+
+    <canvas id="simCanvas"></canvas>
+
+    <div id="telemetry-panel">
+        <h3 style="text-align: center; color: var(--text-muted); font-size: 0.9em; letter-spacing: 1px; text-transform: uppercase;">Real-Time Telemetry</h3>
+        <div class="chart-wrapper"><canvas id="dispChart"></canvas></div>
+        <div class="chart-wrapper"><canvas id="keChart"></canvas></div>
+        <div class="chart-wrapper"><canvas id="peChart"></canvas></div>
+    </div>
+
+    <div id="controls-panel">
+        <div class="tabs">
+            <div class="tab active" data-target="controlsTab">Parameters & Control</div>
+            <div class="tab" data-target="qaTab">5E Lab Notebook</div>
+        </div>
+
+        <div id="controlsTab" class="panel active">
+            
+            <div class="btn-row">
+                <button id="btn-play">⏸ Pause Simulation</button>
+                <button id="btn-reset" style="background: transparent;">↺ Reset System</button>
+            </div>
+            
+            <div class="toggles" style="margin-top: 5px;">
+                <label><input type="checkbox" id="tog-vectors" checked> Show Vectors (v, a, F)</label>
+            </div>
+
+            <div class="control-group" style="margin-top: 5px;">
+                <label>Initial Amplitude (A₀) <span id="val-a0" class="val-display">4.0 m</span></label>
+                <input type="range" id="in-a0" min="1.0" max="8.0" step="0.5" value="4.0">
+            </div>
+
+            <div class="control-group">
+                <label>Friction (Damping Coefficient c) <span id="val-fric" class="val-display">0.0</span></label>
+                <input type="range" id="in-fric" min="0" max="5" step="0.1" value="0">
+            </div>
+
+            <div class="control-group">
+                <label>Spring Configuration</label>
+                <select id="k-config">
+                    <option value="single">Single Spring (k)</option>
+                    <option value="parallel">Parallel Springs (2k)</option>
+                    <option value="series">Series Springs (k/2)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>Spring Constant (k) <span id="val-k" class="val-display">50 N/m</span></label>
+                <input type="range" id="in-k" min="10" max="100" step="1" value="50">
+            </div>
+
+            <div class="control-group">
+                <label>Base Mass (m) <span id="val-m" class="val-display">1.0 kg</span></label>
+                <input type="range" id="in-m" min="0.5" max="5.0" step="0.1" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label>Drop Mass (Q) <span id="val-q" class="val-display val-red">2.0 kg</span></label>
+                <input type="range" id="in-q" min="0.5" max="10.0" step="0.1" value="2.0">
+            </div>
+
+            <div class="btn-row" style="margin-top: 10px;">
+                <button id="btn-drop-eq" class="action-drop">Drop at<br>Equilibrium</button>
+                <button id="btn-drop-amp" class="action-drop">Drop at<br>Amplitude</button>
+            </div>
+        </div>
+
+        <div id="qaTab" class="panel">
+            <div>
+                <h3 id="qa-stage" style="color: var(--accent-cyan);">[Engage]</h3>
+                <span class="subtitle" id="qa-counter">Prompt 1 of 10</span>
+            </div>
+            <p id="qa-question" style="font-size: 0.95em; line-height: 1.5; color: #ddd;"></p>
+            
+            <textarea id="qa-answer" placeholder="Analyze and explain your findings... (Autosaves as you type)"></textarea>
+            <div id="status-msg"></div>
+
+            <div class="btn-row">
+                <button id="btn-prev">Back</button>
+                <button id="btn-next">Next</button>
+            </div>
+            <button style="background: linear-gradient(135deg, #0A84FF, #005bb5); border: none;" id="btn-export">Export .docx Report</button>
+        </div>
+    </div>
+
+<script>
+/* ==========================================
+   1. PHYSICS ENGINE (Fixed Timestep)
+   ========================================== */
+class PhysicsEngine {
+    constructor() {
+        this.isRunning = true;
+        this.resetParams();
+    }
+
+    resetParams() {
+        this.baseMass = parseFloat(document.getElementById('in-m').value);
+        this.dropMass = parseFloat(document.getElementById('in-q').value);
+        this.k_base = parseFloat(document.getElementById('in-k').value);
+        this.config = document.getElementById('k-config').value;
+        this.frictionC = parseFloat(document.getElementById('in-fric').value);
+        this.initialA = parseFloat(document.getElementById('in-a0').value);
+        
+        this.m_current = this.baseMass;
+        this.x = this.initialA; 
+        this.v = 0;
+        this.a = 0;
+        this.F = 0;
+        
+        this.dropArmedEq = false;
+        this.dropArmedAmp = false;
+        this.hasDropped = false;
+        this.dropAnimY = -200; // Starting height for drop animation
+        
+        this.calcKeq();
+        this.calculateForces(); // Initial force calc before step 1
+    }
+
+    calcKeq() {
+        if (this.config === 'single') this.k_eq = this.k_base;
+        else if (this.config === 'parallel') this.k_eq = this.k_base * 2;
+        else if (this.config === 'series') this.k_eq = this.k_base / 2;
+    }
+
+    armEq() { if(!this.hasDropped) { this.dropArmedEq = true; this.dropArmedAmp = false; this.dropAnimY = -200; } }
+    armAmp() { if(!this.hasDropped) { this.dropArmedAmp = true; this.dropArmedEq = false; this.dropAnimY = -200; } }
+
+    calculateForces() {
+        this.a = (-(this.k_eq * this.x) - (this.frictionC * this.v)) / this.m_current;
+        this.F = this.a * this.m_current;
+    }
+
+    step(dt) {
+        if (!this.isRunning) return;
+
+        const x_old = this.x;
+        const v_old = this.v;
+
+        // Semi-Implicit Euler with friction
+        this.calculateForces();
+        this.v += this.a * dt;
+        this.x += this.v * dt;
+
+        // Visual animation of drop mass falling before impact
+        if(this.dropArmedEq || this.dropArmedAmp) {
+            this.dropAnimY += 600 * dt; // Fall speed
+            if (this.dropAnimY > 10) this.dropAnimY = 10; // Stop just above block
+        }
+
+        // Collision Detection Logic
+        if ((this.dropArmedEq || this.dropArmedAmp) && !this.hasDropped) {
+            let trigger = false;
+
+            if (this.dropArmedEq) {
+                // Check if crossing zero
+                if (x_old * this.x <= 0) { trigger = true; this.x = 0; }
+            } else if (this.dropArmedAmp) {
+                // Check if velocity reverses direction
+                if (v_old * this.v <= 0) { trigger = true; this.v = 0; }
+            }
+
+            if (trigger) {
+                // Conservation of Momentum: m_old * v_old = (m_old + m_drop) * v_new
+                const v_new = this.v * (this.m_current / (this.m_current + this.dropMass));
+                this.v = v_new;
+                this.m_current += this.dropMass;
+                this.dropArmedEq = false;
+                this.dropArmedAmp = false;
+                this.hasDropped = true;
+            }
+        }
+    }
+
+    getTelemetry() {
+        const KE = 0.5 * this.m_current * (this.v * this.v);
+        const PE = 0.5 * this.k_eq * (this.x * this.x);
+        return { x: this.x, KE, PE };
+    }
+}
+
+/* ==========================================
+   2. RENDERER
+   ========================================== */
+class Renderer {
+    constructor(canvas, engine) {
+        this.canvas = canvas; this.ctx = canvas.getContext('2d');
+        this.engine = engine; this.scale = 50; 
+        this.wallX = 440; // Avoid left panel
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+    }
+
+    resize() {
+        this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight;
+        this.surfaceY = this.canvas.height / 2 + 80;
+        this.eqX = this.canvas.width / 2 + 50; 
+    }
+
+    drawSpring(startX, endX, yOffset, isSeriesConnector = false) {
+        const ctx = this.ctx; ctx.beginPath(); ctx.strokeStyle = '#888'; ctx.lineWidth = 3;
+        if (isSeriesConnector) {
+            ctx.fillStyle = '#666'; ctx.fillRect(startX - 5, yOffset - 10, 10, 20); return;
+        }
+        const coils = 15; const coilWidth = (endX - startX) / coils; const amplitude = 18;
+        ctx.moveTo(startX, yOffset);
+        for (let i = 1; i <= coils; i++) {
+            const px = startX + i * coilWidth - (coilWidth / 2);
+            const py = yOffset + (i % 2 === 0 ? amplitude : -amplitude);
+            ctx.lineTo(px, py);
+        }
+        ctx.lineTo(endX, yOffset); ctx.stroke();
+    }
+
+    drawArrow(fromX, fromY, toX, toY, color, label) {
+        const ctx = this.ctx;
+        const headlen = 8;
+        const dx = toX - fromX; const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        
+        ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2.5;
+        ctx.moveTo(fromX, fromY); ctx.lineTo(toX, toY);
+        ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.stroke();
+        
+        ctx.fillStyle = color; ctx.font = 'bold 14px sans-serif';
+        ctx.fillText(label, toX + (dx > 0 ? 8 : -20), toY - 8);
+    }
+
+    render() {
+        const ctx = this.ctx;
+        ctx.fillStyle = this.engine.isRunning ? '#050508' : '#0a0a0f'; 
+        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Prominent Equilibrium Line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 2;
+        ctx.setLineDash([8, 8]);
+        ctx.beginPath(); ctx.moveTo(this.eqX, this.surfaceY - 200); ctx.lineTo(this.eqX, this.surfaceY + 50); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '14px monospace'; ctx.textAlign = 'center';
+        ctx.fillText('Equilibrium (x=0)', this.eqX, this.surfaceY + 30);
+
+        // Surface & Friction Indicator
+        if(this.engine.frictionC > 0) {
+            ctx.fillStyle = `rgba(255, 100, 50, ${Math.min(0.3, this.engine.frictionC * 0.1)})`;
+            ctx.fillRect(this.wallX, this.surfaceY, this.canvas.width, 20);
+            ctx.fillStyle = 'rgba(255, 100, 50, 0.5)'; ctx.textAlign = 'left';
+            ctx.fillText(`Friction c = ${this.engine.frictionC}`, this.eqX + 10, this.surfaceY + 15);
+        } else {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.fillRect(this.wallX, this.surfaceY, this.canvas.width, 2);
+        }
+
+        // Wall
+        ctx.fillStyle = '#111'; ctx.fillRect(0, this.surfaceY - 300, this.wallX, 350);
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(this.wallX, this.surfaceY - 300); ctx.lineTo(this.wallX, this.surfaceY+50); ctx.stroke();
+
+        const blockX = this.eqX + (this.engine.x * this.scale);
+        const baseSize = 60 + (this.engine.baseMass * 5); 
+        const attachY = this.surfaceY - baseSize/2;
+        
+        // Draw Springs
+        if (this.engine.config === 'single') {
+            this.drawSpring(this.wallX, blockX - baseSize/2, attachY);
+        } else if (this.engine.config === 'parallel') {
+            this.drawSpring(this.wallX, blockX - baseSize/2, attachY - 15);
+            this.drawSpring(this.wallX, blockX - baseSize/2, attachY + 15);
+        } else if (this.engine.config === 'series') {
+            const midX = this.wallX + (blockX - baseSize/2 - this.wallX) / 2;
+            this.drawSpring(this.wallX, midX, attachY);
+            this.drawSpring(midX, midX, attachY, true);
+            this.drawSpring(midX, blockX - baseSize/2, attachY);
+        }
+
+        // Base Mass
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.2)'; ctx.strokeStyle = '#00E5FF'; ctx.lineWidth = 2;
+        ctx.fillRect(blockX - baseSize/2, this.surfaceY - baseSize, baseSize, baseSize);
+        ctx.strokeRect(blockX - baseSize/2, this.surfaceY - baseSize, baseSize, baseSize);
+        ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(`${this.engine.baseMass} kg`, blockX, this.surfaceY - baseSize/2 + 5);
+
+        // Physics Vectors Toggle
+        if (document.getElementById('tog-vectors').checked) {
+            const cY = this.surfaceY - baseSize/2;
+            
+            // Force (F) - Red (Scaled visually)
+            if (Math.abs(this.engine.F) > 0.5) {
+                this.drawArrow(blockX, cY + 20, blockX + this.engine.F * 0.8, cY + 20, '#FF3B30', 'F');
+            }
+            // Acceleration (a) - Yellow
+            if (Math.abs(this.engine.a) > 0.5) {
+                this.drawArrow(blockX, cY, blockX + this.engine.a * 2.5, cY, '#FFCC00', 'a');
+            }
+            // Velocity (v) - Cyan
+            if (Math.abs(this.engine.v) > 0.5) {
+                this.drawArrow(blockX, cY - 20, blockX + this.engine.v * 10, cY - 20, '#00E5FF', 'v');
+            }
+        }
+
+        // Drop Mass Visualization
+        const dropSize = 40 + (this.engine.dropMass * 3);
+        
+        if (this.engine.hasDropped) {
+            // Stacked on top
+            ctx.fillStyle = 'rgba(255, 59, 48, 0.4)'; ctx.strokeStyle = '#FF3B30';
+            ctx.fillRect(blockX - dropSize/2, this.surfaceY - baseSize - dropSize, dropSize, dropSize);
+            ctx.strokeRect(blockX - dropSize/2, this.surfaceY - baseSize - dropSize, dropSize, dropSize);
+            ctx.fillStyle = '#fff'; ctx.fillText(`+${this.engine.dropMass} kg`, blockX, this.surfaceY - baseSize - dropSize/2 + 5);
+        } else if (this.engine.dropArmedEq || this.engine.dropArmedAmp) {
+            // Falling from top of screen tracking target
+            let targetX = this.engine.dropArmedEq ? this.eqX : blockX;
+            let currentY = this.surfaceY - baseSize - dropSize - 40 + this.engine.dropAnimY;
+            
+            // Limit Y so it doesn't go through block
+            if (currentY > this.surfaceY - baseSize - dropSize - 5) currentY = this.surfaceY - baseSize - dropSize - 5;
+
+            ctx.fillStyle = 'rgba(255, 59, 48, 0.8)'; ctx.strokeStyle = '#FF3B30';
+            ctx.fillRect(targetX - dropSize/2, currentY, dropSize, dropSize);
+            ctx.strokeRect(targetX - dropSize/2, currentY, dropSize, dropSize);
+            ctx.fillStyle = '#fff'; ctx.fillText(`FALLING`, targetX, currentY + dropSize/2 + 5);
+        }
+    }
+}
+
+/* ==========================================
+   3. TRIPLE GRAPH MANAGER (Chart.js)
+   ========================================== */
+class GraphManager {
+    constructor() {
+        Chart.defaults.color = '#778';
+        Chart.defaults.font.family = '-apple-system, sans-serif';
+        
+        this.maxPoints = 120; 
+        this.updateCounter = 0;
+
+        const commonOptions = (title, yLabel) => ({
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: { 
+                legend: { display: false },
+                title: { display: true, text: title, color: '#f0f0f5', font: {size: 11}, padding: {top: 2, bottom: 2} }
+            },
+            elements: { point: { radius: 0 }, line: { tension: 0.4 } }, 
+            scales: {
+                x: { display: true, title: {display: true, text: 'Time (s)', color: '#556'}, grid: {display: false}, ticks: {display: false} },
+                y: { display: true, title: {display: true, text: yLabel, color: '#556'}, grid: { color: 'rgba(255,255,255,0.05)' }, grace: '5%' }
+            }
+        });
+
+        this.dispChart = new Chart(document.getElementById('dispChart').getContext('2d'), {
+            type: 'line', data: { labels: Array(this.maxPoints).fill(''), datasets: [{ borderColor: '#00E5FF', data: Array(this.maxPoints).fill(0), borderWidth: 2.5 }] },
+            options: commonOptions('Displacement (x)', 'Meters (m)')
+        });
+
+        this.keChart = new Chart(document.getElementById('keChart').getContext('2d'), {
+            type: 'line', data: { labels: Array(this.maxPoints).fill(''), datasets: [{ borderColor: '#FF3B30', data: Array(this.maxPoints).fill(0), borderWidth: 2.5 }] },
+            options: commonOptions('Kinetic Energy (KE)', 'Joules (J)')
+        });
+
+        this.peChart = new Chart(document.getElementById('peChart').getContext('2d'), {
+            type: 'line', data: { labels: Array(this.maxPoints).fill(''), datasets: [{ borderColor: '#32d74b', data: Array(this.maxPoints).fill(0), borderWidth: 2.5 }] },
+            options: commonOptions('Potential Energy (PE)', 'Joules (J)')
+        });
+    }
+
+    reset() {
+        [this.dispChart, this.keChart, this.peChart].forEach(chart => {
+            chart.data.datasets[0].data = Array(this.maxPoints).fill(0);
+            chart.update('none');
+        });
+    }
+
+    update(data, isRunning) {
+        if (!isRunning) return; 
+        
+        // Push data to chart every 2nd frame for higher visual fidelity (prevents aliasing)
+        if (this.updateCounter++ % 2 !== 0) return; 
+
+        this.dispChart.data.datasets[0].data.shift(); this.dispChart.data.datasets[0].data.push(data.x);
+        this.keChart.data.datasets[0].data.shift(); this.keChart.data.datasets[0].data.push(data.KE);
+        this.peChart.data.datasets[0].data.shift(); this.peChart.data.datasets[0].data.push(data.PE);
+
+        this.dispChart.update('none'); this.keChart.update('none'); this.peChart.update('none');
+    }
+}
+
+/* ==========================================
+   4. INQUIRY STATE MANAGER (5E)
+   ========================================== */
+const prompts = [
+    { stage: "Engage", q: "Observe the continuous oscillation. At what point in the motion is the Kinetic Energy at its maximum, and where is the Elastic Potential Energy at its maximum?" },
+    { stage: "Engage", q: "Increase the 'Friction' slider. Observe the Displacement graph. What mathematical shape describes the decay of the amplitude envelope over time?" },
+    { stage: "Explore", q: "Turn friction to 0 and Reset. Click 'Drop at Equilibrium'. Describe what happens to the Displacement amplitude immediately after the mass drops. Why does it change?" },
+    { stage: "Explore", q: "Reset. Click 'Drop at Amplitude'. How does the final amplitude compare to the equilibrium drop? Explain why looking at the Kinetic Energy graph at the moment of the drop." },
+    { stage: "Explain", q: "Using the law of conservation of momentum, explain why dropping at Equilibrium (max velocity) results in a loss of velocity, but dropping at Amplitude (zero velocity) results in no change to the momentary velocity." },
+    { stage: "Explain", q: "Because dropping at Equilibrium reduces velocity, the total mechanical energy of the system decreases. Prove mathematically why the new amplitude A_final must be less than the original amplitude A_initial." },
+    { stage: "Elaborate", q: "Look at the frequency/period of the waves in the graph. Does dropping the mass at Amplitude vs Equilibrium result in a different final Period (T)? Relate your answer to T = 2π√(m/k)." },
+    { stage: "Elaborate", q: "Switch to the 'Parallel' spring configuration. Explain how the equivalent spring constant k_eq changes, and predict how this affects the period compared to a single spring." },
+    { stage: "Evaluate", q: "A student claims: 'Since the total mass increased, the total mechanical energy must increase because KE = ½mv² and PE = ½kx².' Use the graphs and your knowledge of inelastic collisions to refute this claim." },
+    { stage: "Evaluate", q: "In a real-world car suspension (which acts like a spring), shock absorbers are added to provide friction (damping). Without shock absorbers, what would happen to the car after hitting a bump, as modeled by this simulation?" }
+];
+
+class InquiryStateManager {
+    constructor() {
+        this.idx = 0; this.answers = Array(10).fill("");
+        this.load(); this.bindEvents(); this.render();
+    }
+    load() { const saved = localStorage.getItem('shm_v6_answers'); if (saved) this.answers = JSON.parse(saved); }
+    save() {
+        localStorage.setItem('shm_v6_answers', JSON.stringify(this.answers));
+        const status = document.getElementById('status-msg'); status.innerText = "Autosaved ✓";
+        clearTimeout(this.msgTimer); this.msgTimer = setTimeout(() => status.innerText = "", 2000);
+    }
+    bindEvents() {
+        document.getElementById('qa-answer').addEventListener('input', (e) => { this.answers[this.idx] = e.target.value; this.save(); });
+        document.getElementById('btn-prev').onclick = () => { if (this.idx > 0) { this.idx--; this.render(); } };
+        document.getElementById('btn-next').onclick = () => { if (this.idx < 9) { this.idx++; this.render(); } };
+        document.getElementById('btn-export').onclick = () => this.exportDOCX();
+    }
+    render() {
+        const p = prompts[this.idx];
+        document.getElementById('qa-stage').innerText = `[${p.stage}]`;
+        document.getElementById('qa-counter').innerText = `Prompt ${this.idx + 1} of 10`;
+        document.getElementById('qa-question').innerText = p.q;
+        document.getElementById('qa-answer').value = this.answers[this.idx];
+    }
+    async exportDOCX() {
+        const name = prompt("Enter Student Name for the Lab Report:"); if (!name) return;
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+        const children = [
+            new Paragraph({ text: "AP Physics: SHM & Momentum Lab Report", heading: HeadingLevel.HEADING_1 }),
+            new Paragraph({ text: `Student Name: ${name}` }), new Paragraph({ text: `Date: ${new Date().toLocaleString()}\n` })
+        ];
+        prompts.forEach((p, i) => {
+            children.push(new Paragraph({ text: `[${p.stage}] Prompt ${i + 1}:`, heading: HeadingLevel.HEADING_2 }));
+            children.push(new Paragraph({ children: [new TextRun({ text: p.q, italics: true })] }));
+            children.push(new Paragraph({ text: this.answers[i] || "(No Answer)" })); children.push(new Paragraph({ text: "" }));
+        });
+        const doc = new Document({ sections: [{ properties: {}, children: children }] });
+        try { const blob = await Packer.toBlob(doc); saveAs(blob, `${name.replace(/\s+/g, '_')}_SHM_Lab.docx`); } 
+        catch (err) { alert("Export failed. See console."); console.error(err); }
+    }
+}
+
+/* ==========================================
+   5. UI CONTROLLER & MAIN LOOP
+   ========================================== */
+const engine = new PhysicsEngine();
+const renderer = new Renderer(document.getElementById('simCanvas'), engine);
+const graph = new GraphManager();
+const inquiry = new InquiryStateManager();
+
+// Input Listeners
+const updateVal = (id, suffix) => {
+    document.getElementById(`val-${id}`).innerText = parseFloat(document.getElementById(`in-${id}`).value).toFixed(1) + suffix;
+    engine.resetParams();
+};
+document.getElementById('in-a0').oninput = () => updateVal('a0', ' m');
+document.getElementById('in-k').oninput = () => updateVal('k', ' N/m');
+document.getElementById('in-m').oninput = () => updateVal('m', ' kg');
+document.getElementById('in-q').oninput = () => updateVal('q', ' kg');
+document.getElementById('in-fric').oninput = () => updateVal('fric', '');
+document.getElementById('k-config').onchange = () => { engine.resetParams(); graph.reset(); };
+
+// Buttons
+const resetBtnState = () => {
+    document.getElementById('btn-drop-eq').innerText = "Drop at\nEquilibrium";
+    document.getElementById('btn-drop-eq').className = "action-drop";
+    document.getElementById('btn-drop-amp').innerText = "Drop at\nAmplitude";
+    document.getElementById('btn-drop-amp').className = "action-drop";
+};
+
+document.getElementById('btn-reset').onclick = () => { 
+    engine.resetParams(); graph.reset(); resetBtnState();
+};
+
+const btnPlay = document.getElementById('btn-play');
+btnPlay.onclick = () => {
+    engine.isRunning = !engine.isRunning;
+    btnPlay.innerText = engine.isRunning ? "⏸ Pause Simulation" : "▶ Resume Simulation";
+    btnPlay.className = engine.isRunning ? "" : "paused";
+};
+
+const btnDropEq = document.getElementById('btn-drop-eq');
+const btnDropAmp = document.getElementById('btn-drop-amp');
+
+btnDropEq.onclick = () => {
+    if(!engine.hasDropped) {
+        engine.armEq();
+        resetBtnState();
+        btnDropEq.innerText = "ARMED (WAITING)";
+        btnDropEq.className = "action-drop armed";
+    }
+};
+
+btnDropAmp.onclick = () => {
+    if(!engine.hasDropped) {
+        engine.armAmp();
+        resetBtnState();
+        btnDropAmp.innerText = "ARMED (WAITING)";
+        btnDropAmp.className = "action-drop armed";
+    }
+};
+
+// Tab Navigation
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.onclick = (e) => {
+        document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById(e.target.getAttribute('data-target')).classList.add('active');
+    };
+});
+
+// Fixed Timestep Loop for Perfect Sinusoids
+let lastTime = performance.now();
+let dtAccumulator = 0;
+const fixedDt = 1 / 120; // 120Hz physics step
+
+function loop(currentTime) {
+    let frameTime = (currentTime - lastTime) / 1000;
+    if (frameTime > 0.1) frameTime = 0.1; // Prevent massive jumps
+    lastTime = currentTime;
+
+    if (engine.isRunning) {
+        dtAccumulator += frameTime;
+        while (dtAccumulator >= fixedDt) {
+            engine.step(fixedDt);
+            dtAccumulator -= fixedDt;
+        }
+        graph.update(engine.getTelemetry(), engine.isRunning);
+    }
+    
+    renderer.render();
+    requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ==========================================
+TEACHER GRADING RUBRIC
+=============================================
+1. [Engage] KE is max at equilibrium (x=0) because velocity is highest. PE is max at the turning points (amplitude) because displacement x is highest.
+2. [Engage] Exponential decay. The amplitude decreases exponentially over time due to the viscous damping force (friction) being proportional to velocity.
+3. [Explore] Amplitude decreases instantly. The inelastic collision at max velocity loses kinetic energy. Since total energy drops, it cannot reach the same potential energy (amplitude) again.
+4. [Explore] Amplitude does NOT change. Because velocity was zero at the turning point, dropping mass adds zero momentum. No kinetic energy is lost.
+5. [Explain] p_i = p_f. If dropped at eq, m*v_max = (m+drop)*v_new. Velocity must drop. If dropped at amp, m*(0) = (m+drop)*v_new. Velocity remains 0. 
+6. [Explain] E_total = ½mv² + ½kx². At equilibrium, x=0, so E_total = ½mv². Since v drops (and mass increases), the new E_total is lower. Since E_total also equals ½kA², a lower E_total means A must be smaller.
+7. [Elaborate] Period T depends ONLY on mass and k. Since final mass is the same in both scenarios (m + dropMass), the new period is identical regardless of *where* the mass was dropped.
+8. [Elaborate] Parallel springs double the k (2k). Since T = 2π√(m/k), doubling k decreases the period (it oscillates faster).
+9. [Evaluate] False. The collision is inelastic. The "missing" energy was converted to internal energy (heat/deformation) when the blocks collided at equilibrium. If dropped at amplitude, energy stays exactly the same, it does not increase.
+10. [Evaluate] Without damping (friction), the car would continue to oscillate back and forth indefinitely after hitting a bump, perfectly conserving its mechanical energy.
+============================================= */
+</script>
+</body>
+</html>

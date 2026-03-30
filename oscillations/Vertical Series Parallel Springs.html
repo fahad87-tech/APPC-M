@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics: Pro SHM Simulator</title>
+    <script>
+        const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+        document.documentElement.classList.add("password-locked");
+
+        const passwordGateStyle = document.createElement("style");
+        passwordGateStyle.textContent = `
+            html.password-locked body { overflow: hidden; }
+            html.password-locked body > * { visibility: hidden; }
+            #password-gate {
+                position: fixed;
+                inset: 0;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                background: rgba(5, 9, 18, 0.88);
+                padding: 24px;
+                z-index: 9999;
+            }
+            html.password-locked #password-gate { display: flex; visibility: visible; }
+            #password-gate-card {
+                width: min(100%, 420px);
+                background: #101625;
+                border: 1px solid rgba(100,181,246,0.28);
+                border-radius: 18px;
+                padding: 24px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+                color: #e7edf7;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+            #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+            #password-gate-input {
+                width: 100%;
+                padding: 12px 14px;
+                border-radius: 12px;
+                border: 1px solid rgba(100,181,246,0.35);
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 16px;
+                outline: none;
+                margin-bottom: 16px;
+                box-sizing: border-box;
+            }
+            #password-gate-input:focus {
+                border-color: #64b5f6;
+                box-shadow: 0 0 0 3px rgba(100,181,246,0.16);
+            }
+            #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+            .password-gate-button {
+                border: none;
+                border-radius: 10px;
+                padding: 10px 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+            #password-gate-submit { background: #64b5f6; color: #08101c; }
+        `;
+        document.head.appendChild(passwordGateStyle);
+
+        function requestPassword(title, message) {
+            return new Promise(resolve => {
+                const existingGate = document.getElementById("password-gate");
+                if (existingGate) existingGate.remove();
+                const gate = document.createElement("div");
+                gate.id = "password-gate";
+                gate.innerHTML = `
+                    <div id="password-gate-card">
+                        <div id="password-gate-title">${title}</div>
+                        <div id="password-gate-message">${message}</div>
+                        <input id="password-gate-input" type="password" autocomplete="current-password">
+                        <div id="password-gate-actions">
+                            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+                            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(gate);
+                const input = document.getElementById("password-gate-input");
+                const cancelButton = document.getElementById("password-gate-cancel");
+                const submitButton = document.getElementById("password-gate-submit");
+                const finish = value => { gate.remove(); resolve(value); };
+                cancelButton.addEventListener("click", () => finish(null));
+                submitButton.addEventListener("click", () => finish(input.value));
+                input.addEventListener("keydown", event => {
+                    if (event.key === "Enter") finish(input.value);
+                    if (event.key === "Escape") finish(null);
+                });
+                window.requestAnimationFrame(() => input.focus());
+            });
+        }
+
+        async function verifyPageAccess() {
+            const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+            if (userInput === null) { window.location.href = "../index.html"; return; }
+            const encoder = new TextEncoder();
+            const data = encoder.encode(userInput);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+            if (hashHex === TARGET_HASH) {
+                document.documentElement.classList.remove("password-locked");
+            } else {
+                alert("Incorrect password. Access denied.");
+                window.location.href = "../index.html";
+            }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+        } else {
+            verifyPageAccess();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        /* Exact replication of the PyQt6 Theme */
+        :root {
+            --bg-main: #0D1117;
+            --bg-panel: #161B22;
+            --border-color: #30363D;
+            --text-main: #C9D1D9;
+            --text-bright: #E6EDF3;
+            --accent-blue: #58A6FF;
+            --accent-green: #238636;
+            --accent-green-hover: #2EA043;
+            --accent-red: #DA3633;
+            --accent-purple: #8957E5;
+            --accent-yellow: #D29922;
+            --accent-cyan: #00E5FF;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-main); color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; user-select: none;
+        }
+
+        /* Tabs Styling */
+        .tab-bar { display: flex; border-bottom: 1px solid var(--border-color); background: var(--bg-main); padding-top: 10px; }
+        .tab { 
+            padding: 12px 25px; cursor: pointer; font-weight: bold; font-size: 14px; color: #8B949E;
+            background: var(--bg-panel); border: 1px solid var(--border-color); border-bottom: none;
+            border-top-left-radius: 6px; border-top-right-radius: 6px; margin-left: 10px;
+        }
+        .tab.active { background: var(--accent-green); color: white; border-color: var(--accent-green); }
+        .tab-content { display: none; height: calc(100vh - 45px); box-sizing: border-box; }
+        .tab-content.active { display: flex; }
+
+        /* Main Layout */
+        #sim-tab { display: flex; padding: 20px; gap: 20px; height: 100%; box-sizing: border-box; }
+        
+        .left-panel { width: 360px; display: flex; flex-direction: column; gap: 15px; }
+        .center-panel { width: 400px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-main); position: relative; overflow: hidden; }
+        .right-panel { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 300px; }
+
+        /* Group Boxes */
+        fieldset { 
+            border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; 
+            background-color: var(--bg-panel); margin-top: 10px;
+        }
+        legend { color: var(--accent-blue); font-size: 15px; font-weight: bold; padding: 0 5px; }
+
+        /* Controls */
+        .control-row { margin-bottom: 12px; }
+        .control-row label { display: flex; justify-content: space-between; color: var(--text-bright); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { height: 6px; background: #21262D; border: 1px solid var(--border-color); border-radius: 3px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; background: var(--accent-blue); border-radius: 8px; margin-top: -6px; cursor: pointer; }
+
+        .radio-group { display: flex; gap: 15px; margin-bottom: 10px; color: var(--text-main); font-size: 14px; }
+        
+        /* Buttons */
+        button { 
+            padding: 12px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer;
+            border: 1px solid rgba(240, 246, 252, 0.1); color: white; transition: 0.2s;
+        }
+        .btn-primary { background-color: var(--accent-green); }
+        .btn-primary:hover { background-color: var(--accent-green-hover); }
+        .btn-secondary { background-color: #21262D; border-color: var(--border-color); }
+        .btn-secondary:hover { background-color: var(--border-color); }
+        .btn-danger { background-color: var(--accent-red); border-color: #F85149; }
+        .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-data { background-color: var(--accent-purple); border-color: #9E6A03; }
+
+        /* Telemetry & Charts */
+        .telem-row { display: flex; justify-content: space-between; color: var(--accent-green-hover); font-size: 15px; font-weight: bold; }
+        .chart-wrapper { flex: 1; min-height: 0; background: var(--bg-main); border-radius: 8px; position: relative; }
+        canvas { width: 100% !important; height: 100% !important; }
+
+        /* QA Layout */
+        #qa-tab { padding: 40px; flex-direction: column; gap: 20px; align-items: center; }
+        .qa-container { width: 800px; max-width: 100%; display: flex; flex-direction: column; gap: 15px; }
+        .qa-prompt { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 25px; border-radius: 8px; font-size: 18px; color: var(--text-bright); }
+        textarea { background: var(--bg-main); color: var(--text-main); font-size: 16px; padding: 15px; border: 1px solid var(--border-color); border-radius: 6px; height: 150px; resize: vertical; font-family: inherit; }
+        input[type=text] { background: #21262D; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); color: var(--text-bright); font-size: 14px; width: 100%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('sim-tab')">🔬 Active Physics Simulation</div>
+        <div class="tab" onclick="switchTab('qa-tab')">📝 5E Knowledge Check</div>
+    </div>
+
+    <div id="sim-tab" class="tab-content active">
+        <div class="left-panel">
+            <fieldset>
+                <legend>Physical Parameters</legend>
+                <div class="radio-group">
+                    <label><input type="radio" name="config" value="single" checked onchange="ui.updateKeq()"> Single</label>
+                    <label><input type="radio" name="config" value="parallel" onchange="ui.updateKeq()"> Parallel</label>
+                    <label><input type="radio" name="config" value="series" onchange="ui.updateKeq()"> Series</label>
+                </div>
+                
+                <div class="control-row">
+                    <label style="justify-content: flex-start; gap: 8px; font-weight: normal; color: var(--text-main);">
+                        <input type="checkbox" id="tog-vectors" checked> Show Vectors (v, a, F)
+                    </label>
+                </div>
+
+                <div class="control-row">
+                    <label><span>Block P Mass (m)</span><span id="lbl-mp">1.0 kg</span></label>
+                    <input type="range" id="in-mp" min="0.5" max="5.0" step="0.1" value="1.0" oninput="ui.updateLabels()">
+                </div>
+                <div class="control-row">
+                    <label><span>Block Q Mass (m_Q)</span><span id="lbl-mq">2.0 kg</span></label>
+                    <input type="range" id="in-mq" min="0.5" max="10.0" step="0.1" value="2.0" oninput="ui.updateLabels()">
+                </div>
+                <div class="control-row">
+                    <label><span>Spring Constant 1</span><span id="lbl-k1">20 N/m</span></label>
+                    <input type="range" id="in-k1" min="5" max="50" step="1" value="20" oninput="ui.updateLabels()">
+                </div>
+                <div class="control-row">
+                    <label><span>Spring Constant 2</span><span id="lbl-k2">20 N/m</span></label>
+                    <input type="range" id="in-k2" min="5" max="50" step="1" value="20" oninput="ui.updateLabels()">
+                </div>
+                <div class="control-row" style="margin-bottom: 0;">
+                    <label><span>Initial Amplitude</span><span id="lbl-a">1.0 m</span></label>
+                    <input type="range" id="in-a" min="0.1" max="2.0" step="0.1" value="1.0" oninput="ui.updateLabels()">
+                </div>
+            </fieldset>
+
+            <button class="btn-primary" id="btn-play" onclick="ui.togglePlay()">▶ Start Simulation</button>
+            <button class="btn-secondary" onclick="ui.resetSim()">↺ Reset System</button>
+            <button class="btn-danger" id="btn-drop" onclick="ui.queueDrop()" disabled>⏬ Drop Block Q (Queues at x=0)</button>
+        </div>
+
+        <div class="center-panel" id="canvas-container">
+            <canvas id="simCanvas"></canvas>
+        </div>
+
+        <div class="right-panel">
+            <fieldset style="margin-top: 0; padding: 10px 15px;">
+                <legend>Real-Time Telemetry</legend>
+                <div class="telem-row">
+                    <span id="tel-k">k_eq: -- N/m</span>
+                    <span id="tel-v">v_max: -- m/s</span>
+                    <span id="tel-pe">PE_max: -- J</span>
+                    <span id="tel-t">Period (T): -- s</span>
+                </div>
+            </fieldset>
+
+            <div class="chart-wrapper"><canvas id="chartPos"></canvas></div>
+            <div class="chart-wrapper"><canvas id="chartKE"></canvas></div>
+            <div class="chart-wrapper"><canvas id="chartPE"></canvas></div>
+
+            <button class="btn-data" onclick="ui.exportCSV()">📊 Export Graph Data (.CSV)</button>
+        </div>
+    </div>
+
+    <div id="qa-tab" class="tab-content">
+        <div class="qa-container">
+            <fieldset>
+                <legend>5E Guided Inquiry Assignment</legend>
+                <label style="color: var(--text-bright); font-weight: bold;">Student Name:</label>
+                <input type="text" id="student-name" placeholder="Enter your full name">
+                
+                <div style="margin-top: 20px;">
+                    <span id="qa-stage" style="color: #A371F7; font-size: 22px; font-weight: bold;">STAGE</span><br>
+                    <span id="qa-counter" style="color: #8B949E; font-size: 14px;">Prompt 1 of 5</span>
+                </div>
+                
+                <div class="qa-prompt" id="qa-prompt-text">Loading prompt...</div>
+                <textarea id="qa-answer" placeholder="Enter scientific reasoning here..."></textarea>
+                
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-secondary" style="flex: 1;" onclick="inquiry.prev()">◀ Previous</button>
+                    <button class="btn-secondary" style="flex: 1;" onclick="inquiry.next()">Next ▶</button>
+                </div>
+                <button class="btn-primary" style="margin-top: 10px;" onclick="inquiry.exportDOCX()">📄 Export Answers to Document</button>
+            </fieldset>
+        </div>
+    </div>
+
+<script>
+// ==========================================
+// 1. ANALYTICAL PHYSICS ENGINE
+// ==========================================
+class PhysicsEngine {
+    constructor() { this.reset(1.0, 20.0, 1.0); }
+
+    reset(m_P, k_eq, A_0) {
+        this.m_P = m_P; this.m_Q = 0.0; this.k_eq = k_eq; this.m_total = m_P;
+        this.omega = Math.sqrt(k_eq / m_P);
+        this.A = A_0; this.phi = -Math.PI / 2;
+        
+        this.omega_init = this.omega; this.A_init = this.A; this.phi_init = this.phi;
+        
+        this.t_start = 0.0; this.collision_queued = false; this.m_Q_pending = 0.0;
+        this.t_drop_queued = -1.0; this.t_collision_actual = Infinity;
+        this.energy_lost = 0.0;
+    }
+
+    queue_collision(m_Q, current_t) {
+        if (this.collision_queued || this.m_Q > 0) return;
+        
+        this.collision_queued = true;
+        this.m_Q_pending = m_Q;
+        this.t_drop_queued = current_t;
+        
+        let phase_current = this.omega_init * current_t + this.phi_init;
+        let n = Math.ceil((phase_current - Math.PI/2) / Math.PI);
+        let target_phase = n * Math.PI + Math.PI/2;
+        let dt = (target_phase - phase_current) / this.omega_init;
+        
+        this.t_collision_actual = current_t + dt;
+    }
+
+    execute_collision(t) {
+        let v_old = -this.A_init * this.omega_init * Math.sin(this.omega_init * t + this.phi_init);
+        let p_initial = this.m_P * v_old;
+        
+        this.m_total = this.m_P + this.m_Q_pending;
+        this.m_Q = this.m_Q_pending;
+        let v_new = p_initial / this.m_total;
+        
+        let ke_old = 0.5 * this.m_P * (v_old * v_old);
+        let ke_new = 0.5 * this.m_total * (v_new * v_new);
+        this.energy_lost = ke_old - ke_new;
+        
+        this.omega = Math.sqrt(this.k_eq / this.m_total);
+        this.A = Math.abs(v_new / this.omega);
+        this.phi = v_new > 0 ? -Math.PI / 2 : Math.PI / 2;
+        this.collision_queued = false;
+    }
+
+    evaluate_at(t) {
+        if (this.collision_queued && t >= this.t_collision_actual) {
+            this.execute_collision(this.t_collision_actual);
+        }
+        
+        let x, v;
+        if (this.m_Q > 0 && t >= this.t_collision_actual) {
+            let dt = t - this.t_collision_actual;
+            x = this.A * Math.cos(this.omega * dt + this.phi);
+            v = -this.A * this.omega * Math.sin(this.omega * dt + this.phi);
+        } else {
+            x = this.A_init * Math.cos(this.omega_init * t + this.phi_init);
+            v = -this.A_init * this.omega_init * Math.sin(this.omega_init * t + this.phi_init);
+        }
+        return { x, v, m_active: this.m_Q > 0 ? this.m_total : this.m_P };
+    }
+}
+
+// ==========================================
+// 2. 5E INQUIRY MANAGER
+// ==========================================
+const PROMPTS = [
+    { stage: "ENGAGE", text: "Set the simulation to Single Spring. Observe the position and energy graphs. Where is the block when Kinetic Energy is at its maximum? Where is it when Potential Energy is at its maximum?" },
+    { stage: "EXPLORE", text: "Click 'Drop Block Q' while the block is oscillating. The block will drop when P passes equilibrium. What happens instantly to the Kinetic Energy? What happens to the maximum amplitude on the position graph?" },
+    { stage: "EXPLAIN", text: "Using the law of conservation of momentum, explain *why* the velocity (and therefore the Kinetic Energy) decreases when Block Q sticks to Block P at the equilibrium position." },
+    { stage: "ELABORATE", text: "Switch the configuration to Parallel Springs, then to Series Springs. How does adding a spring in parallel affect the equivalent spring constant k_eq and the period of oscillation T compared to adding it in series?" },
+    { stage: "EVALUATE", text: "Let Block P have mass m and Block Q have mass 2m. Determine the exact mathematical ratio of the new period T_PQ to the original period T_P. Use the simulation data to verify your theoretical ratio." }
+];
+
+const inquiry = {
+    idx: 0,
+    answers: Array(5).fill(""),
+    
+    init() {
+        const saved = localStorage.getItem('shm_lab_answers');
+        if (saved) this.answers = JSON.parse(saved);
+        
+        document.getElementById('qa-answer').addEventListener('input', e => {
+            this.answers[this.idx] = e.target.value;
+            localStorage.setItem('shm_lab_answers', JSON.stringify(this.answers));
+        });
+        this.render();
+    },
+    render() {
+        const p = PROMPTS[this.idx];
+        document.getElementById('qa-stage').innerText = `STAGE: ${p.stage}`;
+        document.getElementById('qa-counter').innerText = `Prompt ${this.idx + 1} of 5`;
+        document.getElementById('qa-prompt-text').innerText = p.text;
+        document.getElementById('qa-answer').value = this.answers[this.idx];
+    },
+    prev() { if (this.idx > 0) { this.idx--; this.render(); } },
+    next() { if (this.idx < 4) { this.idx++; this.render(); } },
+    async exportDOCX() {
+        const name = document.getElementById('student-name').value.trim();
+        if (!name) return alert("Please enter your name.");
+        
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+        const children = [
+            new Paragraph({ text: "AP Physics: SHM Lab Answers", heading: HeadingLevel.HEADING_1 }),
+            new Paragraph({ text: `Student: ${name}` }),
+            new Paragraph({ text: `Date: ${new Date().toLocaleString()}\n` })
+        ];
+        
+        PROMPTS.forEach((p, i) => {
+            children.push(new Paragraph({ text: `[${p.stage}] Prompt ${i + 1}:`, heading: HeadingLevel.HEADING_2 }));
+            children.push(new Paragraph({ children: [new TextRun({ text: p.text, italics: true })] }));
+            children.push(new Paragraph({ text: this.answers[i] || "(No answer)" }));
+            children.push(new Paragraph({ text: "" }));
+        });
+        
+        const doc = new Document({ sections: [{ properties: {}, children }] });
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `SHM_Lab_${name.replace(/\s+/g, '_')}.docx`);
+    }
+};
+
+// ==========================================
+// 3. GUI & VISUALIZATION CONTROLLER
+// ==========================================
+const engine = new PhysicsEngine();
+let isPlaying = false;
+let t_current = 0.0;
+let lastTime = 0;
+
+// Setup Canvas
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+const container = document.getElementById('canvas-container');
+
+function resizeCanvas() {
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Setup Charts (Chart.js)
+Chart.defaults.color = '#8B949E';
+Chart.defaults.font.family = "'Segoe UI', sans-serif";
+Chart.defaults.elements.point.radius = 0;
+Chart.defaults.elements.line.borderWidth = 3;
+
+const chartOptions = (title) => ({
+    responsive: true, maintainAspectRatio: false, animation: false,
+    plugins: { legend: { display: false }, title: { display: true, text: title, color: '#C9D1D9' } },
+    scales: { x: { display: false }, y: { grid: { color: '#30363D' } } }
+});
+
+const maxDataPoints = 300; 
+const createChart = (id, title, color) => new Chart(document.getElementById(id), {
+    type: 'line',
+    data: { labels: Array(maxDataPoints).fill(''), datasets: [{ data: Array(maxDataPoints).fill(0), borderColor: color }] },
+    options: chartOptions(title)
+});
+
+// EXPLICIT COLOR OVERRIDES APPLIED HERE
+const charts = {
+    pos: createChart('chartPos', 'Position (m)', '#87CEFA'), // Light Blue
+    ke: createChart('chartKE', 'Kinetic Energy (J)', '#F85149'), // Bright Red
+    pe: createChart('chartPE', 'Potential Energy (J)', '#2EA043') // Bright Green
+};
+
+let historyData = { t: [], x: [], v: [], ke: [], pe: [] };
+
+const ui = {
+    updateLabels() {
+        document.getElementById('lbl-mp').innerText = document.getElementById('in-mp').value + ' kg';
+        document.getElementById('lbl-mq').innerText = document.getElementById('in-mq').value + ' kg';
+        document.getElementById('lbl-k1').innerText = document.getElementById('in-k1').value + ' N/m';
+        document.getElementById('lbl-k2').innerText = document.getElementById('in-k2').value + ' N/m';
+        document.getElementById('lbl-a').innerText = document.getElementById('in-a').value + ' m';
+        if (!isPlaying) this.updateKeq();
+    },
+
+    updateKeq() {
+        if (isPlaying) return;
+        t_current = 0.0;
+        historyData = { t: [], x: [], v: [], ke: [], pe: [] };
+        
+        const config = document.querySelector('input[name="config"]:checked').value;
+        const k1 = parseFloat(document.getElementById('in-k1').value);
+        const k2 = parseFloat(document.getElementById('in-k2').value);
+        document.getElementById('in-k2').disabled = (config === 'single');
+        
+        let k_eq = k1;
+        if (config === 'parallel') k_eq = k1 + k2;
+        if (config === 'series') k_eq = (k1 * k2) / (k1 + k2);
+        
+        const m_p = parseFloat(document.getElementById('in-mp').value);
+        const a_0 = parseFloat(document.getElementById('in-a').value);
+        
+        engine.reset(m_p, k_eq, a_0);
+        
+        document.getElementById('tel-k').innerText = `k_eq: ${k_eq.toFixed(1)} N/m`;
+        document.getElementById('tel-v').innerText = `v_max: ${(a_0 * engine.omega).toFixed(2)} m/s`;
+        document.getElementById('tel-pe').innerText = `PE_max: ${(0.5 * k_eq * a_0**2).toFixed(1)} J`;
+        document.getElementById('tel-t').innerText = `Period (T): ${(2 * Math.PI / engine.omega).toFixed(2)} s`;
+        
+        document.getElementById('btn-drop').disabled = true;
+        document.getElementById('btn-drop').innerText = "⏬ Drop Block Q (Queues at x=0)";
+        
+        this.stepSimulation(true);
+    },
+
+    togglePlay() {
+        isPlaying = !isPlaying;
+        document.getElementById('btn-play').innerText = isPlaying ? "⏸ Pause" : "▶ Start Simulation";
+        document.getElementById('btn-drop').disabled = !isPlaying || engine.collision_queued || engine.m_Q > 0;
+        if (isPlaying) lastTime = performance.now();
+    },
+
+    resetSim() {
+        isPlaying = false;
+        document.getElementById('btn-play').innerText = "▶ Start Simulation";
+        this.updateKeq();
+    },
+
+    queueDrop() {
+        engine.queue_collision(parseFloat(document.getElementById('in-mq').value), t_current);
+        document.getElementById('btn-drop').disabled = true;
+        document.getElementById('btn-drop').innerText = "Collision Queued (Waiting for x=0)...";
+    },
+
+    stepSimulation(manual = false) {
+        if (!isPlaying && !manual) return;
+        if (isPlaying) {
+            const now = performance.now();
+            t_current += (now - lastTime) / 1000;
+            lastTime = now;
+        }
+
+        const state = engine.evaluate_at(t_current);
+        const pe = 0.5 * engine.k_eq * (state.x ** 2);
+        const ke = 0.5 * state.m_active * (state.v ** 2);
+
+        if (engine.m_Q > 0) {
+            document.getElementById('btn-drop').innerText = `Collided! Heat/Sound Loss: ${engine.energy_lost.toFixed(2)} J`;
+        }
+
+        this.drawCanvas(state.x, state.v, state.m_active);
+        
+        // Update Charts
+        if (isPlaying) {
+            const pushData = (chart, val) => {
+                chart.data.datasets[0].data.push(val);
+                chart.data.datasets[0].data.shift();
+                chart.update();
+            };
+            pushData(charts.pos, state.x);
+            pushData(charts.ke, ke);
+            pushData(charts.pe, pe);
+
+            if (Math.random() < 0.2) {
+                historyData.t.push(t_current);
+                historyData.x.push(state.x);
+                historyData.v.push(state.v);
+                historyData.ke.push(ke);
+                historyData.pe.push(pe);
+            }
+        } else if (manual) {
+            const period = 2 * Math.PI / engine.omega_init;
+            for (let i = 0; i < maxDataPoints; i++) {
+                const t = (i / maxDataPoints) * period * 2;
+                const x = engine.A_init * Math.cos(engine.omega_init * t + engine.phi_init);
+                const v = -engine.A_init * engine.omega_init * Math.sin(engine.omega_init * t + engine.phi_init);
+                charts.pos.data.datasets[0].data[i] = x;
+                charts.ke.data.datasets[0].data[i] = 0.5 * engine.m_P * (v ** 2);
+                charts.pe.data.datasets[0].data[i] = 0.5 * engine.k_eq * (x ** 2);
+            }
+            Object.values(charts).forEach(c => c.update());
+        }
+    },
+
+    drawArrow(fromX, fromY, toX, toY, color, label) {
+        const headlen = 8;
+        const dx = toX - fromX; const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        
+        ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 3; // Thicker lines for visibility
+        ctx.moveTo(fromX, fromY); ctx.lineTo(toX, toY);
+        ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.stroke();
+        
+        ctx.fillStyle = color; ctx.font = 'bold 16px sans-serif';
+        ctx.fillText(label, toX + 15, toY + 5);
+    },
+
+    drawCanvas(x, v, m_active) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const eqY = canvas.height / 2;
+        const ceilingY = eqY - 220;
+        const scale = 75;
+        const blockY = eqY + (x * scale);
+        const centerX = canvas.width / 2;
+
+        ctx.fillStyle = '#30363D'; 
+        ctx.fillRect(centerX - 80, ceilingY - 20, 160, 20);
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 2; ctx.setLineDash([8, 8]);
+        ctx.beginPath(); ctx.moveTo(centerX - 180, eqY); ctx.lineTo(centerX + 180, eqY); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '14px Segoe UI'; ctx.textAlign = 'center';
+        ctx.fillText('Equilibrium (x = 0)', centerX, eqY + 20);
+
+        const drawSpring = (startX, startY, endY, color) => {
+            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            const coils = 15; const dy = (endY - startY) / coils;
+            for (let i = 1; i < coils; i++) {
+                ctx.lineTo(startX + (i % 2 === 0 ? 15 : -15), startY + i * dy);
+            }
+            ctx.lineTo(startX, endY); ctx.stroke();
+        };
+
+        const config = document.querySelector('input[name="config"]:checked').value;
+        if (config === 'single') {
+            drawSpring(centerX, ceilingY, blockY, '#8B949E');
+        } else if (config === 'parallel') {
+            drawSpring(centerX - 25, ceilingY, blockY, '#8B949E');
+            drawSpring(centerX + 25, ceilingY, blockY, '#8B949E');
+        } else if (config === 'series') {
+            const midY = (ceilingY + blockY) / 2;
+            drawSpring(centerX, ceilingY, midY, '#8B949E');
+            ctx.fillStyle = '#666'; ctx.fillRect(centerX - 15, midY - 5, 30, 10); 
+            drawSpring(centerX, midY, blockY, 'var(--accent-yellow)');
+        }
+
+        ctx.fillStyle = 'var(--accent-blue)'; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+        ctx.fillRect(centerX - 40, blockY, 80, 50); ctx.strokeRect(centerX - 40, blockY, 80, 50);
+        ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.font = 'bold 16px sans-serif';
+        ctx.fillText('P', centerX, blockY + 30);
+
+        if (engine.m_Q > 0) {
+            ctx.fillStyle = '#F85149'; ctx.fillRect(centerX - 30, blockY - 30, 60, 30); ctx.strokeRect(centerX - 30, blockY - 30, 60, 30);
+            ctx.fillStyle = 'white'; ctx.fillText('Q', centerX, blockY - 10);
+        } else if (engine.collision_queued) {
+            const startY = ceilingY + 30;
+            const progress = Math.max(0, Math.min(1, (t_current - engine.t_drop_queued) / (engine.t_collision_actual - engine.t_drop_queued)));
+            const currY = startY + progress * (eqY - startY);
+            ctx.fillStyle = '#F85149'; ctx.fillRect(centerX - 30, currY - 30, 60, 30); ctx.strokeRect(centerX - 30, currY - 30, 60, 30);
+            ctx.fillStyle = 'white'; ctx.fillText('Q', centerX, currY - 10);
+        }
+
+        // VECTORS WITH EXPLICIT COLOR OVERRIDES
+        if (document.getElementById('tog-vectors').checked) {
+            const cX = centerX;
+            const cY = blockY + 25;
+            
+            const a = -(engine.omega ** 2) * x;
+            const F = m_active * a;
+            
+            // Velocity (v) -> Explicit Neon Green
+            if (Math.abs(v) > 0.05) {
+                this.drawArrow(cX - 60, cY, cX - 60, cY + v * 35, '#32D74B', 'v');
+            }
+            // Acceleration (a) -> Explicit Yellow
+            if (Math.abs(a) > 0.05) {
+                this.drawArrow(cX + 60, cY, cX + 60, cY + a * 15, '#FFCC00', 'a');
+            }
+            // Force (F) -> Explicit Red
+            if (Math.abs(F) > 0.05) {
+                this.drawArrow(cX + 110, cY, cX + 110, cY + F * 3, '#FF3B30', 'F');
+            }
+        }
+    },
+
+    exportCSV() {
+        const name = document.getElementById('student-name').value.trim() || "Student";
+        if (historyData.t.length === 0) return alert("Run the simulation first to gather data.");
+        
+        let csv = "Time (s),Position (m),Velocity (m/s),Kinetic Energy (J),Potential Energy (J),Total Energy (J)\n";
+        for (let i = 0; i < historyData.t.length; i++) {
+            const te = historyData.ke[i] + historyData.pe[i];
+            csv += `${historyData.t[i].toFixed(4)},${historyData.x[i].toFixed(4)},${historyData.v[i].toFixed(4)},${historyData.ke[i].toFixed(4)},${historyData.pe[i].toFixed(4)},${te.toFixed(4)}\n`;
+        }
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `SHM_Data_${name.replace(/\s+/g, '_')}.csv`);
+    }
+};
+
+function switchTab(tabId) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+    if(tabId === 'sim-tab') resizeCanvas();
+}
+
+function animate() {
+    ui.stepSimulation();
+    requestAnimationFrame(animate);
+}
+
+inquiry.init();
+ui.updateKeq();
+requestAnimationFrame(animate);
+
+</script>
+</body>
+</html>
