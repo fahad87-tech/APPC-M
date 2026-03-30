@@ -4,6 +4,154 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pro Physics Simulator: Buoyancy & Tension</title>
+    <script>
+        const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+        document.documentElement.classList.add("password-locked");
+
+        const passwordGateStyle = document.createElement("style");
+        passwordGateStyle.textContent = `
+            html.password-locked body { overflow: hidden; }
+            html.password-locked body > * { visibility: hidden; }
+            #password-gate {
+                position: fixed;
+                inset: 0;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                background: rgba(5, 9, 18, 0.88);
+                padding: 24px;
+                z-index: 9999;
+            }
+            html.password-locked #password-gate { display: flex; visibility: visible; }
+            #password-gate-card {
+                width: min(100%, 420px);
+                background: #101625;
+                border: 1px solid rgba(100,181,246,0.28);
+                border-radius: 18px;
+                padding: 24px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+                color: #e7edf7;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            #password-gate-title {
+                font-size: 20px;
+                font-weight: 700;
+                margin-bottom: 8px;
+            }
+            #password-gate-message {
+                font-size: 14px;
+                color: rgba(255,255,255,0.72);
+                margin-bottom: 16px;
+                line-height: 1.5;
+            }
+            #password-gate-input {
+                width: 100%;
+                padding: 12px 14px;
+                border-radius: 12px;
+                border: 1px solid rgba(100,181,246,0.35);
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 16px;
+                outline: none;
+                margin-bottom: 16px;
+            }
+            #password-gate-input:focus {
+                border-color: #64b5f6;
+                box-shadow: 0 0 0 3px rgba(100,181,246,0.16);
+            }
+            #password-gate-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+            .password-gate-button {
+                border: none;
+                border-radius: 10px;
+                padding: 10px 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            #password-gate-cancel {
+                background: rgba(255,255,255,0.08);
+                color: #d9e2f2;
+            }
+            #password-gate-submit {
+                background: #64b5f6;
+                color: #08101c;
+            }
+        `;
+        document.head.appendChild(passwordGateStyle);
+
+        function requestPassword(title, message) {
+            return new Promise(resolve => {
+                const existingGate = document.getElementById("password-gate");
+                if (existingGate) existingGate.remove();
+
+                const gate = document.createElement("div");
+                gate.id = "password-gate";
+                gate.innerHTML = `
+                    <div id="password-gate-card">
+                        <div id="password-gate-title">${title}</div>
+                        <div id="password-gate-message">${message}</div>
+                        <input id="password-gate-input" type="password" autocomplete="current-password">
+                        <div id="password-gate-actions">
+                            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+                            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(gate);
+
+                const input = document.getElementById("password-gate-input");
+                const cancelButton = document.getElementById("password-gate-cancel");
+                const submitButton = document.getElementById("password-gate-submit");
+
+                const finish = value => {
+                    gate.remove();
+                    resolve(value);
+                };
+
+                cancelButton.addEventListener("click", () => finish(null));
+                submitButton.addEventListener("click", () => finish(input.value));
+                input.addEventListener("keydown", event => {
+                    if (event.key === "Enter") finish(input.value);
+                    if (event.key === "Escape") finish(null);
+                });
+
+                window.requestAnimationFrame(() => input.focus());
+            });
+        }
+
+        async function verifyPageAccess() {
+            const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+
+            if (userInput === null) {
+                window.location.href = "../index.html";
+                return;
+            }
+
+            const encoder = new TextEncoder();
+            const data = encoder.encode(userInput);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+            if (hashHex === TARGET_HASH) {
+                document.documentElement.classList.remove("password-locked");
+            } else {
+                alert("Incorrect password. Access denied.");
+                window.location.href = "../index.html";
+            }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+        } else {
+            verifyPageAccess();
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
