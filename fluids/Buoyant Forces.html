@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Physics Simulator: Buoyancy & Tension</title>
+    <script>
+        const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+        async function verifyPageAccess() {
+            document.documentElement.style.display = "none";
+
+            const overlay = document.createElement("div");
+            overlay.style.cssText = "position:fixed;inset:0;background:#0a0e1a;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:'Segoe UI',Arial,sans-serif;";
+
+            const box = document.createElement("div");
+            box.style.cssText = "background:rgba(255,255,255,0.06);border:1px solid rgba(100,181,246,0.3);border-radius:16px;padding:40px;max-width:360px;width:90%;text-align:center;";
+
+            const title = document.createElement("div");
+            title.style.cssText = "font-size:20px;font-weight:bold;color:#90caf9;letter-spacing:1px;margin-bottom:8px;";
+            title.textContent = "🔒 Protected Simulation";
+
+            const sub = document.createElement("div");
+            sub.style.cssText = "font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:28px;letter-spacing:0.5px;";
+            sub.textContent = "Enter classroom password to continue";
+
+            const inputWrap = document.createElement("div");
+            inputWrap.style.cssText = "position:relative;margin-bottom:20px;";
+
+            const input = document.createElement("input");
+            input.type = "password";
+            input.id = "pass-input";
+            input.style.cssText = "width:100%;padding:12px 16px;background:rgba(255,255,255,0.06);border:1px solid rgba(100,181,246,0.3);border-radius:10px;color:#fff;font-size:15px;outline:none;box-sizing:border-box;";
+            input.placeholder = "Password";
+
+            const eyeBtn = document.createElement("button");
+            eyeBtn.textContent = "👁";
+            eyeBtn.type = "button";
+            eyeBtn.style.cssText = "position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;padding:4px;";
+            eyeBtn.addEventListener("click", () => {
+                input.type = input.type === "password" ? "text" : "password";
+            });
+
+            inputWrap.appendChild(input);
+            inputWrap.appendChild(eyeBtn);
+
+            const msg = document.createElement("div");
+            msg.id = "pass-msg";
+            msg.style.cssText = "font-size:12px;color:#ff6b6b;margin-bottom:16px;min-height:18px;";
+
+            const btnRow = document.createElement("div");
+            btnRow.style.cssText = "display:flex;gap:10px;";
+
+            const okBtn = document.createElement("button");
+            okBtn.textContent = "Enter";
+            okBtn.style.cssText = "flex:1;padding:11px;border:none;border-radius:10px;background:#64b5f6;color:#000;font-size:14px;font-weight:bold;cursor:pointer;";
+
+            const cancelBtn = document.createElement("button");
+            cancelBtn.textContent = "Cancel";
+            cancelBtn.style.cssText = "flex:1;padding:11px;border:1px solid rgba(100,181,246,0.3);border-radius:10px;background:transparent;color:#64b5f6;font-size:14px;cursor:pointer;";
+
+            btnRow.appendChild(okBtn);
+            btnRow.appendChild(cancelBtn);
+
+            box.appendChild(title);
+            box.appendChild(sub);
+            box.appendChild(inputWrap);
+            box.appendChild(msg);
+            box.appendChild(btnRow);
+            overlay.appendChild(box);
+            document.head.appendChild(overlay);
+
+            const submit = async () => {
+                const userInput = input.value;
+                if (!userInput) { msg.textContent = "Please enter a password."; return; }
+                const encoder = new TextEncoder();
+                const data = encoder.encode(userInput);
+                const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+                if (hashHex === TARGET_HASH) {
+                    overlay.remove();
+                    document.documentElement.style.display = "block";
+                } else {
+                    msg.textContent = "Incorrect password. Access denied.";
+                    input.value = "";
+                }
+            };
+
+            okBtn.addEventListener("click", submit);
+            cancelBtn.addEventListener("click", () => { window.location.href = "../index.html"; });
+            input.addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+            input.addEventListener("keydown", e => { if (e.key === "Escape") cancelBtn.click(); });
+
+            setTimeout(() => input.focus(), 100);
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", verifyPageAccess);
+        } else {
+            verifyPageAccess();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-main: #12121A;
+            --bg-panel: #1A1A24;
+            --bg-input: #2C2C38;
+            --border: #3A3A50;
+            --text-main: #E0E0E0;
+            --text-muted: #A0A0B0;
+            --primary: #2E86DE;
+            --primary-hover: #54A0FF;
+            --accent-cyan: #00D2D3;
+            --accent-green: #10AC84;
+            --accent-purple: #8E44AD;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        /* Tabs */
+        .tab-buttons {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            background-color: var(--bg-input);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            padding: 12px 25px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Layout */
+        .tab-content {
+            display: none;
+            flex: 1;
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .tab-content.active {
+            display: flex;
+            gap: 20px;
+        }
+
+        /* Panels */
+        .control-panel {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .canvas-panel {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background-color: #12121A;
+            overflow: hidden;
+        }
+        .graph-panel {
+            width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+        .graph-container {
+            flex: 1;
+            min-height: 200px;
+            background: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        /* Controls */
+        fieldset {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 0;
+        }
+        legend {
+            color: var(--accent-cyan);
+            font-weight: bold;
+            padding: 0 5px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        label {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        select, input[type="text"], textarea {
+            background-color: var(--bg-input);
+            color: white;
+            border: 1px solid #4B4B60;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-cyan);
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+        button:hover { background-color: var(--primary-hover); }
+        button.secondary { background-color: #34495E; }
+        button.secondary:hover { background-color: #4B6584; }
+        button.success { background-color: var(--accent-green); margin-top: 15px;}
+        button.teacher { background-color: var(--accent-purple); margin-top: 10px;}
+
+        /* Q/A Specific */
+        .qa-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            overflow-y: auto;
+            padding-right: 15px;
+        }
+        .question-text {
+            font-size: 22px;
+            color: var(--accent-cyan);
+            margin: 20px 0;
+            line-height: 1.4;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 150px;
+            margin-bottom: 20px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tab-buttons">
+        <button class="tab-btn active" onclick="switchTab('sim')">🔬 Interactive Laboratory</button>
+        <button class="tab-btn" onclick="switchTab('qa')">📝 5E Q/A Assignment</button>
+    </div>
+
+    <div id="sim" class="tab-content active">
+        
+        <div class="control-panel">
+            <fieldset>
+                <legend>Physical Properties</legend>
+                <div class="control-group">
+                    <label>Planetary Gravity:</label>
+                    <select id="selGravity" onchange="updateProperties()">
+                        <option value="9.8">Earth (9.8 m/s²)</option>
+                        <option value="1.6">Moon (1.6 m/s²)</option>
+                        <option value="3.7">Mars (3.7 m/s²)</option>
+                        <option value="24.8">Jupiter (24.8 m/s²)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label id="lblMat">Material Density (ρ): 500 kg/m³</label>
+                    <input type="range" id="sldMat" min="100" max="2000" value="500" oninput="updateProperties()">
+                </div>
+                <div class="control-group">
+                    <label id="lblFluid">Fluid Density (ρ): 1000 kg/m³</label>
+                    <input type="range" id="sldFluid" min="500" max="2000" value="1000" oninput="updateProperties()">
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Environment Setup</legend>
+                <div class="control-group">
+                    <label>Tension Scenario:</label>
+                    <select id="selScenario" onchange="resetSim()">
+                        <option value="Free Floating">Free Floating</option>
+                        <option value="Hanging from Top">Hanging from Top</option>
+                        <option value="Anchored to Bottom">Anchored to Bottom</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Initial Drop Height</label>
+                    <input type="range" id="sldPos" min="0" max="400" value="100" oninput="if(!isPlaying) resetSim()">
+                </div>
+            </fieldset>
+
+            <button onclick="togglePlay()" id="btnPlay">▶ Play / Pause Simulation</button>
+            <button class="secondary" onclick="resetSim()">↺ Reset Environment</button>
+        </div>
+
+        <div class="canvas-panel">
+            <canvas id="simCanvas" width="500" height="600"></canvas>
+        </div>
+
+        <div class="graph-panel">
+            <div class="graph-container"><canvas id="chartVel"></canvas></div>
+            <div class="graph-container"><canvas id="chartBuoy"></canvas></div>
+            <div class="graph-container"><canvas id="chartVol"></canvas></div>
+        </div>
+    </div>
+
+    <div id="qa" class="tab-content">
+        <div class="qa-layout">
+            <div class="control-group">
+                <label>Student Name:</label>
+                <input type="text" id="studentName" placeholder="Enter your full name before exporting...">
+            </div>
+
+            <fieldset style="margin-top: 20px;">
+                <legend>5E Interactive Assignment</legend>
+                <div style="padding: 10px;">
+                    <label id="qTracker" style="color: var(--text-muted); font-size: 16px;">Question 1 of 10</label>
+                    <div id="qText" class="question-text">Question text goes here...</div>
+                    <textarea id="qAnswer" placeholder="Type your scientific reasoning here..." oninput="saveCurrentAnswer()"></textarea>
+                    
+                    <div class="nav-buttons">
+                        <button class="secondary" id="btnPrev" onclick="navQuestion(-1)">◀ Previous</button>
+                        <input type="range" id="qSlider" min="0" max="9" value="0" oninput="jumpQuestion()">
+                        <button class="secondary" id="btnNext" onclick="navQuestion(1)">Next ▶</button>
+                    </div>
+                </div>
+            </fieldset>
+
+            <button class="success" onclick="exportToDoc()">💾 Export Assignment to .DOC</button>
+            <button class="teacher" onclick="exportRubric()">📋 Export Teacher Grading Rubric</button>
+        </div>
+    </div>
+
+<script>
+    // ==========================================
+    // UI TAB LOGIC
+    // ==========================================
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    // ==========================================
+    // PHYSICS ENGINE & CANVAS RENDERER
+    // ==========================================
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    let isPlaying = false;
+    let lastTime = performance.now();
+    let animationId;
+
+    let state = {
+        g: 9.8,
+        rho_f: 1000,
+        rho_m: 500,
+        scenario: "Free Floating",
+        y_pos: 100,
+        velocity: 0,
+        time: 0,
+        waterLevel: 300,
+        stringLen: 250,
+        blockSize: 100 
+    };
+
+    const maxDataPoints = 300;
+    let dataTime = [], dataVel = [], dataBuoy = [], dataVol = [];
+
+    function updateProperties() {
+        state.g = parseFloat(document.getElementById('selGravity').value);
+        state.rho_m = parseFloat(document.getElementById('sldMat').value);
+        state.rho_f = parseFloat(document.getElementById('sldFluid').value);
+        
+        document.getElementById('lblMat').innerText = `Material Density (ρ): ${state.rho_m} kg/m³`;
+        document.getElementById('lblFluid').innerText = `Fluid Density (ρ): ${state.rho_f} kg/m³`;
+        
+        if (!isPlaying) drawFrame();
+    }
+
+    function resetSim() {
+        isPlaying = false;
+        document.getElementById('btnPlay').innerText = "▶ Play Simulation";
+        
+        state.scenario = document.getElementById('selScenario').value;
+        state.y_pos = parseFloat(document.getElementById('sldPos').value);
+        state.velocity = 0;
+        state.time = 0;
+        
+        dataTime = []; dataVel = []; dataBuoy = []; dataVol = [];
+        updateCharts();
+        
+        drawFrame();
+    }
+
+    function togglePlay() {
+        isPlaying = !isPlaying;
+        document.getElementById('btnPlay').innerText = isPlaying ? "⏸ Pause Simulation" : "▶ Play Simulation";
+        if (isPlaying) {
+            lastTime = performance.now();
+            animationId = requestAnimationFrame(physicsLoop);
+        } else {
+            cancelAnimationFrame(animationId);
+            drawFrame(); // Update static frame to ensure FBD stays visible
+        }
+    }
+
+    function physicsLoop(currentTime) {
+        if (!isPlaying) return;
+        
+        const dt = 0.016; 
+        state.time += dt;
+
+        let mass = state.rho_m * 1.0; 
+        let weight = mass * state.g;
+
+        let bottom_y = state.y_pos + state.blockSize;
+        let sub_px = Math.max(0, Math.min(state.blockSize, bottom_y - state.waterLevel));
+        let sub_frac = sub_px / state.blockSize;
+        let buoy_force = state.rho_f * sub_frac * 1.0 * state.g;
+
+        let active_rho = sub_frac > 0 ? state.rho_f : 1.225;
+        let drag = 0.5 * active_rho * 1.05 * 1.0 * (state.velocity * state.velocity);
+
+        let net_force = weight - buoy_force;
+        
+        if (state.velocity > 0) net_force -= drag;
+        else if (state.velocity < 0) net_force += drag;
+
+        let tension = 0;
+
+        if (state.scenario === "Hanging from Top") {
+            if (state.y_pos >= state.stringLen && net_force > 0) {
+                state.y_pos = state.stringLen;
+                state.velocity = 0;
+                tension = net_force;
+                net_force = 0;
+            }
+        } else if (state.scenario === "Anchored to Bottom") {
+            let minY = 600 - state.stringLen - state.blockSize;
+            if (state.y_pos <= minY && net_force < 0) {
+                state.y_pos = minY;
+                state.velocity = 0;
+                tension = Math.abs(net_force);
+                net_force = 0;
+            }
+        }
+
+        let acc = net_force / mass;
+        state.velocity += acc * dt;
+        state.y_pos += state.velocity * dt * 100;
+
+        if (state.y_pos >= 600 - state.blockSize) {
+            state.y_pos = 600 - state.blockSize;
+            state.velocity = 0;
+        }
+
+        dataTime.push(state.time.toFixed(2));
+        dataVel.push(state.velocity.toFixed(2));
+        dataBuoy.push(buoy_force.toFixed(0));
+        dataVol.push(sub_frac.toFixed(2));
+
+        if (dataTime.length > maxDataPoints) {
+            dataTime.shift(); dataVel.shift(); dataBuoy.shift(); dataVol.shift();
+        }
+
+        updateCharts();
+        drawFrame(weight, buoy_force, tension);
+
+        animationId = requestAnimationFrame(physicsLoop);
+    }
+
+    function drawArrow(x, y, up, length, color, label, val) {
+        if (length < 2) return;
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 6;
+        ctx.lineCap = "round";
+
+        let endY = up ? y - length : y + length;
+        
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, endY);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x, endY);
+        if (up) {
+            ctx.lineTo(x - 8, endY + 12);
+            ctx.lineTo(x + 8, endY + 12);
+        } else {
+            ctx.lineTo(x - 8, endY - 12);
+            ctx.lineTo(x + 8, endY - 12);
+        }
+        ctx.fill();
+
+        ctx.font = "bold 14px Arial";
+        let textX = x + 15;
+        let textY = endY + (up ? 15 : -5);
+        if (up && x < 250) textX = x - 90; 
+        ctx.fillText(`${label} = ${val.toFixed(0)} N`, textX, textY);
+    }
+
+    function drawFrame(weight=0, buoy=0, tension=0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Calculate static forces if paused to ensure FBD shows correctly
+        if (!isPlaying) {
+            let mass = state.rho_m * 1.0;
+            weight = mass * state.g;
+            let bottom_y = state.y_pos + state.blockSize;
+            let sub_px = Math.max(0, Math.min(state.blockSize, bottom_y - state.waterLevel));
+            buoy = state.rho_f * (sub_px / state.blockSize) * state.g;
+            
+            let net_force = weight - buoy; // Downward is positive
+            
+            if (state.scenario === "Hanging from Top") {
+                if (state.y_pos >= state.stringLen && net_force > 0) {
+                    tension = net_force;
+                }
+            } else if (state.scenario === "Anchored to Bottom") {
+                let minY = 600 - state.stringLen - state.blockSize;
+                if (state.y_pos <= minY && net_force < 0) {
+                    tension = Math.abs(net_force);
+                }
+            }
+        }
+
+        let grd = ctx.createLinearGradient(0, state.waterLevel, 0, 600);
+        grd.addColorStop(0, "rgba(0, 180, 255, 0.4)");
+        grd.addColorStop(1, "rgba(0, 60, 180, 0.8)");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, state.waterLevel, 500, 300);
+
+        let cx = 250;
+        let cy = state.y_pos + state.blockSize / 2;
+
+        if (state.scenario === "Hanging from Top") {
+            ctx.beginPath();
+            ctx.setLineDash([10, 10]);
+            ctx.moveTo(cx, 0);
+            ctx.lineTo(cx, state.y_pos);
+            ctx.strokeStyle = "#B4B4C8";
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        } else if (state.scenario === "Anchored to Bottom") {
+            ctx.beginPath();
+            ctx.setLineDash([10, 10]);
+            ctx.moveTo(cx, state.y_pos + state.blockSize);
+            ctx.lineTo(cx, 600);
+            ctx.strokeStyle = "#B4B4C8";
+            ctx.lineWidth = 4;
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        let shade = Math.max(60, 255 - parseInt((state.rho_m / 2000) * 160));
+        ctx.fillStyle = `rgb(${shade}, ${shade/2}, 40)`;
+        ctx.fillRect(cx - state.blockSize/2, state.y_pos, state.blockSize, state.blockSize);
+        ctx.strokeStyle = "#2C3E50";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(cx - state.blockSize/2, state.y_pos, state.blockSize, state.blockSize);
+
+        const scale = 0.005;
+        
+        drawArrow(cx, cy, false, weight * scale, "#FF4757", "W", weight);
+        if (buoy > 0) drawArrow(cx - 15, cy, true, buoy * scale, "#1E90FF", "F_b", buoy);
+        
+        if (tension > 1) {
+            let up = state.scenario === "Hanging from Top";
+            drawArrow(cx + 15, cy, up, tension * scale, "#2ED573", "T", tension);
+        }
+    }
+
+    // ==========================================
+    // CHART.JS SETUP WITH AXIS LABELS
+    // ==========================================
+    function getChartConfig(yLabel, yMin, yMax, color) {
+        return {
+            type: 'line',
+            data: { labels: [], datasets: [{ data: [], borderColor: color, borderWidth: 2.5, pointRadius: 0 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    x: { 
+                        grid: { color: '#3A3A50' }, 
+                        ticks: { color: '#A0A0B0', maxTicksLimit: 5 },
+                        title: { display: true, text: 'Time (s)', color: '#E0E0E0', font: {size: 13, weight: 'bold'} }
+                    },
+                    y: { 
+                        grid: { color: '#3A3A50' }, 
+                        ticks: { color: '#A0A0B0' },
+                        title: { display: true, text: yLabel, color: '#E0E0E0', font: {size: 13, weight: 'bold'} },
+                        min: yMin, max: yMax
+                    }
+                }
+            }
+        };
+    }
+
+    const cVel = new Chart(document.getElementById('chartVel').getContext('2d'), getChartConfig('Velocity (m/s)', -10, 10, '#10AC84'));
+    const cBuoy = new Chart(document.getElementById('chartBuoy').getContext('2d'), getChartConfig('Buoyant Force (N)', 0, 25000, '#00D2D3'));
+    const cVol = new Chart(document.getElementById('chartVol').getContext('2d'), getChartConfig('Displaced Vol (m³)', 0, 1.2, '#54A0FF'));
+
+    function updateCharts() {
+        cVel.data.labels = dataTime; cVel.data.datasets[0].data = dataVel; cVel.update();
+        cBuoy.data.labels = dataTime; cBuoy.data.datasets[0].data = dataBuoy; cBuoy.update();
+        cVol.data.labels = dataTime; cVol.data.datasets[0].data = dataVol; cVol.update();
+    }
+
+    // ==========================================
+    // 5E Q/A LOGIC
+    // ==========================================
+    const questions = [
+        "ENGAGE: 1. What did you notice about the buoyant force arrow when the object first touched the water versus when it was fully submerged?",
+        "ENGAGE: 2. How does the initial drop height change the way the object behaves when it enters the water?",
+        "EXPLORE: 3. Change the material density to be higher than the fluid density. Describe what happens to the net force and the arrows.",
+        "EXPLORE: 4. Try the 'Hanging from Top' scenario. At what point does the tension arrow appear, and what forces does it balance?",
+        "EXPLAIN: 5. Look at the new Displaced Volume graph. How does the curve of this graph compare to the Buoyant Force graph?",
+        "EXPLAIN: 6. When the object is perfectly floating and not moving, what is the mathematical relationship between Weight (W) and Buoyant Force (F_b)?",
+        "ELABORATE: 7. If you were to change the gravity to Jupiter, what happens to both the Weight and the Buoyant Force?",
+        "ELABORATE: 8. Why does the velocity graph show a damped oscillation (wiggling up and down before stopping) when the block drops into the fluid?",
+        "EVALUATE: 9. Based on this simulation, formally define Archimedes' Principle.",
+        "EVALUATE: 10. If an object has a mass of 500 kg and is floating on Earth, what is the exact Buoyant Force acting on it? Explain your math."
+    ];
+    
+    let answers = Array(10).fill("");
+    let currentQ = 0;
+
+    function saveCurrentAnswer() {
+        answers[currentQ] = document.getElementById('qAnswer').value;
+    }
+
+    function renderQuestion() {
+        document.getElementById('qTracker').innerText = `Question ${currentQ + 1} of 10`;
+        document.getElementById('qText').innerText = questions[currentQ];
+        document.getElementById('qAnswer').value = answers[currentQ];
+        document.getElementById('qSlider').value = currentQ;
+        
+        document.getElementById('btnPrev').disabled = currentQ === 0;
+        document.getElementById('btnNext').disabled = currentQ === 9;
+    }
+
+    function navQuestion(dir) {
+        saveCurrentAnswer();
+        currentQ += dir;
+        if (currentQ < 0) currentQ = 0;
+        if (currentQ > 9) currentQ = 9;
+        renderQuestion();
+    }
+
+    function jumpQuestion() {
+        saveCurrentAnswer();
+        currentQ = parseInt(document.getElementById('qSlider').value);
+        renderQuestion();
+    }
+
+    // ==========================================
+    // DOC EXPORT LOGIC
+    // ==========================================
+    function exportToDoc() {
+        saveCurrentAnswer();
+        let name = document.getElementById('studentName').value.trim();
+        if (!name) {
+            alert("Please enter your name in the 'Student Name' box at the top before exporting.");
+            return;
+        }
+
+        let dateStr = new Date().toLocaleString();
+        
+        let html = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head><meta charset='utf-8'><title>Physics Lab</title></head>
+        <body style="font-family: Arial, sans-serif;">
+            <h2 style="color: #2C3E50; border-bottom: 2px solid #2C3E50; padding-bottom: 10px; text-align: center;">
+                BUOYANCY & TENSION LABORATORY ASSIGNMENT
+            </h2>
+            <p><strong>Student Name:</strong> ${name}<br><strong>Date:</strong> ${dateStr}</p>
+            <hr>
+        `;
+
+        for (let i = 0; i < questions.length; i++) {
+            let ans = answers[i].trim() || "<i>[No answer provided]</i>";
+            html += `
+            <div style="margin-bottom: 20px;">
+                <h4 style="color: #2980B9;">${questions[i]}</h4>
+                <p style="background-color: #F8F9F9; padding: 10px; border-left: 4px solid #BDC3C7; white-space: pre-wrap;">${ans}</p>
+            </div>`;
+        }
+        html += "</body></html>";
+
+        let blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = `Buoyancy_Lab_${name.replace(/\s+/g, '_')}.doc`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    function exportRubric() {
+        let content = `==================================================
+5E BUOYANCY & TENSION - TEACHER GRADING RUBRIC
+==================================================
+Total Points Possible: 30 (3 pts per question)
+
+GRADING SCALE:
+[3 pts] Full Credit: Clear, scientifically accurate reasoning.
+[2 pts] Partial Credit: Correct general idea, but missing key terminology.
+[1 pt] Minimal Credit: Attempted, but contains major misconceptions.
+[0 pts] No Credit: Blank or entirely unrelated.
+
+--------------------------------------------------
+ENGAGE PHASE
+--------------------------------------------------
+Q1: Look For: Arrow grows as more block enters water, stops growing when fully submerged.
+Q2: Look For: Higher drops result in higher entry velocity, plunging deeper initially before bobbing.
+
+--------------------------------------------------
+EXPLORE PHASE
+--------------------------------------------------
+Q3: Look For: Net Force points downward. Weight (W) arrow permanently longer than Buoyant (F_b) arrow. Sinks.
+Q4: Look For: Tension (T) appears when string is taut, points UP to balance remaining downward force (W - F_b).
+
+--------------------------------------------------
+EXPLAIN PHASE
+--------------------------------------------------
+Q5: Look For: Graphs are proportional. As V_sub increases, F_b increases.
+Q6: Look For: W = F_b (Net Force = 0).
+
+--------------------------------------------------
+ELABORATE PHASE
+--------------------------------------------------
+Q7: Look For: Both Weight and Buoyant force increase because gravity (g) is a multiplier for both equations.
+Q8: Look For: Fluid drag/water resistance slows the block as it oscillates past equilibrium.
+
+--------------------------------------------------
+EVALUATE PHASE
+--------------------------------------------------
+Q9: Look For: Upward buoyant force is equal to the weight of the fluid displaced.
+Q10: Look For: Mass = 500kg. W = 500 * 9.8 = 4900 N. Since it is floating, F_b must equal W. F_b = 4900 N.
+==================================================`;
+
+        let blob = new Blob([content], { type: 'text/plain' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = `Teacher_Rubric.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    // Initialize
+    resetSim();
+    renderQuestion();
+
+</script>
+</body>
+</html>
