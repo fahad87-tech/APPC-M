@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Orbital Mechanics Lab</title>
+    <script>
+        const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+        document.documentElement.classList.add("password-locked");
+
+        const passwordGateStyle = document.createElement("style");
+        passwordGateStyle.textContent = `
+            html.password-locked body { overflow: hidden; }
+            html.password-locked body > * { visibility: hidden; }
+            #password-gate {
+                position: fixed;
+                inset: 0;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                background: rgba(5, 9, 18, 0.88);
+                padding: 24px;
+                z-index: 9999;
+            }
+            html.password-locked #password-gate { display: flex; visibility: visible; }
+            #password-gate-card {
+                width: min(100%, 420px);
+                background: #101625;
+                border: 1px solid rgba(100,181,246,0.28);
+                border-radius: 18px;
+                padding: 24px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+                color: #e7edf7;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+            #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+            #password-gate-input {
+                width: 100%;
+                padding: 12px 14px;
+                border-radius: 12px;
+                border: 1px solid rgba(100,181,246,0.35);
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 16px;
+                outline: none;
+                margin-bottom: 16px;
+                box-sizing: border-box;
+            }
+            #password-gate-input:focus {
+                border-color: #64b5f6;
+                box-shadow: 0 0 0 3px rgba(100,181,246,0.16);
+            }
+            #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+            .password-gate-button {
+                border: none;
+                border-radius: 10px;
+                padding: 10px 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+            #password-gate-submit { background: #64b5f6; color: #08101c; }
+        `;
+        document.head.appendChild(passwordGateStyle);
+
+        function requestPassword(title, message) {
+            return new Promise(resolve => {
+                const existingGate = document.getElementById("password-gate");
+                if (existingGate) existingGate.remove();
+                const gate = document.createElement("div");
+                gate.id = "password-gate";
+                gate.innerHTML = `
+                    <div id="password-gate-card">
+                        <div id="password-gate-title">${title}</div>
+                        <div id="password-gate-message">${message}</div>
+                        <input id="password-gate-input" type="password" autocomplete="current-password">
+                        <div id="password-gate-actions">
+                            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+                            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(gate);
+                const input = document.getElementById("password-gate-input");
+                const cancelButton = document.getElementById("password-gate-cancel");
+                const submitButton = document.getElementById("password-gate-submit");
+                const finish = value => { gate.remove(); resolve(value); };
+                cancelButton.addEventListener("click", () => finish(null));
+                submitButton.addEventListener("click", () => finish(input.value));
+                input.addEventListener("keydown", event => {
+                    if (event.key === "Enter") finish(input.value);
+                    if (event.key === "Escape") finish(null);
+                });
+                window.requestAnimationFrame(() => input.focus());
+            });
+        }
+
+        async function verifyPageAccess() {
+            const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+            if (userInput === null) { window.location.href = "../index.html"; return; }
+            const encoder = new TextEncoder();
+            const data = encoder.encode(userInput);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+            if (hashHex === TARGET_HASH) {
+                document.documentElement.classList.remove("password-locked");
+            } else {
+                alert("Incorrect password. Access denied.");
+                window.location.href = "../index.html";
+            }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+        } else {
+            verifyPageAccess();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        :root {
+            --bg-deep: #020205; --glass-bg: rgba(18, 18, 22, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.15); --accent-cyan: #00E5FF;
+            --accent-red: #FF3B30; --accent-blue: #0A84FF; --text-main: #f0f0f5; --text-muted: #9aa;
+            --planet-gold: #FFD700;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-deep); color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            overflow: hidden; user-select: none;
+        }
+
+        #simCanvas { position: absolute; top: 0; left: 0; z-index: 0; cursor: crosshair; }
+
+        #dashboard {
+            position: absolute; top: 20px; left: 20px; width: 420px; max-height: calc(100vh - 40px);
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 12px;
+            display: flex; flex-direction: column; z-index: 10;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6); overflow: hidden;
+        }
+
+        .tabs { display: flex; border-bottom: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-muted); transition: 0.2s;}
+        .tab.active { color: var(--accent-cyan); border-bottom: 2px solid var(--accent-cyan); background: rgba(0, 229, 255, 0.05); }
+
+        .panel { padding: 20px; overflow-y: auto; display: none; flex-direction: column; gap: 18px; }
+        .panel.active { display: flex; }
+        
+        h2, h3 { margin: 0; font-weight: 600; font-size: 1.1em; color: #fff;}
+        .unit { color: var(--text-muted); font-size: 0.8em; font-weight: normal; }
+        .planet-tag { color: var(--planet-gold); font-size: 0.85em; font-weight: bold; margin-left: 5px; text-shadow: 0 0 5px var(--planet-gold); }
+
+        .control-group { display: flex; flex-direction: column; gap: 6px; }
+        .control-group label { font-size: 0.9em; display: flex; justify-content: space-between; font-weight: 500; align-items: baseline;}
+        .val-display { color: var(--accent-cyan); font-family: monospace; font-size: 1.1em; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: var(--accent-cyan); cursor: pointer; margin-top: -5px; box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .redundancy-row { display: flex; gap: 10px; align-items: center; }
+        .redundancy-row input[type=number] {
+            flex: 2; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); 
+            color: var(--accent-cyan); padding: 8px; border-radius: 4px; font-family: monospace; text-align: right;
+        }
+        .redundancy-row button { flex: 1; padding: 8px; font-size: 0.85em; }
+
+        .toggles { display: flex; gap: 15px; font-size: 0.85em; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 10px; border-radius: 6px;}
+        .toggles label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+
+        .btn-row { display: flex; gap: 10px; }
+        button {
+            flex: 1; background: #2A2A35; color: white; border: 1px solid var(--glass-border);
+            padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;
+        }
+        button:hover { background: #3A3A45; transform: translateY(-1px); }
+        
+        button#playBtn { background: linear-gradient(135deg, #10b981, #059669); border: none; font-size: 1.1em; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);}
+        button#playBtn.paused { background: linear-gradient(135deg, #ef4444, #b91c1c); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);}
+        button#resetBtn { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); }
+        button#resetBtn:hover { background: rgba(255,255,255,0.05); color: #fff;}
+
+        .chart-container { width: 100%; height: 160px; background: rgba(0,0,0,0.4); border-radius: 8px; padding: 8px; box-sizing: border-box; border: 1px solid rgba(255,255,255,0.05);}
+        #qaTab textarea { width: 100%; height: 150px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); color: var(--text-main); border-radius: 6px; padding: 10px; font-family: inherit; resize: vertical; box-sizing: border-box; }
+        #qaTab textarea:focus { outline: none; border-color: var(--accent-cyan); }
+    </style>
+</head>
+<body>
+
+    <canvas id="simCanvas"></canvas>
+
+    <div id="dashboard">
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('controls')">Mission Control</div>
+            <div class="tab" onclick="switchTab('qa')">5E Lab Notebook</div>
+        </div>
+
+        <div id="controlsTab" class="panel active">
+            
+            <div class="btn-row">
+                <button id="playBtn" class="paused" onclick="sim.togglePause()">▶ PAUSED</button>
+                <button id="resetBtn" onclick="sim.resetOrbit()">↺ Reset</button>
+            </div>
+
+            <div class="control-group">
+                <label>
+                    <span>Central Mass <span class="unit">(x10²⁴ kg)</span> <span id="tag-M" class="planet-tag"></span></span>
+                    <span id="val-M" class="val-display">5000</span>
+                </label>
+                <input type="range" id="in-M" min="1000" max="15000" step="100" value="5000">
+            </div>
+            
+            <div class="control-group">
+                <label>
+                    <span>Satellite Mass <span class="unit">(x10²² kg)</span> <span id="tag-m" class="planet-tag"></span></span>
+                    <span id="val-m" class="val-display">10</span>
+                </label>
+                <input type="range" id="in-m" min="1" max="5000" step="1" value="10">
+            </div>
+            
+            <div class="control-group">
+                <label>Orbital Velocity <span class="unit">(m/s)</span> <span id="val-v-disp" class="val-display">4.50</span></label>
+                <div class="redundancy-row">
+                    <input type="number" id="in-v-exact" value="4.50" step="0.1">
+                    <button onclick="sim.setExactVelocity()">Set v₀</button>
+                </div>
+            </div>
+
+            <div class="toggles">
+                <label><input type="checkbox" id="tog-grid" checked> Grid & Ruler</label>
+                <label><input type="checkbox" id="tog-vectors" checked> Fg / v Vectors</label>
+            </div>
+
+            <div class="chart-container"><canvas id="energyChart"></canvas></div>
+            <div class="chart-container"><canvas id="altChart"></canvas></div>
+        </div>
+
+        <div id="qaTab" class="panel">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <h2 id="qa-stage" style="color: var(--accent-cyan);">Engage</h2>
+                <span class="unit" id="qa-counter">Prompt 1 of 10</span>
+            </div>
+            <p id="qa-question" style="font-size: 0.95em; line-height: 1.5; color: #ddd;"></p>
+            <textarea id="qa-answer" placeholder="Type your response... (Autosaves)"></textarea>
+            <span id="save-status" style="color: var(--text-muted); font-size: 0.8em; text-align: right;"></span>
+            <div class="btn-row">
+                <button onclick="inquiry.prev()">Back</button>
+                <button onclick="inquiry.next()">Next</button>
+            </div>
+            <button style="background: linear-gradient(135deg, var(--accent-blue), #005bb5); border: none;" onclick="inquiry.exportDOCX()">Export .docx</button>
+        </div>
+    </div>
+
+<script>
+/* =======================================================================
+   1. PHYSICS ENGINE
+   ======================================================================= */
+class PhysicsEngine {
+    constructor() {
+        this.G = 10; this.dt = 0.5; this.trail = [];
+        this.crashed = false; this.escaped = false; this.isPaused = true;
+    }
+
+    reset(M, m, r0, v0) {
+        this.M = M; this.m = m;
+        this.pos = { x: r0, y: 0 };
+        this.vel = { x: 0, y: v0 }; 
+        this.acc = this.calcGravity(this.pos);
+        this.trail = []; this.crashed = false; this.escaped = false; this.time = 0;
+    }
+
+    calcGravity(pos) {
+        const r2 = pos.x*pos.x + pos.y*pos.y;
+        const r = Math.sqrt(r2);
+        
+        // Dynamic crash radius based on Central Mass visual size
+        const crashRadius = Math.max(15, Math.log(this.M)*4);
+        if (r < crashRadius) { this.crashed = true; return {x:0, y:0}; } 
+        if (r > 4000) { this.escaped = true; return {x:0, y:0}; } 
+        
+        const Fg = (this.G * this.M * this.m) / r2;
+        return { x: -Fg * (pos.x / r) / this.m, y: -Fg * (pos.y / r) / this.m };
+    }
+
+    step() {
+        if (this.isPaused || this.crashed || this.escaped) return;
+
+        this.pos.x += this.vel.x * this.dt + 0.5 * this.acc.x * this.dt * this.dt;
+        this.pos.y += this.vel.y * this.dt + 0.5 * this.acc.y * this.dt * this.dt;
+        const nextAcc = this.calcGravity(this.pos);
+        this.vel.x += 0.5 * (this.acc.x + nextAcc.x) * this.dt;
+        this.vel.y += 0.5 * (this.acc.y + nextAcc.y) * this.dt;
+        this.acc = nextAcc; this.time += this.dt;
+
+        if (Math.floor(this.time) % 2 === 0) {
+            this.trail.push({x: this.pos.x, y: this.pos.y});
+            if (this.trail.length > 600) this.trail.shift();
+        }
+    }
+    
+    getBarycenter() {
+        const totalM = this.M + this.m;
+        return { x: (this.m * this.pos.x) / totalM, y: (this.m * this.pos.y) / totalM };
+    }
+
+    getTelemetry() {
+        const r = Math.sqrt(this.pos.x**2 + this.pos.y**2);
+        const v = Math.sqrt(this.vel.x**2 + this.vel.y**2);
+        const K = 0.5 * this.m * (v**2);
+        const U = -(this.G * this.M * this.m) / r;
+        return { r, K, U, E: K + U, v };
+    }
+}
+
+/* =======================================================================
+   2. UI, RENDERER & SOLAR SYSTEM IDENTITY
+   ======================================================================= */
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+const engine = new PhysicsEngine();
+
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize); resize();
+
+const sim = {
+    cx: 0, cy: 0, 
+    isDraggingVector: false, isDraggingSat: false,
+    
+    togglePause: () => {
+        engine.isPaused = !engine.isPaused;
+        const btn = document.getElementById('playBtn');
+        btn.innerHTML = engine.isPaused ? "▶ PAUSED" : "⏸ RUNNING";
+        btn.className = engine.isPaused ? "paused" : "";
+    },
+    
+    resetOrbit: () => {
+        const M = parseFloat(document.getElementById('in-M').value);
+        const m = parseFloat(document.getElementById('in-m').value);
+        const v = parseFloat(document.getElementById('in-v-exact').value);
+        engine.reset(M, m, 250, v); 
+        engine.isPaused = true;
+        document.getElementById('playBtn').innerHTML = "▶ PAUSED";
+        document.getElementById('playBtn').className = "paused";
+        telemetry.resetCharts();
+    },
+
+    setExactVelocity: () => {
+        const exactV = parseFloat(document.getElementById('in-v-exact').value);
+        if(!isNaN(exactV)) {
+            const currentMag = Math.hypot(engine.vel.x, engine.vel.y) || 1;
+            engine.vel.x = (engine.vel.x / currentMag) * exactV;
+            engine.vel.y = (engine.vel.y / currentMag) * exactV;
+            document.getElementById('val-v-disp').innerText = exactV.toFixed(2);
+            engine.trail = [];
+        }
+    }
+};
+
+// MASS CONSTRAINT & IDENTITY LOGIC
+function checkMassConstraints() {
+    let M = parseFloat(document.getElementById('in-M').value);
+    let m = parseFloat(document.getElementById('in-m').value);
+    
+    // Ensure orbiting object is ALWAYS smaller
+    if (m >= M) {
+        m = M - 1; // Or M - 100 depending on scale, let's keep it strictly less
+        document.getElementById('in-m').value = m;
+        document.getElementById('val-m').innerText = m;
+        engine.m = m;
+    }
+
+    // Assign Identities
+    let tagM = "";
+    if (M >= 14000) tagM = "⭐ The Sun";
+    else if (M >= 4000 && M <= 6000) tagM = "🪐 Jupiter";
+    else if (M <= 2000) tagM = "🔵 Neptune";
+    document.getElementById('tag-M').innerText = tagM;
+
+    let tagM_sat = "";
+    if (m >= 80 && m <= 120) tagM_sat = "🌍 Earth";
+    else if (m >= 8 && m <= 15) tagM_sat = "🔴 Mars";
+    else if (m <= 3) tagM_sat = "🌑 The Moon";
+    document.getElementById('tag-m').innerText = tagM_sat;
+}
+
+document.getElementById('in-M').addEventListener('input', (e) => { 
+    document.getElementById('val-M').innerText = e.target.value; 
+    engine.M = parseFloat(e.target.value); 
+    checkMassConstraints();
+});
+
+document.getElementById('in-m').addEventListener('input', (e) => { 
+    document.getElementById('val-m').innerText = e.target.value; 
+    engine.m = parseFloat(e.target.value); 
+    checkMassConstraints();
+});
+
+// PROCEDURAL PLANET DRAWING
+function drawCelestialBody(ctx, x, y, mass, isCentral) {
+    let radius = isCentral ? Math.max(15, Math.log(mass)*4) : Math.max(6, Math.log(mass)*2);
+    
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI*2);
+    ctx.save();
+    ctx.clip(); // Keep features inside the circle
+
+    // Determine Planet Appearance based on mass thresholds
+    if (isCentral && mass >= 14000) { // SUN
+        const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        grad.addColorStop(0, '#FFFFFF');
+        grad.addColorStop(0.5, '#FFD700');
+        grad.addColorStop(1, '#FF8C00');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.restore();
+        // External Glow
+        ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI*2);
+        ctx.shadowBlur = 40; ctx.shadowColor = '#FF8C00'; ctx.stroke(); ctx.shadowBlur = 0;
+
+    } else if (isCentral && mass >= 4000 && mass <= 6000) { // JUPITER
+        const grad = ctx.createLinearGradient(x, y - radius, x, y + radius);
+        grad.addColorStop(0, '#A08060');
+        grad.addColorStop(0.3, '#D0B090');
+        grad.addColorStop(0.5, '#F0E0D0');
+        grad.addColorStop(0.7, '#C09070');
+        grad.addColorStop(1, '#A08060');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        // Great Red Spot
+        ctx.beginPath(); ctx.ellipse(x + radius/3, y + radius/4, radius/3, radius/5, 0, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(200, 80, 50, 0.7)'; ctx.fill();
+        ctx.restore();
+
+    } else if (isCentral) { // GENERIC CENTRAL / NEPTUNE
+        const grad = ctx.createRadialGradient(x-radius/3, y-radius/3, 0, x, y, radius);
+        grad.addColorStop(0, '#4facfe');
+        grad.addColorStop(1, '#00f2fe');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.restore();
+
+    } else if (!isCentral && mass >= 80 && mass <= 120) { // EARTH
+        ctx.fillStyle = '#0A84FF'; // Ocean
+        ctx.fill();
+        ctx.fillStyle = '#32D74B'; // Continents
+        ctx.beginPath(); ctx.arc(x - radius/2, y, radius/1.5, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x + radius/3, y - radius/3, radius/2, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+
+    } else if (!isCentral && mass >= 8 && mass <= 15) { // MARS
+        ctx.fillStyle = '#FF3B30';
+        ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,0.3)'; // Rust spots
+        ctx.beginPath(); ctx.arc(x - radius/3, y + radius/3, radius/2, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+
+    } else { // GENERIC SATELLITE / MOON
+        ctx.fillStyle = '#A0A0B0';
+        ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,0.2)'; // Craters
+        ctx.beginPath(); ctx.arc(x + radius/3, y - radius/3, radius/4, 0, Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x - radius/4, y + radius/2, radius/3, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+    }
+}
+
+// DRAG INTERACTIONS
+canvas.addEventListener('mousedown', (e) => {
+    if(!engine.isPaused) return;
+    const satX = sim.cx + engine.pos.x; const satY = sim.cy + engine.pos.y; const vScale = 15;
+    const tipX = satX + engine.vel.x * vScale; const tipY = satY + engine.vel.y * vScale;
+    if(Math.hypot(e.clientX - tipX, e.clientY - tipY) < 20) { sim.isDraggingVector = true; return; }
+    if(Math.hypot(e.clientX - satX, e.clientY - satY) < 25) { sim.isDraggingSat = true; }
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if(sim.isDraggingVector) {
+        const vScale = 15;
+        engine.vel.x = (e.clientX - (sim.cx + engine.pos.x)) / vScale;
+        engine.vel.y = (e.clientY - (sim.cy + engine.pos.y)) / vScale;
+        const vMag = Math.hypot(engine.vel.x, engine.vel.y);
+        document.getElementById('val-v-disp').innerText = vMag.toFixed(2);
+        document.getElementById('in-v-exact').value = vMag.toFixed(2);
+        engine.trail = [];
+    } else if (sim.isDraggingSat) {
+        engine.pos.x = e.clientX - sim.cx; engine.pos.y = e.clientY - sim.cy;
+        engine.trail = []; engine.acc = engine.calcGravity(engine.pos); 
+    }
+});
+canvas.addEventListener('mouseup', () => { sim.isDraggingVector = false; sim.isDraggingSat = false; });
+
+// CHART SETUP
+Chart.defaults.color = '#778'; Chart.defaults.font.family = '-apple-system, sans-serif';
+const energyCtx = document.getElementById('energyChart').getContext('2d');
+const altCtx = document.getElementById('altChart').getContext('2d');
+
+const telemetry = {
+    frameCount: 0,
+    energyChart: new Chart(energyCtx, {
+        type: 'line',
+        data: { labels: [], datasets: [ { label: 'K', borderColor: '#00E5FF', data: [], pointRadius: 0, borderWidth: 1.5 }, { label: 'U', borderColor: '#FF3B30', data: [], pointRadius: 0, borderWidth: 1.5 }, { label: 'E', borderColor: '#f0f0f5', data: [], pointRadius: 0, borderWidth: 2, borderDash: [5,5] } ] },
+        options: { responsive: true, maintainAspectRatio: false, animation: false,
+            scales: { x: { display: false }, y: { display: true, title: {display: true, text: 'Energy (J)', color: '#666', font:{size: 10}}, grid: {color: 'rgba(255,255,255,0.05)'} } },
+            plugins: { legend: { position: 'right', labels: {boxWidth: 8, font:{size: 10}} } }
+        }
+    }),
+    altChart: new Chart(altCtx, {
+        type: 'line',
+        data: { labels: [], datasets: [{ label: 'Altitude (m)', borderColor: '#0A84FF', data: [], pointRadius: 0, borderWidth: 2 }] },
+        options: { responsive: true, maintainAspectRatio: false, animation: false,
+            scales: { x: { display: false }, y: { display: true, title: {display: true, text: 'Distance (m)', color: '#666', font:{size: 10}}, grid: {color: 'rgba(255,255,255,0.05)'} } },
+            plugins: { legend: { display: false } }
+        }
+    }),
+    resetCharts: () => {
+        telemetry.energyChart.data.labels = []; telemetry.energyChart.data.datasets.forEach(ds => ds.data = []);
+        telemetry.altChart.data.labels = []; telemetry.altChart.data.datasets[0].data = [];
+    },
+    update: (data) => {
+        if(engine.isPaused) return; 
+        if(telemetry.frameCount++ % 10 !== 0) return;
+        const t = Math.floor(engine.time);
+        telemetry.energyChart.data.labels.push(t); telemetry.energyChart.data.datasets[0].data.push(data.K); telemetry.energyChart.data.datasets[1].data.push(data.U); telemetry.energyChart.data.datasets[2].data.push(data.E);
+        telemetry.altChart.data.labels.push(t); telemetry.altChart.data.datasets[0].data.push(data.r);
+        
+        if(telemetry.energyChart.data.labels.length > 100) { telemetry.energyChart.data.labels.shift(); telemetry.energyChart.data.datasets.forEach(ds => ds.data.shift()); telemetry.altChart.data.labels.shift(); telemetry.altChart.data.datasets[0].data.shift(); }
+        telemetry.energyChart.update(); telemetry.altChart.update();
+    }
+};
+
+function drawArrow(ctx, fromX, fromY, toX, toY, color) {
+    const headlen = 10; const dx = toX - fromX; const dy = toY - fromY; const angle = Math.atan2(dy, dx);
+    ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.moveTo(fromX, fromY); ctx.lineTo(toX, toY);
+    ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6)); ctx.stroke();
+}
+
+function renderLoop() {
+    engine.step();
+    ctx.fillStyle = engine.isPaused ? '#020205' : 'rgba(2, 2, 5, 0.35)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    sim.cx = canvas.width / 2 + 150; sim.cy = canvas.height / 2;
+
+    if(document.getElementById('tog-grid').checked) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)'; ctx.lineWidth = 1;
+        for(let x = sim.cx % 50; x < canvas.width; x += 50) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+        for(let y = sim.cy % 50; y < canvas.height; y += 50) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+        
+        ctx.fillStyle = '#9aa'; ctx.font = '12px monospace';
+        const dist = Math.hypot(engine.pos.x, engine.pos.y).toFixed(0);
+        
+        ctx.beginPath(); ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.setLineDash([4, 4]);
+        ctx.moveTo(sim.cx, sim.cy); ctx.lineTo(sim.cx + engine.pos.x, sim.cy + engine.pos.y); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillText(`r = ${dist} m`, sim.cx + engine.pos.x/2 + 10, sim.cy + engine.pos.y/2);
+        
+        const cm = engine.getBarycenter();
+        ctx.strokeStyle = '#FF3B30'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(sim.cx + cm.x - 5, sim.cy + cm.y - 5); ctx.lineTo(sim.cx + cm.x + 5, sim.cy + cm.y + 5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(sim.cx + cm.x + 5, sim.cy + cm.y - 5); ctx.lineTo(sim.cx + cm.x - 5, sim.cy + cm.y + 5); ctx.stroke();
+        ctx.fillText(`CM`, sim.cx + cm.x - 20, sim.cy + cm.y + 20);
+    }
+
+    ctx.beginPath(); ctx.strokeStyle = 'rgba(0, 229, 255, 0.5)'; ctx.lineWidth = 2;
+    for(let i=0; i<engine.trail.length; i++) {
+        const pt = engine.trail[i];
+        if(i===0) ctx.moveTo(sim.cx + pt.x, sim.cy + pt.y); else ctx.lineTo(sim.cx + pt.x, sim.cy + pt.y);
+    } ctx.stroke();
+
+    // 1. Draw Central Body using new procedural logic
+    drawCelestialBody(ctx, sim.cx, sim.cy, engine.M, true);
+
+    if (!engine.crashed && !engine.escaped) {
+        const satX = sim.cx + engine.pos.x; const satY = sim.cy + engine.pos.y;
+        
+        // 2. Draw Orbiting Body using new procedural logic
+        drawCelestialBody(ctx, satX, satY, engine.m, false);
+        
+        if(engine.isPaused) {
+            let satRadius = Math.max(6, Math.log(engine.m)*2);
+            ctx.beginPath(); ctx.arc(satX, satY, satRadius + 5, 0, Math.PI*2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.setLineDash([2,2]); ctx.stroke(); ctx.setLineDash([]);
+        }
+        
+        if(document.getElementById('tog-vectors').checked || engine.isPaused) {
+            drawArrow(ctx, satX, satY, satX + engine.vel.x * 15, satY + engine.vel.y * 15, '#00E5FF');
+            if(engine.isPaused) {
+                const tipX = satX + engine.vel.x * 15; const tipY = satY + engine.vel.y * 15;
+                ctx.beginPath(); ctx.arc(tipX, tipY, 5, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+                ctx.fillText("Drag v₀", tipX + 10, tipY + 5);
+            }
+            if(!engine.isPaused || sim.isDraggingSat) {
+                const rawForceMag = Math.hypot(engine.acc.x, engine.acc.y);
+                const visualScale = Math.min(150 / (rawForceMag + 0.001), 6000); 
+                drawArrow(ctx, satX, satY, satX + engine.acc.x * visualScale, satY + engine.acc.y * visualScale, '#FF3B30');
+                ctx.fillStyle = '#FF3B30'; ctx.fillText("Fg", satX + engine.acc.x * visualScale + 10, satY + engine.acc.y * visualScale);
+            }
+        }
+        
+        const tel = engine.getTelemetry();
+        if(!sim.isDraggingVector && !engine.isPaused) {
+            document.getElementById('val-v-disp').innerText = tel.v.toFixed(2);
+            document.getElementById('in-v-exact').value = tel.v.toFixed(2);
+        }
+        telemetry.update(tel);
+    } else {
+        ctx.fillStyle = '#FF3B30'; ctx.font = 'bold 28px sans-serif';
+        ctx.fillText(engine.crashed ? "IMPACT DETECTED" : "ORBIT ESCAPED", sim.cx - 120, sim.cy - 60);
+    }
+
+    requestAnimationFrame(renderLoop);
+}
+
+// Boot
+checkMassConstraints();
+sim.resetOrbit();
+requestAnimationFrame(renderLoop);
+
+/* =======================================================================
+   3. AP/NGSS 5E INQUIRY WORKFLOW & STATE MANAGER
+   ======================================================================= */
+const qaPrompts = [
+    { stage: "Engage", q: "Pause the simulation. Ensure the Grid is on and maximize the Satellite Mass (m). Observe the red 'CM' (Center of Mass) marker. How does the ratio of the satellite mass to the central mass affect the location of the system's barycenter? Why is this wobble critical for astronomers discovering exoplanets?" },
+    { stage: "Engage", q: "While paused, observe the cyan velocity vector and the red gravitational force vector. If you drag the velocity vector so it points slightly inward toward the planet (rather than purely tangentially), predict what will happen to the shape of the orbit when you press play." },
+    { stage: "Explore", q: "Manipulate the initial velocity to create a highly elliptical orbit. Track the Kinetic Energy (K) and Potential Energy (U) graphs. At what point in the orbit is the rate of change of energy greatest, and how does the Total Energy (E) line reflect the Law of Conservation of Energy?" },
+    { stage: "Explore", q: "Pause and use the distance ruler to establish a circular orbit at a radius of ~200m. If you drag the satellite to double the orbital radius (to ~400m), by what factor must you change the velocity to maintain a circular orbit? Relate this to the equation v = √(GM/r)." },
+    { stage: "Explain", q: "As the satellite approaches periapsis (closest approach to the central mass), the red Fg vector increases in visual magnitude. Explain this behavior mathematically using Newton's Law of Universal Gravitation (F = G*m1*m2/r²)." },
+    { stage: "Explain", q: "Using the altitude chart and the visual speed of the satellite, explain how the simulation demonstrates Kepler's Second Law of Planetary Motion (Equal Areas in Equal Times). How does the conservation of angular momentum apply here?" },
+    { stage: "Elaborate", q: "Drag the velocity vector to increase v₀ until the orbit escapes the screen entirely. Look at the Energy chart. What is the mathematical condition for Total Energy (E) that dictates an open (escape) trajectory versus a closed (bound) orbit?" },
+    { stage: "Elaborate", q: "To transition from a lower circular orbit to a higher circular orbit, positive work must be done by the satellite's thrusters. Explain how Kinetic, Potential, and Total Energy change during this process, noting the paradox that satellites in higher orbits travel at slower speeds." },
+    { stage: "Evaluate", q: "A classmate argues: 'A heavier satellite requires a faster initial velocity to avoid crashing into the planet because it is heavier.' Test this by changing the satellite mass. Evaluate their claim mathematically by setting Centripetal Force equal to Gravitational Force." },
+    { stage: "Evaluate", q: "Critique the simulation's energy graph: Why is the Potential Energy (U) always represented as a negative value, and what physical meaning does the U = 0 baseline represent at a distance of infinity?" }
+];
+
+const inquiry = {
+    currentIndex: 0,
+    answers: Array(10).fill(""),
+    
+    init: () => {
+        const saved = localStorage.getItem('pro_orbital_5e_answers');
+        if (saved) inquiry.answers = JSON.parse(saved);
+        
+        document.getElementById('qa-answer').addEventListener('input', (e) => {
+            inquiry.answers[inquiry.currentIndex] = e.target.value;
+            localStorage.setItem('pro_orbital_5e_answers', JSON.stringify(inquiry.answers));
+            document.getElementById('save-status').innerText = "Autosaved ✓";
+            setTimeout(() => { document.getElementById('save-status').innerText = ""; }, 2000);
+        });
+        inquiry.render();
+    },
+    
+    render: () => {
+        const p = qaPrompts[inquiry.currentIndex];
+        document.getElementById('qa-stage').innerText = p.stage;
+        document.getElementById('qa-counter').innerText = `Prompt ${inquiry.currentIndex + 1} of 10`;
+        document.getElementById('qa-question').innerText = p.q;
+        document.getElementById('qa-answer').value = inquiry.answers[inquiry.currentIndex];
+    },
+    
+    next: () => { if(inquiry.currentIndex < 9) { inquiry.currentIndex++; inquiry.render(); } },
+    prev: () => { if(inquiry.currentIndex > 0) { inquiry.currentIndex--; inquiry.render(); } },
+    
+    exportDOCX: async () => {
+        const studentName = prompt("Enter your full name for the Lab Report:");
+        if (!studentName) return;
+
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+        const children = [
+            new Paragraph({ text: "AP Physics: Orbital Mechanics & Energy", heading: HeadingLevel.HEADING_1 }),
+            new Paragraph({ text: `Student Name: ${studentName}` }),
+            new Paragraph({ text: `Date Completed: ${new Date().toLocaleString()}` }),
+            new Paragraph({ text: "" }) 
+        ];
+
+        qaPrompts.forEach((p, index) => {
+            children.push(new Paragraph({ text: `[${p.stage}] Prompt ${index + 1}:`, heading: HeadingLevel.HEADING_2 }));
+            children.push(new Paragraph({ children: [new TextRun({ text: p.q, italics: true })] }));
+            children.push(new Paragraph({ text: inquiry.answers[index] || "(No answer provided)" }));
+            children.push(new Paragraph({ text: "" })); 
+        });
+
+        const doc = new Document({ sections: [{ properties: {}, children: children }] });
+        try {
+            const blob = await Packer.toBlob(doc);
+            saveAs(blob, `${studentName.replace(/\s+/g, '_')}_AP_Orbital_Lab.docx`);
+        } catch (err) { alert("Error generating DOCX. Check console."); console.error(err); }
+    }
+};
+
+function switchTab(t) { 
+    document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
+    if (t === 'controls') { document.querySelectorAll('.tab')[0].classList.add('active'); document.getElementById('controlsTab').classList.add('active'); } 
+    else { document.querySelectorAll('.tab')[1].classList.add('active'); document.getElementById('qaTab').classList.add('active'); }
+}
+
+inquiry.init();
+</script>
+</body>
+</html>
