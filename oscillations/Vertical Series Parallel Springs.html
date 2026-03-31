@@ -125,7 +125,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
-        /* Exact replication of the PyQt6 Theme */
         :root {
             --bg-main: #0D1117;
             --bg-panel: #161B22;
@@ -156,12 +155,13 @@
             border-top-left-radius: 6px; border-top-right-radius: 6px; margin-left: 10px;
         }
         .tab.active { background: var(--accent-green); color: white; border-color: var(--accent-green); }
-        .tab-content { display: none; height: calc(100vh - 45px); box-sizing: border-box; }
+        .tab-content { display: none; height: calc(100vh - 45px); box-sizing: border-box; width: 100%; }
         .tab-content.active { display: flex; }
 
         /* Main Layout */
-        #sim-tab { display: flex; padding: 20px; gap: 20px; height: 100%; box-sizing: border-box; }
-        
+        #sim-tab { padding: 20px; gap: 20px; box-sizing: border-box; }
+        #qa-tab { padding: 40px; flex-direction: column; gap: 20px; align-items: center; overflow-y: auto; }
+
         .left-panel { width: 360px; display: flex; flex-direction: column; gap: 15px; }
         .center-panel { width: 400px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-main); position: relative; overflow: hidden; }
         .right-panel { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 300px; }
@@ -201,19 +201,34 @@
         .chart-wrapper { flex: 1; min-height: 0; background: var(--bg-main); border-radius: 8px; position: relative; }
         canvas { width: 100% !important; height: 100% !important; }
 
-        /* QA Layout */
-        #qa-tab { padding: 40px; flex-direction: column; gap: 20px; align-items: center; }
-        .qa-container { width: 800px; max-width: 100%; display: flex; flex-direction: column; gap: 15px; }
+        /* QA Layout Elements */
+        .qa-container { width: 800px; max-width: 100%; display: flex; flex-direction: column; gap: 15px; margin: 0 auto; }
         .qa-prompt { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 25px; border-radius: 8px; font-size: 18px; color: var(--text-bright); }
-        textarea { background: var(--bg-main); color: var(--text-main); font-size: 16px; padding: 15px; border: 1px solid var(--border-color); border-radius: 6px; height: 150px; resize: vertical; font-family: inherit; }
+        
+        /* THE FIX: width: 100% and box-sizing guarantees the text area fills the screen nicely */
+        textarea { 
+            width: 100%; 
+            box-sizing: border-box; 
+            background: var(--bg-main); 
+            color: var(--text-main); 
+            font-size: 16px; 
+            padding: 15px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 6px; 
+            height: 200px; 
+            resize: vertical; 
+            font-family: inherit; 
+        }
+        textarea:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2); }
+        
         input[type=text] { background: #21262D; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); color: var(--text-bright); font-size: 14px; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
     <div class="tab-bar">
-        <div class="tab active" onclick="switchTab('sim-tab')">🔬 Active Physics Simulation</div>
-        <div class="tab" onclick="switchTab('qa-tab')">📝 5E Knowledge Check</div>
+        <div class="tab active" onclick="switchTab('sim-tab', this)">🔬 Active Physics Simulation</div>
+        <div class="tab" onclick="switchTab('qa-tab', this)">📝 5E Knowledge Check</div>
     </div>
 
     <div id="sim-tab" class="tab-content active">
@@ -286,11 +301,11 @@
         <div class="qa-container">
             <fieldset>
                 <legend>5E Guided Inquiry Assignment</legend>
-                <label style="color: var(--text-bright); font-weight: bold;">Student Name:</label>
+                <label style="color: var(--text-bright); font-weight: bold; display:block; margin-bottom: 5px;">Student Name:</label>
                 <input type="text" id="student-name" placeholder="Enter your full name">
                 
                 <div style="margin-top: 20px;">
-                    <span id="qa-stage" style="color: #A371F7; font-size: 22px; font-weight: bold;">STAGE</span><br>
+                    <span id="qa-stage" style="color: var(--accent-purple); font-size: 22px; font-weight: bold;">STAGE</span><br>
                     <span id="qa-counter" style="color: #8B949E; font-size: 14px;">Prompt 1 of 5</span>
                 </div>
                 
@@ -392,12 +407,12 @@ const inquiry = {
     answers: Array(5).fill(""),
     
     init() {
-        const saved = localStorage.getItem('shm_lab_answers');
+        const saved = localStorage.getItem('shm_lab_answers_final');
         if (saved) this.answers = JSON.parse(saved);
         
         document.getElementById('qa-answer').addEventListener('input', e => {
             this.answers[this.idx] = e.target.value;
-            localStorage.setItem('shm_lab_answers', JSON.stringify(this.answers));
+            localStorage.setItem('shm_lab_answers_final', JSON.stringify(this.answers));
         });
         this.render();
     },
@@ -414,6 +429,10 @@ const inquiry = {
         const name = document.getElementById('student-name').value.trim();
         if (!name) return alert("Please enter your name.");
         
+        if (typeof docx === 'undefined') {
+            return alert("Document export library failed to load. Please check your internet connection.");
+        }
+        
         const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
         const children = [
             new Paragraph({ text: "AP Physics: SHM Lab Answers", heading: HeadingLevel.HEADING_1 }),
@@ -429,8 +448,13 @@ const inquiry = {
         });
         
         const doc = new Document({ sections: [{ properties: {}, children }] });
-        const blob = await Packer.toBlob(doc);
-        saveAs(blob, `SHM_Lab_${name.replace(/\s+/g, '_')}.docx`);
+        try {
+            const blob = await Packer.toBlob(doc);
+            saveAs(blob, `SHM_Lab_${name.replace(/\s+/g, '_')}.docx`);
+        } catch (e) {
+            console.error(e);
+            alert("There was an error generating the document. See console for details.");
+        }
     }
 };
 
@@ -441,6 +465,7 @@ const engine = new PhysicsEngine();
 let isPlaying = false;
 let t_current = 0.0;
 let lastTime = 0;
+let chartUpdateCounter = 0; // Fixed: Defined counter for smooth rendering throttle
 
 // Setup Canvas
 const canvas = document.getElementById('simCanvas');
@@ -457,27 +482,30 @@ resizeCanvas();
 // Setup Charts (Chart.js)
 Chart.defaults.color = '#8B949E';
 Chart.defaults.font.family = "'Segoe UI', sans-serif";
-Chart.defaults.elements.point.radius = 0;
-Chart.defaults.elements.line.borderWidth = 3;
 
 const chartOptions = (title) => ({
     responsive: true, maintainAspectRatio: false, animation: false,
+    elements: { 
+        point: { radius: 0 }, 
+        // THE FIX: tension 0.4 enables beautiful smooth bezier curves for perfect sine waves
+        line: { tension: 0.4, borderWidth: 2.5 } 
+    },
     plugins: { legend: { display: false }, title: { display: true, text: title, color: '#C9D1D9' } },
-    scales: { x: { display: false }, y: { grid: { color: '#30363D' } } }
+    scales: { x: { display: false }, y: { grid: { color: '#30363D' }, grace: '5%' } }
 });
 
-const maxDataPoints = 300; 
+// THE FIX: Reduced to 120 points to stretch the waves horizontally
+const maxDataPoints = 120; 
 const createChart = (id, title, color) => new Chart(document.getElementById(id), {
     type: 'line',
     data: { labels: Array(maxDataPoints).fill(''), datasets: [{ data: Array(maxDataPoints).fill(0), borderColor: color }] },
     options: chartOptions(title)
 });
 
-// EXPLICIT COLOR OVERRIDES APPLIED HERE
 const charts = {
-    pos: createChart('chartPos', 'Position (m)', '#87CEFA'), // Light Blue
-    ke: createChart('chartKE', 'Kinetic Energy (J)', '#F85149'), // Bright Red
-    pe: createChart('chartPE', 'Potential Energy (J)', '#2EA043') // Bright Green
+    pos: createChart('chartPos', 'Position (m)', '#87CEFA'),
+    ke: createChart('chartKE', 'Kinetic Energy (J)', '#F85149'), 
+    pe: createChart('chartPE', 'Potential Energy (J)', '#2EA043') 
 };
 
 let historyData = { t: [], x: [], v: [], ke: [], pe: [] };
@@ -561,14 +589,18 @@ const ui = {
         
         // Update Charts
         if (isPlaying) {
-            const pushData = (chart, val) => {
-                chart.data.datasets[0].data.push(val);
-                chart.data.datasets[0].data.shift();
-                chart.update();
-            };
-            pushData(charts.pos, state.x);
-            pushData(charts.ke, ke);
-            pushData(charts.pe, pe);
+            
+            // THE FIX: Throttle rendering so points aren't stacked on top of each other
+            if (chartUpdateCounter++ % 2 === 0) {
+                const pushData = (chart, val) => {
+                    chart.data.datasets[0].data.push(val);
+                    chart.data.datasets[0].data.shift();
+                    chart.update();
+                };
+                pushData(charts.pos, state.x);
+                pushData(charts.ke, ke);
+                pushData(charts.pe, pe);
+            }
 
             if (Math.random() < 0.2) {
                 historyData.t.push(t_current);
@@ -596,7 +628,7 @@ const ui = {
         const dx = toX - fromX; const dy = toY - fromY;
         const angle = Math.atan2(dy, dx);
         
-        ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 3; // Thicker lines for visibility
+        ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 3; 
         ctx.moveTo(fromX, fromY); ctx.lineTo(toX, toY);
         ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
         ctx.moveTo(toX, toY);
@@ -663,7 +695,6 @@ const ui = {
             ctx.fillStyle = 'white'; ctx.fillText('Q', centerX, currY - 10);
         }
 
-        // VECTORS WITH EXPLICIT COLOR OVERRIDES
         if (document.getElementById('tog-vectors').checked) {
             const cX = centerX;
             const cY = blockY + 25;
@@ -671,15 +702,12 @@ const ui = {
             const a = -(engine.omega ** 2) * x;
             const F = m_active * a;
             
-            // Velocity (v) -> Explicit Neon Green
             if (Math.abs(v) > 0.05) {
                 this.drawArrow(cX - 60, cY, cX - 60, cY + v * 35, '#32D74B', 'v');
             }
-            // Acceleration (a) -> Explicit Yellow
             if (Math.abs(a) > 0.05) {
                 this.drawArrow(cX + 60, cY, cX + 60, cY + a * 15, '#FFCC00', 'a');
             }
-            // Force (F) -> Explicit Red
             if (Math.abs(F) > 0.05) {
                 this.drawArrow(cX + 110, cY, cX + 110, cY + F * 3, '#FF3B30', 'F');
             }
@@ -701,12 +729,20 @@ const ui = {
     }
 };
 
-function switchTab(tabId) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+function switchTab(tabId, btnElement) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    
     document.getElementById(tabId).classList.add('active');
-    if(tabId === 'sim-tab') resizeCanvas();
+    
+    if (btnElement) {
+        btnElement.classList.add('active');
+    }
+    
+    if(tabId === 'sim-tab') {
+        resizeCanvas();
+        Object.values(charts).forEach(c => c.resize());
+    }
 }
 
 function animate() {
