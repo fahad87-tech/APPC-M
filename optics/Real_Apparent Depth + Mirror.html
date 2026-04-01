@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fish Tank Optics - Virtual Image Convergence</title>
+    <script>
+        const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+        document.documentElement.classList.add("password-locked");
+
+        const passwordGateStyle = document.createElement("style");
+        passwordGateStyle.textContent = `
+            html.password-locked body { overflow: hidden; }
+            html.password-locked body > * { visibility: hidden; }
+            #password-gate {
+                position: fixed;
+                inset: 0;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                background: rgba(5, 9, 18, 0.88);
+                padding: 24px;
+                z-index: 9999;
+            }
+            html.password-locked #password-gate { display: flex; visibility: visible; }
+            #password-gate-card {
+                width: min(100%, 420px);
+                background: #101625;
+                border: 1px solid rgba(100,181,246,0.28);
+                border-radius: 18px;
+                padding: 24px;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+                color: #e7edf7;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+            #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+            #password-gate-input {
+                width: 100%;
+                padding: 12px 14px;
+                border-radius: 12px;
+                border: 1px solid rgba(100,181,246,0.35);
+                background: rgba(255,255,255,0.05);
+                color: #fff;
+                font-size: 16px;
+                outline: none;
+                margin-bottom: 16px;
+                box-sizing: border-box;
+            }
+            #password-gate-input:focus {
+                border-color: #64b5f6;
+                box-shadow: 0 0 0 3px rgba(100,181,246,0.16);
+            }
+            #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+            .password-gate-button {
+                border: none;
+                border-radius: 10px;
+                padding: 10px 16px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+            }
+            #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+            #password-gate-submit { background: #64b5f6; color: #08101c; }
+        `;
+        document.head.appendChild(passwordGateStyle);
+
+        function requestPassword(title, message) {
+            return new Promise(resolve => {
+                const existingGate = document.getElementById("password-gate");
+                if (existingGate) existingGate.remove();
+                const gate = document.createElement("div");
+                gate.id = "password-gate";
+                gate.innerHTML = `
+                    <div id="password-gate-card">
+                        <div id="password-gate-title">${title}</div>
+                        <div id="password-gate-message">${message}</div>
+                        <input id="password-gate-input" type="password" autocomplete="current-password">
+                        <div id="password-gate-actions">
+                            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+                            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(gate);
+                const input = document.getElementById("password-gate-input");
+                const cancelButton = document.getElementById("password-gate-cancel");
+                const submitButton = document.getElementById("password-gate-submit");
+                const finish = value => { gate.remove(); resolve(value); };
+                cancelButton.addEventListener("click", () => finish(null));
+                submitButton.addEventListener("click", () => finish(input.value));
+                input.addEventListener("keydown", event => {
+                    if (event.key === "Enter") finish(input.value);
+                    if (event.key === "Escape") finish(null);
+                });
+                window.requestAnimationFrame(() => input.focus());
+            });
+        }
+
+        async function verifyPageAccess() {
+            const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+            if (userInput === null) { window.location.href = "../index.html"; return; }
+            const encoder = new TextEncoder();
+            const data = encoder.encode(userInput);
+            const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+            if (hashHex === TARGET_HASH) {
+                document.documentElement.classList.remove("password-locked");
+            } else {
+                alert("Incorrect password. Access denied.");
+                window.location.href = "../index.html";
+            }
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+        } else {
+            verifyPageAccess();
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.2.3/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        * { box-sizing: border-box; }
+        :root {
+            --bg: #0a0b0d;
+            --panel: #14151a;
+            --cyan: #00f2ff;
+            --orange: #ff9500;
+            --yellow: #ffee00;
+            --green: #00ff95;
+            --magenta: #ff00ff;
+            --purple: #b088ff;
+        }
+        body { 
+            margin: 0; 
+            background: var(--bg); 
+            color: #e0e0e0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+        }
+        
+        #canvas-container { 
+            flex: 1; 
+            position: relative;
+            background: linear-gradient(to bottom, #0f1525 0%, #1a2444 50%, #0a0b0d 100%);
+        }
+        canvas { 
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        #sidebar { 
+            width: 450px; 
+            background: var(--panel); 
+            border-left: 1px solid #333;
+            display: flex; 
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+        }
+        .scroll { 
+            padding: 20px; 
+            flex: 1; 
+            overflow-y: auto; 
+        }
+        
+        h1 { 
+            font-size: 1.2rem; 
+            color: var(--cyan); 
+            margin: 0 0 15px 0;
+            font-weight: 700;
+        }
+        
+        .data-card { 
+            background: #1c1e26; 
+            padding: 12px; 
+            border-radius: 6px; 
+            border-left: 3px solid var(--cyan); 
+            font-family: 'Courier New', monospace; 
+            font-size: 0.8rem; 
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .control-group { 
+            margin-bottom: 12px;
+        }
+        label { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 0.8rem; 
+            color: #aaa; 
+            margin-bottom: 4px;
+        }
+        input[type="range"] { 
+            width: 100%; 
+            accent-color: var(--cyan); 
+            height: 6px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 6px;
+            background: #222;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        
+        .toggle-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin: 10px 0;
+        }
+        .toggle-btn {
+            padding: 8px;
+            border: 1px solid #444;
+            background: #1a1a25;
+            color: #888;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            border-color: var(--yellow);
+            background: rgba(255, 238, 0, 0.15);
+            color: var(--yellow);
+        }
+        
+        .section-title {
+            font-size: 0.95rem;
+            color: var(--yellow);
+            margin: 15px 0 10px 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 4px;
+        }
+        
+        .formula {
+            background: #1a1a25;
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Cambria Math', serif;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 1rem;
+            border-left: 3px solid var(--green);
+        }
+        
+        .btn {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.85rem;
+            margin: 4px;
+            transition: 0.2s;
+        }
+        .btn-cyan { background: var(--cyan); color: #000; }
+        .btn-green { background: var(--green); color: #000; }
+        .btn-orange { background: var(--orange); color: #000; }
+        .btn:hover { filter: brightness(1.2); }
+        
+        .solution-box {
+            background: #1a1a25;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 3px solid var(--green);
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .answer-correct {
+            background: rgba(0, 255, 150, 0.1);
+            border: 1px solid var(--green);
+            padding: 8px;
+            border-radius: 4px;
+            margin: 8px 0;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 80px;
+            background: #0a0a0f;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            resize: none;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+        
+        .ap-question {
+            background: #1a1a25;
+            border-left: 3px solid var(--purple);
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .ap-question h4 {
+            color: var(--purple);
+            margin: 0 0 8px 0;
+            font-size: 0.9rem;
+        }
+        .ap-question p {
+            margin: 0 0 8px 0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #ccc;
+        }
+        
+        .tab-container { display: flex; gap: 8px; margin-bottom: 15px; }
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            background: #222;
+            border: none;
+            color: #888;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .tab-btn.active { background: var(--cyan); color: #000; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .legend {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 8px;
+            padding: 8px;
+            background: #1a1a25;
+            border-radius: 4px;
+        }
+        .legend-item { display: flex; align-items: center; margin: 3px 0; }
+        .legend-color { width: 20px; height: 3px; margin-right: 8px; border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+<div id="canvas-container">
+    <canvas id="simCanvas"></canvas>
+</div>
+
+<div id="sidebar">
+    <div class="scroll">
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="switchTab('sim')">Simulation</button>
+            <button class="tab-btn" onclick="switchTab('report')">AP Lab Report</button>
+        </div>
+        
+        <div id="sim-tab" class="tab-content active">
+            <h1>🔬 Virtual Image Convergence</h1>
+            
+            <div class="data-card" id="hud">
+                Tank Depth (H): 4.00 m<br>
+                Fish Depth: 2.00 m<br>
+                Mirror Image (I₁): 6.00 m<br>
+                Apparent Image (I₂): 4.50 m
+            </div>
+            
+            <div class="section-title">Ray Visibility</div>
+            <div class="toggle-group">
+                <button class="toggle-btn active" onclick="toggle(this, 'real')">Real Rays</button>
+                <button class="toggle-btn active" onclick="toggle(this, 'virtual')">Virtual Rays</button>
+                <button class="toggle-btn active" onclick="toggle(this, 'convergence')">Convergence Point</button>
+                <button class="toggle-btn active" onclick="toggle(this, 'eye')">Eye</button>
+                <button class="toggle-btn active" onclick="toggle(this, 'normals')">Normals</button>
+                <button class="toggle-btn active" onclick="toggle(this, 'labels')">Labels</button>
+            </div>
+            
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background: #ffcc33;"></div>Real: Fish→Mirror→Surface→Eye</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ff00ff; border: 1px dashed #ff00ff;"></div>Virtual: I₂→Surface→Eye (straight)</div>
+                <div class="legend-item"><div class="legend-color" style="background: #00ff95;"></div>All virtual rays converge at I₂</div>
+            </div>
+            
+            <div class="section-title">Parameters</div>
+            
+            <div class="control-group">
+                <label>Tank Depth H <span id="h-val">4.0 m</span></label>
+                <input type="range" id="h-slider" min="2" max="8" step="0.1" value="4">
+                <input type="number" id="h-num" value="4" min="2" max="8" step="0.1">
+            </div>
+            
+            <div class="control-group">
+                <label>Fish Depth d₀ <span id="do-val">2.0 m</span></label>
+                <input type="range" id="do-slider" min="0.2" max="7.8" step="0.1" value="2">
+                <input type="number" id="do-num" value="2" min="0.2" max="7.8" step="0.1">
+            </div>
+            
+            <div class="control-group">
+                <label>Water Index n₁ <span id="n1-val">1.33</span></label>
+                <input type="range" id="n1-slider" min="1.1" max="1.8" step="0.01" value="1.33">
+                <input type="number" id="n1-num" value="1.33" min="1.1" max="1.8" step="0.01">
+            </div>
+            
+            <div class="control-group">
+                <label>Ray Angle Spread <span id="ang-val">25°</span></label>
+                <input type="range" id="ang-slider" min="5" max="45" step="1" value="25">
+                <input type="number" id="ang-num" value="25" min="5" max="45" step="1">
+            </div>
+            
+            <div style="display: flex; gap: 8px; margin: 15px 0;">
+                <button class="btn btn-green" onclick="showSolution()" style="flex: 2;">Show Solution</button>
+                <button class="btn btn-orange" onclick="resetSim()" style="flex: 1;">Reset</button>
+            </div>
+            
+            <div class="solution-box" id="solution">
+                <strong style="color: var(--green);">Answer: d) 9H/8</strong>
+                <div class="answer-correct">
+                    <strong>Step 1:</strong> Mirror image at depth = 2H - H/2 = 3H/2<br><br>
+                    <strong>Step 2:</strong> Apparent depth = (3H/2) × (3/4) = 9H/8
+                </div>
+                <div class="formula">
+                    d<sub>apparent</sub> = (2H - d₀) × (n₂/n₁)<br>
+                    = (3H/2) × (3/4) = 9H/8
+                </div>
+            </div>
+            
+            <div class="section-title">Key Concept</div>
+            <p style="font-size: 0.85rem; color: #aaa; line-height: 1.5;">
+                <strong>Virtual rays (magenta)</strong> appear to come from I₂ and travel in <em>straight lines</em> to the eye. All virtual rays <strong>converge at I₂</strong> (the apparent image), showing where the eye perceives the fish to be. Real rays (yellow/orange/cyan) bend at the surface.
+            </p>
+        </div>
+        
+        <div id="report-tab" class="tab-content">
+            <h1>📝 AP Physics Lab Report</h1>
+            
+            <div class="control-group">
+                <label>Student Name</label>
+                <input type="text" id="student-name" placeholder="Enter full name" style="width: 100%; padding: 8px; background: #222; border: 1px solid #444; color: white; border-radius: 4px;">
+            </div>
+            
+            <div class="ap-question">
+                <h4>Question 1: Quantitative Analysis (7 points)</h4>
+                <p>A fish tank has depth H = 3.0 m and is filled with water (n = 1.33). A fish swims at depth d₀ = 1.0 m. Calculate:</p>
+                <p>(a) The depth of the virtual image formed by the mirror. [2 pts]<br>
+                (b) The apparent depth of this image as seen by an observer above the water. [3 pts]<br>
+                (c) The ratio of apparent depth to actual tank depth. [2 pts]</p>
+                <textarea id="q1" placeholder="Show all calculations with proper units..."></textarea>
+            </div>
+            
+            <div class="ap-question">
+                <h4>Question 2: Conceptual Analysis (5 points)</h4>
+                <p>Explain why the apparent depth of the fish's image is <em>greater</em> than the actual depth of the fish (d₀), despite the fact that refraction normally makes objects appear <em>shallower</em> than they are. Your explanation should address:</p>
+                <p>(a) The role of the mirror in creating the optical path. [2 pts]<br>
+                (b) Why the mirror image is located below the actual fish. [3 pts]</p>
+                <textarea id="q2" placeholder="Explain the physics concepts..."></textarea>
+            </div>
+            
+            <div class="ap-question">
+                <h4>Question 3: Experimental Design (7 points)</h4>
+                <p>Design an experiment using this simulation to verify the relationship d<sub>apparent</sub> = (2H - d₀)(n₂/n₁). Your answer should include:</p>
+                <p>(a) Independent and dependent variables. [2 pts]<br>
+                (b) How you would manipulate the variables and what data to collect. [3 pts]<br>
+                (c) What graph you would plot to verify the linear relationship. [2 pts]</p>
+                <textarea id="q3" placeholder="Describe your experimental procedure..."></textarea>
+            </div>
+            
+            <div class="ap-question">
+                <h4>Question 4: Multiple Representations (5 points)</h4>
+                <p>On the simulation, when the ray angle increases from near-vertical to 30°, observe what happens to the apparent position I₂.</p>
+                <p>(a) Does the apparent depth change with angle? Why or why not? [2 pts]<br>
+                (b) At what angle would total internal reflection prevent Donna from seeing the fish at all? Calculate this critical angle for water-air interface. [3 pts]</p>
+                <textarea id="q4" placeholder="Use the simulation and physics principles..."></textarea>
+            </div>
+            
+            <div class="ap-question">
+                <h4>Question 5: Advanced Application (6 points)</h4>
+                <p>The fish tank is replaced with a different liquid where the apparent depth of the mirror image equals exactly H (the tank depth) when the fish is at d₀ = H/2.</p>
+                <p>(a) Determine the refractive index of this new liquid. [4 pts]<br>
+                (b) If Donna views the fish at a 45° angle in this new liquid, calculate the angle of refraction in air. [2 pts]</p>
+                <textarea id="q5" placeholder="Show your mathematical reasoning..."></textarea>
+            </div>
+            
+            <button class="btn btn-cyan" onclick="exportDoc()" style="width: 100%; margin-top: 15px;">Export Lab Report to DOCX</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+
+let state = {
+    H: 4.0,
+    do: 2.0,
+    n1: 1.33,
+    n2: 1.0,
+    angle: 25 * Math.PI / 180,
+    mpx: 50,
+    dragging: false,
+    time: 0,
+    show: {
+        real: true,
+        virtual: true,
+        convergence: true,
+        eye: true,
+        normals: true,
+        labels: true
+    }
+};
+
+function resize() {
+    const container = document.getElementById('canvas-container');
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+}
+window.addEventListener('resize', resize);
+
+function calculate() {
+    const i1Depth = 2 * state.H - state.do;
+    const i2Depth = i1Depth * (state.n2 / state.n1);
+    return { i1Depth, i2Depth };
+}
+
+function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+    const cx = w / 2;
+    const surfY = h * 0.28;
+    const bottomY = surfY + state.H * state.mpx;
+    const fishY = surfY + state.do * state.mpx;
+    
+    const { i1Depth, i2Depth } = calculate();
+    const i1Y = surfY + i1Depth * state.mpx;
+    const i2Y = surfY + i2Depth * state.mpx;
+    
+    document.getElementById('hud').innerHTML = 
+        `Tank Depth (H): ${state.H.toFixed(2)} m<br>` +
+        `Fish Depth: ${state.do.toFixed(2)} m<br>` +
+        `Mirror Image (I₁): ${i1Depth.toFixed(2)} m<br>` +
+        `Apparent Image (I₂): ${i2Depth.toFixed(2)} m`;
+    
+    ctx.clearRect(0, 0, w, h);
+    
+    // Sky
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, surfY);
+    skyGrad.addColorStop(0, '#0b1026');
+    skyGrad.addColorStop(1, '#1a3a5c');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, w, surfY);
+    
+    // Sun
+    ctx.fillStyle = '#ffdd44';
+    ctx.beginPath();
+    ctx.arc(cx, 50, 20, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255, 220, 100, 0.3)';
+    ctx.beginPath();
+    ctx.arc(cx, 50, 35, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Tank
+    const tankW = Math.min(400, w - 100);
+    const tankX = cx - tankW/2;
+    
+    const waterGrad = ctx.createLinearGradient(0, surfY, 0, bottomY);
+    waterGrad.addColorStop(0, 'rgba(0, 100, 200, 0.3)');
+    waterGrad.addColorStop(1, 'rgba(0, 50, 150, 0.5)');
+    ctx.fillStyle = waterGrad;
+    ctx.fillRect(tankX, surfY, tankW, bottomY - surfY);
+    
+    ctx.strokeStyle = 'rgba(200, 200, 255, 0.4)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(tankX, surfY, tankW, bottomY - surfY);
+    
+    ctx.strokeStyle = 'rgba(150, 200, 255, 0.8)';
+    ctx.beginPath();
+    ctx.moveTo(tankX, surfY);
+    ctx.lineTo(tankX + tankW, surfY);
+    ctx.stroke();
+    
+    // Mirror
+    ctx.fillStyle = 'rgba(200, 220, 255, 0.3)';
+    ctx.fillRect(tankX + 5, bottomY - 5, tankW - 10, 5);
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = '#aaa';
+    ctx.beginPath();
+    ctx.moveTo(tankX + 10, bottomY);
+    ctx.lineTo(tankX + tankW - 10, bottomY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Bubbles
+    for (let i = 0; i < 8; i++) {
+        const bx = cx + Math.sin(state.time * 0.02 + i) * 80;
+        const by = surfY + ((state.time * 0.5 + i * 50) % (state.H * state.mpx));
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.beginPath();
+        ctx.arc(bx, by, 3 + Math.sin(i), 0, Math.PI*2);
+        ctx.fill();
+    }
+    
+    // Fish and mirror image
+    drawFish(cx, fishY, state.time);
+    ctx.globalAlpha = 0.3;
+    drawFish(cx, i1Y, state.time + Math.PI, true);
+    ctx.globalAlpha = 1.0;
+    
+    // Observer eye
+    const eyeX = cx + 140;
+    const eyeY = surfY - 80;
+    drawEye(eyeX, eyeY);
+    
+    // Ray tracing
+    const numRays = 7;
+    const angles = [];
+    for (let i = 0; i < numRays; i++) {
+        const angle = (i - (numRays-1)/2) * state.angle / 3;
+        angles.push(angle);
+    }
+    
+    // First pass: calculate all intersection points
+    const rayData = angles.map(angle => {
+        const distToMirror = bottomY - fishY;
+        const mirrorX = cx + distToMirror * Math.tan(angle);
+        const distToSurf = bottomY - surfY;
+        const surfaceX = mirrorX + distToSurf * Math.tan(angle);
+        
+        const sinTheta1 = Math.sin(Math.abs(angle));
+        const sinTheta2 = (state.n1 / state.n2) * sinTheta1;
+        let refractedAngle = angle;
+        let tir = false;
+        
+        if (sinTheta2 <= 1) {
+            refractedAngle = Math.sign(angle) * Math.asin(sinTheta2);
+        } else {
+            tir = true;
+            refractedAngle = -angle;
+        }
+        
+        // Calculate where refracted ray goes
+        const dx = eyeX - surfaceX;
+        const dy = eyeY - surfY;
+        const distToEye = Math.sqrt(dx*dx + dy*dy);
+        const actualEyeX = tir ? surfaceX + 100 * Math.sin(refractedAngle) : eyeX;
+        const actualEyeY = tir ? surfY + 100 : eyeY;
+        
+        return { angle, mirrorX, surfaceX, refractedAngle, tir, actualEyeX, actualEyeY };
+    });
+    
+    // Draw REAL rays (Fish -> Mirror -> Surface -> Eye)
+    if (state.show.real) {
+        rayData.forEach((ray, i) => {
+            const opacity = 0.9 - Math.abs(i - 3) * 0.15;
+            
+            // Fish to mirror
+            ctx.strokeStyle = `rgba(255, 200, 50, ${opacity})`;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            ctx.moveTo(cx, fishY);
+            ctx.lineTo(ray.mirrorX, bottomY);
+            ctx.stroke();
+            
+            // Mirror to surface
+            ctx.strokeStyle = `rgba(255, 140, 30, ${opacity})`;
+            ctx.beginPath();
+            ctx.moveTo(ray.mirrorX, bottomY);
+            ctx.lineTo(ray.surfaceX, surfY);
+            ctx.stroke();
+            
+            // Surface to eye (refracted)
+            if (!ray.tir) {
+                ctx.strokeStyle = `rgba(0, 200, 255, ${opacity})`;
+                ctx.beginPath();
+                ctx.moveTo(ray.surfaceX, surfY);
+                ctx.lineTo(ray.actualEyeX, ray.actualEyeY);
+                ctx.stroke();
+            }
+        });
+    }
+    
+    // Draw VIRTUAL rays (I2 -> Surface -> Eye) - STRAIGHT LINES converging at I2
+    if (state.show.virtual) {
+        rayData.forEach((ray, i) => {
+            if (ray.tir) return;
+            const opacity = 0.85 - Math.abs(i - 3) * 0.12;
+            
+            // Draw straight line from I2 through surface to eye
+            // This shows the apparent path - all these lines converge at I2
+            ctx.strokeStyle = `rgba(255, 0, 255, ${opacity})`;
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 4]);
+            
+            ctx.beginPath();
+            ctx.moveTo(cx, i2Y); // Start at apparent image (convergence point)
+            ctx.lineTo(ray.surfaceX, surfY); // Through surface
+            ctx.lineTo(ray.actualEyeX, ray.actualEyeY); // To eye
+            ctx.stroke();
+            
+            // Draw small dots at convergence
+            ctx.fillStyle = `rgba(255, 0, 255, ${opacity})`;
+            ctx.beginPath();
+            ctx.arc(cx, i2Y, 3, 0, Math.PI*2);
+            ctx.fill();
+        });
+        ctx.setLineDash([]);
+    }
+    
+    // Draw convergence glow at I2
+    if (state.show.convergence) {
+        const glow = ctx.createRadialGradient(cx, i2Y, 0, cx, i2Y, 25);
+        glow.addColorStop(0, 'rgba(255, 0, 255, 0.4)');
+        glow.addColorStop(0.5, 'rgba(255, 0, 255, 0.15)');
+        glow.addColorStop(1, 'rgba(255, 0, 255, 0)');
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(cx, i2Y, 25, 0, Math.PI*2);
+        ctx.fill();
+        
+        // Convergence label
+        if (state.show.labels) {
+            ctx.fillStyle = '#ff88ff';
+            ctx.font = 'bold 10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('← CONVERGENCE', cx - 35, i2Y - 10);
+        }
+    }
+    
+    // Normals
+    if (state.show.normals) {
+        rayData.forEach((ray, i) => {
+            if (i % 2 === 0) { // Draw every other to avoid clutter
+                ctx.strokeStyle = 'rgba(100, 100, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath();
+                ctx.moveTo(ray.surfaceX, surfY - 25);
+                ctx.lineTo(ray.surfaceX, surfY + 25);
+                ctx.stroke();
+            }
+        });
+        ctx.setLineDash([]);
+    }
+    
+    // Labels
+    if (state.show.labels) {
+        // Fish
+        ctx.fillStyle = '#ff9500';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('🐟 Real Fish', cx + 25, fishY + 4);
+        
+        // Mirror image
+        ctx.fillStyle = 'rgba(255, 149, 0, 0.6)';
+        ctx.fillText('I₁ (mirror image)', cx + 25, i1Y + 4);
+        
+        // Apparent image with emphasis
+        ctx.fillStyle = '#ff00ff';
+        ctx.beginPath();
+        ctx.arc(cx, i2Y, 8, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(cx, i2Y, 4, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#ff00ff';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText('I₂ (APPARENT)', cx + 25, i2Y + 4);
+        ctx.font = '10px sans-serif';
+        ctx.fillText('All virtual rays converge here', cx + 25, i2Y + 16);
+        
+        // Depth markers
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1;
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#666';
+        ctx.font = '10px monospace';
+        
+        for (let d = 0; d <= state.H; d += 1) {
+            const y = surfY + d * state.mpx;
+            ctx.beginPath();
+            ctx.moveTo(tankX - 5, y);
+            ctx.lineTo(tankX, y);
+            ctx.stroke();
+            ctx.fillText(d + 'm', tankX - 8, y + 3);
+        }
+    }
+    
+    // Eye label
+    if (state.show.eye && state.show.labels) {
+        ctx.fillStyle = '#aaa';
+        ctx.font = 'bold 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText("DONNA'S EYE", eyeX, eyeY + 28);
+        ctx.font = '9px sans-serif';
+        ctx.fillText("(traces rays back to I₂)", eyeX, eyeY + 40);
+    }
+    
+    state.time++;
+    requestAnimationFrame(draw);
+}
+
+function drawFish(x, y, t, isGhost = false) {
+    ctx.save();
+    const bob = Math.sin(t * 0.05) * 2;
+    ctx.translate(x, y + bob);
+    
+    if (isGhost) ctx.globalAlpha = 0.4;
+    
+    // Tail
+    ctx.fillStyle = isGhost ? '#ff8844' : '#ff7733';
+    ctx.beginPath();
+    ctx.moveTo(-12, 0);
+    ctx.lineTo(-20, -6);
+    ctx.lineTo(-18, 0);
+    ctx.lineTo(-20, 6);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Body
+    const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 14);
+    grad.addColorStop(0, '#ffcc66');
+    grad.addColorStop(0.6, '#ff9933');
+    grad.addColorStop(1, '#cc5500');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 14, 8, 0, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Eye
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(6, -2, 3.5, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(7, -2, 2, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Fin
+    ctx.fillStyle = 'rgba(255, 150, 50, 0.8)';
+    ctx.beginPath();
+    ctx.moveTo(-2, -8);
+    ctx.lineTo(2, -14);
+    ctx.lineTo(6, -8);
+    ctx.closePath();
+    ctx.fill();
+    
+    ctx.restore();
+}
+
+function drawEye(x, y) {
+    if (!state.show.eye) return;
+    
+    ctx.save();
+    ctx.fillStyle = '#e0e0e0';
+    ctx.beginPath();
+    ctx.ellipse(x, y, 16, 11, 0, 0, Math.PI*2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#4a90d9';
+    ctx.beginPath();
+    ctx.arc(x + 2, y, 6, 0, Math.PI*2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#111';
+    ctx.beginPath();
+    ctx.arc(x + 3, y, 3, 0, Math.PI*2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(x + 4, y - 2, 2, 0, Math.PI*2);
+    ctx.fill();
+    
+    ctx.strokeStyle = '#999';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(x - 14, y - 5);
+    ctx.quadraticCurveTo(x, y - 12, x + 14, y - 5);
+    ctx.stroke();
+    
+    ctx.restore();
+}
+
+// Controls
+function updateControls() {
+    document.getElementById('h-val').innerText = state.H.toFixed(1) + ' m';
+    document.getElementById('do-val').innerText = state.do.toFixed(1) + ' m';
+    document.getElementById('n1-val').innerText = state.n1.toFixed(2);
+    document.getElementById('ang-val').innerText = Math.round(state.angle * 180 / Math.PI) + '°';
+    
+    document.getElementById('h-slider').value = state.H;
+    document.getElementById('do-slider').value = state.do;
+    document.getElementById('n1-slider').value = state.n1;
+    document.getElementById('ang-slider').value = state.angle * 180 / Math.PI;
+    
+    document.getElementById('h-num').value = state.H;
+    document.getElementById('do-num').value = state.do;
+    document.getElementById('n1-num').value = state.n1;
+    document.getElementById('ang-num').value = (state.angle * 180 / Math.PI).toFixed(0);
+}
+
+document.getElementById('h-slider').oninput = (e) => { state.H = parseFloat(e.target.value); updateControls(); };
+document.getElementById('h-num').oninput = (e) => { state.H = parseFloat(e.target.value); updateControls(); };
+document.getElementById('do-slider').oninput = (e) => { state.do = parseFloat(e.target.value); updateControls(); };
+document.getElementById('do-num').oninput = (e) => { state.do = parseFloat(e.target.value); updateControls(); };
+document.getElementById('n1-slider').oninput = (e) => { state.n1 = parseFloat(e.target.value); updateControls(); };
+document.getElementById('n1-num').oninput = (e) => { state.n1 = parseFloat(e.target.value); updateControls(); };
+document.getElementById('ang-slider').oninput = (e) => { state.angle = parseFloat(e.target.value) * Math.PI / 180; updateControls(); };
+document.getElementById('ang-num').oninput = (e) => { state.angle = parseFloat(e.target.value) * Math.PI / 180; updateControls(); };
+
+canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const cx = canvas.width / 2;
+    const surfY = canvas.height * 0.28;
+    const fishY = surfY + state.do * state.mpx;
+    
+    if (Math.abs(x - cx) < 30 && Math.abs(y - fishY) < 30) {
+        state.dragging = true;
+    }
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (!state.dragging) return;
+    const rect = canvas.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const surfY = canvas.height * 0.28;
+    
+    let newDepth = (y - surfY) / state.mpx;
+    newDepth = Math.max(0.2, Math.min(state.H - 0.2, newDepth));
+    state.do = newDepth;
+    updateControls();
+});
+
+canvas.addEventListener('mouseup', () => state.dragging = false);
+canvas.addEventListener('mouseleave', () => state.dragging = false);
+
+function toggle(btn, type) {
+    state.show[type] = !state.show[type];
+    btn.classList.toggle('active');
+}
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById(tab + '-tab').classList.add('active');
+}
+
+function showSolution() {
+    const box = document.getElementById('solution');
+    box.style.display = box.style.display === 'block' ? 'none' : 'block';
+}
+
+function resetSim() {
+    state.H = 4.0;
+    state.do = 2.0;
+    state.n1 = 1.33;
+    state.angle = 25 * Math.PI / 180;
+    updateControls();
+}
+
+function exportDoc() {
+    const name = document.getElementById('student-name').value || 'Student';
+    const { Document, Paragraph, TextRun, HeadingLevel } = window.docx;
+    
+    const doc = new Document({
+        sections: [{
+            children: [
+                new Paragraph({ text: "AP Physics 2: Fish Tank Optics Lab Report", heading: HeadingLevel.HEADING_1, alignment: "center" }),
+                new Paragraph({ children: [new TextRun({ text: `Name: ${name}`, bold: true, size: 24 })], spacing: { after: 200 } }),
+                new Paragraph({ text: `Parameters: H=${state.H}m, d₀=${state.do}m, n₁=${state.n1}`, spacing: { after: 200 } }),
+                new Paragraph({ text: "Question 1: Quantitative Analysis (7 points)", heading: HeadingLevel.HEADING_2, spacing: { before: 300 } }),
+                new Paragraph({ text: document.getElementById('q1').value || "No response." }),
+                new Paragraph({ text: "Question 2: Conceptual Analysis (5 points)", heading: HeadingLevel.HEADING_2, spacing: { before: 300 } }),
+                new Paragraph({ text: document.getElementById('q2').value || "No response." }),
+                new Paragraph({ text: "Question 3: Experimental Design (7 points)", heading: HeadingLevel.HEADING_2, spacing: { before: 300 } }),
+                new Paragraph({ text: document.getElementById('q3').value || "No response." }),
+                new Paragraph({ text: "Question 4: Multiple Representations (5 points)", heading: HeadingLevel.HEADING_2, spacing: { before: 300 } }),
+                new Paragraph({ text: document.getElementById('q4').value || "No response." }),
+                new Paragraph({ text: "Question 5: Advanced Application (6 points)", heading: HeadingLevel.HEADING_2, spacing: { before: 300 } }),
+                new Paragraph({ text: document.getElementById('q5').value || "No response." }),
+                new Paragraph({ text: `Total: 30 points`, alignment: "right", spacing: { before: 400 } })
+            ]
+        }]
+    });
+    
+    window.docx.createBlob(doc).then(blob => saveAs(blob, `${name.replace(/\s+/g, '_')}_AP_Physics_Lab.docx`));
+}
+
+resize();
+updateControls();
+draw();
+</script>
+</body>
+</html>
