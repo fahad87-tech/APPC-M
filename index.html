@@ -6,6 +6,7 @@
 <title>Physics Simulations Dashboard</title>
 <script>
   const WEBSITE_TARGET_HASH = "028f0aff59e51eae7eae5d3feb4f72426eb597f2f38eafeaf9174e80e66735af";
+  const SIMULATION_TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
 
   document.documentElement.classList.add("password-locked");
 
@@ -124,6 +125,14 @@
     });
   }
 
+  async function sha256Hex(value) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(value);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+
   async function verifyWebsiteAccess() {
     const userInput = await requestPassword("Website Access", "Website password required:");
 
@@ -132,11 +141,7 @@
       return;
     }
 
-    const encoder = new TextEncoder();
-    const data = encoder.encode(userInput);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    const hashHex = await sha256Hex(userInput);
 
     if (hashHex === WEBSITE_TARGET_HASH) {
       document.documentElement.classList.remove("password-locked");
@@ -226,8 +231,9 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
     gap: 22px;
+    justify-content: center;
   }
 
   /* Card Styles */
@@ -455,7 +461,7 @@
 
   <h2 class="section-title">Rotational Motion</h2>
   <div class="grid">
-    <a class="card" href="rotational motion/Ladybug on Disc.html">
+    <a class="card" id="ladybug-card" href="rotational motion/Ladybug on Disc.html">
       <div class="card-icon">🐞</div>
       <div class="card-title">Ladybug on Disc</div>
       <div class="card-subtitle">Angular Momentum</div>
@@ -497,6 +503,23 @@
       }
     });
   });
+
+  const ladybugCard = document.getElementById('ladybug-card');
+  if (ladybugCard) {
+    ladybugCard.addEventListener('click', async function(e) {
+      e.preventDefault();
+      const userInput = await requestPassword('Simulation Access', 'Classroom password required for this simulation:');
+      if (userInput === null) {
+        return;
+      }
+      const hashHex = await sha256Hex(userInput);
+      if (hashHex === SIMULATION_TARGET_HASH) {
+        window.location.href = this.href;
+      } else {
+        alert('Incorrect password. Access denied.');
+      }
+    });
+  }
 </script>
 
 </body>

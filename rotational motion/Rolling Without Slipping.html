@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics: Rolling Cylinder Dynamics (FRQ 4)</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        :root {
+            --bg-main: #05070A;
+            --bg-panel: #0D1117;
+            --border-color: #30363D;
+            --text-main: #C9D1D9;
+            --text-bright: #E6EDF3;
+            --accent-blue: #58A6FF;
+            --accent-green: #238636;
+            --accent-green-hover: #2EA043;
+            --accent-red: #FF3B30;
+            --accent-purple: #8957E5;
+            --accent-yellow: #FFCC00;
+            --accent-cyan: #00E5FF;
+            --accent-orange: #FF9500;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100vw; height: 100vh;
+            background-color: var(--bg-main); color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden; user-select: none;
+        }
+
+        /* Tabs Styling */
+        .tab-bar { display: flex; border-bottom: 1px solid var(--border-color); background: rgba(13, 17, 23, 0.8); backdrop-filter: blur(10px); padding-top: 10px; z-index: 100; position: relative;}
+        .tab { 
+            padding: 12px 25px; cursor: pointer; font-weight: bold; font-size: 14px; color: #8B949E;
+            background: var(--bg-panel); border: 1px solid var(--border-color); border-bottom: none;
+            border-top-left-radius: 8px; border-top-right-radius: 8px; margin-left: 15px; transition: 0.2s;
+        }
+        .tab.active { background: var(--accent-green); color: white; border-color: var(--accent-green); box-shadow: 0 -4px 15px rgba(35, 134, 54, 0.3); }
+        .tab-content { display: none; height: calc(100vh - 45px); box-sizing: border-box; width: 100%; position: relative; z-index: 10; }
+        .tab-content.active { display: flex; }
+
+        /* Main Layout */
+        #sim-tab { padding: 20px; gap: 20px; box-sizing: border-box; }
+        #qa-tab { padding: 40px; flex-direction: column; gap: 20px; align-items: center; overflow-y: auto; }
+
+        .left-panel { width: 360px; display: flex; flex-direction: column; gap: 15px; }
+        .center-panel { flex: 1; border: 1px solid var(--border-color); border-radius: 12px; background: radial-gradient(circle at 50% 50%, #161B22, #05070A); position: relative; overflow: hidden; box-shadow: inset 0 0 50px rgba(0,0,0,0.8); }
+        .right-panel { width: 420px; display: flex; flex-direction: column; gap: 10px; }
+
+        fieldset { border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; background: rgba(22, 27, 34, 0.6); backdrop-filter: blur(10px); margin-top: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+        legend { color: var(--accent-cyan); font-size: 14px; font-weight: bold; padding: 0 8px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .control-row { margin-bottom: 15px; }
+        .control-row label { display: flex; justify-content: space-between; color: var(--text-bright); font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { height: 6px; background: #21262D; border: 1px solid var(--border-color); border-radius: 3px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; background: var(--accent-cyan); border-radius: 50%; margin-top: -6px; cursor: pointer; box-shadow: 0 0 10px var(--accent-cyan); }
+        
+        select { width: 100%; background: #21262D; color: var(--text-bright); border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; font-weight: bold; font-family: inherit; outline: none; cursor: pointer;}
+
+        button { 
+            padding: 14px; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer;
+            border: 1px solid rgba(240, 246, 252, 0.1); color: white; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .btn-primary { background: linear-gradient(135deg, #2EA043, #238636); box-shadow: 0 4px 15px rgba(35, 134, 54, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(35, 134, 54, 0.5); }
+        
+        .btn-secondary { background: #21262D; border-color: var(--border-color); }
+        .btn-secondary:hover { background: #30363D; }
+        .btn-data { background: linear-gradient(135deg, #A371F7, #8957E5); box-shadow: 0 4px 15px rgba(137, 87, 229, 0.3); }
+
+        .telem-row { display: flex; justify-content: space-between; color: var(--accent-cyan); font-size: 14px; font-weight: bold; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); }
+        .telem-val { font-family: 'Courier New', Courier, monospace; color: #fff; font-size: 16px;}
+        .chart-wrapper { flex: 1; min-height: 0; background: rgba(22, 27, 34, 0.6); border-radius: 10px; position: relative; padding: 10px; box-sizing: border-box; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        canvas { width: 100% !important; height: 100% !important; }
+        #simCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        /* QA Layout Elements */
+        .qa-container { width: 850px; max-width: 100%; display: flex; flex-direction: column; gap: 20px; margin: 0 auto; }
+        .qa-prompt { background: rgba(33, 38, 45, 0.8); border: 1px solid var(--accent-blue); padding: 30px; border-radius: 12px; font-size: 18px; color: var(--text-bright); line-height: 1.6; box-shadow: 0 8px 32px rgba(88, 166, 255, 0.1); }
+        textarea { width: 100%; box-sizing: border-box; background: #010409; color: var(--text-main); font-size: 16px; padding: 20px; border: 1px solid var(--border-color); border-radius: 8px; height: 220px; resize: vertical; font-family: inherit; line-height: 1.5; }
+        textarea:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.3); }
+        input[type=text] { background: #010409; padding: 12px 15px; border-radius: 6px; border: 1px solid var(--border-color); color: var(--text-bright); font-size: 15px; width: 100%; box-sizing: border-box; }
+        #status-msg { font-size: 13px; color: var(--accent-green); height: 20px; text-align: right; font-weight: bold;}
+    </style>
+</head>
+<body>
+
+    <div class="tab-bar">
+        <div class="tab active" onclick="switchTab('sim-tab', this)">🔬 High-Fidelity Laboratory</div>
+        <div class="tab" onclick="switchTab('qa-tab', this)">📝 5E Analysis & Export</div>
+    </div>
+
+    <div id="sim-tab" class="tab-content active">
+        <div class="left-panel">
+            <fieldset>
+                <legend>System Parameters (FRQ 4)</legend>
+                
+                <div class="control-row">
+                    <label>Active Object Type</label>
+                    <select id="obj-type" onchange="ui.resetSim()">
+                        <option value="cylinder">Solid Cylinder (Rolls without slipping)</option>
+                        <option value="block">Rectangular Block (Slides with friction)</option>
+                    </select>
+                </div>
+
+                <div class="control-row">
+                    <label><span>Mass (m₀)</span><span id="lbl-m0" style="color: var(--accent-cyan)">1.0 kg</span></label>
+                    <input type="range" id="in-m0" min="0.5" max="5.0" step="0.1" value="1.0" oninput="ui.updateLabels()">
+                </div>
+                <div class="control-row">
+                    <label><span>Ramp Height (H₀)</span><span id="lbl-h0" style="color: var(--accent-yellow)">5.0 m</span></label>
+                    <input type="range" id="in-h0" min="2.0" max="8.0" step="0.5" value="5.0" oninput="ui.updateLabels()">
+                </div>
+                <div class="control-row" style="margin-bottom: 0;">
+                    <label><span>Ramp Length (L₀)</span><span id="lbl-l0" style="color: var(--accent-green)">12.0 m</span></label>
+                    <input type="range" id="in-l0" min="8.0" max="16.0" step="0.5" value="12.0" oninput="ui.updateLabels()">
+                </div>
+            </fieldset>
+
+            <div style="display:flex; flex-direction:column; gap:12px; margin-top: 10px;">
+                <button class="btn-primary" id="btn-play" onclick="ui.togglePlay()">▶ Release from Rest</button>
+                <button class="btn-secondary" onclick="ui.resetSim()">↺ Reset System</button>
+            </div>
+            
+            <p style="color: var(--text-muted); font-size: 13px; line-height: 1.5; margin-top: 15px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+                <strong>AP Physics Setup:</strong> Both objects reach the bottom with the <em>exact same translational speed</em>. The cylinder splits its energy into translation and rotation. The block loses that equivalent rotational fraction to thermal energy via friction.
+            </p>
+        </div>
+
+        <div class="center-panel" id="canvas-container">
+            <canvas id="simCanvas"></canvas>
+        </div>
+
+        <div class="right-panel">
+            <fieldset style="margin-top: 0; padding: 12px 15px; background: rgba(0,0,0,0.5);">
+                <legend>Real-Time Telemetry</legend>
+                <div class="telem-row" style="margin-bottom: 8px;">
+                    <span>Translational Speed (v):</span>
+                    <span><span id="tel-v" class="telem-val">0.00</span> <span style="font-size:12px; color:var(--text-muted)">m/s</span></span>
+                </div>
+                <div class="telem-row">
+                    <span>Distance Traveled (d):</span>
+                    <span><span id="tel-d" class="telem-val" style="color: var(--accent-yellow)">0.00</span> <span style="font-size:12px; color:var(--text-muted)">m</span></span>
+                </div>
+            </fieldset>
+
+            <div class="chart-wrapper"><canvas id="chartE"></canvas></div>
+
+            <button class="btn-data" onclick="ui.exportCSV()">📊 Export Graph Data (.CSV)</button>
+        </div>
+    </div>
+
+    <div id="qa-tab" class="tab-content">
+        <div class="qa-container">
+            <fieldset style="background: rgba(13, 17, 23, 0.9);">
+                <legend style="font-size: 18px;">5E Guided Inquiry Assignment (AP FRQ 4)</legend>
+                
+                <label style="color: var(--text-bright); font-weight: bold; display:block; margin-bottom: 8px; font-size: 15px;">Student Name:</label>
+                <input type="text" id="student-name" placeholder="Enter your full name for the final report">
+                
+                <div style="margin-top: 30px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">
+                    <span id="qa-stage" style="color: var(--accent-purple); font-size: 26px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">STAGE</span>
+                    <span id="qa-counter" style="color: #8B949E; font-size: 15px; float: right; margin-top: 10px; font-weight: bold;">Prompt 1 of 10</span>
+                </div>
+                
+                <div class="qa-prompt" id="qa-prompt-text">Loading prompt...</div>
+                
+                <textarea id="qa-answer" placeholder="Construct your scientific reasoning here. Reference equations and simulation data where applicable..."></textarea>
+                <div id="status-msg"></div>
+                
+                <div style="display: flex; gap: 15px; margin-top:15px;">
+                    <button class="btn-secondary" style="flex: 1; padding: 16px; font-size: 16px;" onclick="inquiry.prev()">◀ Previous Prompt</button>
+                    <button class="btn-secondary" style="flex: 1; padding: 16px; font-size: 16px; background: #21262D; border-color: var(--accent-blue); color: var(--accent-blue);" onclick="inquiry.next()">Next Prompt ▶</button>
+                </div>
+                <button class="btn-primary" style="margin-top: 15px; width: 100%; padding: 18px; font-size: 16px; background: linear-gradient(135deg, #A371F7, #8957E5);" onclick="inquiry.exportDOCX()">📄 Generate & Download .DOCX Report</button>
+            </fieldset>
+        </div>
+    </div>
+
+<script>
+// ==========================================
+// 1. PHYSICS ENGINE
+// ==========================================
+class PhysicsEngine {
+    constructor() { this.reset(); }
+
+    reset() {
+        this.mode = document.getElementById('obj-type').value; // 'cylinder' or 'block'
+        this.m0 = parseFloat(document.getElementById('in-m0').value);
+        this.H0 = parseFloat(document.getElementById('in-h0').value);
+        this.L0 = parseFloat(document.getElementById('in-l0').value);
+        this.R = 0.5; // Visual/Physical radius for the cylinder
+        this.g = 9.81;
+
+        this.theta = Math.asin(this.H0 / this.L0);
+        
+        // Acceleration calculations
+        // Cylinder (Solid): a = g*sin(theta) / (1 + 0.5) = (2/3) g sin(theta)
+        // Block: Must reach same speed. Therefore, its acceleration must also be exactly (2/3) g sin(theta)
+        this.a_ramp = (2/3) * this.g * Math.sin(this.theta);
+        
+        this.d = 0;     // Distance traveled along path
+        this.v = 0;     // Translational velocity
+        this.w = 0;     // Angular velocity (only for cylinder)
+        this.t = 0;
+        this.isReleased = false;
+        
+        this.E_total_initial = this.m0 * this.g * this.H0;
+        this.K_trans = 0;
+        this.K_rot = 0;
+        this.E_thermal = 0;
+    }
+
+    step(dt) {
+        if (!this.isReleased || this.d >= 2 * this.L0) return;
+
+        // Determine if on ramp or horizontal surface
+        let current_a = 0;
+        if (this.d < this.L0) {
+            current_a = this.a_ramp;
+        } else {
+            current_a = 0; // Constant velocity on horizontal surface (no net forces doing work)
+        }
+
+        // Kinematics
+        this.v += current_a * dt;
+        this.d += this.v * dt;
+        
+        // Cap distance at 2*L0
+        if (this.d > 2 * this.L0) {
+            this.d = 2 * this.L0;
+            this.isReleased = false; // Stop at the end
+        }
+
+        // Energy Calculations
+        this.K_trans = 0.5 * this.m0 * (this.v * this.v);
+
+        if (this.mode === 'cylinder') {
+            this.w = this.v / this.R; // Rolling without slipping
+            // I = 1/2 m R^2
+            let I = 0.5 * this.m0 * (this.R * this.R);
+            this.K_rot = 0.5 * I * (this.w * this.w);
+            this.E_thermal = 0;
+        } else {
+            this.w = 0;
+            this.K_rot = 0;
+            // The missing energy goes to thermal (work done by friction)
+            // On the ramp, U_initial = U_current + K_trans + E_thermal
+            // U_current = mg(H0 - d*sin(theta))
+            if (this.d < this.L0) {
+                let U_current = this.m0 * this.g * (this.H0 - this.d * Math.sin(this.theta));
+                this.E_thermal = this.E_total_initial - U_current - this.K_trans;
+            } else {
+                // On flat, thermal energy is capped at what was generated on the ramp
+                this.E_thermal = this.E_total_initial - this.K_trans;
+            }
+        }
+        
+        this.t += dt;
+    }
+}
+
+// ==========================================
+// 2. 5E INQUIRY MANAGER
+// ==========================================
+const PROMPTS = [
+    { stage: "ENGAGE", text: "Before running the simulation, look at the blank grid for Energy vs Distance. If a solid cylinder rolls without slipping down the incline, what shape do you predict for the Total Kinetic Energy curve? Why?" },
+    { stage: "ENGAGE", text: "Run the simulation for the Solid Cylinder. The Total Kinetic Energy (Cyan line) splits into two other energy forms. What are they, and what is the mathematical ratio between them for a solid cylinder?" },
+    { stage: "EXPLORE", text: "Reset the simulation and switch the active object to the 'Rectangular Block'. Run the simulation. How does the final translational kinetic energy of the block compare to the final translational kinetic energy of the cylinder?" },
+    { stage: "EXPLORE", text: "On the block's graph, a red line appears representing Thermal Energy (Work done by friction). Why does this line plateau exactly at distance L₀?" },
+    { stage: "EXPLAIN", text: "The FRQ states both objects reach the bottom with the exact same translational speed. Using the Work-Energy Theorem, write the equation for the cylinder (K_trans + K_rot = ...) and the block (K_trans + W_friction = ...) to mathematically prove why the friction work must equal the cylinder's rotational energy." },
+    { stage: "EXPLAIN", text: "Calculate the exact acceleration (a) down the ramp for the rolling cylinder in terms of 'g' and 'θ'. Show your derivation using Newton's Second Law and Torque." },
+    { stage: "ELABORATE", text: "If you increased the mass of the cylinder (m₀) to 3.0 kg, would the final translational speed at the bottom of the ramp increase, decrease, or stay the same? Verify this by changing the slider in the simulation." },
+    { stage: "ELABORATE", text: "If the object was a hollow thin hoop (I = mR²) instead of a solid cylinder, how would the ratio of Translational to Rotational Kinetic Energy change? Which would be larger?" },
+    { stage: "EVALUATE", text: "A student claims: 'Static friction does negative work on the cylinder as it rolls down the incline, which is why it has less translational speed than a frictionless sliding block.' Evaluate this claim. Is it static friction doing negative work?" },
+    { stage: "EVALUATE", text: "Using the default parameters (m=1kg, H=5m), calculate the exact final translational velocity at the bottom of the ramp for the cylinder. Verify your calculation matches the 'v' readout in the telemetry panel." }
+];
+
+const inquiry = {
+    idx: 0,
+    answers: Array(10).fill(""),
+    
+    init() {
+        const saved = localStorage.getItem('frq4_lab_answers');
+        if (saved) this.answers = JSON.parse(saved);
+        
+        document.getElementById('qa-answer').addEventListener('input', e => {
+            this.answers[this.idx] = e.target.value;
+            localStorage.setItem('frq4_lab_answers', JSON.stringify(this.answers));
+            const status = document.getElementById('status-msg'); status.innerText = "Autosaved ✓";
+            clearTimeout(this.msgTimer); this.msgTimer = setTimeout(() => status.innerText = "", 2000);
+        });
+        this.render();
+    },
+    render() {
+        const p = PROMPTS[this.idx];
+        document.getElementById('qa-stage').innerText = `${p.stage} PHASE`;
+        document.getElementById('qa-counter').innerText = `Prompt ${this.idx + 1} of 10`;
+        document.getElementById('qa-prompt-text').innerText = p.text;
+        document.getElementById('qa-answer').value = this.answers[this.idx];
+    },
+    prev() { if (this.idx > 0) { this.idx--; this.render(); } },
+    next() { if (this.idx < 9) { this.idx++; this.render(); } },
+    async exportDOCX() {
+        const name = document.getElementById('student-name').value.trim();
+        if (!name) return alert("Please enter your name before generating the document.");
+        
+        if (typeof docx === 'undefined') return alert("Document export library failed to load.");
+        
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
+        const children = [
+            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "AP Physics: FRQ 4 Rolling Dynamics", bold: true, size: 36, color: "00E5FF" })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Student: ${name}`, size: 24 })] }),
+            new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: `Date: ${new Date().toLocaleString()}\n\n`, size: 20, color: "8B949E" })] })
+        ];
+        
+        PROMPTS.forEach((p, i) => {
+            children.push(new Paragraph({ spacing: { before: 300, after: 100 }, heading: HeadingLevel.HEADING_2, children: [new TextRun({ text: `[${p.stage}] Prompt ${i + 1}:`, color: "A371F7" })] }));
+            children.push(new Paragraph({ spacing: { after: 150 }, children: [new TextRun({ text: p.text, italics: true, size: 24 })] }));
+            children.push(new Paragraph({ spacing: { after: 300 }, border: { left: { color: "30363D", space: 10, value: "single", size: 10 } }, children: [new TextRun({ text: "  " + (this.answers[i] || "(No answer provided)"), size: 24 })] }));
+        });
+        
+        const doc = new Document({ sections: [{ properties: {}, children }] });
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `FRQ4_Lab_${name.replace(/\s+/g, '_')}.docx`);
+    }
+};
+
+// ==========================================
+// 3. GUI, RENDERER & CHART CONTROLLER
+// ==========================================
+const engine = new PhysicsEngine();
+let lastTime = 0;
+let dtAccumulator = 0;
+const fixedDt = 1 / 120; 
+
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+const container = document.getElementById('canvas-container');
+
+function resizeCanvas() {
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// Chart.js Setup (Energy vs Distance Graph)
+Chart.defaults.color = '#8B949E';
+Chart.defaults.font.family = "'Segoe UI', sans-serif";
+
+const chartOptions = {
+    responsive: true, maintainAspectRatio: false, animation: false,
+    elements: { point: { radius: 0 }, line: { tension: 0.1, borderWidth: 2.5 } },
+    plugins: { 
+        legend: { display: true, position: 'top', labels: {color: '#E6EDF3'} }, 
+        title: { display: true, text: 'Energy (J) vs. Distance Traveled (m)', color: '#E6EDF3', font: {size: 14} } 
+    },
+    scales: { 
+        x: { type: 'linear', display: true, title: {display: true, text: 'Distance (m)', color: '#556'}, min: 0, max: 24, grid: { color: '#30363D' } }, 
+        y: { display: true, title: {display: true, text: 'Energy (Joules)', color: '#556'}, min: 0, max: 150, grid: { color: '#30363D' } } 
+    }
+};
+
+const energyChart = new Chart(document.getElementById('chartE').getContext('2d'), {
+    type: 'line',
+    data: { datasets: [] },
+    options: chartOptions
+});
+
+let historyData = { d: [], K_tot: [], K_trans: [], K_rot: [], E_th: [] };
+
+const ui = {
+    updateLabels() {
+        document.getElementById('lbl-m0').innerText = parseFloat(document.getElementById('in-m0').value).toFixed(1) + ' kg';
+        document.getElementById('lbl-h0').innerText = parseFloat(document.getElementById('in-h0').value).toFixed(1) + ' m';
+        document.getElementById('lbl-l0').innerText = parseFloat(document.getElementById('in-l0').value).toFixed(1) + ' m';
+        if (!engine.isReleased) this.resetSim();
+    },
+
+    togglePlay() {
+        if (!engine.isReleased && engine.d < 2 * engine.L0) {
+            engine.isReleased = true;
+            document.getElementById('btn-play').disabled = true;
+            document.getElementById('btn-play').style.background = '#30363D';
+            document.getElementById('btn-play').style.color = '#8B949E';
+            
+            document.getElementById('in-m0').disabled = true;
+            document.getElementById('in-h0').disabled = true;
+            document.getElementById('in-l0').disabled = true;
+            document.getElementById('obj-type').disabled = true;
+            lastTime = performance.now();
+        }
+    },
+
+    resetSim() {
+        engine.reset();
+        
+        const btnPlay = document.getElementById('btn-play');
+        btnPlay.disabled = false;
+        btnPlay.style.background = '';
+        btnPlay.style.color = '';
+        
+        document.getElementById('in-m0').disabled = false;
+        document.getElementById('in-h0').disabled = false;
+        document.getElementById('in-l0').disabled = false;
+        document.getElementById('obj-type').disabled = false;
+        
+        historyData = { d: [], K_tot: [], K_trans: [], K_rot: [], E_th: [] };
+        
+        // Configure Chart Datasets based on mode
+        energyChart.options.scales.x.max = 2 * engine.L0;
+        energyChart.options.scales.y.max = engine.E_total_initial * 1.1; // Add 10% headroom
+        
+        if (engine.mode === 'cylinder') {
+            energyChart.data.datasets = [
+                { label: 'Total Kinetic (K)', data: [], borderColor: '#00E5FF', borderDash: [] },
+                { label: 'Translational (K_trans)', data: [], borderColor: '#0A84FF', borderDash: [5, 5] },
+                { label: 'Rotational (K_rot)', data: [], borderColor: '#A371F7', borderDash: [5, 5] }
+            ];
+        } else {
+            energyChart.data.datasets = [
+                { label: 'Translational (K_trans)', data: [], borderColor: '#0A84FF', borderDash: [] },
+                { label: 'Thermal (W_friction)', data: [], borderColor: '#FF3B30', borderDash: [] }
+            ];
+        }
+        energyChart.update('none');
+        
+        document.getElementById('tel-v').innerText = "0.00";
+        document.getElementById('tel-d').innerText = "0.00";
+        this.drawCanvas();
+    },
+
+    stepSimulation(frameTime) {
+        if (engine.isReleased) {
+            dtAccumulator += frameTime;
+            while (dtAccumulator >= fixedDt) {
+                engine.step(fixedDt);
+                dtAccumulator -= fixedDt;
+            }
+            
+            document.getElementById('tel-v').innerText = engine.v.toFixed(2);
+            document.getElementById('tel-d').innerText = engine.d.toFixed(2);
+
+            // Throttle chart updates
+            if (historyData.d.length === 0 || engine.d - historyData.d[historyData.d.length - 1] > 0.1 || engine.d === 2*engine.L0) {
+                
+                historyData.d.push(engine.d);
+                
+                if (engine.mode === 'cylinder') {
+                    let K_tot = engine.K_trans + engine.K_rot;
+                    historyData.K_tot.push(K_tot);
+                    historyData.K_trans.push(engine.K_trans);
+                    historyData.K_rot.push(engine.K_rot);
+                    
+                    energyChart.data.datasets[0].data.push({x: engine.d, y: K_tot});
+                    energyChart.data.datasets[1].data.push({x: engine.d, y: engine.K_trans});
+                    energyChart.data.datasets[2].data.push({x: engine.d, y: engine.K_rot});
+                } else {
+                    historyData.K_trans.push(engine.K_trans);
+                    historyData.E_th.push(engine.E_thermal);
+                    
+                    energyChart.data.datasets[0].data.push({x: engine.d, y: engine.K_trans});
+                    energyChart.data.datasets[1].data.push({x: engine.d, y: engine.E_thermal});
+                }
+                energyChart.update('none');
+            }
+        }
+        this.drawCanvas();
+    },
+
+    drawProceduralCylinder(cx, cy, radius, rotation) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rotation);
+
+        // Metallic Rim
+        let rimGrad = ctx.createLinearGradient(-radius, -radius, radius, radius);
+        rimGrad.addColorStop(0, '#888'); rimGrad.addColorStop(0.5, '#ccc'); rimGrad.addColorStop(1, '#444');
+        ctx.fillStyle = rimGrad;
+        ctx.beginPath(); ctx.arc(0, 0, radius, 0, Math.PI*2); ctx.fill();
+
+        // Inner Cutouts to show rotation
+        ctx.fillStyle = '#05070A';
+        for(let i=0; i<4; i++) {
+            let a = i * (Math.PI/2);
+            ctx.beginPath(); 
+            // Draw pie slice cutouts
+            ctx.arc(0, 0, radius*0.8, a + 0.2, a + Math.PI/2 - 0.2);
+            ctx.lineTo(0,0);
+            ctx.fill();
+        }
+
+        // Center Pin
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, 0, radius*0.15, 0, Math.PI*2); ctx.fill();
+        ctx.restore();
+    },
+
+    drawCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Scale physics to fit canvas roughly
+        const scale = (canvas.width * 0.8) / (2 * engine.L0); 
+        
+        const startX = 50;
+        const startY = 100;
+        
+        // Ramp Geometry
+        const rampEndX = startX + engine.L0 * scale * Math.cos(engine.theta);
+        const rampEndY = startY + engine.H0 * scale;
+        
+        const flatEndX = rampEndX + engine.L0 * scale;
+
+        // Draw Structure (Ramp & Floor)
+        ctx.fillStyle = '#111';
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(rampEndX, rampEndY);
+        ctx.lineTo(flatEndX, rampEndY);
+        ctx.lineTo(flatEndX, canvas.height);
+        ctx.lineTo(startX, canvas.height);
+        ctx.fill();
+
+        // Draw Outlines
+        ctx.strokeStyle = '#00E5FF'; ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(rampEndX, rampEndY);
+        ctx.lineTo(flatEndX, rampEndY);
+        ctx.stroke();
+
+        // Distance Markers
+        ctx.fillStyle = '#8B949E'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText('d = 0', startX, startY - 20);
+        
+        ctx.setLineDash([5, 5]); ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(rampEndX, rampEndY); ctx.lineTo(rampEndX, rampEndY + 30); ctx.stroke();
+        ctx.fillText('d = L₀', rampEndX, rampEndY + 45);
+        
+        ctx.beginPath(); ctx.moveTo(flatEndX, rampEndY); ctx.lineTo(flatEndX, rampEndY + 30); ctx.stroke();
+        ctx.fillText('d = 2L₀', flatEndX, rampEndY + 45);
+        ctx.setLineDash([]);
+
+        // Calculate Object Position
+        let objX, objY, angle;
+        if (engine.d < engine.L0) {
+            objX = startX + engine.d * scale * Math.cos(engine.theta);
+            objY = startY + engine.d * scale * Math.sin(engine.theta);
+            angle = engine.theta;
+        } else {
+            objX = rampEndX + (engine.d - engine.L0) * scale;
+            objY = rampEndY;
+            angle = 0;
+        }
+
+        // Draw Object
+        const objRadius = engine.R * scale * 2; // Visually enlarge slightly for visibility
+        
+        ctx.save();
+        ctx.translate(objX, objY);
+        ctx.rotate(angle);
+        ctx.translate(0, -objRadius); // Sit ON the line
+
+        if (engine.mode === 'cylinder') {
+            // Theta_rot = distance / R
+            let rotAngle = engine.d / engine.R;
+            this.drawProceduralCylinder(0, 0, objRadius, rotAngle);
+        } else {
+            // Draw Sliding Block
+            let grad = ctx.createLinearGradient(-objRadius, -objRadius, objRadius, objRadius);
+            grad.addColorStop(0, '#0A84FF');
+            grad.addColorStop(1, '#003366');
+            ctx.fillStyle = grad;
+            ctx.fillRect(-objRadius, -objRadius, objRadius*2, objRadius*2);
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+            ctx.strokeRect(-objRadius, -objRadius, objRadius*2, objRadius*2);
+            
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 16px sans-serif';
+            ctx.fillText('m₀', 0, 5);
+
+            // Friction sparks if on ramp
+            if (engine.isReleased && engine.d < engine.L0) {
+                ctx.fillStyle = '#FF3B30';
+                for(let i=0; i<5; i++) {
+                    ctx.fillRect(-objRadius - 5 - Math.random()*15, objRadius - 2 - Math.random()*5, 4, 2);
+                }
+            }
+        }
+        ctx.restore();
+    },
+
+    exportCSV() {
+        const name = document.getElementById('student-name').value.trim() || "Student";
+        if (historyData.d.length === 0) return alert("Run the simulation first to gather data.");
+        
+        let csv = "Distance (m),";
+        if (engine.mode === 'cylinder') {
+            csv += "Total Kinetic Energy (J),Translational KE (J),Rotational KE (J)\n";
+            for (let i = 0; i < historyData.d.length; i++) {
+                csv += `${historyData.d[i].toFixed(4)},${historyData.K_tot[i].toFixed(4)},${historyData.K_trans[i].toFixed(4)},${historyData.K_rot[i].toFixed(4)}\n`;
+            }
+        } else {
+            csv += "Translational KE (J),Thermal Energy Work (J)\n";
+            for (let i = 0; i < historyData.d.length; i++) {
+                csv += `${historyData.d[i].toFixed(4)},${historyData.K_trans[i].toFixed(4)},${historyData.E_th[i].toFixed(4)}\n`;
+            }
+        }
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        saveAs(blob, `FRQ4_Data_${name.replace(/\s+/g, '_')}.csv`);
+    }
+};
+
+// ==========================================
+// TABS & INIT
+// ==========================================
+function switchTab(tabId, btnElement) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    if (btnElement) btnElement.classList.add('active');
+    if(tabId === 'sim-tab') { resizeCanvas(); energyChart.resize(); }
+}
+
+function animate(currentTime) {
+    let frameTime = (currentTime - lastTime) / 1000;
+    if (frameTime > 0.1) frameTime = 0.1; 
+    lastTime = currentTime;
+
+    ui.stepSimulation(frameTime);
+    requestAnimationFrame(animate);
+}
+
+inquiry.init();
+ui.resetSim();
+requestAnimationFrame(animate);
+
+</script>
+</body>
+</html>
