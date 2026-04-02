@@ -231,10 +231,9 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 330px));
     gap: 22px;
     justify-content: start;
-    justify-items: start;
   }
 
   /* Card Styles */
@@ -250,7 +249,7 @@
     position: relative;
     overflow: hidden;
     width: 100%;
-    max-width: 360px;
+    max-width: 330px;
   }
 
   .card::before {
@@ -464,11 +463,27 @@
 
   <h2 class="section-title">Rotational Motion</h2>
   <div class="grid">
-    <a class="card" id="ladybug-card" href="rotational motion/Ladybug on Disc.html">
+    <a class="card" id="ladybug-card" href="#" data-href="rotational motion/Ladybug on Disc.html">
       <div class="card-icon">🐞</div>
       <div class="card-title">Ladybug on Disc</div>
       <div class="card-subtitle">Angular Momentum</div>
       <div class="card-desc">A ladybug clings to a rotating disc. Explore how angular momentum is transferred when the disc speeds up, slows down, or reverses direction.</div>
+      <span class="card-tag">Simulation</span>
+    </a>
+
+    <a class="card" id="rolling-without-slipping-card" href="#" data-href="rotational motion/Rolling Without Slipping.html">
+      <div class="card-icon">🛞</div>
+      <div class="card-title">Rolling Without Slipping</div>
+      <div class="card-subtitle">Rotation & Translation</div>
+      <div class="card-desc">Explore pure rolling motion and the relationship between linear speed and angular speed.</div>
+      <span class="card-tag">Simulation</span>
+    </a>
+
+    <a class="card" id="rolling-without-slipping-2-card" href="#" data-href="rotational motion/Rolling Without Slipping 2.html">
+      <div class="card-icon">⚙️</div>
+      <div class="card-title">Rolling Without Slipping (2)</div>
+      <div class="card-subtitle">Rotation & Energy</div>
+      <div class="card-desc">A second rolling model to compare constraints, acceleration, and energy in rolling motion.</div>
       <span class="card-tag">Simulation</span>
     </a>
   </div>
@@ -507,22 +522,43 @@
     });
   });
 
-  const ladybugCard = document.getElementById('ladybug-card');
-  if (ladybugCard) {
-    ladybugCard.addEventListener('click', async function(e) {
-      e.preventDefault();
-      const userInput = await requestPassword('Simulation Access', 'Classroom password required for this simulation:');
-      if (userInput === null) {
-        return;
-      }
-      const hashHex = await sha256Hex(userInput);
-      if (hashHex === SIMULATION_TARGET_HASH) {
-        window.location.href = this.href;
+  async function handleSimulationCardClick(event) {
+    event.preventDefault();
+    const targetUrl = this.getAttribute('data-href');
+    if (!targetUrl) return;
+    const userInput = await requestPassword('Simulation Access', 'Classroom password required for this simulation:');
+    if (userInput === null) return;
+    const hashHex = await sha256Hex(userInput);
+    if (hashHex === SIMULATION_TARGET_HASH) {
+      if (event.ctrlKey || event.metaKey) {
+        window.open(targetUrl, '_blank', 'noopener');
       } else {
-        alert('Incorrect password. Access denied.');
+        window.location.href = targetUrl;
       }
-    });
+    } else {
+      alert('Incorrect password. Access denied.');
+    }
   }
+
+  function handleSimulationCardKeydown(event) {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    handleSimulationCardClick.call(this, event);
+  }
+
+  const simulationCardIds = [
+    'ladybug-card',
+    'rolling-without-slipping-card',
+    'rolling-without-slipping-2-card'
+  ];
+
+  simulationCardIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', handleSimulationCardClick);
+    el.addEventListener('auxclick', handleSimulationCardClick);
+    el.addEventListener('keydown', handleSimulationCardKeydown);
+  });
 </script>
 
 </body>
