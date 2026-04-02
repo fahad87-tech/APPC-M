@@ -14,17 +14,18 @@
   passwordGateStyle.textContent = `
     html.password-locked body { overflow: hidden; }
     html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
     #password-gate {
       position: fixed;
       inset: 0;
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       background: rgba(5, 9, 18, 0.88);
       padding: 24px;
       z-index: 9999;
+      visibility: visible;
     }
-    html.password-locked #password-gate { display: flex; visibility: visible; }
     #password-gate-card {
       width: min(100%, 420px);
       background: #101625;
