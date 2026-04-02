@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics C: FRQ 4 — Rolling Cylinder & Sliding Block</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #060810;
+            --bg-panel: #0B0E16;
+            --bg-card: rgba(16, 20, 30, 0.85);
+            --border: #1E2433;
+            --text: #B0B8C8;
+            --text-bright: #E2E8F0;
+            --cyan: #00D4E8;
+            --blue: #5B9CF6;
+            --green: #34D399;
+            --red: #F87171;
+            --purple: #A78BFA;
+            --yellow: #FBBF24;
+            --orange: #FB923C;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html {
+            width: 100vw; height: 100vh; overflow: hidden;
+            background: var(--bg-main); color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            user-select: none;
+        }
+        .tab-bar {
+            display: flex; gap: 0; background: var(--bg-panel);
+            border-bottom: 1px solid var(--border); padding: 0 16px;
+            position: relative; z-index: 100; height: 42px; align-items: flex-end;
+        }
+        .tab {
+            padding: 9px 22px; cursor: pointer; font-weight: 700; font-size: 11px;
+            color: #5A6270; background: transparent; border: none; border-bottom: 2px solid transparent;
+            transition: all 0.2s; letter-spacing: 0.5px; text-transform: uppercase;
+        }
+        .tab:hover { color: var(--text-bright); }
+        .tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+        .tab-content { display: none; height: calc(100vh - 42px); width: 100%; }
+        .tab-content.active { display: flex; }
+        #sim-tab { gap: 0; }
+
+        .left-panel {
+            width: 310px; min-width: 310px; padding: 12px;
+            display: flex; flex-direction: column; gap: 10px;
+            overflow-y: auto; border-right: 1px solid var(--border); background: var(--bg-panel);
+        }
+        .left-panel::-webkit-scrollbar { width: 4px; }
+        .left-panel::-webkit-scrollbar-thumb { background: #1E2433; border-radius: 2px; }
+
+        .center-panel {
+            flex: 1; position: relative; overflow: hidden;
+            background: radial-gradient(ellipse at 50% 40%, #0c1120 0%, #060810 100%);
+            cursor: grab;
+        }
+        .center-panel:active { cursor: grabbing; }
+        #simCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+        .right-panel {
+            width: 390px; min-width: 390px; padding: 10px;
+            display: flex; flex-direction: column; gap: 7px;
+            border-left: 1px solid var(--border); background: var(--bg-panel);
+            overflow-y: auto;
+        }
+        .right-panel::-webkit-scrollbar { width: 4px; }
+        .right-panel::-webkit-scrollbar-thumb { background: #1E2433; border-radius: 2px; }
+
+        fieldset {
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 12px 14px; background: var(--bg-card);
+        }
+        legend {
+            color: var(--cyan); font-size: 10px; font-weight: 800;
+            padding: 0 6px; text-transform: uppercase; letter-spacing: 1.5px;
+        }
+        .control-row { margin-bottom: 8px; }
+        .control-row:last-child { margin-bottom: 0; }
+        .control-row label {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 11px; font-weight: 600; color: var(--text); margin-bottom: 5px;
+        }
+        .val-badge {
+            font-family: 'JetBrains Mono', 'SF Mono', monospace;
+            font-size: 11px; font-weight: 700; padding: 1px 7px;
+            border-radius: 4px; background: rgba(0,212,232,0.08); color: var(--cyan);
+            border: 1px solid rgba(0,212,232,0.15);
+        }
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; height: 18px;
+        }
+        input[type=range]::-webkit-slider-runnable-track { height: 3px; background: var(--border); border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 14px;
+            background: var(--cyan); border-radius: 50%; margin-top: -5.5px;
+            box-shadow: 0 0 8px rgba(0,212,232,0.35);
+        }
+        select {
+            width: 100%; background: #111520; color: var(--text-bright);
+            border: 1px solid var(--border); padding: 7px 10px; border-radius: 6px;
+            font-weight: 600; font-size: 11px; cursor: pointer; outline: none;
+        }
+
+        .btn-row { display: flex; gap: 6px; }
+        button {
+            padding: 9px 14px; border-radius: 6px; font-weight: 700; font-size: 11px;
+            cursor: pointer; border: 1px solid transparent; color: #fff;
+            transition: all 0.15s ease; letter-spacing: 0.3px; flex: 1;
+        }
+        .btn-go { background: linear-gradient(135deg, #059669, #047857); border-color: rgba(52,211,153,0.2); }
+        .btn-go:hover { box-shadow: 0 4px 16px rgba(5,150,105,0.3); transform: translateY(-1px); }
+        .btn-go:disabled { opacity: 0.35; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-pause { background: linear-gradient(135deg, #D97706, #B45309); border-color: rgba(251,191,36,0.2); }
+        .btn-pause:hover { box-shadow: 0 4px 16px rgba(217,119,6,0.3); }
+        .btn-pause:disabled { opacity: 0.35; cursor: not-allowed; }
+        .btn-reset { background: #161C28; border-color: var(--border); color: var(--text); }
+        .btn-reset:hover { background: #1E2433; }
+        .btn-export {
+            background: linear-gradient(135deg, #7C3AED, #6D28D9);
+            font-size: 10px; flex: unset; padding: 5px 12px; border-radius: 5px;
+            width: auto; align-self: flex-start;
+        }
+
+        .telem-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; }
+        .telem-cell {
+            background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+            border-radius: 6px; padding: 6px; text-align: center;
+        }
+        .telem-label { font-size: 8px; color: #5A6270; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 2px; }
+        .telem-val { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: #fff; }
+        .telem-unit { font-size: 8px; color: #5A6270; }
+
+        .chart-toggle-row { display: flex; gap: 4px; }
+        .chart-toggle-btn {
+            padding: 3px 10px; border-radius: 12px; font-size: 9px;
+            font-weight: 700; cursor: pointer; border: 1px solid var(--border);
+            background: transparent; color: #5A6270; flex: unset;
+            transition: all 0.15s;
+        }
+        .chart-toggle-btn.active { border-color: currentColor; color: var(--text-bright); background: rgba(255,255,255,0.04); }
+
+        .chart-box {
+            flex: 1; min-height: 120px; background: rgba(0,0,0,0.2);
+            border-radius: 8px; border: 1px solid var(--border); padding: 6px; position: relative;
+        }
+        .chart-box canvas { width: 100% !important; height: 100% !important; }
+
+        .sim-status {
+            position: absolute; top: 10px; left: 10px; z-index: 20;
+            font-size: 10px; font-weight: 800; padding: 4px 12px;
+            border-radius: 4px; letter-spacing: 1px;
+        }
+        .sim-status.idle { background: rgba(30,36,51,0.85); color: #5A6270; border: 1px solid var(--border); }
+        .sim-status.running { background: rgba(5,150,105,0.15); color: var(--green); border: 1px solid rgba(52,211,153,0.25); }
+        .sim-status.paused { background: rgba(217,119,6,0.15); color: var(--orange); border: 1px solid rgba(251,191,36,0.25); }
+        .sim-status.done { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.2); }
+
+        .cam-hud {
+            position: absolute; bottom: 10px; left: 10px;
+            display: flex; gap: 4px; z-index: 20;
+        }
+        .cam-btn {
+            padding: 5px 10px; background: rgba(11,14,22,0.85); border: 1px solid var(--border);
+            color: #5A6270; border-radius: 4px; cursor: pointer; font-weight: 700;
+            font-size: 9px; flex: unset; backdrop-filter: blur(8px);
+        }
+        .cam-btn:hover { color: var(--cyan); border-color: var(--cyan); }
+
+        .speed-hud {
+            position: absolute; bottom: 10px; right: 10px; z-index: 20;
+            display: flex; align-items: center; gap: 4px;
+            background: rgba(11,14,22,0.85); border: 1px solid var(--border);
+            border-radius: 4px; padding: 4px 8px; backdrop-filter: blur(8px);
+        }
+        .speed-hud span { font-size: 9px; font-weight: 700; color: #5A6270; margin-right: 2px; }
+        .spd-btn {
+            padding: 3px 7px; font-size: 9px; border-radius: 3px;
+            background: transparent; border: 1px solid var(--border); color: #5A6270;
+            cursor: pointer; font-weight: 700; flex: unset;
+        }
+        .spd-btn:hover { color: var(--text-bright); }
+        .spd-btn.active { background: var(--cyan); color: #000; border-color: var(--cyan); }
+
+        .info-note {
+            font-size: 10px; color: #4A5260; line-height: 1.45;
+            padding: 8px 10px; border-radius: 6px;
+            border: 1px solid var(--border); background: rgba(0,0,0,0.2);
+        }
+        .info-note strong { color: #7A8290; }
+
+        /* QA */
+        #qa-tab {
+            flex-direction: column; align-items: center;
+            padding: 30px 20px; overflow-y: auto; gap: 16px; background: var(--bg-main);
+        }
+        #qa-tab::-webkit-scrollbar { width: 5px; }
+        #qa-tab::-webkit-scrollbar-thumb { background: #1E2433; border-radius: 3px; }
+        .qa-header {
+            width: 880px; max-width: 100%;
+            display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;
+        }
+        .qa-header input[type=text] {
+            background: #111520; padding: 10px 14px; border-radius: 6px;
+            border: 1px solid var(--border); color: var(--text-bright);
+            font-size: 14px; font-weight: 600; width: 320px; outline: none; font-family: inherit;
+        }
+        .qa-header input[type=text]:focus { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(0,212,232,0.15); }
+        .qa-header input[type=text]::placeholder { color: #3A4250; }
+        .btn-docx {
+            background: linear-gradient(135deg, #2563EB, #1D4ED8);
+            border-color: rgba(59,130,246,0.2); flex: unset; padding: 10px 18px; font-size: 12px;
+        }
+        .qa-container { width: 880px; max-width: 100%; }
+        .qa-card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 22px; margin-bottom: 14px;
+        }
+        .qa-card h3 { color: var(--cyan); font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; font-weight: 800; }
+        .qa-card .prompt { font-size: 15px; color: var(--text-bright); line-height: 1.65; margin-bottom: 14px; }
+        .qa-card .prompt strong { color: var(--yellow); }
+        textarea {
+            width: 100%; background: #0A0D14; color: var(--text);
+            font-size: 13px; padding: 12px; border: 1px solid var(--border);
+            border-radius: 6px; min-height: 130px; resize: vertical; font-family: inherit; line-height: 1.5;
+        }
+        textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 2px rgba(91,156,246,0.15); }
+        .hint-toggle {
+            background: none; border: none; color: var(--blue); cursor: pointer;
+            font-size: 11px; font-weight: 600; padding: 4px 0; text-decoration: underline;
+            flex: unset; margin-top: 6px; display: inline-block;
+        }
+        .hint-box {
+            display: none; background: rgba(91,156,246,0.05); border: 1px solid rgba(91,156,246,0.15);
+            border-radius: 6px; padding: 12px; margin-top: 8px; font-size: 12px;
+            color: var(--blue); line-height: 1.55;
+        }
+    </style>
+</head>
+<body>
+
+<div class="tab-bar">
+    <div class="tab active" onclick="switchTab('sim-tab', this)">SIMULATION</div>
+    <div class="tab" onclick="switchTab('qa-tab', this)">FRQ RESPONSES</div>
+</div>
+
+<div id="sim-tab" class="tab-content active">
+    <div class="left-panel">
+        <fieldset>
+            <legend>Scenario</legend>
+            <div class="control-row">
+                <select id="in-scenario" onchange="ui.onScenarioChange()">
+                    <option value="cylinder">Part (a): Cylinder — rolls without slipping</option>
+                    <option value="cylinder-slip">Cylinder — rolls w/o slip on ramp, slips on ground</option>
+                    <option value="block">Part (b): Block — slides with friction</option>
+                    <option value="both">Compare: Cylinder vs Block</option>
+                </select>
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>Parameters</legend>
+            <div class="control-row">
+                <label><span>Mass m₀</span><span class="val-badge" id="lbl-m">2.0 kg</span></label>
+                <input type="range" id="in-m" min="0.5" max="10" step="0.1" value="2.0" oninput="ui.updateLabels()">
+            </div>
+            <div class="control-row" id="row-radius">
+                <label><span>Cylinder Radius R</span><span class="val-badge" id="lbl-r">0.50 m</span></label>
+                <input type="range" id="in-r" min="0.1" max="2.0" step="0.05" value="0.50" oninput="ui.updateLabels()">
+            </div>
+            <div class="control-row">
+                <label><span>Ramp Height H₀</span><span class="val-badge" id="lbl-h0">3.0 m</span></label>
+                <input type="range" id="in-h0" min="1" max="8" step="0.1" value="3.0" oninput="ui.updateLabels()">
+            </div>
+            <div class="control-row">
+                <label><span>Ramp Length L₀</span><span class="val-badge" id="lbl-l0">10.0 m</span></label>
+                <input type="range" id="in-l0" min="5" max="25" step="0.5" value="10.0" oninput="ui.updateLabels()">
+            </div>
+            <div class="control-row" id="row-mu" style="display:none;">
+                <label><span>μₖ (block on ramp)</span><span class="val-badge" id="lbl-mu">0.15</span></label>
+                <input type="range" id="in-mu" min="0.01" max="0.5" step="0.01" value="0.15" oninput="ui.updateLabels()">
+            </div>
+            <div class="control-row" id="row-mu-ground" style="display:none;">
+                <label><span>μₖ (ground, slipping)</span><span class="val-badge" id="lbl-mu-ground">0.20</span></label>
+                <input type="range" id="in-mu-ground" min="0.01" max="0.6" step="0.01" value="0.20" oninput="ui.updateLabels()">
+            </div>
+        </fieldset>
+        <div class="btn-row">
+            <button class="btn-go" id="btn-go" onclick="ui.release()">▶ RELEASE</button>
+            <button class="btn-pause" id="btn-pause" onclick="ui.togglePause()" disabled>⏸ PAUSE</button>
+            <button class="btn-reset" onclick="ui.resetAll()">↺ RESET</button>
+        </div>
+        <div class="info-note">
+            <strong>Camera:</strong> Drag to pan · Scroll to zoom<br>
+            <strong>Cylinder:</strong> I = ½m₀R², no-slip → a = ⅔g sin θ<br>
+            <strong>Block:</strong> Kinetic friction μₖ on rough incline<br>
+            <strong>Slip mode:</strong> Ground friction decelerates v, spins up ω until v = ωR
+        </div>
+    </div>
+
+    <div class="center-panel" id="canvas-wrap">
+        <canvas id="simCanvas"></canvas>
+        <div class="sim-status idle" id="sim-status">READY</div>
+        <div class="cam-hud">
+            <button class="cam-btn" onclick="renderer.resetCamera()">⌂ Reset View</button>
+            <button class="cam-btn" onclick="renderer.followObj()">◎ Follow</button>
+        </div>
+        <div class="speed-hud">
+            <span>SPEED</span>
+            <button class="spd-btn" onclick="ui.setSpeed(0.5,this)">½×</button>
+            <button class="spd-btn active" onclick="ui.setSpeed(1,this)">1×</button>
+            <button class="spd-btn" onclick="ui.setSpeed(2,this)">2×</button>
+            <button class="spd-btn" onclick="ui.setSpeed(4,this)">4×</button>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <fieldset style="padding: 8px 10px;">
+            <legend>Telemetry</legend>
+            <div id="telem-section"></div>
+        </fieldset>
+        <div class="chart-toggle-row" id="chart-toggles"></div>
+        <div class="chart-box" id="box-energy" style="flex:1.2;"><canvas id="chartEnergy"></canvas></div>
+        <div class="chart-box" id="box-kinematics" style="flex:1;"><canvas id="chartKin"></canvas></div>
+        <button class="btn-export" onclick="ui.exportCSV()">⬇ Export CSV</button>
+    </div>
+</div>
+
+<div id="qa-tab" class="tab-content">
+    <div class="qa-header">
+        <input type="text" id="student-name" placeholder="Student Name">
+        <button class="btn-docx" onclick="exportDocx()">⬇ Export as .docx</button>
+    </div>
+    <div class="qa-container">
+        <div class="qa-card">
+            <h3>Part (a) — Graph Sketch</h3>
+            <div class="prompt">Sketch a graph of the <strong>total kinetic energy</strong> vs <strong>distance traveled</strong> as the cylinder rolls down the incline (0 → L₀) and across the horizontal surface (L₀ → 2L₀).</div>
+            <textarea id="ans-a" placeholder="On the incline (0 to L₀), the total KE... On the flat surface (L₀ to 2L₀)..."></textarea>
+            <button class="hint-toggle" onclick="toggleHint('hint-a')">Show Hint</button>
+            <div class="hint-box" id="hint-a">Height drops linearly with d: h = H₀ − d·sin θ. By energy conservation KE = m₀g·d·sin θ — <strong>linear in d</strong>. On flat, no work → KE = <strong>constant</strong> at m₀gH₀. Graph: line from (0,0) to (L₀, m₀gH₀), then horizontal to 2L₀.</div>
+        </div>
+        <div class="qa-card">
+            <h3>Part (b) — Energy Explanation</h3>
+            <div class="prompt">A block of mass <strong>m₀</strong> slides down a separate rough incline (same L₀, H₀). Both reach the bottom with the <strong>same translational speed</strong>. Explain why in terms of energy.</div>
+            <textarea id="ans-b" placeholder="Both start with PE = m₀gH₀. For the cylinder, energy splits between..."></textarea>
+            <button class="hint-toggle" onclick="toggleHint('hint-b')">Show Hint</button>
+            <div class="hint-box" id="hint-b"><strong>Cylinder:</strong> ¾m₀v² = m₀gH₀ → v² = 4gH₀/3. <strong>Block:</strong> ½m₀v² = m₀gH₀ − |W_f|. Equal v requires |W_f| = ⅓m₀gH₀ = cylinder's KE_rot.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+// PHYSICS
+// ═══════════════════════════════════
+class Body {
+    constructor(type) {
+        this.type = type;
+        this.d = 0; this.v = 0; this.w = 0; this.a = 0; this.t = 0;
+        this.finished = false;
+        this.slipPhase = false;
+        this.pureRollGround = false;
+    }
+}
+
+class Physics {
+    constructor() {
+        this.g = 9.81; this.bodies = [];
+        this.running = false; this.paused = false;
+        this.readParams();
+    }
+
+    readParams() {
+        this.m = +document.getElementById('in-m').value;
+        this.R = +document.getElementById('in-r').value;
+        this.H0 = +document.getElementById('in-h0').value;
+        this.L0 = +document.getElementById('in-l0').value;
+        this.mu = +document.getElementById('in-mu').value;
+        this.muG = +document.getElementById('in-mu-ground').value;
+        if (this.H0 >= this.L0) {
+            this.H0 = this.L0 * 0.95;
+            document.getElementById('in-h0').value = this.H0;
+            document.getElementById('lbl-h0').innerText = this.H0.toFixed(1) + ' m';
+        }
+        this.sinT = this.H0 / this.L0;
+        this.cosT = Math.sqrt(1 - this.sinT * this.sinT);
+        this.theta = Math.asin(this.sinT);
+        this.a_cyl = (2 / 3) * this.g * this.sinT;
+        this.a_blk = this.g * (this.sinT - this.mu * this.cosT);
+        if (this.a_blk < 0.01) this.a_blk = 0.01;
+    }
+
+    setupBodies(scenario) {
+        this.bodies = []; this.running = false; this.paused = false;
+        this.readParams();
+        if (scenario === 'cylinder' || scenario === 'both') this.bodies.push(new Body('cylinder'));
+        if (scenario === 'cylinder-slip') this.bodies.push(new Body('cylinder-slip'));
+        if (scenario === 'block' || scenario === 'both') this.bodies.push(new Body('block'));
+    }
+
+    start() { this.running = true; this.paused = false; }
+
+    step(dt) {
+        if (!this.running || this.paused) return;
+        let allDone = true;
+        for (const b of this.bodies) {
+            if (b.finished) continue;
+            allDone = false;
+            const onRamp = b.d < this.L0;
+            if (b.type === 'cylinder') {
+                b.a = onRamp ? this.a_cyl : 0;
+                b.v += b.a * dt; b.w = b.v / this.R; b.d += b.v * dt;
+            } else if (b.type === 'cylinder-slip') {
+                if (onRamp) {
+                    b.a = this.a_cyl; b.v += b.a * dt;
+                    b.w = b.v / this.R; b.d += b.v * dt;
+                } else {
+                    if (!b.slipPhase && !b.pureRollGround) {
+                        b.slipPhase = true; b.w = 0.4 * b.v / this.R;
+                    }
+                    if (b.slipPhase) {
+                        const fk = this.muG * this.m * this.g;
+                        if (b.v > b.w * this.R + 0.005) {
+                            b.a = -fk / this.m;
+                            b.v += b.a * dt;
+                            b.w += (fk * this.R) / (0.5 * this.m * this.R * this.R) * dt;
+                        } else {
+                            b.slipPhase = false; b.pureRollGround = true;
+                            b.w = b.v / this.R; b.a = 0;
+                        }
+                    } else { b.a = 0; b.w = b.v / this.R; }
+                    b.d += b.v * dt; if (b.v < 0) b.v = 0;
+                }
+            } else {
+                b.a = onRamp ? this.a_blk : 0;
+                b.v += b.a * dt; b.w = 0; b.d += b.v * dt;
+            }
+            b.t += dt;
+            if (b.d >= 2.5 * this.L0) { b.d = 2.5 * this.L0; b.finished = true; }
+        }
+        if (allDone) this.running = false;
+    }
+
+    getEnergies(b) {
+        const KT = 0.5 * this.m * b.v * b.v;
+        const I = 0.5 * this.m * this.R * this.R;
+        const KR = (b.type !== 'block') ? 0.5 * I * b.w * b.w : 0;
+        const h = (b.d < this.L0) ? Math.max(0, this.H0 - b.d * this.sinT) : 0;
+        const PE = this.m * this.g * h;
+        const E0 = this.m * this.g * this.H0;
+        let Eth = 0;
+        if (b.type === 'block') Eth = this.mu * this.m * this.g * this.cosT * Math.min(b.d, this.L0);
+        else if (b.type === 'cylinder-slip') Eth = Math.max(0, E0 - KT - KR - PE);
+        return { KT, KR, KE_total: KT + KR, PE, Eth };
+    }
+}
+
+// ═══════════════════════════════════
+// RENDERER — CORRECT GEOMETRY
+// ═══════════════════════════════════
+class Renderer {
+    constructor(canvasId, physics) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        this.physics = physics;
+        this.cam = { x: 0, y: 0, zoom: 1 };
+        this.follow = false; this.dragging = false;
+        this.lastM = { x: 0, y: 0 };
+        this.PX = 28;
+        this.needsAutoFit = true;
+
+        this.canvas.addEventListener('mousedown', e => { this.dragging = true; this.lastM = { x: e.clientX, y: e.clientY }; });
+        window.addEventListener('mouseup', () => this.dragging = false);
+        window.addEventListener('mousemove', e => {
+            if (!this.dragging) return;
+            this.follow = false;
+            this.cam.x += (e.clientX - this.lastM.x) / this.cam.zoom;
+            this.cam.y += (e.clientY - this.lastM.y) / this.cam.zoom;
+            this.lastM = { x: e.clientX, y: e.clientY };
+        });
+        this.canvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            this.cam.zoom *= (e.deltaY < 0) ? 1.07 : 1 / 1.07;
+            this.cam.zoom = Math.max(0.1, Math.min(6, this.cam.zoom));
+        }, { passive: false });
+
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+    }
+
+    resize() {
+        const r = this.canvas.parentElement.getBoundingClientRect();
+        this.canvas.width = r.width; this.canvas.height = r.height;
+        this.needsAutoFit = true;
+    }
+    resetCamera() { this.follow = false; this.needsAutoFit = true; }
+    followObj() { this.follow = true; }
+
+    // Compute visual radius, capped to not exceed ramp geometry
+    getVisR(S) {
+        const p = this.physics;
+        // Cap: cylinder shouldn't be wider than ~30% of ramp height visually
+        return Math.max(6, Math.min(p.R * S * 1.1, p.H0 * S * 0.3, p.L0 * S * 0.12));
+    }
+
+    autoFit() {
+        const p = this.physics;
+        const S = this.PX;
+        const W = this.canvas.width, H = this.canvas.height;
+        const rampHoriz = p.L0 * p.cosT * S;
+        const flatLen = p.L0 * S;
+
+        // Account for object size at start position (above top of ramp)
+        const visR = this.getVisR(S);
+        const objOverhang = visR * 2; // space above ramp top for cylinder
+
+        const totalW = rampHoriz + flatLen + 100;
+        const totalH = p.H0 * S + objOverhang + 80;
+        const numB = p.bodies.length;
+        const sceneH = numB > 1 ? totalH * 2 + 40 : totalH;
+        const zW = (W - 80) / totalW;
+        const zH = (H - 60) / sceneH;
+        this.cam.zoom = Math.min(zW, zH, 2.5);
+        this.cam.zoom = Math.max(0.2, this.cam.zoom);
+        this.cam.x = -(rampHoriz + flatLen) / 2 + 30;
+        this.cam.y = numB > 1 ? -10 : p.H0 * S * 0.2;
+        this.needsAutoFit = false;
+    }
+
+    /*
+     * GEOMETRY:
+     *
+     * Ramp surface: line from origin (0,0) at TOP to (botX, botY) at BOTTOM.
+     * Screen coords: +x right, +y down.
+     * Ramp direction (unit): (cosθ, sinθ)
+     * Ramp outward normal (pointing AWAY from ground, toward the object): (-sinθ, -cosθ)
+     *
+     * CYLINDER contact at distance d along ramp:
+     *   contactPt = d * (cosθ, sinθ)
+     *   center    = contactPt + visR * (-sinθ, -cosθ)
+     *
+     * The problem: at d=0, contact is at (0,0) [ramp tip], and the cylinder
+     * center is at (visR*(-sinθ), visR*(-cosθ)). The BOTTOM of the cylinder
+     * at that center extends to center + (sinθ*visR, cosθ*visR) = (0,0).
+     * But the LEFT side of the cylinder extends to center.x - visR, which
+     * can overlap the vertical edge of the ramp triangle.
+     *
+     * FIX: We extend the ramp surface line BEYOND the top corner so the
+     * cylinder at d=0 sits on the extended ramp line, and we draw the ramp
+     * body (fill) only below the surface line. The cylinder's body will
+     * always be ABOVE the surface line because of the normal offset.
+     *
+     * Additionally, we draw the ramp fill AFTER drawing the objects, using
+     * compositing, OR we simply extend the ramp line upward and ensure the
+     * fill region doesn't overlap the object by using proper layering:
+     * 1) Draw ramp fill (solid ground)
+     * 2) Draw ramp surface line
+     * 3) Draw objects ON TOP of everything
+     */
+
+    getContactWorld(p, S, d) {
+        const botX = p.L0 * p.cosT * S;
+        const botY = p.H0 * S;
+        if (d < p.L0) {
+            const frac = d / p.L0;
+            return { x: frac * botX, y: frac * botY, angle: p.theta, onRamp: true };
+        } else {
+            return { x: botX + (d - p.L0) * S, y: botY, angle: 0, onRamp: false };
+        }
+    }
+
+    draw() {
+        const ctx = this.ctx;
+        const p = this.physics;
+        const S = this.PX;
+        const W = this.canvas.width, H = this.canvas.height;
+
+        if (this.needsAutoFit) this.autoFit();
+
+        // Follow
+        if (this.follow && p.bodies.length > 0) {
+            const pos = this.getContactWorld(p, S, p.bodies[0].d);
+            this.cam.x = -pos.x;
+            this.cam.y = -pos.y + 60;
+        }
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Grid
+        ctx.save();
+        ctx.globalAlpha = 0.1;
+        ctx.strokeStyle = '#1a1f2e'; ctx.lineWidth = 1;
+        const gs = 50 * this.cam.zoom;
+        const gox = (W / 2 + this.cam.x * this.cam.zoom) % gs;
+        const goy = (H * 0.38 + this.cam.y * this.cam.zoom) % gs;
+        for (let x = gox; x < W; x += gs) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+        for (let y = goy; y < H; y += gs) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(W / 2, H * 0.38);
+        ctx.scale(this.cam.zoom, this.cam.zoom);
+        ctx.translate(this.cam.x, this.cam.y);
+
+        const hasBoth = p.bodies.length > 1;
+        const offsets = {};
+        if (hasBoth) {
+            let i = 0;
+            for (const b of p.bodies) { offsets[b.type] = i * (p.H0 * S + 5 * S); i++; }
+        } else {
+            for (const b of p.bodies) offsets[b.type] = 0;
+        }
+
+        // LAYER 1: Ramp fill (ground body) — drawn first so objects appear on top
+        for (const b of p.bodies) {
+            ctx.save();
+            ctx.translate(0, offsets[b.type] || 0);
+            this.drawRampFill(ctx, S, p, b);
+            ctx.restore();
+        }
+
+        // LAYER 2: Ramp surface lines + annotations
+        for (const b of p.bodies) {
+            ctx.save();
+            ctx.translate(0, offsets[b.type] || 0);
+            this.drawRampSurface(ctx, S, p, b);
+            ctx.restore();
+        }
+
+        // LAYER 3: Objects — always on top
+        for (const b of p.bodies) {
+            ctx.save();
+            ctx.translate(0, offsets[b.type] || 0);
+            this.drawObject(ctx, S, p, b);
+            ctx.restore();
+        }
+
+        ctx.restore();
+    }
+
+    drawRampFill(ctx, S, p, b) {
+        const botX = p.L0 * p.cosT * S;
+        const botY = p.H0 * S;
+        const flatEnd = botX + p.L0 * S;
+        const z = this.cam.zoom;
+
+        // Ramp solid (triangle below surface)
+        ctx.fillStyle = '#090d15';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(botX, botY);
+        ctx.lineTo(0, botY);
+        ctx.closePath();
+        ctx.fill();
+
+        // Ground solid
+        ctx.fillStyle = '#080c14';
+        ctx.fillRect(botX - 1, botY, flatEnd - botX + 400, 60);
+
+        // Additional fill below ramp triangle to extend ground
+        ctx.fillStyle = '#080c14';
+        ctx.fillRect(0, botY, botX, 60);
+    }
+
+    drawRampSurface(ctx, S, p, b) {
+        const botX = p.L0 * p.cosT * S;
+        const botY = p.H0 * S;
+        const flatEnd = botX + p.L0 * S;
+        const z = this.cam.zoom;
+        const col = b.type === 'cylinder' ? '#5B9CF6' : b.type === 'cylinder-slip' ? '#FB923C' : '#F87171';
+        const visR = this.getVisR(S);
+
+        // Extend ramp line UPWARD beyond the top corner so cylinder at d=0 has a surface to sit on
+        // Extend by enough to accommodate the largest cylinder
+        const ext = visR * 2;
+        const extX = -ext * p.cosT;
+        const extY = -ext * p.sinT;
+
+        // Ramp surface line (extended)
+        ctx.strokeStyle = col; ctx.lineWidth = 3 / z; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(extX, extY);
+        ctx.lineTo(botX, botY);
+        ctx.stroke();
+
+        // Flat surface
+        ctx.strokeStyle = '#444'; ctx.lineWidth = 2 / z;
+        ctx.beginPath(); ctx.moveTo(botX, botY); ctx.lineTo(flatEnd + 400, botY); ctx.stroke();
+
+        // Hatching
+        if (b.type === 'block') {
+            ctx.strokeStyle = 'rgba(248,113,113,0.18)'; ctx.lineWidth = 1 / z;
+            for (let i = 0; i < 45; i++) {
+                const f = i / 45;
+                const sx = botX * f, sy = botY * f;
+                ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx - 4 / z, sy + 8 / z); ctx.stroke();
+            }
+        }
+        if (b.type === 'cylinder-slip') {
+            ctx.strokeStyle = 'rgba(251,146,60,0.2)'; ctx.lineWidth = 1 / z;
+            for (let x = botX + 5; x < flatEnd + 300; x += 8 / z) {
+                ctx.beginPath(); ctx.moveTo(x, botY); ctx.lineTo(x - 4 / z, botY + 8 / z); ctx.stroke();
+            }
+        }
+
+        // Annotations
+        const fs = Math.max(9, 11 / z);
+        ctx.font = `bold ${fs}px monospace`;
+        ctx.textAlign = 'center'; ctx.fillStyle = '#5A6270';
+
+        // H₀ arrow
+        const hx = -22 / z;
+        ctx.strokeStyle = '#2A3040'; ctx.lineWidth = 1 / z;
+        ctx.setLineDash([4 / z, 4 / z]);
+        ctx.beginPath(); ctx.moveTo(hx, 5 / z); ctx.lineTo(hx, botY - 5 / z); ctx.stroke();
+        ctx.setLineDash([]);
+        const asz = 4 / z;
+        ctx.fillStyle = '#5A6270';
+        ctx.beginPath(); ctx.moveTo(hx, 2 / z); ctx.lineTo(hx - asz, 2 / z + asz * 1.5); ctx.lineTo(hx + asz, 2 / z + asz * 1.5); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(hx, botY - 2 / z); ctx.lineTo(hx - asz, botY - 2 / z - asz * 1.5); ctx.lineTo(hx + asz, botY - 2 / z - asz * 1.5); ctx.fill();
+        ctx.fillText('H₀', hx - 14 / z, botY / 2 + 3 / z);
+
+        // L₀ ramp
+        ctx.fillText('L₀', botX / 2 - 10 / z, botY / 2 - 12 / z);
+
+        // L₀ flat
+        ctx.strokeStyle = '#2A3040'; ctx.lineWidth = 1 / z;
+        ctx.setLineDash([4 / z, 4 / z]);
+        const lY = botY + 28 / z;
+        ctx.beginPath(); ctx.moveTo(botX, lY); ctx.lineTo(botX + p.L0 * S, lY); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillText('L₀', botX + p.L0 * S / 2, lY + 14 / z);
+
+        // Distance markers
+        ctx.font = `${Math.max(7, 9 / z)}px monospace`; ctx.fillStyle = '#3A4250';
+        ctx.fillText('0', 0, -12 / z);
+        ctx.fillText('L₀', botX, botY + 46 / z);
+        ctx.fillText('2L₀', botX + p.L0 * S, botY + 46 / z);
+
+        // Type label
+        ctx.font = `bold ${Math.max(10, 12 / z)}px sans-serif`;
+        ctx.textAlign = 'left'; ctx.fillStyle = col;
+        const txt = b.type === 'cylinder' ? 'Cylinder (roll, no slip)' :
+            b.type === 'cylinder-slip' ? 'Cylinder (roll + slip on ground)' :
+                'Block (slide, μₖ=' + p.mu.toFixed(2) + ')';
+        ctx.fillText(txt, 5 / z, -visR * 2.2 - 10 / z);
+    }
+
+    drawObject(ctx, S, p, b) {
+        const isCyl = b.type !== 'block';
+        const pos = this.getContactWorld(p, S, b.d);
+        const z = this.cam.zoom;
+
+        ctx.save();
+
+        if (isCyl) {
+            const visR = this.getVisR(S);
+
+            // Normal away from ground surface toward the object
+            const nx = pos.onRamp ? -Math.sin(p.theta) : 0;
+            const ny = pos.onRamp ? -Math.cos(p.theta) : -1;
+
+            // Center = contact point + visR * normal
+            const cx = pos.x + visR * nx;
+            const cy = pos.y + visR * ny;
+
+            ctx.translate(cx, cy);
+
+            const rot = b.d / p.R;
+            ctx.save(); ctx.rotate(rot);
+
+            const isSlipping = b.type === 'cylinder-slip' && b.slipPhase;
+            const grad = ctx.createRadialGradient(0, 0, visR * 0.05, 0, 0, visR);
+            if (isSlipping) {
+                grad.addColorStop(0, '#ffe082'); grad.addColorStop(0.6, '#e6a218'); grad.addColorStop(1, '#b87308');
+            } else if (b.type === 'cylinder-slip') {
+                grad.addColorStop(0, '#ffc480'); grad.addColorStop(0.6, '#e67e22'); grad.addColorStop(1, '#c0601a');
+            } else {
+                grad.addColorStop(0, '#a0c8ff'); grad.addColorStop(0.6, '#4a90d9'); grad.addColorStop(1, '#2a6cb8');
+            }
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(0, 0, visR, 0, Math.PI * 2); ctx.fill();
+
+            // Rim
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5 / z;
+            ctx.beginPath(); ctx.arc(0, 0, visR, 0, Math.PI * 2); ctx.stroke();
+
+            // Spokes
+            ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5 / z;
+            for (let a = 0; a < Math.PI * 2; a += Math.PI / 3) {
+                ctx.beginPath(); ctx.moveTo(0, 0);
+                ctx.lineTo(Math.cos(a) * visR * 0.78, Math.sin(a) * visR * 0.78); ctx.stroke();
+            }
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.beginPath(); ctx.arc(0, 0, 3 / z, 0, Math.PI * 2); ctx.fill();
+
+            ctx.restore(); // un-rotate
+
+            // Sparks
+            if (isSlipping && b.d >= p.L0) {
+                for (let i = 0; i < 4; i++) {
+                    const sx = (Math.random() - 0.5) * visR;
+                    const sy = visR + Math.random() * 4 / z;
+                    ctx.fillStyle = `rgba(255,${180 + Math.random() * 75 | 0},50,${0.4 + Math.random() * 0.5})`;
+                    ctx.beginPath(); ctx.arc(sx, sy, (1 + Math.random() * 1.5) / z, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+        } else {
+            // BLOCK
+            const halfW = Math.max(6, S * 0.4);
+            const blockH = halfW * 1.8;
+
+            ctx.translate(pos.x, pos.y);
+            ctx.rotate(pos.angle);
+            // Block sits on surface: bottom at y=0, top at y=-blockH
+            const grad = ctx.createLinearGradient(-halfW, -blockH, halfW, 0);
+            grad.addColorStop(0, '#ff8a80'); grad.addColorStop(1, '#d32f2f');
+            ctx.fillStyle = grad;
+            ctx.fillRect(-halfW, -blockH, halfW * 2, blockH);
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1.5 / z;
+            ctx.strokeRect(-halfW, -blockH, halfW * 2, blockH);
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)'; ctx.lineWidth = 1 / z;
+            ctx.beginPath(); ctx.moveTo(-halfW, 0); ctx.lineTo(halfW, -blockH); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(halfW, 0); ctx.lineTo(-halfW, -blockH); ctx.stroke();
+        }
+        ctx.restore();
+    }
+}
+
+// ═══════════════════════════════════
+// CHARTS
+// ═══════════════════════════════════
+function makeChart(id, title, yLabel) {
+    return new Chart(document.getElementById(id).getContext('2d'), {
+        type: 'line', data: { datasets: [] },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: {
+                legend: { labels: { color: '#8090A0', font: { size: 9, weight: 'bold' }, boxWidth: 10, padding: 5 } },
+                title: { display: true, text: title, color: '#B0B8C8', font: { size: 11, weight: '700' }, padding: { bottom: 4 } }
+            },
+            elements: { point: { radius: 0 }, line: { tension: 0.15, borderWidth: 1.8 } },
+            scales: {
+                x: { type: 'linear', title: { display: true, text: 'Distance (m)', color: '#5A6270', font: { size: 9 } }, grid: { color: '#111827' }, ticks: { color: '#5A6270', font: { size: 8 } } },
+                y: { title: { display: true, text: yLabel, color: '#5A6270', font: { size: 9 } }, grid: { color: '#111827' }, ticks: { color: '#5A6270', font: { size: 8 } }, beginAtZero: true }
+            }
+        }
+    });
+}
+const chartEnergy = makeChart('chartEnergy', 'Energy vs Distance', 'Energy (J)');
+const chartKin = makeChart('chartKin', 'Kinematics vs Distance', 'Value');
+let showEnergy = true, showKin = true;
+
+// ═══════════════════════════════════
+// UI
+// ═══════════════════════════════════
+const physics = new Physics();
+const renderer = new Renderer('simCanvas', physics);
+let simSpeed = 1, lastFrame = performance.now(), logTimer = 0, wasRunning = false;
+
+const ui = {
+    scenario: 'cylinder',
+
+    updateLabels() {
+        document.getElementById('lbl-m').innerText = (+document.getElementById('in-m').value).toFixed(1) + ' kg';
+        document.getElementById('lbl-r').innerText = (+document.getElementById('in-r').value).toFixed(2) + ' m';
+        document.getElementById('lbl-h0').innerText = (+document.getElementById('in-h0').value).toFixed(1) + ' m';
+        document.getElementById('lbl-l0').innerText = (+document.getElementById('in-l0').value).toFixed(1) + ' m';
+        document.getElementById('lbl-mu').innerText = (+document.getElementById('in-mu').value).toFixed(2);
+        document.getElementById('lbl-mu-ground').innerText = (+document.getElementById('in-mu-ground').value).toFixed(2);
+        if (!physics.running) { physics.readParams(); renderer.needsAutoFit = true; }
+    },
+
+    onScenarioChange() {
+        this.scenario = document.getElementById('in-scenario').value;
+        const isCyl = this.scenario === 'cylinder' || this.scenario === 'cylinder-slip' || this.scenario === 'both';
+        const isBlk = this.scenario === 'block' || this.scenario === 'both';
+        const isSlip = this.scenario === 'cylinder-slip';
+        document.getElementById('row-radius').style.display = isCyl ? '' : 'none';
+        document.getElementById('row-mu').style.display = isBlk ? '' : 'none';
+        document.getElementById('row-mu-ground').style.display = isSlip ? '' : 'none';
+        this.resetAll();
+    },
+
+    release() {
+        if (physics.running) return;
+        physics.readParams();
+        physics.setupBodies(this.scenario);
+        this.buildChartDS(); this.buildToggles(); this.buildTelem();
+        renderer.needsAutoFit = true;
+        physics.start();
+        document.getElementById('btn-go').disabled = true;
+        document.getElementById('btn-pause').disabled = false;
+        document.getElementById('btn-pause').innerHTML = '⏸ PAUSE';
+        document.getElementById('sim-status').className = 'sim-status running';
+        document.getElementById('sim-status').innerText = 'RUNNING';
+    },
+
+    togglePause() {
+        if (!physics.running) return;
+        physics.paused = !physics.paused;
+        const btn = document.getElementById('btn-pause');
+        const st = document.getElementById('sim-status');
+        if (physics.paused) {
+            btn.innerHTML = '▶ RESUME';
+            st.className = 'sim-status paused';
+            st.innerText = 'PAUSED';
+        } else {
+            btn.innerHTML = '⏸ PAUSE';
+            st.className = 'sim-status running';
+            st.innerText = 'RUNNING';
+        }
+    },
+
+    resetAll() {
+        physics.setupBodies(this.scenario);
+        physics.readParams(); logTimer = 0;
+        document.getElementById('btn-go').disabled = false;
+        document.getElementById('btn-pause').disabled = true;
+        document.getElementById('btn-pause').innerHTML = '⏸ PAUSE';
+        document.getElementById('sim-status').className = 'sim-status idle';
+        document.getElementById('sim-status').innerText = 'READY';
+        this.buildChartDS(); this.buildToggles(); this.buildTelem();
+        renderer.needsAutoFit = true;
+    },
+
+    setSpeed(s, btn) {
+        simSpeed = s;
+        document.querySelectorAll('.spd-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    },
+
+    buildTelem() {
+        const el = document.getElementById('telem-section');
+        let h = '<div class="telem-grid">';
+        for (const b of physics.bodies) {
+            const isCyl = b.type !== 'block';
+            const nm = isCyl ? 'Cylinder' : 'Block';
+            const col = b.type === 'cylinder' ? 'var(--blue)' : b.type === 'cylinder-slip' ? 'var(--orange)' : 'var(--red)';
+            h += `<div class="telem-cell"><div class="telem-label" style="color:${col}">${nm} Velocity</div><div class="telem-val" id="tel-v-${b.type}">0.00<span class="telem-unit"> m/s</span></div></div>`;
+            h += `<div class="telem-cell"><div class="telem-label" style="color:${col}">${nm} Distance</div><div class="telem-val" id="tel-d-${b.type}">0.00<span class="telem-unit"> m</span></div></div>`;
+            if (isCyl) h += `<div class="telem-cell"><div class="telem-label" style="color:${col}">${nm} Angular Vel.</div><div class="telem-val" id="tel-w-${b.type}">0.00<span class="telem-unit"> rad/s</span></div></div>`;
+            else h += `<div class="telem-cell"><div class="telem-label" style="color:${col}">${nm} Acceleration</div><div class="telem-val" id="tel-a-${b.type}">0.00<span class="telem-unit"> m/s²</span></div></div>`;
+        }
+        h += '</div>'; el.innerHTML = h;
+    },
+
+    buildChartDS() {
+        const eDS = [], kDS = [];
+        for (const b of physics.bodies) {
+            const isCyl = b.type !== 'block';
+            const pfx = b.type === 'cylinder' ? 'Cyl' : b.type === 'cylinder-slip' ? 'Cyl(slip)' : 'Block';
+            const mc = b.type === 'cylinder' ? '#5B9CF6' : b.type === 'cylinder-slip' ? '#FB923C' : '#F87171';
+            if (isCyl) {
+                eDS.push({ label: pfx + ': Total KE', data: [], borderColor: mc, borderWidth: 2.2 });
+                eDS.push({ label: pfx + ': KE trans', data: [], borderColor: mc, borderDash: [5, 3], borderWidth: 1.3 });
+                eDS.push({ label: pfx + ': KE rot', data: [], borderColor: '#A78BFA', borderDash: [5, 3], borderWidth: 1.3 });
+                eDS.push({ label: pfx + ': PE', data: [], borderColor: '#34D399', borderDash: [3, 3], borderWidth: 1.3 });
+                if (b.type === 'cylinder-slip') eDS.push({ label: pfx + ': E thermal', data: [], borderColor: '#F87171', borderDash: [4, 3], borderWidth: 1.3 });
+                kDS.push({ label: pfx + ': v (m/s)', data: [], borderColor: mc, borderWidth: 2 });
+                kDS.push({ label: pfx + ': ω (rad/s)', data: [], borderColor: '#A78BFA', borderDash: [6, 3], borderWidth: 1.8 });
+            } else {
+                eDS.push({ label: pfx + ': KE trans', data: [], borderColor: mc, borderWidth: 2.2 });
+                eDS.push({ label: pfx + ': E thermal', data: [], borderColor: '#FB923C', borderDash: [5, 3], borderWidth: 1.3 });
+                eDS.push({ label: pfx + ': PE', data: [], borderColor: '#34D399', borderDash: [3, 3], borderWidth: 1.3 });
+                kDS.push({ label: pfx + ': v (m/s)', data: [], borderColor: mc, borderWidth: 2 });
+            }
+        }
+        chartEnergy.data.datasets = eDS; chartKin.data.datasets = kDS;
+        chartEnergy.update('none'); chartKin.update('none');
+    },
+
+    buildToggles() {
+        document.getElementById('chart-toggles').innerHTML = `
+            <button class="chart-toggle-btn ${showEnergy ? 'active' : ''}" style="color:var(--cyan)" onclick="ui.toggleChart('energy',this)">Energy Graph</button>
+            <button class="chart-toggle-btn ${showKin ? 'active' : ''}" style="color:var(--purple)" onclick="ui.toggleChart('kin',this)">Kinematics Graph</button>
+        `;
+    },
+
+    toggleChart(w, btn) {
+        if (w === 'energy') showEnergy = !showEnergy; else showKin = !showKin;
+        document.getElementById('box-energy').style.display = showEnergy ? '' : 'none';
+        document.getElementById('box-kinematics').style.display = showKin ? '' : 'none';
+        btn.classList.toggle('active');
+    },
+
+    logCharts() {
+        let eI = 0, kI = 0;
+        for (const b of physics.bodies) {
+            const e = physics.getEnergies(b);
+            const isCyl = b.type !== 'block';
+            if (isCyl) {
+                chartEnergy.data.datasets[eI].data.push({ x: b.d, y: e.KE_total });
+                chartEnergy.data.datasets[eI + 1].data.push({ x: b.d, y: e.KT });
+                chartEnergy.data.datasets[eI + 2].data.push({ x: b.d, y: e.KR });
+                chartEnergy.data.datasets[eI + 3].data.push({ x: b.d, y: e.PE });
+                eI += 4;
+                if (b.type === 'cylinder-slip') { chartEnergy.data.datasets[eI].data.push({ x: b.d, y: e.Eth }); eI++; }
+                chartKin.data.datasets[kI].data.push({ x: b.d, y: b.v });
+                chartKin.data.datasets[kI + 1].data.push({ x: b.d, y: b.w });
+                kI += 2;
+            } else {
+                chartEnergy.data.datasets[eI].data.push({ x: b.d, y: e.KT });
+                chartEnergy.data.datasets[eI + 1].data.push({ x: b.d, y: e.Eth });
+                chartEnergy.data.datasets[eI + 2].data.push({ x: b.d, y: e.PE });
+                eI += 3;
+                chartKin.data.datasets[kI].data.push({ x: b.d, y: b.v });
+                kI += 1;
+            }
+        }
+        chartEnergy.update('none'); chartKin.update('none');
+    },
+
+    updateTelem() {
+        for (const b of physics.bodies) {
+            const v = document.getElementById('tel-v-' + b.type);
+            const d = document.getElementById('tel-d-' + b.type);
+            if (v) v.innerHTML = b.v.toFixed(2) + '<span class="telem-unit"> m/s</span>';
+            if (d) d.innerHTML = b.d.toFixed(2) + '<span class="telem-unit"> m</span>';
+            if (b.type !== 'block') {
+                const w = document.getElementById('tel-w-' + b.type);
+                if (w) w.innerHTML = b.w.toFixed(2) + '<span class="telem-unit"> rad/s</span>';
+            } else {
+                const a = document.getElementById('tel-a-' + b.type);
+                if (a) a.innerHTML = b.a.toFixed(2) + '<span class="telem-unit"> m/s²</span>';
+            }
+        }
+    },
+
+    exportCSV() {
+        if (!chartEnergy.data.datasets.length || !chartEnergy.data.datasets[0].data.length) { alert('Run the simulation first.'); return; }
+        let csv = 'distance_m';
+        for (const ds of [...chartEnergy.data.datasets, ...chartKin.data.datasets]) csv += ',' + ds.label.replace(/,/g, ';');
+        csv += '\n';
+        const ml = Math.max(...chartEnergy.data.datasets.map(ds => ds.data.length), ...chartKin.data.datasets.map(ds => ds.data.length));
+        for (let i = 0; i < ml; i++) {
+            csv += (chartEnergy.data.datasets[0].data[i]?.x?.toFixed(4) ?? '');
+            for (const ds of [...chartEnergy.data.datasets, ...chartKin.data.datasets]) csv += ',' + (ds.data[i]?.y?.toFixed(4) ?? '');
+            csv += '\n';
+        }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+        a.download = 'frq4_data.csv'; a.click();
+    }
+};
+
+// ═══════════════════════════════════
+// DOCX
+// ═══════════════════════════════════
+async function exportDocx() {
+    const name = document.getElementById('student-name').value || 'Student';
+    const ansA = document.getElementById('ans-a').value || '(No response)';
+    const ansB = document.getElementById('ans-b').value || '(No response)';
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
+    const doc = new Document({
+        sections: [{
+            children: [
+                new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'AP Physics C: FRQ 4 — Rolling Dynamics', bold: true, size: 32 })] }),
+                new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 400 }, children: [new TextRun({ text: `Student: ${name}`, size: 24, color: '555555' })] }),
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun({ text: 'Part (a) — Total KE vs Distance Graph', bold: true })] }),
+                new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: 'Sketch a graph of total KE vs distance (0 → L₀ → 2L₀).', italics: true, size: 22 })] }),
+                new Paragraph({ spacing: { after: 400 }, children: [new TextRun({ text: ansA, size: 24 })] }),
+                new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun({ text: 'Part (b) — Energy Explanation', bold: true })] }),
+                new Paragraph({ spacing: { after: 200 }, children: [new TextRun({ text: 'Explain why cylinder and block reach the bottom with the same translational speed.', italics: true, size: 22 })] }),
+                new Paragraph({ children: [new TextRun({ text: ansB, size: 24 })] }),
+            ]
+        }]
+    });
+    saveAs(await Packer.toBlob(doc), `FRQ4_${name.replace(/\s+/g, '_')}.docx`);
+}
+
+// ═══════════════════════════════════
+// MAIN LOOP
+// ═══════════════════════════════════
+function mainLoop(now) {
+    let dt = (now - lastFrame) / 1000;
+    lastFrame = now;
+    dt = Math.min(dt, 0.05) * simSpeed;
+    const steps = 8;
+    for (let i = 0; i < steps; i++) physics.step(dt / steps);
+    ui.updateTelem();
+    logTimer += dt;
+    if (physics.running && !physics.paused && logTimer > 0.03) { ui.logCharts(); logTimer = 0; }
+    if (wasRunning && !physics.running) {
+        document.getElementById('sim-status').className = 'sim-status done';
+        document.getElementById('sim-status').innerText = 'COMPLETE';
+        document.getElementById('btn-pause').disabled = true;
+        ui.logCharts();
+    }
+    wasRunning = physics.running;
+    renderer.draw();
+    requestAnimationFrame(mainLoop);
+}
+
+function switchTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active'); btn.classList.add('active');
+    if (id === 'sim-tab') { renderer.resize(); renderer.needsAutoFit = true; }
+}
+
+function toggleHint(id) {
+    const el = document.getElementById(id);
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+
+ui.onScenarioChange();
+ui.updateLabels();
+requestAnimationFrame(mainLoop);
+</script>
+</body>
+</html>

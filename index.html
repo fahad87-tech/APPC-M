@@ -231,9 +231,10 @@
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 22px;
     justify-content: start;
+    justify-items: start;
   }
 
   /* Card Styles */
@@ -248,6 +249,8 @@
     display: block;
     position: relative;
     overflow: hidden;
+    width: 100%;
+    max-width: 360px;
   }
 
   .card::before {
