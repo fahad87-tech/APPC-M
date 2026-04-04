@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AP Physics 1 — Orbital Mechanics Simulation</title>
+<script>
+const TARGET_HASH="596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+document.documentElement.classList.add("password-locked");
+
+const passwordGateStyle=document.createElement("style");
+passwordGateStyle.textContent=`
+html.password-locked body{overflow:hidden}
+html.password-locked body>*{visibility:hidden}
+#password-gate{
+position:fixed;
+inset:0;
+display:none;
+align-items:center;
+justify-content:center;
+background:rgba(5,9,18,.88);
+padding:24px;
+z-index:9999
+}
+html.password-locked #password-gate{display:flex;visibility:visible}
+#password-gate-card{
+width:min(100%,420px);
+background:#101625;
+border:1px solid rgba(100,181,246,.28);
+border-radius:18px;
+padding:24px;
+box-shadow:0 24px 60px rgba(0,0,0,.45);
+color:#e7edf7;
+font-family:'Segoe UI',Arial,sans-serif
+}
+#password-gate-title{font-size:20px;font-weight:700;margin-bottom:8px}
+#password-gate-message{font-size:14px;color:rgba(255,255,255,.72);margin-bottom:16px;line-height:1.5}
+#password-gate-input{
+width:100%;
+padding:12px 14px;
+border-radius:12px;
+border:1px solid rgba(100,181,246,.35);
+background:rgba(255,255,255,.05);
+color:#fff;
+font-size:16px;
+outline:none;
+margin-bottom:16px;
+box-sizing:border-box
+}
+#password-gate-input:focus{
+border-color:#64b5f6;
+box-shadow:0 0 0 3px rgba(100,181,246,.16)
+}
+#password-gate-actions{display:flex;justify-content:flex-end;gap:10px}
+.password-gate-button{
+border:none;
+border-radius:10px;
+padding:10px 16px;
+font-size:14px;
+font-weight:600;
+cursor:pointer
+}
+#password-gate-cancel{background:rgba(255,255,255,.08);color:#d9e2f2}
+#password-gate-submit{background:#64b5f6;color:#08101c}
+`;
+document.head.appendChild(passwordGateStyle);
+
+function requestPassword(title,message){
+return new Promise(resolve=>{
+const existingGate=document.getElementById("password-gate");
+if(existingGate)existingGate.remove();
+const gate=document.createElement("div");
+gate.id="password-gate";
+gate.innerHTML=`
+<div id="password-gate-card">
+<div id="password-gate-title">${title}</div>
+<div id="password-gate-message">${message}</div>
+<input id="password-gate-input" type="password" autocomplete="current-password">
+<div id="password-gate-actions">
+<button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+<button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+</div>
+</div>
+`;
+document.body.appendChild(gate);
+const input=document.getElementById("password-gate-input");
+const cancelButton=document.getElementById("password-gate-cancel");
+const submitButton=document.getElementById("password-gate-submit");
+const finish=value=>{gate.remove();resolve(value)};
+cancelButton.addEventListener("click",()=>finish(null));
+submitButton.addEventListener("click",()=>finish(input.value));
+input.addEventListener("keydown",event=>{
+if(event.key==="Enter")finish(input.value);
+if(event.key==="Escape")finish(null);
+});
+window.requestAnimationFrame(()=>input.focus());
+});
+}
+
+async function verifyPageAccess(){
+const userInput=await requestPassword("Simulation Access","Classroom password required for this simulation:");
+if(userInput===null){window.location.href="../index.html";return}
+const encoder=new TextEncoder();
+const data=encoder.encode(userInput);
+const hashBuffer=await crypto.subtle.digest("SHA-256",data);
+const hashArray=Array.from(new Uint8Array(hashBuffer));
+const hashHex=hashArray.map(b=>b.toString(16).padStart(2,"0")).join("");
+if(hashHex===TARGET_HASH){
+document.documentElement.classList.remove("password-locked");
+}else{
+alert("Incorrect password. Access denied.");
+window.location.href="../index.html";
+}
+}
+
+if(document.readyState==="loading"){
+document.addEventListener("DOMContentLoaded",verifyPageAccess,{once:true});
+}else{
+verifyPageAccess();
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#050508;--panel:rgba(22,22,26,0.92);--border:rgba(0,229,255,0.12);
+--accent:#00E5FF;--red:#FF3B30;--green:#34C759;--orange:#FF9F0A;--blue:#0A84FF;
+--txt:#f0f0f5;--muted:#8899aa;
+--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+--ctrl-w:282px;--info-w:286px;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:var(--font);font-size:13px}
+canvas#sim{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;cursor:grab}
+canvas#sim:active{cursor:grabbing}
+
+/* ── Tabs ── */
+.tabs{position:fixed;top:0;left:0;right:0;height:38px;display:flex;align-items:flex-end;background:rgba(10,10,14,0.96);z-index:1000;border-bottom:1px solid var(--border);padding:0 14px}
+.tabs .t{padding:7px 20px;cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.4px;border-bottom:2px solid transparent;transition:.2s;user-select:none}
+.tabs .t.on{color:var(--accent);border-bottom-color:var(--accent)}
+.tabs .t:hover{color:var(--txt)}
+.tc{display:none;position:fixed;top:38px;left:0;right:0;bottom:0;z-index:1}
+.tc.on{display:block}
+
+/* ── Panels ── */
+.lp,.rp{position:fixed;top:46px;max-height:calc(100vh - 54px);overflow-y:auto;background:var(--panel);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--border);border-radius:10px;z-index:500;padding:12px 14px;scrollbar-width:thin;scrollbar-color:var(--accent) transparent;transition:transform .3s,opacity .3s}
+.lp{left:8px;width:var(--ctrl-w)}
+.rp{right:8px;width:var(--info-w)}
+.lp.hide{transform:translateX(calc(-1*var(--ctrl-w) - 20px));opacity:0;pointer-events:none}
+.rp.hide{transform:translateX(calc(var(--info-w) + 20px));opacity:0;pointer-events:none}
+.lp::-webkit-scrollbar,.rp::-webkit-scrollbar{width:4px}
+.lp::-webkit-scrollbar-thumb,.rp::-webkit-scrollbar-thumb{background:var(--accent);border-radius:4px}
+
+.lp h2{font-size:13px;color:var(--accent);margin-bottom:10px;letter-spacing:.5px}
+fieldset{border:1px solid var(--border);border-radius:7px;padding:8px 10px;margin-bottom:10px}
+legend{font-size:10px;color:var(--accent);font-weight:700;letter-spacing:.7px;text-transform:uppercase;padding:0 5px}
+.sr{display:flex;align-items:center;margin:4px 0;gap:6px}
+.sr label{flex:0 0 108px;font-size:11px;color:var(--muted)}
+.sr input[type=range]{flex:1;-webkit-appearance:none;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--accent),var(--blue));outline:none;cursor:pointer}
+.sr input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 5px var(--accent)}
+.sr .v{flex:0 0 50px;text-align:right;font-size:11px;color:var(--txt);font-weight:600;font-variant-numeric:tabular-nums}
+select{width:100%;padding:5px 7px;background:rgba(255,255,255,0.06);color:var(--txt);border:1px solid var(--border);border-radius:5px;font-size:11px;margin:3px 0 6px}
+select option{background:#1a1a1e;color:var(--txt)}
+.br{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
+.b{padding:5px 12px;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.3px;transition:.15s;user-select:none}
+.b:hover{filter:brightness(1.15);transform:translateY(-1px)}
+.b-go{background:linear-gradient(135deg,var(--green),#2ab748);color:#000}
+.b-pa{background:linear-gradient(135deg,var(--orange),#e08800);color:#000}
+.b-re{background:linear-gradient(135deg,var(--red),#cc2020);color:#fff}
+.b-sp{background:rgba(255,255,255,0.08);color:var(--txt);border:1px solid var(--border);min-width:34px;text-align:center;font-size:10px;padding:4px 6px}
+.b-sp.on{background:var(--accent);color:#000;border-color:var(--accent)}
+.cr{display:flex;align-items:center;gap:5px;margin:3px 0;flex-wrap:wrap}
+.cr label{font-size:10px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:4px}
+.cr input[type=checkbox]{accent-color:var(--accent);width:13px;height:13px}
+
+/* ── Telemetry ── */
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin:8px 4px 12px;padding:6px 8px}
+.ti{display:flex;flex-direction:column;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,0.02)}
+.ti .tl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.ti .tv{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ── Charts ── */
+.ctr{display:flex;gap:5px;margin:4px 4px 8px;flex-wrap:wrap}
+.ct{padding:3px 8px;border-radius:10px;font-size:9px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--muted);text-transform:uppercase;letter-spacing:.4px;user-select:none;transition:.15s}
+.ct.on{background:var(--accent);color:#000;border-color:var(--accent)}
+.cb{width:calc(100% - 8px);margin:0 4px 8px;height:130px;border-radius:7px;overflow:hidden;border:1px solid var(--border);background:rgba(0,0,0,0.3)}
+.cb.hid{display:none}
+.cb canvas{width:100%!important;height:100%!important}
+.bx{padding:3px 8px;border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,0.04);color:var(--muted);font-size:9px;font-weight:700;cursor:pointer;margin:4px}
+.bx:hover{background:var(--accent);color:#000}
+
+/* ── Toggle arrows ── */
+.pt{position:fixed;top:50%;z-index:600;width:24px;height:48px;background:var(--panel);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:14px;transition:.2s;user-select:none}
+.pt:hover{background:var(--accent);color:#000}
+.pt.l{left:0;border-radius:0 8px 8px 0}
+.pt.l.s{left:calc(var(--ctrl-w) + 8px)}
+.pt.r{right:0;border-radius:8px 0 0 8px}
+.pt.r.s{right:calc(var(--info-w) + 8px)}
+
+/* ── Status ── */
+.st{position:fixed;top:46px;left:50%;transform:translateX(-50%);padding:3px 14px;border-radius:10px;font-size:10px;font-weight:800;letter-spacing:1px;z-index:600;pointer-events:none}
+.st.idle{background:rgba(100,100,120,0.5);color:var(--muted)}
+.st.run{background:rgba(52,199,89,0.25);color:var(--green)}
+.st.pau{background:rgba(255,159,10,0.25);color:var(--orange)}
+
+/* ── Zoom HUD ── */
+.zh{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:600;background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:4px 12px;align-items:center}
+.zh .zb{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:rgba(255,255,255,0.06);color:var(--accent);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.zh .zb:hover{background:var(--accent);color:#000}
+.zh .zl{font-size:10px;color:var(--muted);min-width:50px;text-align:center}
+
+/* ── QA Tab ── */
+#qa{overflow-y:auto;padding:20px;background:var(--bg)}
+.qc{max-width:700px;margin:0 auto}
+.qc h2{color:var(--accent);font-size:18px;margin-bottom:6px}
+.qc .qs{color:var(--muted);font-size:12px;margin-bottom:18px}
+.srow{display:flex;gap:10px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.srow label{font-size:13px;color:var(--muted)}
+.srow input{flex:1;min-width:180px;padding:6px 10px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-size:13px}
+.bdx{background:linear-gradient(135deg,var(--blue),#0060cc);color:#fff;padding:5px 14px;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer}
+.prog{display:flex;align-items:center;justify-content:center;gap:8px;margin:16px 0}
+.prog .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.1);border:1px solid var(--border);transition:.2s;cursor:pointer}
+.prog .dot.act{background:var(--accent);border-color:var(--accent);box-shadow:0 0 6px var(--accent)}
+.prog .dot.ans{background:var(--green);border-color:var(--green)}
+.qcard{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px 24px;min-height:260px}
+.qcard .badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:10px;font-weight:700;color:#000;margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px}
+.qcard .pn{font-size:12px;color:var(--accent);font-weight:700;margin-bottom:6px}
+.qcard .pt2{font-size:14px;color:var(--txt);line-height:1.7;margin-bottom:12px}
+.qcard textarea{width:100%;min-height:100px;padding:10px 12px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;color:var(--txt);font-size:13px;font-family:var(--font);resize:vertical}
+.qcard .hb{font-size:10px;color:var(--blue);cursor:pointer;margin-top:6px;user-select:none}
+.qcard .ht{font-size:11px;color:var(--orange);margin-top:6px;display:none;line-height:1.5;padding:8px;background:rgba(255,159,10,0.06);border-radius:6px}
+.qnav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}
+.qnav .nb{padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:rgba(255,255,255,0.06);color:var(--accent);font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+.qnav .nb:hover{background:var(--accent);color:#000}
+.qnav .nb:disabled{opacity:.3;cursor:not-allowed}
+.qnav .nb:disabled:hover{background:rgba(255,255,255,0.06);color:var(--accent)}
+.qnav .pg{font-size:11px;color:var(--muted)}
+@keyframes pf{0%{box-shadow:0 0 8px var(--accent)}100%{box-shadow:none}}
+.pf{animation:pf .4s ease-out}
+body::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="t on" onclick="tabTo('sim',this)">Simulation</div>
+  <div class="t" onclick="tabTo('qa',this)">5E Inquiry &amp; FRQ</div>
+</div>
+
+<!-- Sim Tab -->
+<div id="sim" class="tc on">
+  <canvas id="sim"></canvas>
+  <div class="st idle" id="status">READY</div>
+  <div class="pt l s" id="tl" onclick="togPan('l')">◀</div>
+  <div class="pt r s" id="tr" onclick="togPan('r')">▶</div>
+  <div class="zh">
+    <div class="zb" onclick="cam.zoomBy(1.3)">+</div>
+    <div class="zl" id="zlbl">100%</div>
+    <div class="zb" onclick="cam.zoomBy(1/1.3)">−</div>
+    <div class="zb" onclick="cam.reset()" style="font-size:10px;width:auto;border-radius:12px;padding:0 10px">Fit</div>
+  </div>
+
+  <!-- Left Panel -->
+  <div class="lp" id="lp">
+    <h2>Orbital Mechanics Lab</h2>
+    <fieldset><legend>Scenario</legend>
+      <select id="scn">
+        <option value="single">Single Spacecraft (m)</option>
+        <option value="mass">Compare: m vs 2m (same orbit)</option>
+        <option value="radius">Compare: orbit a₁ vs a₂</option>
+        <option value="all">All Three</option>
+      </select>
+    </fieldset>
+    <fieldset><legend>Orbit Parameters</legend>
+      <div class="sr"><label>Mass m (kg)</label><input type="range" id="sl_m" min="100" max="10000" step="100" value="1000"><span class="v" id="d_m">1000</span></div>
+      <div class="sr"><label>Semi-major a (×Rₑ)</label><input type="range" id="sl_a" min="1.2" max="8" step="0.1" value="2.0"><span class="v" id="d_a">2.0</span></div>
+      <div class="sr"><label>Eccentricity e</label><input type="range" id="sl_e" min="0" max="0.85" step="0.01" value="0.00"><span class="v" id="d_e">0.00</span></div>
+      <div class="sr" id="rA2" style="display:none"><label>2nd semi-major a₂</label><input type="range" id="sl_a2" min="1.2" max="10" step="0.1" value="3.5"><span class="v" id="d_a2">3.5</span></div>
+      <div class="sr" id="rE2" style="display:none"><label>2nd eccentricity e₂</label><input type="range" id="sl_e2" min="0" max="0.85" step="0.01" value="0.00"><span class="v" id="d_e2">0.00</span></div>
+      <div class="sr"><label>M_E (×10²⁴ kg)</label><input type="range" id="sl_M" min="1" max="20" step="0.5" value="5.97"><span class="v" id="d_M">5.97</span></div>
+    </fieldset>
+    <fieldset><legend>Controls</legend>
+      <div class="br">
+        <button class="b b-go" id="bGo" onclick="ui.go()">▶ START</button>
+        <button class="b b-pa" id="bPa" onclick="ui.pause()" style="display:none">⏸ PAUSE</button>
+        <button class="b b-re" onclick="ui.rst()">↺ RESET</button>
+      </div>
+      <div class="br">
+        <span style="font-size:10px;color:var(--muted);line-height:24px">Speed:</span>
+        <button class="b b-sp" onclick="ui.spd(0.25)">0.25</button>
+        <button class="b b-sp" onclick="ui.spd(0.5)">0.5</button>
+        <button class="b b-sp on" onclick="ui.spd(1)">1</button>
+        <button class="b b-sp" onclick="ui.spd(2)">2</button>
+        <button class="b b-sp" onclick="ui.spd(5)">5</button>
+      </div>
+      <div class="cr">
+        <label><input type="checkbox" id="cF" checked> Force</label>
+        <label><input type="checkbox" id="cV" checked> Velocity</label>
+        <label><input type="checkbox" id="cT"> Trail</label>
+        <label><input type="checkbox" id="cL" checked> Labels</label>
+      </div>
+    </fieldset>
+    <fieldset><legend>Derived</legend>
+      <div style="font-size:11px;color:var(--muted);line-height:1.7;padding:2px 4px" id="deriv"></div>
+    </fieldset>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="rp" id="rp">
+    <fieldset style="padding:10px 12px"><legend>Live Telemetry</legend><div class="tg" id="tgrid"></div></fieldset>
+    <div class="ctr" id="ctog"></div>
+    <div class="cb" id="bE"><canvas id="chE"></canvas></div>
+    <div class="cb" id="bS"><canvas id="chS"></canvas></div>
+    <div class="cb" id="bR"><canvas id="chR"></canvas></div>
+    <div><button class="bx" onclick="ui.csv()">⬇ CSV</button></div>
+  </div>
+</div>
+
+<!-- QA Tab -->
+<div id="qa" class="tc">
+  <div class="qc">
+    <h2>5E Guided Inquiry — Orbital Mechanics</h2>
+    <p class="qs">AP Physics 1 FRQ — 10 scaffolded prompts</p>
+    <div class="srow">
+      <label>Student Name:</label>
+      <input type="text" id="sname" placeholder="Enter your full name">
+      <button class="bdx" onclick="ui.docx()">📄 Export .docx</button>
+    </div>
+    <div class="prog" id="prog"></div>
+    <div id="qcc"></div>
+    <div class="qnav">
+      <button class="nb" id="qP" onclick="ui.qn(-1)">← Previous</button>
+      <span class="pg" id="qPg">1 / 10</span>
+      <button class="nb" id="qN" onclick="ui.qn(1)">Next →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════ TABS / PANELS ═══════ */
+function tabTo(id,el){document.querySelectorAll('.tc').forEach(t=>t.classList.remove('on'));document.querySelectorAll('.tabs .t').forEach(t=>t.classList.remove('on'));document.getElementById(id).classList.add('on');el.classList.add('on')}
+function togPan(s){if(s==='l'){const p=$('lp'),b=$('tl');p.classList.toggle('hide');b.classList.toggle('s');b.textContent=p.classList.contains('hide')?'▶':'◀'}else{const p=$('rp'),b=$('tr');p.classList.toggle('hide');b.classList.toggle('s');b.textContent=p.classList.contains('hide')?'◀':'▶'}}
+function $(id){return document.getElementById(id)}
+
+/* ═══════ CONSTANTS ═══════ */
+const GC=6.674e-11,RE=6.371e6;
+const SUP='⁰¹²³⁴⁵⁶⁷⁸⁹';
+function fSci(v,d){if(v===0)return'0';const a=Math.abs(v);if(a>=1e6||a<.01){const e=Math.floor(Math.log10(a)),m=v/Math.pow(10,e);return m.toFixed(d||1)+'×10^'+e}return v.toFixed(d||1)}
+function sTick(v){if(v===0)return'0';const a=Math.abs(v);if(a>=1e5||(a<.01&&a!==0)){const e=Math.floor(Math.log10(a)),m=v/Math.pow(10,e);let s='';const es=Math.abs(e).toString();for(let i=0;i<es.length;i++)s+=SUP[+es[i]];if(e<0)s='⁻'+s;return m.toFixed(1)+'×10'+s}if(a>=1e3)return(v/1e3).toFixed(1)+'k';return v.toFixed(1)}
+
+/* ═══════ KEPLER SOLVER ═══════ */
+function keplerE(M,e){
+  // Solve M = E - e*sin(E) for E using Newton-Raphson
+  let E=M; // initial guess
+  for(let i=0;i<60;i++){
+    const f=E-e*Math.sin(E)-M;
+    const fp=1-e*Math.cos(E);
+    const dE=f/fp;
+    E-=dE;
+    if(Math.abs(dE)<1e-12)break;
+  }
+  return E;
+}
+function E2nu(E,e){
+  // Eccentric anomaly → true anomaly
+  return 2*Math.atan2(Math.sqrt(1+e)*Math.sin(E/2),Math.sqrt(1-e)*Math.cos(E/2));
+}
+function nu2E(nu,e){
+  // True anomaly → eccentric anomaly
+  return 2*Math.atan2(Math.sqrt(1-e)*Math.sin(nu/2),Math.sqrt(1+e)*Math.cos(nu/2));
+}
+// Orbital position from true anomaly (relative to focus at origin)
+function orbitPos(a,e,nu){
+  const r=a*(1-e*e)/(1+e*Math.cos(nu));
+  return{x:r*Math.cos(nu),y:r*Math.sin(nu),r:r};
+}
+
+/* ═══════ SPACECRAFT ═══════ */
+class Craft{
+  constructor(label,mass,a,e,color,nu0){
+    this.label=label;this.mass=mass;this.a=a;this.e=e;this.color=color;
+    this.nu=nu0||0; // true anomaly
+    this.r=0;this.v=0;this.vr=0;this.vt=0;
+    this.KE=0;this.PE=0;this.Fg=0;this.T=0;
+    this.M=0; // mean anomaly (cumulative, not mod 2π)
+    this.trail=[];
+  }
+  init(ME){
+    const mu=GC*ME;
+    this.T=2*Math.PI*Math.sqrt(this.a**3/mu);
+    // Set mean anomaly from initial true anomaly
+    const E0=nu2E(this.nu,this.e);
+    let M0=E0-this.e*Math.sin(E0);
+    if(M0<0)M0+=2*Math.PI;
+    this.M=M0;
+    this._calc(mu);
+    this.trail=[];
+  }
+  _calc(mu){
+    const p=this.a*(1-this.e*this.e);
+    this.r=p/(1+this.e*Math.cos(this.nu));
+    // vis-viva
+    this.v=Math.sqrt(Math.max(0,mu*(2/this.r-1/this.a)));
+    // angular momentum
+    const h=Math.sqrt(mu*p);
+    this.vt=h/this.r; // tangential
+    this.vr=Math.sqrt(Math.max(0,this.v*this.v-this.vt*this.vt));
+    // sign of vr: positive when moving away from focus
+    const sinNu=Math.sin(this.nu);
+    if(sinNu<0)this.vr=-this.vr;
+    this.Fg=mu*this.mass/(this.r*this.r);
+    this.KE=0.5*this.mass*this.v*this.v;
+    this.PE=-GC*this.mass*mu/(GC*this.r); // = -mu*m/r ... wait, mu=G*ME so PE=-G*ME*m/r=-mu*m/r
+  }
+  step(dt,ME){
+    const mu=GC*ME;
+    this.T=2*Math.PI*Math.sqrt(this.a**3/mu);
+    // Advance mean anomaly
+    const n=2*Math.PI/this.T; // mean motion
+    this.M+=n*dt;
+    // Solve Kepler's equation for eccentric anomaly
+    const Mmod=((this.M%( 2*Math.PI))+(2*Math.PI))%(2*Math.PI);
+    const E=keplerE(Mmod,this.e);
+    this.nu=E2nu(E,this.e);
+    // Ensure nu is positive
+    if(this.nu<0)this.nu+=2*Math.PI;
+    this._calc(mu);
+    // Fix PE
+    this.PE=-mu*this.mass/this.r;
+    // Trail
+    const pos=this.pos();
+    this.trail.push(pos);
+    if(this.trail.length>5000)this.trail.shift();
+  }
+  pos(){
+    return orbitPos(this.a,this.e,this.nu);
+  }
+  revs(){return this.M/(2*Math.PI)}
+  liveUpdate(a,e,mass,ME){
+    this.a=a;this.e=e;this.mass=mass;
+    const mu=GC*ME;
+    this.T=2*Math.PI*Math.sqrt(this.a**3/mu);
+    // Re-derive M from current nu with new e (keep position consistent)
+    const E0=nu2E(this.nu,this.e);
+    let M0=E0-this.e*Math.sin(E0);
+    if(M0<0)M0+=2*Math.PI;
+    const fullRevs=Math.floor(this.M/(2*Math.PI));
+    this.M=fullRevs*2*Math.PI+M0;
+    this._calc(mu);
+    this.PE=-mu*this.mass/this.r;
+  }
+}
+
+/* ═══════ PHYSICS ENGINE ═══════ */
+const phys={
+  ME:5.972e24,crafts:[],time:0,running:false,paused:false,
+  setup(scn,p){
+    this.ME=p.ME;this.crafts=[];this.time=0;
+    const m=p.m,a=p.a*RE,a2=p.a2*RE,e=p.e,e2=p.e2;
+    if(scn==='single'){
+      this.crafts.push(new Craft('Spacecraft (m)',m,a,e,'#00E5FF',0));
+    }else if(scn==='mass'){
+      this.crafts.push(new Craft('Craft m',m,a,e,'#00E5FF',0));
+      this.crafts.push(new Craft('Craft 2m',2*m,a,e,'#FF9F0A',Math.PI));
+    }else if(scn==='radius'){
+      this.crafts.push(new Craft('Craft a₁',m,a,e,'#00E5FF',0));
+      this.crafts.push(new Craft('Craft a₂',m,a2,e2,'#34C759',0));
+    }else{
+      this.crafts.push(new Craft('m,a₁',m,a,e,'#00E5FF',0));
+      this.crafts.push(new Craft('2m,a₁',2*m,a,e,'#FF9F0A',Math.PI));
+      this.crafts.push(new Craft('m,a₂',m,a2,e2,'#34C759',0));
+    }
+    this.crafts.forEach(c=>c.init(this.ME));
+  },
+  live(scn,p){
+    this.ME=p.ME;
+    const m=p.m,a=p.a*RE,a2=p.a2*RE,e=p.e,e2=p.e2;
+    this.crafts.forEach(c=>{
+      if(scn==='single'){c.liveUpdate(a,e,m,this.ME)}
+      else if(scn==='mass'){c.color==='#00E5FF'?c.liveUpdate(a,e,m,this.ME):c.liveUpdate(a,e,2*m,this.ME)}
+      else if(scn==='radius'){c.color==='#00E5FF'?c.liveUpdate(a,e,m,this.ME):c.liveUpdate(a2,e2,m,this.ME)}
+      else{c.color==='#00E5FF'?c.liveUpdate(a,e,m,this.ME):c.color==='#FF9F0A'?c.liveUpdate(a,e,2*m,this.ME):c.liveUpdate(a2,e2,m,this.ME)}
+    });
+  },
+  step(dt){
+    if(!this.running||this.paused)return;
+    const sub=8;const s=dt/sub;
+    for(let i=0;i<sub;i++){this.crafts.forEach(c=>c.step(s,this.ME));this.time+=s}
+  }
+};
+
+/* ═══════ CAMERA ═══════ */
+const cam={
+  ox:0,oy:0,zoom:1,drag:false,lx:0,ly:0,_s:1,
+  w2s(wx,wy,cx,cy){return{x:cx+(wx-this.ox)*this._s*this.zoom,y:cy-(wy-this.oy)*this._s*this.zoom}},
+  zoomBy(f){this.zoom=Math.max(.1,Math.min(20,this.zoom*f));$('zlbl').textContent=Math.round(this.zoom*100)+'%'},
+  reset(){this.ox=0;this.oy=0;this.zoom=1;$('zlbl').textContent='100%'}
+};
+(function(){
+  const cv=document.querySelector('canvas#sim');
+  // Fix: canvas id conflicts with tab id. Let's use a different selector.
+})();
+
+/* ═══════ RENDERER ═══════ */
+const render={
+  cv:null,ctx:null,W:0,H:0,stars:[],
+  init(){
+    // Create canvas programmatically to avoid ID conflict
+    const old=document.querySelector('#sim canvas#sim');
+    // Actually let's just get the canvas differently
+    this.cv=document.querySelector('canvas');
+    this.ctx=this.cv.getContext('2d');
+    for(let i=0;i<400;i++)this.stars.push({x:Math.random(),y:Math.random(),r:Math.random()*1.2+.3,a:Math.random()*.5+.12});
+    this.resize();
+    window.addEventListener('resize',()=>this.resize());
+    // Mouse events
+    this.cv.addEventListener('mousedown',e=>{cam.drag=true;cam.lx=e.clientX;cam.ly=e.clientY});
+    this.cv.addEventListener('mousemove',e=>{if(!cam.drag)return;const dx=e.clientX-cam.lx,dy=e.clientY-cam.ly;cam.lx=e.clientX;cam.ly=e.clientY;cam.ox-=dx/(cam._s*cam.zoom);cam.oy+=dy/(cam._s*cam.zoom)});
+    this.cv.addEventListener('mouseup',()=>cam.drag=false);
+    this.cv.addEventListener('mouseleave',()=>cam.drag=false);
+    this.cv.addEventListener('wheel',e=>{e.preventDefault();cam.zoomBy(e.deltaY<0?1.12:1/1.12)},{passive:false});
+    // Touch
+    let ld=0;
+    this.cv.addEventListener('touchstart',e=>{if(e.touches.length===1){cam.drag=true;cam.lx=e.touches[0].clientX;cam.ly=e.touches[0].clientY}if(e.touches.length===2){const dx=e.touches[1].clientX-e.touches[0].clientX,dy=e.touches[1].clientY-e.touches[0].clientY;ld=Math.sqrt(dx*dx+dy*dy)}});
+    this.cv.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&cam.drag){const dx=e.touches[0].clientX-cam.lx,dy=e.touches[0].clientY-cam.ly;cam.lx=e.touches[0].clientX;cam.ly=e.touches[0].clientY;cam.ox-=dx/(cam._s*cam.zoom);cam.oy+=dy/(cam._s*cam.zoom)}if(e.touches.length===2){const dx=e.touches[1].clientX-e.touches[0].clientX,dy=e.touches[1].clientY-e.touches[0].clientY;const d=Math.sqrt(dx*dx+dy*dy);if(ld>0)cam.zoomBy(d/ld);ld=d}},{passive:false});
+    this.cv.addEventListener('touchend',()=>{cam.drag=false;ld=0});
+  },
+  resize(){
+    const d=window.devicePixelRatio||1;
+    this.cv.width=window.innerWidth*d;this.cv.height=window.innerHeight*d;
+    this.ctx.setTransform(d,0,0,d,0,0);
+    this.W=window.innerWidth;this.H=window.innerHeight;
+  },
+  draw(){
+    const ctx=this.ctx,W=this.W,H=this.H;
+    ctx.clearRect(0,0,W,H);
+    // BG
+    const bg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,Math.max(W,H)*.7);
+    bg.addColorStop(0,'#0c0c18');bg.addColorStop(1,'#020204');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+    // Stars
+    this.stars.forEach(s=>{ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(200,210,255,${s.a})`;ctx.fill()});
+
+    // Scale
+    let maxR=0;
+    phys.crafts.forEach(c=>{const ap=c.a*(1+c.e);if(ap>maxR)maxR=ap});
+    if(maxR===0)maxR=2*RE;
+    const baseS=(Math.min(W,H)/2*0.65)/maxR;
+    cam._s=baseS;
+    const cx=W/2,cy=H/2;
+    const S=baseS*cam.zoom;
+
+    const showF=$('cF').checked,showV=$('cV').checked,showT=$('cT').checked,showL=$('cL').checked;
+
+    // Earth
+    const ep=cam.w2s(0,0,cx,cy);
+    const ePx=RE*S;
+    if(ePx>1.5){
+      // Glow
+      const gl=ctx.createRadialGradient(ep.x,ep.y,ePx*.7,ep.x,ep.y,ePx*1.6);
+      gl.addColorStop(0,'rgba(60,140,255,0.1)');gl.addColorStop(1,'rgba(60,140,255,0)');
+      ctx.beginPath();ctx.arc(ep.x,ep.y,ePx*1.6,0,Math.PI*2);ctx.fillStyle=gl;ctx.fill();
+      // Body
+      const eg=ctx.createRadialGradient(ep.x-ePx*.25,ep.y-ePx*.25,ePx*.1,ep.x,ep.y,ePx);
+      eg.addColorStop(0,'#5ab8ff');eg.addColorStop(.35,'#2a80d0');eg.addColorStop(.7,'#15508a');eg.addColorStop(1,'#082840');
+      ctx.beginPath();ctx.arc(ep.x,ep.y,ePx,0,Math.PI*2);ctx.fillStyle=eg;ctx.fill();
+      // Continents
+      ctx.save();ctx.beginPath();ctx.arc(ep.x,ep.y,ePx,0,Math.PI*2);ctx.clip();
+      [[-.2,-.3,.35],[.15,.2,.25],[-.1,.35,.2]].forEach(([ox,oy,r])=>{ctx.beginPath();ctx.arc(ep.x+ox*ePx,ep.y+oy*ePx,r*ePx,0,Math.PI*2);ctx.fillStyle='rgba(40,120,60,0.25)';ctx.fill()});
+      ctx.restore();
+      ctx.beginPath();ctx.arc(ep.x,ep.y,ePx,0,Math.PI*2);ctx.strokeStyle='rgba(100,180,255,0.2)';ctx.lineWidth=1;ctx.stroke();
+      if(showL){ctx.fillStyle='rgba(180,200,240,0.45)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('Earth',ep.x,ep.y+ePx+14)}
+    }
+
+    // Each craft
+    phys.crafts.forEach(craft=>{
+      const a=craft.a,e=craft.e;
+
+      // ── Draw orbit path using the SAME polar equation ──
+      // This guarantees the spacecraft sits exactly on this curve
+      ctx.beginPath();
+      const N=200;
+      for(let i=0;i<=N;i++){
+        const nu_i=(i/N)*2*Math.PI;
+        const p=orbitPos(a,e,nu_i);
+        const sp=cam.w2s(p.x,p.y,cx,cy);
+        if(i===0)ctx.moveTo(sp.x,sp.y);else ctx.lineTo(sp.x,sp.y);
+      }
+      ctx.closePath();
+      ctx.strokeStyle=craft.color+'35';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);ctx.stroke();ctx.setLineDash([]);
+
+      // Periapsis / apoapsis markers
+      if(e>0.01&&showL){
+        const peri=orbitPos(a,e,0);const apo=orbitPos(a,e,Math.PI);
+        const pp=cam.w2s(peri.x,peri.y,cx,cy);const ap=cam.w2s(apo.x,apo.y,cx,cy);
+        ctx.beginPath();ctx.arc(pp.x,pp.y,3,0,Math.PI*2);ctx.fillStyle=craft.color+'88';ctx.fill();
+        ctx.beginPath();ctx.arc(ap.x,ap.y,3,0,Math.PI*2);ctx.fillStyle=craft.color+'44';ctx.fill();
+        ctx.font='9px sans-serif';ctx.textAlign='center';ctx.fillStyle=craft.color+'88';
+        ctx.fillText('periapsis',pp.x,pp.y-8);ctx.fillStyle=craft.color+'55';ctx.fillText('apoapsis',ap.x,ap.y-8);
+      }
+
+      // Trail
+      if(showT&&craft.trail.length>1){
+        ctx.beginPath();
+        const s0=cam.w2s(craft.trail[0].x,craft.trail[0].y,cx,cy);ctx.moveTo(s0.x,s0.y);
+        for(let i=1;i<craft.trail.length;i++){const t=craft.trail[i];const sp=cam.w2s(t.x,t.y,cx,cy);ctx.lineTo(sp.x,sp.y)}
+        ctx.strokeStyle=craft.color+'44';ctx.lineWidth=1.5;ctx.stroke();
+      }
+
+      // Spacecraft position
+      const pos=craft.pos();
+      const sp=cam.w2s(pos.x,pos.y,cx,cy);
+      const sz=10;
+
+      // Velocity world vector
+      const vx_w=-craft.vt*Math.sin(craft.nu)+craft.vr*Math.cos(craft.nu);
+      const vy_w= craft.vt*Math.cos(craft.nu)+craft.vr*Math.sin(craft.nu);
+      const vAng=Math.atan2(vy_w,vx_w);
+
+      // Ship body
+      ctx.save();ctx.translate(sp.x,sp.y);ctx.rotate(-vAng);
+      const sg=ctx.createRadialGradient(0,0,0,0,0,sz*3);
+      sg.addColorStop(0,craft.color+'50');sg.addColorStop(1,craft.color+'00');
+      ctx.beginPath();ctx.arc(0,0,sz*3,0,Math.PI*2);ctx.fillStyle=sg;ctx.fill();
+      ctx.beginPath();ctx.moveTo(sz*1.3,0);ctx.lineTo(-sz*.7,-sz*.6);ctx.lineTo(-sz*.3,0);ctx.lineTo(-sz*.7,sz*.6);ctx.closePath();
+      ctx.fillStyle=craft.color;ctx.fill();ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=.5;ctx.stroke();
+      ctx.restore();
+
+      // Force vector (toward Earth)
+      if(showF){
+        const dx=ep.x-sp.x,dy=ep.y-sp.y,dl=Math.sqrt(dx*dx+dy*dy);
+        if(dl>3){
+          const aL=Math.min(45,Math.max(22,35));const nx=dx/dl,ny=dy/dl;
+          const ax=sp.x+nx*aL,ay=sp.y+ny*aL;
+          ctx.beginPath();ctx.moveTo(sp.x,sp.y);ctx.lineTo(ax,ay);ctx.strokeStyle='#FF3B30';ctx.lineWidth=2.5;ctx.stroke();
+          const ha=Math.atan2(ny,nx);
+          ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax-7*Math.cos(ha-.4),ay-7*Math.sin(ha-.4));ctx.moveTo(ax,ay);ctx.lineTo(ax-7*Math.cos(ha+.4),ay-7*Math.sin(ha+.4));ctx.strokeStyle='#FF3B30';ctx.lineWidth=2.5;ctx.stroke();
+          if(showL){ctx.fillStyle='#FF3B30';ctx.font='bold 10px sans-serif';ctx.textAlign='left';ctx.fillText('Fg',ax+nx*5+3,ay+ny*5)}
+        }
+      }
+
+      // Velocity vector
+      if(showV&&craft.v>0){
+        const vMag=Math.sqrt(vx_w*vx_w+vy_w*vy_w);
+        if(vMag>0){
+          const vnx=vx_w/vMag,vny=vy_w/vMag;
+          const vL=Math.min(40,Math.max(20,35));
+          const vax=sp.x+vnx*vL,vay=sp.y-vny*vL;
+          ctx.beginPath();ctx.moveTo(sp.x,sp.y);ctx.lineTo(vax,vay);ctx.strokeStyle='#34C759';ctx.lineWidth=2;ctx.stroke();
+          const va=Math.atan2(-vny,vnx);
+          ctx.beginPath();ctx.moveTo(vax,vay);ctx.lineTo(vax-6*Math.cos(va-.4),vay-6*Math.sin(va-.4));ctx.moveTo(vax,vay);ctx.lineTo(vax-6*Math.cos(va+.4),vay-6*Math.sin(va+.4));ctx.strokeStyle='#34C759';ctx.lineWidth=2;ctx.stroke();
+          if(showL){ctx.fillStyle='#34C759';ctx.font='bold 10px sans-serif';ctx.fillText('v',vax+vnx*7,vay-vny*7)}
+        }
+      }
+
+      // Radius line
+      ctx.beginPath();ctx.moveTo(ep.x,ep.y);ctx.lineTo(sp.x,sp.y);
+      ctx.strokeStyle=craft.color+'18';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+      if(showL){
+        const mx=(ep.x+sp.x)/2,my=(ep.y+sp.y)/2;
+        ctx.fillStyle=craft.color+'BB';ctx.font='10px sans-serif';ctx.textAlign='center';
+        ctx.fillText('r='+(craft.r/RE).toFixed(2)+'Rₑ',mx+8,my-5);
+      }
+      if(showL){ctx.fillStyle=craft.color;ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(craft.label,sp.x,sp.y-sz*2-2)}
+    });
+
+    // Legend
+    ctx.font='9px sans-serif';ctx.textAlign='left';
+    ctx.fillStyle='rgba(200,200,220,0.22)';ctx.fillText('Scroll=zoom · Drag=pan · G=6.674×10⁻¹¹ N·m²/kg²',8,H-10);
+  }
+};
+
+/* ═══════ CHARTS ═══════ */
+const CM=300;
+function mkCh(id,t,y){return new Chart($(id).getContext('2d'),{type:'line',data:{labels:[],datasets:[]},options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{title:{display:true,text:t,color:'#8899aa',font:{size:10}},legend:{labels:{color:'#8899aa',font:{size:8},boxWidth:8}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+sTick(c.parsed.y)}}},scales:{x:{ticks:{color:'#555',maxTicksLimit:5,font:{size:8}},grid:{color:'rgba(255,255,255,0.03)'}},y:{ticks:{color:'#555',font:{size:8},maxTicksLimit:6,callback:sTick},grid:{color:'rgba(255,255,255,0.03)'}}},elements:{point:{radius:0},line:{borderWidth:1.5}}}})}
+let cE,cS,cR;
+
+/* ═══════ 5E PROMPTS ═══════ */
+const QS=[
+  {s:'Engage',sc:'#FF3B30',n:'Q1',q:'Examine the simulation with e = 0 (circular orbit). What single force acts on the spacecraft? Draw a free-body diagram and explain why only one force exists in orbit.',h:'Only gravity: Fg=GMm/R², toward Earth. No contact forces or drag in space. [Rubric: 2 pts — arrow toward Earth (1pt), correct label (1pt).]'},
+  {s:'Engage',sc:'#FF3B30',n:'Q2',q:'The spacecraft has constant speed but is accelerating. Explain this seeming contradiction using Newton\'s second law and the concept of centripetal acceleration.',h:'Velocity is a vector — direction changes even if magnitude doesn\'t. Gravity provides centripetal force: ΣF=mv²/R inward.'},
+  {s:'Explore',sc:'#FF9F0A',n:'Q3',q:'Record v and T from telemetry. Derive the period T in terms of m, M_E, R, and fundamental constants. Begin with ΣF=ma for circular motion.',h:'GMm/R²=mv²/R → v=√(GM_E/R). With v=2πR/T → T=2π√(R³/(GM_E)). Mass m cancels! [3 pts]'},
+  {s:'Explore',sc:'#FF9F0A',n:'Q4',q:'Switch to "m vs 2m." Are the periods equal? Explain using your derivation from Q3.',h:'Equal — m cancels from T=2π√(R³/GM_E). T depends only on R and M_E. [1 pt]'},
+  {s:'Explain',sc:'#34C759',n:'Q5',q:'Switch to "a₁ vs a₂." Compare speeds in the telemetry. Is the larger orbit faster or slower? Justify with v=√(GM_E/R).',h:'Slower. v=√(GM_E/R) → larger R → smaller v. [1 pt]'},
+  {s:'Explain',sc:'#34C759',n:'Q6',q:'Increase eccentricity to e≈0.5. Observe the spacecraft speed up at periapsis and slow at apoapsis. Explain using conservation of energy or angular momentum.',h:'Energy: KE+PE=const. Small r → PE most negative → KE max → v max. Or: L=mvr=const → smaller r → larger v.'},
+  {s:'Elaborate',sc:'#0A84FF',n:'Q7',q:'With an elliptical orbit, watch the Energy chart. Is total energy constant? How do KE and PE trade off? Compare with circular.',h:'E_total=−GMm/(2a) is constant. Elliptical: KE and PE oscillate. Circular: both constant.'},
+  {s:'Elaborate',sc:'#0A84FF',n:'Q8',q:'A geostationary satellite has T=24 hrs, e=0. Calculate its orbital radius in Rₑ. What happens to the ground track if e>0?',h:'R=(GM_E T²/(4π²))^(1/3)≈6.63 Rₑ. With e>0 the satellite traces a figure-8 analemma on the ground.'},
+  {s:'Evaluate',sc:'#FF3B30',n:'Q9',q:'A student says: "An elliptical orbit with the same semi-major axis as a circular one has the same period." Test this with the simulation. Correct?',h:'Yes! T=2π√(a³/(GM_E)) depends only on a, not e. This is Kepler\'s third law.'},
+  {s:'Evaluate',sc:'#FF3B30',n:'Q10',q:'Summarize: (1) the only force, (2) why T is mass-independent, (3) v vs R for circles, (4) how eccentricity affects speed. Connect all to Newton\'s gravity.',h:'(1) Only gravity. (2) m cancels. (3) v=√(GM_E/R). (4) v varies via energy/L conservation. All from F=GMm/r².'}
+];
+
+/* ═══════ UI CONTROLLER ═══════ */
+const ui={
+  spd_v:1,logs:[],ci:0,qi:0,
+  tog:{e:true,s:true,r:true},
+
+  P(){return{m:+$('sl_m').value,a:+$('sl_a').value,e:+$('sl_e').value,a2:+$('sl_a2').value,e2:+$('sl_e2').value,ME:+$('sl_M').value*1e24}},
+  S(){return $('scn').value},
+
+  init(){
+    phys.setup(this.S(),this.P());phys.running=false;phys.paused=false;
+    this.logs=[];this.ci=0;
+    this.der();this.tel();this.chDS();this.chTog();
+    this.sts('idle','READY');
+    $('bGo').style.display='';$('bPa').style.display='none';$('bGo').textContent='▶ START';
+  },
+  live(){const p=this.P(),s=this.S();if(phys.running)phys.live(s,p);else phys.setup(s,p);this.der();this.uTel();const el=$('deriv');el.classList.remove('pf');void el.offsetWidth;el.classList.add('pf')},
+  go(){if(phys.paused){this.pause();return}phys.setup(this.S(),this.P());phys.running=true;phys.paused=false;this.logs=[];this.ci=0;this.chDS();this.tel();this.sts('run','RUNNING');$('bGo').style.display='none';$('bPa').style.display='';$('bPa').textContent='⏸ PAUSE'},
+  pause(){if(!phys.running)return;phys.paused=!phys.paused;if(phys.paused){this.sts('pau','PAUSED');$('bPa').textContent='▶ RESUME'}else{this.sts('run','RUNNING');$('bPa').textContent='⏸ PAUSE'}},
+  rst(){phys.running=false;phys.paused=false;phys.time=0;cam.reset();this.init()},
+  spd(s){this.spd_v=s;document.querySelectorAll('.b-sp').forEach(b=>b.classList.toggle('on',parseFloat(b.textContent)===s))},
+  sts(c,t){const e=$('status');e.className='st '+c;e.textContent=t},
+
+  der(){
+    const p=this.P(),a=p.a*RE,mu=GC*p.ME,T=2*Math.PI*Math.sqrt(a**3/mu);
+    const rp=a*(1-p.e),ra=a*(1+p.e);
+    let h=`<b style="color:#00E5FF">a=${p.a.toFixed(1)}Rₑ e=${p.e.toFixed(2)}</b><br>T=${(T/3600).toFixed(2)}hrs`;
+    if(p.e>0.01)h+=`<br>rₚ=${(rp/RE).toFixed(2)}Rₑ rₐ=${(ra/RE).toFixed(2)}Rₑ`;
+    else{const v=Math.sqrt(mu/a);h+=` v=${v.toFixed(0)}m/s`}
+    const sc=this.S();
+    if(sc==='radius'||sc==='all'){const a2=p.a2*RE,T2=2*Math.PI*Math.sqrt(a2**3/mu);h+=`<br><b style="color:#34C759">a₂=${p.a2.toFixed(1)}Rₑ</b> T₂=${(T2/3600).toFixed(2)}hrs`}
+    if(sc==='mass'||sc==='all')h+=`<br><b style="color:#FF9F0A">2m:</b> same T`;
+    $('deriv').innerHTML=h;
+  },
+
+  tel(){
+    const g=$('tgrid');g.innerHTML='';
+    phys.crafts.forEach((c,i)=>{
+      [{l:c.label+' Speed',id:'tv'+i},{l:c.label+' Radius',id:'tr'+i},{l:c.label+' KE',id:'tk'+i},{l:c.label+' PE',id:'tp'+i}].forEach(it=>{
+        const d=document.createElement('div');d.className='ti';d.innerHTML=`<span class="tl">${it.l}</span><span class="tv" id="${it.id}">—</span>`;g.appendChild(d)});
+    });
+    g.appendChild(Object.assign(document.createElement('div'),{className:'ti',innerHTML:'<span class="tl">Time</span><span class="tv" id="tt">0.0 s</span>'}));
+  },
+  uTel(){
+    phys.crafts.forEach((c,i)=>{
+      const sv=$('tv'+i),sr=$('tr'+i),sk=$('tk'+i),sp=$('tp'+i);
+      if(sv)sv.textContent=fSci(c.v,0)+' m/s';
+      if(sr)sr.textContent=(c.r/RE).toFixed(3)+' Rₑ';
+      if(sk)sk.textContent=fSci(c.KE,2)+' J';
+      if(sp)sp.textContent=fSci(c.PE,2)+' J';
+    });
+    const te=$('tt');if(te)te.textContent=(phys.time/3600).toFixed(3)+' hrs';
+  },
+
+  chDS(){
+    cE.data.labels=[];cE.data.datasets=[];cS.data.labels=[];cS.data.datasets=[];cR.data.labels=[];cR.data.datasets=[];
+    phys.crafts.forEach(c=>{
+      cE.data.datasets.push({label:c.label+' KE',data:[],borderColor:c.color,tension:.3});
+      cE.data.datasets.push({label:c.label+' PE',data:[],borderColor:c.color+'88',borderDash:[5,3],tension:.3});
+      cE.data.datasets.push({label:c.label+' E',data:[],borderColor:c.color+'44',borderDash:[2,2],tension:.3});
+      cS.data.datasets.push({label:c.label,data:[],borderColor:c.color,tension:.3});
+      cR.data.datasets.push({label:c.label,data:[],borderColor:c.color,tension:.3});
+    });[cE,cS,cR].forEach(c=>c.update('none'));
+  },
+  logCh(){
+    this.ci++;if(this.ci%3)return;
+    const t=(phys.time/3600).toFixed(3);
+    cE.data.labels.push(t);if(cE.data.labels.length>CM)cE.data.labels.shift();
+    let d=0;phys.crafts.forEach(c=>{[c.KE,c.PE,c.KE+c.PE].forEach(v=>{cE.data.datasets[d].data.push(v);if(cE.data.datasets[d].data.length>CM)cE.data.datasets[d].data.shift();d++})});cE.update('none');
+    cS.data.labels.push(t);if(cS.data.labels.length>CM)cS.data.labels.shift();
+    phys.crafts.forEach((c,i)=>{cS.data.datasets[i].data.push(c.v);if(cS.data.datasets[i].data.length>CM)cS.data.datasets[i].data.shift()});cS.update('none');
+    cR.data.labels.push(t);if(cR.data.labels.length>CM)cR.data.labels.shift();
+    phys.crafts.forEach((c,i)=>{cR.data.datasets[i].data.push(c.revs());if(cR.data.datasets[i].data.length>CM)cR.data.datasets[i].data.shift()});cR.update('none');
+    const row=[phys.time.toFixed(3)];phys.crafts.forEach(c=>row.push(c.v.toFixed(2),c.r.toFixed(0),c.KE.toExponential(4),c.PE.toExponential(4)));this.logs.push(row.join(','));
+  },
+  chTog(){
+    const c=$('ctog');c.innerHTML='';
+    [{k:'e',l:'Energy',b:'bE'},{k:'s',l:'Speed',b:'bS'},{k:'r',l:'Revolutions',b:'bR'}].forEach(t=>{
+      const b=document.createElement('div');b.className='ct'+(this.tog[t.k]?' on':'');b.textContent=t.l;
+      b.onclick=()=>{this.tog[t.k]=!this.tog[t.k];b.classList.toggle('on');$(t.b).classList.toggle('hid',!this.tog[t.k])};
+      c.appendChild(b);$(t.b).classList.toggle('hid',!this.tog[t.k]);
+    });
+  },
+
+  csv(){if(!this.logs.length){alert('No data.');return}const h=['t(s)'];phys.crafts.forEach(c=>{const n=c.label.replace(/\W/g,'_');h.push(n+'_v',n+'_r',n+'_KE',n+'_PE')});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h.join(',')+'\n'+this.logs.join('\n')],{type:'text/csv'}));a.download='orbit.csv';a.click()},
+
+  docx(){
+    const nm=$('sname').value.trim()||'Unnamed';
+    const{Document,Packer,Paragraph,TextRun,HeadingLevel}=window.docx;
+    const ch=[new Paragraph({children:[new TextRun({text:'AP Physics 1 — Orbital Mechanics',bold:true,size:32,font:'Calibri'})],heading:HeadingLevel.HEADING_1}),new Paragraph({children:[new TextRun({text:'Student: '+nm+'  |  '+new Date().toLocaleDateString(),size:22,font:'Calibri',color:'555555'})]}),new Paragraph({text:''})];
+    QS.forEach(p=>{ch.push(new Paragraph({children:[new TextRun({text:`[${p.s}] ${p.n}`,bold:true,size:24,font:'Calibri',color:'0066CC'})],heading:HeadingLevel.HEADING_2}));ch.push(new Paragraph({children:[new TextRun({text:p.q,size:22,font:'Calibri'})]}));const ans=localStorage.getItem('orb_'+p.n)||'(no response)';ch.push(new Paragraph({children:[new TextRun({text:'Response: ',bold:true,size:22,font:'Calibri',color:'006600'}),new TextRun({text:ans,size:22,font:'Calibri'})]}));ch.push(new Paragraph({text:''}))});
+    Packer.toBlob(new Document({sections:[{children:ch}]})).then(b=>saveAs(b,`Orbit_${nm.replace(/\s+/g,'_')}.docx`));
+  },
+
+  // Paginated QA
+  buildQA(){
+    const p=$('prog');p.innerHTML='';
+    QS.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' act':'');const a=localStorage.getItem('orb_'+QS[i].n);if(a&&a.trim())d.classList.add('ans');d.onclick=()=>{this.qi=i;this.showQ()};p.appendChild(d)});
+    this.showQ();
+  },
+  showQ(){
+    const p=QS[this.qi],sv=localStorage.getItem('orb_'+p.n)||'';
+    $('qcc').innerHTML=`<div class="qcard"><div class="badge" style="background:${p.sc}">${p.s}</div><div class="pn">${p.n} of ${QS.length}</div><div class="pt2">${p.q}</div><textarea id="qta" placeholder="Type your response...">${sv}</textarea><div class="hb" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='block'?'none':'block'">💡 Show/Hide Hint</div><div class="ht">${p.h}</div></div>`;
+    $('qta').addEventListener('input',()=>{localStorage.setItem('orb_'+p.n,$('qta').value);this.uDots()});
+    $('qP').disabled=this.qi===0;$('qN').disabled=this.qi===QS.length-1;
+    $('qPg').textContent=`${this.qi+1} / ${QS.length}`;
+    this.uDots();
+  },
+  uDots(){document.querySelectorAll('.prog .dot').forEach((d,i)=>{d.classList.toggle('act',i===this.qi);const a=localStorage.getItem('orb_'+QS[i].n);d.classList.toggle('ans',!!(a&&a.trim()))})},
+  qn(dir){const ta=$('qta');if(ta)localStorage.setItem('orb_'+QS[this.qi].n,ta.value);this.qi=Math.max(0,Math.min(QS.length-1,this.qi+dir));this.showQ()},
+
+  scnChg(){const s=this.S(),sh=s==='radius'||s==='all';$('rA2').style.display=sh?'':'none';$('rE2').style.display=sh?'':'none';this.rst()}
+};
+
+/* ═══════ WIRE CONTROLS ═══════ */
+$('scn').addEventListener('change',()=>ui.scnChg());
+['sl_m','sl_a','sl_e','sl_a2','sl_e2','sl_M'].forEach(id=>{
+  const el=$(id),did='d_'+id.slice(3);
+  el.addEventListener('input',()=>{
+    $(did).textContent=(id==='sl_e'||id==='sl_e2')?parseFloat(el.value).toFixed(2):el.value;
+    ui.live();
+  });
+});
+
+/* ═══════ MAIN LOOP ═══════ */
+let lt=0;
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(!lt)lt=ts;
+  let dt=(ts-lt)/1000;lt=ts;dt=Math.min(dt,.05);
+  let base=500;
+  if(phys.crafts.length)base=phys.crafts[0].T/15;
+  if(phys.running&&!phys.paused){phys.step(dt*ui.spd_v*base);ui.logCh()}
+  ui.uTel();
+  render.draw();
+}
+
+/* ═══════ FIX: Canvas ID conflict ═══════ */
+// The sim tab div and canvas both can't have id="sim"
+// Fix by setting up properly on load
+window.addEventListener('DOMContentLoaded',()=>{
+  // Get the canvas (it's the first canvas in the document)
+  const allCanvas=document.querySelectorAll('canvas');
+  const simCanvas=allCanvas[0]; // the main sim canvas
+  render.cv=simCanvas;
+  render.ctx=simCanvas.getContext('2d');
+
+  // Re-init mouse events on the correct canvas
+  simCanvas.addEventListener('mousedown',e=>{cam.drag=true;cam.lx=e.clientX;cam.ly=e.clientY});
+  simCanvas.addEventListener('mousemove',e=>{if(!cam.drag)return;const dx=e.clientX-cam.lx,dy=e.clientY-cam.ly;cam.lx=e.clientX;cam.ly=e.clientY;cam.ox-=dx/(cam._s*cam.zoom);cam.oy+=dy/(cam._s*cam.zoom)});
+  simCanvas.addEventListener('mouseup',()=>cam.drag=false);
+  simCanvas.addEventListener('mouseleave',()=>cam.drag=false);
+  simCanvas.addEventListener('wheel',e=>{e.preventDefault();cam.zoomBy(e.deltaY<0?1.12:1/1.12)},{passive:false});
+  let ld=0;
+  simCanvas.addEventListener('touchstart',e=>{if(e.touches.length===1){cam.drag=true;cam.lx=e.touches[0].clientX;cam.ly=e.touches[0].clientY}if(e.touches.length===2){const dx=e.touches[1].clientX-e.touches[0].clientX,dy=e.touches[1].clientY-e.touches[0].clientY;ld=Math.sqrt(dx*dx+dy*dy)}});
+  simCanvas.addEventListener('touchmove',e=>{e.preventDefault();if(e.touches.length===1&&cam.drag){const dx=e.touches[0].clientX-cam.lx,dy=e.touches[0].clientY-cam.ly;cam.lx=e.touches[0].clientX;cam.ly=e.touches[0].clientY;cam.ox-=dx/(cam._s*cam.zoom);cam.oy+=dy/(cam._s*cam.zoom)}if(e.touches.length===2){const dx=e.touches[1].clientX-e.touches[0].clientX,dy=e.touches[1].clientY-e.touches[0].clientY;const d=Math.sqrt(dx*dx+dy*dy);if(ld>0)cam.zoomBy(d/ld);ld=d}},{passive:false});
+  simCanvas.addEventListener('touchend',()=>{cam.drag=false;ld=0});
+
+  render.resize();
+  cE=mkCh('chE','Energy vs Time','J');
+  cS=mkCh('chS','Speed vs Time','m/s');
+  cR=mkCh('chR','Revolutions vs Time','rev');
+  ui.buildQA();
+  ui.init();
+  cam.reset();
+  requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>
