@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP Physics FRQ: Rolling Cylinder & Sliding Block</title>
+<script>
+  const SIMULATION_TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+  
+  document.documentElement.classList.add("password-locked");
+  
+  const passwordGateStyle = document.createElement("style");
+  passwordGateStyle.textContent = `
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
+    #password-gate {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 9, 18, 0.88);
+      padding: 24px;
+      z-index: 9999;
+      visibility: visible;
+    }
+    #password-gate-card {
+      width: min(100%, 420px);
+      background: #101625;
+      border: 1px solid rgba(100,181,246,0.28);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      color: #e7edf7;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #password-gate-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    #password-gate-message {
+      font-size: 14px;
+      color: rgba(255,255,255,0.72);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    #password-gate-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(100,181,246,0.35);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    #password-gate-input:focus {
+      border-color: #64b5f6;
+      box-shadow: 0 0 0 3px rgba(100,181,246,0.16);
+    }
+    #password-gate-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .password-gate-button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #password-gate-cancel {
+      background: rgba(255,255,255,0.08);
+      color: #d9e2f2;
+    }
+    #password-gate-submit {
+      background: #64b5f6;
+      color: #08101c;
+    }
+  `;
+  document.head.appendChild(passwordGateStyle);
+  
+  function requestPassword(title, message) {
+    return new Promise(resolve => {
+      const existingGate = document.getElementById("password-gate");
+      if (existingGate) existingGate.remove();
+      
+      const gate = document.createElement("div");
+      gate.id = "password-gate";
+      gate.innerHTML = `
+        <div id="password-gate-card">
+          <div id="password-gate-title">${title}</div>
+          <div id="password-gate-message">${message}</div>
+          <input id="password-gate-input" type="password" autocomplete="current-password">
+          <div id="password-gate-actions">
+            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(gate);
+      
+      const input = document.getElementById("password-gate-input");
+      const cancelButton = document.getElementById("password-gate-cancel");
+      const submitButton = document.getElementById("password-gate-submit");
+      
+      const finish = value => {
+        gate.remove();
+        resolve(value);
+      };
+      
+      cancelButton.addEventListener("click", () => finish(null));
+      submitButton.addEventListener("click", () => finish(input.value));
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") finish(input.value);
+        if (event.key === "Escape") finish(null);
+      });
+      
+      window.requestAnimationFrame(() => input.focus());
+    });
+  }
+  
+  async function sha256Hex(value) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(value);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  
+  async function verifySimulationAccess() {
+    const userInput = await requestPassword("Simulation Access", "Password required to access this simulation:");
+    
+    if (userInput === null) {
+      window.location.replace("index.html");
+      return;
+    }
+    
+    const hashHex = await sha256Hex(userInput);
+    
+    if (hashHex === SIMULATION_TARGET_HASH) {
+      document.documentElement.classList.remove("password-locked");
+    } else {
+      alert("Incorrect password. Access denied.");
+      window.location.replace("index.html");
+    }
+  }
+  
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", verifySimulationAccess, { once: true });
+  } else {
+    verifySimulationAccess();
+  }
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+<style>
+  :root {
+    --bg-color: #0a0a1a;
+    --panel-bg: rgba(15, 20, 40, 0.85);
+    --accent: #00b4d8;
+    --accent-hover: #0096c7;
+    --text-primary: #e0e0e0;
+    --text-secondary: #888;
+    --cyl-color: #00b4d8;
+    --blk-color: #ff6b6b;
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Tab Bar */
+  #tab-bar {
+    display: flex;
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 100;
+  }
+  .tab {
+    flex: 1;
+    background: transparent;
+    color: var(--text-secondary);
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+  .tab:hover { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+  .tab.active {
+    color: var(--accent);
+    border-bottom: 2px solid var(--accent);
+    background: rgba(0, 180, 216, 0.1);
+  }
+
+  /* Content Areas */
+  .tab-content {
+    display: none;
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  .tab-content.active { display: flex; }
+
+  /* Panels */
+  aside {
+    width: 300px;
+    background: var(--panel-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    position: absolute;
+    top: 0; bottom: 0;
+    z-index: 10;
+    overflow-y: auto;
+  }
+  #left-panel { left: 0; }
+  #right-panel { right: 0; }
+  
+  .panel-collapsed#left-panel { transform: translateX(-100%); }
+  .panel-collapsed#right-panel { transform: translateX(100%); }
+
+  .panel-toggle {
+    position: absolute;
+    top: 10px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 20;
+  }
+  #left-panel .panel-toggle { right: 10px; }
+  #right-panel .panel-toggle { left: 10px; }
+
+  .panel-content { padding: 20px; }
+  h3 { font-size: 15px; margin-bottom: 15px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+
+  /* Controls */
+  fieldset {
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 15px;
+  }
+  legend { font-size: 12px; color: var(--text-secondary); padding: 0 5px; }
+  
+  .control-group { margin-bottom: 12px; }
+  label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 5px; }
+  .val-readout { color: var(--accent); font-family: monospace; }
+  
+  input[type=range] {
+    width: 100%; appearance: none; background: transparent;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    appearance: none; height: 16px; width: 16px; border-radius: 50%;
+    background: var(--accent); margin-top: -6px; cursor: pointer;
+  }
+
+  select {
+    width: 100%; padding: 8px; background: rgba(0,0,0,0.5); color: white;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; margin-bottom: 15px;
+  }
+
+  button.btn {
+    width: 100%; padding: 10px; border: none; border-radius: 4px;
+    background: var(--accent); color: #000; font-weight: bold; cursor: pointer;
+    margin-bottom: 8px; transition: opacity 0.2s;
+  }
+  button.btn:hover { opacity: 0.8; }
+  button.btn-secondary { background: rgba(255,255,255,0.1); color: white; }
+
+  .speed-row { display: flex; gap: 5px; margin-bottom: 15px; }
+  .speed-row button {
+    flex: 1; padding: 5px; background: rgba(255,255,255,0.1); border: none;
+    color: white; border-radius: 4px; cursor: pointer; font-size: 12px;
+  }
+  .speed-row button.active { background: var(--accent); color: #000; }
+
+  .toggles label { justify-content: flex-start; gap: 10px; cursor: pointer; }
+
+  /* Telemetry */
+  .telem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+  .telem-item {
+    background: rgba(255,255,255,0.05); padding: 8px 10px; border-radius: 6px;
+    display: flex; flex-direction: column;
+  }
+  .telem-label { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
+  .telem-val { font-size: 13px; font-family: monospace; color: white; word-break: break-all; }
+  
+  #derived-info {
+    background: rgba(0, 180, 216, 0.1); border: 1px solid rgba(0, 180, 216, 0.3);
+    padding: 10px; border-radius: 6px; font-size: 12px; line-height: 1.5;
+  }
+
+  /* Canvas */
+  #sim-canvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+  }
+  #hud-zoom {
+    position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+    background: rgba(255,255,255,0.9); padding: 5px 15px; border-radius: 15px;
+    font-size: 12px; z-index: 5; pointer-events: none; border: 1px solid rgba(0,0,0,0.1);
+    color: #1a202c; font-weight: bold;
+  }
+
+  /* Charts Tab */
+  #tab-charts { flex-direction: column; padding: 20px; overflow-y: auto; background: var(--bg-color); }
+  .chart-container {
+    background: var(--panel-bg); border-radius: 8px; padding: 15px;
+    margin-bottom: 20px; height: 300px; border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* 5E Inquiry Tab */
+  #tab-inquiry { flex-direction: column; align-items: center; padding: 40px 20px; overflow-y: auto; }
+  #inquiry-container { width: 100%; max-width: 800px; }
+  
+  #inquiry-progress { display: flex; justify-content: center; gap: 8px; margin-bottom: 30px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; background: rgba(255,255,255,0.2); transition: 0.3s; }
+  .dot.active { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+
+  #inquiry-card {
+    background: var(--panel-bg); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 30px; margin-bottom: 20px;
+  }
+  #q-category {
+    display: inline-block; background: rgba(0, 180, 216, 0.2); color: var(--accent);
+    padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;
+    text-transform: uppercase; margin-bottom: 15px;
+  }
+  #q-text { font-size: 18px; line-height: 1.5; margin-bottom: 20px; }
+  textarea {
+    width: 100%; background: rgba(0,0,0,0.3); color: white; border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px; padding: 15px; font-family: var(--font-main); font-size: 14px;
+    resize: vertical; min-height: 120px; margin-bottom: 15px;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  
+  details { background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; font-size: 13px; }
+  summary { cursor: pointer; color: var(--accent); font-weight: bold; }
+  #q-hint { margin-top: 10px; color: var(--text-secondary); line-height: 1.4; }
+
+  .inquiry-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+  .inquiry-nav button {
+    padding: 10px 20px; background: rgba(255,255,255,0.1); border: none;
+    color: white; border-radius: 6px; cursor: pointer; font-weight: bold;
+  }
+  .inquiry-nav button:hover:not(:disabled) { background: rgba(255,255,255,0.2); }
+  .inquiry-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  #q-counter { font-weight: bold; color: var(--text-secondary); }
+
+  .inquiry-export { display: flex; gap: 15px; justify-content: center; }
+  .inquiry-export button {
+    padding: 12px 24px; background: var(--accent); border: none; color: #000;
+    border-radius: 6px; cursor: pointer; font-weight: bold;
+  }
+
+  @keyframes flash { 0% { background-color: rgba(0, 180, 216, 0.5); } 100% { background-color: transparent; } }
+  .flash { animation: flash 0.5s ease-out; }
+</style>
+</head>
+<body>
+
+<nav id="tab-bar">
+  <button class="tab active" data-tab="sim">Simulation</button>
+  <button class="tab" data-tab="charts">Charts</button>
+  <button class="tab" data-tab="inquiry">5E Inquiry</button>
+</nav>
+
+<div id="tab-sim" class="tab-content active">
+  <aside id="left-panel">
+    <button id="toggle-left" class="panel-toggle">?</button>
+    <div class="panel-content">
+      <h3>Controls</h3>
+      
+      <label>Scenario</label>
+      <select id="scenario">
+        <option value="3">Race (Cylinder & Block)</option>
+        <option value="1">Cylinder Only (Rolling)</option>
+        <option value="2">Block Only (Sliding)</option>
+      </select>
+
+      <fieldset>
+        <legend>Environment</legend>
+        <div class="control-group">
+          <label>Incline Height (H??) <span class="val-readout" id="val-height">5.0 m</span></label>
+          <input type="range" id="slider-height" min="1" max="15" step="0.5" value="5">
+        </div>
+        <div class="control-group">
+          <label>Incline Angle (??) <span class="val-readout" id="val-angle">30??</span></label>
+          <input type="range" id="slider-angle" min="10" max="80" step="1" value="30">
+        </div>
+        <div class="control-group">
+          <label>Horizontal Track ??_k <span class="val-readout" id="val-muHorizontal">0.00</span></label>
+          <input type="range" id="slider-muHorizontal" min="0" max="1" step="0.05" value="0">
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Objects (Mass m??)</legend>
+        <div class="control-group">
+          <label>Mass <span class="val-readout" id="val-mass">2.0 kg</span></label>
+          <input type="range" id="slider-mass" min="0.5" max="10" step="0.5" value="2">
+        </div>
+        <div class="control-group">
+          <label>Cylinder Radius (R) <span class="val-readout" id="val-radius">0.5 m</span></label>
+          <input type="range" id="slider-radius" min="0.1" max="2" step="0.1" value="0.5">
+        </div>
+      </fieldset>
+
+      <div class="playback">
+        <button id="btn-start" class="btn">Release Objects</button>
+        <button id="btn-pause" class="btn btn-secondary">Pause</button>
+        <button id="btn-reset" class="btn btn-secondary">Reset</button>
+      </div>
+
+      <div class="speed-row">
+        <button data-speed="0.25">0.25x</button>
+        <button data-speed="0.5">0.5x</button>
+        <button data-speed="1" class="active">1x</button>
+        <button data-speed="2">2x</button>
+        <button data-speed="4">4x</button>
+      </div>
+
+      <div class="toggles">
+        <label><input type="checkbox" id="chk-force"> Show Forces</label>
+        <label><input type="checkbox" id="chk-vel" checked> Show Velocity</label>
+        <label><input type="checkbox" id="chk-trail" checked> Show Trails</label>
+        <label><input type="checkbox" id="chk-labels" checked> Show Labels</label>
+      </div>
+    </div>
+  </aside>
+
+  <div id="hud-zoom">Zoom: 100%</div>
+  <canvas id="sim-canvas"></canvas>
+
+  <aside id="right-panel">
+    <button id="toggle-right" class="panel-toggle">?</button>
+    <div class="panel-content">
+      <h3>Telemetry</h3>
+      
+      <div class="telem-grid">
+        <div class="telem-item"><span class="telem-label">Time (t)</span><span class="telem-val" id="tel-time">0.00 s</span></div>
+        <div class="telem-item"><span class="telem-label">Distance (d)</span><span class="telem-val" id="tel-dist">0.00 m</span></div>
+        
+        <div class="telem-item" id="ti-cyl-v"><span class="telem-label">Cyl Speed (v)</span><span class="telem-val" id="tel-cyl-v" style="color:var(--cyl-color)">0.00 m/s</span></div>
+        <div class="telem-item" id="ti-blk-v"><span class="telem-label">Blk Speed (v)</span><span class="telem-val" id="tel-blk-v" style="color:var(--blk-color)">0.00 m/s</span></div>
+        
+        <div class="telem-item" id="ti-cyl-e"><span class="telem-label">Cyl Total E</span><span class="telem-val" id="tel-cyl-e" style="color:var(--cyl-color)">0.00 J</span></div>
+        <div class="telem-item" id="ti-blk-e"><span class="telem-label">Blk Total E</span><span class="telem-val" id="tel-blk-e" style="color:var(--blk-color)">0.00 J</span></div>
+        
+        <div class="telem-item" id="ti-cyl-kel"><span class="telem-label">Cyl KE_lin</span><span class="telem-val" id="tel-cyl-kel">0.00 J</span></div>
+        <div class="telem-item" id="ti-cyl-ker"><span class="telem-label">Cyl KE_rot</span><span class="telem-val" id="tel-cyl-ker">0.00 J</span></div>
+
+        <div class="telem-item" id="ti-cyl-th"><span class="telem-label">Cyl Thermal</span><span class="telem-val" id="tel-cyl-th">0.00 J</span></div>
+        <div class="telem-item" id="ti-blk-th"><span class="telem-label">Blk Thermal</span><span class="telem-val" id="tel-blk-th">0.00 J</span></div>
+      </div>
+
+      <div id="derived-info">
+        <strong>Derived Constants:</strong><br>
+        Incline Length (L??): <span id="der-l0">10.00</span> m<br>
+        Block ??_k: <span id="der-muk">0.192</span><br>
+        Acceleration: <span id="der-acc">3.27</span> m/s??<br>
+        Expected Final v: <span id="der-vf">8.08</span> m/s
+      </div>
+    </div>
+  </aside>
+</div>
+
+<div id="tab-charts" class="tab-content">
+  <div class="chart-container"><canvas id="chart-energy"></canvas></div>
+  <div class="chart-container"><canvas id="chart-kinematics"></canvas></div>
+  <div class="chart-container"><canvas id="chart-position"></canvas></div>
+</div>
+
+<div id="tab-inquiry" class="tab-content">
+  <div id="inquiry-container">
+    <div id="inquiry-progress"></div>
+    <div id="inquiry-card">
+      <span id="q-category">Engage</span>
+      <p id="q-text">Question text goes here...</p>
+      <textarea id="q-answer" placeholder="Type your observations and reasoning here..."></textarea>
+      <details>
+        <summary>Hint / Rubric</summary>
+        <p id="q-hint">Hint text goes here...</p>
+      </details>
+    </div>
+    <div class="inquiry-nav">
+      <button id="btn-prev">? Previous</button>
+      <span id="q-counter">1 / 10</span>
+      <button id="btn-next">Next ?</button>
+    </div>
+    <div class="inquiry-export">
+      <button id="btn-csv">Export Data (CSV)</button>
+      <button id="btn-docx">Export Responses (.docx)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================================
+// UTILITIES & FORMATTING
+// ============================================================================
+function formatSci(val, sigFigs = 3) {
+  if (val === 0) return "0.00";
+  const absVal = Math.abs(val);
+  if (absVal >= 1e4 || absVal < 1e-3) {
+    const [mantissa, exponent] = val.toExponential(sigFigs - 1).split('e');
+    const superscripts = { '-': '?', '0': '?', '1': '?', '2': '?', '3': '?', '4': '?', '5': '?', '6': '?', '7': '?', '8': '?', '9': '?' };
+    const expStr = exponent.replace('+', '').split('').map(c => superscripts[c]).join('');
+    return `${mantissa} ? 10${expStr}`;
+  }
+  return val.toFixed(2);
+}
+
+function sciTickCallback(value) {
+  if (value === 0) return "0";
+  const absVal = Math.abs(value);
+  if (absVal >= 1e4 || absVal < 1e-3) {
+    const [mantissa, exponent] = value.toExponential(1).split('e');
+    const superscripts = { '-': '?', '0': '?', '1': '?', '2': '?', '3': '?', '4': '?', '5': '?', '6': '?', '7': '?', '8': '?', '9': '?' };
+    const expStr = exponent.replace('+', '').split('').map(c => superscripts[c]).join('');
+    return `${mantissa}?10${expStr}`;
+  }
+  return value.toString();
+}
+
+// ============================================================================
+// MODULE 1: PhysicsEngine
+// ============================================================================
+class PhysicsEngine {
+  constructor() {
+    this.g = 9.8;
+    this.time = 0;
+    this.running = false;
+    this.speedFactor = 1;
+    this.bodies = [];
+    this.params = { mass: 2, height: 5, angle: 30, radius: 0.5, scenario: '3', muHorizontal: 0.0 };
+    this.trails = { cylinder: [], block: [] };
+  }
+
+  setup(params) {
+    this.params = { ...this.params, ...params };
+    this.time = 0;
+    this.bodies = [];
+    this.trails = { cylinder: [], block: [] };
+    
+    const theta = this.params.angle * Math.PI / 180;
+    const L0 = this.params.height / Math.sin(theta);
+    const muk = (1/3) * Math.tan(theta); // Derived from FRQ: same final speed
+
+    if (this.params.scenario === '1' || this.params.scenario === '3') {
+      this.bodies.push({
+        id: 'cylinder', type: 'cylinder', mass: this.params.mass, R: this.params.radius,
+        x: 0, y: this.params.height, vx: 0, vy: 0, v: 0, omega: 0,
+        theta: theta, L0: L0, d: 0, rot: 0, thermal: 0,
+        I: 0.5 * this.params.mass * this.params.radius * this.params.radius
+      });
+    }
+    if (this.params.scenario === '2' || this.params.scenario === '3') {
+      this.bodies.push({
+        id: 'block', type: 'block', mass: this.params.mass,
+        x: 0, y: this.params.height, vx: 0, vy: 0, v: 0,
+        theta: theta, L0: L0, d: 0, muk: muk, thermal: 0
+      });
+    }
+  }
+
+  liveUpdate(params) {
+    this.params = { ...this.params, ...params };
+    // Recompute derived constants without resetting position
+    const theta = this.params.angle * Math.PI / 180;
+    const L0 = this.params.height / Math.sin(theta);
+    const muk = (1/3) * Math.tan(theta);
+    
+    this.bodies.forEach(b => {
+      b.mass = this.params.mass;
+      b.theta = theta;
+      b.L0 = L0;
+      if (b.type === 'cylinder') {
+        b.R = this.params.radius;
+        b.I = 0.5 * b.mass * b.R * b.R;
+      }
+      if (b.type === 'block') b.muk = muk;
+    });
+  }
+
+  step(dt) {
+    if (!this.running) return;
+    
+    // Cap dt and subdivide for stability
+    const maxDt = 0.05;
+    const actualDt = Math.min(dt, maxDt);
+    const subSteps = 4;
+    const sdt = actualDt / subSteps;
+
+    for (let i = 0; i < subSteps; i++) {
+      this.time += sdt;
+      
+      this.bodies.forEach(b => {
+        if (b.d < b.L0) {
+          // On the incline
+          let a = 0;
+          if (b.type === 'cylinder') {
+            // a = g*sin(theta) / (1 + I/mR^2) = g*sin(theta) / 1.5 = (2/3)g*sin(theta)
+            a = (2/3) * this.g * Math.sin(b.theta);
+          } else if (b.type === 'block') {
+            // a = g*(sin(theta) - muk*cos(theta)) = g*(sin - (1/3)tan*cos) = (2/3)g*sin(theta)
+            a = this.g * (Math.sin(b.theta) - b.muk * Math.cos(b.theta));
+            // Accumulate thermal energy (Work done by friction)
+            let fk = b.muk * b.mass * this.g * Math.cos(b.theta);
+            b.thermal += fk * b.v * sdt;
+          }
+          
+          b.v += a * sdt;
+          b.d += b.v * sdt;
+          
+          // Clamp to bottom of ramp
+          if (b.d > b.L0) {
+            let over = b.d - b.L0;
+            b.d = b.L0;
+            b.x = b.L0 * Math.cos(b.theta) + over;
+            b.y = 0;
+            b.vx = b.v;
+            b.vy = 0;
+            b.d += over; // total distance
+          } else {
+            b.x = b.d * Math.cos(b.theta);
+            b.y = this.params.height - b.d * Math.sin(b.theta);
+            b.vx = b.v * Math.cos(b.theta);
+            b.vy = -b.v * Math.sin(b.theta);
+          }
+          
+          if (b.type === 'cylinder') {
+            b.omega = b.v / b.R;
+            b.rot += b.omega * sdt;
+          }
+          
+        } else {
+          // On horizontal surface
+          b.y = 0;
+          b.vy = 0;
+          
+          if (b.v > 0) {
+            let a = -this.params.muHorizontal * this.g;
+            let fk = this.params.muHorizontal * b.mass * this.g;
+            let dE = fk * b.v * sdt;
+            let ke = 0.5 * b.mass * b.v * b.v;
+            if (dE > ke) dE = ke;
+            b.thermal += dE;
+            
+            if (b.type === 'cylinder') {
+              // Friction causes slipping: decelerates translation, torque increases rotation
+              let alpha = (2 * fk) / (b.mass * b.R);
+              b.omega += alpha * sdt;
+            }
+            
+            b.v += a * sdt;
+            if (b.v < 0) b.v = 0;
+          }
+          
+          b.vx = b.v;
+          b.x += b.vx * sdt;
+          b.d += b.vx * sdt;
+          
+          if (b.type === 'cylinder') {
+            if (b.omega === undefined) b.omega = b.vx / b.R;
+            if (b.v > 0) b.rot += b.omega * sdt;
+            else b.omega = 0;
+          }
+        }
+
+        // NaN Check
+        if (isNaN(b.x) || isNaN(b.y)) { b.x = 0; b.y = 0; b.v = 0; }
+      });
+    }
+
+    // Record trails
+    if (Math.random() < 0.2) {
+      this.bodies.forEach(b => {
+        this.trails[b.id].push({x: b.x, y: b.y});
+        if (this.trails[b.id].length > 500) this.trails[b.id].shift();
+      });
+    }
+  }
+
+  getState() {
+    const state = { time: this.time, bodies: {} };
+    this.bodies.forEach(b => {
+      let pe = b.mass * this.g * Math.max(0, b.y);
+      let ke_trans = 0.5 * b.mass * b.v * b.v;
+      let ke_rot = 0;
+      if (b.type === 'cylinder') {
+        let w = b.omega !== undefined ? b.omega : (b.v / b.R);
+        ke_rot = 0.5 * b.I * w * w;
+      }
+      
+      state.bodies[b.id] = {
+        x: b.x, y: b.y, vx: b.vx, vy: b.vy, v: b.v, d: b.d,
+        pe: pe, ke_trans: ke_trans, ke_rot: ke_rot, thermal: b.thermal,
+        total_e: pe + ke_trans + ke_rot + b.thermal,
+        rot: b.rot || 0
+      };
+    });
+    return state;
+  }
+}
+
+// ============================================================================
+// MODULE 2: Camera
+// ============================================================================
+const cam = {
+  ox: 0, oy: 0, zoom: 1, baseScale: 40, // pixels per meter
+  worldToScreen(wx, wy, cx, cy) {
+    return {
+      x: cx + (wx - this.ox) * this.baseScale * this.zoom,
+      y: cy - (wy - this.oy) * this.baseScale * this.zoom
+    };
+  },
+  screenToWorld(sx, sy, cx, cy) {
+    return {
+      x: this.ox + (sx - cx) / (this.baseScale * this.zoom),
+      y: this.oy - (sy - cy) / (this.baseScale * this.zoom)
+    };
+  },
+  zoomBy(factor, px, py, cx, cy) {
+    const wBefore = this.screenToWorld(px, py, cx, cy);
+    this.zoom = Math.max(0.1, Math.min(this.zoom * factor, 10));
+    const wAfter = this.screenToWorld(px, py, cx, cy);
+    this.ox += (wBefore.x - wAfter.x);
+    this.oy += (wBefore.y - wAfter.y);
+    document.getElementById('hud-zoom').innerText = `Zoom: ${Math.round(this.zoom * 100)}%`;
+  },
+  pan(dx, dy) {
+    this.ox -= dx / (this.baseScale * this.zoom);
+    this.oy += dy / (this.baseScale * this.zoom);
+  },
+  resetView(engine) {
+    this.zoom = 1;
+    const theta = engine.params.angle * Math.PI / 180;
+    const L0 = engine.params.height / Math.sin(theta);
+    const maxX = L0 * Math.cos(theta) + 5;
+    this.ox = maxX / 2;
+    this.oy = engine.params.height / 2;
+    document.getElementById('hud-zoom').innerText = `Zoom: 100%`;
+  }
+};
+
+// ============================================================================
+// MODULE 3: Renderer
+// ============================================================================
+class Renderer {
+  constructor(canvas, engine, camera) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.engine = engine;
+    this.cam = camera;
+    this.stars = Array.from({length: 200}, () => ({
+      x: Math.random(), y: Math.random(), r: Math.random()*1.5, a: Math.random()
+    }));
+    
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    
+    // Input bindings
+    let isDragging = false, lastX, lastY;
+    canvas.addEventListener('mousedown', e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+    window.addEventListener('mouseup', () => isDragging = false);
+    window.addEventListener('mousemove', e => {
+      if (isDragging) {
+        this.cam.pan(e.clientX - lastX, e.clientY - lastY);
+        lastX = e.clientX; lastY = e.clientY;
+      }
+    });
+    canvas.addEventListener('wheel', e => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      this.cam.zoomBy(e.deltaY > 0 ? 0.9 : 1.1, e.clientX - rect.left, e.clientY - rect.top, this.cx, this.cy);
+    });
+  }
+
+  resize() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+    this.cx = this.canvas.width / 2;
+    this.cy = this.canvas.height / 2 + 100; // Offset origin down
+  }
+
+  draw() {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    // Draw Dark Background & Starfield
+    ctx.fillStyle = '#0a0a1a';
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    
+    this.stars.forEach(s => {
+      ctx.beginPath();
+      ctx.arc(s.x * this.canvas.width, s.y * this.canvas.height, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${s.a * 0.5})`;
+      ctx.fill();
+    });
+
+    const gridSize = 40 * this.cam.zoom;
+    const offsetX = (this.cam.ox * this.cam.baseScale * this.cam.zoom) % gridSize;
+    const offsetY = (this.cam.oy * this.cam.baseScale * this.cam.zoom) % gridSize;
+    
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = -gridSize + offsetX; x < this.canvas.width + gridSize; x += gridSize) {
+      ctx.moveTo(x, 0); ctx.lineTo(x, this.canvas.height);
+    }
+    for (let y = -gridSize + offsetY; y < this.canvas.height + gridSize; y += gridSize) {
+      ctx.moveTo(0, y); ctx.lineTo(this.canvas.width, y);
+    }
+    ctx.stroke();
+    
+    // Major grid lines
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const majorGrid = gridSize * 5;
+    const majorOffsetX = (this.cam.ox * this.cam.baseScale * this.cam.zoom) % majorGrid;
+    const majorOffsetY = (this.cam.oy * this.cam.baseScale * this.cam.zoom) % majorGrid;
+    for (let x = -majorGrid + majorOffsetX; x < this.canvas.width + majorGrid; x += majorGrid) {
+      ctx.moveTo(x, 0); ctx.lineTo(x, this.canvas.height);
+    }
+    for (let y = -majorGrid + majorOffsetY; y < this.canvas.height + majorGrid; y += majorGrid) {
+      ctx.moveTo(0, y); ctx.lineTo(this.canvas.width, y);
+    }
+    ctx.stroke();
+
+    const theta = this.engine.params.angle * Math.PI / 180;
+    const H0 = this.engine.params.height;
+    const L0 = H0 / Math.sin(theta);
+    const rampBaseX = L0 * Math.cos(theta);
+
+    // Draw Environment (Ramp & Floor)
+    const pTop = this.cam.worldToScreen(0, H0, this.cx, this.cy);
+    const pBase = this.cam.worldToScreen(rampBaseX, 0, this.cx, this.cy);
+    const pOrigin = this.cam.worldToScreen(0, 0, this.cx, this.cy);
+    const pEnd = this.cam.worldToScreen(rampBaseX + 50, 0, this.cx, this.cy);
+
+    ctx.beginPath();
+    ctx.moveTo(pTop.x, pTop.y);
+    ctx.lineTo(pBase.x, pBase.y);
+    ctx.lineTo(pOrigin.x, pOrigin.y);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(100, 120, 150, 0.25)';
+    ctx.fill();
+    ctx.strokeStyle = '#8899aa';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(pBase.x, pBase.y);
+    ctx.lineTo(pEnd.x, pEnd.y);
+    ctx.strokeStyle = '#8899aa';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Draw Trails
+    if (document.getElementById('chk-trail').checked) {
+      Object.keys(this.engine.trails).forEach(id => {
+        const trail = this.engine.trails[id];
+        if (trail.length < 2) return;
+        ctx.beginPath();
+        const start = this.cam.worldToScreen(trail[0].x, trail[0].y, this.cx, this.cy);
+        ctx.moveTo(start.x, start.y);
+        trail.forEach(pt => {
+          const p = this.cam.worldToScreen(pt.x, pt.y, this.cx, this.cy);
+          ctx.lineTo(p.x, p.y);
+        });
+        ctx.strokeStyle = id === 'cylinder' ? 'rgba(0, 119, 182, 0.6)' : 'rgba(220, 53, 69, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+    }
+
+    // Draw Bodies
+    const showLabels = document.getElementById('chk-labels').checked;
+    const showVel = document.getElementById('chk-vel').checked;
+    const showForce = document.getElementById('chk-force').checked;
+
+    this.engine.bodies.forEach(b => {
+      // Offset block slightly if both are present to avoid complete overlap
+      let drawY = b.y;
+      if (b.type === 'block' && this.engine.params.scenario === '3') {
+        drawY += 0.2; // visual offset
+      }
+      
+      const p = this.cam.worldToScreen(b.x, drawY, this.cx, this.cy);
+      const rPx = b.R ? b.R * this.cam.baseScale * this.cam.zoom : 0.4 * this.cam.baseScale * this.cam.zoom;
+
+      if (b.type === 'cylinder') {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y - rPx, rPx, 0, Math.PI*2);
+        ctx.fillStyle = 'rgba(0, 180, 216, 0.8)';
+        ctx.fill();
+        ctx.strokeStyle = '#00b4d8';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Rotation line
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y - rPx);
+        ctx.lineTo(p.x + rPx * Math.cos(b.rot), p.y - rPx + rPx * Math.sin(b.rot));
+        ctx.strokeStyle = '#fff';
+        ctx.stroke();
+      } else if (b.type === 'block') {
+        const w = 0.8 * this.cam.baseScale * this.cam.zoom;
+        const h = 0.4 * this.cam.baseScale * this.cam.zoom;
+        
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        if (b.d < b.L0) ctx.rotate(b.theta);
+        
+        ctx.fillStyle = 'rgba(255, 107, 107, 0.8)';
+        ctx.fillRect(-w/2, -h, w, h);
+        ctx.strokeStyle = '#ff6b6b';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-w/2, -h, w, h);
+        ctx.restore();
+      }
+
+      // Vectors
+      if (showVel && b.v > 0.1) {
+        this.drawArrow(ctx, p.x, p.y - rPx, b.vx, -b.vy, '#6bff8e', 10);
+      }
+      if (showForce) {
+        if (b.d < b.L0) {
+          // Gravity
+          this.drawArrow(ctx, p.x, p.y - rPx, 0, 1, '#ffd93d', b.mass * 2);
+          // Normal
+          this.drawArrow(ctx, p.x, p.y - rPx, Math.sin(b.theta), -Math.cos(b.theta), '#ffd93d', b.mass * 2 * Math.cos(b.theta));
+        } else {
+          // Horizontal forces
+          this.drawArrow(ctx, p.x, p.y - rPx, 0, 1, '#ffd93d', b.mass * 2); // Gravity
+          this.drawArrow(ctx, p.x, p.y - rPx, 0, -1, '#ffd93d', b.mass * 2); // Normal
+          if (b.type === 'block' && this.engine.params.muHorizontal > 0 && b.v > 0) {
+            this.drawArrow(ctx, p.x, p.y - rPx, -1, 0, '#ff6b6b', b.mass * 2 * this.engine.params.muHorizontal); // Friction
+          }
+        }
+      }
+
+      // Labels
+      if (showLabels) {
+        ctx.fillStyle = '#1a202c';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.shadowColor = 'rgba(255,255,255,0.8)';
+        ctx.shadowBlur = 4;
+        ctx.fillText(`${b.type} (${b.mass}kg)`, p.x - 20, p.y - rPx - 15);
+        ctx.shadowBlur = 0;
+      }
+    });
+  }
+
+  drawArrow(ctx, x, y, vx, vy, color, scale) {
+    const len = Math.sqrt(vx*vx + vy*vy);
+    if (len === 0) return;
+    const nx = vx / len;
+    const ny = vy / len;
+    const endX = x + nx * scale * len;
+    const endY = y + ny * scale * len;
+    
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(endX, endY);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    ctx.beginPath();
+    ctx.moveTo(endX, endY);
+    ctx.lineTo(endX - nx*8 - ny*4, endY - ny*8 + nx*4);
+    ctx.lineTo(endX - nx*8 + ny*4, endY - ny*8 - nx*4);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+}
+
+// ============================================================================
+// MODULE 4: UIControls
+// ============================================================================
+class UIControls {
+  constructor(engine, renderer, logger) {
+    this.engine = engine;
+    this.renderer = renderer;
+    this.logger = logger;
+    this.wireSliders();
+    this.wirePlayback();
+    this.wireTabs();
+    this.wirePanels();
+  }
+
+  wireSliders() {
+    ['mass', 'height', 'angle', 'radius', 'muHorizontal'].forEach(id => {
+      const slider = document.getElementById(`slider-${id}`);
+      const readout = document.getElementById(`val-${id}`);
+      slider.addEventListener('input', e => {
+        const val = parseFloat(e.target.value);
+        let unit = id === 'angle' ? '�' : (id === 'mass' ? ' kg' : ' m');
+        readout.innerText = val + unit;
+        this.engine.liveUpdate({ [id]: val });
+      });
+    });
+    
+    document.getElementById('scenario').addEventListener('change', e => {
+      this.engine.setup({ scenario: e.target.value });
+      this.renderer.cam.resetView(this.engine);
+      this.logger.setupCharts();
+    });
+  }
+
+  wirePlayback() {
+    document.getElementById('btn-start').addEventListener('click', () => this.engine.running = true);
+    document.getElementById('btn-pause').addEventListener('click', () => this.engine.running = false);
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      this.engine.running = false;
+      this.engine.setup({});
+      this.logger.setupCharts();
+    });
+
+    document.querySelectorAll('.speed-row button').forEach(btn => {
+      btn.addEventListener('click', e => {
+        document.querySelectorAll('.speed-row button').forEach(b => b.classList.remove('active'));
+        e.target.classList.add('active');
+        this.engine.speedFactor = parseFloat(e.target.dataset.speed);
+      });
+    });
+  }
+
+  wireTabs() {
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', e => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById(`tab-${e.target.dataset.tab}`).classList.add('active');
+        if (e.target.dataset.tab === 'sim') this.renderer.resize();
+      });
+    });
+  }
+
+  wirePanels() {
+    document.getElementById('toggle-left').addEventListener('click', () => {
+      document.getElementById('left-panel').classList.toggle('panel-collapsed');
+      setTimeout(() => this.renderer.resize(), 300);
+    });
+    document.getElementById('toggle-right').addEventListener('click', () => {
+      document.getElementById('right-panel').classList.toggle('panel-collapsed');
+      setTimeout(() => this.renderer.resize(), 300);
+    });
+  }
+
+  updateTelemetry(state) {
+    const flash = (id, val) => {
+      const el = document.getElementById(id);
+      if (el && el.innerText !== val) {
+        el.innerText = val;
+        el.parentElement.classList.remove('flash');
+        void el.parentElement.offsetWidth;
+        el.parentElement.classList.add('flash');
+      }
+    };
+    
+    flash('tel-time', state.time.toFixed(2) + ' s');
+    
+    let cyl = state.bodies['cylinder'];
+    let blk = state.bodies['block'];
+
+    const setVisible = (id, visible) => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = visible ? 'flex' : 'none';
+    };
+
+    const isCyl = this.engine.params.scenario === '1' || this.engine.params.scenario === '3';
+    const isBlk = this.engine.params.scenario === '2' || this.engine.params.scenario === '3';
+
+    setVisible('ti-cyl-v', isCyl);
+    setVisible('ti-cyl-e', isCyl);
+    setVisible('ti-cyl-kel', isCyl);
+    setVisible('ti-cyl-ker', isCyl);
+    setVisible('ti-cyl-th', isCyl);
+
+    setVisible('ti-blk-v', isBlk);
+    setVisible('ti-blk-e', isBlk);
+    setVisible('ti-blk-th', isBlk);
+    
+    if (cyl) {
+      flash('tel-dist', formatSci(cyl.d) + ' m');
+      flash('tel-cyl-v', formatSci(cyl.v) + ' m/s');
+      flash('tel-cyl-e', formatSci(cyl.total_e) + ' J');
+      flash('tel-cyl-kel', formatSci(cyl.ke_trans) + ' J');
+      flash('tel-cyl-ker', formatSci(cyl.ke_rot) + ' J');
+      flash('tel-cyl-th', formatSci(cyl.thermal) + ' J');
+    }
+    if (blk) {
+      if (!cyl) flash('tel-dist', formatSci(blk.d) + ' m');
+      flash('tel-blk-v', formatSci(blk.v) + ' m/s');
+      flash('tel-blk-e', formatSci(blk.total_e) + ' J');
+      flash('tel-blk-th', formatSci(blk.thermal) + ' J');
+    }
+
+    const L0 = this.engine.params.height / Math.sin(this.engine.params.angle * Math.PI / 180);
+    document.getElementById('der-l0').innerText = L0.toFixed(2);
+    document.getElementById('der-muk').innerText = ((1/3) * Math.tan(this.engine.params.angle * Math.PI / 180)).toFixed(3);
+    const a = (2/3) * this.engine.g * Math.sin(this.engine.params.angle * Math.PI / 180);
+    document.getElementById('der-acc').innerText = a.toFixed(2);
+    document.getElementById('der-vf').innerText = Math.sqrt(2 * a * L0).toFixed(2);
+  }
+}
+
+// ============================================================================
+// MODULE 5: DataLogger
+// ============================================================================
+class DataLogger {
+  constructor(HISTORY_MAX = 5000) {
+    this.HISTORY_MAX = HISTORY_MAX;
+    this.data = [];
+    this.frameCount = 0;
+    this.charts = {};
+  }
+
+  log(state) {
+    this.data.push(state);
+    this.frameCount++;
+    if (this.data.length > this.HISTORY_MAX) {
+      this.downsample();
+    }
+  }
+
+  downsample() {
+    const half = Math.floor(this.data.length / 2);
+    const olderHalf = this.data.slice(0, half);
+    const newerHalf = this.data.slice(half);
+    const decimated = [];
+    for (let i = 0; i < olderHalf.length; i += 2) {
+      decimated.push(olderHalf[i]);
+    }
+    this.data = decimated.concat(newerHalf);
+  }
+
+  setupCharts() {
+    this.data = [];
+    const chartConfig = {
+      type: 'line',
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: false,
+        elements: { point: { radius: 0 }, line: { borderWidth: 2 } },
+        scales: {
+          x: { type: 'linear', min: 0, title: { display: true, color: '#fff', text: 'Time (s)' }, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#888' } },
+          y: { type: 'linear', title: { display: true, color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#888', callback: sciTickCallback } }
+        },
+        plugins: { legend: { labels: { color: '#e0e0e0' } } }
+      }
+    };
+
+    if (this.charts.energy) this.charts.energy.destroy();
+    if (this.charts.kinematics) this.charts.kinematics.destroy();
+    if (this.charts.position) this.charts.position.destroy();
+
+    const ctxE = document.getElementById('chart-energy').getContext('2d');
+    this.charts.energy = new Chart(ctxE, { ...chartConfig, data: { datasets: [] } });
+    this.charts.energy.options.scales.y.title.text = 'Energy (J)';
+
+    const ctxK = document.getElementById('chart-kinematics').getContext('2d');
+    this.charts.kinematics = new Chart(ctxK, { ...chartConfig, data: { datasets: [] } });
+    this.charts.kinematics.options.scales.y.title.text = 'Speed (m/s)';
+
+    const ctxP = document.getElementById('chart-position').getContext('2d');
+    this.charts.position = new Chart(ctxP, { ...chartConfig, data: { datasets: [] } });
+    this.charts.position.options.scales.y.title.text = 'Distance down ramp (m)';
+  }
+
+  updateCharts() {
+    if (this.data.length === 0) return;
+    
+    // Energy
+    let datasetsE = [];
+    let state0 = this.data[0];
+    if (state0.bodies['cylinder']) {
+      datasetsE.push({ label: 'Cyl KE_trans', data: this.data.map(d => ({x: d.time, y: d.bodies['cylinder'].ke_trans})), borderColor: '#00b4d8' });
+      datasetsE.push({ label: 'Cyl KE_rot', data: this.data.map(d => ({x: d.time, y: d.bodies['cylinder'].ke_rot})), borderColor: '#80d4f6' });
+      datasetsE.push({ label: 'Cyl PE', data: this.data.map(d => ({x: d.time, y: d.bodies['cylinder'].pe})), borderColor: '#ffd93d' });
+    }
+    if (state0.bodies['block']) {
+      datasetsE.push({ label: 'Blk KE', data: this.data.map(d => ({x: d.time, y: d.bodies['block'].ke_trans})), borderColor: '#ff6b6b' });
+      datasetsE.push({ label: 'Blk PE', data: this.data.map(d => ({x: d.time, y: d.bodies['block'].pe})), borderColor: '#ffb3b3' });
+      datasetsE.push({ label: 'Blk Thermal', data: this.data.map(d => ({x: d.time, y: d.bodies['block'].thermal})), borderColor: '#ffa500' });
+    }
+    this.charts.energy.data.datasets = datasetsE;
+    this.charts.energy.update();
+
+    // Kinematics
+    let datasetsK = [];
+    if (state0.bodies['cylinder']) datasetsK.push({ label: 'Cyl Speed', data: this.data.map(d => ({x: d.time, y: d.bodies['cylinder'].v})), borderColor: '#00b4d8' });
+    if (state0.bodies['block']) datasetsK.push({ label: 'Blk Speed', data: this.data.map(d => ({x: d.time, y: d.bodies['block'].v})), borderColor: '#ff6b6b' });
+    this.charts.kinematics.data.datasets = datasetsK;
+    this.charts.kinematics.update();
+
+    // Position
+    let datasetsP = [];
+    if (state0.bodies['cylinder']) datasetsP.push({ label: 'Cyl Distance', data: this.data.map(d => ({x: d.time, y: d.bodies['cylinder'].d})), borderColor: '#00b4d8' });
+    if (state0.bodies['block']) datasetsP.push({ label: 'Blk Distance', data: this.data.map(d => ({x: d.time, y: d.bodies['block'].d})), borderColor: '#ff6b6b' });
+    this.charts.position.data.datasets = datasetsP;
+    this.charts.position.update();
+  }
+}
+
+// ============================================================================
+// MODULE 6: ExportManager & 5E Inquiry
+// ============================================================================
+const QUESTIONS = [
+  { category: "Engage", text: "If a solid cylinder and a block of identical mass are released from rest at the top of an incline, which do you expect to reach the bottom first? Why?", hint: "Think about how energy is distributed. Where does potential energy go for a rolling object versus a sliding object?" },
+  { category: "Engage", text: "Identify real-world scenarios where an object rolls down a slope instead of sliding. How does rolling affect the object's final speed?", hint: "Examples: wheels, bowling balls. Consider if rolling uses up energy that would otherwise make the object go faster." },
+  { category: "Explore", text: "Set the scenario to 'Race'. Click 'Release Objects'. Observe their motion. Which object reaches the bottom first? Does the mass slider change this outcome?", hint: "The simulation shows one object consistently ahead. Try changing mass and see if the relative lead changes." },
+  { category: "Explore", text: "Look at the Energy chart. How does the distribution of kinetic energy differ between the cylinder and the block as they move down the ramp?", hint: "The block has translational KE and Thermal energy (from friction). The cylinder has translational KE and rotational KE." },
+  { category: "Explain", text: "Using conservation of energy, write down the energy equations for both the cylinder and the block at the bottom of the incline. Why do they reach the same final speed in this specific FRQ scenario?", hint: "For the cylinder: mgh = 1/2 mv^2 + 1/2 I w^2. For the block: mgh - W_friction = 1/2 mv^2. The friction coefficient mu_k = (1/3)tan(theta) is specifically chosen in the FRQ so they tie." },
+  { category: "Explain", text: "Explain how the coefficient of kinetic friction (mu_k) relates to the incline angle (theta) to ensure the block has the exact same acceleration as the cylinder.", hint: "Set a_cyl = (2/3)g sin(theta) equal to a_blk = g(sin(theta) - mu_k cos(theta)). Solve for mu_k." },
+  { category: "Elaborate", text: "What would happen if the cylinder were replaced by a hollow hoop of the same mass and radius? Would it tie, win, or lose against the block?", hint: "A hollow hoop has I = mr^2. This means more energy goes into rotation, leaving less for translation. It would have a lower acceleration: a = 1/2 g sin(theta)." },
+  { category: "Elaborate", text: "How would the results change if the incline were completely frictionless? Explain the new energy distribution for both objects.", hint: "Without friction, the block slides with a = g sin(theta). The cylinder also slides (does not roll) with a = g sin(theta), so they would tie and both have only translational KE." },
+  { category: "Evaluate", text: "Using the telemetry readout, calculate the theoretical final speed for an incline of height 5m and angle 30 degrees. Compare your calculation with the simulation's 'Expected Final v'.", hint: "L = 5/sin(30 degrees) = 10m. a = (2/3)(9.8)sin(30 degrees) = 3.267 m/s^2. v_f = sqrt(2aL)." },
+  { category: "Evaluate", text: "If the cylinder's radius is doubled but its mass remains the same, how does its translational acceleration change? Verify this by manipulating the simulation.", hint: "Look at the acceleration formula: a = g sin(theta) / (1 + I/mr^2). For a solid cylinder, I/mr^2 is always 1/2, regardless of r. The acceleration should not change." }
+];
+
+class ExportManager {
+  constructor(logger, questions) {
+    this.logger = logger;
+    this.questions = questions;
+    this.currentQ = 0;
+    this.answers = JSON.parse(localStorage.getItem('ap_physics_frq_answers')) || new Array(10).fill("");
+    
+    this.initUI();
+    this.updateQ();
+  }
+
+  initUI() {
+    const prev = document.getElementById('btn-prev');
+    const next = document.getElementById('btn-next');
+    const answerBox = document.getElementById('q-answer');
+    const dotsDiv = document.getElementById('inquiry-progress');
+    
+    for (let i=0; i<10; i++) {
+      let d = document.createElement('div');
+      d.className = 'dot';
+      dotsDiv.appendChild(d);
+    }
+
+    prev.addEventListener('click', () => { if (this.currentQ > 0) { this.currentQ--; this.updateQ(); } });
+    next.addEventListener('click', () => { if (this.currentQ < 9) { this.currentQ++; this.updateQ(); } });
+    
+    answerBox.addEventListener('input', e => {
+      this.answers[this.currentQ] = e.target.value;
+      localStorage.setItem('ap_physics_frq_answers', JSON.stringify(this.answers));
+    });
+
+    document.getElementById('btn-csv').addEventListener('click', () => this.exportCSV());
+    document.getElementById('btn-docx').addEventListener('click', () => this.exportDOCX());
+  }
+
+  updateQ() {
+    document.getElementById('q-category').innerText = this.questions[this.currentQ].category;
+    document.getElementById('q-text').innerText = this.questions[this.currentQ].text;
+    document.getElementById('q-hint').innerText = this.questions[this.currentQ].hint;
+    document.getElementById('q-answer').value = this.answers[this.currentQ];
+    document.getElementById('q-counter').innerText = `${this.currentQ + 1} / 10`;
+    
+    document.getElementById('btn-prev').disabled = this.currentQ === 0;
+    document.getElementById('btn-next').disabled = this.currentQ === 9;
+    
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((d, i) => {
+      d.classList.toggle('active', i === this.currentQ);
+    });
+  }
+
+  exportCSV() {
+    if (this.logger.data.length === 0) return alert("No data to export. Run the simulation first.");
+    let header = "Time (s), Cyl x (m), Cyl y (m), Cyl v (m/s), Cyl PE (J), Cyl KE_rot (J), Cyl Total E (J), Blk x (m), Blk y (m), Blk v (m/s), Blk PE (J), Blk Thermal (J), Blk Total E (J)\n";
+    let rows = this.logger.data.map(d => {
+      let c = d.bodies['cylinder'] || { x:0, y:0, v:0, pe:0, ke_rot:0, total_e:0 };
+      let b = d.bodies['block'] || { x:0, y:0, v:0, pe:0, thermal:0, total_e:0 };
+      return `${d.time.toFixed(3)},${c.x.toFixed(3)},${c.y.toFixed(3)},${c.v.toFixed(3)},${c.pe.toFixed(3)},${c.ke_rot.toFixed(3)},${c.total_e.toFixed(3)},${b.x.toFixed(3)},${b.y.toFixed(3)},${b.v.toFixed(3)},${b.pe.toFixed(3)},${b.thermal.toFixed(3)},${b.total_e.toFixed(3)}`;
+    }).join("\n");
+    
+    const blob = new Blob([header + rows], { type: "text/csv;charset=utf-8" });
+    saveAs(blob, "ap_physics_simulation_data.csv");
+  }
+
+  exportDOCX() {
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+    const children = [
+      new Paragraph({ text: "AP Physics FRQ Simulation - Student Responses", heading: HeadingLevel.HEADING_1 }),
+      new Paragraph({ text: `Generated on: ${new Date().toLocaleDateString()}` }),
+      new Paragraph({ text: "" })
+    ];
+
+    this.questions.forEach((q, i) => {
+      children.push(new Paragraph({ children: [new TextRun({ text: `Q${i+1} (${q.category}): `, bold: true }), new TextRun({ text: q.text })] }));
+      children.push(new Paragraph({ text: "Answer:", bold: true }));
+      children.push(new Paragraph({ text: this.answers[i] || "[No answer provided]" }));
+      children.push(new Paragraph({ text: "" }));
+    });
+
+    const doc = new Document({ sections: [{ properties: {}, children }] });
+    Packer.toBlob(doc).then(blob => saveAs(blob, "AP_Physics_Responses.docx"));
+  }
+}
+
+// ============================================================================
+// MAIN LOOP
+// ============================================================================
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('sim-canvas');
+  const engine = new PhysicsEngine();
+  const renderer = new Renderer(canvas, engine, cam);
+  const logger = new DataLogger();
+  const ui = new UIControls(engine, renderer, logger);
+  const exporter = new ExportManager(logger, QUESTIONS);
+
+  engine.setup({});
+  logger.setupCharts();
+  cam.resetView(engine);
+
+  let lastTime = performance.now();
+  function mainLoop(timestamp) {
+    const rawDt = Math.min((timestamp - lastTime) / 1000, 0.05);
+    lastTime = timestamp;
+    
+    if (engine.running) {
+      const scaledDt = rawDt * engine.speedFactor;
+      engine.step(scaledDt);
+      logger.log(engine.getState());
+      if (logger.frameCount % 4 === 0) logger.updateCharts();
+    }
+    
+    renderer.draw();
+    ui.updateTelemetry(engine.getState());
+    requestAnimationFrame(mainLoop);
+  }
+  requestAnimationFrame(mainLoop);
+});
+</script>
+</body>
+</html>
