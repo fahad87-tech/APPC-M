@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Spinning Ball — Rolling Physics Simulation</title>
+<script>
+  const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+  document.documentElement.classList.add("password-locked");
+
+  const passwordGateStyle = document.createElement("style");
+  passwordGateStyle.textContent = `
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    #password-gate {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 9, 18, 0.88);
+      padding: 24px;
+      z-index: 9999;
+    }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card {
+      width: min(100%, 420px);
+      background: #101625;
+      border: 1px solid rgba(100,181,246,0.28);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      color: #e7edf7;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #password-gate-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    #password-gate-message {
+      font-size: 14px;
+      color: rgba(255,255,255,0.72);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    #password-gate-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(100,181,246,0.35);
+      background: rgba(255,255,255,0.05);
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    #password-gate-input:focus {
+      border-color: #64b5f6;
+      box-shadow: 0 0 0 3px rgba(100,181,246,0.16);
+    }
+    #password-gate-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .password-gate-button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #password-gate-cancel {
+      background: rgba(255,255,255,0.08);
+      color: #d9e2f2;
+    }
+    #password-gate-submit {
+      background: #64b5f6;
+      color: #08101c;
+    }
+  `;
+  document.head.appendChild(passwordGateStyle);
+
+  function requestPassword(title, message) {
+    return new Promise(resolve => {
+      const existingGate = document.getElementById("password-gate");
+      if (existingGate) existingGate.remove();
+
+      const gate = document.createElement("div");
+      gate.id = "password-gate";
+      gate.innerHTML = `
+        <div id="password-gate-card">
+          <div id="password-gate-title">${title}</div>
+          <div id="password-gate-message">${message}</div>
+          <input id="password-gate-input" type="password" autocomplete="current-password">
+          <div id="password-gate-actions">
+            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(gate);
+
+      const input = document.getElementById("password-gate-input");
+      const cancelButton = document.getElementById("password-gate-cancel");
+      const submitButton = document.getElementById("password-gate-submit");
+
+      const finish = value => {
+        gate.remove();
+        resolve(value);
+      };
+
+      cancelButton.addEventListener("click", () => finish(null));
+      submitButton.addEventListener("click", () => finish(input.value));
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") finish(input.value);
+        if (event.key === "Escape") finish(null);
+      });
+
+      window.requestAnimationFrame(() => input.focus());
+    });
+  }
+
+  async function verifyPageAccess() {
+    const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+
+    if (userInput === null) {
+      window.location.href = "../index.html";
+      return;
+    }
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userInput);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+    if (hashHex === TARGET_HASH) {
+      document.documentElement.classList.remove("password-locked");
+    } else {
+      alert("Incorrect password. Access denied.");
+      window.location.href = "../index.html";
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+  } else {
+    verifyPageAccess();
+  }
+</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0e1a;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #app {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 14px;
+    gap: 10px;
+    min-width: 900px;
+  }
+
+  /* ── Title ── */
+  #title {
+    text-align: center;
+    font-size: 17px;
+    font-weight: bold;
+    letter-spacing: 5px;
+    color: rgba(255,255,255,0.61);
+    padding: 4px 0;
+  }
+
+  /* ── Control Panel ── */
+  #controls {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    box-shadow: 0 3px 24px rgba(0,0,0,0.5);
+  }
+
+  .slider-grid {
+    display: grid;
+    grid-template-columns: 110px 160px 55px;
+    row-gap: 6px;
+    column-gap: 8px;
+    align-items: center;
+  }
+
+  .slider-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.55);
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 160px;
+    height: 6px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 3px;
+    outline: none;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #64b5f6;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { background: #90caf9; }
+
+  .slider-val {
+    font-family: 'Consolas', monospace;
+    font-size: 10px;
+    color: #90caf9;
+    min-width: 45px;
+  }
+
+  .vdiv {
+    width: 1px;
+    align-self: stretch;
+    background: rgba(255,255,255,0.1);
+    margin: 0 4px;
+  }
+
+  /* ── Checkboxes ── */
+  .cb-group { display: flex; flex-direction: column; gap: 3px; }
+  .cb-group-title {
+    font-size: 11px;
+    font-weight: bold;
+    color: rgba(255,255,255,0.42);
+    margin-bottom: 2px;
+  }
+  .cb-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #b0b0b0; cursor: pointer; }
+  .cb-row input[type=checkbox] { accent-color: #7c4dff; width: 14px; height: 14px; cursor: pointer; }
+
+  /* ── Buttons ── */
+  .btn-group { display: flex; flex-direction: column; gap: 6px; }
+
+  button {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.15s;
+    min-width: 160px;
+  }
+  button:disabled { background: rgba(255,255,255,0.06) !important; color: rgba(255,255,255,0.25); cursor: default; }
+
+  #dropBtn  { background: #1b5e20; } #dropBtn:hover:not(:disabled)  { background: #2e7d32; }
+  #pauseBtn { background: #e65100; } #pauseBtn:hover:not(:disabled) { background: #f57c00; }
+  #resetBtn { background: #b71c1c; } #resetBtn:hover:not(:disabled) { background: #d32f2f; }
+
+  .slow-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #b0b0b0; cursor: pointer; }
+  .slow-row input { accent-color: #7c4dff; }
+
+  /* ── Main layout ── */
+  #main {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+  }
+
+  canvas { display: block; border-radius: 10px; }
+
+  #simCanvas  { flex: 5; min-width: 0; }
+  #graphCanvas { flex: 3; min-width: 0; }
+
+  /* ── Equations panel ── */
+  #eqPanel {
+    width: 230px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  #eqCanvas { width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="title">SPINNING &nbsp; BALL &nbsp; DROPPED &nbsp; ON &nbsp; SURFACE</div>
+
+  <!-- Controls -->
+  <div id="controls">
+
+    <div class="slider-grid" id="sliderGrid">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="vdiv"></div>
+
+    <div class="cb-group">
+      <div class="cb-group-title">Show Vectors</div>
+      <label class="cb-row"><input type="checkbox" id="cb_vcm"  checked> v_cm (green)</label>
+      <label class="cb-row"><input type="checkbox" id="cb_rw"   checked> Rω (purple)</label>
+      <label class="cb-row"><input type="checkbox" id="cb_fric" checked> Friction (gold)</label>
+      <label class="cb-row"><input type="checkbox" id="cb_wt"        > Weight (gray)</label>
+      <label class="cb-row"><input type="checkbox" id="cb_norm"      > Normal (cyan)</label>
+    </div>
+
+    <div class="vdiv"></div>
+
+    <div class="btn-group">
+      <button id="dropBtn">▶  DROP BALL</button>
+      <button id="pauseBtn" disabled>⏸  PAUSE</button>
+      <button id="resetBtn">↺  RESET</button>
+      <label class="slow-row"><input type="checkbox" id="slowCb"> Slow-motion (0.12×)</label>
+    </div>
+
+  </div>
+
+  <!-- Main area -->
+  <div id="main">
+    <canvas id="simCanvas"></canvas>
+    <canvas id="graphCanvas"></canvas>
+    <div id="eqPanel"><canvas id="eqCanvas"></canvas></div>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+// ═══════════════════════════ PHYSICS ═══════════════════════════
+
+class BallPhysics {
+  constructor() {
+    this.R       = 40;
+    this.mass    = 1;
+    this.g       = 400;
+    this.mu      = 0.35;
+    this.omega_0 = 15;
+    this.reset();
+  }
+
+  reset() {
+    this.t = 0; this.omega = this.omega_0;
+    this.v_cm = 0; this.theta = 0; this.x_cm = 0;
+    this.phase = "hovering";
+    this.drop_start_y = 0; this.y_cm = 0; this.y_target = 0;
+    this.drop_v = 0; this.hover_elapsed = 0; this.drop_x = 0;
+    this.recalc_analytical();
+    this.hist_t = []; this.hist_v = []; this.hist_omega = [];
+    this.hist_Romega = []; this.hist_vcontact = [];
+  }
+
+  recalc_analytical() {
+    const d = 7 * this.mu * this.g;
+    if (d < 1e-9) {
+      this.t_r = Infinity; this.v_r = 0; this.omega_r = 0;
+    } else {
+      this.t_r    = 2 * this.R * this.omega_0 / d;
+      this.v_r    = 2 * this.R * this.omega_0 / 7;
+      this.omega_r = 2 * this.omega_0 / 7;
+    }
+  }
+
+  step(dt) {
+    if (this.phase === "hovering") {
+      this.theta += this.omega * dt;
+      this.hover_elapsed += dt;
+      if (this.hover_elapsed >= 1.8) { this.phase = "falling"; this.drop_v = 0; }
+      return;
+    }
+    if (this.phase === "falling") {
+      this.drop_v += 650 * dt;
+      this.y_cm   += this.drop_v * dt;
+      this.theta  += this.omega * dt;
+      if (this.y_cm >= this.y_target) {
+        this.y_cm = this.y_target; this.drop_v = 0;
+        this.phase = "slipping"; this.t = 0; this.v_cm = 0;
+      }
+      return;
+    }
+    if (this.phase === "slipping") {
+      this.t     += dt;
+      this.v_cm  += this.mu * this.g * dt;
+      this.omega += (-5 * this.mu * this.g / (2 * this.R)) * dt;
+      if (this.omega < 0) this.omega = 0;
+      if (this.v_cm >= this.R * this.omega) {
+        this.v_cm  = this.v_r;
+        this.omega = this.omega_r;
+        this.t     = this.t_r;
+        this.phase = "rolling";
+      }
+    }
+    if (this.phase === "rolling") {
+      if (this.t < this.t_r) this.t = this.t_r;
+      this.t += dt;
+    }
+    this.x_cm  += this.v_cm * dt;
+    this.theta += this.omega * dt;
+    const Rw = this.R * this.omega;
+    const vc = this.v_cm - Rw;
+    this.hist_t.push(this.t);
+    this.hist_v.push(this.v_cm);
+    this.hist_omega.push(this.omega);
+    this.hist_Romega.push(Rw);
+    this.hist_vcontact.push(vc);
+  }
+}
+
+// ═══════════════════════════ GLOBALS ═══════════════════════════
+
+const phy    = new BallPhysics();
+let running  = false;
+let paused   = false;
+let slow     = false;
+let lastTime = 0;
+let sparks   = [];
+
+const simCv   = document.getElementById("simCanvas");
+const graphCv = document.getElementById("graphCanvas");
+const eqCv    = document.getElementById("eqCanvas");
+const sc      = simCv.getContext("2d");
+const gc      = graphCv.getContext("2d");
+const ec      = eqCv.getContext("2d");
+
+let show_vcm = true, show_rw = true, show_fric = true,
+    show_wt  = false, show_norm = false;
+
+// ═══════════════════════════ RESIZE ═══════════════════════════
+
+function resize() {
+  const app  = document.getElementById("app");
+  const ctrl = document.getElementById("controls");
+  const main = document.getElementById("main");
+
+  const appW  = app.clientWidth;
+  const ctrlH = ctrl.offsetHeight;
+  const titleH = document.getElementById("title").offsetHeight;
+  const availH = window.innerHeight - titleH - ctrlH - 50;
+  const mainH  = Math.max(380, availH);
+
+  main.style.height = mainH + "px";
+
+  const eqW   = 230;
+  const gap   = 10 * 3;
+  const rest  = appW - eqW - gap;
+  const simW  = Math.round(rest * 5 / 8);
+  const grW   = rest - simW;
+
+  simCv.width   = simW;   simCv.height  = mainH;
+  graphCv.width = grW;    graphCv.height = mainH;
+  eqCv.width    = eqW;    eqCv.height   = mainH;
+
+  document.getElementById("eqPanel").style.height = mainH + "px";
+
+  drawAll();
+}
+
+window.addEventListener("resize", resize);
+
+// ═══════════════════════════ SLIDERS ═══════════════════════════
+
+const SLIDERS = [
+  { label: "ω₀ (rad/s)", attr: "omega_0", lo: 1,   hi: 50,  dflt: 15,  div: 1   },
+  { label: "μ (friction)",attr: "mu",      lo: 5,   hi: 95,  dflt: 35,  div: 100 },
+  { label: "R (radius)",  attr: "R",       lo: 20,  hi: 80,  dflt: 40,  div: 1   },
+  { label: "g (gravity)", attr: "g",       lo: 100, hi: 900, dflt: 400, div: 1   },
+];
+
+function buildSliders() {
+  const grid = document.getElementById("sliderGrid");
+  grid.innerHTML = "";
+  SLIDERS.forEach(s => {
+    const lbl = document.createElement("span");
+    lbl.className = "slider-label";
+    lbl.textContent = s.label;
+
+    const inp = document.createElement("input");
+    inp.type  = "range";
+    inp.min   = s.lo; inp.max = s.hi; inp.value = s.dflt;
+    inp.id    = "sl_" + s.attr;
+
+    const val = document.createElement("span");
+    val.className = "slider-val";
+    val.id = "sv_" + s.attr;
+    const disp = s.dflt / s.div;
+    val.textContent = s.div > 1 ? disp.toFixed(2) : String(s.dflt);
+
+    inp.addEventListener("input", () => {
+      const v = parseFloat(inp.value) / s.div;
+      val.textContent = s.div > 1 ? v.toFixed(2) : inp.value;
+      phy[s.attr] = v;
+      phy.recalc_analytical();
+      drawEq();
+    });
+
+    grid.appendChild(lbl);
+    grid.appendChild(inp);
+    grid.appendChild(val);
+  });
+}
+
+// ═══════════════════════════ HELPERS ═══════════════════════════
+
+function groundY() { return Math.floor(simCv.height * 0.72); }
+
+function arrow(ctx, x1, y1, x2, y2, color, width, label) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const ln = Math.hypot(dx, dy);
+  if (ln < 2) return;
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = width;
+  ctx.lineCap     = "round";
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const ang = Math.atan2(dy, dx);
+  const hl  = Math.min(14, ln * 0.35);
+  for (const s of [1, -1]) {
+    const ha = ang + Math.PI + s * 0.4;
+    ctx.beginPath(); ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 + hl * Math.cos(ha), y2 + hl * Math.sin(ha)); ctx.stroke();
+  }
+  if (label) {
+    ctx.font      = "bold 9px Segoe UI";
+    ctx.fillStyle = color;
+    ctx.fillText(label, (x1 + x2) / 2 - 25, Math.min(y1, y2) - 8);
+  }
+}
+
+function omegaArc(ctx, cx, cy, R, omega) {
+  const ar   = R * 1.35;
+  const span = Math.min(300, omega * 18);
+  ctx.strokeStyle = "rgba(255,171,64,0.63)";
+  ctx.lineWidth   = 2.2;
+  ctx.lineCap     = "round";
+  ctx.beginPath();
+  ctx.arc(cx, cy, ar, -Math.PI / 2, -Math.PI / 2 + span * Math.PI / 180, false);
+  ctx.stroke();
+  const endRad  = -Math.PI / 2 + span * Math.PI / 180;
+  const tx_ = cx + ar * Math.cos(endRad);
+  const ty_ = cy + ar * Math.sin(endRad);
+  const tdx = -Math.sin(endRad), tdy = Math.cos(endRad);
+  for (const s of [0.4, -0.4]) {
+    const hx = tx_ - 10 * (tdx * Math.cos(s) - tdy * Math.sin(s));
+    const hy = ty_ - 10 * (tdx * Math.sin(s) + tdy * Math.cos(s));
+    ctx.beginPath(); ctx.moveTo(tx_, ty_); ctx.lineTo(hx, hy); ctx.stroke();
+  }
+  const midRad = -Math.PI / 2 + (span / 2) * Math.PI / 180;
+  const lx = cx + (ar + 16) * Math.cos(midRad);
+  const ly = cy + (ar + 16) * Math.sin(midRad);
+  ctx.font      = "bold 12px Segoe UI";
+  ctx.fillStyle = "#ffab40";
+  ctx.fillText("ω", lx - 4, ly + 5);
+}
+
+// ═══════════════════════════ DRAW SIMULATION ═══════════════════════════
+
+function drawSim() {
+  const w = simCv.width, h = simCv.height;
+  const gy = groundY();
+  const R  = phy.R;
+  sc.clearRect(0, 0, w, h);
+
+  // Sky
+  const sky = sc.createLinearGradient(0, 0, 0, gy);
+  sky.addColorStop(0, "#0b1120"); sky.addColorStop(1, "#141e30");
+  sc.fillStyle = sky; sc.fillRect(0, 0, w, gy);
+
+  // Ground
+  const gnd = sc.createLinearGradient(0, gy, 0, h);
+  gnd.addColorStop(0, "#1a1a2e"); gnd.addColorStop(1, "#0f0f1a");
+  sc.fillStyle = gnd; sc.fillRect(0, gy, w, h - gy);
+
+  // Ground glow lines
+  for (let i = 0; i < 5; i++) {
+    const a = Math.max(5, 80 - i * 16);
+    sc.strokeStyle = `rgba(100,200,255,${(a/255).toFixed(2)})`;
+    sc.lineWidth   = 2.5 - i * 0.4;
+    sc.beginPath(); sc.moveTo(0, gy + i); sc.lineTo(w, gy + i); sc.stroke();
+  }
+
+  // Hatching
+  sc.strokeStyle = "rgba(255,255,255,0.07)";
+  sc.lineWidth   = 1;
+  for (let xi = 0; xi < w + 28; xi += 28) {
+    sc.beginPath(); sc.moveTo(xi, gy + 3); sc.lineTo(xi - 18, gy + 24); sc.stroke();
+  }
+
+  // Ball position
+  const drop_x  = w * 0.18;
+  const rest_y  = gy - R;
+
+  let bx, by;
+  if (phy.phase === "hovering") {
+    bx = drop_x; by = rest_y - 180;
+  } else if (phy.phase === "falling") {
+    bx = drop_x; by = phy.y_cm;
+  } else {
+    bx = drop_x + phy.x_cm; by = rest_y;
+  }
+
+  // Drop marker
+  if ((phy.phase === "slipping" || phy.phase === "rolling") && phy.x_cm > 5) {
+    sc.setLineDash([4, 4]);
+    sc.strokeStyle = "rgba(255,255,255,0.12)";
+    sc.lineWidth   = 1;
+    sc.beginPath(); sc.moveTo(drop_x, gy - 50); sc.lineTo(drop_x, gy); sc.stroke();
+    sc.setLineDash([]);
+    sc.font      = "8px Segoe UI";
+    sc.fillStyle = "rgba(255,255,255,0.25)";
+    sc.fillText("drop", drop_x + 4, gy - 54);
+
+    if (bx > drop_x && bx < w + 200) {
+      const ruler_y  = gy + 28;
+      const draw_bx  = Math.min(bx, w - 5);
+      sc.strokeStyle = "rgba(255,255,255,0.15)";
+      sc.lineWidth   = 1;
+      sc.beginPath(); sc.moveTo(drop_x, ruler_y); sc.lineTo(draw_bx, ruler_y); sc.stroke();
+      sc.beginPath(); sc.moveTo(drop_x, ruler_y - 4); sc.lineTo(drop_x, ruler_y + 4); sc.stroke();
+      sc.beginPath(); sc.moveTo(draw_bx, ruler_y - 4); sc.lineTo(draw_bx, ruler_y + 4); sc.stroke();
+      sc.font      = "8px Segoe UI";
+      sc.fillStyle = "rgba(255,255,255,0.22)";
+      sc.fillText(`${phy.x_cm.toFixed(0)} px`, (drop_x + draw_bx) / 2 - 20, ruler_y - 6);
+    }
+  }
+
+  // Off-screen indicator
+  if (bx > w + R) {
+    sc.font      = "bold 12px Segoe UI";
+    sc.fillStyle = "#42a5f5";
+    sc.fillText(`→ ball at x = ${phy.x_cm.toFixed(0)} px →`, w - 220, rest_y);
+    drawHUD(); return;
+  }
+
+  // Shadow
+  let st;
+  if (phy.phase === "hovering" || phy.phase === "falling") {
+    const dist = Math.max(1, rest_y - by);
+    st = Math.max(0.1, 1 - dist / 250);
+  } else { st = 1; }
+  sc.fillStyle = `rgba(0,0,0,${(0.31 * st).toFixed(2)})`;
+  sc.beginPath();
+  sc.ellipse(bx, gy + 3, R * 1.5 * st, 4.5 * st, 0, 0, Math.PI * 2);
+  sc.fill();
+
+  // Ball colours
+  const bg = sc.createRadialGradient(bx - R * 0.3, by - R * 0.3, R * 0.1, bx, by, R * 1.6);
+  let glowC;
+  if (phy.phase === "hovering" || phy.phase === "falling") {
+    bg.addColorStop(0, "#fff59d"); bg.addColorStop(0.4, "#fdd835"); bg.addColorStop(1, "#f9a825");
+    glowC = "rgba(253,216,53,0.16)";
+  } else if (phy.phase === "slipping") {
+    bg.addColorStop(0, "#ff8a65"); bg.addColorStop(0.4, "#e53935"); bg.addColorStop(1, "#7f0000");
+    glowC = "rgba(255,60,30,0.2)";
+  } else {
+    bg.addColorStop(0, "#81d4fa"); bg.addColorStop(0.4, "#1e88e5"); bg.addColorStop(1, "#0d47a1");
+    glowC = "rgba(30,136,229,0.16)";
+  }
+
+  // Outer glow
+  const glow = sc.createRadialGradient(bx, by, R * 0.4, bx, by, R * 2);
+  glow.addColorStop(0, glowC); glow.addColorStop(1, "rgba(0,0,0,0)");
+  sc.fillStyle = glow;
+  sc.beginPath(); sc.arc(bx, by, R * 2, 0, Math.PI * 2); sc.fill();
+
+  // Ball body
+  sc.fillStyle   = bg;
+  sc.strokeStyle = "rgba(255,255,255,0.2)";
+  sc.lineWidth   = 1.5;
+  sc.beginPath(); sc.arc(bx, by, R, 0, Math.PI * 2); sc.fill(); sc.stroke();
+
+  // Spokes
+  sc.strokeStyle = "rgba(255,255,255,0.2)";
+  sc.lineWidth   = 1.2;
+  for (let i = 0; i < 8; i++) {
+    const a  = phy.theta + i * (Math.PI / 4);
+    const sx = bx + R * 0.82 * Math.cos(a);
+    const sy = by + R * 0.82 * Math.sin(a);
+    sc.beginPath(); sc.moveTo(bx, by); sc.lineTo(sx, sy); sc.stroke();
+  }
+
+  // Thick radius line
+  const ra = phy.theta;
+  const rx = bx + R * 0.9 * Math.cos(ra);
+  const ry = by + R * 0.9 * Math.sin(ra);
+  sc.strokeStyle = "rgba(255,255,255,0.55)";
+  sc.lineWidth   = 2.2;
+  sc.beginPath(); sc.moveTo(bx, by); sc.lineTo(rx, ry); sc.stroke();
+  sc.font      = "bold 10px Segoe UI";
+  sc.fillStyle = "rgba(255,255,255,0.43)";
+  sc.fillText("r", bx + R * 0.45 * Math.cos(ra) + 6, by + R * 0.45 * Math.sin(ra) - 6);
+
+  // Centre dot
+  sc.fillStyle = "rgba(255,255,255,0.63)";
+  sc.beginPath(); sc.arc(bx, by, 3.5, 0, Math.PI * 2); sc.fill();
+
+  // Omega arc
+  if (phy.omega > 0.2) omegaArc(sc, bx, by, R, phy.omega);
+
+  // Contact point
+  if (phy.phase === "slipping" || phy.phase === "rolling") {
+    const cpx = bx, cpy = by + R;
+    const cpc = phy.phase === "slipping" ? "#ff1744" : "#00e676";
+    const cg2  = sc.createRadialGradient(cpx, cpy, 0, cpx, cpy, 12);
+    const rgb  = phy.phase === "slipping" ? "255,23,68" : "0,230,118";
+    cg2.addColorStop(0, `rgba(${rgb},0.35)`);
+    cg2.addColorStop(1, "rgba(0,0,0,0)");
+    sc.fillStyle = cg2;
+    sc.beginPath(); sc.arc(cpx, cpy, 12, 0, Math.PI * 2); sc.fill();
+    sc.fillStyle = cpc;
+    sc.beginPath(); sc.arc(cpx, cpy, 4, 0, Math.PI * 2); sc.fill();
+  }
+
+  // Vectors
+  if (phy.phase === "slipping" || phy.phase === "rolling") {
+    const scale = 1.8;
+    const Rw    = phy.R * phy.omega;
+    if (show_vcm && phy.v_cm > 0.3)
+      arrow(sc, bx, by, bx + phy.v_cm * scale, by, "#66bb6a", 3, `v_cm = ${phy.v_cm.toFixed(1)}`);
+    if (show_rw && Rw > 0.3) {
+      arrow(sc, bx, by - R, bx + Rw * scale, by - R, "#ce93d8", 2.5, `Rω = ${Rw.toFixed(1)} →`);
+      arrow(sc, bx, by + R, bx - Rw * scale, by + R, "#ce93d8", 2.5, `Rω = ${Rw.toFixed(1)} ←`);
+      sc.font = "8px Segoe UI"; sc.fillStyle = "#ce93d8";
+      sc.fillText("Rω = 0 (CM)", bx - R - 55, by + 4);
+    }
+    if (show_fric && phy.phase === "slipping") {
+      const f_mag = phy.mu * phy.mass * phy.g;
+      const f_len = f_mag * 0.28;
+      const fy    = by + R + 14;
+      arrow(sc, bx - 10, fy, bx - 10 + f_len, fy, "#ffd740", 3.5, `f = μmg = ${f_mag.toFixed(0)} →`);
+    }
+    if (show_wt) arrow(sc, bx, by, bx, by + 50, "rgba(180,180,180,0.47)", 2, "mg");
+    if (show_norm) arrow(sc, bx, by + R, bx, by + R - 55, "rgba(100,220,255,0.47)", 2, "N");
+  }
+
+  // v_contact text
+  if (phy.phase === "slipping") {
+    const vc = phy.v_cm - phy.R * phy.omega;
+    sc.font = "bold 9px Consolas"; sc.fillStyle = "#ff5252";
+    sc.fillText(`v_contact = ${vc.toFixed(1)}`, bx + R + 10, by + R + 8);
+  }
+
+  // Sparks
+  if (phy.phase === "slipping" && phy.omega > 0.3) {
+    for (let i = 0; i < 3; i++) {
+      sparks.push([
+        bx + (Math.random() - 0.5) * 10,
+        gy - Math.random() * 3,
+        Math.random() * (-50) - 10,
+        Math.random() * (-80) - 30,
+        1.0
+      ]);
+    }
+  }
+  const alive = [];
+  for (const sp of sparks) {
+    sp[0] += sp[2] * 0.016; sp[1] += sp[3] * 0.016;
+    sp[3] += 280 * 0.016;   sp[4] -= 0.04;
+    if (sp[4] > 0) {
+      const a   = Math.round(255 * sp[4]);
+      sc.fillStyle = sp[4] > 0.4
+        ? `rgba(255,200,50,${sp[4].toFixed(2)})`
+        : `rgba(255,100,30,${sp[4].toFixed(2)})`;
+      sc.beginPath();
+      sc.arc(sp[0], sp[1], 3 * sp[4], 0, Math.PI * 2); sc.fill();
+      alive.push(sp);
+    }
+  }
+  sparks = alive;
+
+  // Pure rolling label
+  if (phy.phase === "rolling") {
+    sc.font = "bold 14px Segoe UI"; sc.fillStyle = "#69f0ae";
+    sc.fillText("v_cm = Rω  ✓  Pure Rolling!", bx - 70, by - R - 38);
+    sc.font = "10px Consolas";
+    sc.fillText(`v_cm = Rω = ${phy.v_r.toFixed(1)} px/s`, bx - 70, by - R - 20);
+  }
+
+  // Phase badge
+  const badges = {
+    hovering: ["SPINNING CLOCKWISE IN AIR",    "#fdd835"],
+    falling:  ["FALLING (still spinning CW)",  "#fdd835"],
+    slipping: ["SLIPPING → sliding RIGHT",      "#ff5252"],
+    rolling:  ["PURE ROLLING (CW)",             "#69f0ae"],
+  };
+  const [bt, bc] = badges[phy.phase] || ["", "#fff"];
+  sc.font = "bold 12px Segoe UI";
+  const bw_ = sc.measureText(bt).width + 30;
+  const bh_ = 34;
+  const brx  = w - bw_ - 12, bry = 10;
+  sc.fillStyle   = "rgba(0,0,0,0.59)";
+  sc.strokeStyle = bc; sc.lineWidth = 1.5;
+  roundRect(sc, brx, bry, bw_, bh_, 8);
+  sc.fill(); sc.stroke();
+  sc.fillStyle = bc;
+  sc.fillText(bt, brx + (bw_ - sc.measureText(bt).width) / 2, bry + 22);
+
+  // HUD
+  if (phy.phase === "slipping" || phy.phase === "rolling") drawHUD();
+}
+
+function drawHUD() {
+  const w = simCv.width, h = simCv.height;
+  const bw = 285, bh = 148;
+  const bx_ = 10, by_ = h - bh - 10;
+  sc.fillStyle   = "rgba(0,0,0,0.67)";
+  sc.strokeStyle = "rgba(255,255,255,0.08)";
+  sc.lineWidth   = 1;
+  roundRect(sc, bx_, by_, bw, bh, 10); sc.fill(); sc.stroke();
+  const Rw = phy.R * phy.omega;
+  const lines = [
+    `t = ${phy.t.toFixed(3)} s    t_r = ${phy.t_r.toFixed(3)} s`,
+    `v_cm = ${phy.v_cm.toFixed(1)} px/s  (rightward)`,
+    `ω = ${phy.omega.toFixed(2)} rad/s  (clockwise)`,
+    `Rω = ${Rw.toFixed(1)} px/s`,
+    `v_contact = v_cm − Rω = ${(phy.v_cm - Rw).toFixed(2)}`,
+    `x = ${phy.x_cm.toFixed(0)} px   phase: ${phy.phase}`,
+  ];
+  sc.font = "9px Consolas"; sc.fillStyle = "rgba(220,220,220,0.78)";
+  lines.forEach((ln, i) => sc.fillText(ln, bx_ + 10, by_ + 20 + i * 20));
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+  ctx.lineTo(x + w, y + h - r); ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+  ctx.lineTo(x + r, y + h); ctx.arcTo(x, y + h, x, y + h - r, r);
+  ctx.lineTo(x, y + r); ctx.arcTo(x, y, x + r, y, r);
+  ctx.closePath();
+}
+
+// ═══════════════════════════ DRAW GRAPHS ═══════════════════════════
+
+function drawGraphs() {
+  const w = graphCv.width, h = graphCv.height;
+  gc.fillStyle = "#0d1117"; gc.fillRect(0, 0, w, h);
+  const ml = 55, mr = 14, mt = 22, mb = 14, gap = 42;
+  const gh = (h - mt - mb - gap) / 2;
+  drawGraphTop(ml, mt, w - ml - mr, gh);
+  drawGraphBot(ml, mt + gh + gap, w - ml - mr, gh);
+}
+
+function plotLine(ctx, t_data, y_data, t_max, gx, gy, gw, gh, color, width, y_min, y_range) {
+  if (t_data.length < 2) return;
+  ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = "round";
+  ctx.beginPath();
+  const step = Math.max(1, Math.floor(t_data.length / 2000));
+  let first = true;
+  for (let i = 0; i < t_data.length; i += step) {
+    const px = Math.max(gx, Math.min(gx + gw, gx + (t_data[i] / t_max) * gw));
+    const py = Math.max(gy, Math.min(gy + gh, gy + gh - ((y_data[i] - y_min) / y_range) * gh));
+    if (first) { ctx.moveTo(px, py); first = false; } else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+}
+
+function drawGraphTop(gx, gy, gw, gh) {
+  gc.fillStyle = "rgba(255,255,255,0.024)";
+  gc.strokeStyle = "rgba(255,255,255,0.08)"; gc.lineWidth = 1;
+  roundRect(gc, gx, gy, gw, gh, 6); gc.fill(); gc.stroke();
+  gc.font = "bold 10px Segoe UI"; gc.fillStyle = "rgba(255,255,255,0.55)";
+  gc.fillText("v_cm (↑ green)   Rω (↓ purple)   vs time", gx + 6, gy - 5);
+
+  if (phy.hist_t.length < 2) {
+    gc.font = "11px Segoe UI"; gc.fillStyle = "rgba(255,255,255,0.14)";
+    gc.fillText("Drop ball to see real-time data", gx + gw / 2 - 80, gy + gh / 2);
+    return;
+  }
+
+  const t_max = Math.max(phy.hist_t[phy.hist_t.length - 1] * 1.2, 0.3);
+  const Rw0   = phy.R * phy.omega_0;
+  const v_max = Math.max(Rw0 * 1.1, 10);
+
+  const tx = t => gx + (t / t_max) * gw;
+  const ty = v => gy + gh - (v / v_max) * gh;
+
+  gc.strokeStyle = "rgba(255,255,255,0.04)"; gc.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    gc.beginPath(); gc.moveTo(gx, gy + gh * i / 4); gc.lineTo(gx + gw, gy + gh * i / 4); gc.stroke();
+  }
+
+  gc.font = "8px Segoe UI"; gc.fillStyle = "rgba(255,255,255,0.24)";
+  gc.fillText(v_max.toFixed(0), gx - 38, gy + 10);
+  gc.fillText("0", gx - 14, gy + gh + 4);
+
+  plotLine(gc, phy.hist_t, phy.hist_v,      t_max, gx, gy, gw, gh, "#66bb6a", 3, 0, v_max);
+  plotLine(gc, phy.hist_t, phy.hist_Romega, t_max, gx, gy, gw, gh, "#ce93d8", 3, 0, v_max);
+
+  const cx_ = tx(phy.hist_t[phy.hist_t.length - 1]);
+  gc.fillStyle = "#66bb6a"; gc.beginPath();
+  gc.arc(cx_, ty(phy.hist_v[phy.hist_v.length - 1]), 5, 0, Math.PI * 2); gc.fill();
+  gc.fillStyle = "#ce93d8"; gc.beginPath();
+  gc.arc(cx_, ty(phy.hist_Romega[phy.hist_Romega.length - 1]), 5, 0, Math.PI * 2); gc.fill();
+
+  if (phy.phase === "rolling" && phy.t_r < t_max) {
+    const tr_x  = tx(phy.t_r);
+    gc.strokeStyle = "#69f0ae"; gc.lineWidth = 1.5;
+    gc.setLineDash([5, 4]);
+    gc.beginPath(); gc.moveTo(tr_x, gy); gc.lineTo(tr_x, gy + gh); gc.stroke();
+    gc.setLineDash([]);
+    const conv_y = ty(phy.v_r);
+    gc.fillStyle = "#69f0ae"; gc.beginPath();
+    gc.arc(tr_x, conv_y, 6, 0, Math.PI * 2); gc.fill();
+    gc.font = "bold 9px Segoe UI"; gc.fillStyle = "#69f0ae";
+    gc.fillText(`t_r = ${phy.t_r.toFixed(3)}s`, tr_x + 5, gy + 14);
+    gc.fillText(`v_r = ${phy.v_r.toFixed(1)}`, tr_x + 5, conv_y - 6);
+    gc.font = "9px Segoe UI"; gc.fillStyle = "rgba(255,100,100,0.24)";
+    gc.fillText("SLIPPING", gx + 8, gy + gh - 6);
+    gc.fillStyle = "rgba(100,240,170,0.24)";
+    gc.fillText("ROLLING", tr_x + 8, gy + gh - 6);
+  } else if (phy.phase === "slipping") {
+    gc.font = "9px Segoe UI"; gc.fillStyle = "rgba(255,100,100,0.24)";
+    gc.fillText("SLIPPING", gx + 8, gy + gh - 6);
+  }
+
+  gc.font = "bold 9px Segoe UI";
+  gc.fillStyle = "#66bb6a"; gc.fillText("── v_cm ↑", gx + gw - 100, gy + 16);
+  gc.fillStyle = "#ce93d8"; gc.fillText("── Rω ↓",  gx + gw - 100, gy + 32);
+}
+
+function drawGraphBot(gx, gy, gw, gh) {
+  gc.fillStyle = "rgba(255,255,255,0.024)";
+  gc.strokeStyle = "rgba(255,255,255,0.08)"; gc.lineWidth = 1;
+  roundRect(gc, gx, gy, gw, gh, 6); gc.fill(); gc.stroke();
+  gc.font = "bold 10px Segoe UI"; gc.fillStyle = "rgba(255,255,255,0.55)";
+  gc.fillText("v_contact = v_cm − Rω  (→ 0 at pure rolling)", gx + 6, gy - 5);
+
+  if (phy.hist_t.length < 2) {
+    gc.font = "11px Segoe UI"; gc.fillStyle = "rgba(255,255,255,0.14)";
+    gc.fillText("Drop ball to see real-time data", gx + gw / 2 - 80, gy + gh / 2);
+    return;
+  }
+
+  const t_max   = Math.max(phy.hist_t[phy.hist_t.length - 1] * 1.2, 0.3);
+  const Rw0     = phy.R * phy.omega_0;
+  const vc_min  = -Rw0 * 1.1;
+  const vc_max  = Rw0 * 0.12;
+  const vc_range = Math.max(1, vc_max - vc_min);
+
+  const tx = t => gx + (t / t_max) * gw;
+  const ty = v => gy + gh - ((v - vc_min) / vc_range) * gh;
+
+  gc.strokeStyle = "rgba(255,255,255,0.04)"; gc.lineWidth = 0.5;
+  for (let i = 0; i <= 4; i++) {
+    gc.beginPath(); gc.moveTo(gx, gy + gh * i / 4); gc.lineTo(gx + gw, gy + gh * i / 4); gc.stroke();
+  }
+
+  const zy = ty(0);
+  gc.strokeStyle = "#69f0ae"; gc.lineWidth = 1;
+  gc.setLineDash([5, 4]);
+  gc.beginPath(); gc.moveTo(gx, zy); gc.lineTo(gx + gw, zy); gc.stroke();
+  gc.setLineDash([]);
+  gc.font = "bold 8px Segoe UI"; gc.fillStyle = "#69f0ae";
+  gc.fillText("0", gx - 14, zy + 4);
+  gc.font = "8px Segoe UI"; gc.fillStyle = "rgba(255,255,255,0.22)";
+  gc.fillText(vc_min.toFixed(0), gx - 40, ty(vc_min) + 4);
+
+  plotLine(gc, phy.hist_t, phy.hist_vcontact, t_max, gx, gy, gw, gh,
+           "#ff5252", 3, vc_min, vc_range);
+
+  const cx_ = tx(phy.hist_t[phy.hist_t.length - 1]);
+  const cy_ = ty(phy.hist_vcontact[phy.hist_vcontact.length - 1]);
+  gc.fillStyle = "#ff5252"; gc.beginPath(); gc.arc(cx_, cy_, 5, 0, Math.PI * 2); gc.fill();
+
+  if (phy.phase === "rolling" && phy.t_r < t_max) {
+    const tr_x = tx(phy.t_r);
+    gc.strokeStyle = "#69f0ae"; gc.lineWidth = 1.5;
+    gc.setLineDash([5, 4]);
+    gc.beginPath(); gc.moveTo(tr_x, gy); gc.lineTo(tr_x, gy + gh); gc.stroke();
+    gc.setLineDash([]);
+    gc.fillStyle = "#69f0ae"; gc.beginPath();
+    gc.arc(tr_x, zy, 6, 0, Math.PI * 2); gc.fill();
+    gc.font = "bold 9px Segoe UI"; gc.fillStyle = "#69f0ae";
+    gc.fillText("v_contact = 0", tr_x + 5, zy - 8);
+  }
+
+  gc.font = "bold 9px Segoe UI";
+  gc.fillStyle = "#ff5252"; gc.fillText("── v_contact", gx + gw - 105, gy + 16);
+}
+
+// ═══════════════════════════ DRAW EQUATIONS ═══════════════════════════
+
+function drawEq() {
+  const w = eqCv.width, h = eqCv.height;
+  ec.fillStyle = "#0d1117"; ec.fillRect(0, 0, w, h);
+  ec.fillStyle = "rgba(255,255,255,0.024)";
+  ec.strokeStyle = "rgba(255,255,255,0.06)"; ec.lineWidth = 1;
+  roundRect(ec, 8, 8, w - 16, h - 16, 10); ec.fill(); ec.stroke();
+
+  let y = 28;
+  const x0 = 18, lh = 18;
+  const Rw0 = phy.R * phy.omega_0;
+
+  function head(text, c = "#64b5f6") {
+    ec.font = "bold 11px Segoe UI"; ec.fillStyle = c;
+    ec.fillText(text, x0, y); y += lh + 5;
+  }
+  function ln(text, c = "#d0d0d0") {
+    ec.font = "9px Consolas"; ec.fillStyle = c;
+    ec.fillText(text, x0 + 4, y); y += lh;
+  }
+
+  head("Solid Sphere  I = ²⁄₅mR²");
+  ln(`R = ${phy.R.toFixed(0)},  μ = ${phy.mu.toFixed(2)},  g = ${phy.g.toFixed(0)}`);
+  ln(`ω₀ = ${phy.omega_0.toFixed(1)} rad/s  (CW)`);
+  ln(`Rω₀ = ${Rw0.toFixed(1)} px/s`);
+  y += 5;
+
+  head("Before Contact", "#fdd835");
+  ln("v_cm = 0   (dropped gently)");
+  ln("ω = ω₀     (spinning CW)");
+  y += 5;
+
+  head("Slipping  (t < t_r)", "#ff8a65");
+  ln("Bottom→LEFT, f→RIGHT");
+  ln("v_cm(t) = μg·t         (↑)");
+  ln("ω(t) = ω₀−5μg/(2R)·t  (↓)");
+  ln("Ball accelerates RIGHT");
+  y += 5;
+
+  head("Pure Rolling  v_cm = Rω", "#69f0ae");
+  ln("t_r = 2Rω₀/(7μg)");
+  ln(`   = ${phy.t_r.toFixed(4)} s`);
+  ln(`v_r = 2Rω₀/7 = ${phy.v_r.toFixed(2)}`);
+  ln(`ω_r = 2ω₀/7  = ${phy.omega_r.toFixed(2)}`);
+  y += 5;
+
+  head("After t_r", "#42a5f5");
+  ln("No sliding friction");
+  ln("v_cm, ω both constant");
+  ln("Still CW, rolling right");
+  y += 5;
+
+  head("Key Insight", "#ffd740");
+  ln("v_r = 2Rω₀/7");
+  ln("Independent of μ !");
+}
+
+// ═══════════════════════════ ANIMATION LOOP ═══════════════════════════
+
+function drawAll() { drawSim(); drawGraphs(); drawEq(); }
+
+function tick(ts) {
+  requestAnimationFrame(tick);
+  if (!running || paused) { drawAll(); return; }
+  const now = ts / 1000;
+  let dt = Math.min(now - lastTime, 0.05);
+  lastTime = now;
+  if (slow) dt *= 0.12;
+  phy.step(dt);
+  drawAll();
+}
+
+// ═══════════════════════════ BUTTONS ═══════════════════════════
+
+document.getElementById("dropBtn").addEventListener("click", () => {
+  phy.reset(); phy.recalc_analytical();
+  const gy    = groundY();
+  const rest_y = gy - phy.R;
+  phy.y_cm    = rest_y - 180;
+  phy.y_target = rest_y;
+  phy.phase   = "hovering";
+  sparks      = [];
+  running     = true; paused = false;
+  lastTime    = performance.now() / 1000;
+  document.getElementById("dropBtn").disabled  = true;
+  document.getElementById("pauseBtn").disabled = false;
+  document.getElementById("pauseBtn").textContent = "⏸  PAUSE";
+});
+
+document.getElementById("pauseBtn").addEventListener("click", () => {
+  paused = !paused;
+  if (!paused) lastTime = performance.now() / 1000;
+  document.getElementById("pauseBtn").textContent = paused ? "▶  RESUME" : "⏸  PAUSE";
+});
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  running = false; paused = false;
+  phy.reset(); phy.recalc_analytical();
+  sparks = [];
+  document.getElementById("dropBtn").disabled  = false;
+  document.getElementById("pauseBtn").disabled = true;
+  document.getElementById("pauseBtn").textContent = "⏸  PAUSE";
+  drawAll();
+});
+
+document.getElementById("slowCb").addEventListener("change", e => { slow = e.target.checked; });
+
+document.getElementById("cb_vcm").addEventListener("change",  e => { show_vcm  = e.target.checked; });
+document.getElementById("cb_rw").addEventListener("change",   e => { show_rw   = e.target.checked; });
+document.getElementById("cb_fric").addEventListener("change", e => { show_fric = e.target.checked; });
+document.getElementById("cb_wt").addEventListener("change",   e => { show_wt   = e.target.checked; });
+document.getElementById("cb_norm").addEventListener("change", e => { show_norm = e.target.checked; });
+
+// ═══════════════════════════ INIT ═══════════════════════════
+
+buildSliders();
+resize();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
