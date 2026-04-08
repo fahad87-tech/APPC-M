@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AP Physics 1 Rotational Dynamics Simulator</title>
+  <script>
+  const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+  document.documentElement.classList.add("password-locked");
+  const passwordGateStyle = document.createElement("style");
+  passwordGateStyle.textContent = `
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    #password-gate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5, 9, 18, 0.88); padding: 24px; z-index: 9999; }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card { width: min(100%, 420px); background: #101625; border: 1px solid rgba(100,181,246,0.28); border-radius: 18px; padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); color: #e7edf7; font-family: 'Segoe UI', Arial, sans-serif; }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px; }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  `;
+  document.head.appendChild(passwordGateStyle);
+  function requestPassword(title, message) {
+    return new Promise(resolve => {
+      const existingGate = document.getElementById("password-gate");
+      if (existingGate) existingGate.remove();
+      const gate = document.createElement("div");
+      gate.id = "password-gate";
+      gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+      document.body.appendChild(gate);
+      const input = document.getElementById("password-gate-input");
+      const cancelButton = document.getElementById("password-gate-cancel");
+      const submitButton = document.getElementById("password-gate-submit");
+      const finish = value => { gate.remove(); resolve(value); };
+      cancelButton.addEventListener("click", () => finish(null));
+      submitButton.addEventListener("click", () => finish(input.value));
+      input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+      window.requestAnimationFrame(() => input.focus());
+    });
+  }
+  async function verifyPageAccess() {
+    const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+    if (userInput === null) { window.location.href = "../index.html"; return; }
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userInput);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    if (hashHex === TARGET_HASH) { document.documentElement.classList.remove("password-locked"); }
+    else { alert("Incorrect password. Access denied."); window.location.href = "../index.html"; }
+  }
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true }); }
+  else { verifyPageAccess(); }
+</script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #050508;
+      --panel: rgba(22, 22, 26, 0.85);
+      --panel-2: rgba(28, 28, 34, 0.78);
+      --border: rgba(255,255,255,0.10);
+      --text: #f0f0f5;
+      --muted: #9aa;
+      --cyan: #00E5FF;
+      --magenta: #FF00FF;
+      --yellow: #FFD60A;
+      --green: #2ee6a6;
+      --orange: #ff9f1c;
+      --shadow: 0 10px 40px rgba(0,0,0,0.45);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background: radial-gradient(circle at top left, #0b1020 0%, #050508 55%, #020204 100%);
+      color: var(--text);
+    }
+
+    #app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    #simCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(0,229,255,0.08), transparent 20%),
+        radial-gradient(circle at 80% 15%, rgba(255,0,255,0.06), transparent 20%),
+        radial-gradient(circle at 50% 80%, rgba(255,214,10,0.05), transparent 24%);
+    }
+
+    #simCanvas.dragging {
+      cursor: grabbing;
+    }
+
+    .side-panel {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 500px;
+      max-width: calc(100vw - 40px);
+      height: calc(100vh - 40px);
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      border-radius: 24px;
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 14px 14px 0 14px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.02), transparent);
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 14px 14px 0 0;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: rgba(0,229,255,0.12);
+      border-color: rgba(0,229,255,0.35);
+      color: var(--cyan);
+    }
+
+    .tab-content {
+      display: none;
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .section {
+      margin-bottom: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .section h2, .section h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    .control-group {
+      margin-bottom: 14px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    label {
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    .value-pill {
+      min-width: 96px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--cyan);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(0,229,255,0.6), rgba(255,0,255,0.4));
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px rgba(0,229,255,0.65);
+      cursor: pointer;
+      border: 2px solid #fff;
+    }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .toggle-row:last-child {
+      border-bottom: none;
+    }
+
+    .switch {
+      position: relative;
+      width: 54px;
+      height: 30px;
+      flex: 0 0 auto;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: rgba(255,255,255,0.14);
+      transition: .2s;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.09);
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 22px;
+      width: 22px;
+      left: 3px;
+      top: 3px;
+      background: white;
+      transition: .2s;
+      border-radius: 50%;
+    }
+
+    .switch input:checked + .slider {
+      background: rgba(0,229,255,0.3);
+      box-shadow: inset 0 0 10px rgba(0,229,255,0.25);
+    }
+
+    .switch input:checked + .slider:before {
+      transform: translateX(24px);
+      background: var(--cyan);
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(0,229,255,0.35);
+      box-shadow: 0 6px 18px rgba(0,229,255,0.08);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, rgba(0,229,255,0.18), rgba(0,229,255,0.08));
+      color: var(--cyan);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, rgba(255,214,10,0.14), rgba(255,214,10,0.06));
+      color: var(--yellow);
+    }
+
+    button.magenta {
+      background: linear-gradient(135deg, rgba(255,0,255,0.16), rgba(255,0,255,0.08));
+      color: #ff77ff;
+    }
+
+    .mini-note {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.4;
+      margin-top: 10px;
+    }
+
+    .graph-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .graph-toggles {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .graph-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .chart-wrap {
+      height: 360px;
+      position: relative;
+      margin-top: 8px;
+    }
+
+    .readout-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .readout {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .readout .label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .readout .value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .prompt-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .prompt-box {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 12px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(0,0,0,0.22);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.10);
+      outline: none;
+      font: inherit;
+      line-height: 1.45;
+    }
+
+    textarea:focus {
+      border-color: rgba(0,229,255,0.4);
+      box-shadow: 0 0 0 3px rgba(0,229,255,0.10);
+    }
+
+    .qa-actions, .nav-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 1150px) {
+      .side-panel {
+        width: 460px;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .side-panel {
+        left: 10px;
+        right: 10px;
+        top: auto;
+        bottom: 10px;
+        width: auto;
+        max-width: none;
+        height: 74vh;
+      }
+      .chart-wrap {
+        height: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <canvas id="simCanvas"></canvas>
+
+    <aside class="side-panel">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="controlsTab">Controls & Graphs</button>
+        <button class="tab-btn" data-tab="qaTab">Q/A Prompts</button>
+      </div>
+
+      <div class="tab-content active" id="controlsTab">
+        <div class="section">
+          <h2>System Controls</h2>
+
+          <div class="control-group">
+            <div class="control-row">
+              <label for="massSlider">Board Mass m</label>
+              <div class="value-pill" id="massValue">5.0 kg</div>
+            </div>
+            <input type="range" id="massSlider" min="1" max="10" step="0.1" value="5" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-row">
+              <label for="springSlider">Spring Constant k</label>
+              <div class="value-pill" id="springValue">40 N/m</div>
+            </div>
+            <input type="range" id="springSlider" min="10" max="100" step="1" value="40" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-row">
+              <label for="angleSlider">Initial Push Angle θ₀</label>
+              <div class="value-pill" id="angleValue">8.0°</div>
+            </div>
+            <input type="range" id="angleSlider" min="-15" max="15" step="0.1" value="8" />
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Display & Model Options</h3>
+
+          <div class="toggle-row">
+            <label for="fbdToggle">Show Free Body Diagram</label>
+            <label class="switch">
+              <input type="checkbox" id="fbdToggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="toggle-row">
+            <label for="blocksToggle">Add Two Blocks (Equidistant)</label>
+            <label class="switch">
+              <input type="checkbox" id="blocksToggle" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <p class="mini-note">
+            Pan by dragging the simulation. Zoom with the mouse wheel. Double-click to reset the camera.
+          </p>
+        </div>
+
+        <div class="section">
+          <h3>Actions</h3>
+          <div class="button-grid">
+            <button class="secondary" id="holdBtn">Hold at θ₀</button>
+            <button class="primary" id="releaseBtn">Release</button>
+            <button class="magenta" id="equilibriumBtn">Let Settle to Equilibrium</button>
+          </div>
+          <p class="mini-note">
+            A small damping torque is included to make the motion settle realistically while preserving the FRQ torque model.
+          </p>
+        </div>
+
+        <div class="section">
+          <div class="graph-topbar">
+            <h3 style="margin:0;">Kinematics Graph</h3>
+            <div class="graph-toggles">
+              <label class="graph-toggle">
+                <input type="checkbox" id="showTheta" checked />
+                <span class="dot" style="background:#00E5FF;"></span>
+                θ
+              </label>
+              <label class="graph-toggle">
+                <input type="checkbox" id="showOmega" checked />
+                <span class="dot" style="background:#FF00FF;"></span>
+                ω
+              </label>
+              <label class="graph-toggle">
+                <input type="checkbox" id="showAlpha" checked />
+                <span class="dot" style="background:#FFD60A;"></span>
+                α
+              </label>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="motionChart"></canvas>
+          </div>
+
+          <div class="readout-grid">
+            <div class="readout">
+              <div class="label">Angle θ</div>
+              <div class="value" id="statTheta">0.00°</div>
+            </div>
+            <div class="readout">
+              <div class="label">Angular Velocity ω</div>
+              <div class="value" id="statOmega">0.000 rad/s</div>
+            </div>
+            <div class="readout">
+              <div class="label">Angular Acceleration α</div>
+              <div class="value" id="statAlpha">0.000 rad/s²</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="qaTab">
+        <div class="section">
+          <div class="prompt-meta">
+            <div class="pill" id="stageLabel">Stage: Engage</div>
+            <div class="pill" id="promptCounter">Prompt 1 / 10</div>
+          </div>
+
+          <div class="prompt-box" id="promptText"></div>
+
+          <textarea id="answerBox" placeholder="Write your AP Physics reasoning here..."></textarea>
+
+          <div class="qa-actions">
+            <button id="saveAnswerBtn" class="primary">Save Answer</button>
+            <button id="exportDocxBtn" class="secondary">Export .docx</button>
+          </div>
+
+          <div class="nav-actions">
+            <button id="prevPromptBtn">Back</button>
+            <button id="nextPromptBtn">Next</button>
+          </div>
+
+          <div class="footer-note">
+            Answers auto-save locally in your browser while you type. Export bundles your name,
+            timestamp, all 10 prompts, and your responses into a downloadable DOCX file.
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    class RotationalEngine {
+      constructor() {
+        this.g = 9.8;
+        this.L = 4.0;
+        this.pivotX = this.L / 4;
+        this.comDistance = this.L / 4;
+        this.leftDistance = this.L / 4;
+
+        this.blockDistance = 0.75;
+        this.blockMass = 1.5;
+
+        this.m = 5.0;
+        this.k = 40.0;
+        this.theta0 = this.degToRad(8.0);
+
+        this.theta = 0;
+        this.omega = 0;
+        this.alpha = 0;
+
+        this.time = 0;
+        this.running = false;
+        this.showFBD = false;
+        this.blocksEnabled = false;
+
+        this.rotationalDamping = 1.2; // N·m·s/rad
+        this.maxDt = 1 / 360;
+      }
+
+      degToRad(d) { return d * Math.PI / 180; }
+      radToDeg(r) { return r * 180 / Math.PI; }
+
+      getBoardInertia() {
+        return (1 / 12) * this.m * this.L * this.L + this.m * Math.pow(this.L / 4, 2);
+      }
+
+      getTotalInertia() {
+        let I = this.getBoardInertia();
+        if (this.blocksEnabled) {
+          I += 2 * this.blockMass * Math.pow(this.blockDistance, 2);
+        }
+        return I;
+      }
+
+      getEquilibriumStretch() {
+        return (this.m * this.g) / this.k;
+      }
+
+      getLeftEndYOffset(theta = this.theta) {
+        return -this.leftDistance * Math.sin(theta);
+      }
+
+      getSpringTotalStretch(theta = this.theta) {
+        return this.getEquilibriumStretch() + this.getLeftEndYOffset(theta);
+      }
+
+      getForces(theta = this.theta) {
+        const mg = this.m * this.g;
+        const springStretch = this.getSpringTotalStretch(theta);
+        const Fs = this.k * springStretch;
+        return {
+          gravity: { magnitude: mg, direction: -1 },
+          spring: { magnitude: Fs, direction: +1 }
+        };
+      }
+
+      getTorques(theta = this.theta, omega = this.omega) {
+        const mg = this.m * this.g;
+        const springStretch = this.getSpringTotalStretch(theta);
+        const Fs = this.k * springStretch;
+
+        const tauG = -mg * this.comDistance * Math.cos(theta);
+        const tauS = +Fs * this.leftDistance * Math.cos(theta);
+        const tauD = -this.rotationalDamping * omega;
+
+        return {
+          tauG,
+          tauS,
+          tauD,
+          tauNet: tauG + tauS + tauD
+        };
+      }
+
+      getStateSnapshot() {
+        const torques = this.getTorques(this.theta, this.omega);
+        return {
+          time: this.time,
+          theta: this.theta,
+          thetaDeg: this.radToDeg(this.theta),
+          omega: this.omega,
+          alpha: this.alpha,
+          I: this.getTotalInertia(),
+          torques,
+          equilibriumStretch: this.getEquilibriumStretch(),
+          springStretch: this.getSpringTotalStretch(this.theta)
+        };
+      }
+
+      setMass(v) { this.m = v; }
+      setSpring(v) { this.k = v; }
+      setInitialAngleDeg(v) { this.theta0 = this.degToRad(v); }
+      setBlocksEnabled(flag) { this.blocksEnabled = flag; }
+      setShowFBD(flag) { this.showFBD = flag; }
+
+      holdAtInitialAngle() {
+        this.running = false;
+        this.time = 0;
+        this.theta = this.theta0;
+        this.omega = 0;
+        const torques = this.getTorques(this.theta, this.omega);
+        this.alpha = torques.tauNet / this.getTotalInertia();
+      }
+
+      settleToEquilibrium() {
+        this.running = false;
+        this.time = 0;
+        this.theta = 0;
+        this.omega = 0;
+        this.alpha = 0;
+      }
+
+      release() {
+        this.running = true;
+      }
+
+      step(frameDt) {
+        if (!this.running) return;
+        let remaining = frameDt;
+        while (remaining > 0) {
+          const dt = Math.min(this.maxDt, remaining);
+          this.integrateSemiImplicit(dt);
+          remaining -= dt;
+        }
+
+        if (Math.abs(this.theta) < 1e-4 && Math.abs(this.omega) < 1e-4 && Math.abs(this.alpha) < 1e-4) {
+          this.theta = 0;
+          this.omega = 0;
+          this.alpha = 0;
+        }
+      }
+
+      integrateSemiImplicit(dt) {
+        const torques = this.getTorques(this.theta, this.omega);
+        const I = this.getTotalInertia();
+        this.alpha = torques.tauNet / I;
+        this.omega += this.alpha * dt;
+        this.theta += this.omega * dt;
+        this.time += dt;
+      }
+    }
+
+    class Renderer {
+      constructor(canvas, engine) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.engine = engine;
+        this.pixelRatio = Math.max(1, window.devicePixelRatio || 1);
+
+        this.baseScale = 120;
+        this.camera = {
+          x: 0,
+          y: 0,
+          zoom: 1
+        };
+
+        this.dragging = false;
+        this.lastPointer = null;
+
+        this.initInteractions();
+      }
+
+      initInteractions() {
+        this.canvas.addEventListener('mousedown', (e) => {
+          this.dragging = true;
+          this.lastPointer = { x: e.clientX, y: e.clientY };
+          this.canvas.classList.add('dragging');
+        });
+
+        window.addEventListener('mouseup', () => {
+          this.dragging = false;
+          this.lastPointer = null;
+          this.canvas.classList.remove('dragging');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (!this.dragging || !this.lastPointer) return;
+          const dx = e.clientX - this.lastPointer.x;
+          const dy = e.clientY - this.lastPointer.y;
+          this.camera.x += dx;
+          this.camera.y += dy;
+          this.lastPointer = { x: e.clientX, y: e.clientY };
+        });
+
+        this.canvas.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+          this.camera.zoom *= zoomFactor;
+          this.camera.zoom = Math.max(0.45, Math.min(3.0, this.camera.zoom));
+        }, { passive: false });
+
+        this.canvas.addEventListener('dblclick', () => {
+          this.camera.x = 0;
+          this.camera.y = 0;
+          this.camera.zoom = 1;
+        });
+      }
+
+      resize() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width * this.pixelRatio;
+        this.canvas.height = rect.height * this.pixelRatio;
+        this.ctx.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
+      }
+
+      clear() {
+        const ctx = this.ctx;
+        const w = this.canvas.clientWidth;
+        const h = this.canvas.clientHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        for (let i = 0; i < 45; i++) {
+          const x = (i * 97) % w;
+          const y = (i * 59) % h;
+          ctx.beginPath();
+          ctx.fillStyle = i % 3 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(0,229,255,0.04)';
+          ctx.arc(x, y, 1 + (i % 2), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      getOrigin() {
+        const w = this.canvas.clientWidth;
+        const h = this.canvas.clientHeight;
+        const base = {
+          x: Math.min(w * 0.34, w - 560),
+          y: h * 0.52
+        };
+        return {
+          x: Math.max(220, base.x) + this.camera.x,
+          y: base.y + this.camera.y
+        };
+      }
+
+      worldToCanvas(x, y) {
+        const origin = this.getOrigin();
+        const scale = this.baseScale * this.camera.zoom;
+        return {
+          x: origin.x + x * scale,
+          y: origin.y - y * scale
+        };
+      }
+
+      rotateLocalPoint(localX, localY, theta) {
+        return {
+          x: localX * Math.cos(theta) - localY * Math.sin(theta),
+          y: localX * Math.sin(theta) + localY * Math.cos(theta)
+        };
+      }
+
+      draw() {
+        this.clear();
+        this.drawGround();
+        this.drawReference();
+        this.drawSpring();
+        this.drawPivot();
+        this.drawBoard();
+        if (this.engine.blocksEnabled) this.drawBlocks();
+        if (this.engine.showFBD) this.drawFBD();
+      }
+
+      drawGround() {
+        const ctx = this.ctx;
+        const w = this.canvas.clientWidth;
+        const h = this.canvas.clientHeight;
+        const origin = this.getOrigin();
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, h - 70 + this.camera.y * 0.08);
+        ctx.lineTo(w, h - 70 + this.camera.y * 0.08);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(origin.x - 70, origin.y + 34);
+        ctx.lineTo(origin.x + 70, origin.y + 34);
+        ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      drawReference() {
+        const ctx = this.ctx;
+        const pivot = this.worldToCanvas(0, 0);
+
+        ctx.save();
+        ctx.setLineDash([6, 6]);
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(pivot.x - 300, pivot.y);
+        ctx.lineTo(pivot.x + 420, pivot.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+
+      drawPivot() {
+        const ctx = this.ctx;
+        const p = this.worldToCanvas(0, 0);
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,214,10,0.92)';
+        ctx.strokeStyle = 'rgba(255,214,10,0.5)';
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y + 4);
+        ctx.lineTo(p.x - 20, p.y + 34);
+        ctx.lineTo(p.x + 20, p.y + 34);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      drawBoard() {
+        const ctx = this.ctx;
+        const theta = this.engine.theta;
+        const pivot = this.worldToCanvas(0, 0);
+        const scale = this.baseScale * this.camera.zoom;
+        const lengthPx = this.engine.L * scale;
+        const leftOffsetPx = this.engine.leftDistance * scale;
+
+        ctx.save();
+        ctx.translate(pivot.x, pivot.y);
+        ctx.rotate(-theta);
+
+        const boardHeight = Math.max(16, 18 * this.camera.zoom);
+
+        const x = -leftOffsetPx;
+        const y = -boardHeight / 2;
+
+        const grad = ctx.createLinearGradient(x, 0, x + lengthPx, 0);
+        grad.addColorStop(0, 'rgba(0,229,255,0.86)');
+        grad.addColorStop(0.5, 'rgba(245,245,255,0.96)');
+        grad.addColorStop(1, 'rgba(255,0,255,0.84)');
+
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+        ctx.lineWidth = 2;
+
+        this.roundRect(ctx, x, y, lengthPx, boardHeight, 10);
+        ctx.fill();
+        ctx.stroke();
+
+        // board centerline
+        ctx.beginPath();
+        ctx.moveTo(x + 10, 0);
+        ctx.lineTo(x + lengthPx - 10, 0);
+        ctx.strokeStyle = 'rgba(0,0,0,0.22)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // COM marker
+        const comX = this.engine.comDistance * scale;
+        ctx.beginPath();
+        ctx.arc(comX, 0, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#050508';
+        ctx.fill();
+        ctx.strokeStyle = '#FFD60A';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // left spring connection
+        ctx.beginPath();
+        ctx.arc(-leftOffsetPx, 0, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      drawSpring() {
+        const ctx = this.ctx;
+        const theta = this.engine.theta;
+        const leftLocal = this.rotateLocalPoint(-this.engine.leftDistance, 0, theta);
+        const leftCanvas = this.worldToCanvas(leftLocal.x, leftLocal.y);
+
+        const eqLeftCanvas = this.worldToCanvas(-this.engine.leftDistance, 0);
+        const anchor = {
+          x: eqLeftCanvas.x,
+          y: eqLeftCanvas.y + 180 * this.camera.zoom
+        };
+
+        ctx.save();
+        ctx.strokeStyle = '#00E5FF';
+        ctx.lineWidth = Math.max(2.5, 3 * this.camera.zoom);
+        ctx.shadowColor = 'rgba(0,229,255,0.4)';
+        ctx.shadowBlur = 10;
+
+        const dx = leftCanvas.x - anchor.x;
+        const dy = leftCanvas.y - anchor.y;
+        const length = Math.hypot(dx, dy);
+        const ux = dx / (length || 1);
+        const uy = dy / (length || 1);
+        const px = -uy;
+        const py = ux;
+
+        const coils = 12;
+        const amp = 8 * this.camera.zoom;
+
+        ctx.beginPath();
+        ctx.moveTo(anchor.x, anchor.y);
+
+        for (let i = 1; i < coils; i++) {
+          const t = i / coils;
+          const bx = anchor.x + dx * t;
+          const by = anchor.y + dy * t;
+          const offset = (i % 2 === 0 ? -amp : amp);
+          ctx.lineTo(bx + px * offset, by + py * offset);
+        }
+
+        ctx.lineTo(leftCanvas.x, leftCanvas.y);
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(255,255,255,0.18)';
+        ctx.fillRect(anchor.x - 30, anchor.y + 6, 60, 8);
+
+        ctx.restore();
+      }
+
+      drawBlocks() {
+        const ctx = this.ctx;
+        const theta = this.engine.theta;
+        const d = this.engine.blockDistance;
+        const p1Local = this.rotateLocalPoint(-d, 0, theta);
+        const p2Local = this.rotateLocalPoint(d, 0, theta);
+        const p1 = this.worldToCanvas(p1Local.x, p1Local.y);
+        const p2 = this.worldToCanvas(p2Local.x, p2Local.y);
+
+        ctx.save();
+        [p1, p2].forEach(p => {
+          ctx.fillStyle = 'rgba(255,214,10,0.92)';
+          ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+          ctx.lineWidth = 2;
+          const size = 30 * this.camera.zoom;
+          this.roundRect(ctx, p.x - size/2, p.y - size/2, size, size, 8);
+          ctx.fill();
+          ctx.stroke();
+        });
+        ctx.restore();
+      }
+
+      drawFBD() {
+        const theta = this.engine.theta;
+        const pivot = this.worldToCanvas(0, 0);
+        const comLocal = this.rotateLocalPoint(this.engine.comDistance, 0, theta);
+        const leftLocal = this.rotateLocalPoint(-this.engine.leftDistance, 0, theta);
+
+        const com = this.worldToCanvas(comLocal.x, comLocal.y);
+        const left = this.worldToCanvas(leftLocal.x, leftLocal.y);
+
+        const forces = this.engine.getForces(theta);
+        const mg = forces.gravity.magnitude;
+        const fs = forces.spring.magnitude;
+
+        const gLen = Math.min(110, Math.max(28, mg * 0.7));
+        const sLen = Math.min(130, Math.max(28, fs * 0.25));
+        const nLen = Math.min(120, Math.max(36, (mg + fs) * 0.12));
+
+        this.drawArrow(com.x, com.y, com.x, com.y + gLen, '#FF00FF', 'Fg');
+        this.drawArrow(left.x, left.y, left.x, left.y - sLen, '#2ee6a6', 'Fs');
+        this.drawArrow(pivot.x, pivot.y, pivot.x, pivot.y - nLen, '#FFD60A', 'Fn');
+      }
+
+      drawArrow(x1, y1, x2, y2, color, label) {
+        const ctx = this.ctx;
+        const head = 10;
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 12;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.font = '12px -apple-system, BlinkMacSystemFont, Roboto, sans-serif';
+        ctx.fillText(label, x2 + 8, y2 + (y2 > y1 ? 14 : -8));
+        ctx.restore();
+      }
+
+      roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+    }
+
+    class GraphManager {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.maxPoints = 500;
+
+        this.chart = new Chart(this.canvas.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: 'θ (deg)',
+                data: [],
+                borderColor: '#00E5FF',
+                backgroundColor: 'rgba(0,229,255,0.08)',
+                borderWidth: 2.2,
+                pointRadius: 0,
+                tension: 0.16,
+                hidden: false
+              },
+              {
+                label: 'ω (rad/s)',
+                data: [],
+                borderColor: '#FF00FF',
+                backgroundColor: 'rgba(255,0,255,0.08)',
+                borderWidth: 2.2,
+                pointRadius: 0,
+                tension: 0.16,
+                hidden: false
+              },
+              {
+                label: 'α (rad/s²)',
+                data: [],
+                borderColor: '#FFD60A',
+                backgroundColor: 'rgba(255,214,10,0.08)',
+                borderWidth: 2.2,
+                pointRadius: 0,
+                tension: 0.16,
+                hidden: false
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            interaction: {
+              mode: 'index',
+              intersect: false
+            },
+            plugins: {
+              legend: {
+                labels: { color: '#f0f0f5' }
+              }
+            },
+            scales: {
+              x: {
+                title: { display: true, text: 'Time (s)', color: '#9aa' },
+                ticks: { color: '#9aa' },
+                grid: { color: 'rgba(255,255,255,0.06)' }
+              },
+              y: {
+                title: { display: true, text: 'Kinematic Value', color: '#9aa' },
+                ticks: { color: '#9aa' },
+                grid: { color: 'rgba(255,255,255,0.06)' }
+              }
+            }
+          }
+        });
+      }
+
+      reset() {
+        this.chart.data.labels = [];
+        this.chart.data.datasets.forEach(ds => ds.data = []);
+        this.chart.update('none');
+      }
+
+      append(t, thetaDeg, omega, alpha) {
+        const labels = this.chart.data.labels;
+        labels.push(t.toFixed(2));
+        this.chart.data.datasets[0].data.push(thetaDeg);
+        this.chart.data.datasets[1].data.push(omega);
+        this.chart.data.datasets[2].data.push(alpha);
+
+        if (labels.length > this.maxPoints) {
+          labels.shift();
+          this.chart.data.datasets.forEach(ds => ds.data.shift());
+        }
+
+        this.chart.update('none');
+      }
+
+      setVisibility(showTheta, showOmega, showAlpha) {
+        this.chart.data.datasets[0].hidden = !showTheta;
+        this.chart.data.datasets[1].hidden = !showOmega;
+        this.chart.data.datasets[2].hidden = !showAlpha;
+        this.chart.update('none');
+      }
+    }
+
+    class InquiryStateManager {
+      constructor() {
+        this.storageKey = 'ap-rotation-inquiry-answers-v1';
+        this.indexKey = 'ap-rotation-inquiry-index-v1';
+
+        this.prompts = [
+          { stage: 'Engage', text: '1. [Engage] Set the simulation to "Equilibrium" and turn on Force Vectors. What three main forces act on the board, and exactly where is each force applied relative to the pivot?' },
+          { stage: 'Engage', text: "2. [Engage] Why doesn't the normal force from the pivot create a torque on the board?" },
+          { stage: 'Explore', text: '3. [Explore] Adjust the Spring Constant (k) and the Board Mass (m). How does the equilibrium stretch distance Δx of the spring change as you increase m?' },
+          { stage: 'Explore', text: '4. [Explore] Pause at equilibrium. Using the concept of net torque (τ_net = 0), derive the algebraic expression for the spring stretch Δx in terms of k, L, m, g.' },
+          { stage: 'Explain', text: '5. [Explain] Hold the board at an initial angle θ₀ (pushed down on the right) and click Release. Observe the Angular Acceleration (α) vs Time graph. Describe its shape from t=0 until the board reaches horizontal.' },
+          { stage: 'Explain', text: '6. [Explain] Why does the angular acceleration reach exactly zero when the board crosses the horizontal equilibrium position? Relate this to torque.' },
+          { stage: 'Elaborate', text: '7. [Elaborate] Using Newton’s Second Law for Rotation (τ_net = Iα), derive the algebraic expression for the initial angular acceleration α₀ exactly at the moment of release. Express in terms of k, L, m, I, Δx_total, θ₀.' },
+          { stage: 'Elaborate', text: '8. [Elaborate] Calculate your theoretical α₀ using the current values from the simulation sliders. Check the peak of the graph at t=0 to verify your derivation.' },
+          { stage: 'Evaluate', text: '9. [Evaluate] Toggle the "Add Two Blocks" button. These blocks have equal mass and are equidistant from the pivot. What happens to the net torque on the system? Why?' },
+          { stage: 'Evaluate', text: "10. [Evaluate] Look at the new initial angular acceleration α' on the graph. Is α' > α₀, α' < α₀, or α' = α₀? Justify this result mathematically using your knowledge of rotational inertia." }
+        ];
+
+        this.answers = this.loadAnswers();
+        this.currentIndex = this.loadIndex();
+      }
+
+      loadAnswers() {
+        try {
+          const raw = localStorage.getItem(this.storageKey);
+          if (!raw) return Array(this.prompts.length).fill('');
+          const parsed = JSON.parse(raw);
+          return Array.from({ length: this.prompts.length }, (_, i) => parsed[i] || '');
+        } catch {
+          return Array(this.prompts.length).fill('');
+        }
+      }
+
+      saveAnswers() {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.answers));
+      }
+
+      loadIndex() {
+        const raw = localStorage.getItem(this.indexKey);
+        const val = Number(raw);
+        if (Number.isFinite(val) && val >= 0 && val < this.prompts.length) return val;
+        return 0;
+      }
+
+      saveIndex() {
+        localStorage.setItem(this.indexKey, String(this.currentIndex));
+      }
+
+      setAnswer(index, text) {
+        this.answers[index] = text;
+        this.saveAnswers();
+      }
+
+      getCurrentPrompt() { return this.prompts[this.currentIndex]; }
+      getCurrentAnswer() { return this.answers[this.currentIndex] || ''; }
+
+      next() {
+        if (this.currentIndex < this.prompts.length - 1) {
+          this.currentIndex++;
+          this.saveIndex();
+        }
+      }
+
+      prev() {
+        if (this.currentIndex > 0) {
+          this.currentIndex--;
+          this.saveIndex();
+        }
+      }
+
+      async exportDocx() {
+        const studentName = prompt('Enter student name for DOCX export:');
+        if (!studentName || !studentName.trim()) return;
+
+        const {
+          Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType
+        } = window.docx;
+
+        const timestamp = new Date().toLocaleString();
+
+        const children = [
+          new Paragraph({
+            heading: HeadingLevel.TITLE,
+            alignment: AlignmentType.CENTER,
+            children: [new TextRun({
+              text: 'AP Physics 1 Rotational Dynamics Guided Inquiry',
+              bold: true,
+              size: 32
+            })]
+          }),
+          new Paragraph({ children: [new TextRun({ text: `Student: ${studentName}`, bold: true })] }),
+          new Paragraph({ children: [new TextRun({ text: `Exported: ${timestamp}` })] }),
+          new Paragraph({ text: '' })
+        ];
+
+        this.prompts.forEach((p, i) => {
+          children.push(
+            new Paragraph({
+              heading: HeadingLevel.HEADING_2,
+              children: [new TextRun({ text: `${p.stage} — Prompt ${i + 1}` })]
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: p.text, italics: true })]
+            }),
+            new Paragraph({
+              children: [new TextRun({
+                text: this.answers[i] && this.answers[i].trim() ? this.answers[i] : '[No answer entered]'
+              })]
+            }),
+            new Paragraph({ text: '' })
+          );
+        });
+
+        const doc = new Document({ sections: [{ children }] });
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `${studentName.replace(/\s+/g, '_')}_Rotational_Dynamics_Inquiry.docx`);
+      }
+    }
+
+    class UIController {
+      constructor(engine, renderer, graph, inquiry) {
+        this.engine = engine;
+        this.renderer = renderer;
+        this.graph = graph;
+        this.inquiry = inquiry;
+
+        this.els = {
+          massSlider: document.getElementById('massSlider'),
+          springSlider: document.getElementById('springSlider'),
+          angleSlider: document.getElementById('angleSlider'),
+          massValue: document.getElementById('massValue'),
+          springValue: document.getElementById('springValue'),
+          angleValue: document.getElementById('angleValue'),
+          fbdToggle: document.getElementById('fbdToggle'),
+          blocksToggle: document.getElementById('blocksToggle'),
+          holdBtn: document.getElementById('holdBtn'),
+          releaseBtn: document.getElementById('releaseBtn'),
+          equilibriumBtn: document.getElementById('equilibriumBtn'),
+
+          statTheta: document.getElementById('statTheta'),
+          statOmega: document.getElementById('statOmega'),
+          statAlpha: document.getElementById('statAlpha'),
+
+          showTheta: document.getElementById('showTheta'),
+          showOmega: document.getElementById('showOmega'),
+          showAlpha: document.getElementById('showAlpha'),
+
+          tabButtons: document.querySelectorAll('.tab-btn'),
+          tabContents: document.querySelectorAll('.tab-content'),
+
+          stageLabel: document.getElementById('stageLabel'),
+          promptCounter: document.getElementById('promptCounter'),
+          promptText: document.getElementById('promptText'),
+          answerBox: document.getElementById('answerBox'),
+          saveAnswerBtn: document.getElementById('saveAnswerBtn'),
+          exportDocxBtn: document.getElementById('exportDocxBtn'),
+          prevPromptBtn: document.getElementById('prevPromptBtn'),
+          nextPromptBtn: document.getElementById('nextPromptBtn')
+        };
+
+        this.bindEvents();
+        this.refreshControls();
+        this.refreshPromptUI();
+        this.engine.settleToEquilibrium();
+      }
+
+      bindEvents() {
+        this.els.massSlider.addEventListener('input', () => {
+          this.engine.setMass(parseFloat(this.els.massSlider.value));
+          this.refreshControls();
+          this.updateHeldStateIfPaused();
+        });
+
+        this.els.springSlider.addEventListener('input', () => {
+          this.engine.setSpring(parseFloat(this.els.springSlider.value));
+          this.refreshControls();
+          this.updateHeldStateIfPaused();
+        });
+
+        this.els.angleSlider.addEventListener('input', () => {
+          this.engine.setInitialAngleDeg(parseFloat(this.els.angleSlider.value));
+          this.refreshControls();
+        });
+
+        this.els.fbdToggle.addEventListener('change', () => {
+          this.engine.setShowFBD(this.els.fbdToggle.checked);
+        });
+
+        this.els.blocksToggle.addEventListener('change', () => {
+          this.engine.setBlocksEnabled(this.els.blocksToggle.checked);
+          this.updateHeldStateIfPaused();
+        });
+
+        this.els.showTheta.addEventListener('change', () => this.updateGraphVisibility());
+        this.els.showOmega.addEventListener('change', () => this.updateGraphVisibility());
+        this.els.showAlpha.addEventListener('change', () => this.updateGraphVisibility());
+
+        this.els.holdBtn.addEventListener('click', () => {
+          this.engine.holdAtInitialAngle();
+          this.graph.reset();
+          this.pushGraphPoint();
+        });
+
+        this.els.releaseBtn.addEventListener('click', () => {
+          if (this.engine.time === 0 && this.engine.omega === 0 && Math.abs(this.engine.theta - this.engine.theta0) > 1e-7) {
+            this.engine.holdAtInitialAngle();
+          }
+          if (this.engine.time === 0) {
+            this.graph.reset();
+            this.pushGraphPoint();
+          }
+          this.engine.release();
+        });
+
+        this.els.equilibriumBtn.addEventListener('click', () => {
+          this.engine.settleToEquilibrium();
+          this.graph.reset();
+          this.pushGraphPoint();
+        });
+
+        this.els.tabButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            this.els.tabButtons.forEach(b => b.classList.remove('active'));
+            this.els.tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+          });
+        });
+
+        this.els.answerBox.addEventListener('input', () => {
+          this.inquiry.setAnswer(this.inquiry.currentIndex, this.els.answerBox.value);
+        });
+
+        this.els.saveAnswerBtn.addEventListener('click', () => {
+          this.inquiry.setAnswer(this.inquiry.currentIndex, this.els.answerBox.value);
+          this.flashButton(this.els.saveAnswerBtn, 'Saved');
+        });
+
+        this.els.prevPromptBtn.addEventListener('click', () => {
+          this.saveCurrentAnswer();
+          this.inquiry.prev();
+          this.refreshPromptUI();
+        });
+
+        this.els.nextPromptBtn.addEventListener('click', () => {
+          this.saveCurrentAnswer();
+          this.inquiry.next();
+          this.refreshPromptUI();
+        });
+
+        this.els.exportDocxBtn.addEventListener('click', async () => {
+          this.saveCurrentAnswer();
+          await this.inquiry.exportDocx();
+        });
+
+        window.addEventListener('resize', () => this.renderer.resize());
+      }
+
+      updateGraphVisibility() {
+        this.graph.setVisibility(
+          this.els.showTheta.checked,
+          this.els.showOmega.checked,
+          this.els.showAlpha.checked
+        );
+      }
+
+      pushGraphPoint() {
+        this.graph.append(
+          this.engine.time,
+          this.engine.radToDeg(this.engine.theta),
+          this.engine.omega,
+          this.engine.alpha
+        );
+      }
+
+      flashButton(button, text) {
+        const original = button.textContent;
+        button.textContent = text;
+        setTimeout(() => button.textContent = original, 850);
+      }
+
+      saveCurrentAnswer() {
+        this.inquiry.setAnswer(this.inquiry.currentIndex, this.els.answerBox.value);
+      }
+
+      refreshPromptUI() {
+        const prompt = this.inquiry.getCurrentPrompt();
+        this.els.stageLabel.textContent = `Stage: ${prompt.stage}`;
+        this.els.promptCounter.textContent = `Prompt ${this.inquiry.currentIndex + 1} / ${this.inquiry.prompts.length}`;
+        this.els.promptText.textContent = prompt.text;
+        this.els.answerBox.value = this.inquiry.getCurrentAnswer();
+      }
+
+      refreshControls() {
+        this.els.massValue.textContent = `${parseFloat(this.els.massSlider.value).toFixed(1)} kg`;
+        this.els.springValue.textContent = `${parseFloat(this.els.springSlider.value).toFixed(0)} N/m`;
+        this.els.angleValue.textContent = `${parseFloat(this.els.angleSlider.value).toFixed(1)}°`;
+      }
+
+      updateHeldStateIfPaused() {
+        if (!this.engine.running) {
+          const nearTheta0 = Math.abs(this.engine.theta - this.engine.theta0) < 1e-5;
+          const nearEq = Math.abs(this.engine.theta) < 1e-5 && Math.abs(this.engine.omega) < 1e-5;
+          if (nearTheta0) {
+            this.engine.holdAtInitialAngle();
+          } else if (nearEq) {
+            this.engine.settleToEquilibrium();
+          } else {
+            const torques = this.engine.getTorques(this.engine.theta, this.engine.omega);
+            this.engine.alpha = torques.tauNet / this.engine.getTotalInertia();
+          }
+        }
+      }
+
+      updateHUD() {
+        const s = this.engine.getStateSnapshot();
+        this.els.statTheta.textContent = `${s.thetaDeg.toFixed(2)}°`;
+        this.els.statOmega.textContent = `${s.omega.toFixed(3)} rad/s`;
+        this.els.statAlpha.textContent = `${s.alpha.toFixed(3)} rad/s²`;
+      }
+    }
+
+    const canvas = document.getElementById('simCanvas');
+    const engine = new RotationalEngine();
+    const renderer = new Renderer(canvas, engine);
+    const graph = new GraphManager(document.getElementById('motionChart'));
+    const inquiry = new InquiryStateManager();
+    const ui = new UIController(engine, renderer, graph, inquiry);
+
+    renderer.resize();
+    renderer.draw();
+    ui.updateHUD();
+    ui.updateGraphVisibility();
+    ui.pushGraphPoint();
+
+    let lastTime = performance.now();
+    let graphAccumulator = 0;
+
+    function animate(now) {
+      const dt = Math.min(0.033, (now - lastTime) / 1000);
+      lastTime = now;
+
+      engine.step(dt);
+      graphAccumulator += dt;
+
+      if (engine.running && graphAccumulator >= 0.025) {
+        ui.pushGraphPoint();
+        graphAccumulator = 0;
+      }
+
+      ui.updateHUD();
+      renderer.draw();
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>

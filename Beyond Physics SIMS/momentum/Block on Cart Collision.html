@@ -1,0 +1,1677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AP Physics 1 - Cart and Dropped Block Simulation</title>
+  <script>
+  const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+  document.documentElement.classList.add("password-locked");
+
+  const passwordGateStyle = document.createElement("style");
+  passwordGateStyle.textContent = `
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    #password-gate {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 9, 18, 0.88);
+      padding: 24px;
+      z-index: 9999;
+    }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card {
+      width: min(100%, 420px);
+      background: #101625;
+      border: 1px solid rgba(100,181,246,0.28);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      color: #e7edf7;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35);
+      background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px;
+    }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  `;
+  document.head.appendChild(passwordGateStyle);
+
+  function requestPassword(title, message) {
+    return new Promise(resolve => {
+      const existingGate = document.getElementById("password-gate");
+      if (existingGate) existingGate.remove();
+      const gate = document.createElement("div");
+      gate.id = "password-gate";
+      gate.innerHTML = `
+        <div id="password-gate-card">
+          <div id="password-gate-title">${title}</div>
+          <div id="password-gate-message">${message}</div>
+          <input id="password-gate-input" type="password" autocomplete="current-password">
+          <div id="password-gate-actions">
+            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+          </div>
+        </div>`;
+      document.body.appendChild(gate);
+      const input = document.getElementById("password-gate-input");
+      const cancelButton = document.getElementById("password-gate-cancel");
+      const submitButton = document.getElementById("password-gate-submit");
+      const finish = value => { gate.remove(); resolve(value); };
+      cancelButton.addEventListener("click", () => finish(null));
+      submitButton.addEventListener("click", () => finish(input.value));
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") finish(input.value);
+        if (event.key === "Escape") finish(null);
+      });
+      window.requestAnimationFrame(() => input.focus());
+    });
+  }
+
+  async function verifyPageAccess() {
+    const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+    if (userInput === null) { window.location.href = "../index.html"; return; }
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userInput);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    if (hashHex === TARGET_HASH) { document.documentElement.classList.remove("password-locked"); }
+    else { alert("Incorrect password. Access denied."); window.location.href = "../index.html"; }
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true }); }
+  else { verifyPageAccess(); }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #050508;
+      --panel: rgba(22, 22, 26, 0.85);
+      --panel-2: rgba(28, 28, 34, 0.78);
+      --border: rgba(255,255,255,0.10);
+      --text: #f0f0f5;
+      --muted: #9aa;
+      --cyan: #00E5FF;
+      --yellow: #FFD60A;
+      --red: #FF3B30;
+      --green: #2ee6a6;
+      --shadow: 0 10px 40px rgba(0,0,0,0.45);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at top left, #0b1020 0%, #050508 55%, #020204 100%);
+      color: var(--text);
+    }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 450px;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .main-area {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: minmax(340px, 1fr) 320px;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    .sim-shell, .graph-shell, .side-panel {
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      border-radius: 24px;
+    }
+
+    .sim-shell {
+      position: relative;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    #simCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      cursor: grab;
+      background:
+        radial-gradient(circle at 12% 16%, rgba(0,229,255,0.08), transparent 20%),
+        radial-gradient(circle at 80% 15%, rgba(255,214,10,0.06), transparent 20%),
+        radial-gradient(circle at 45% 82%, rgba(255,59,48,0.05), transparent 24%);
+    }
+
+    #simCanvas.dragging { cursor: grabbing; }
+
+    .sim-overlay {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      top: 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+      flex-wrap: wrap;
+    }
+
+    .overlay-card {
+      pointer-events: auto;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      font-size: 0.83rem;
+      color: var(--muted);
+    }
+
+    .overlay-card strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .graph-shell {
+      padding: 14px 16px 12px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .graph-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .graph-head h3 {
+      margin: 0;
+      font-size: 1rem;
+    }
+
+    .graph-toggle-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .graph-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.82rem;
+    }
+
+    .graph-chip input { accent-color: var(--cyan); }
+    .graph-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .chart-wrap {
+      position: relative;
+      min-height: 0;
+      flex: 1;
+    }
+
+    #combinedChart {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      padding: 14px 14px 0 14px;
+      background: linear-gradient(to bottom, rgba(255,255,255,0.02), transparent);
+    }
+
+    .tab-btn {
+      flex: 1;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 14px 14px 0 0;
+      padding: 12px 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: rgba(0,229,255,0.12);
+      border-color: rgba(0,229,255,0.35);
+      color: var(--cyan);
+    }
+
+    .tab-content {
+      display: none;
+      flex: 1;
+      overflow: auto;
+      padding: 16px;
+    }
+
+    .tab-content.active { display: block; }
+
+    .section {
+      margin-bottom: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .section h2, .section h3 {
+      margin: 0 0 12px;
+      font-size: 1rem;
+    }
+
+    .control-group { margin-bottom: 14px; }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    label {
+      font-size: 0.92rem;
+      color: var(--text);
+    }
+
+    .value-pill {
+      min-width: 86px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--cyan);
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(0,229,255,0.6), rgba(255,214,10,0.45));
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 12px rgba(0,229,255,0.65);
+      cursor: pointer;
+      border: 2px solid #fff;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+
+    button {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(0,229,255,0.35);
+      box-shadow: 0 6px 18px rgba(0,229,255,0.08);
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, rgba(0,229,255,0.18), rgba(0,229,255,0.08));
+      color: var(--cyan);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, rgba(255,214,10,0.14), rgba(255,214,10,0.06));
+      color: var(--yellow);
+    }
+
+    .pause-btn {
+      background: linear-gradient(135deg, rgba(255,59,48,0.14), rgba(255,59,48,0.08));
+      color: var(--red);
+    }
+
+    .mini-note {
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.4;
+      margin-top: 10px;
+    }
+
+    .readout-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .readout {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .readout .label {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .readout .value {
+      font-size: 0.98rem;
+      font-weight: 600;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .prompt-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .prompt-box {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 12px;
+      line-height: 1.5;
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(0,0,0,0.22);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.10);
+      outline: none;
+      font: inherit;
+      line-height: 1.45;
+    }
+
+    textarea:focus {
+      border-color: rgba(0,229,255,0.4);
+      box-shadow: 0 0 0 3px rgba(0,229,255,0.10);
+    }
+
+    .qa-actions, .nav-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 1150px) {
+      #app {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) minmax(280px, 38vh) minmax(300px, 46vh);
+      }
+
+      .main-area {
+        grid-template-rows: minmax(280px, 1fr) 280px;
+      }
+
+      .side-panel {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 760px) {
+      #app {
+        padding: 10px;
+        gap: 10px;
+      }
+
+      .main-area {
+        gap: 10px;
+      }
+
+      .graph-head {
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="main-area">
+      <div class="sim-shell">
+        <canvas id="simCanvas"></canvas>
+        <div class="sim-overlay">
+          <div class="overlay-card">
+            <strong>Pan/Zoom:</strong> drag to pan, wheel to zoom, double-click to reset
+          </div>
+          <div class="overlay-card">
+            <strong>Live Graph:</strong> always visible below simulation
+          </div>
+        </div>
+      </div>
+
+      <div class="graph-shell">
+        <div class="graph-head">
+          <h3>Interactive System Graph</h3>
+          <div class="graph-toggle-row">
+            <label class="graph-chip">
+              <input type="checkbox" id="toggleMomentum" checked />
+              <span class="graph-dot" style="background:#2ee6a6;"></span>
+              Momentum pₓ
+            </label>
+            <label class="graph-chip">
+              <input type="checkbox" id="toggleCartV" checked />
+              <span class="graph-dot" style="background:#00E5FF;"></span>
+              Cart vₓ
+            </label>
+            <label class="graph-chip">
+              <input type="checkbox" id="toggleBlockV" checked />
+              <span class="graph-dot" style="background:#FFD60A;"></span>
+              Block vₓ
+            </label>
+            <label class="graph-chip">
+              <input type="checkbox" id="toggleEnergy" checked />
+              <span class="graph-dot" style="background:#FF3B30;"></span>
+              Energy K
+            </label>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="combinedChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <aside class="side-panel">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="controlsTab">Controls</button>
+        <button class="tab-btn" data-tab="qaTab">Q/A Prompts</button>
+      </div>
+
+      <div class="tab-content active" id="controlsTab">
+        <div class="section">
+          <h2>System Controls</h2>
+
+          <div class="control-group">
+            <div class="control-row">
+              <label for="cartMassSlider">Cart Mass m<sub>c</sub></label>
+              <div class="value-pill" id="cartMassValue">4.0 kg</div>
+            </div>
+            <input type="range" id="cartMassSlider" min="1" max="10" step="0.1" value="4" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-row">
+              <label for="blockMassSlider">Block Mass m<sub>b</sub></label>
+              <div class="value-pill" id="blockMassValue">2.0 kg</div>
+            </div>
+            <input type="range" id="blockMassSlider" min="1" max="10" step="0.1" value="2" />
+          </div>
+
+          <div class="control-group">
+            <div class="control-row">
+              <label for="cartVelocitySlider">Initial Cart Velocity v<sub>c</sub></label>
+              <div class="value-pill" id="cartVelocityValue">6.0 m/s</div>
+            </div>
+            <input type="range" id="cartVelocitySlider" min="2" max="10" step="0.1" value="6" />
+          </div>
+
+          <div class="control-group">
+            <label>Collision Mode</label>
+            <div class="radio-group">
+              <label class="radio-option">
+                <input type="radio" name="collisionMode" value="instant" checked />
+                Instant Stick
+              </label>
+              <label class="radio-option">
+                <input type="radio" name="collisionMode" value="sliding" />
+                Sliding with Friction
+              </label>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <div class="control-row">
+              <label for="muSlider">Friction Coefficient μ<sub>k</sub></label>
+              <div class="value-pill" id="muValue">0.30</div>
+            </div>
+            <input type="range" id="muSlider" min="0.1" max="0.9" step="0.01" value="0.30" />
+          </div>
+
+          <div class="button-grid">
+            <button class="primary" id="releaseBtn">Release Block (Starts t₀)</button>
+            <button class="pause-btn" id="pauseBtn">Pause</button>
+            <button class="secondary" id="resetBtn">Reset Track</button>
+          </div>
+
+          <p class="mini-note">
+            The graph is always visible under the simulation. Pause freezes the physics state without resetting the graph.
+          </p>
+        </div>
+
+        <div class="section">
+          <h3>Physics Readouts</h3>
+          <div class="readout-grid">
+            <div class="readout">
+              <div class="label">State</div>
+              <div class="value" id="stateValue">Pre-Drop</div>
+            </div>
+            <div class="readout">
+              <div class="label">Time</div>
+              <div class="value" id="timeValue">0.000 s</div>
+            </div>
+            <div class="readout">
+              <div class="label">System pₓ</div>
+              <div class="value" id="momentumValue">24.000 kg·m/s</div>
+            </div>
+            <div class="readout">
+              <div class="label">System K</div>
+              <div class="value" id="energyValue">72.000 J</div>
+            </div>
+            <div class="readout">
+              <div class="label">Cart vₓ</div>
+              <div class="value" id="cartVValue">6.000 m/s</div>
+            </div>
+            <div class="readout">
+              <div class="label">Block vₓ</div>
+              <div class="value" id="blockVValue">0.000 m/s</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="qaTab">
+        <div class="section">
+          <div class="prompt-meta">
+            <div class="pill" id="stageLabel">Stage: Engage</div>
+            <div class="pill" id="promptCounter">Prompt 1 / 10</div>
+          </div>
+
+          <div class="prompt-box" id="promptText"></div>
+
+          <textarea id="answerBox" placeholder="Write your AP Physics reasoning here..."></textarea>
+
+          <div class="qa-actions">
+            <button id="saveAnswerBtn" class="primary">Save Answer</button>
+            <button id="exportDocxBtn" class="secondary">Export .docx</button>
+          </div>
+
+          <div class="nav-actions">
+            <button id="prevPromptBtn">Back</button>
+            <button id="nextPromptBtn">Next</button>
+          </div>
+
+          <div class="footer-note">
+            Answers auto-save locally in your browser while you type. Export bundles your name,
+            timestamp, all 10 prompts, and your responses into a downloadable DOCX file.
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    class PhysicsEngine {
+      constructor() {
+        this.g = 9.8;
+        this.mc = 4.0;
+        this.mb = 2.0;
+        this.vc0 = 6.0;
+        this.mu = 0.30;
+        this.mode = 'instant';
+
+        this.cartWidth = 1.8;
+        this.cartHeight = 0.55;
+        this.blockSize = 0.45;
+        this.dropHeight = 1.7;
+
+        this.maxDt = 1 / 360;
+        this.reset();
+      }
+
+      reset() {
+        this.state = 0;
+        this.time = 0;
+        this.t0 = null;
+        this.t1 = null;
+        this.t2 = null;
+
+        this.cartX = 0;
+        this.cartY = 0;
+        this.cartVx = this.vc0;
+
+        this.blockX = this.cartX;
+        this.blockY = this.cartHeight + this.dropHeight;
+        this.blockVx = 0;
+        this.blockVy = 0;
+
+        this.blockOnCart = false;
+        this.running = false;
+      }
+
+      setCartMass(v) { this.mc = v; this.reset(); }
+      setBlockMass(v) { this.mb = v; this.reset(); }
+      setCartVelocity(v) { this.vc0 = v; this.reset(); }
+      setMu(v) { this.mu = v; this.reset(); }
+      setMode(v) { this.mode = v; this.reset(); }
+
+      startDrop() {
+        this.reset();
+        this.running = true;
+        this.state = 1;
+        this.t0 = 0;
+      }
+
+      pause() {
+        this.running = false;
+      }
+
+      getStateLabel() {
+        switch (this.state) {
+          case 0: return 'Pre-Drop';
+          case 1: return 'Free Fall';
+          case 2: return this.mode === 'instant' ? 'Instant Collision' : 'Sliding / Friction Phase';
+          case 3: return 'Post-Collision';
+          default: return 'Unknown';
+        }
+      }
+
+      getSystemMomentumX() {
+        return this.mc * this.cartVx + this.mb * this.blockVx;
+      }
+
+      getSystemKineticEnergy() {
+        const kc = 0.5 * this.mc * this.cartVx * this.cartVx;
+        const kb = 0.5 * this.mb * (this.blockVx * this.blockVx + this.blockVy * this.blockVy);
+        return kc + kb;
+      }
+
+      getFinalSharedVelocity() {
+        return (this.mc * this.vc0) / (this.mc + this.mb);
+      }
+
+      getStateSnapshot() {
+        return {
+          state: this.state,
+          stateLabel: this.getStateLabel(),
+          time: this.time,
+          t0: this.t0,
+          t1: this.t1,
+          t2: this.t2,
+          cartX: this.cartX,
+          cartY: this.cartY,
+          cartVx: this.cartVx,
+          blockX: this.blockX,
+          blockY: this.blockY,
+          blockVx: this.blockVx,
+          blockVy: this.blockVy,
+          momentumX: this.getSystemMomentumX(),
+          kineticEnergy: this.getSystemKineticEnergy(),
+          mode: this.mode,
+          blockOnCart: this.blockOnCart
+        };
+      }
+
+      step(frameDt) {
+        if (!this.running) return;
+        let remaining = frameDt;
+        while (remaining > 0) {
+          const dt = Math.min(this.maxDt, remaining);
+          this.integrate(dt);
+          remaining -= dt;
+        }
+      }
+
+      integrate(dt) {
+        this.time += dt;
+
+        if (this.state === 1) {
+          this.cartX += this.cartVx * dt;
+
+          this.blockVy -= this.g * dt;
+          this.blockY += this.blockVy * dt;
+          this.blockX = this.cartX;
+
+          const cartTop = this.cartHeight;
+          const blockBottom = this.blockY - this.blockSize / 2;
+
+          if (blockBottom <= cartTop) {
+            this.blockY = cartTop + this.blockSize / 2;
+            this.t1 = this.time;
+            this.enterCollisionPhase();
+          }
+          return;
+        }
+
+        if (this.state === 2) {
+          if (this.mode === 'sliding') {
+            const fk = this.mu * this.mb * this.g;
+            const ab = fk / this.mb;
+            const ac = -fk / this.mc;
+
+            this.blockVx += ab * dt;
+            this.cartVx += ac * dt;
+
+            this.cartX += this.cartVx * dt;
+            this.blockX += this.blockVx * dt;
+            this.blockY = this.cartHeight + this.blockSize / 2;
+
+            const leftLimit = this.cartX - this.cartWidth * 0.35;
+            const rightLimit = this.cartX + this.cartWidth * 0.35;
+            if (this.blockX < leftLimit) this.blockX = leftLimit;
+            if (this.blockX > rightLimit) this.blockX = rightLimit;
+
+            if (this.blockVx >= this.cartVx) {
+              const vf = this.getFinalSharedVelocity();
+              this.cartVx = vf;
+              this.blockVx = vf;
+              this.blockVy = 0;
+              this.blockOnCart = true;
+              this.blockX = this.cartX;
+              this.t2 = this.time;
+              this.state = 3;
+            }
+          }
+          return;
+        }
+
+        if (this.state === 3) {
+          this.cartX += this.cartVx * dt;
+          this.blockX = this.cartX;
+          this.blockY = this.cartHeight + this.blockSize / 2;
+        }
+      }
+
+      enterCollisionPhase() {
+        this.state = 2;
+        this.blockVy = 0;
+
+        if (this.mode === 'instant') {
+          const vf = this.getFinalSharedVelocity();
+          this.cartVx = vf;
+          this.blockVx = vf;
+          this.blockX = this.cartX;
+          this.blockY = this.cartHeight + this.blockSize / 2;
+          this.blockOnCart = true;
+          this.t2 = this.t1;
+          this.state = 3;
+          return;
+        }
+
+        this.blockVx = 0;
+        this.blockY = this.cartHeight + this.blockSize / 2;
+        this.blockX = this.cartX;
+        this.blockOnCart = false;
+      }
+    }
+
+    class Renderer {
+      constructor(canvas, engine) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.engine = engine;
+        this.pixelRatio = Math.max(1, window.devicePixelRatio || 1);
+
+        this.baseScale = 140;
+        this.camera = { x: 0, y: 0, zoom: 1 };
+        this.dragging = false;
+        this.lastPointer = null;
+
+        this.initInteractions();
+      }
+
+      initInteractions() {
+        this.canvas.addEventListener('mousedown', (e) => {
+          this.dragging = true;
+          this.lastPointer = { x: e.clientX, y: e.clientY };
+          this.canvas.classList.add('dragging');
+        });
+
+        window.addEventListener('mouseup', () => {
+          this.dragging = false;
+          this.lastPointer = null;
+          this.canvas.classList.remove('dragging');
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (!this.dragging || !this.lastPointer) return;
+          const dx = e.clientX - this.lastPointer.x;
+          const dy = e.clientY - this.lastPointer.y;
+          this.camera.x += dx;
+          this.camera.y += dy;
+          this.lastPointer = { x: e.clientX, y: e.clientY };
+        });
+
+        this.canvas.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const factor = e.deltaY < 0 ? 1.08 : 0.92;
+          this.camera.zoom *= factor;
+          this.camera.zoom = Math.max(0.45, Math.min(3.0, this.camera.zoom));
+        }, { passive: false });
+
+        this.canvas.addEventListener('dblclick', () => {
+          this.camera.x = 0;
+          this.camera.y = 0;
+          this.camera.zoom = 1;
+        });
+      }
+
+      resize() {
+        const rect = this.canvas.getBoundingClientRect();
+        this.canvas.width = rect.width * this.pixelRatio;
+        this.canvas.height = rect.height * this.pixelRatio;
+        this.ctx.setTransform(this.pixelRatio, 0, 0, this.pixelRatio, 0, 0);
+      }
+
+      getOrigin() {
+        const w = this.canvas.clientWidth;
+        const h = this.canvas.clientHeight;
+        const cartFollowX = w * 0.36 - this.engine.cartX * this.baseScale * this.camera.zoom;
+        const baseY = h * 0.72;
+
+        return {
+          x: cartFollowX + this.camera.x,
+          y: baseY + this.camera.y
+        };
+      }
+
+      worldToCanvas(x, y) {
+        const origin = this.getOrigin();
+        const scale = this.baseScale * this.camera.zoom;
+        return {
+          x: origin.x + x * scale,
+          y: origin.y - y * scale
+        };
+      }
+
+      clear() {
+        const ctx = this.ctx;
+        const w = this.canvas.clientWidth;
+        const h = this.canvas.clientHeight;
+        ctx.clearRect(0, 0, w, h);
+
+        for (let i = 0; i < 42; i++) {
+          const x = (i * 89) % w;
+          const y = (i * 61) % h;
+          ctx.beginPath();
+          ctx.fillStyle = i % 3 === 0 ? 'rgba(255,255,255,0.05)' : 'rgba(0,229,255,0.035)';
+          ctx.arc(x, y, 1 + (i % 2), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      draw() {
+        this.clear();
+        this.drawTrack();
+        this.drawVelocityVectors();
+        this.drawCart();
+        this.drawBlock();
+      }
+
+      drawTrack() {
+        const ctx = this.ctx;
+        const w = this.canvas.clientWidth;
+        const origin = this.getOrigin();
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, origin.y);
+        ctx.lineTo(w, origin.y);
+        ctx.stroke();
+
+        for (let x = -200; x < w + 200; x += 28) {
+          ctx.beginPath();
+          ctx.moveTo(x + ((origin.x * 0.2) % 28), origin.y + 2);
+          ctx.lineTo(x + 12 + ((origin.x * 0.2) % 28), origin.y + 14);
+          ctx.strokeStyle = 'rgba(255,255,255,0.045)';
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      drawCart() {
+        const ctx = this.ctx;
+        const scale = this.baseScale * this.camera.zoom;
+        const cart = this.worldToCanvas(this.engine.cartX, this.engine.cartY);
+        const width = this.engine.cartWidth * scale;
+        const height = this.engine.cartHeight * scale;
+
+        ctx.save();
+        ctx.translate(cart.x, cart.y);
+
+        const bodyX = -width / 2;
+        const bodyY = -height;
+
+        const grad = ctx.createLinearGradient(bodyX, 0, bodyX + width, 0);
+        grad.addColorStop(0, 'rgba(0,229,255,0.85)');
+        grad.addColorStop(1, 'rgba(120,245,255,0.95)');
+
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+        ctx.lineWidth = 2;
+
+        this.roundRect(ctx, bodyX, bodyY, width, height, 16 * this.camera.zoom);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.10)';
+        ctx.fillRect(bodyX + 12, bodyY + 8, width - 24, 8);
+
+        const wheelY = 4;
+        const wheelOffsets = [-width * 0.28, width * 0.28];
+        wheelOffsets.forEach(dx => {
+          ctx.beginPath();
+          ctx.arc(dx, wheelY, 17 * this.camera.zoom, 0, Math.PI * 2);
+          ctx.fillStyle = '#111';
+          ctx.fill();
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.arc(dx, wheelY, 6 * this.camera.zoom, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(255,255,255,0.35)';
+          ctx.fill();
+        });
+
+        ctx.restore();
+      }
+
+      drawBlock() {
+        const ctx = this.ctx;
+        const scale = this.baseScale * this.camera.zoom;
+        const p = this.worldToCanvas(this.engine.blockX, this.engine.blockY);
+        const size = this.engine.blockSize * scale;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+
+        const grad = ctx.createLinearGradient(-size/2, -size/2, size/2, size/2);
+        grad.addColorStop(0, 'rgba(255,214,10,0.98)');
+        grad.addColorStop(1, 'rgba(255,170,20,0.90)');
+
+        ctx.fillStyle = grad;
+        ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+        ctx.lineWidth = 2;
+        this.roundRect(ctx, -size/2, -size/2, size, size, 10 * this.camera.zoom);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      drawVelocityVectors() {
+        const cartPos = this.worldToCanvas(this.engine.cartX, this.engine.cartHeight + 0.35);
+        const blockPos = this.worldToCanvas(this.engine.blockX, this.engine.blockY + 0.45);
+
+        const cartScale = 20;
+        const blockScale = 20;
+
+        this.drawArrow(cartPos.x, cartPos.y, cartPos.x + this.engine.cartVx * cartScale, cartPos.y, '#00E5FF', 'v_cart');
+        this.drawArrow(blockPos.x, blockPos.y, blockPos.x + this.engine.blockVx * blockScale, blockPos.y, '#FFD60A', 'v_block,x');
+
+        if (this.engine.state === 1) {
+          this.drawArrow(blockPos.x, blockPos.y, blockPos.x, blockPos.y + this.engine.blockVy * -12, '#FF3B30', 'v_block,y');
+        }
+      }
+
+      drawArrow(x1, y1, x2, y2, color, label) {
+        const ctx = this.ctx;
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const len = Math.hypot(dx, dy);
+        if (len < 6) return;
+
+        const angle = Math.atan2(dy, dx);
+        const head = 10;
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 3;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 12;
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+        ctx.font = '12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(label, x2 + 8, y2 - 6);
+        ctx.restore();
+      }
+
+      roundRect(ctx, x, y, w, h, r) {
+        const rr = Math.max(2, r);
+        ctx.beginPath();
+        ctx.moveTo(x + rr, y);
+        ctx.arcTo(x + w, y, x + w, y + h, rr);
+        ctx.arcTo(x + w, y + h, x, y + h, rr);
+        ctx.arcTo(x, y + h, x, y, rr);
+        ctx.arcTo(x, y, x + w, y, rr);
+        ctx.closePath();
+      }
+    }
+
+    class GraphManager {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.maxPoints = 600;
+
+        this.chart = new Chart(this.canvas.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: 'Momentum pₓ (kg·m/s)',
+                data: [],
+                borderColor: '#2ee6a6',
+                backgroundColor: 'rgba(46,230,166,0.08)',
+                borderWidth: 2.2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                tension: 0.08,
+                yAxisID: 'yMomentum'
+              },
+              {
+                label: 'Cart vₓ (m/s)',
+                data: [],
+                borderColor: '#00E5FF',
+                backgroundColor: 'rgba(0,229,255,0.08)',
+                borderWidth: 2.2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                tension: 0.08,
+                yAxisID: 'yVelocity'
+              },
+              {
+                label: 'Block vₓ (m/s)',
+                data: [],
+                borderColor: '#FFD60A',
+                backgroundColor: 'rgba(255,214,10,0.08)',
+                borderWidth: 2.2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                tension: 0.08,
+                yAxisID: 'yVelocity'
+              },
+              {
+                label: 'Energy K (J)',
+                data: [],
+                borderColor: '#FF3B30',
+                backgroundColor: 'rgba(255,59,48,0.08)',
+                borderWidth: 2.2,
+                pointRadius: 0,
+                pointHoverRadius: 4,
+                tension: 0.08,
+                yAxisID: 'yEnergy'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            interaction: {
+              mode: 'index',
+              intersect: false
+            },
+            plugins: {
+              legend: {
+                labels: { color: '#f0f0f5' }
+              },
+              tooltip: {
+                enabled: true,
+                backgroundColor: 'rgba(18,18,24,0.94)',
+                titleColor: '#f0f0f5',
+                bodyColor: '#f0f0f5',
+                borderColor: 'rgba(255,255,255,0.12)',
+                borderWidth: 1,
+                displayColors: true,
+                callbacks: {
+                  title(items) {
+                    if (!items.length) return '';
+                    return `t = ${items[0].label} s`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                title: { display: true, text: 'Time (s)', color: '#9aa' },
+                ticks: { color: '#9aa' },
+                grid: { color: 'rgba(255,255,255,0.06)' }
+              },
+              yMomentum: {
+                type: 'linear',
+                position: 'left',
+                title: { display: true, text: 'Momentum', color: '#2ee6a6' },
+                ticks: { color: '#2ee6a6' },
+                grid: { color: 'rgba(255,255,255,0.06)' }
+              },
+              yVelocity: {
+                type: 'linear',
+                position: 'right',
+                title: { display: true, text: 'Velocity', color: '#00E5FF' },
+                ticks: { color: '#00E5FF' },
+                grid: { drawOnChartArea: false }
+              },
+              yEnergy: {
+                type: 'linear',
+                position: 'right',
+                offset: true,
+                title: { display: true, text: 'Energy', color: '#FF3B30' },
+                ticks: { color: '#FF3B30' },
+                grid: { drawOnChartArea: false }
+              }
+            }
+          }
+        });
+      }
+
+      reset() {
+        this.chart.data.labels = [];
+        this.chart.data.datasets.forEach(ds => ds.data = []);
+        this.chart.update('none');
+      }
+
+      append(snapshot) {
+        const t = snapshot.time.toFixed(3);
+        this.chart.data.labels.push(t);
+        this.chart.data.datasets[0].data.push(snapshot.momentumX);
+        this.chart.data.datasets[1].data.push(snapshot.cartVx);
+        this.chart.data.datasets[2].data.push(snapshot.blockVx);
+        this.chart.data.datasets[3].data.push(snapshot.kineticEnergy);
+
+        if (this.chart.data.labels.length > this.maxPoints) {
+          this.chart.data.labels.shift();
+          this.chart.data.datasets.forEach(ds => ds.data.shift());
+        }
+
+        this.chart.update('none');
+      }
+
+      setVisibility(index, visible) {
+        this.chart.data.datasets[index].hidden = !visible;
+        this.chart.update('none');
+      }
+    }
+
+    class InquiryStateManager {
+      constructor() {
+        this.storageKey = 'ap-cart-block-inquiry-answers-v1';
+        this.indexKey = 'ap-cart-block-inquiry-index-v1';
+
+        this.prompts = [
+          { stage: 'Engage', text: '1. [Engage] Set the simulation to "Instant Stick". Release the block. Look at the System X-Momentum graph. What happens to the magnitude of the system’s horizontal momentum from t₀ to after t₂?' },
+          { stage: 'Engage', text: '2. [Engage] Observe the Kinetic Energy graph during the collision. If momentum is conserved, why does the kinetic energy decrease? Where does that energy go?' },
+          { stage: 'Explore', text: '3. [Explore] Change m_b so it is exactly equal to m_c. Release the block. Mathematically, what is the ratio of the final speed v_f to the initial speed v_c?' },
+          { stage: 'Explore', text: '4. [Explore] Switch to "Sliding with Friction" mode. Observe the Velocity graph. Describe the slopes (accelerations) of the cart’s velocity and the block’s velocity between t₁ and t₂.' },
+          { stage: 'Explain', text: '5. [Explain] Let’s derive the answer to AP Part A(ii). Using the principle of Conservation of Momentum, write the algebraic derivation for the final speed v_f in terms of m_c, m_b, and v_c.' },
+          { stage: 'Explain', text: '6. [Explain] Let’s derive AP Part A(iii). Write the fundamental algebraic expression for the change in kinetic energy ΔK = K_f - K_i in terms of m_c, m_b, and v_c.' },
+          { stage: 'Elaborate', text: '7. [Elaborate] Look at the AP Part B question: During the sliding time interval t_T, there is a frictional force. Does the x-component of the momentum of the new block-cart system increase, decrease, or remain constant?' },
+          { stage: 'Elaborate', text: '8. [Elaborate] Justify your previous answer. Identify the internal forces acting between the cart and the block, and explain how Newton’s Third Law guarantees the system’s total momentum remains unchanged.' },
+          { stage: 'Evaluate', text: '9. [Evaluate] In "Sliding" mode, double the friction coefficient μ_k. Run the simulation. Does the final shared velocity v_f change? Why or why not? What does change on the graph?' },
+          { stage: 'Evaluate', text: '10. [Evaluate] Synthesize: If the block had been thrown straight down with a high initial vertical velocity instead of being dropped from rest, would the final horizontal velocity v_f of the cart change? Explain using momentum vectors.' }
+        ];
+
+        this.answers = this.loadAnswers();
+        this.currentIndex = this.loadIndex();
+      }
+
+      loadAnswers() {
+        try {
+          const raw = localStorage.getItem(this.storageKey);
+          if (!raw) return Array(this.prompts.length).fill('');
+          const parsed = JSON.parse(raw);
+          return Array.from({ length: this.prompts.length }, (_, i) => parsed[i] || '');
+        } catch {
+          return Array(this.prompts.length).fill('');
+        }
+      }
+
+      saveAnswers() {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.answers));
+      }
+
+      loadIndex() {
+        const raw = localStorage.getItem(this.indexKey);
+        const val = Number(raw);
+        if (Number.isFinite(val) && val >= 0 && val < this.prompts.length) return val;
+        return 0;
+      }
+
+      saveIndex() {
+        localStorage.setItem(this.indexKey, String(this.currentIndex));
+      }
+
+      setAnswer(index, text) {
+        this.answers[index] = text;
+        this.saveAnswers();
+      }
+
+      getCurrentPrompt() {
+        return this.prompts[this.currentIndex];
+      }
+
+      getCurrentAnswer() {
+        return this.answers[this.currentIndex] || '';
+      }
+
+      next() {
+        if (this.currentIndex < this.prompts.length - 1) {
+          this.currentIndex++;
+          this.saveIndex();
+        }
+      }
+
+      prev() {
+        if (this.currentIndex > 0) {
+          this.currentIndex--;
+          this.saveIndex();
+        }
+      }
+
+      async exportDocx() {
+        const studentName = prompt('Enter student name for DOCX export:');
+        if (!studentName || !studentName.trim()) return;
+
+        const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = window.docx;
+        const timestamp = new Date().toLocaleString();
+
+        const children = [
+          new Paragraph({
+            heading: HeadingLevel.TITLE,
+            alignment: AlignmentType.CENTER,
+            children: [new TextRun({ text: 'AP Physics 1 Cart-Block Guided Inquiry', bold: true, size: 32 })]
+          }),
+          new Paragraph({ children: [new TextRun({ text: `Student: ${studentName}`, bold: true })] }),
+          new Paragraph({ children: [new TextRun({ text: `Exported: ${timestamp}` })] }),
+          new Paragraph({ text: '' })
+        ];
+
+        this.prompts.forEach((p, i) => {
+          children.push(
+            new Paragraph({
+              heading: HeadingLevel.HEADING_2,
+              children: [new TextRun({ text: `${p.stage} — Prompt ${i + 1}` })]
+            }),
+            new Paragraph({
+              children: [new TextRun({ text: p.text, italics: true })]
+            }),
+            new Paragraph({
+              children: [new TextRun({
+                text: this.answers[i] && this.answers[i].trim() ? this.answers[i] : '[No answer entered]'
+              })]
+            }),
+            new Paragraph({ text: '' })
+          );
+        });
+
+        const doc = new Document({ sections: [{ children }] });
+        const blob = await Packer.toBlob(doc);
+        saveAs(blob, `${studentName.replace(/\s+/g, '_')}_Cart_Block_Inquiry.docx`);
+      }
+    }
+
+    class UIController {
+      constructor(engine, renderer, graph, inquiry) {
+        this.engine = engine;
+        this.renderer = renderer;
+        this.graph = graph;
+        this.inquiry = inquiry;
+
+        this.els = {
+          cartMassSlider: document.getElementById('cartMassSlider'),
+          blockMassSlider: document.getElementById('blockMassSlider'),
+          cartVelocitySlider: document.getElementById('cartVelocitySlider'),
+          muSlider: document.getElementById('muSlider'),
+
+          cartMassValue: document.getElementById('cartMassValue'),
+          blockMassValue: document.getElementById('blockMassValue'),
+          cartVelocityValue: document.getElementById('cartVelocityValue'),
+          muValue: document.getElementById('muValue'),
+
+          releaseBtn: document.getElementById('releaseBtn'),
+          pauseBtn: document.getElementById('pauseBtn'),
+          resetBtn: document.getElementById('resetBtn'),
+
+          stateValue: document.getElementById('stateValue'),
+          timeValue: document.getElementById('timeValue'),
+          momentumValue: document.getElementById('momentumValue'),
+          energyValue: document.getElementById('energyValue'),
+          cartVValue: document.getElementById('cartVValue'),
+          blockVValue: document.getElementById('blockVValue'),
+
+          modeRadios: document.querySelectorAll('input[name="collisionMode"]'),
+
+          tabButtons: document.querySelectorAll('.tab-btn'),
+          tabContents: document.querySelectorAll('.tab-content'),
+
+          stageLabel: document.getElementById('stageLabel'),
+          promptCounter: document.getElementById('promptCounter'),
+          promptText: document.getElementById('promptText'),
+          answerBox: document.getElementById('answerBox'),
+          saveAnswerBtn: document.getElementById('saveAnswerBtn'),
+          exportDocxBtn: document.getElementById('exportDocxBtn'),
+          prevPromptBtn: document.getElementById('prevPromptBtn'),
+          nextPromptBtn: document.getElementById('nextPromptBtn'),
+
+          toggleMomentum: document.getElementById('toggleMomentum'),
+          toggleCartV: document.getElementById('toggleCartV'),
+          toggleBlockV: document.getElementById('toggleBlockV'),
+          toggleEnergy: document.getElementById('toggleEnergy')
+        };
+
+        this.bindEvents();
+        this.refreshControls();
+        this.refreshPromptUI();
+        this.syncModeUI();
+        this.syncGraphToggles();
+        this.updateReadouts();
+      }
+
+      bindEvents() {
+        this.els.cartMassSlider.addEventListener('input', () => {
+          this.engine.setCartMass(parseFloat(this.els.cartMassSlider.value));
+          this.refreshControls();
+          this.resetGraphAndReadouts();
+        });
+
+        this.els.blockMassSlider.addEventListener('input', () => {
+          this.engine.setBlockMass(parseFloat(this.els.blockMassSlider.value));
+          this.refreshControls();
+          this.resetGraphAndReadouts();
+        });
+
+        this.els.cartVelocitySlider.addEventListener('input', () => {
+          this.engine.setCartVelocity(parseFloat(this.els.cartVelocitySlider.value));
+          this.refreshControls();
+          this.resetGraphAndReadouts();
+        });
+
+        this.els.muSlider.addEventListener('input', () => {
+          this.engine.setMu(parseFloat(this.els.muSlider.value));
+          this.refreshControls();
+          this.resetGraphAndReadouts();
+        });
+
+        this.els.modeRadios.forEach(radio => {
+          radio.addEventListener('change', () => {
+            if (radio.checked) {
+              this.engine.setMode(radio.value);
+              this.syncModeUI();
+              this.resetGraphAndReadouts();
+            }
+          });
+        });
+
+        this.els.releaseBtn.addEventListener('click', () => {
+          if (this.engine.state === 0) {
+            this.engine.startDrop();
+            this.graph.reset();
+            this.graph.append(this.engine.getStateSnapshot());
+          } else {
+            this.engine.running = true;
+          }
+        });
+
+        this.els.pauseBtn.addEventListener('click', () => {
+          this.engine.pause();
+        });
+
+        this.els.resetBtn.addEventListener('click', () => {
+          this.engine.reset();
+          this.graph.reset();
+          this.graph.append(this.engine.getStateSnapshot());
+          this.updateReadouts();
+        });
+
+        this.els.tabButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            this.els.tabButtons.forEach(b => b.classList.remove('active'));
+            this.els.tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+          });
+        });
+
+        this.els.answerBox.addEventListener('input', () => {
+          this.inquiry.setAnswer(this.inquiry.currentIndex, this.els.answerBox.value);
+        });
+
+        this.els.saveAnswerBtn.addEventListener('click', () => {
+          this.inquiry.setAnswer(this.inquiry.currentIndex, this.els.answerBox.value);
+          this.flashButton(this.els.saveAnswerBtn, 'Saved');
+        });
+
+        this.els.prevPromptBtn.addEventListener('click', () => {
+          this.saveCurrentAnswer();
+          this.inquiry.prev();
+          this.refreshPromptUI();
+        });
+
+        this.els.nextPromptBtn.addEventListener('click', () => {
+          this.saveCurrentAnswer();
+          this.inquiry.next();
+          this.refreshPromptUI();
+        });
+
+        this.els.exportDocxBtn.addEventListener('click', async () => {
+          this.saveCurrentAnswer();
+          await this.inquiry.exportDocx();
+        });
+
+        this.els.toggleMomentum.addEventListener('change', () => this.syncGraphToggles());
+        this.els.toggleCartV.addEventListener('change', () => this.syncGraphToggles());
+        this.els.toggleBlockV.addEventListener('change', () => this.syncGraphToggles());
+        this.els.toggleEnergy.addEventListener('change', () => this.syncGraphToggles());
+
+        window.addEventListener('resize', () => {
+          this.renderer.resize();
+          this.graph.chart.resize();
+        });
+      }
+
+      syncGraphToggles() {
+        this.graph.setVisibility(0, this.els.toggleMomentum.checked);
+        this.graph.setVisibility(1, this.els.toggleCartV.checked);
+        this.graph.setVisibility(2, this.els.toggleBlockV.checked);
+        this.graph.setVisibility(3, this.els.toggleEnergy.checked);
+      }
+
+      flashButton(button, text) {
+        const original = button.textContent;
+        button.textContent = text;
+        setTimeout(() => button.textContent = original, 850);
+      }
+
+      saveCurrentAnswer() {
+        this.inquiry.setAnswer(this.inquiry.currentIndex, this.els.answerBox.value);
+      }
+
+      refreshPromptUI() {
+        const prompt = this.inquiry.getCurrentPrompt();
+        this.els.stageLabel.textContent = `Stage: ${prompt.stage}`;
+        this.els.promptCounter.textContent = `Prompt ${this.inquiry.currentIndex + 1} / ${this.inquiry.prompts.length}`;
+        this.els.promptText.textContent = prompt.text;
+        this.els.answerBox.value = this.inquiry.getCurrentAnswer();
+      }
+
+      syncModeUI() {
+        const sliding = this.engine.mode === 'sliding';
+        this.els.muSlider.disabled = !sliding;
+        this.els.muSlider.style.opacity = sliding ? '1' : '0.45';
+      }
+
+      refreshControls() {
+        this.els.cartMassValue.textContent = `${parseFloat(this.els.cartMassSlider.value).toFixed(1)} kg`;
+        this.els.blockMassValue.textContent = `${parseFloat(this.els.blockMassSlider.value).toFixed(1)} kg`;
+        this.els.cartVelocityValue.textContent = `${parseFloat(this.els.cartVelocitySlider.value).toFixed(1)} m/s`;
+        this.els.muValue.textContent = `${parseFloat(this.els.muSlider.value).toFixed(2)}`;
+      }
+
+      resetGraphAndReadouts() {
+        this.graph.reset();
+        this.graph.append(this.engine.getStateSnapshot());
+        this.updateReadouts();
+      }
+
+      updateReadouts() {
+        const s = this.engine.getStateSnapshot();
+        this.els.stateValue.textContent = s.stateLabel;
+        this.els.timeValue.textContent = `${s.time.toFixed(3)} s`;
+        this.els.momentumValue.textContent = `${s.momentumX.toFixed(3)} kg·m/s`;
+        this.els.energyValue.textContent = `${s.kineticEnergy.toFixed(3)} J`;
+        this.els.cartVValue.textContent = `${s.cartVx.toFixed(3)} m/s`;
+        this.els.blockVValue.textContent = `${s.blockVx.toFixed(3)} m/s`;
+      }
+    }
+
+    const engine = new PhysicsEngine();
+    const renderer = new Renderer(document.getElementById('simCanvas'), engine);
+    const graph = new GraphManager(document.getElementById('combinedChart'));
+    const inquiry = new InquiryStateManager();
+    const ui = new UIController(engine, renderer, graph, inquiry);
+
+    renderer.resize();
+    graph.append(engine.getStateSnapshot());
+
+    let lastTime = performance.now();
+    let graphAccumulator = 0;
+
+    function animate(now) {
+      const dt = Math.min(0.033, (now - lastTime) / 1000);
+      lastTime = now;
+
+      engine.step(dt);
+      graphAccumulator += dt;
+
+      if (engine.running && graphAccumulator >= 0.02) {
+        graph.append(engine.getStateSnapshot());
+        graphAccumulator = 0;
+      }
+
+      ui.updateReadouts();
+      renderer.draw();
+      requestAnimationFrame(animate);
+    }
+
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
