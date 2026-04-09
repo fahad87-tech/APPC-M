@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exam Pacing Timer</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+/* CSS Resets & Base Variables */
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
+:root { --mid-height: 560px; --tile-gap: 10px; --tile-height: 128px; --ring-size: 500px; }
+body { background: #0a0e1a; color: #e0e0e0; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 8px 20px; overflow-x: hidden; }
+
+/* Typography */
+.title { font-size: 24px; font-weight: 800; color: rgba(255,255,255,0.8); letter-spacing: 6px; text-align: center; margin-bottom: 6px; }
+
+/* Cards & Layout */
+.glass-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; box-shadow: 0 4px 30px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
+.settings-row { display: flex; gap: 24px; padding: 14px 20px; width: 100%; max-width: 1400px; margin-bottom: 8px; justify-content: space-between; flex-wrap: wrap; }
+.setting-group { flex: 1; min-width: 200px; }
+.setting-group h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+.v-divider { width: 1px; background: rgba(255,255,255,0.1); margin: 0 12px; }
+
+/* Inputs */
+.input-grid { display: grid; grid-template-columns: auto 1fr; gap: 12px 16px; align-items: center; }
+.input-grid label { font-size: 12px; color: rgba(255,255,255,0.5); }
+.input-grid input[type="number"] { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 12px; color: #fff; font-size: 14px; width: 100px; outline: none; transition: 0.2s; }
+.input-grid input[type="number"]:focus { border-color: rgba(100,180,255,0.5); }
+
+/* Checkboxes */
+.checkbox-group { display: flex; flex-direction: column; gap: 12px; }
+.checkbox-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #b0b0b0; cursor: pointer; }
+.checkbox-label input { accent-color: #7c4dff; width: 16px; height: 16px; cursor: pointer; }
+
+/* Buttons */
+.btn-row { display: flex; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; justify-content: center; }
+.btn { padding: 12px 30px; border-radius: 10px; border: none; font-size: 14px; font-weight: 700; letter-spacing: 1px; cursor: pointer; color: #fff; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+.btn-start { background: #1b5e20; } .btn-start:hover:not(:disabled) { background: #2e7d32; }
+.btn-pause { background: #e65100; } .btn-pause:hover:not(:disabled) { background: #f57c00; }
+.btn-reset { background: #b71c1c; } .btn-reset:hover:not(:disabled) { background: #d32f2f; }
+.btn-frq { background: #6a1b9a; display: none; } .btn-frq:hover:not(:disabled) { background: #8e24aa; }
+
+/* Middle Layout */
+.mid-layout { display: flex; gap: 18px; width: 100%; max-width: 1400px; flex-wrap: nowrap; justify-content: center; align-items: stretch; height: var(--mid-height); margin-bottom: 10px; }
+.ring-container { flex: 1 1 auto; min-width: 320px; min-height: 0; display: flex; justify-content: center; align-items: center; position: relative; }
+.canvas-ring { width: var(--ring-size); height: var(--ring-size); }
+
+/* Right Column */
+.info-col { flex: 0 0 clamp(220px, 25%, 300px); min-width: 210px; height: 100%; display: grid; grid-template-rows: repeat(4, minmax(0, 1fr)); gap: var(--tile-gap); }
+.info-card { height: 100%; min-height: var(--tile-height); padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+.info-card .lbl { font-size: clamp(22px, calc(var(--tile-height) * 0.27), 38px); font-weight: 700; color: rgba(255,255,255,0.7); margin-bottom: 5px; line-height: 1; }
+.info-card .val { font-size: clamp(32px, calc(var(--tile-height) * 0.42), 64px); font-weight: 700; color: #fff; line-height: 1; }
+
+.q-card { height: 100%; min-height: var(--tile-height); padding: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; overflow: hidden; }
+.q-card .sec-name { font-size: clamp(20px, calc(var(--tile-height) * 0.20), 34px); font-weight: 700; color: rgba(255,255,255,0.5); margin-bottom: 2px; line-height: 0.98; }
+.q-card .q-main { font-size: clamp(40px, calc(var(--tile-height) * 0.43), 76px); font-weight: 800; color: #00e676; position: relative; z-index: 2; text-shadow: 0 0 24px rgba(0,230,118,0.45); line-height: 0.94; }
+.q-card .q-sub { font-size: clamp(14px, calc(var(--tile-height) * 0.14), 26px); color: rgba(255,255,255,0.7); margin-top: 2px; z-index: 2; line-height: 0.95; }
+.q-glow { position: absolute; width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, rgba(0,230,118,0.2) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; }
+
+/* Progress Bar */
+.prog-container { width: 100%; max-width: 1400px; height: 26px; background: rgba(255,255,255,0.05); border-radius: 13px; margin-bottom: 10px; position: relative; overflow: hidden; }
+.prog-fill { height: 100%; width: 0%; border-radius: 13px; background: linear-gradient(90deg, rgba(0,230,118,0.7), #00e676); transition: width 0.3s; position: relative; }
+.prog-glow { position: absolute; right: 0; top: 0; bottom: 0; width: 40px; background: radial-gradient(circle, rgba(255,255,255,0.8), transparent); filter: blur(5px); opacity: 0.5; }
+.prog-text { position: absolute; inset: 0; display: flex; justify-content: center; align-items: center; font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.8); }
+
+/* Overview Bar */
+.overview-bar { width: 100%; max-width: 1400px; height: 38px; display: flex; gap: 4px; margin-bottom: 0; }
+.ov-seg { height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: rgba(255,255,255,0.8); position: relative; overflow: hidden; }
+.ov-seg.finished { opacity: 0.3; }
+.ov-seg.active { border: 1.5px solid rgba(255,255,255,0.3); opacity: 1; }
+.ov-seg.inactive { opacity: 0.3; }
+.ov-seg-fill { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(255,255,255,0.2); }
+.ov-text { position: relative; z-index: 2; }
+
+/* Pause Overlay */
+.pause-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+.pause-overlay.active { display: flex; }
+.pause-icon { display: flex; gap: 16px; margin-bottom: 24px; position: relative; }
+.pause-icon::before { content:''; position: absolute; inset: -40px; background: radial-gradient(circle, rgba(255,193,7,0.3) 0%, transparent 70%); border-radius: 50%; z-index: -1; }
+.pause-bar { width: 18px; height: 60px; background: #ffc107; border-radius: 4px; box-shadow: 0 0 15px rgba(255,193,7,0.5); }
+.pause-text { font-size: 24px; font-weight: 800; color: #ffc107; letter-spacing: 4px; }
+.pause-resume-btn { margin-top: 20px; }
+@media (max-width: 1020px) {
+  .mid-layout { height: auto; flex-wrap: wrap; }
+  .ring-container { width: 100%; }
+  .canvas-ring { width: min(86vw, 620px); height: min(86vw, 620px); }
+  .info-col { flex: 1 1 100%; height: auto; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; }
+  .info-card, .q-card { min-height: 170px; }
+}
+</style>
+</head>
+<body>
+
+<div class="title">EXAM PACING TIMER</div>
+
+<div class="glass-card settings-row">
+  <div class="setting-group">
+    <h3 style="color:#42a5f5;">MCQ</h3>
+    <div class="input-grid">
+      <label>Questions</label><input type="number" id="mcq-q" value="40" min="0">
+      <label>Minutes</label><input type="number" id="mcq-t" value="45" min="0">
+    </div>
+  </div>
+  
+  <div class="v-divider"></div>
+  
+  <div class="setting-group">
+    <h3 style="color:#ab47bc;">FRQ</h3>
+    <div class="input-grid">
+      <label>Questions</label><input type="number" id="frq-q" value="5" min="0">
+      <label>Minutes</label><input type="number" id="frq-t" value="35" min="0">
+    </div>
+  </div>
+  
+  <div class="v-divider"></div>
+
+  <div class="setting-group">
+    <div style="font-size:14px; font-weight:700; color:rgba(255,255,255,0.5); margin-bottom:12px;">Options</div>
+    <div class="checkbox-group">
+      <label class="checkbox-label"><input type="checkbox" id="break-cb"> Break between MCQ & FRQ</label>
+      <label class="checkbox-label"><input type="checkbox" id="slow-cb"> Slow-motion (0.25x speed)</label>
+    </div>
+  </div>
+</div>
+
+<div class="btn-row">
+  <button class="btn btn-start" id="btn-start">▶ START</button>
+  <button class="btn btn-pause" id="btn-pause" disabled>⏸ PAUSE</button>
+  <button class="btn btn-reset" id="btn-reset">↺ RESET</button>
+  <button class="btn btn-frq" id="btn-frq">▶ START FRQ</button>
+</div>
+
+<div class="mid-layout">
+  <div class="ring-container">
+    <canvas id="ring-canvas" class="canvas-ring" width="1000" height="1000"></canvas>
+  </div>
+  
+  <div class="info-col">
+    <div class="glass-card q-card">
+      <div class="sec-name" id="q-sec-name">—</div>
+      <div class="q-main" id="q-val">Q0</div>
+      <div class="q-sub" id="q-sub">out of 0</div>
+      <div class="q-glow" id="q-glow"></div>
+    </div>
+    <div class="glass-card info-card">
+      <div class="lbl">Questions Left</div>
+      <div class="val" id="val-q-left">—</div>
+    </div>
+    <div class="glass-card info-card">
+      <div class="lbl">Sec / Question</div>
+      <div class="val" id="val-sec-q">—</div>
+    </div>
+    <div class="glass-card info-card">
+      <div class="lbl">Elapsed Time</div>
+      <div class="val" id="val-elapsed">—</div>
+    </div>
+  </div>
+</div>
+
+<div class="prog-container">
+  <div class="prog-fill" id="prog-fill"><div class="prog-glow"></div></div>
+  <div class="prog-text" id="prog-text">0%</div>
+</div>
+
+<div class="overview-bar" id="overview-bar">
+  <!-- Filled dynamically -->
+</div>
+
+<div class="pause-overlay" id="pause-overlay">
+  <div class="pause-icon">
+    <div class="pause-bar"></div><div class="pause-bar"></div>
+  </div>
+  <div class="pause-text">PAUSED</div>
+  <button class="btn btn-pause pause-resume-btn" id="pause-resume-btn">▶ RESUME</button>
+</div>
+
+<script>
+// --- Utils ---
+function lerpColor(c1, c2, t) {
+  t = Math.max(0, Math.min(1, t));
+  const r = Math.round(c1[0] + (c2[0] - c1[0]) * t);
+  const g = Math.round(c1[1] + (c2[1] - c1[1]) * t);
+  const b = Math.round(c1[2] + (c2[2] - c1[2]) * t);
+  return [r, g, b];
+}
+
+function hexToRgb(h) {
+  h = h.replace('#','');
+  if(h.length === 3) h = h.split('').map(c=>c+c).join('');
+  return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
+}
+
+function urgencyColor(frac) {
+  const cGreen = hexToRgb('#00e676');
+  const cYellow = hexToRgb('#ffeb3b');
+  const cOrange = hexToRgb('#ff9800');
+  const cRed = hexToRgb('#ff1744');
+  
+  if(frac < 0.5) return lerpColor(cGreen, cYellow, frac / 0.5);
+  else if(frac < 0.8) return lerpColor(cYellow, cOrange, (frac - 0.5) / 0.3);
+  else return lerpColor(cOrange, cRed, (frac - 0.8) / 0.2);
+}
+
+function rgbToStr(rgb, a=1) { return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`; }
+function fmtTime(sec) {
+  const s = Math.max(0, Math.floor(sec));
+  const m = Math.floor(s / 60);
+  const rm = s % 60;
+  return `${m.toString().padStart(2,'0')}:${rm.toString().padStart(2,'0')}`;
+}
+
+// --- State ---
+let state = {
+  running: false,
+  paused: false,
+  waitingForFrq: false,
+  sections: [],
+  currentSectionIdx: -1,
+  lastTick: 0,
+  lastQNum: -1,
+  pulsePhase: 0
+};
+const EXAM_TIMER_STATE_KEY = 'examTimerStateV1';
+let lastPersistAt = 0;
+
+// DOM
+const cvs = document.getElementById('ring-canvas');
+const ctx = cvs.getContext('2d');
+const btnStart = document.getElementById('btn-start');
+const btnPause = document.getElementById('btn-pause');
+const btnReset = document.getElementById('btn-reset');
+const btnFrq = document.getElementById('btn-frq');
+const btnPauseResumeOverlay = document.getElementById('pause-resume-btn');
+
+const elQVal = document.getElementById('q-val');
+const elQSub = document.getElementById('q-sub');
+const elQSecName = document.getElementById('q-sec-name');
+const elQGlow = document.getElementById('q-glow');
+
+const elValQLeft = document.getElementById('val-q-left');
+const elValSecQ = document.getElementById('val-sec-q');
+const elValElapsed = document.getElementById('val-elapsed');
+
+const elProgFill = document.getElementById('prog-fill');
+const elProgText = document.getElementById('prog-text');
+const elOverview = document.getElementById('overview-bar');
+
+const elPauseOv = document.getElementById('pause-overlay');
+
+function getOuterHeight(el) {
+  if (!el) return 0;
+  const style = window.getComputedStyle(el);
+  return el.offsetHeight + parseFloat(style.marginTop || 0) + parseFloat(style.marginBottom || 0);
+}
+
+function applyResponsiveLayoutSizing() {
+  const root = document.documentElement;
+  const wideLayout = window.matchMedia('(min-width: 1021px)').matches;
+  if (!wideLayout) {
+    root.style.setProperty('--mid-height', 'auto');
+    root.style.setProperty('--ring-size', `${Math.min(window.innerWidth * 0.96, 760)}px`);
+    return;
+  }
+  const bodyStyle = window.getComputedStyle(document.body);
+  const bodyPaddingY = parseFloat(bodyStyle.paddingTop || 0) + parseFloat(bodyStyle.paddingBottom || 0);
+  const reservedHeight =
+    getOuterHeight(document.querySelector('.title')) +
+    getOuterHeight(document.querySelector('.settings-row')) +
+    getOuterHeight(document.querySelector('.btn-row')) +
+    getOuterHeight(document.querySelector('.prog-container')) +
+    getOuterHeight(document.querySelector('.overview-bar'));
+  const midHeight = Math.max(420, window.innerHeight - bodyPaddingY - reservedHeight - 10);
+  root.style.setProperty('--mid-height', `${midHeight}px`);
+  const tileGap = 12;
+  const tileHeight = Math.max(90, (midHeight - tileGap * 3) / 4);
+  root.style.setProperty('--tile-height', `${tileHeight}px`);
+  const midWidth = document.querySelector('.mid-layout')?.getBoundingClientRect().width || 1000;
+  const infoWidth = document.querySelector('.info-col')?.getBoundingClientRect().width || 330;
+  const ringByTiles = tileHeight * 4.4;
+  const ringMaxByWidth = Math.max(380, midWidth - infoWidth - 18);
+  const ringSize = Math.max(360, Math.min(ringByTiles, midHeight, ringMaxByWidth));
+  root.style.setProperty('--ring-size', `${ringSize}px`);
+}
+
+function serializeInputs() {
+  return {
+    mcqQ: document.getElementById('mcq-q').value,
+    mcqT: document.getElementById('mcq-t').value,
+    frqQ: document.getElementById('frq-q').value,
+    frqT: document.getElementById('frq-t').value,
+    breakCb: document.getElementById('break-cb').checked,
+    slowCb: document.getElementById('slow-cb').checked
+  };
+}
+
+function applyInputs(inputs = {}) {
+  if (inputs.mcqQ !== undefined) document.getElementById('mcq-q').value = inputs.mcqQ;
+  if (inputs.mcqT !== undefined) document.getElementById('mcq-t').value = inputs.mcqT;
+  if (inputs.frqQ !== undefined) document.getElementById('frq-q').value = inputs.frqQ;
+  if (inputs.frqT !== undefined) document.getElementById('frq-t').value = inputs.frqT;
+  document.getElementById('break-cb').checked = !!inputs.breakCb;
+  document.getElementById('slow-cb').checked = !!inputs.slowCb;
+}
+
+function persistExamState(force = false) {
+  const now = Date.now();
+  if (!force && now - lastPersistAt < 800) return;
+  lastPersistAt = now;
+  const snapshot = {
+    inputs: serializeInputs(),
+    state: {
+      running: state.running,
+      paused: state.paused,
+      waitingForFrq: state.waitingForFrq,
+      sections: state.sections.map(s => ({ ...s })),
+      currentSectionIdx: state.currentSectionIdx,
+      lastQNum: state.lastQNum,
+      pulsePhase: state.pulsePhase
+    }
+  };
+  localStorage.setItem(EXAM_TIMER_STATE_KEY, JSON.stringify(snapshot));
+}
+
+function syncControlsFromState() {
+  if (!state.running) {
+    btnStart.disabled = false;
+    btnPause.disabled = true;
+    btnPause.innerText = "⏸ PAUSE";
+    btnFrq.style.display = 'none';
+    elPauseOv.classList.remove('active');
+    return;
+  }
+  btnStart.disabled = true;
+  btnPause.disabled = !!state.waitingForFrq;
+  btnPause.innerText = state.paused ? "▶ RESUME" : "⏸ PAUSE";
+  btnFrq.style.display = state.waitingForFrq ? 'block' : 'none';
+  if (state.paused) elPauseOv.classList.add('active');
+  else elPauseOv.classList.remove('active');
+}
+
+function loadExamState() {
+  try {
+    const raw = localStorage.getItem(EXAM_TIMER_STATE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return;
+    applyInputs(parsed.inputs || {});
+    if (!parsed.state || typeof parsed.state !== 'object') return;
+    state.running = !!parsed.state.running;
+    state.paused = !!parsed.state.paused;
+    state.waitingForFrq = !!parsed.state.waitingForFrq;
+    state.sections = Array.isArray(parsed.state.sections) ? parsed.state.sections.map(s => ({ ...s })) : [];
+    state.currentSectionIdx = Number.isInteger(parsed.state.currentSectionIdx) ? parsed.state.currentSectionIdx : -1;
+    state.lastQNum = Number.isInteger(parsed.state.lastQNum) ? parsed.state.lastQNum : -1;
+    state.pulsePhase = Number.isFinite(parsed.state.pulsePhase) ? parsed.state.pulsePhase : 0;
+    state.lastTick = performance.now();
+    syncControlsFromState();
+    drawRing();
+    updateUI();
+    if (state.running && !state.paused && !state.waitingForFrq) requestAnimationFrame(tick);
+  } catch(e) {}
+}
+
+// Canvas Render
+function drawRing() {
+  ctx.clearRect(0, 0, 1000, 1000);
+  const w = 1000, h = 1000;
+  const cx = w/2, cy = h/2;
+  const side = Math.min(w, h);
+  
+  ctx.lineCap = 'round';
+  
+  // Total Exam (Outer)
+  const outerR = side * 0.46;
+  const outerW = side * 0.02;
+  
+  // Base outer arc
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = outerW;
+  ctx.beginPath(); ctx.arc(cx, cy, outerR, 0, Math.PI*2); ctx.stroke();
+  
+  const totElapsed = state.sections.reduce((a,b)=>a+b.elapsed, 0);
+  const totDur = state.sections.reduce((a,b)=>a+b.totalSecs, 0);
+  const totFrac = totDur > 0 ? Math.min(1.0, totElapsed / totDur) : 0;
+  
+  const spanTot = -Math.max(0, 1.0 - totFrac) * Math.PI * 2;
+  
+  ctx.save();
+  ctx.translate(cx, cy); ctx.rotate(-Math.PI/2);
+  
+  for(let i=0; i<3; i++) {
+    const ga = Math.max(0.01, 0.12 - i*0.04);
+    ctx.lineWidth = outerW + (i+1)*6;
+    ctx.strokeStyle = `rgba(255,255,255,${ga})`;
+    ctx.beginPath(); ctx.arc(0, 0, outerR, 0, spanTot, true); ctx.stroke();
+  }
+  ctx.lineWidth = outerW;
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.beginPath(); ctx.arc(0, 0, outerR, 0, spanTot, true); ctx.stroke();
+  
+  ctx.restore();
+  
+  // Section (Inner)
+  const innerR = side * 0.38;
+  const innerW = side * 0.04;
+  
+  ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+  ctx.lineWidth = innerW;
+  ctx.beginPath(); ctx.arc(cx, cy, innerR, 0, Math.PI*2); ctx.stroke();
+  
+  let sec = state.currentSectionIdx >= 0 && state.currentSectionIdx < state.sections.length ? state.sections[state.currentSectionIdx] : null;
+
+  let colorRgb = [0,230,118]; // green default
+  let frc = 0;
+  let remainingSec = 0;
+  let secName = "";
+  let secText = "00:00";
+  let pulse = 1.0;
+  
+  if (sec) {
+    frc = sec.totalSecs > 0 ? Math.min(1.0, sec.elapsed / sec.totalSecs) : 1;
+    colorRgb = urgencyColor(frc);
+    remainingSec = Math.max(0, sec.totalSecs - sec.elapsed);
+    secName = sec.name.toUpperCase();
+    secText = fmtTime(remainingSec);
+    
+    if(frc > 0.8) {
+      state.pulsePhase += 0.08;
+      pulse = 1.0 + 0.15 * Math.sin(state.pulsePhase);
+    }
+  } else if(state.sections.length > 0 && state.currentSectionIdx >= state.sections.length) {
+    colorRgb = [255, 23, 68]; // red
+    secName = "FINISHED";
+    secText = "DONE";
+    frc = 1;
+  }
+  
+  const spanSec = -Math.max(0, 1.0 - frc) * Math.PI * 2;
+  
+  ctx.save();
+  ctx.translate(cx, cy); ctx.rotate(-Math.PI/2);
+  
+  for(let i=0; i<5; i++) {
+    const ga = Math.max(0.01, (0.27 - i*0.05) * pulse);
+    ctx.lineWidth = innerW + (i+1)*10;
+    ctx.strokeStyle = rgbToStr(colorRgb, ga);
+    ctx.beginPath(); ctx.arc(0, 0, innerR, 0, spanSec, true); ctx.stroke();
+  }
+  ctx.lineWidth = innerW;
+  ctx.strokeStyle = rgbToStr(colorRgb, 1);
+  ctx.beginPath(); ctx.arc(0, 0, innerR, 0, spanSec, true); ctx.stroke();
+  
+  // Bright tip
+  if(spanSec < -0.05) {
+    const tipX = innerR * Math.cos(spanSec);
+    const tipY = innerR * Math.sin(spanSec);
+    const grd = ctx.createRadialGradient(tipX, tipY, 0, tipX, tipY, innerW*2);
+    grd.addColorStop(0, 'rgba(255,255,255,0.8)');
+    grd.addColorStop(0.3, rgbToStr(colorRgb, 0.7));
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath(); ctx.arc(tipX, tipY, innerW*2, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  
+  // Center Text Layout
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  
+  let y = cy - 250;
+  
+  ctx.font = '900 85px "Segoe UI"';
+  ctx.fillStyle = rgbToStr(colorRgb, 0.2);
+  ctx.fillText(secName, cx, y+3);
+  ctx.fillStyle = rgbToStr(colorRgb, 1);
+  ctx.fillText(secName, cx, y);
+  
+  y += 115;
+  ctx.font = '900 150px "Segoe UI"';
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillText(secText, cx+6, y+6);
+  ctx.fillStyle = '#fff';
+  ctx.fillText(secText, cx, y);
+  
+  y += 85;
+  ctx.font = '700 42px "Segoe UI"';
+  ctx.fillStyle = rgbToStr(colorRgb, 0.8);
+  ctx.fillText(`${Math.max(0, 1-frc)*100|0}% remaining`, cx, y);
+  
+  y += 50;
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(cx - 90, y); ctx.lineTo(cx + 90, y); ctx.stroke();
+  
+  y += 65;
+  ctx.font = '700 32px "Segoe UI"';
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText("TOTAL EXAM", cx, y);
+  
+  y += 85;
+  ctx.font = '800 100px "Segoe UI"';
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  const totText = fmtTime(Math.max(0, totDur - totElapsed));
+  ctx.fillText(totText, cx+4, y+4);
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.fillText(totText, cx, y);
+  
+  y += 75;
+  ctx.font = '700 42px "Segoe UI"';
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillText(`${Math.max(0, 1-totFrac)*100|0}% of exam left`, cx, y);
+}
+
+// Draw initial empty frame
+drawRing();
+
+// Engine
+function startSection() {
+  state.sections = [];
+  const mq = parseInt(document.getElementById('mcq-q').value) || 0;
+  const mt = parseInt(document.getElementById('mcq-t').value) || 0;
+  const fq = parseInt(document.getElementById('frq-q').value) || 0;
+  const ft = parseInt(document.getElementById('frq-t').value) || 0;
+  
+  if (mq>0 && mt>0) state.sections.push({name:'MCQ', totalSecs:mt*60, qCount:mq, elapsed:0, qTimer:0, bg:'#42a5f5'});
+  if (fq>0 && ft>0) state.sections.push({name:'FRQ', totalSecs:ft*60, qCount:fq, elapsed:0, qTimer:0, bg:'#ab47bc'});
+  
+  if(state.sections.length === 0) return;
+  
+  state.currentSectionIdx = 0;
+  state.running = true;
+  state.paused = false;
+  state.waitingForFrq = false;
+  state.lastQNum = -1;
+  state.lastTick = performance.now();
+  
+  btnStart.disabled = true;
+  btnPause.disabled = false;
+  btnPause.innerText = "⏸ PAUSE";
+  btnFrq.style.display = 'none';
+  elPauseOv.classList.remove('active');
+  
+  persistExamState(true);
+  requestAnimationFrame(tick);
+}
+
+function pauseToggle() {
+  if(!state.running) return;
+  state.paused = !state.paused;
+  if(!state.paused) {
+    state.lastTick = performance.now();
+    elPauseOv.classList.remove('active');
+    btnPause.innerText = "⏸ PAUSE";
+    persistExamState(true);
+    requestAnimationFrame(tick);
+  } else {
+    elPauseOv.classList.add('active');
+    btnPause.innerText = "▶ RESUME";
+    persistExamState(true);
+  }
+}
+
+function resetApp() {
+  state.running = false;
+  state.paused = false;
+  state.sections = [];
+  state.currentSectionIdx = -1;
+  
+  btnStart.disabled = false;
+  btnPause.disabled = true;
+  btnPause.innerText = "⏸ PAUSE";
+  btnFrq.style.display = 'none';
+  elPauseOv.classList.remove('active');
+  
+  drawRing();
+  updateUI();
+  persistExamState(true);
+}
+
+function startFrq() {
+  state.waitingForFrq = false;
+  btnFrq.style.display = 'none';
+  btnPause.disabled = false;
+  state.lastQNum = -1;
+  state.lastTick = performance.now();
+  persistExamState(true);
+  requestAnimationFrame(tick);
+}
+
+function tick(now) {
+  if(!state.running) return;
+  if(state.paused || state.waitingForFrq) { drawRing(); updateUI(); return; }
+  
+  let dt = (now - state.lastTick) / 1000.0;
+  state.lastTick = now;
+  
+  if(document.getElementById('slow-cb').checked) dt *= 0.25;
+  
+  if(state.currentSectionIdx >= state.sections.length) {
+    finishExam();
+    return;
+  }
+  
+  let sec = state.sections[state.currentSectionIdx];
+  sec.elapsed += dt;
+  
+  const frc = Math.min(1.0, sec.elapsed / sec.totalSecs);
+  const qSec = sec.totalSecs / sec.qCount;
+  const currQ = Math.min(sec.qCount, Math.max(1, Math.ceil(frc * sec.qCount)));
+  
+  if (currQ !== state.lastQNum) {
+    sec.qTimer = 0;
+    state.lastQNum = currQ;
+  } else {
+    sec.qTimer += dt;
+  }
+  
+  if(sec.elapsed >= sec.totalSecs) {
+    sec.elapsed = sec.totalSecs;
+    state.currentSectionIdx++;
+    state.lastQNum = -1;
+    
+    if(state.currentSectionIdx >= state.sections.length) {
+      finishExam(); return;
+    }
+    
+    if(document.getElementById('break-cb').checked) {
+      if(state.sections[state.currentSectionIdx].name === 'FRQ') {
+        state.waitingForFrq = true;
+        btnFrq.style.display = 'block';
+        btnPause.disabled = true;
+      }
+    }
+  }
+  
+  drawRing();
+  updateUI();
+  persistExamState();
+  requestAnimationFrame(tick);
+}
+
+function finishExam() {
+  state.running = false;
+  btnStart.disabled = false;
+  btnPause.disabled = true;
+  btnFrq.style.display = 'none';
+  drawRing(); updateUI();
+  persistExamState(true);
+}
+
+function updateUI() {
+  if(state.currentSectionIdx < 0) {
+    elQVal.innerText = "Q0"; elQSub.innerText = "out of 0"; elQSecName.innerText = "—";
+    elValQLeft.innerText = "—"; elValSecQ.innerText = "—"; elValElapsed.innerText = "—";
+    elProgFill.style.width = "0%"; elProgText.innerText = `0%`;
+    elOverview.innerHTML = "";
+    return;
+  }
+  
+  if(state.currentSectionIdx >= state.sections.length) {
+    elQSecName.innerText = "Exam Complete";
+    elQVal.innerText = "DONE"; elQVal.style.color = "#ff1744"; elQSub.innerText = "";
+    elProgFill.style.width = "100%"; elProgFill.style.background = "#ff1744";
+    elOverview.innerHTML = state.sections.map(s => `<div class='ov-seg finished' style='flex:1;background:${s.bg}'>${s.name}</div>`).join('');
+    return;
+  }
+  
+  let sec = state.sections[state.currentSectionIdx];
+  const frc = sec.totalSecs > 0 ? Math.min(1.0, sec.elapsed / sec.totalSecs) : 1.0;
+  const col = urgencyColor(frc);
+  const colStr = rgbToStr(col);
+  
+  if(state.waitingForFrq) {
+    elQSecName.innerText = "BREAK — Press START FRQ";
+    elQSecName.style.color = "#ffc107";
+  } else {
+    elQSecName.innerText = sec.name;
+    elQSecName.style.color = colStr;
+  }
+  
+  const currQ = Math.min(sec.qCount, Math.max(1, Math.ceil(frc * sec.qCount)));
+  elQVal.innerText = `Q${currQ}`;
+  elQVal.style.color = colStr;
+  elQGlow.style.background = `radial-gradient(circle, ${rgbToStr(col, 0.2)} 0%, transparent 70%)`;
+  elQSub.innerText = `out of ${sec.qCount}`;
+  
+  elValQLeft.innerText = Math.max(0, sec.qCount - currQ);
+  elValQLeft.style.color = colStr;
+  
+  const qBudget = sec.totalSecs / sec.qCount;
+  const qRem = Math.max(0, qBudget - sec.qTimer);
+  const qFrc = Math.min(1.0, sec.qTimer / qBudget);
+  elValSecQ.innerText = `${qRem.toFixed(1)}s`;
+  elValSecQ.style.color = rgbToStr(urgencyColor(qFrc));
+  
+  elValElapsed.innerText = fmtTime(sec.elapsed);
+  
+  elProgFill.style.width = `${frc * 100}%`;
+  elProgFill.style.background = `linear-gradient(90deg, ${rgbToStr(col, 0.7)}, ${colStr})`;
+  elProgText.innerText = `${frc * 100 | 0}%`;
+  
+  const totDur = state.sections.reduce((a,b)=>a+b.totalSecs, 0);
+  elOverview.innerHTML = state.sections.map((s, i) => {
+    let cl = 'ov-seg ';
+    let fl = 0;
+    if(i < state.currentSectionIdx) { cl += 'finished'; fl = 1; }
+    else if(i === state.currentSectionIdx) { cl += 'active'; fl = frc; }
+    else { cl += 'inactive'; }
+    
+    const flexW = s.totalSecs / totDur;
+    return `
+      <div class='${cl}' style='flex: ${flexW}; background: ${s.bg}44;'>
+        <div class='ov-seg-fill' style='width: ${fl*100}%; background: ${s.bg}CC;'></div>
+        <div class='ov-text'>${s.name}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+btnStart.onclick = startSection;
+btnPause.onclick = pauseToggle;
+btnReset.onclick = resetApp;
+btnFrq.onclick = startFrq;
+btnPauseResumeOverlay.onclick = pauseToggle;
+['mcq-q','mcq-t','frq-q','frq-t','break-cb','slow-cb'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('change', () => { persistExamState(true); applyResponsiveLayoutSizing(); });
+  el.addEventListener('input', () => { persistExamState(); applyResponsiveLayoutSizing(); });
+});
+window.addEventListener('keydown', (e) => {
+  if (e.code !== 'Space') return;
+  const target = e.target;
+  const isTypingTarget = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+  if (isTypingTarget) return;
+  if (!state.running || state.waitingForFrq) return;
+  e.preventDefault();
+  pauseToggle();
+});
+window.addEventListener('resize', applyResponsiveLayoutSizing);
+window.addEventListener('beforeunload', () => persistExamState(true));
+loadExamState();
+applyResponsiveLayoutSizing();
+
+</script>
+</body>
+</html>

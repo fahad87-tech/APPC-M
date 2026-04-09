@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curving Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+body { background: radial-gradient(circle at top, #1e293b, #0f172a 60%); color: #e5e7eb; min-height: 100vh; padding: 16px; }
+.app-container { max-width: 1600px; margin: 0 auto; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 16px; backdrop-filter: blur(10px); box-shadow: 0 10px 35px rgba(0,0,0,0.35); }
+.header { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+h1 { font-size: 1.5rem; margin-bottom: 4px; }
+.subtitle { color: #94a3b8; font-size: 0.9rem; }
+.class-selector-container, .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.settings-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+.input-group { display: flex; flex-direction: column; gap: 4px; }
+.input-group label { font-size: 0.72rem; color: #cbd5e1; }
+.input-group input, .class-selector, .formula-input { background: rgba(30, 41, 59, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 8px 10px; outline: none; }
+.input-group input { width: 110px; }
+.class-selector { min-width: 220px; }
+.formula-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 360px; }
+.formula-input { min-width: 360px; }
+.formula-status { font-size: 0.78rem; color: #a5b4fc; min-height: 18px; }
+.assignment-input { width: 230px !important; }
+.save-status { font-size: 0.78rem; color: #cbd5e1; min-height: 18px; }
+.btn { border: none; border-radius: 8px; padding: 9px 12px; font-size: 0.87rem; font-weight: 600; cursor: pointer; color: #fff; background: #3b82f6; }
+.btn:hover { filter: brightness(1.08); }
+.btn-secondary { background: #475569; }
+.btn-danger { background: #dc2626; }
+.btn-icon { width: 38px; }
+.table-container { overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); }
+table { width: 100%; border-collapse: collapse; min-width: 1080px; table-layout: fixed; }
+thead th { position: sticky; top: 0; z-index: 2; background: #1e293b; color: #f1f5f9; text-align: left; padding: 11px; font-size: 0.9rem; letter-spacing: 0.03em; text-transform: uppercase; }
+tbody td { padding: 10px 11px; border-bottom: 1px solid rgba(255,255,255,0.08); vertical-align: middle; font-size: 1rem; }
+tbody tr:hover { background: rgba(59, 130, 246, 0.08); }
+.col-number { color: #93c5fd; width: 52px; }
+.col-name { font-weight: 600; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-input input { width: 84px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(30,41,59,0.85); color: #fff; font-size: 0.95rem; }
+.calculated { color: #f8fafc; }
+.highlight-score { font-weight: 700; color: #86efac; }
+.curve-error { color: #fda4af; font-weight: 700; }
+.delete-btn { border: none; background: #dc2626; color: white; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; }
+.modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,0.6); z-index: 20; }
+.modal.show { display: flex; }
+.modal-content { width: 92%; max-width: 440px; background: #0f172a; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; }
+.modal-header, .modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.modal-footer { border-bottom: none; border-top: 1px solid rgba(255,255,255,0.1); justify-content: flex-end; gap: 8px; }
+.modal-body { padding: 16px; }
+.modal-body input { width: 100%; }
+@media (max-width: 1000px) {
+  .header { flex-direction: column; align-items: stretch; }
+  .formula-wrap, .formula-input { min-width: 100%; }
+}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <header class="header">
+    <div>
+      <h1>Curving Tool</h1>
+      <p class="subtitle">Formula-Based Grading Curve Calculator</p>
+    </div>
+    <div class="class-selector-container">
+      <select id="classSelector" class="class-selector"></select>
+      <button id="renameClassBtn" class="btn btn-secondary btn-icon" title="Rename Class">✎</button>
+      <button id="addClassBtn" class="btn btn-secondary btn-icon" title="Add Class">＋</button>
+      <button id="deleteClassBtn" class="btn btn-danger" title="Delete Class">Delete Class</button>
+    </div>
+    <div class="actions">
+      <button id="addStudentBtn" class="btn">Add Student</button>
+      <div class="settings-group">
+        <div class="input-group">
+          <label for="maxMcqInput">Max MCQ</label>
+          <input type="number" id="maxMcqInput" value="40" min="1">
+        </div>
+        <div class="input-group">
+          <label for="scaledMcqInput">Scaled MCQ</label>
+          <input type="number" id="scaledMcqInput" value="52" min="1">
+        </div>
+        <div class="input-group">
+          <label for="maxFrqInput">Max FRQ</label>
+          <input type="number" id="maxFrqInput" value="48" min="1">
+        </div>
+        <div class="input-group">
+          <label for="maxRawScoreInput">Max Raw Score</label>
+          <input type="number" id="maxRawScoreInput" value="100" min="1">
+        </div>
+      </div>
+      <div class="formula-wrap">
+        <label for="curveFormulaInput">Curve Formula (Excel-style)</label>
+        <input type="text" id="curveFormulaInput" class="formula-input" value="=RAW_PCT" placeholder="=ROUND(RAW_PCT*1.08,1)">
+        <div id="formulaStatus" class="formula-status"></div>
+      </div>
+      <div class="input-group">
+        <label for="assignmentNameInput">Assignment Name</label>
+        <input type="text" id="assignmentNameInput" class="assignment-input" placeholder="e.g. Unit 3 Test">
+      </div>
+      <button id="saveAssignmentBtn" class="btn">Save Assignment</button>
+      <button id="resetDataBtn" class="btn btn-secondary" title="Reset Current Class">Reset</button>
+      <button id="exportCsvBtn" class="btn btn-secondary" title="Export to CSV">Export CSV</button>
+      <div id="saveStatus" class="save-status"></div>
+    </div>
+  </header>
+
+  <div class="table-container">
+    <table id="gradesTable">
+      <thead>
+        <tr>
+          <th style="width: 50px;">#</th>
+          <th style="width: 250px;">Student Name</th>
+          <th style="width: 112px;">MCQ Score</th>
+          <th style="width: 112px;">FRQ Score</th>
+          <th style="width: 112px;">Scaled MCQ</th>
+          <th style="width: 112px;">Raw Score</th>
+          <th style="width: 112px;">Raw %</th>
+          <th style="width: 128px;">Curved Score (%)</th>
+          <th style="width: 70px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="studentList"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="addStudentModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Add Student</h2>
+      <button class="btn btn-secondary close-modal">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group">
+        <label for="newStudentName">Student Name</label>
+        <input type="text" id="newStudentName" placeholder="e.g. John Doe" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary cancel-modal">Cancel</button>
+      <button id="confirmAddStudent" class="btn">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const classSelector = document.getElementById('classSelector');
+  const studentListEl = document.getElementById('studentList');
+  const addStudentBtn = document.getElementById('addStudentBtn');
+  const resetDataBtn = document.getElementById('resetDataBtn');
+  const exportCsvBtn = document.getElementById('exportCsvBtn');
+  const renameClassBtn = document.getElementById('renameClassBtn');
+  const addClassBtn = document.getElementById('addClassBtn');
+  const deleteClassBtn = document.getElementById('deleteClassBtn');
+  const maxMcqInput = document.getElementById('maxMcqInput');
+  const scaledMcqInput = document.getElementById('scaledMcqInput');
+  const maxFrqInput = document.getElementById('maxFrqInput');
+  const maxRawScoreInput = document.getElementById('maxRawScoreInput');
+  const curveFormulaInput = document.getElementById('curveFormulaInput');
+  const formulaStatus = document.getElementById('formulaStatus');
+  const assignmentNameInput = document.getElementById('assignmentNameInput');
+  const saveAssignmentBtn = document.getElementById('saveAssignmentBtn');
+  const saveStatus = document.getElementById('saveStatus');
+  const modal = document.getElementById('addStudentModal');
+  const closeModalBtn = document.querySelector('.close-modal');
+  const cancelModalBtn = document.querySelector('.cancel-modal');
+  const confirmAddBtn = document.getElementById('confirmAddStudent');
+  const newStudentNameInput = document.getElementById('newStudentName');
+  const STORAGE_KEY = 'curving_formula_app_data_v1';
+  const ROTATOR_STORAGE_KEY = 'classRotatorData';
+  const DEFAULT_STUDENTS_CLASS1 = [
+    'Cao, Zhiyuan(Jessica)', 'Chen, Haiwei(Harvey)',
+    'Cui, Hankun(Daniel)', 'Jiang, Haosen(Jerry)',
+    'Li, Yuyang (Micheal)', 'Pei, Jingzhou(Oscar)',
+    'Qu, Haibo (Lucas)', 'Wang, Han(Bright)',
+    'Wang, Jinghan (Jason)', 'Wang, Yunbo(Steven)',
+    'Xu, Shien(Steven)', 'Xu, Yuwei(Lisa)',
+    'Zhang, Jiazhen(Anthony)', 'Zhang, Ziye(Eason)',
+    'Zhao, Siqi(Steven Zhao)', 'Cerelia'
+  ];
+  const DEFAULT_STUDENTS_CLASS2 = [
+    'Cheng, Yitian(Timothy)', 'Li, Dong(Jasper)', 'Li, Qianran(Cindy)',
+    'Li, Zhe(Jackson)', 'Liu, Yuyin (Sam)', 'Luo, Yuhong',
+    'Mao, Zhengkang(Kang)', 'Miao, Yan (Helen)', 'Nie, Wenda(Nick)',
+    'Pu, Zihang(Andy)', 'Ruan, Zhenghao(Deo)', 'Shen, Duowei(Maxime)',
+    'Wang, Yihao(will)', 'Wang, Zijian(James)', 'Wang, Ziyan (Zoe)',
+    'Yang, Shijie(Nick)', 'Zhang, Ziye(Eason)', 'Bella'
+  ];
+
+  let currentClass = 'class1';
+  let appData = {
+    class1: {
+      label: 'APP1 (Class 1)',
+      settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: '=RAW_PCT', assignmentName: '' },
+      assignments: [],
+      students: []
+    },
+    class2: {
+      label: 'APPC-M (Class 2)',
+      settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: '=RAW_PCT', assignmentName: '' },
+      assignments: [],
+      students: []
+    }
+  };
+
+  init();
+
+  function init() {
+    loadData();
+    syncFromRotatorData();
+    pruneRedundantClasses();
+    setupEventListeners();
+    syncUIWithState();
+  }
+
+  function pruneRedundantClasses() {
+    const keys = Object.keys(appData);
+    const seenLabels = new Set();
+    const toDelete = [];
+    keys.forEach(k => {
+      const lbl = appData[k].label;
+      if (lbl === 'APP1 (Class 1)' || lbl === 'APPC-M (Class 2)') {
+        toDelete.push(k);
+      } else if (seenLabels.has(lbl)) {
+        toDelete.push(k);
+      } else {
+        seenLabels.add(lbl);
+      }
+    });
+    if (toDelete.length < keys.length) {
+      toDelete.forEach(k => delete appData[k]);
+    }
+    if (!appData[currentClass]) {
+      currentClass = Object.keys(appData)[0];
+    }
+    saveData();
+  }
+
+  function getRotatorClasses() {
+    try {
+      const raw = localStorage.getItem(ROTATOR_STORAGE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || !parsed.classes || typeof parsed.classes !== 'object') return {};
+      return parsed.classes;
+    } catch {
+      return {};
+    }
+  }
+
+  function toStudentRecord(item) {
+    if (typeof item === 'string') {
+      const name = item.trim();
+      if (!name) return null;
+      return { id: generateId(), name, mcq: '', frq: '' };
+    }
+    if (item && typeof item === 'object' && typeof item.name === 'string') {
+      const name = item.name.trim();
+      if (!name) return null;
+      return { id: generateId(), name, mcq: '', frq: '' };
+    }
+    return null;
+  }
+
+  function makeClassId(name) {
+    const normalized = String(name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+    return `rot_${normalized || generateId().slice(0, 8)}`;
+  }
+
+  function syncFromRotatorData() {
+    const classes = getRotatorClasses();
+    const classNames = Object.keys(classes);
+    if (!classNames.length) return;
+    classNames.forEach(className => {
+      const students = Array.isArray(classes[className]) ? classes[className].map(toStudentRecord).filter(Boolean) : [];
+      let existingId = Object.keys(appData).find(id =>
+        appData[id].label === className || appData[id].sourceClassName === className
+      );
+      if (!existingId) {
+        const baseId = makeClassId(className);
+        let candidateId = baseId;
+        let suffix = 2;
+        while (appData[candidateId] && appData[candidateId].sourceClassName !== className) {
+          candidateId = `${baseId}_${suffix}`;
+          suffix += 1;
+        }
+        existingId = candidateId;
+        appData[existingId] = {
+          label: className,
+          sourceClassName: className,
+          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: '=RAW_PCT', assignmentName: '' },
+          assignments: [],
+          students: students
+        };
+        return;
+      }
+      appData[existingId].label = className;
+      appData[existingId].sourceClassName = className;
+      const hasManualGrades = appData[existingId].students.some(s => String(s.mcq).trim() !== '' || String(s.frq).trim() !== '');
+      if (!hasManualGrades) {
+        appData[existingId].students = students;
+      }
+    });
+    if (!appData[currentClass]) {
+      currentClass = Object.keys(appData)[0];
+    }
+    saveData();
+  }
+
+  function loadData() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        appData = { ...appData, ...parsed };
+        Object.keys(appData).forEach(key => {
+          if (!appData[key].settings) appData[key].settings = { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: '=RAW_PCT', assignmentName: '' };
+          if (!Object.prototype.hasOwnProperty.call(appData[key].settings, 'formula')) appData[key].settings.formula = '=RAW_PCT';
+          if (!Object.prototype.hasOwnProperty.call(appData[key].settings, 'assignmentName')) appData[key].settings.assignmentName = '';
+          if (!appData[key].label) appData[key].label = key;
+          if (!Object.prototype.hasOwnProperty.call(appData[key], 'sourceClassName')) appData[key].sourceClassName = null;
+          if (!Array.isArray(appData[key].assignments)) appData[key].assignments = [];
+          if (!Array.isArray(appData[key].students)) appData[key].students = [];
+        });
+        if (!appData[currentClass]) currentClass = Object.keys(appData)[0];
+      } catch {
+        loadDefaults();
+      }
+    } else {
+      loadDefaults();
+    }
+  }
+
+  function loadDefaults() {
+    const rotatorClasses = getRotatorClasses();
+    const classNames = Object.keys(rotatorClasses);
+    if (classNames.length) {
+      appData = {};
+      classNames.forEach(className => {
+        const classId = makeClassId(className);
+        const students = (rotatorClasses[className] || []).map(toStudentRecord).filter(Boolean);
+        appData[classId] = {
+          label: className,
+          sourceClassName: className,
+          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: '=RAW_PCT', assignmentName: '' },
+          assignments: [],
+          students
+        };
+      });
+      currentClass = Object.keys(appData)[0];
+      saveData();
+      return;
+    }
+    appData.class1.sourceClassName = null;
+    appData.class2.sourceClassName = null;
+    appData.class1.students = DEFAULT_STUDENTS_CLASS1.map(name => ({ id: generateId(), name, mcq: '', frq: '' }));
+    appData.class2.students = DEFAULT_STUDENTS_CLASS2.map(name => ({ id: generateId(), name, mcq: '', frq: '' }));
+    saveData();
+  }
+
+  function loadClassDefaults(cls) {
+    const sourceClassName = appData[cls]?.sourceClassName;
+    if (sourceClassName) {
+      const rotatorClasses = getRotatorClasses();
+      const roster = Array.isArray(rotatorClasses[sourceClassName]) ? rotatorClasses[sourceClassName] : [];
+      appData[cls].students = roster.map(toStudentRecord).filter(Boolean);
+      appData[cls].settings.formula = '=RAW_PCT';
+      saveData();
+      return;
+    }
+    const defaults = cls === 'class1' ? DEFAULT_STUDENTS_CLASS1 : cls === 'class2' ? DEFAULT_STUDENTS_CLASS2 : [];
+    appData[cls].students = defaults.map(name => ({ id: generateId(), name, mcq: '', frq: '' }));
+    appData[cls].settings.formula = '=RAW_PCT';
+    saveData();
+  }
+
+  function syncUIWithState() {
+    const state = appData[currentClass];
+    maxMcqInput.value = state.settings.maxMcq;
+    scaledMcqInput.value = state.settings.scaledMcq;
+    maxFrqInput.value = state.settings.maxFrq;
+    maxRawScoreInput.value = state.settings.maxRaw;
+    curveFormulaInput.value = state.settings.formula || '=RAW_PCT';
+    assignmentNameInput.value = state.settings.assignmentName || '';
+    renderClassSelector();
+    validateFormulaUI();
+    renderTable();
+  }
+
+  function saveData() {
+    appData[currentClass].settings = {
+      maxMcq: parseFloat(maxMcqInput.value) || 40,
+      scaledMcq: parseFloat(scaledMcqInput.value) || 52,
+      maxFrq: parseFloat(maxFrqInput.value) || 48,
+      maxRaw: parseFloat(maxRawScoreInput.value) || 100,
+      formula: curveFormulaInput.value.trim() || '=RAW_PCT',
+      assignmentName: assignmentNameInput.value.trim()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    syncOrderToOtherApp('ap_curving_local_data_v1');
+  }
+
+  function syncOrderToOtherApp(targetKey) {
+    try {
+      const saved = localStorage.getItem(targetKey);
+      if (!saved) return;
+      const otherData = JSON.parse(saved);
+      let changed = false;
+      Object.keys(appData).forEach(classId => {
+        if (otherData[classId] && otherData[classId].students && appData[classId].students) {
+          const newOrder = [];
+          const sourceStudents = appData[classId].students;
+          const targetStudents = otherData[classId].students;
+          sourceStudents.forEach(s => {
+            const matched = targetStudents.find(ts => ts.id === s.id || ts.name === s.name);
+            if (matched) newOrder.push(matched);
+            else newOrder.push({ id: s.id, name: s.name, mcq: '', frq: '' });
+          });
+          if (JSON.stringify(targetStudents.map(ts=>ts.name)) !== JSON.stringify(newOrder.map(n=>n.name))) {
+            otherData[classId].students = newOrder;
+            changed = true;
+          }
+        }
+      });
+      if (changed) {
+        localStorage.setItem(targetKey, JSON.stringify(otherData));
+      }
+    } catch {}
+  }
+
+  function renderClassSelector() {
+    classSelector.innerHTML = '';
+    Object.keys(appData).forEach(key => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = appData[key].label || key;
+      if (key === currentClass) opt.selected = true;
+      classSelector.appendChild(opt);
+    });
+    deleteClassBtn.disabled = Object.keys(appData).length <= 1;
+  }
+
+  function generateId() {
+    if (crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'id_' + Math.random().toString(36).slice(2);
+  }
+
+  function toNumber(v) {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function buildFormulaScope(ctx) {
+    const round = (n, d = 0) => {
+      const p = Math.pow(10, d);
+      return Math.round(n * p) / p;
+    };
+    const roundup = (n, d = 0) => {
+      const p = Math.pow(10, d);
+      return Math.sign(n) * Math.ceil(Math.abs(n) * p) / p;
+    };
+    const rounddown = (n, d = 0) => {
+      const p = Math.pow(10, d);
+      return Math.sign(n) * Math.floor(Math.abs(n) * p) / p;
+    };
+    return {
+      ...ctx,
+      IF: (c, a, b) => c ? a : b,
+      AND: (...args) => args.every(Boolean),
+      OR: (...args) => args.some(Boolean),
+      NOT: (x) => !x,
+      MIN: (...args) => Math.min(...args),
+      MAX: (...args) => Math.max(...args),
+      ABS: (x) => Math.abs(x),
+      SQRT: (x) => Math.sqrt(x),
+      ROUND: round,
+      ROUNDUP: roundup,
+      ROUNDDOWN: rounddown,
+      INT: (x) => Math.floor(x),
+      CEILING: (x, sig = 1) => Math.ceil(x / sig) * sig,
+      FLOOR: (x, sig = 1) => Math.floor(x / sig) * sig,
+      CEILING_MATH: (x, sig = 1) => Math.ceil(x / sig) * sig,
+      FLOOR_MATH: (x, sig = 1) => Math.floor(x / sig) * sig,
+      POWER: (x, y) => Math.pow(x, y),
+      MOD: (x, y) => x % y,
+      SUM: (...args) => args.reduce((a, b) => a + b, 0),
+      AVERAGE: (...args) => args.length ? args.reduce((a, b) => a + b, 0) / args.length : 0,
+      COUNT: (...args) => args.filter(x => Number.isFinite(x)).length,
+      COUNTA: (...args) => args.filter(x => x !== null && x !== undefined && x !== '').length,
+      MEDIAN: (...args) => {
+        if (!args.length) return 0;
+        const s = [...args].sort((a, b) => a - b);
+        const m = Math.floor(s.length / 2);
+        return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+      },
+      TRUNC: (x, d = 0) => {
+        const p = Math.pow(10, d);
+        return x < 0 ? Math.ceil(x * p) / p : Math.floor(x * p) / p;
+      },
+      SIGN: (x) => Math.sign(x),
+      EXP: (x) => Math.exp(x),
+      LN: (x) => Math.log(x),
+      LOG: (x, base = 10) => Math.log(x) / Math.log(base),
+      LOG10: (x) => Math.log10(x),
+      SIN: (x) => Math.sin(x),
+      COS: (x) => Math.cos(x),
+      TAN: (x) => Math.tan(x),
+      ASIN: (x) => Math.asin(x),
+      ACOS: (x) => Math.acos(x),
+      ATAN: (x) => Math.atan(x),
+      MROUND: (x, m) => Math.round(x / m) * m,
+      RAND: () => Math.random(),
+      RANDBETWEEN: (a, b) => Math.floor(Math.random() * (b - a + 1)) + a,
+      IFERROR: (value, fallback) => {
+        if (value === null || value === undefined || Number.isNaN(value)) return fallback;
+        return value;
+      },
+      TRUE: true,
+      FALSE: false,
+      PI: Math.PI,
+      E: Math.E
+    };
+  }
+
+  function normalizeFormula(formula) {
+    let f = String(formula || '').trim();
+    if (!f) return '';
+    if (f.startsWith('=')) f = f.slice(1);
+    f = f.replace(/;/g, ',');
+    f = f.replace(/(\d+(\.\d+)?)\s*%/g, '($1/100)');
+    f = f.replace(/\^/g, '**');
+    f = f.replace(/<>/g, '!=');
+    f = f.replace(/(^|[^<>=!])=([^=])/g, '$1==$2');
+    f = f.toUpperCase();
+    return f;
+  }
+
+  function evaluateCurveFormula(formula, ctx) {
+    const normalized = normalizeFormula(formula);
+    if (!normalized) return { value: null, error: 'Formula is empty' };
+    if (/[^A-Z0-9_+\-*/().,<>=!%\s]/.test(normalized)) {
+      return { value: null, error: 'Formula contains unsupported characters' };
+    }
+    try {
+      const scope = buildFormulaScope(ctx);
+      const argNames = Object.keys(scope);
+      const argVals = Object.values(scope);
+      const fn = Function(...argNames, `"use strict"; return (${normalized});`);
+      const value = fn(...argVals);
+      if (!Number.isFinite(value)) return { value: null, error: 'Formula result is not a valid number' };
+      return { value, error: null };
+    } catch {
+      return { value: null, error: 'Formula could not be parsed' };
+    }
+  }
+
+  function processStudentGrades(student) {
+    const mcq = toNumber(String(student.mcq).trim());
+    const frq = toNumber(String(student.frq).trim());
+    const state = appData[currentClass];
+    let scaledMcq = null;
+    let rawScore = null;
+    let rawPct = null;
+    let curve = null;
+    let curveError = null;
+    const hasMcq = mcq !== null;
+    const hasFrq = frq !== null;
+    if (hasMcq) {
+      scaledMcq = (mcq / (state.settings.maxMcq || 40)) * (state.settings.scaledMcq || 52);
+    }
+    if (hasMcq || hasFrq) {
+      rawScore = (scaledMcq || 0) + (hasFrq ? frq : 0);
+      rawPct = (rawScore / (state.settings.maxRaw || 100)) * 100;
+      const evalResult = evaluateCurveFormula(state.settings.formula || '=RAW_PCT', {
+        RAW: rawScore,
+        RAW_PCT: rawPct,
+        MCQ: hasMcq ? mcq : 0,
+        FRQ: hasFrq ? frq : 0,
+        SCALED_MCQ: scaledMcq || 0,
+        MAX_MCQ: state.settings.maxMcq || 40,
+        SCALED_MCQ_MAX: state.settings.scaledMcq || 52,
+        MAX_FRQ: state.settings.maxFrq || 48,
+        MAX_RAW: state.settings.maxRaw || 100
+      });
+      curve = evalResult.value;
+      curveError = evalResult.error;
+    }
+    return { scaledMcq, rawScore, rawPct, curve, curveError };
+  }
+
+  function captureGradeInputFocus() {
+    const active = document.activeElement;
+    if (!active || active.tagName !== 'INPUT') return null;
+    if (!studentListEl.contains(active)) return null;
+    const id = active.dataset.id;
+    const field = active.dataset.field;
+    if (!id || !field) return null;
+    return {
+      id,
+      field,
+      start: typeof active.selectionStart === 'number' ? active.selectionStart : null,
+      end: typeof active.selectionEnd === 'number' ? active.selectionEnd : null
+    };
+  }
+
+  function restoreGradeInputFocus(focusInfo) {
+    if (!focusInfo) return;
+    const selector = `input[data-id="${focusInfo.id}"][data-field="${focusInfo.field}"]`;
+    const input = studentListEl.querySelector(selector);
+    if (!input) return;
+    input.focus();
+    if (focusInfo.start !== null && focusInfo.end !== null) input.setSelectionRange(focusInfo.start, focusInfo.end);
+  }
+
+  function renderTable() {
+    const focusInfo = captureGradeInputFocus();
+    const state = appData[currentClass];
+    studentListEl.innerHTML = '';
+    state.students.forEach((student, index) => {
+      const results = processStudentGrades(student);
+      const tr = document.createElement('tr');
+      tr.draggable = true;
+      tr.style.cursor = 'move';
+      
+      tr.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', index);
+        tr.style.opacity = '0.5';
+      });
+      tr.addEventListener('dragend', () => {
+        tr.style.opacity = '1';
+      });
+      tr.addEventListener('dragover', (e) => {
+        e.preventDefault();
+      });
+      tr.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const toIndex = index;
+        if (fromIndex !== toIndex && !isNaN(fromIndex)) {
+          const state = appData[currentClass];
+          const movedStudent = state.students.splice(fromIndex, 1)[0];
+          state.students.splice(toIndex, 0, movedStudent);
+          saveData();
+          renderTable();
+        }
+      });
+
+      const scaledStr = results.scaledMcq !== null ? results.scaledMcq.toFixed(1) : '-';
+      const rawStr = results.rawScore !== null ? results.rawScore.toFixed(1) : '-';
+      const rawPctStr = results.rawPct !== null ? results.rawPct.toFixed(1) + '%' : '-';
+      const curveStr = results.curve !== null ? results.curve.toFixed(1) + '%' : results.curveError ? '#ERR' : '-';
+      const numTd = document.createElement('td');
+      numTd.className = 'col-number';
+      numTd.textContent = index + 1;
+      const nameTd = document.createElement('td');
+      nameTd.className = 'col-name';
+      nameTd.dataset.studentId = student.id;
+      nameTd.textContent = student.name;
+      nameTd.title = 'Click to edit name';
+      nameTd.style.cursor = 'pointer';
+      const mcqTd = document.createElement('td');
+      mcqTd.className = 'td-input';
+      const mcqInput = document.createElement('input');
+      mcqInput.type = 'number';
+      mcqInput.step = '0.5';
+      mcqInput.min = '0';
+      mcqInput.dataset.id = student.id;
+      mcqInput.dataset.field = 'mcq';
+      mcqInput.value = student.mcq;
+      mcqTd.appendChild(mcqInput);
+      const frqTd = document.createElement('td');
+      frqTd.className = 'td-input';
+      const frqInput = document.createElement('input');
+      frqInput.type = 'number';
+      frqInput.step = '0.5';
+      frqInput.min = '0';
+      frqInput.dataset.id = student.id;
+      frqInput.dataset.field = 'frq';
+      frqInput.value = student.frq;
+      frqTd.appendChild(frqInput);
+      const scaledTd = document.createElement('td');
+      scaledTd.className = 'calculated';
+      scaledTd.textContent = scaledStr;
+      const rawTd = document.createElement('td');
+      rawTd.className = 'calculated highlight-score';
+      rawTd.textContent = rawStr;
+      const rawPctTd = document.createElement('td');
+      rawPctTd.className = 'calculated highlight-score';
+      rawPctTd.textContent = rawPctStr;
+      const curveTd = document.createElement('td');
+      curveTd.className = results.curveError ? 'curve-error' : 'calculated highlight-score';
+      curveTd.textContent = curveStr;
+      curveTd.title = results.curveError || '';
+      const actionTd = document.createElement('td');
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.dataset.id = student.id;
+      deleteBtn.title = 'Remove Student';
+      deleteBtn.textContent = '✕';
+      actionTd.appendChild(deleteBtn);
+      tr.append(numTd, nameTd, mcqTd, frqTd, scaledTd, rawTd, rawPctTd, curveTd, actionTd);
+      studentListEl.appendChild(tr);
+    });
+    restoreGradeInputFocus(focusInfo);
+  }
+
+  function validateFormulaUI() {
+    const state = appData[currentClass];
+    const probe = evaluateCurveFormula(state.settings.formula || '=RAW_PCT', {
+      RAW: 72,
+      RAW_PCT: 72,
+      MCQ: 28,
+      FRQ: 35,
+      SCALED_MCQ: 37,
+      MAX_MCQ: state.settings.maxMcq || 40,
+      SCALED_MCQ_MAX: state.settings.scaledMcq || 52,
+      MAX_FRQ: state.settings.maxFrq || 48,
+      MAX_RAW: state.settings.maxRaw || 100
+    });
+    if (probe.error) {
+      formulaStatus.textContent = `Error: ${probe.error}`;
+      formulaStatus.style.color = '#fda4af';
+    } else {
+      formulaStatus.textContent = 'Variables: RAW, RAW_PCT, MCQ, FRQ, SCALED_MCQ, MAX_RAW, MAX_MCQ, MAX_FRQ | Functions: SQRT, IF, ROUND, MIN, MAX, LOG, LN';
+      formulaStatus.style.color = '#a5b4fc';
+    }
+  }
+
+  function setupEventListeners() {
+    classSelector.addEventListener('change', (e) => {
+      currentClass = e.target.value;
+      syncUIWithState();
+    });
+    window.addEventListener('storage', (e) => {
+      if (e.key === ROTATOR_STORAGE_KEY) {
+        syncFromRotatorData();
+        syncUIWithState();
+      } else if (e.key === STORAGE_KEY) {
+        loadData();
+        syncUIWithState();
+      }
+    });
+    studentListEl.addEventListener('input', (e) => {
+      if (e.target.tagName === 'INPUT') {
+        const id = e.target.dataset.id;
+        const field = e.target.dataset.field;
+        const val = e.target.value;
+        const state = appData[currentClass];
+        const student = state.students.find(s => s.id === id);
+        if (student) {
+          student[field] = val;
+          saveData();
+          updateRowDisplay(e.target.closest('tr'), student);
+        }
+      }
+    });
+    studentListEl.addEventListener('click', (e) => {
+      const nameTd = e.target.closest('td.col-name');
+      if (nameTd) {
+        const id = nameTd.dataset.studentId;
+        const student = appData[currentClass].students.find(s => s.id === id);
+        if (student) startNameEdit(nameTd, student);
+      }
+      const deleteBtn = e.target.closest('.delete-btn');
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        const state = appData[currentClass];
+        state.students = state.students.filter(s => s.id !== id);
+        saveData();
+        renderTable();
+      }
+    });
+    [maxMcqInput, scaledMcqInput, maxFrqInput, maxRawScoreInput].forEach(input => {
+      input.addEventListener('change', () => {
+        saveData();
+        validateFormulaUI();
+        renderTable();
+      });
+    });
+    curveFormulaInput.addEventListener('input', () => {
+      saveData();
+      validateFormulaUI();
+      renderTable();
+    });
+    assignmentNameInput.addEventListener('input', () => {
+      saveData();
+    });
+    resetDataBtn.addEventListener('click', () => {
+      if (confirm('This will clear all entered grades and reset the student list for the current class. Continue?')) {
+        loadClassDefaults(currentClass);
+        syncUIWithState();
+      }
+    });
+    addStudentBtn.addEventListener('click', showModal);
+    closeModalBtn.addEventListener('click', hideModal);
+    cancelModalBtn.addEventListener('click', hideModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideModal(); });
+    confirmAddBtn.addEventListener('click', handleAddStudent);
+    newStudentNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAddStudent(); });
+    saveAssignmentBtn.addEventListener('click', saveAssignmentSnapshot);
+    exportCsvBtn.addEventListener('click', exportToCSV);
+    renameClassBtn.addEventListener('click', () => {
+      const newName = prompt('Rename class:', appData[currentClass].label || currentClass);
+      if (newName && newName.trim()) {
+        appData[currentClass].label = newName.trim();
+        saveData();
+        renderClassSelector();
+      }
+    });
+    addClassBtn.addEventListener('click', () => {
+      const name = prompt('New class name:');
+      if (name && name.trim()) {
+        const id = 'class_' + generateId().slice(0, 8);
+        appData[id] = {
+          label: name.trim(),
+          sourceClassName: null,
+          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: '=RAW_PCT', assignmentName: '' },
+          assignments: [],
+          students: []
+        };
+        currentClass = id;
+        saveData();
+        syncUIWithState();
+      }
+    });
+    deleteClassBtn.addEventListener('click', () => {
+      if (Object.keys(appData).length <= 1) return;
+      const label = appData[currentClass].label || currentClass;
+      if (!confirm(`Delete "${label}" and all its data? This cannot be undone.`)) return;
+      delete appData[currentClass];
+      currentClass = Object.keys(appData)[0];
+      saveData();
+      syncUIWithState();
+    });
+  }
+
+  function startNameEdit(td, student) {
+    if (td.querySelector('input')) return;
+    const prev = student.name;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = prev;
+    input.style.cssText = 'width:100%;padding:0.35rem 0.5rem;font-size:inherit;font-weight:600;';
+    td.textContent = '';
+    td.appendChild(input);
+    input.focus();
+    input.select();
+    const commit = () => {
+      const val = input.value.trim();
+      student.name = val || prev;
+      saveData();
+      td.textContent = student.name;
+      td.title = 'Click to edit name';
+    };
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') input.blur();
+      if (e.key === 'Escape') {
+        input.value = prev;
+        input.blur();
+      }
+    });
+  }
+
+  function updateRowDisplay(row, student) {
+    const results = processStudentGrades(student);
+    const scaledStr = results.scaledMcq !== null ? results.scaledMcq.toFixed(1) : '-';
+    const rawStr = results.rawScore !== null ? results.rawScore.toFixed(1) : '-';
+    const rawPctStr = results.rawPct !== null ? results.rawPct.toFixed(1) + '%' : '-';
+    const curveStr = results.curve !== null ? results.curve.toFixed(1) + '%' : results.curveError ? '#ERR' : '-';
+    const cells = row.querySelectorAll('td');
+    cells[4].textContent = scaledStr;
+    cells[5].textContent = rawStr;
+    cells[6].textContent = rawPctStr;
+    cells[7].textContent = curveStr;
+    cells[7].className = results.curveError ? 'curve-error' : 'calculated highlight-score';
+    cells[7].title = results.curveError || '';
+  }
+
+  function showModal() {
+    modal.classList.add('show');
+    newStudentNameInput.value = '';
+    setTimeout(() => newStudentNameInput.focus(), 40);
+  }
+
+  function hideModal() {
+    modal.classList.remove('show');
+  }
+
+  function handleAddStudent() {
+    const name = newStudentNameInput.value.trim();
+    if (name) {
+      const state = appData[currentClass];
+      state.students.push({ id: generateId(), name, mcq: '', frq: '' });
+      saveData();
+      renderTable();
+      hideModal();
+    }
+  }
+
+  function escapeCsvField(val) {
+    return `"${String(val).replace(/"/g, '""')}"`;
+  }
+
+  function getClassLabel() {
+    return appData[currentClass]?.label || currentClass;
+  }
+
+  function currentDateTimeIso() {
+    return new Date().toISOString();
+  }
+
+  function formatDateForFile(dateIso) {
+    return String(dateIso || '').replace(/[:.]/g, '-');
+  }
+
+  function buildAssignmentRows(assignmentName, savedAtIso) {
+    const state = appData[currentClass];
+    return state.students.map(student => {
+      const r = processStudentGrades(student);
+      return {
+        classLabel: getClassLabel(),
+        assignmentName,
+        savedAtIso,
+        studentName: student.name,
+        mcq: student.mcq || '',
+        frq: student.frq || '',
+        scaledMcq: r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : '',
+        rawScore: r.rawScore !== null ? r.rawScore.toFixed(1) : '',
+        rawPct: r.rawPct !== null ? r.rawPct.toFixed(1) : '',
+        curvedScore: r.curve !== null ? r.curve.toFixed(1) : '',
+        formula: state.settings.formula || '=RAW_PCT'
+      };
+    });
+  }
+
+  function saveAssignmentSnapshot() {
+    const assignmentName = assignmentNameInput.value.trim();
+    if (!assignmentName) {
+      saveStatus.textContent = 'Enter assignment name first';
+      saveStatus.style.color = '#fda4af';
+      assignmentNameInput.focus();
+      return;
+    }
+    const savedAtIso = currentDateTimeIso();
+    const snapshotRows = buildAssignmentRows(assignmentName, savedAtIso);
+    if (!appData[currentClass].assignments) appData[currentClass].assignments = [];
+    appData[currentClass].assignments.push({
+      id: generateId(),
+      assignmentName,
+      savedAtIso,
+      rows: snapshotRows
+    });
+    saveData();
+    exportToCSV();
+    saveStatus.textContent = `Saved "${assignmentName}" at ${new Date(savedAtIso).toLocaleString()}`;
+    saveStatus.style.color = '#86efac';
+  }
+
+  function exportToCSV() {
+    const rows = [['Class Name', 'Assignment Name', 'Saved At', 'Student Name', 'MCQ Score', 'FRQ Score', 'Scaled MCQ', 'Raw Score', 'Raw %', 'Curved Score (%)', 'Formula']];
+    const state = appData[currentClass];
+    const assignments = Array.isArray(state.assignments) ? state.assignments : [];
+    assignments.forEach(record => {
+      (record.rows || []).forEach(row => {
+        rows.push([
+          row.classLabel || getClassLabel(),
+          row.assignmentName || '',
+          row.savedAtIso || '',
+          row.studentName || '',
+          row.mcq || '',
+          row.frq || '',
+          row.scaledMcq || '',
+          row.rawScore || '',
+          row.rawPct || '',
+          row.curvedScore || '',
+          row.formula || ''
+        ]);
+      });
+    });
+    if (rows.length === 1) {
+      saveStatus.textContent = 'No saved assignments yet. Click Save Assignment first.';
+      saveStatus.style.color = '#fda4af';
+      return;
+    }
+    const csvContent = rows.map(r => r.map(escapeCsvField).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const latestDate = assignments.length ? assignments[assignments.length - 1].savedAtIso : currentDateTimeIso();
+    link.download = `Formula_Curves_${getClassLabel().replace(/[^\w-]+/g, '_')}_${formatDateForFile(latestDate)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+});
+</script>
+</body>
+</html>

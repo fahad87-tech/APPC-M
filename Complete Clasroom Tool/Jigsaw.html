@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧩 Jigsaw Group Generator</title>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);color:#fff;min-height:100vh;}
+  .app-container{max-width:1200px;margin:0 auto;padding:20px;}
+  h1{text-align:center;font-size:2.2rem;margin-bottom:8px;background:linear-gradient(90deg,#f7971e,#ffd200);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  .subtitle{text-align:center;opacity:.7;margin-bottom:24px;font-size:.95rem;}
+  .screen{display:none;} .screen.active{display:block;}
+
+  /* Class Manager */
+  .class-mgr{background:rgba(255,255,255,.07);border-radius:14px;padding:16px;margin-bottom:18px;}
+  .class-mgr h3{margin-bottom:10px;font-size:1rem;opacity:.85;}
+  .class-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+  .class-tab{padding:6px 14px;border-radius:20px;background:rgba(255,255,255,.12);cursor:pointer;font-size:.85rem;transition:.2s;}
+  .class-tab:hover{background:rgba(255,255,255,.25);}
+  .class-tab .del{margin-left:6px;color:#ff6b6b;cursor:pointer;font-weight:bold;}
+  .save-row{display:flex;gap:8px;}
+  .save-row input{flex:1;padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:.9rem;}
+  .save-row input::placeholder{color:rgba(255,255,255,.4);}
+
+  /* Upload */
+  .upload-zone{border:3px dashed rgba(255,255,255,.25);border-radius:16px;padding:40px 20px;text-align:center;cursor:pointer;transition:.3s;margin-bottom:16px;position:relative;}
+  .upload-zone:hover,.upload-zone.dragover{border-color:#ffd200;background:rgba(255,210,0,.06);}
+  .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+  .upload-zone .icon{font-size:3rem;margin-bottom:8px;}
+
+  /* Progress */
+  .progress-wrap{display:none;margin-bottom:14px;}
+  .progress-bar{height:8px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden;}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#f7971e,#ffd200);transition:width .3s;}
+  .progress-text{font-size:.8rem;opacity:.7;margin-top:4px;text-align:center;}
+
+  /* Preview */
+  .preview-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .preview-row img,.preview-row canvas{max-width:260px;max-height:180px;border-radius:10px;border:2px solid rgba(255,255,255,.15);}
+
+  /* Debug */
+  .debug-panel{background:rgba(0,0,0,.3);border-radius:10px;padding:12px;margin-bottom:14px;display:none;max-height:180px;overflow-y:auto;font-family:monospace;font-size:.78rem;line-height:1.6;color:#aaa;}
+
+  /* Student chips */
+  .student-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;min-height:40px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#667eea,#764ba2);padding:6px 14px;border-radius:20px;font-size:.88rem;animation:popIn .3s;}
+  .chip .remove{cursor:pointer;opacity:.7;font-weight:bold;} .chip .remove:hover{opacity:1;color:#ff6b6b;}
+  @keyframes popIn{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+  .add-row{display:flex;gap:8px;margin-bottom:18px;}
+  .add-row input{flex:1;padding:8px 12px;border-radius:8px;border:none;background:rgba(255,255,255,.1);color:#fff;font-size:.9rem;}
+  .add-row input::placeholder{color:rgba(255,255,255,.4);}
+
+  /* Buttons */
+  .btn{padding:10px 22px;border:none;border-radius:10px;font-size:.95rem;font-weight:600;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px;}
+  .btn:hover{transform:translateY(-2px);box-shadow:0 4px 15px rgba(0,0,0,.3);}
+  .btn-primary{background:linear-gradient(135deg,#f7971e,#ffd200);color:#1a1a2e;}
+  .btn-secondary{background:rgba(255,255,255,.15);color:#fff;}
+  .btn-danger{background:linear-gradient(135deg,#ff416c,#ff4b2b);color:#fff;}
+  .btn-success{background:linear-gradient(135deg,#11998e,#38ef7d);color:#1a1a2e;}
+  .btn-small{padding:6px 14px;font-size:.82rem;border-radius:8px;}
+
+  /* Config */
+  .config{display:flex;flex-wrap:wrap;gap:14px;align-items:end;margin-bottom:18px;}
+  .config label{font-size:.82rem;opacity:.7;display:block;margin-bottom:4px;}
+  .config input[type=number]{width:80px;padding:8px;border-radius:8px;border:none;background:rgba(255,255,255,.12);color:#fff;font-size:1rem;text-align:center;}
+
+  /* Group cards */
+  .groups-grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-bottom:20px;}
+  .group-card{background:rgba(255,255,255,.08);border-radius:16px;padding:18px;min-width:220px;max-width:280px;flex:1;backdrop-filter:blur(10px);border:2px solid transparent;transition:.3s;position:relative;}
+  .group-card.drag-over-ok{border-color:#38ef7d;box-shadow:0 0 20px rgba(56,239,125,.3);}
+  .group-card.drag-over-full{border-color:#ff416c;box-shadow:0 0 20px rgba(255,65,108,.3);}
+  .group-card h3{margin-bottom:12px;font-size:1.05rem;display:flex;align-items:center;gap:8px;}
+  .group-card h3 .gbadge{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:bold;font-size:.85rem;color:#fff;}
+  .group-card ul{list-style:none;padding:0;}
+  .group-card li{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;margin-bottom:4px;transition:.2s;cursor:default;position:relative;}
+  .group-card li:hover{background:rgba(255,255,255,.08);}
+  .group-card li .avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:.8rem;color:#fff;flex-shrink:0;}
+  .group-card li .sname{flex:1;}
+  .group-card li .expert-badge{font-size:.65rem;padding:2px 7px;border-radius:10px;opacity:.8;}
+
+  /* Drag handle */
+  .drag-handle{cursor:grab;opacity:.4;font-size:1.1rem;user-select:none;margin-right:2px;}
+  .drag-handle:hover{opacity:.8;}
+  li[draggable=true]{cursor:grab;}
+  li.dragging{opacity:.4;}
+
+  /* Absent */
+  .gmi.absent .avatar{filter:grayscale(1);opacity:.5;}
+  .gmi.absent .sname{text-decoration:line-through;opacity:.45;}
+  .absent-btn{display:none;cursor:pointer;font-size:.85rem;color:#ff6b6b;margin-left:auto;padding:2px 6px;border-radius:6px;transition:.2s;}
+  .group-card li:hover .absent-btn{display:inline-block;}
+  .absent-btn:hover{background:rgba(255,65,108,.2);}
+  .absent-card{background:rgba(255,65,108,.1);border:2px dashed rgba(255,65,108,.3);border-radius:14px;padding:14px;margin-bottom:12px;text-align:center;}
+  .absent-card .aname{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);padding:4px 12px;border-radius:14px;margin:4px;font-size:.85rem;}
+  .absent-card .aname .restore{cursor:pointer;color:#38ef7d;font-weight:bold;}
+  .abs-banner{display:none;text-align:center;padding:8px;margin-bottom:10px;border-radius:10px;background:rgba(255,65,108,.15);font-size:.88rem;}
+
+  /* Swap group arrows */
+  .swap-arrows{display:flex;gap:4px;margin-left:auto;}
+  .swap-arrow{cursor:pointer;background:rgba(255,255,255,.1);border:none;color:#fff;width:26px;height:26px;border-radius:6px;font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:.2s;}
+  .swap-arrow:hover{background:rgba(255,255,255,.25);transform:scale(1.1);}
+  .swap-arrow:disabled{opacity:.2;cursor:default;transform:none;}
+
+  /* Timer */
+  .timer-section{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:18px;flex-wrap:wrap;}
+  .timer-display{position:relative;width:120px;height:120px;}
+  .timer-ring{transform:rotate(-90deg);}
+  .timer-ring-bg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:8;}
+  .timer-ring-fg{fill:none;stroke:#38ef7d;stroke-width:8;stroke-linecap:round;transition:stroke-dashoffset 1s linear, stroke .3s;}
+  .timer-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:bold;}
+  .timer-warn .timer-ring-fg{stroke:#ffd200;}
+  .timer-danger .timer-ring-fg{stroke:#ff416c;}
+  .timer-btns{display:flex;flex-direction:column;gap:6px;}
+
+  /* Toast */
+  .swap-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:rgba(30,30,60,.95);color:#fff;padding:12px 24px;border-radius:12px;font-size:.92rem;opacity:0;transition:.4s;z-index:999;pointer-events:none;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);}
+  .swap-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Timesup overlay */
+  .timesup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;align-items:center;justify-content:center;flex-direction:column;}
+  .timesup-overlay.show{display:flex;}
+  .timesup-overlay h1{font-size:4rem;background:linear-gradient(90deg,#ff416c,#ff4b2b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:20px;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+  /* Nav bar */
+  .nav-bar{display:flex;justify-content:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+
+  /* Print */
+  @media print{body{background:#fff!important;color:#000!important;} .no-print{display:none!important;} .group-card{break-inside:avoid;border:1px solid #ccc!important;background:#f9f9f9!important;} .timer-section,.nav-bar,.abs-banner,.absent-card,.swap-arrows,.drag-handle,.absent-btn{display:none!important;}}
+
+  /* Responsive */
+  @media(max-width:600px){h1{font-size:1.5rem;} .group-card{min-width:100%;}}
+</style>
+</head>
+<body>
+<div class="app-container">
+
+<!-- ============ SETUP SCREEN ============ -->
+<div class="screen active" id="screen-setup">
+  <h1>🧩 Jigsaw Group Generator</h1>
+  <p class="subtitle">Upload a screenshot of your class list, configure groups, and go!</p>
+
+  <!-- Class Manager -->
+  <div class="class-mgr">
+    <h3>📚 Saved Classes</h3>
+    <div class="class-tabs" id="classTabs"></div>
+    <div class="save-row">
+      <input type="text" id="classNameInput" placeholder="Enter class name to save…">
+      <button class="btn btn-small btn-success" onclick="saveCurrentClass()">💾 Save</button>
+    </div>
+  </div>
+
+  <!-- Upload -->
+  <div class="upload-zone" id="uploadZone">
+    <div class="icon">📷</div>
+    <p><strong>Drop a screenshot here</strong> or click to browse</p>
+    <p style="font-size:.8rem;opacity:.6;margin-top:6px;">Supports PNG, JPG, BMP — works best with clear, high-contrast images</p>
+    <input type="file" id="fileInput" accept="image/*">
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">Initializing OCR…</div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-row" id="previewRow"></div>
+
+  <!-- Debug -->
+  <div class="debug-panel" id="debugPanel"></div>
+  <div style="margin-bottom:10px;"><label style="font-size:.8rem;opacity:.6;cursor:pointer;"><input type="checkbox" id="debugToggle" onchange="document.getElementById('debugPanel').style.display=this.checked?'block':'none'"> Show raw OCR text (debug)</label></div>
+
+  <!-- Student List -->
+  <h3 style="margin-bottom:8px;">Students (<span id="studentCount">0</span>)</h3>
+  <div class="student-list" id="studentList"></div>
+  <div class="add-row">
+    <input type="text" id="addStudentInput" placeholder="Add a student name…" onkeydown="if(event.key==='Enter')addStudent()">
+    <button class="btn btn-small btn-secondary" onclick="addStudent()">+ Add</button>
+  </div>
+
+  <!-- Config -->
+  <div class="config">
+    <div><label>Expert Groups</label><input type="number" id="numGroups" value="4" min="2" max="20"></div>
+    <div><label>Max per Group</label><input type="number" id="maxPerGroup" value="5" min="2" max="15"></div>
+    <div><label>Expert Timer (min)</label><input type="number" id="expertMin" value="10" min="1" max="120"></div>
+    <div><label>Home Timer (min)</label><input type="number" id="homeMin" value="10" min="1" max="120"></div>
+    <div><button class="btn btn-primary" onclick="generateGroups()" id="genBtn" disabled>🚀 Generate Groups</button></div>
+  </div>
+</div>
+
+<!-- ============ EXPERT SCREEN ============ -->
+<div class="screen" id="screen-expert">
+  <h1>🧩 Expert Groups</h1>
+  <div class="nav-bar no-print">
+    <button class="btn btn-secondary btn-small" onclick="goSetup()">⬅ Setup</button>
+    <button class="btn btn-success btn-small" onclick="reshuffleGroups()">🔀 Reshuffle</button>
+    <button class="btn btn-secondary btn-small" onclick="restoreAll()">↩ Restore All Absent</button>
+    <button class="btn btn-primary btn-small" onclick="goHome()">Home Groups ➡</button>
+    <button class="btn btn-secondary btn-small no-print" onclick="printGroups('expert')">🖨 Print</button>
+  </div>
+  <div class="abs-banner" id="absBannerE"></div>
+  <div id="absentCardE"></div>
+  <div class="timer-section no-print" id="timerE">
+    <div class="timer-display" id="timerDispE">
+      <svg class="timer-ring" width="120" height="120"><circle class="timer-ring-bg" cx="60" cy="60" r="44"/><circle class="timer-ring-fg" id="ringE" cx="60" cy="60" r="44" stroke-dasharray="276.46" stroke-dashoffset="0"/></svg>
+      <div class="timer-text" id="timerTextE">10:00</div>
+    </div>
+    <div class="timer-btns">
+      <button class="btn btn-small btn-success" id="startEBtn" onclick="startTimer('E')">▶ Start</button>
+      <button class="btn btn-small btn-secondary" onclick="pauseTimer('E')">⏸ Pause</button>
+      <button class="btn btn-small btn-danger" onclick="resetTimer('E')">⟲ Reset</button>
+    </div>
+  </div>
+  <div class="groups-grid" id="expertGrid"></div>
+</div>
+
+<!-- ============ HOME SCREEN ============ -->
+<div class="screen" id="screen-home">
+  <h1>🏠 Home Groups</h1>
+  <div class="nav-bar no-print">
+    <button class="btn btn-secondary btn-small" onclick="goExpert()">⬅ Expert Groups</button>
+    <button class="btn btn-secondary btn-small" onclick="printGroups('home')">🖨 Print</button>
+  </div>
+  <div class="abs-banner" id="absBannerH"></div>
+  <div class="timer-section no-print" id="timerH">
+    <div class="timer-display" id="timerDispH">
+      <svg class="timer-ring" width="120" height="120"><circle class="timer-ring-bg" cx="60" cy="60" r="44"/><circle class="timer-ring-fg" id="ringH" cx="60" cy="60" r="44" stroke-dasharray="276.46" stroke-dashoffset="0"/></svg>
+      <div class="timer-text" id="timerTextH">10:00</div>
+    </div>
+    <div class="timer-btns">
+      <button class="btn btn-small btn-success" id="startHBtn" onclick="startTimer('H')">▶ Start</button>
+      <button class="btn btn-small btn-secondary" onclick="pauseTimer('H')">⏸ Pause</button>
+      <button class="btn btn-small btn-danger" onclick="resetTimer('H')">⟲ Reset</button>
+    </div>
+  </div>
+  <div class="groups-grid" id="homeGrid"></div>
+</div>
+
+</div><!-- /app-container -->
+
+<!-- Toast -->
+<div class="swap-toast" id="swapToast"></div>
+
+<!-- Timesup overlay -->
+<div class="timesup-overlay" id="timesupOverlay">
+  <h1>⏰ TIME'S UP!</h1>
+  <p style="font-size:1.3rem;margin-bottom:20px;opacity:.8;">Please wrap up your discussion.</p>
+  <button class="btn btn-primary" onclick="dismissTimesup()">✓ Dismiss</button>
+</div>
+
+<canvas id="prepCanvas" style="display:none;"></canvas>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+let students = [];
+let expertGroups = [];
+let homeGroups = [];
+const absentSet = new Set();
+const GRP_COLORS = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e84393','#00b894','#6c5ce7','#fd79a8','#00cec9','#d63031','#0984e3','#fdcb6e','#55efc4','#a29bfe','#fab1a0','#74b9ff','#dfe6e9'];
+
+/* ============================================================
+   DRAG & DROP STATE
+   ============================================================ */
+let dragSrcGroup = -1, dragSrcIndex = -1, dragName = '';
+let dragSrcGroupHG = -1, dragSrcIndexHG = -1, dragObjHG = null;
+
+/* ============================================================
+   CLASS MANAGER
+   ============================================================ */
+function getSaved() {
+  try {
+    const data = JSON.parse(localStorage.getItem('classRotatorData'));
+    if (!data || !data.classes) return {};
+    const jigsawFormat = {};
+    for (let c in data.classes) {
+      jigsawFormat[c] = data.classes[c].map(s => typeof s === 'string' ? s : s.name);
+    }
+    return jigsawFormat;
+  } catch(e) { return {}; }
+}
+
+function setSaved(jigsawFormat) {
+  try {
+    let data = JSON.parse(localStorage.getItem('classRotatorData')) || { classes: {}, last_rotation: {} };
+    if (!data.classes) data.classes = {};
+    
+    // Update existing classes or create new ones
+    for (let c in jigsawFormat) {
+      if (!data.classes[c]) {
+        data.classes[c] = jigsawFormat[c].map(name => ({name, row: 0, pair_position: 0}));
+      } else {
+        let existingMap = {};
+        data.classes[c].forEach(obj => {
+          if (typeof obj === 'object' && obj.name) {
+             existingMap[obj.name] = obj;
+          } else if (typeof obj === 'string') {
+             existingMap[obj] = {name: obj, row: 0, pair_position: 0};
+          }
+        });
+        let r = 1, p = 1, cnt = 0;
+        data.classes[c] = jigsawFormat[c].map(name => {
+          if (existingMap[name]) {
+             return existingMap[name];
+          }
+          let obj = {name: name, row: r, pair_position: p};
+          cnt++;
+          if (cnt % 2 === 0) { 
+             p++; 
+             if (p > 3) { p = 1; r++; }
+             if (r > 3) { r = 1; }
+          }
+          return obj;
+        });
+      }
+    }
+    
+    // Delete classes that are removed
+    for (let c in data.classes) {
+      if (!jigsawFormat[c]) {
+        delete data.classes[c];
+        if (data.last_rotation && data.last_rotation[c]) {
+          delete data.last_rotation[c];
+        }
+      }
+    }
+    
+    localStorage.setItem('classRotatorData', JSON.stringify(data));
+  } catch(e) {}
+}
+// The overrides for loadClass, saveCurrentClass, deleteClass, renderClassTabs 
+// have been shifted to the STUDENT LIST section below to ensure activeClassName works nicely.
+
+/* ============================================================
+   FILE UPLOAD & OCR
+   ============================================================ */
+const uploadZone=document.getElementById('uploadZone');
+const fileInput=document.getElementById('fileInput');
+uploadZone.addEventListener('dragover',e=>{e.preventDefault();uploadZone.classList.add('dragover');});
+uploadZone.addEventListener('dragleave',()=>uploadZone.classList.remove('dragover'));
+uploadZone.addEventListener('drop',e=>{e.preventDefault();uploadZone.classList.remove('dragover');if(e.dataTransfer.files.length)handleFile(e.dataTransfer.files[0]);});
+fileInput.addEventListener('change',e=>{if(e.target.files.length)handleFile(e.target.files[0]);});
+
+function handleFile(file){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>runOCR(img);
+    img.src=e.target.result;
+    // show original preview
+    const pr=document.getElementById('previewRow'); pr.innerHTML='';
+    const im=document.createElement('img'); im.src=e.target.result; pr.appendChild(im);
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ============================================================
+   IMAGE PREPROCESSING — remove table borders, binarize
+   ============================================================ */
+function preprocessImage(img){
+  return new Promise(resolve=>{
+    const canvas=document.getElementById('prepCanvas');
+    const scale=Math.max(2, Math.min(4, 2000/Math.max(img.width,img.height)));
+    const w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+    canvas.width=w; canvas.height=h;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(img,0,0,w,h);
+    let id=ctx.getImageData(0,0,w,h), d=id.data;
+
+    // Grayscale
+    for(let i=0;i<d.length;i+=4){
+      const g=Math.round(d[i]*.299+d[i+1]*.587+d[i+2]*.114);
+      d[i]=d[i+1]=d[i+2]=g;
+    }
+
+    // Binary mask for line detection
+    const bin=new Uint8Array(w*h);
+    for(let i=0;i<w*h;i++) bin[i]=d[i*4]<160?1:0;
+
+    const lineMask=new Uint8Array(w*h);
+    const hThresh=Math.round(w*.25), vThresh=Math.round(h*.15);
+
+    // Horizontal lines
+    for(let y=0;y<h;y++){
+      let run=0, start=0;
+      for(let x=0;x<=w;x++){
+        if(x<w && bin[y*w+x]){if(!run)start=x;run++;}
+        else{if(run>hThresh)for(let xx=start;xx<start+run;xx++)lineMask[y*w+xx]=1;run=0;}
+      }
+    }
+    // Vertical lines
+    for(let x=0;x<w;x++){
+      let run=0, start=0;
+      for(let y=0;y<=h;y++){
+        if(y<h && bin[y*w+x]){if(!run)start=y;run++;}
+        else{if(run>vThresh)for(let yy=start;yy<start+run;yy++)lineMask[yy*w+x]=1;run=0;}
+      }
+    }
+
+    // Dilate lineMask by 2px and paint white; binarize text
+    for(let y=0;y<h;y++){
+      for(let x=0;x<w;x++){
+        let isLine=false;
+        for(let dy=-2;dy<=2&&!isLine;dy++)for(let dx=-2;dx<=2&&!isLine;dx++){
+          const ny=y+dy,nx=x+dx;
+          if(ny>=0&&ny<h&&nx>=0&&nx<w&&lineMask[ny*w+nx])isLine=true;
+        }
+        const i=(y*w+x)*4;
+        if(isLine){d[i]=d[i+1]=d[i+2]=255;}
+        else{const v=d[i]<180?0:255;d[i]=d[i+1]=d[i+2]=v;}
+        d[i+3]=255;
+      }
+    }
+    ctx.putImageData(id,0,0);
+
+    // show processed preview
+    const pr=document.getElementById('previewRow');
+    const c2=document.createElement('canvas'); c2.width=w; c2.height=h; c2.style.maxWidth='260px'; c2.style.maxHeight='180px'; c2.style.borderRadius='10px'; c2.style.border='2px solid rgba(255,255,255,.15)';
+    c2.getContext('2d').putImageData(id,0,0);
+    pr.appendChild(c2);
+
+    resolve(canvas.toDataURL('image/png'));
+  });
+}
+
+/* ============================================================
+   OCR
+   ============================================================ */
+async function runOCR(img){
+  const pw=document.getElementById('progressWrap'); pw.style.display='block';
+  const pf=document.getElementById('progressFill');
+  const pt=document.getElementById('progressText');
+  pf.style.width='0%'; pt.textContent='Preprocessing image…';
+
+  const dataUrl=await preprocessImage(img);
+  pt.textContent='Loading OCR engine…'; pf.style.width='10%';
+
+  try{
+    const worker=await Tesseract.createWorker('eng',1,{
+      logger:m=>{
+        if(m.status==='recognizing text'){
+          const pct=Math.round(10+m.progress*85);
+          pf.style.width=pct+'%';
+          pt.textContent='Recognizing text… '+Math.round(m.progress*100)+'%';
+        }
+      }
+    });
+    await worker.setParameters({tessedit_pageseg_mode:'6', preserve_interword_spaces:'1'});
+
+    pt.textContent='Recognizing text…'; pf.style.width='20%';
+    const {data}=await worker.recognize(dataUrl);
+    await worker.terminate();
+
+    pf.style.width='100%'; pt.textContent='Done!';
+
+    const raw=data.text;
+    // Debug panel
+    const dp=document.getElementById('debugPanel');
+    dp.innerHTML='<strong>Raw OCR Output:</strong><br>'+raw.split('\n').map(l=>'<div>'+l.replace(/</g,'&lt;')+'</div>').join('');
+
+    students=extractNames(raw);
+    renderStudentList();
+
+    if(students.length===0) pt.textContent='No names found. Try a clearer image or add names manually.';
+    else pt.textContent='Extracted '+students.length+' students!';
+
+    setTimeout(()=>{pw.style.display='none';},3000);
+  }catch(err){
+    pt.textContent='OCR Error: '+err.message;
+    console.error(err);
+  }
+}
+
+function extractNames(text){
+  const lines=text.split(/\n/).map(l=>l.trim()).filter(l=>l.length>0);
+  const names=[];
+  const skip=new Set(['name','student','class','period','roster','number','no','date','teacher','grade','total','list','group','room','id','absent','present','attendance','roll']);
+  for(const line of lines){
+    // Try splitting by common delimiters (multiple names per line)
+    const parts=line.split(/[,;|\/\\]+/).map(p=>p.trim()).filter(Boolean);
+    for(let part of parts){
+      // Strip leading numbers, bullets
+      part=part.replace(/^[\d]+[\.\)\:\-\s]+/,'').replace(/^[\•\-\–\—\*\>\#]+\s*/,'').trim();
+      // Keep only Latin-range characters + basic punctuation
+      let cleaned='';
+      for(const c of part){
+        const code=c.charCodeAt(0);
+        if((code>=65&&code<=90)||(code>=97&&code<=122)||(code>=192&&code<=255)
+          ||c===','||c==='.'||c==='('||c===')'||c==='-'||c==="'"||c===' ') cleaned+=c;
+      }
+      cleaned=cleaned.replace(/\s+/g,' ').replace(/^[,.\-\s]+|[,.\-\s]+$/g,'').trim();
+      if(cleaned.length<2||!/[A-Za-z]/.test(cleaned)) continue;
+      if(skip.has(cleaned.toLowerCase())) continue;
+      // Capitalize each word
+      cleaned=cleaned.split(' ').map(w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join(' ');
+      if(!names.includes(cleaned)) names.push(cleaned);
+    }
+  }
+  return names;
+}
+
+/* ============================================================
+   STUDENT LIST
+   ============================================================ */
+function autoSaveToCurrentClass() {
+  const selectNode = document.getElementById('classTabs').querySelector('.class-tab[style*="background: rgba(255, 255, 255, 0.25)"]');
+  // We don't explicitly track the "active" class in Jigsaw state currently,
+  // but if the teacher typed a name or we just loaded one, students array represents it.
+  // We'll rely on the class being explicitly saved via the Save button first, OR
+  // we can infer the currently loaded class name if it were tracked.
+  // Let's implement a robust tracking variable since it's missing.
+}
+
+let activeClassName = "";
+function renderClassTabs() {
+  const ct = document.getElementById('classTabs'); ct.innerHTML='';
+  const saved = getSaved();
+  for(const name in saved){
+    const t=document.createElement('span'); t.className='class-tab';
+    if(name === activeClassName) t.style.background = 'rgba(255,255,255,.25)';
+    t.innerHTML=`${name} (${saved[name].length}) <span class="del" onclick="event.stopPropagation();deleteClass('${name}')">&times;</span>`;
+    t.onclick=()=>{ activeClassName=name; loadClass(name); renderClassTabs(); };
+    ct.appendChild(t);
+  }
+}
+
+function loadClass(name){
+  activeClassName = name;
+  const s=getSaved(); if(!s[name]) return;
+  students=[...s[name]]; renderStudentList();
+  renderClassTabs();
+  showToast('📚 Loaded "'+name+'" ('+students.length+' students)');
+}
+
+function saveCurrentClass(){
+  const n=document.getElementById('classNameInput').value.trim(); if(!n||!students.length) return;
+  activeClassName = n;
+  const s=getSaved(); s[n]=[...students]; setSaved(s); renderClassTabs();
+  document.getElementById('classNameInput').value='';
+  showToast('💾 Class "'+n+'" saved!');
+}
+
+function deleteClass(name){
+  if(activeClassName === name) activeClassName = "";
+  const s=getSaved(); delete s[name]; setSaved(s); renderClassTabs();
+}
+
+function syncActiveClassToStorage() {
+  if(!activeClassName) return;
+  const s=getSaved(); s[activeClassName]=[...students]; setSaved(s);
+  renderClassTabs(); // update count
+}
+
+function renderStudentList(){
+  const sl=document.getElementById('studentList'); sl.innerHTML='';
+  document.getElementById('studentCount').textContent=students.length;
+  document.getElementById('genBtn').disabled=students.length<2;
+  students.forEach((s,i)=>{
+    const chip=document.createElement('span'); chip.className='chip';
+    chip.innerHTML=`${s} <span class="remove" onclick="removeStudent(${i})">&times;</span>`;
+    sl.appendChild(chip);
+  });
+}
+function removeStudent(i){ students.splice(i,1); renderStudentList(); syncActiveClassToStorage(); }
+function addStudent(){
+  const inp=document.getElementById('addStudentInput');
+  const v=inp.value.trim();
+  if(v && !students.includes(v)){ students.push(v); renderStudentList(); inp.value=''; syncActiveClassToStorage(); }
+}
+
+/* ============================================================
+   GROUP GENERATION
+   ============================================================ */
+function shuffleArray(arr){
+  const a=[...arr]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a;
+}
+
+function generateGroups(){
+  const n=parseInt(document.getElementById('numGroups').value)||4;
+  if(students.length<n){showToast('⚠ Need at least '+n+' students!');return;}
+  absentSet.clear();
+  buildGroupsFrom(students,n);
+  goExpert();
+  confetti({particleCount:100,spread:70,origin:{y:.6}});
+}
+
+function buildGroupsFrom(list,n){
+  const shuffled=shuffleArray(list);
+  const ng=Math.min(n,shuffled.length);
+  expertGroups=Array.from({length:ng},()=>[]);
+  shuffled.forEach((s,i)=>expertGroups[i%ng].push(s));
+  buildHomeFromExpert();
+}
+
+function buildHomeFromExpert(){
+  // Home groups: column-wise extraction
+  const maxLen=Math.max(...expertGroups.map(g=>g.length));
+  homeGroups=[];
+  for(let i=0;i<maxLen;i++){
+    const hg=[];
+    for(let g=0;g<expertGroups.length;g++){
+      if(i<expertGroups[g].length) hg.push({name:expertGroups[g][i],expert:g});
+    }
+    if(hg.length) homeGroups.push(hg);
+  }
+}
+
+function reshuffleGroups(){
+  const present=students.filter(s=>!absentSet.has(s));
+  const n=expertGroups.length;
+  buildGroupsFrom(present,n);
+  renderEG(); renderHG();
+  showToast('🔀 Groups reshuffled!');
+  confetti({particleCount:60,spread:50,origin:{y:.6}});
+}
+
+/* ============================================================
+   ABSENT MANAGEMENT
+   ============================================================ */
+function toggleAbsent(name){
+  if(absentSet.has(name)) absentSet.delete(name);
+  else absentSet.add(name);
+  rebuildFromPresent();
+}
+function restoreAll(){
+  absentSet.clear();
+  rebuildFromPresent();
+  showToast('↩ All students restored!');
+}
+function rebuildFromPresent(){
+  const present=students.filter(s=>!absentSet.has(s));
+  const n=Math.min(expertGroups.length, present.length||1);
+  buildGroupsFrom(present,n);
+  // Re-add absent students so they still show
+  renderEG(); renderHG(); updAbsBanners();
+}
+function updAbsBanners(){
+  const arr=[...absentSet];
+  for(const id of ['absBannerE','absBannerH']){
+    const el=document.getElementById(id);
+    if(arr.length){el.style.display='block';el.textContent='🚫 Absent ('+arr.length+'): '+arr.join(', ');}
+    else el.style.display='none';
+  }
+}
+
+/* ============================================================
+   RENDER EXPERT GROUPS
+   ============================================================ */
+function renderEG(){
+  const grid=document.getElementById('expertGrid'); grid.innerHTML='';
+  const absentCard=document.getElementById('absentCardE'); absentCard.innerHTML='';
+
+  // Absent card
+  if(absentSet.size){
+    const ac=document.createElement('div'); ac.className='absent-card';
+    ac.innerHTML='<strong>🚫 Absent Students</strong><br>';
+    absentSet.forEach(name=>{
+      ac.innerHTML+=`<span class="aname">${name} <span class="restore" onclick="toggleAbsent('${name.replace(/'/g,"\\'")}')" title="Restore">↩</span></span>`;
+    });
+    absentCard.appendChild(ac);
+  }
+
+  const maxPG=parseInt(document.getElementById('maxPerGroup').value)||5;
+
+  expertGroups.forEach((group,gi)=>{
+    const card=document.createElement('div'); card.className='group-card';
+    card.style.borderColor=GRP_COLORS[gi%GRP_COLORS.length]+'44';
+
+    // Drag over listeners for individual student drops
+    card.addEventListener('dragover',e=>{e.preventDefault();
+      if(dragSrcGroup===gi) return;
+      card.classList.toggle('drag-over-ok', group.length<maxPG);
+      card.classList.toggle('drag-over-full', group.length>=maxPG);
+    });
+    card.addEventListener('dragleave',()=>{card.classList.remove('drag-over-ok','drag-over-full');});
+    card.addEventListener('drop',e=>{e.preventDefault();card.classList.remove('drag-over-ok','drag-over-full');
+      if(dragSrcGroup===gi||dragSrcGroup<0) return;
+      handleStudentDrop(gi, maxPG);
+    });
+
+    const color=GRP_COLORS[gi%GRP_COLORS.length];
+
+    // Header with swap arrows
+    const h=document.createElement('h3');
+    h.innerHTML=`<span class="gbadge" style="background:${color}">${gi+1}</span> Expert Group ${gi+1}
+      <div class="swap-arrows">
+        <button class="swap-arrow" ${gi===0?'disabled':''} onclick="swapGroupLeft(${gi})" title="Move group left">◀</button>
+        <button class="swap-arrow" ${gi===expertGroups.length-1?'disabled':''} onclick="swapGroupRight(${gi})" title="Move group right">▶</button>
+      </div>`;
+    card.appendChild(h);
+
+    const ul=document.createElement('ul');
+    group.forEach((name,mi)=>{
+      const li=document.createElement('li');
+      li.className='gmi';
+      li.draggable=true;
+      li.addEventListener('dragstart',e=>onDragStart(e,gi,mi,name));
+      li.addEventListener('dragend',onDragEnd);
+      li.innerHTML=`
+        <span class="drag-handle" title="Drag to move">≡</span>
+        <span class="avatar" style="background:${color}">${name.charAt(0)}</span>
+        <span class="sname">${name}</span>
+        <span class="absent-btn" onclick="toggleAbsent('${name.replace(/'/g,"\\'")}')" title="Mark absent">✕</span>`;
+      ul.appendChild(li);
+    });
+    card.appendChild(ul);
+    grid.appendChild(card);
+  });
+  updAbsBanners();
+}
+
+/* ============================================================
+   RENDER HOME GROUPS
+   ============================================================ */
+function renderHG(){
+  const grid=document.getElementById('homeGrid'); grid.innerHTML='';
+  homeGroups.forEach((group,gi)=>{
+    const card=document.createElement('div'); card.className='group-card';
+    const baseColor=GRP_COLORS[gi%GRP_COLORS.length];
+    card.style.borderColor=baseColor+'44';
+
+    card.addEventListener('dragover', e => {
+      e.preventDefault();
+      if (dragSrcGroupHG === gi) return;
+      card.classList.add('drag-over-ok');
+    });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over-ok'));
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('drag-over-ok');
+      if (dragSrcGroupHG === gi || dragSrcGroupHG < 0) return;
+      handleStudentDropHome(gi);
+    });
+
+    const h=document.createElement('h3');
+    h.innerHTML=`<span class="gbadge" style="background:${baseColor}">${gi+1}</span> Home Group ${gi+1}`;
+    card.appendChild(h);
+
+    const ul=document.createElement('ul');
+    group.forEach((obj, mi)=>{
+      const {name, expert} = obj;
+      const ec=GRP_COLORS[expert%GRP_COLORS.length];
+      const li=document.createElement('li'); li.className='gmi';
+      li.draggable = true;
+      li.addEventListener('dragstart', e => {
+        dragSrcGroupHG = gi;
+        dragSrcIndexHG = mi;
+        dragObjHG = obj;
+        e.target.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', name);
+      });
+      li.addEventListener('dragend', e => {
+        e.target.classList.remove('dragging');
+        dragSrcGroupHG = -1; dragSrcIndexHG = -1; dragObjHG = null;
+        document.querySelectorAll('.group-card').forEach(c => c.classList.remove('drag-over-ok'));
+      });
+      li.innerHTML=`
+        <span class="drag-handle" title="Drag to move">≡</span>
+        <span class="avatar" style="background:${ec}">${name.charAt(0)}</span>
+        <span class="sname">${name}</span>
+        <span class="expert-badge" style="background:${ec}33;color:${ec}">Expert ${expert+1}</span>`;
+      ul.appendChild(li);
+    });
+    card.appendChild(ul);
+    grid.appendChild(card);
+  });
+  updAbsBanners();
+}
+
+/* ============================================================
+   DRAG & DROP — INDIVIDUAL STUDENTS
+   ============================================================ */
+function onDragStart(e,gi,mi,name){
+  dragSrcGroup=gi; dragSrcIndex=mi; dragName=name;
+  e.target.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+  e.dataTransfer.setData('text/plain',name);
+}
+function onDragEnd(e){
+  e.target.classList.remove('dragging');
+  dragSrcGroup=-1; dragSrcIndex=-1; dragName='';
+  document.querySelectorAll('.group-card').forEach(c=>c.classList.remove('drag-over-ok','drag-over-full'));
+}
+function handleStudentDrop(targetGi, maxPG){
+  if(dragSrcGroup<0||dragSrcGroup===targetGi) return;
+  const srcG=expertGroups[dragSrcGroup];
+  const tgtG=expertGroups[targetGi];
+  const name=dragName;
+
+  if(tgtG.length>=maxPG){
+    // Auto-swap: swap dragged student with last member of target group
+    const swapName=tgtG[tgtG.length-1];
+    // Remove from source
+    srcG.splice(dragSrcIndex,1);
+    // Remove swapName from target
+    tgtG.splice(tgtG.length-1,1);
+    // Add dragged student to target
+    tgtG.push(name);
+    // Add swapped student to source
+    srcG.push(swapName);
+    showToast('🔄 Swapped: '+name+' ↔ '+swapName);
+  } else {
+    // Simply move
+    srcG.splice(dragSrcIndex,1);
+    tgtG.push(name);
+    showToast('✅ Moved '+name+' → Expert Group '+(targetGi+1));
+  }
+  buildHomeFromExpert();
+  renderEG(); renderHG();
+}
+
+/* ============================================================
+   DRAG & DROP — HOME GROUPS
+   ============================================================ */
+function handleStudentDropHome(targetGi) {
+  if (dragSrcGroupHG < 0 || dragSrcGroupHG === targetGi) return;
+  const srcG = homeGroups[dragSrcGroupHG];
+  const tgtG = homeGroups[targetGi];
+  const obj = dragObjHG;
+
+  // Move
+  srcG.splice(dragSrcIndexHG, 1);
+  tgtG.push(obj);
+
+  // Dissolve empty groups
+  homeGroups = homeGroups.filter(g => g.length > 0);
+  
+  showToast('✅ Moved '+obj.name+' → Home Group '+(targetGi+1));
+  renderHG();
+}
+
+/* ============================================================
+   SWAP ENTIRE GROUPS LEFT / RIGHT
+   ============================================================ */
+function swapGroupLeft(gi){
+  if(gi<=0) return;
+  [expertGroups[gi-1], expertGroups[gi]] = [expertGroups[gi], expertGroups[gi-1]];
+  buildHomeFromExpert();
+  renderEG(); renderHG();
+  showToast('◀ Swapped Group '+(gi)+' ↔ Group '+(gi+1));
+}
+function swapGroupRight(gi){
+  if(gi>=expertGroups.length-1) return;
+  [expertGroups[gi], expertGroups[gi+1]] = [expertGroups[gi+1], expertGroups[gi]];
+  buildHomeFromExpert();
+  renderEG(); renderHG();
+  showToast('▶ Swapped Group '+(gi+1)+' ↔ Group '+(gi+2));
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goSetup(){ showScreen('setup'); }
+function goExpert(){
+  showScreen('expert');
+  renderEG();
+  resetTimer('E');
+  const mins=parseInt(document.getElementById('expertMin').value)||10;
+  timerSeconds.E=mins*60; timerTotal.E=mins*60; updateTimerDisplay('E');
+}
+function goHome(){
+  showScreen('home');
+  renderHG();
+  resetTimer('H');
+  const mins=parseInt(document.getElementById('homeMin').value)||10;
+  timerSeconds.H=mins*60; timerTotal.H=mins*60; updateTimerDisplay('H');
+}
+
+/* ============================================================
+   TIMERS
+   ============================================================ */
+const CIRCUMFERENCE=2*Math.PI*44; // ~276.46
+const timerSeconds={E:600,H:600};
+const timerTotal={E:600,H:600};
+const timerIntervals={E:null,H:null};
+
+function updateTimerDisplay(key){
+  const s=timerSeconds[key];
+  const m=Math.floor(s/60); const sec=s%60;
+  document.getElementById('timerText'+key).textContent=String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
+  const pct=timerTotal[key]>0?s/timerTotal[key]:1;
+  document.getElementById('ring'+key).style.strokeDashoffset=CIRCUMFERENCE*(1-pct);
+  const disp=document.getElementById('timerDisp'+key);
+  disp.classList.toggle('timer-warn', s<=60&&s>10);
+  disp.classList.toggle('timer-danger', s<=10);
+}
+function startTimer(key){
+  if(timerIntervals[key]) return;
+  timerIntervals[key]=setInterval(()=>{
+    timerSeconds[key]--;
+    updateTimerDisplay(key);
+    if(timerSeconds[key]<=0){
+      clearInterval(timerIntervals[key]); timerIntervals[key]=null;
+      showTimesup();
+    }
+  },1000);
+}
+function pauseTimer(key){
+  if(timerIntervals[key]){clearInterval(timerIntervals[key]);timerIntervals[key]=null;}
+}
+function resetTimer(key){
+  pauseTimer(key);
+  const inputId=key==='E'?'expertMin':'homeMin';
+  const mins=parseInt(document.getElementById(inputId).value)||10;
+  timerSeconds[key]=mins*60; timerTotal[key]=mins*60;
+  updateTimerDisplay(key);
+  const disp=document.getElementById('timerDisp'+key);
+  disp.classList.remove('timer-warn','timer-danger');
+}
+function showTimesup(){
+  document.getElementById('timesupOverlay').classList.add('show');
+  confetti({particleCount:200,spread:120,origin:{y:.5}});
+  // Beep
+  try{const ac=new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.frequency.value=880;g.gain.value=.3;o.start();setTimeout(()=>{o.stop();ac.close();},1500);}catch(e){}
+}
+function dismissTimesup(){document.getElementById('timesupOverlay').classList.remove('show');}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+function showToast(msg){
+  const t=document.getElementById('swapToast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+function printGroups(which){
+  const screens={setup:'screen-setup',expert:'screen-expert',home:'screen-home'};
+  Object.values(screens).forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('screen-'+which).style.display='block';
+  window.print();
+  Object.values(screens).forEach(id=>document.getElementById(id).style.display='');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+which).classList.add('active');
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+renderClassTabs();
+</script>
+</body>
+</html>

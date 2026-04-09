@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Curve Manager - Unified Grading Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); color: #e5e7eb; min-height: 100vh; }
+
+.app-container { max-width: 1800px; margin: 0 auto; padding: 16px; }
+
+/* Header */
+.header { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; margin-bottom: 16px; backdrop-filter: blur(10px); }
+.header-top { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+h1 { font-size: 1.6rem; background: linear-gradient(90deg, #a78bfa, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.subtitle { color: #94a3b8; font-size: 0.85rem; margin-top: 4px; }
+
+/* Tab Navigation */
+.tab-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.tab-btn { padding: 10px 20px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #94a3b8; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
+.tab-btn:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+.tab-btn.active { background: #8b5cf6; border-color: #a78bfa; color: #fff; box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Controls Row */
+.controls-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.control-group { display: flex; flex-direction: column; gap: 4px; }
+.control-group label { font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+.control-group input, .control-group select { background: rgba(30, 41, 59, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; outline: none; font-size: 0.9rem; }
+.control-group input:focus, .control-group select:focus { border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); }
+.control-group input[type="number"] { width: 90px; }
+.control-group input[type="text"] { width: 200px; }
+.class-select { min-width: 200px; }
+
+/* Buttons */
+.btn { border: none; border-radius: 8px; padding: 9px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; color: #fff; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-primary { background: linear-gradient(135deg, #8b5cf6, #a78bfa); }
+.btn-secondary { background: #475569; }
+.btn-success { background: linear-gradient(135deg, #10b981, #34d399); }
+.btn-danger { background: linear-gradient(135deg, #ef4444, #f87171); }
+.btn-warning { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #1a1a2e; }
+
+/* Table */
+.table-container { overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); margin: 16px 0; max-height: 500px; }
+table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+thead th { position: sticky; top: 0; z-index: 2; background: #1e293b; color: #f1f5f9; text-align: left; padding: 12px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid rgba(139, 92, 246, 0.3); }
+tbody td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.95rem; }
+tbody tr:hover { background: rgba(139, 92, 246, 0.08); }
+tbody tr { transition: background 0.2s; }
+tbody tr.dragging { opacity: 0.5; background: rgba(139, 92, 246, 0.15); }
+tbody tr.drag-over { border-top: 2px solid #8b5cf6; }
+
+.col-num { width: 50px; color: #94a3b8; text-align: center; }
+.col-name { font-weight: 600; min-width: 180px; cursor: grab; }
+.col-name:active { cursor: grabbing; }
+.col-input { width: 100px; }
+.col-input input { width: 80px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(30, 41, 59, 0.8); color: #fff; font-size: 0.9rem; text-align: center; }
+.col-input input:focus { border-color: #8b5cf6; }
+.col-calc { color: #f8fafc; font-weight: 500; }
+.col-highlight { color: #86efac; font-weight: 700; }
+.col-error { color: #fca5a5; font-weight: 600; }
+
+/* AP Score Badge */
+.ap-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 26px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; color: #fff; }
+.ap-none { background: #475569; }
+.ap-1 { background: #ef4444; }
+.ap-2 { background: #f97316; }
+.ap-3 { background: #eab308; color: #1a1a2e; }
+.ap-4 { background: #22c55e; }
+.ap-5 { background: #3b82f6; }
+
+/* Delete Button */
+.delete-btn { border: none; background: rgba(239, 68, 68, 0.8); color: white; border-radius: 6px; width: 30px; height: 30px; cursor: pointer; font-size: 1rem; transition: all 0.2s; }
+.delete-btn:hover { background: #ef4444; transform: scale(1.1); }
+
+/* Drag Handle */
+.drag-handle { color: #64748b; margin-right: 8px; cursor: grab; font-size: 1.1rem; }
+.drag-handle:hover { color: #8b5cf6; }
+
+/* Curve Legend Panel */
+.legend-panel { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; margin-top: 16px; }
+.legend-panel h3 { font-size: 1rem; color: #a78bfa; margin-bottom: 12px; }
+.legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.legend-card { background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px; }
+.legend-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.legend-card-header strong { font-size: 1rem; }
+.legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.legend-row label { width: 80px; font-size: 0.75rem; color: #94a3b8; }
+.legend-row input { width: 80px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); background: rgba(15, 23, 42, 0.8); color: #fff; font-size: 0.85rem; text-align: center; }
+
+/* Formula Panel */
+.formula-panel { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; margin-top: 16px; }
+.formula-panel h3 { font-size: 1rem; color: #a78bfa; margin-bottom: 12px; }
+.formula-input-wrap { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+.formula-input { flex: 1; min-width: 300px; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(30, 41, 59, 0.8); color: #fff; font-size: 1rem; font-family: 'Consolas', monospace; }
+.formula-input:focus { border-color: #8b5cf6; }
+.formula-status { font-size: 0.8rem; color: #94a3b8; margin-top: 8px; }
+.formula-help { font-size: 0.75rem; color: #64748b; margin-top: 8px; line-height: 1.6; }
+
+/* Data Info Panel */
+.data-info { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; margin-top: 16px; }
+.data-info h3 { font-size: 1rem; color: #a78bfa; margin-bottom: 12px; }
+.data-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.data-info-card { background: rgba(30, 41, 59, 0.5); border-radius: 8px; padding: 12px; border-left: 3px solid #8b5cf6; }
+.data-info-card h4 { font-size: 0.85rem; color: #e2e8f0; margin-bottom: 6px; }
+.data-info-card p { font-size: 0.78rem; color: #94a3b8; line-height: 1.5; }
+.data-info-card code { background: rgba(139, 92, 246, 0.2); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; color: #a78bfa; }
+
+/* Status Message */
+.status-msg { font-size: 0.8rem; padding: 8px 12px; border-radius: 6px; margin-top: 8px; display: none; }
+.status-msg.show { display: block; }
+.status-success { background: rgba(34, 197, 94, 0.15); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.3); }
+.status-error { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
+.status-info { background: rgba(59, 130, 246, 0.15); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.3); }
+
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(2, 6, 23, 0.7); z-index: 100; }
+.modal-overlay.show { display: flex; }
+.modal { width: 92%; max-width: 480px; background: #1e293b; border: 1px solid rgba(255,255,255,0.15); border-radius: 16px; overflow: hidden; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.modal-header h2 { font-size: 1.1rem; }
+.modal-body { padding: 20px; }
+.modal-body input { width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(30, 41, 59, 0.8); color: #fff; font-size: 0.95rem; }
+.modal-footer { display: flex; justify-content: flex-end; gap: 8px; padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.1); }
+
+/* Responsive */
+@media (max-width: 1000px) {
+  .header-top { flex-direction: column; }
+  .controls-row { flex-direction: column; align-items: stretch; }
+  .control-group input[type="text"] { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-top">
+      <div>
+        <h1>Curve Manager</h1>
+        <p class="subtitle">Unified AP & Formula-Based Grading Tool</p>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button id="reloadStudentsBtn" class="btn btn-secondary" title="Reload students from students_data.json">Reload Students</button>
+        <button id="resetAllBtn" class="btn btn-warning">Reset All</button>
+        <button id="exportCsvBtn" class="btn btn-secondary">Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="ap">AP Curve</button>
+      <button class="tab-btn" data-tab="formula">Formula Curve</button>
+      <button class="tab-btn" data-tab="info">Data Storage Info</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-row">
+      <div class="control-group">
+        <label>Class</label>
+        <select id="classSelector" class="class-select"></select>
+      </div>
+      <div class="control-group">
+        <label>Max MCQ</label>
+        <input type="number" id="maxMcqInput" value="40" min="1">
+      </div>
+      <div class="control-group">
+        <label>Scaled MCQ</label>
+        <input type="number" id="scaledMcqInput" value="52" min="1">
+      </div>
+      <div class="control-group">
+        <label>Max FRQ</label>
+        <input type="number" id="maxFrqInput" value="48" min="1">
+      </div>
+      <div class="control-group">
+        <label>Max Raw Score</label>
+        <input type="number" id="maxRawInput" value="100" min="1">
+      </div>
+      <div class="control-group">
+        <label>Assignment Name</label>
+        <input type="text" id="assignmentNameInput" placeholder="e.g. Unit 3 Test">
+      </div>
+      <button id="addStudentBtn" class="btn btn-primary">Add Student</button>
+      <button id="saveAssignmentBtn" class="btn btn-success">Save Assignment</button>
+    </div>
+    <div id="statusMsg" class="status-msg"></div>
+  </header>
+
+  <!-- AP Curve Tab -->
+  <div id="tab-ap" class="tab-content active">
+    <div class="table-container">
+      <table id="apTable">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th style="width:250px">Student Name</th>
+            <th style="width:100px">MCQ Score</th>
+            <th style="width:100px">FRQ Score</th>
+            <th style="width:100px">Scaled MCQ</th>
+            <th style="width:100px">Raw Score</th>
+            <th style="width:100px">Raw %</th>
+            <th style="width:120px">Curved %</th>
+            <th style="width:80px">AP Score</th>
+            <th style="width:60px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="apTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- AP Curve Legend -->
+    <div class="legend-panel">
+      <h3>AP Curve Legend (Editable)</h3>
+      <div id="apLegendGrid" class="legend-grid"></div>
+    </div>
+  </div>
+
+  <!-- Formula Curve Tab -->
+  <div id="tab-formula" class="tab-content">
+    <div class="table-container">
+      <table id="formulaTable">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th style="width:250px">Student Name</th>
+            <th style="width:100px">MCQ Score</th>
+            <th style="width:100px">FRQ Score</th>
+            <th style="width:100px">Scaled MCQ</th>
+            <th style="width:100px">Raw Score</th>
+            <th style="width:100px">Raw %</th>
+            <th style="width:120px">Curved %</th>
+            <th style="width:60px">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="formulaTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Formula Input -->
+    <div class="formula-panel">
+      <h3>Curve Formula (Excel-style)</h3>
+      <div class="formula-input-wrap">
+        <input type="text" id="curveFormulaInput" class="formula-input" value="=RAW_PCT" placeholder="e.g. =ROUND(RAW_PCT*1.08,1)">
+        <button id="validateFormulaBtn" class="btn btn-secondary">Validate</button>
+      </div>
+      <div id="formulaStatus" class="formula-status"></div>
+      <div class="formula-help">
+        <strong>Variables:</strong> RAW, RAW_PCT, MCQ, FRQ, SCALED_MCQ, MAX_MCQ, MAX_FRQ, MAX_RAW, SCALED_MCQ_MAX<br>
+        <strong>Functions:</strong> ROUND, ROUNDUP, ROUNDDOWN, MIN, MAX, ABS, SQRT, IF, AND, OR, NOT, SUM, AVERAGE, MEDIAN, POWER, MOD, LOG, LN, SIN, COS, TAN
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Storage Info Tab -->
+  <div id="tab-info" class="tab-content">
+    <div class="data-info">
+      <h3>Data Storage Locations</h3>
+      <div class="data-info-grid">
+        <div class="data-info-card">
+          <h4>Student Names</h4>
+          <p>Stored in: <code>students_data.json</code><br>
+          Edit this file directly to add/remove students. Click "Reload Students" to refresh.<br>
+          Format: <code>{ "classes": { "ClassName": [{"id": "...", "name": "..."}] } }</code></p>
+        </div>
+        <div class="data-info-card">
+          <h4>Scores & Grades</h4>
+          <p>Stored in: <code>localStorage["curve_manager_data_v1"]</code><br>
+          Contains MCQ scores, FRQ scores, and all calculated values per class.<br>
+          Persists automatically on every change.</p>
+        </div>
+        <div class="data-info-card">
+          <h4>Student Order</h4>
+          <p>Stored in: <code>localStorage["curve_manager_order_v1"]</code><br>
+          Drag-and-drop reordering is saved immediately. Order persists between sessions.</p>
+        </div>
+        <div class="data-info-card">
+          <h4>AP Curve Bands</h4>
+          <p>Stored in: <code>localStorage["curve_manager_ap_bands_v1"]</code><br>
+          Edit the raw/curve min/max values in the legend panel. Changes save automatically.</p>
+        </div>
+        <div class="data-info-card">
+          <h4>Formula Settings</h4>
+          <p>Stored in: <code>localStorage["curve_manager_formula_v1"]</code><br>
+          The curve formula is saved per class. Edit in the Formula tab.</p>
+        </div>
+        <div class="data-info-card">
+          <h4>Assignment Snapshots</h4>
+          <p>Stored in: <code>localStorage["curve_manager_assignments_v1"]</code><br>
+          Saved assignments with all scores at that point in time. Export to CSV.</p>
+        </div>
+        <div class="data-info-card">
+          <h4>Reset to Defaults</h4>
+          <p>Click "Reset All" to clear all localStorage data and reload students from <code>students_data.json</code>.<br>
+          This does NOT modify the JSON file.</p>
+        </div>
+        <div class="data-info-card">
+          <h4>N/A Filtering</h4>
+          <p>Empty strings, null, undefined, and "N/A" values are automatically filtered out.<br>
+          Only actual student data with valid names is displayed.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Student Modal -->
+<div id="addStudentModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Add Student</h2>
+      <button class="btn btn-secondary" id="closeModalBtn">Close</button>
+    </div>
+    <div class="modal-body">
+      <input type="text" id="newStudentName" placeholder="Enter student name" autocomplete="off">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="cancelModalBtn">Cancel</button>
+      <button class="btn btn-primary" id="confirmAddBtn">Add Student</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ===== STORAGE KEYS =====
+  const STORAGE_KEYS = {
+    mainData: 'curve_manager_data_v1',
+    order: 'curve_manager_order_v1',
+    apBands: 'curve_manager_ap_bands_v1',
+    formula: 'curve_manager_formula_v1',
+    assignments: 'curve_manager_assignments_v1'
+  };
+
+  // ===== DEFAULT VALUES =====
+  const DEFAULT_SETTINGS = {
+    maxMcq: 40,
+    scaledMcq: 52,
+    maxFrq: 48,
+    maxRaw: 100,
+    assignmentName: ''
+  };
+
+  const DEFAULT_AP_BANDS = [
+    { rawMin: 70, rawMax: 100, curveMin: 90, curveMax: 100, ap: 5 },
+    { rawMin: 54, rawMax: 69.9, curveMin: 75, curveMax: 89, ap: 4 },
+    { rawMin: 40, rawMax: 53.9, curveMin: 60, curveMax: 74, ap: 3 },
+    { rawMin: 25, rawMax: 39.9, curveMin: 30, curveMax: 59, ap: 2 },
+    { rawMin: 0, rawMax: 24.9, curveMin: 0, curveMax: 29, ap: 1 }
+  ];
+
+  const DEFAULT_FORMULA = '=RAW_PCT';
+
+  // ===== STATE =====
+  let currentClass = '';
+  let appData = {};
+  let studentOrders = {};
+  let apBands = {};
+  let formulas = {};
+  let assignments = {};
+  let externalStudents = {};
+
+  // ===== DOM ELEMENTS =====
+  const $ = id => document.getElementById(id);
+  const classSelector = $('classSelector');
+  const maxMcqInput = $('maxMcqInput');
+  const scaledMcqInput = $('scaledMcqInput');
+  const maxFrqInput = $('maxFrqInput');
+  const maxRawInput = $('maxRawInput');
+  const assignmentNameInput = $('assignmentNameInput');
+  const curveFormulaInput = $('curveFormulaInput');
+  const apTableBody = $('apTableBody');
+  const formulaTableBody = $('formulaTableBody');
+  const apLegendGrid = $('apLegendGrid');
+  const formulaStatus = $('formulaStatus');
+  const statusMsg = $('statusMsg');
+  const addStudentModal = $('addStudentModal');
+  const newStudentNameInput = $('newStudentName');
+
+  // ===== UTILITY FUNCTIONS =====
+  function generateId() {
+    if (crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'id_' + Math.random().toString(36).slice(2, 11);
+  }
+
+  function toNumber(v) {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function showStatus(msg, type = 'info') {
+    statusMsg.textContent = msg;
+    statusMsg.className = 'status-msg show status-' + type;
+    setTimeout(() => { statusMsg.classList.remove('show'); }, 3000);
+  }
+
+  // Filter out N/A, empty, null, undefined values
+  function isValidStudent(student) {
+    if (!student) return false;
+    if (typeof student === 'string') {
+      const trimmed = student.trim();
+      return trimmed.length > 0 && trimmed.toUpperCase() !== 'N/A';
+    }
+    if (typeof student === 'object') {
+      const name = (student.name || '').trim();
+      return name.length > 0 && name.toUpperCase() !== 'N/A';
+    }
+    return false;
+  }
+
+  function cleanStudentList(students) {
+    return students.filter(isValidStudent).map(s => {
+      if (typeof s === 'string') {
+        return { id: generateId(), name: s.trim(), mcq: '', frq: '' };
+      }
+      return {
+        id: s.id || generateId(),
+        name: (s.name || '').trim(),
+        mcq: s.mcq !== undefined ? s.mcq : '',
+        frq: s.frq !== undefined ? s.frq : ''
+      };
+    });
+  }
+
+  // ===== STORAGE FUNCTIONS =====
+  function saveMainData() {
+    localStorage.setItem(STORAGE_KEYS.mainData, JSON.stringify(appData));
+  }
+
+  function loadMainData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.mainData);
+      if (raw) {
+        appData = JSON.parse(raw);
+        Object.keys(appData).forEach(key => {
+          if (!appData[key].settings) appData[key].settings = { ...DEFAULT_SETTINGS };
+          if (!appData[key].students) appData[key].students = [];
+        });
+      }
+    } catch (e) {
+      appData = {};
+    }
+  }
+
+  function saveOrders() {
+    localStorage.setItem(STORAGE_KEYS.order, JSON.stringify(studentOrders));
+  }
+
+  function loadOrders() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.order);
+      if (raw) studentOrders = JSON.parse(raw);
+    } catch (e) {
+      studentOrders = {};
+    }
+  }
+
+  function saveApBands() {
+    localStorage.setItem(STORAGE_KEYS.apBands, JSON.stringify(apBands));
+  }
+
+  function loadApBands() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.apBands);
+      if (raw) apBands = JSON.parse(raw);
+    } catch (e) {
+      apBands = {};
+    }
+  }
+
+  function saveFormulas() {
+    localStorage.setItem(STORAGE_KEYS.formula, JSON.stringify(formulas));
+  }
+
+  function loadFormulas() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.formula);
+      if (raw) formulas = JSON.parse(raw);
+    } catch (e) {
+      formulas = {};
+    }
+  }
+
+  function saveAssignments() {
+    localStorage.setItem(STORAGE_KEYS.assignments, JSON.stringify(assignments));
+  }
+
+  function loadAssignments() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEYS.assignments);
+      if (raw) assignments = JSON.parse(raw);
+    } catch (e) {
+      assignments = {};
+    }
+  }
+
+  function loadAllData() {
+    loadMainData();
+    loadOrders();
+    loadApBands();
+    loadFormulas();
+    loadAssignments();
+  }
+
+  function saveAllData() {
+    saveMainData();
+    saveOrders();
+    saveApBands();
+    saveFormulas();
+    saveAssignments();
+  }
+
+  // ===== EXTERNAL STUDENT FILE LOADING =====
+  async function loadExternalStudents() {
+    try {
+      const response = await fetch('students_data.json?t=' + Date.now());
+      if (response.ok) {
+        const data = await response.json();
+        if (data.classes && typeof data.classes === 'object') {
+          externalStudents = {};
+          Object.keys(data.classes).forEach(className => {
+            const rawStudents = data.classes[className];
+            if (Array.isArray(rawStudents)) {
+              externalStudents[className] = cleanStudentList(rawStudents);
+            }
+          });
+          showStatus('Loaded students from students_data.json', 'success');
+          return true;
+        }
+      }
+    } catch (e) {
+      console.log('Could not load students_data.json:', e.message);
+    }
+    return false;
+  }
+
+  function syncExternalStudents() {
+    Object.keys(externalStudents).forEach(className => {
+      const classId = makeClassId(className);
+      if (!appData[classId]) {
+        appData[classId] = {
+          label: className,
+          settings: { ...DEFAULT_SETTINGS },
+          students: externalStudents[className].map(s => ({ ...s, mcq: '', frq: '' }))
+        };
+        if (!apBands[classId]) apBands[classId] = JSON.parse(JSON.stringify(DEFAULT_AP_BANDS));
+        if (!formulas[classId]) formulas[classId] = DEFAULT_FORMULA;
+        if (!assignments[classId]) assignments[classId] = [];
+        if (!studentOrders[classId]) studentOrders[classId] = appData[classId].students.map(s => s.id);
+      } else {
+        // Update student list if no manual grades entered
+        const hasGrades = appData[classId].students.some(s => String(s.mcq).trim() || String(s.frq).trim());
+        if (!hasGrades) {
+          const externalIds = new Set(externalStudents[className].map(s => s.id));
+          const currentStudents = appData[classId].students;
+          
+          // Preserve grades for students that still exist
+          const updatedStudents = externalStudents[className].map(ext => {
+            const existing = currentStudents.find(s => s.id === ext.id || s.name === ext.name);
+            return existing || { ...ext, mcq: '', frq: '' };
+          });
+          
+          appData[classId].students = updatedStudents;
+          studentOrders[classId] = updatedStudents.map(s => s.id);
+        }
+      }
+    });
+    saveAllData();
+  }
+
+  function makeClassId(name) {
+    return 'cls_' + name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+  }
+
+  // ===== DEFAULT CLASS INITIALIZATION =====
+  function initializeDefaultClasses() {
+    if (Object.keys(appData).length === 0) {
+      const defaultStudents1 = [
+        'Cao, Zhiyuan (Jessica)', 'Chen, Haiwei (Harvey)', 'Cui, Hankun (Daniel)',
+        'Jiang, Haosen (Jerry)', 'Li, Yuyang (Michael)', 'Pei, Jingzhou (Oscar)',
+        'Qu, Haibo (Lucas)', 'Wang, Han (Bright)', 'Wang, Jinghan (Jason)',
+        'Wang, Yunbo (Steven)', 'Xu, Shien (Steven)', 'Xu, Yuwei (Lisa)',
+        'Zhang, Jiazhen (Anthony)', 'Zhang, Ziye (Eason)', 'Zhao, Siqi (Steven Zhao)', 'Cerelia'
+      ];
+      const defaultStudents2 = [
+        'Cheng, Yitian (Timothy)', 'Li, Dong (Jasper)', 'Li, Qianran (Cindy)',
+        'Li, Zhe (Jackson)', 'Liu, Yuyin (Sam)', 'Luo, Yuhong',
+        'Mao, Zhengkang (Kang)', 'Miao, Yan (Helen)', 'Nie, Wenda (Nick)',
+        'Pu, Zihang (Andy)', 'Ruan, Zhenghao (Deo)', 'Shen, Duowei (Maxime)',
+        'Wang, Yihao (Will)', 'Wang, Zijian (James)', 'Wang, Ziyan (Zoe)',
+        'Yang, Shijie (Nick)', 'Zhang, Ziye (Eason)', 'Bella'
+      ];
+
+      appData.class1 = {
+        label: 'APP1 (Class 1)',
+        settings: { ...DEFAULT_SETTINGS },
+        students: cleanStudentList(defaultStudents1)
+      };
+      appData.class2 = {
+        label: 'APPC-M (Class 2)',
+        settings: { ...DEFAULT_SETTINGS },
+        students: cleanStudentList(defaultStudents2)
+      };
+
+      ['class1', 'class2'].forEach(id => {
+        if (!apBands[id]) apBands[id] = JSON.parse(JSON.stringify(DEFAULT_AP_BANDS));
+        if (!formulas[id]) formulas[id] = DEFAULT_FORMULA;
+        if (!assignments[id]) assignments[id] = [];
+        if (!studentOrders[id]) studentOrders[id] = appData[id].students.map(s => s.id);
+      });
+      saveAllData();
+    }
+  }
+
+  // ===== APPLY STUDENT ORDER =====
+  function applyOrder(classId) {
+    const students = appData[classId]?.students || [];
+    const order = studentOrders[classId] || [];
+    
+    if (order.length === 0) {
+      studentOrders[classId] = students.map(s => s.id);
+      saveOrders();
+      return students;
+    }
+
+    const ordered = [];
+    const used = new Set();
+    
+    order.forEach(id => {
+      const student = students.find(s => s.id === id);
+      if (student && !used.has(id)) {
+        ordered.push(student);
+        used.add(id);
+      }
+    });
+    
+    students.forEach(s => {
+      if (!used.has(s.id)) {
+        ordered.push(s);
+      }
+    });
+    
+    return ordered;
+  }
+
+  function saveStudentOrder(classId, students) {
+    studentOrders[classId] = students.map(s => s.id);
+    saveOrders();
+  }
+
+  // ===== RENDER CLASS SELECTOR =====
+  function renderClassSelector() {
+    classSelector.innerHTML = '';
+    Object.keys(appData).forEach(key => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = appData[key].label || key;
+      if (key === currentClass) opt.selected = true;
+      classSelector.appendChild(opt);
+    });
+    if (!currentClass && Object.keys(appData).length > 0) {
+      currentClass = Object.keys(appData)[0];
+      classSelector.value = currentClass;
+    }
+  }
+
+  // ===== RENDER SETTINGS =====
+  function renderSettings() {
+    const settings = appData[currentClass]?.settings || DEFAULT_SETTINGS;
+    maxMcqInput.value = settings.maxMcq;
+    scaledMcqInput.value = settings.scaledMcq;
+    maxFrqInput.value = settings.maxFrq;
+    maxRawInput.value = settings.maxRaw;
+    assignmentNameInput.value = settings.assignmentName || '';
+    curveFormulaInput.value = formulas[currentClass] || DEFAULT_FORMULA;
+  }
+
+  function saveSettings() {
+    if (!appData[currentClass]) return;
+    appData[currentClass].settings = {
+      maxMcq: parseFloat(maxMcqInput.value) || 40,
+      scaledMcq: parseFloat(scaledMcqInput.value) || 52,
+      maxFrq: parseFloat(maxFrqInput.value) || 48,
+      maxRaw: parseFloat(maxRawInput.value) || 100,
+      assignmentName: assignmentNameInput.value.trim()
+    };
+    saveMainData();
+  }
+
+  // ===== CALCULATIONS =====
+  function processStudentGrades(student, useFormula = false) {
+    const mcq = toNumber(String(student.mcq).trim());
+    const frq = toNumber(String(student.frq).trim());
+    const settings = appData[currentClass]?.settings || DEFAULT_SETTINGS;
+    
+    let scaledMcq = null, rawScore = null, rawPct = null, curve = null, ap = null, curveError = null;
+    
+    if (mcq !== null) {
+      scaledMcq = (mcq / (settings.maxMcq || 40)) * (settings.scaledMcq || 52);
+    }
+    
+    if (mcq !== null || frq !== null) {
+      rawScore = (scaledMcq || 0) + (frq !== null ? frq : 0);
+      rawPct = (rawScore / (settings.maxRaw || 100)) * 100;
+      
+      if (useFormula) {
+        const result = evaluateFormula(formulas[currentClass] || DEFAULT_FORMULA, {
+          RAW: rawScore,
+          RAW_PCT: rawPct,
+          MCQ: mcq !== null ? mcq : 0,
+          FRQ: frq !== null ? frq : 0,
+          SCALED_MCQ: scaledMcq || 0,
+          MAX_MCQ: settings.maxMcq || 40,
+          SCALED_MCQ_MAX: settings.scaledMcq || 52,
+          MAX_FRQ: settings.maxFrq || 48,
+          MAX_RAW: settings.maxRaw || 100
+        });
+        curve = result.value;
+        curveError = result.error;
+      } else {
+        const apResult = calculateAPCurve(rawPct);
+        curve = apResult.curve;
+        ap = apResult.ap;
+      }
+    }
+    
+    return { scaledMcq, rawScore, rawPct, curve, ap, curveError };
+  }
+
+  function calculateAPCurve(rawPct) {
+    if (rawPct === null) return { curve: null, ap: null };
+    const bands = apBands[currentClass] || DEFAULT_AP_BANDS;
+    
+    if (rawPct >= 100) return { curve: 100, ap: 5 };
+    
+    let targetBand = bands[bands.length - 1];
+    for (const band of bands) {
+      if (rawPct >= band.rawMin && rawPct <= band.rawMax) {
+        targetBand = band;
+        break;
+      }
+    }
+    
+    const widthRaw = (targetBand.rawMax - targetBand.rawMin) || 1;
+    const widthCurve = targetBand.curveMax - targetBand.curveMin;
+    const curvedScore = ((rawPct - targetBand.rawMin) / widthRaw) * widthCurve + targetBand.curveMin;
+    
+    return {
+      curve: Math.max(0, Math.min(100, curvedScore)),
+      ap: targetBand.ap
+    };
+  }
+
+  // ===== FORMULA EVALUATION =====
+  function evaluateFormula(formula, ctx) {
+    let f = String(formula || '').trim();
+    if (!f) return { value: null, error: 'Empty formula' };
+    if (f.startsWith('=')) f = f.slice(1);
+    
+    f = f.replace(/;/g, ',');
+    f = f.replace(/(\d+(\.\d+)?)\s*%/g, '($1/100)');
+    f = f.replace(/\^/g, '**');
+    f = f.replace(/<>/g, '!=');
+    f = f.replace(/(^|[^<>=!])=([^=])/g, '$1==$2');
+    f = f.toUpperCase();
+    
+    if (/[^A-Z0-9_+\-*/().,<>=!%\s]/.test(f)) {
+      return { value: null, error: 'Unsupported characters' };
+    }
+    
+    try {
+      const scope = {
+        ...ctx,
+        ROUND: (n, d = 0) => { const p = Math.pow(10, d); return Math.round(n * p) / p; },
+        ROUNDUP: (n, d = 0) => { const p = Math.pow(10, d); return Math.sign(n) * Math.ceil(Math.abs(n) * p) / p; },
+        ROUNDDOWN: (n, d = 0) => { const p = Math.pow(10, d); return Math.sign(n) * Math.floor(Math.abs(n) * p) / p; },
+        MIN: (...a) => Math.min(...a),
+        MAX: (...a) => Math.max(...a),
+        ABS: x => Math.abs(x),
+        SQRT: x => Math.sqrt(x),
+        IF: (c, a, b) => c ? a : b,
+        AND: (...a) => a.every(Boolean),
+        OR: (...a) => a.some(Boolean),
+        NOT: x => !x,
+        SUM: (...a) => a.reduce((x, y) => x + y, 0),
+        AVERAGE: (...a) => a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0,
+        MEDIAN: (...a) => {
+          if (!a.length) return 0;
+          const s = [...a].sort((x, y) => x - y);
+          const m = Math.floor(s.length / 2);
+          return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+        },
+        POWER: (x, y) => Math.pow(x, y),
+        MOD: (x, y) => x % y,
+        LOG: (x, b = 10) => Math.log(x) / Math.log(b),
+        LN: x => Math.log(x),
+        SIN: x => Math.sin(x),
+        COS: x => Math.cos(x),
+        TAN: x => Math.tan(x),
+        PI: Math.PI,
+        E: Math.E
+      };
+      
+      const argNames = Object.keys(scope);
+      const argVals = Object.values(scope);
+      const fn = Function(...argNames, '"use strict"; return (' + f + ');');
+      const value = fn(...argVals);
+      
+      if (!Number.isFinite(value)) return { value: null, error: 'Invalid result' };
+      return { value, error: null };
+    } catch (e) {
+      return { value: null, error: 'Parse error' };
+    }
+  }
+
+  function validateFormula() {
+    const result = evaluateFormula(curveFormulaInput.value, {
+      RAW: 72, RAW_PCT: 72, MCQ: 28, FRQ: 35, SCALED_MCQ: 37,
+      MAX_MCQ: parseFloat(maxMcqInput.value) || 40,
+      SCALED_MCQ_MAX: parseFloat(scaledMcqInput.value) || 52,
+      MAX_FRQ: parseFloat(maxFrqInput.value) || 48,
+      MAX_RAW: parseFloat(maxRawInput.value) || 100
+    });
+    
+    if (result.error) {
+      formulaStatus.textContent = 'Error: ' + result.error;
+      formulaStatus.style.color = '#fca5a5';
+    } else {
+      formulaStatus.textContent = 'Valid. Test result: ' + result.value.toFixed(2) + '%';
+      formulaStatus.style.color = '#86efac';
+    }
+  }
+
+  // ===== RENDER AP TABLE =====
+  function renderAPTable() {
+    const students = applyOrder(currentClass);
+    apTableBody.innerHTML = '';
+    
+    students.forEach((student, index) => {
+      const r = processStudentGrades(student, false);
+      const tr = document.createElement('tr');
+      tr.draggable = true;
+      tr.dataset.studentId = student.id;
+      
+      const apClass = r.ap !== null ? 'ap-' + r.ap : 'ap-none';
+      
+      tr.innerHTML = `
+        <td class="col-num"><span class="drag-handle">⋮⋮</span>${index + 1}</td>
+        <td class="col-name" data-id="${student.id}" title="Click to edit">${student.name}</td>
+        <td class="col-input"><input type="number" step="0.5" min="0" data-id="${student.id}" data-field="mcq" value="${student.mcq}"></td>
+        <td class="col-input"><input type="number" step="0.5" min="0" data-id="${student.id}" data-field="frq" value="${student.frq}"></td>
+        <td class="col-calc">${r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : '-'}</td>
+        <td class="col-highlight">${r.rawScore !== null ? r.rawScore.toFixed(1) : '-'}</td>
+        <td class="col-highlight">${r.rawPct !== null ? r.rawPct.toFixed(1) + '%' : '-'}</td>
+        <td class="col-highlight">${r.curve !== null ? r.curve.toFixed(1) + '%' : '-'}</td>
+        <td><span class="ap-badge ${apClass}">${r.ap !== null ? r.ap : '-'}</span></td>
+        <td><button class="delete-btn" data-id="${student.id}" title="Remove">×</button></td>
+      `;
+      
+      setupRowDrag(tr, index);
+      apTableBody.appendChild(tr);
+    });
+  }
+
+  // ===== RENDER FORMULA TABLE =====
+  function renderFormulaTable() {
+    const students = applyOrder(currentClass);
+    formulaTableBody.innerHTML = '';
+    
+    students.forEach((student, index) => {
+      const r = processStudentGrades(student, true);
+      const tr = document.createElement('tr');
+      tr.draggable = true;
+      tr.dataset.studentId = student.id;
+      
+      tr.innerHTML = `
+        <td class="col-num"><span class="drag-handle">⋮⋮</span>${index + 1}</td>
+        <td class="col-name" data-id="${student.id}" title="Click to edit">${student.name}</td>
+        <td class="col-input"><input type="number" step="0.5" min="0" data-id="${student.id}" data-field="mcq" value="${student.mcq}"></td>
+        <td class="col-input"><input type="number" step="0.5" min="0" data-id="${student.id}" data-field="frq" value="${student.frq}"></td>
+        <td class="col-calc">${r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : '-'}</td>
+        <td class="col-highlight">${r.rawScore !== null ? r.rawScore.toFixed(1) : '-'}</td>
+        <td class="col-highlight">${r.rawPct !== null ? r.rawPct.toFixed(1) + '%' : '-'}</td>
+        <td class="${r.curveError ? 'col-error' : 'col-highlight'}" title="${r.curveError || ''}">${r.curve !== null ? r.curve.toFixed(1) + '%' : r.curveError ? '#ERR' : '-'}</td>
+        <td><button class="delete-btn" data-id="${student.id}" title="Remove">×</button></td>
+      `;
+      
+      setupRowDrag(tr, index);
+      formulaTableBody.appendChild(tr);
+    });
+  }
+
+  // ===== DRAG AND DROP =====
+  let dragSrcIndex = null;
+
+  function setupRowDrag(tr, index) {
+    tr.addEventListener('dragstart', (e) => {
+      dragSrcIndex = index;
+      tr.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', index);
+    });
+    
+    tr.addEventListener('dragend', () => {
+      tr.classList.remove('dragging');
+      document.querySelectorAll('tr.drag-over').forEach(el => el.classList.remove('drag-over'));
+    });
+    
+    tr.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      tr.classList.add('drag-over');
+    });
+    
+    tr.addEventListener('dragleave', () => {
+      tr.classList.remove('drag-over');
+    });
+    
+    tr.addEventListener('drop', (e) => {
+      e.preventDefault();
+      tr.classList.remove('drag-over');
+      
+      const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+      const toIndex = index;
+      
+      if (fromIndex !== toIndex && !isNaN(fromIndex)) {
+        const students = appData[currentClass].students;
+        const movedStudent = students.splice(fromIndex, 1)[0];
+        students.splice(toIndex, 0, movedStudent);
+        saveStudentOrder(currentClass, students);
+        saveMainData();
+        renderAPTable();
+        renderFormulaTable();
+        showStatus('Student order saved', 'success');
+      }
+    });
+  }
+
+  // ===== RENDER AP LEGEND =====
+  function renderAPLegend() {
+    const bands = apBands[currentClass] || DEFAULT_AP_BANDS;
+    apLegendGrid.innerHTML = '';
+    
+    bands.forEach(band => {
+      const card = document.createElement('div');
+      card.className = 'legend-card';
+      card.innerHTML = `
+        <div class="legend-card-header">
+          <strong>AP ${band.ap}</strong>
+          <span class="ap-badge ap-${band.ap}">${band.ap}</span>
+        </div>
+        <div class="legend-row">
+          <label>Raw Min</label>
+          <input type="number" step="0.1" data-ap="${band.ap}" data-field="rawMin" value="${band.rawMin}">
+          <label>Raw Max</label>
+          <input type="number" step="0.1" data-ap="${band.ap}" data-field="rawMax" value="${band.rawMax}">
+        </div>
+        <div class="legend-row">
+          <label>Curve Min</label>
+          <input type="number" step="0.1" data-ap="${band.ap}" data-field="curveMin" value="${band.curveMin}">
+          <label>Curve Max</label>
+          <input type="number" step="0.1" data-ap="${band.ap}" data-field="curveMax" value="${band.curveMax}">
+        </div>
+      `;
+      apLegendGrid.appendChild(card);
+    });
+  }
+
+  // ===== NAME EDITING =====
+  function startNameEdit(td, student) {
+    if (td.querySelector('input')) return;
+    
+    const prev = student.name;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = prev;
+    input.style.cssText = 'width:100%;padding:4px 8px;font-size:inherit;font-weight:600;background:rgba(30,41,59,0.9);border:1px solid #8b5cf6;border-radius:4px;color:#fff;';
+    
+    td.textContent = '';
+    td.appendChild(input);
+    input.focus();
+    input.select();
+    
+    const commit = () => {
+      const val = input.value.trim();
+      if (val && val.toUpperCase() !== 'N/A') {
+        student.name = val;
+      }
+      saveMainData();
+      renderAPTable();
+      renderFormulaTable();
+    };
+    
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') input.blur();
+      if (e.key === 'Escape') { input.value = prev; input.blur(); }
+    });
+  }
+
+  // ===== ADD STUDENT =====
+  function showModal() {
+    addStudentModal.classList.add('show');
+    newStudentNameInput.value = '';
+    setTimeout(() => newStudentNameInput.focus(), 50);
+  }
+
+  function hideModal() {
+    addStudentModal.classList.remove('show');
+  }
+
+  function handleAddStudent() {
+    const name = newStudentNameInput.value.trim();
+    if (!name || name.toUpperCase() === 'N/A') {
+      showStatus('Invalid student name', 'error');
+      return;
+    }
+    
+    const newStudent = { id: generateId(), name, mcq: '', frq: '' };
+    appData[currentClass].students.push(newStudent);
+    studentOrders[currentClass].push(newStudent.id);
+    saveAllData();
+    renderAPTable();
+    renderFormulaTable();
+    hideModal();
+    showStatus('Student added', 'success');
+  }
+
+  // ===== DELETE STUDENT =====
+  function handleDeleteStudent(id) {
+    if (!confirm('Remove this student?')) return;
+    appData[currentClass].students = appData[currentClass].students.filter(s => s.id !== id);
+    studentOrders[currentClass] = (studentOrders[currentClass] || []).filter(sid => sid !== id);
+    saveAllData();
+    renderAPTable();
+    renderFormulaTable();
+    showStatus('Student removed', 'success');
+  }
+
+  // ===== SAVE ASSIGNMENT =====
+  function saveAssignment() {
+    const name = assignmentNameInput.value.trim();
+    if (!name) {
+      showStatus('Enter assignment name first', 'error');
+      assignmentNameInput.focus();
+      return;
+    }
+    
+    const savedAt = new Date().toISOString();
+    const students = applyOrder(currentClass);
+    const rows = students.map(student => {
+      const r = processStudentGrades(student, false);
+      return {
+        studentName: student.name,
+        mcq: student.mcq || '',
+        frq: student.frq || '',
+        scaledMcq: r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : '',
+        rawScore: r.rawScore !== null ? r.rawScore.toFixed(1) : '',
+        rawPct: r.rawPct !== null ? r.rawPct.toFixed(1) : '',
+        curvedScore: r.curve !== null ? r.curve.toFixed(1) : '',
+        apScore: r.ap !== null ? r.ap : ''
+      };
+    });
+    
+    if (!assignments[currentClass]) assignments[currentClass] = [];
+    assignments[currentClass].push({
+      id: generateId(),
+      name,
+      savedAt,
+      settings: { ...appData[currentClass].settings },
+      rows
+    });
+    
+    saveAssignments();
+    showStatus('Assignment saved: ' + name, 'success');
+  }
+
+  // ===== EXPORT CSV =====
+  function exportCSV() {
+    const classLabel = appData[currentClass]?.label || currentClass;
+    const students = applyOrder(currentClass);
+    
+    const rows = [['#', 'Student Name', 'MCQ Score', 'FRQ Score', 'Scaled MCQ', 'Raw Score', 'Raw %', 'Curved %', 'AP Score']];
+    
+    students.forEach((student, i) => {
+      const r = processStudentGrades(student, false);
+      rows.push([
+        i + 1,
+        student.name,
+        student.mcq || '',
+        student.frq || '',
+        r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : '',
+        r.rawScore !== null ? r.rawScore.toFixed(1) : '',
+        r.rawPct !== null ? r.rawPct.toFixed(1) : '',
+        r.curve !== null ? r.curve.toFixed(1) : '',
+        r.ap !== null ? r.ap : ''
+      ]);
+    });
+    
+    const csvContent = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = classLabel.replace(/[^\w-]+/g, '_') + '_grades.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    showStatus('CSV exported', 'success');
+  }
+
+  // ===== RESET ALL =====
+  function resetAll() {
+    if (!confirm('This will clear ALL saved data and reload students from students_data.json. Continue?')) return;
+    
+    Object.keys(STORAGE_KEYS).forEach(key => {
+      localStorage.removeItem(STORAGE_KEYS[key]);
+    });
+    
+    appData = {};
+    studentOrders = {};
+    apBands = {};
+    formulas = {};
+    assignments = {};
+    
+    loadAllData();
+    initializeDefaultClasses();
+    
+    if (Object.keys(externalStudents).length > 0) {
+      syncExternalStudents();
+    }
+    
+    currentClass = Object.keys(appData)[0] || '';
+    renderClassSelector();
+    renderSettings();
+    renderAPTable();
+    renderFormulaTable();
+    renderAPLegend();
+    
+    showStatus('All data reset to defaults', 'success');
+  }
+
+  // ===== RELOAD STUDENTS =====
+  async function reloadStudents() {
+    const loaded = await loadExternalStudents();
+    if (loaded) {
+      syncExternalStudents();
+      renderClassSelector();
+      renderAPTable();
+      renderFormulaTable();
+      showStatus('Students reloaded from file', 'success');
+    } else {
+      showStatus('Could not load students_data.json', 'error');
+    }
+  }
+
+  // ===== EVENT LISTENERS =====
+  function setupEventListeners() {
+    // Tab navigation
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Class selector
+    classSelector.addEventListener('change', () => {
+      currentClass = classSelector.value;
+      renderSettings();
+      renderAPTable();
+      renderFormulaTable();
+      renderAPLegend();
+      validateFormula();
+    });
+
+    // Settings inputs
+    [maxMcqInput, scaledMcqInput, maxFrqInput, maxRawInput].forEach(input => {
+      input.addEventListener('change', () => {
+        saveSettings();
+        renderAPTable();
+        renderFormulaTable();
+      });
+    });
+
+    assignmentNameInput.addEventListener('input', saveSettings);
+
+    // Formula
+    curveFormulaInput.addEventListener('input', () => {
+      formulas[currentClass] = curveFormulaInput.value;
+      saveFormulas();
+      renderFormulaTable();
+    });
+
+    $('validateFormulaBtn').addEventListener('click', validateFormula);
+
+    // AP Legend inputs
+    apLegendGrid.addEventListener('input', (e) => {
+      const input = e.target.closest('input[data-ap]');
+      if (!input) return;
+      
+      const ap = parseInt(input.dataset.ap, 10);
+      const field = input.dataset.field;
+      const val = parseFloat(input.value);
+      if (!Number.isFinite(val)) return;
+      
+      const bands = apBands[currentClass] || DEFAULT_AP_BANDS;
+      const band = bands.find(b => b.ap === ap);
+      if (band) {
+        band[field] = val;
+        apBands[currentClass] = bands;
+        saveApBands();
+        renderAPTable();
+      }
+    });
+
+    // Table input events
+    [apTableBody, formulaTableBody].forEach(tbody => {
+      tbody.addEventListener('input', (e) => {
+        if (e.target.tagName !== 'INPUT') return;
+        const id = e.target.dataset.id;
+        const field = e.target.dataset.field;
+        const student = appData[currentClass].students.find(s => s.id === id);
+        if (student) {
+          student[field] = e.target.value;
+          saveMainData();
+          renderAPTable();
+          renderFormulaTable();
+        }
+      });
+
+      tbody.addEventListener('click', (e) => {
+        const nameTd = e.target.closest('td.col-name');
+        if (nameTd) {
+          const student = appData[currentClass].students.find(s => s.id === nameTd.dataset.id);
+          if (student) startNameEdit(nameTd, student);
+        }
+        
+        const deleteBtn = e.target.closest('.delete-btn');
+        if (deleteBtn) {
+          handleDeleteStudent(deleteBtn.dataset.id);
+        }
+      });
+    });
+
+    // Buttons
+    $('addStudentBtn').addEventListener('click', showModal);
+    $('closeModalBtn').addEventListener('click', hideModal);
+    $('cancelModalBtn').addEventListener('click', hideModal);
+    $('confirmAddBtn').addEventListener('click', handleAddStudent);
+    newStudentNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAddStudent(); });
+    $('saveAssignmentBtn').addEventListener('click', saveAssignment);
+    $('exportCsvBtn').addEventListener('click', exportCSV);
+    $('resetAllBtn').addEventListener('click', resetAll);
+    $('reloadStudentsBtn').addEventListener('click', reloadStudents);
+
+    // Escape to close modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') hideModal();
+    });
+
+    // Listen for external storage changes
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'students_data_json_loaded') {
+        reloadStudents();
+      }
+    });
+  }
+
+  // ===== INITIALIZATION =====
+  async function init() {
+    loadAllData();
+    await loadExternalStudents();
+    
+    if (Object.keys(appData).length === 0) {
+      initializeDefaultClasses();
+    }
+    
+    if (Object.keys(externalStudents).length > 0) {
+      syncExternalStudents();
+    }
+    
+    // Ensure currentClass is set
+    if (!currentClass || !appData[currentClass]) {
+      currentClass = Object.keys(appData)[0] || '';
+    }
+    
+    // Ensure all classes have required data
+    Object.keys(appData).forEach(classId => {
+      if (!apBands[classId]) apBands[classId] = JSON.parse(JSON.stringify(DEFAULT_AP_BANDS));
+      if (!formulas[classId]) formulas[classId] = DEFAULT_FORMULA;
+      if (!assignments[classId]) assignments[classId] = [];
+      if (!studentOrders[classId]) studentOrders[classId] = appData[classId].students.map(s => s.id);
+    });
+    
+    saveAllData();
+    
+    renderClassSelector();
+    renderSettings();
+    renderAPTable();
+    renderFormulaTable();
+    renderAPLegend();
+    validateFormula();
+    setupEventListeners();
+    
+    console.log('Curve Manager initialized');
+    console.log('Data storage locations:');
+    console.log('  - Main data:', STORAGE_KEYS.mainData);
+    console.log('  - Student orders:', STORAGE_KEYS.order);
+    console.log('  - AP bands:', STORAGE_KEYS.apBands);
+    console.log('  - Formulas:', STORAGE_KEYS.formula);
+    console.log('  - Assignments:', STORAGE_KEYS.assignments);
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

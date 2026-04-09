@@ -1,0 +1,85 @@
+{
+  "classes": {
+    "AP Physics C": [
+      { "id": "apc_001", "name": "Will", "row": 3, "pair_position": 1 },
+      { "id": "apc_002", "name": "James", "row": 3, "pair_position": 1 },
+      { "id": "apc_003", "name": "Andy", "row": 3, "pair_position": 2 },
+      { "id": "apc_004", "name": "Maxim", "row": 3, "pair_position": 2 },
+      { "id": "apc_005", "name": "Nick Nie", "row": 3, "pair_position": 3 },
+      { "id": "apc_006", "name": "Sam", "row": 3, "pair_position": 3 },
+      { "id": "apc_007", "name": "Cindy", "row": 1, "pair_position": 1 },
+      { "id": "apc_008", "name": "Helen", "row": 1, "pair_position": 1 },
+      { "id": "apc_009", "name": "Nick Yang", "row": 1, "pair_position": 2 },
+      { "id": "apc_010", "name": "Kang", "row": 1, "pair_position": 2 },
+      { "id": "apc_011", "name": "Jackson", "row": 1, "pair_position": 3 },
+      { "id": "apc_012", "name": "Deo", "row": 1, "pair_position": 3 },
+      { "id": "apc_013", "name": "Timothy", "row": 2, "pair_position": 1 },
+      { "id": "apc_014", "name": "Jasper", "row": 2, "pair_position": 1 },
+      { "id": "apc_015", "name": "Yuhong", "row": 2, "pair_position": 2 },
+      { "id": "apc_016", "name": "Bella", "row": 2, "pair_position": 2 },
+      { "id": "apc_017", "name": "Zoe", "row": 2, "pair_position": 3 },
+      { "id": "apc_018", "name": "Eason", "row": 2, "pair_position": 3 },
+      { "id": "apc_019", "name": "Frank", "row": 1, "pair_position": 1 }
+    ],
+    "AP Physics 1": [
+      { "id": "ap1_001", "name": "Steven Zhao", "row": 1, "pair_position": 1 },
+      { "id": "ap1_002", "name": "Steven Xu", "row": 1, "pair_position": 1 },
+      { "id": "ap1_003", "name": "Steven Wang", "row": 1, "pair_position": 2 },
+      { "id": "ap1_004", "name": "Lisa", "row": 1, "pair_position": 2 },
+      { "id": "ap1_005", "name": "Harvey", "row": 1, "pair_position": 3 },
+      { "id": "ap1_006", "name": "Bright", "row": 1, "pair_position": 3 },
+      { "id": "ap1_007", "name": "Jessica", "row": 2, "pair_position": 1 },
+      { "id": "ap1_008", "name": "Michael", "row": 2, "pair_position": 1 },
+      { "id": "ap1_009", "name": "Daniel", "row": 2, "pair_position": 2 },
+      { "id": "ap1_010", "name": "Jerry", "row": 2, "pair_position": 2 },
+      { "id": "ap1_011", "name": "Jason", "row": 2, "pair_position": 3 },
+      { "id": "ap1_012", "name": "Lucas", "row": 2, "pair_position": 3 },
+      { "id": "ap1_013", "name": "Cerelia", "row": 3, "pair_position": 1 },
+      { "id": "ap1_014", "name": "Oscar", "row": 3, "pair_position": 2 },
+      { "id": "ap1_015", "name": "Anthony", "row": 3, "pair_position": 2 },
+      { "id": "ap1_016", "name": "Eason", "row": 3, "pair_position": 3 }
+    ],
+    "Honors Physics 1": [
+      { "id": "hp1_001", "name": "Garland", "row": 2, "pair_position": 2 },
+      { "id": "hp1_002", "name": "Chelsea", "row": 1, "pair_position": 1 },
+      { "id": "hp1_003", "name": "Eric", "row": 2, "pair_position": 1 },
+      { "id": "hp1_004", "name": "Brandon", "row": 1, "pair_position": 2 },
+      { "id": "hp1_005", "name": "Chris", "row": 2, "pair_position": 2 },
+      { "id": "hp1_006", "name": "Bill", "row": 2, "pair_position": 3 },
+      { "id": "hp1_007", "name": "Barron", "row": 2, "pair_position": 3 },
+      { "id": "hp1_008", "name": "Owen", "row": 1, "pair_position": 2 },
+      { "id": "hp1_009", "name": "Gloria", "row": 1, "pair_position": 1 },
+      { "id": "hp1_010", "name": "Michael", "row": 1, "pair_position": 3 },
+      { "id": "hp1_011", "name": "Justin", "row": 2, "pair_position": 1 }
+    ],
+    "Honors Physics 2": [
+      { "id": "hp2_001", "name": "Iris", "row": 1, "pair_position": 1 },
+      { "id": "hp2_002", "name": "Carl", "row": 1, "pair_position": 2 },
+      { "id": "hp2_003", "name": "Jerry", "row": 1, "pair_position": 2 },
+      { "id": "hp2_004", "name": "Shawn", "row": 1, "pair_position": 3 },
+      { "id": "hp2_005", "name": "Banks", "row": 1, "pair_position": 3 },
+      { "id": "hp2_006", "name": "Angela", "row": 2, "pair_position": 1 },
+      { "id": "hp2_007", "name": "Lenore", "row": 2, "pair_position": 1 },
+      { "id": "hp2_008", "name": "Anthony", "row": 1, "pair_position": 1 }
+    ]
+  },
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2026-04-09",
+    "description": "Student roster for curve tools. Edit this file to add/update students. The app will automatically reload changes."
+  },
+  "default_settings": {
+    "max_mcq": 40,
+    "scaled_mcq": 52,
+    "max_frq": 48,
+    "max_raw": 100,
+    "ap_curve_bands": [
+      { "raw_min": 70, "raw_max": 100, "curve_min": 90, "curve_max": 100, "ap": 5 },
+      { "raw_min": 54, "raw_max": 69.9, "curve_min": 75, "curve_max": 89, "ap": 4 },
+      { "raw_min": 40, "raw_max": 53.9, "curve_min": 60, "curve_max": 74, "ap": 3 },
+      { "raw_min": 25, "raw_max": 39.9, "curve_min": 30, "curve_max": 59, "ap": 2 },
+      { "raw_min": 0, "raw_max": 24.9, "curve_min": 0, "curve_max": 29, "ap": 1 }
+    ],
+    "formula": "=RAW_PCT"
+  }
+}

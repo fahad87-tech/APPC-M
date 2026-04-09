@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Rotator Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a, #1e1b4b);
+            --panel-bg: rgba(255, 255, 255, 0.05);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #8b5cf6;
+            --accent-hover: #7c3aed;
+            --row1-color: rgba(34, 197, 94, 0.2);
+            --row1-border: rgba(34, 197, 94, 0.5);
+            --row2-color: rgba(234, 179, 8, 0.2);
+            --row2-border: rgba(234, 179, 8, 0.5);
+            --row3-color: rgba(239, 68, 68, 0.2);
+            --row3-border: rgba(239, 68, 68, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar container */
+        .sidebar {
+            width: 320px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--panel-border);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            z-index: 10;
+        }
+
+        .title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .layout-row-actions, .layout-seat-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .layout-seat-actions {
+            flex-direction: column;
+        }
+
+        .seat-action-row {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .seat-action-row span {
+            min-width: 58px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .seat-action-row button {
+            flex: 1;
+            padding: 0.5rem 0.7rem;
+            font-size: 0.82rem;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.3);
+        }
+
+        button {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            border: 1px solid var(--panel-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-rotate {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 1rem;
+            font-size: 1.1rem;
+            margin-top: auto;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-rotate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Main Workspace */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .front-board {
+            width: 60%;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .classroom {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .row {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding: 1.5rem;
+            border-radius: 16px;
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            position: relative;
+            backdrop-filter: blur(5px);
+            transition: all 0.5s ease;
+        }
+
+        .row-label {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--bg-gradient);
+            padding: 0 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-radius: 4px;
+        }
+
+        .row[data-row="1"] { border-color: var(--row1-border); background: var(--row1-color); }
+        .row[data-row="2"] { border-color: var(--row2-border); background: var(--row2-color); }
+        .row[data-row="3"] { border-color: var(--row3-border); background: var(--row3-color); }
+
+        .pairs-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+
+        .pair {
+            flex: 1;
+            display: flex;
+            gap: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px dashed rgba(255, 255, 255, 0.1);
+        }
+
+        .pair.no-seats {
+            justify-content: center;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            min-height: 120px;
+        }
+
+        .student {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 0.8rem;
+            text-align: center;
+            cursor: grab;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 120px;
+            word-break: break-word;
+            user-select: none;
+        }
+
+        .student:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+            border-color: var(--accent);
+        }
+
+        .student:active {
+            cursor: grabbing;
+        }
+
+        .student-img {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .student-img:hover {
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .student-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            width: 100%;
+        }
+
+        .student.drag-over {
+            background: rgba(139, 92, 246, 0.4);
+            border-color: #a78bfa;
+            transform: scale(1.05);
+        }
+
+        .student.empty {
+            opacity: 0.5;
+            border-style: dashed;
+            cursor: default;
+            flex-direction: row; /* reset for empty text */
+        }
+
+        .student.empty:hover {
+            transform: none;
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .student-name input {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--accent);
+            color: white;
+            text-align: center;
+            border-radius: 4px;
+            padding: 4px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            outline: none;
+        }
+        
+        .student-name input::selection {
+            background: var(--accent);
+        }
+
+        /* File Input hidden */
+        #fileInput {
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--accent);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* Animation classes */
+        .rotating .row {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="title">✨ Rotator Pro</div>
+        
+        <div class="control-group">
+            <label>Select Class</label>
+            <div style="display: flex; gap: 0.5rem;">
+                <select id="classSelect"></select>
+                <button class="btn-secondary" id="btnRenameClass" title="Rename Class" style="padding: 0.5rem;">✏️</button>
+            </div>
+        </div>
+
+        <div class="control-group" style="margin-top: 1rem;">
+            <label>Create New Class</label>
+            <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="newClassName" placeholder="e.g., Math101">
+                <button class="btn-primary" id="btnCreate">+</button>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Layout Editor</label>
+            <select id="layoutRowSelect"></select>
+            <div class="layout-row-actions">
+                <button class="btn-secondary" id="btnAddRow">+ Row</button>
+                <button class="btn-secondary" id="btnDeleteRow">Delete Row</button>
+            </div>
+            <div class="layout-seat-actions">
+                <div class="seat-action-row">
+                    <span>Left</span>
+                    <button class="btn-secondary seat-adjust-btn" data-pair="1" data-delta="-1">- Seat</button>
+                    <button class="btn-secondary seat-adjust-btn" data-pair="1" data-delta="1">+ Seat</button>
+                </div>
+                <div class="seat-action-row">
+                    <span>Middle</span>
+                    <button class="btn-secondary seat-adjust-btn" data-pair="2" data-delta="-1">- Seat</button>
+                    <button class="btn-secondary seat-adjust-btn" data-pair="2" data-delta="1">+ Seat</button>
+                </div>
+                <div class="seat-action-row">
+                    <span>Right</span>
+                    <button class="btn-secondary seat-adjust-btn" data-pair="3" data-delta="-1">- Seat</button>
+                    <button class="btn-secondary seat-adjust-btn" data-pair="3" data-delta="1">+ Seat</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="flex: 1;"></div>
+
+        <div class="control-group">
+            <label>Data Management</label>
+            <button class="btn-secondary" id="btnImport">📥 Import JSON</button>
+            <button class="btn-secondary" id="btnExport">📤 Export JSON</button>
+            <input type="file" id="fileInput" accept=".json">
+        </div>
+
+        <button class="btn-rotate" id="btnRotate">🔄 Rotate Classroom</button>
+    </div>
+
+    <div class="main-content">
+        <div class="front-board">FRONT OF CLASSROOM</div>
+        
+        <div class="classroom" id="classroom">
+            <!-- Rows injected by JS -->
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Message</div>
+
+    <script>
+        // State Management
+        let appData = {
+            classes: {},
+            last_rotation: {},
+            layouts: {},
+            layout_selection: {}
+        };
+        let currentClass = null;
+        let dragSrcEl = null;
+
+        const classSelect = document.getElementById('classSelect');
+        const classroomEl = document.getElementById('classroom');
+        const fileInput = document.getElementById('fileInput');
+        const layoutRowSelect = document.getElementById('layoutRowSelect');
+        const btnAddRow = document.getElementById('btnAddRow');
+        const btnDeleteRow = document.getElementById('btnDeleteRow');
+        const seatAdjustButtons = document.querySelectorAll('.seat-adjust-btn');
+
+        function createDefaultLayout() {
+            return [
+                { row: 1, pairs: [2, 2, 2] },
+                { row: 2, pairs: [2, 2, 2] },
+                { row: 3, pairs: [2, 2, 2] }
+            ];
+        }
+
+        function normalizeLayout(layout) {
+            if (!Array.isArray(layout) || layout.length === 0) return createDefaultLayout();
+            const cleaned = layout
+                .map(item => ({
+                    row: parseInt(item.row, 10),
+                    pairs: Array.isArray(item.pairs) ? item.pairs.slice(0, 3).map(v => Math.max(0, Math.min(2, parseInt(v, 10) || 0))) : [2, 2, 2]
+                }))
+                .filter(item => Number.isInteger(item.row) && item.row > 0);
+            cleaned.forEach(item => {
+                while (item.pairs.length < 3) item.pairs.push(0);
+            });
+            cleaned.sort((a, b) => a.row - b.row);
+            return cleaned.length ? cleaned : createDefaultLayout();
+        }
+
+        function inferLayoutFromStudents(students) {
+            if (!Array.isArray(students) || students.length === 0) return createDefaultLayout();
+            const rowSet = new Set(students.map(s => parseInt(s.row, 10)).filter(v => Number.isInteger(v) && v > 0));
+            if (rowSet.size === 0) return createDefaultLayout();
+            const rows = Array.from(rowSet).sort((a, b) => a - b);
+            return rows.map(rowNum => {
+                const pairs = [1, 2, 3].map(pairNum => {
+                    const count = students.filter(s => s.row === rowNum && s.pair_position === pairNum).length;
+                    if (count > 0) return Math.min(2, count);
+                    return rowNum <= 3 ? 2 : 0;
+                });
+                return { row: rowNum, pairs };
+            });
+        }
+
+        function ensureLayoutSchema() {
+            if (!appData.layouts || typeof appData.layouts !== 'object') appData.layouts = {};
+            if (!appData.layout_selection || typeof appData.layout_selection !== 'object') appData.layout_selection = {};
+            Object.keys(appData.classes).forEach(className => {
+                if (!appData.layouts[className]) {
+                    appData.layouts[className] = inferLayoutFromStudents(appData.classes[className]);
+                } else {
+                    appData.layouts[className] = normalizeLayout(appData.layouts[className]);
+                }
+                if (!appData.layout_selection[className]) {
+                    appData.layout_selection[className] = appData.layouts[className][0].row;
+                }
+            });
+        }
+
+        function getClassLayout(className) {
+            if (!appData.layouts[className]) appData.layouts[className] = createDefaultLayout();
+            appData.layouts[className] = normalizeLayout(appData.layouts[className]);
+            return appData.layouts[className];
+        }
+
+        function getSelectedLayoutRow(className) {
+            if (!appData.layout_selection || !appData.layout_selection[className]) return null;
+            const parsed = parseInt(appData.layout_selection[className], 10);
+            return Number.isInteger(parsed) ? parsed : null;
+        }
+
+        function setSelectedLayoutRow(className, rowNum) {
+            if (!appData.layout_selection || typeof appData.layout_selection !== 'object') appData.layout_selection = {};
+            appData.layout_selection[className] = rowNum;
+        }
+
+        function getTotalCapacity(layout) {
+            return layout.reduce((sum, rowCfg) => sum + rowCfg.pairs.reduce((rowSum, c) => rowSum + c, 0), 0);
+        }
+
+        function normalizeStudentSeats(className) {
+            const students = appData.classes[className];
+            const layout = getClassLayout(className);
+            const seatCapacity = new Map();
+            layout.forEach(rowCfg => {
+                [1, 2, 3].forEach(pairNum => {
+                    seatCapacity.set(`${rowCfg.row}-${pairNum}`, rowCfg.pairs[pairNum - 1]);
+                });
+            });
+
+            const grouped = new Map();
+            students.forEach(student => {
+                const key = `${student.row}-${student.pair_position}`;
+                if (!grouped.has(key)) grouped.set(key, []);
+                grouped.get(key).push(student);
+            });
+
+            const keptCount = new Map();
+            const overflow = [];
+            grouped.forEach((arr, key) => {
+                const cap = seatCapacity.get(key) || 0;
+                const keep = arr.slice(0, cap);
+                const extras = arr.slice(cap);
+                keptCount.set(key, keep.length);
+                overflow.push(...extras);
+            });
+
+            const availableSlots = [];
+            seatCapacity.forEach((cap, key) => {
+                const used = keptCount.get(key) || 0;
+                const remaining = Math.max(0, cap - used);
+                const [row, pair] = key.split('-').map(Number);
+                for (let i = 0; i < remaining; i++) {
+                    availableSlots.push({ row, pair });
+                }
+            });
+
+            overflow.forEach((student, idx) => {
+                const slot = availableSlots[idx];
+                if (slot) {
+                    student.row = slot.row;
+                    student.pair_position = slot.pair;
+                }
+            });
+        }
+
+        function updateLayoutRowDropdown(preferredRow = null) {
+            const existingSelected = preferredRow ?? getSelectedLayoutRow(currentClass) ?? parseInt(layoutRowSelect.value, 10);
+            layoutRowSelect.innerHTML = '';
+            if (!currentClass || !appData.classes[currentClass]) {
+                layoutRowSelect.disabled = true;
+                btnAddRow.disabled = true;
+                btnDeleteRow.disabled = true;
+                seatAdjustButtons.forEach(btn => btn.disabled = true);
+                return;
+            }
+            btnAddRow.disabled = false;
+            seatAdjustButtons.forEach(btn => btn.disabled = false);
+            const layout = getClassLayout(currentClass);
+            layout.forEach(rowCfg => {
+                const opt = document.createElement('option');
+                opt.value = String(rowCfg.row);
+                opt.text = `Row ${rowCfg.row}`;
+                layoutRowSelect.add(opt);
+            });
+            layoutRowSelect.disabled = false;
+            const matched = Number.isInteger(existingSelected) && layout.some(r => r.row === existingSelected);
+            const selectedRow = matched ? existingSelected : layout[0].row;
+            layoutRowSelect.value = String(selectedRow);
+            setSelectedLayoutRow(currentClass, selectedRow);
+            btnDeleteRow.disabled = layout.length <= 1;
+        }
+
+        function initApp() {
+            const savedData = localStorage.getItem('classRotatorData');
+            if (savedData) {
+                try {
+                    appData = JSON.parse(savedData);
+                } catch (e) {
+                    console.error("Error parsing local storage", e);
+                }
+            }
+            ensureLayoutSchema();
+            updateClassDropdown();
+            updateLayoutRowDropdown();
+            
+            if (Object.keys(appData.classes).length > 0) {
+                currentClass = classSelect.value;
+                normalizeStudentSeats(currentClass);
+                renderClassroom();
+            } else {
+                classroomEl.innerHTML = `<div style="text-align:center; color: var(--text-muted); margin-top: 5rem;">No class selected. Create or import a class to begin.</div>`;
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('classRotatorData', JSON.stringify(appData));
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function updateClassDropdown() {
+            classSelect.innerHTML = '';
+            const classNames = Object.keys(appData.classes);
+            if (classNames.length === 0) {
+                const opt = document.createElement('option');
+                opt.text = "No Classes";
+                classSelect.add(opt);
+                classSelect.disabled = true;
+                return;
+            }
+            classSelect.disabled = false;
+            classNames.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.text = name;
+                classSelect.add(opt);
+            });
+            if (currentClass && appData.classes[currentClass]) {
+                classSelect.value = currentClass;
+            } else {
+                currentClass = classNames[0];
+                classSelect.value = currentClass;
+            }
+        }
+
+        // Render Classroom
+        function renderClassroom() {
+            if (!currentClass || !appData.classes[currentClass]) {
+                classroomEl.innerHTML = '';
+                return;
+            }
+
+            const students = appData.classes[currentClass];
+            const layout = getClassLayout(currentClass);
+            normalizeStudentSeats(currentClass);
+            classroomEl.innerHTML = '';
+
+            for (const rowCfg of layout) {
+                const r = rowCfg.row;
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'row';
+                rowDiv.setAttribute('data-row', r);
+                
+                const label = document.createElement('div');
+                label.className = 'row-label';
+                label.innerText = `ROW ${r}`;
+                rowDiv.appendChild(label);
+
+                const pairsContainer = document.createElement('div');
+                pairsContainer.className = 'pairs-container';
+
+                for (let p = 1; p <= 3; p++) {
+                    const pairDiv = document.createElement('div');
+                    pairDiv.className = 'pair';
+                    const seatCount = Math.max(0, Math.min(2, rowCfg.pairs[p - 1] || 0));
+                    let seatStudents = students.filter(s => s.row === r && s.pair_position === p);
+                    if (seatCount === 0) {
+                        pairDiv.classList.add('no-seats');
+                        pairDiv.innerText = 'No Seats';
+                        pairsContainer.appendChild(pairDiv);
+                        continue;
+                    }
+                    for (let seatIdx = 0; seatIdx < seatCount; seatIdx++) {
+                        const studentDiv = document.createElement('div');
+                        studentDiv.className = 'student';
+                        let studentObj = seatStudents[seatIdx];
+                        let realIndex = studentObj ? students.indexOf(studentObj) : -1;
+
+                        if (studentObj) {
+                            studentDiv.setAttribute('draggable', true);
+                            studentDiv.dataset.index = realIndex;
+                            
+                            let imgDiv = document.createElement('div');
+                            imgDiv.className = 'student-img';
+                            if (studentObj.image) {
+                                imgDiv.style.backgroundImage = `url(${studentObj.image})`;
+                                imgDiv.innerHTML = '';
+                            } else {
+                                imgDiv.innerHTML = '👤';
+                            }
+                            imgDiv.title = "Click to set picture";
+                            
+                            imgDiv.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                                let input = document.createElement('input');
+                                input.type = 'file';
+                                input.accept = 'image/*';
+                                input.onchange = (ev) => {
+                                    let file = ev.target.files[0];
+                                    if(!file) return;
+                                    let reader = new FileReader();
+                                    reader.onload = (re) => {
+                                        let imgObj = new Image();
+                                        imgObj.onload = () => {
+                                            let canvas = document.createElement('canvas');
+                                            let ctx = canvas.getContext('2d');
+                                            canvas.width = 120; canvas.height = 120;
+                                            let size = Math.min(imgObj.width, imgObj.height);
+                                            let sx = (imgObj.width - size) / 2;
+                                            let sy = (imgObj.height - size) / 2;
+                                            ctx.drawImage(imgObj, sx, sy, size, size, 0, 0, 120, 120);
+                                            let dataURL = canvas.toDataURL('image/jpeg', 0.8);
+                                            
+                                            appData.classes[currentClass][realIndex].image = dataURL;
+                                            saveData();
+                                            renderClassroom();
+                                        };
+                                        imgObj.src = re.target.result;
+                                    };
+                                    reader.readAsDataURL(file);
+                                };
+                                input.click();
+                            });
+                            studentDiv.appendChild(imgDiv);
+
+                            let nameSpan = document.createElement('span');
+                            nameSpan.className = 'student-name';
+                            nameSpan.innerText = studentObj.name;
+                            studentDiv.appendChild(nameSpan);
+
+                            setupDragAndDrop(studentDiv);
+                            setupNameEdit(nameSpan, realIndex, studentDiv);
+                        } else {
+                            studentDiv.innerText = "Empty";
+                            studentDiv.classList.add('empty');
+                            studentDiv.dataset.targetRow = r;
+                            studentDiv.dataset.targetPair = p;
+                            setupDragAndDropEmpty(studentDiv);
+                        }
+                        
+                        pairDiv.appendChild(studentDiv);
+                    }
+                    pairsContainer.appendChild(pairDiv);
+                }
+                rowDiv.appendChild(pairsContainer);
+                classroomEl.appendChild(rowDiv);
+            }
+        }
+
+        // Drag and Drop implementation
+        function setupDragAndDrop(el) {
+            el.addEventListener('dragstart', function(e) {
+                dragSrcEl = this;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', this.dataset.index);
+                this.style.opacity = '0.4';
+            });
+
+            el.addEventListener('dragend', function(e) {
+                this.style.opacity = '1';
+                document.querySelectorAll('.student').forEach(s => s.classList.remove('drag-over'));
+            });
+
+            el.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                return false;
+            });
+
+            el.addEventListener('dragenter', function(e) {
+                this.classList.add('drag-over');
+            });
+
+            el.addEventListener('dragleave', function(e) {
+                this.classList.remove('drag-over');
+            });
+
+            el.addEventListener('drop', handleDrop);
+        }
+
+        function setupDragAndDropEmpty(el) {
+            el.addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; });
+            el.addEventListener('dragenter', function(e) { this.classList.add('drag-over'); });
+            el.addEventListener('dragleave', function(e) { this.classList.remove('drag-over'); });
+            el.addEventListener('drop', handleDropEmpty);
+        }
+
+        function handleDrop(e) {
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+
+            if (dragSrcEl !== this) {
+                let srcIndex = dragSrcEl.dataset.index;
+                let targetIndex = this.dataset.index;
+                
+                // Swap names and positions structurally
+                let students = appData.classes[currentClass];
+                
+                // Keep the structural coordinates (row/pair), swap the names
+                let tempName = students[srcIndex].name;
+                students[srcIndex].name = students[targetIndex].name;
+                students[targetIndex].name = tempName;
+
+                saveData();
+                renderClassroom();
+                showToast("Seats Swapped!");
+            }
+            return false;
+        }
+
+        function handleDropEmpty(e) {
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+            
+            let srcIndex = dragSrcEl.dataset.index;
+            let targetRow = parseInt(this.dataset.targetRow);
+            let targetPair = parseInt(this.dataset.targetPair);
+            
+            let students = appData.classes[currentClass];
+            // Move student to new row/pair
+            students[srcIndex].row = targetRow;
+            students[srcIndex].pair_position = targetPair;
+            
+            saveData();
+            renderClassroom();
+            showToast("Student Moved!");
+        }
+
+        // Edit Name Implementation
+        function setupNameEdit(spanEl, index, parentCard) {
+            parentCard.addEventListener('dblclick', function(e) {
+                // Prevent creating multiple inputs
+                if(spanEl.querySelector('input')) return;
+                
+                let currentName = spanEl.innerText;
+                spanEl.innerText = '';
+                let input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentName;
+                spanEl.appendChild(input);
+                input.focus();
+                
+                // Highlight text
+                input.setSelectionRange(0, input.value.length);
+                
+                // Prevent drag while editing
+                parentCard.setAttribute('draggable', false);
+
+                let finishEdit = () => {
+                    let newName = input.value.trim();
+                    if(newName === '') newName = currentName; // revert if empty
+                    
+                    appData.classes[currentClass][index].name = newName;
+                    spanEl.innerHTML = newName;
+                    parentCard.setAttribute('draggable', true);
+                    saveData();
+                };
+
+                input.addEventListener('blur', finishEdit);
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') finishEdit();
+                    if (e.key === 'Escape') {
+                        input.value = currentName;
+                        finishEdit();
+                    }
+                });
+            });
+        }
+
+        function changeSeatCountForSelectedRow(pairNum, delta) {
+            if (!currentClass || !appData.classes[currentClass]) return;
+            const selectedRow = parseInt(layoutRowSelect.value, 10);
+            if (!Number.isInteger(selectedRow)) return;
+            const currentLayout = getClassLayout(currentClass);
+            const targetRow = currentLayout.find(r => r.row === selectedRow);
+            if (!targetRow) return;
+            const idx = pairNum - 1;
+            const nextVal = Math.max(0, Math.min(2, targetRow.pairs[idx] + delta));
+            if (nextVal === targetRow.pairs[idx]) return;
+            const nextLayout = currentLayout.map(r => ({ row: r.row, pairs: [...r.pairs] }));
+            const changedRow = nextLayout.find(r => r.row === selectedRow);
+            changedRow.pairs[idx] = nextVal;
+            if (getTotalCapacity(nextLayout) < appData.classes[currentClass].length) {
+                showToast("Not enough seats for current students");
+                return;
+            }
+            appData.layouts[currentClass] = nextLayout;
+            normalizeStudentSeats(currentClass);
+            saveData();
+            updateLayoutRowDropdown();
+            renderClassroom();
+        }
+
+        function addRowToCurrentClass() {
+            if (!currentClass || !appData.classes[currentClass]) return;
+            const layout = getClassLayout(currentClass);
+            const nextRowNumber = layout.length ? Math.max(...layout.map(r => r.row)) + 1 : 1;
+            layout.push({ row: nextRowNumber, pairs: [2, 2, 2] });
+            appData.layouts[currentClass] = normalizeLayout(layout);
+            setSelectedLayoutRow(currentClass, nextRowNumber);
+            saveData();
+            updateLayoutRowDropdown(nextRowNumber);
+            renderClassroom();
+            showToast(`Row ${nextRowNumber} added`);
+        }
+
+        function deleteSelectedRowFromCurrentClass() {
+            if (!currentClass || !appData.classes[currentClass]) return;
+            const selectedRow = parseInt(layoutRowSelect.value, 10);
+            if (!Number.isInteger(selectedRow)) return;
+            const currentLayout = getClassLayout(currentClass);
+            if (currentLayout.length <= 1) {
+                showToast("At least one row is required");
+                return;
+            }
+            const nextLayout = currentLayout.filter(r => r.row !== selectedRow);
+            if (getTotalCapacity(nextLayout) < appData.classes[currentClass].length) {
+                showToast("Not enough seats after deleting this row");
+                return;
+            }
+            appData.layouts[currentClass] = nextLayout;
+            const fallbackRow = nextLayout.length ? nextLayout[0].row : null;
+            if (fallbackRow !== null) setSelectedLayoutRow(currentClass, fallbackRow);
+            normalizeStudentSeats(currentClass);
+            saveData();
+            updateLayoutRowDropdown(fallbackRow);
+            renderClassroom();
+            showToast(`Row ${selectedRow} deleted`);
+        }
+
+        // Event Listeners
+        document.getElementById('btnCreate').addEventListener('click', () => {
+            const nameInput = document.getElementById('newClassName');
+            const name = nameInput.value.trim();
+            if (!name) {
+                showToast("Class name cannot be empty");
+                return;
+            }
+            if (appData.classes[name]) {
+                showToast("Class already exists");
+                return;
+            }
+
+            let newStudents = [];
+            for (let r = 1; r <= 3; r++) {
+                for (let p = 1; p <= 3; p++) {
+                    newStudents.push({ name: `${name}_R${r}P${p}A`, row: r, pair_position: p });
+                    newStudents.push({ name: `${name}_R${r}P${p}B`, row: r, pair_position: p });
+                }
+            }
+
+            appData.classes[name] = newStudents;
+            appData.layouts[name] = createDefaultLayout();
+            setSelectedLayoutRow(name, 1);
+            appData.last_rotation[name] = new Date().toISOString().split('T')[0];
+            currentClass = name;
+            
+            nameInput.value = '';
+            saveData();
+            updateClassDropdown();
+            updateLayoutRowDropdown();
+            renderClassroom();
+            showToast(`Class ${name} created!`);
+        });
+
+        document.getElementById('btnRenameClass').addEventListener('click', () => {
+            if (!currentClass) return;
+            let newName = prompt("Enter new name for class:", currentClass);
+            if (newName && newName.trim() !== '' && newName !== currentClass) {
+                newName = newName.trim();
+                if (appData.classes[newName]) {
+                    showToast("A class with that name already exists!");
+                    return;
+                }
+                
+                appData.classes[newName] = appData.classes[currentClass];
+                delete appData.classes[currentClass];
+                appData.layouts[newName] = appData.layouts[currentClass] ? normalizeLayout(appData.layouts[currentClass]) : createDefaultLayout();
+                delete appData.layouts[currentClass];
+                setSelectedLayoutRow(newName, getSelectedLayoutRow(currentClass) || appData.layouts[newName][0].row);
+                delete appData.layout_selection[currentClass];
+                
+                if (appData.last_rotation[currentClass]) {
+                    appData.last_rotation[newName] = appData.last_rotation[currentClass];
+                    delete appData.last_rotation[currentClass];
+                }
+                
+                currentClass = newName;
+                saveData();
+                updateClassDropdown();
+                updateLayoutRowDropdown();
+                showToast("Class Renamed!");
+            }
+        });
+
+        classSelect.addEventListener('change', (e) => {
+            currentClass = e.target.value;
+            updateLayoutRowDropdown();
+            renderClassroom();
+        });
+
+        layoutRowSelect.addEventListener('change', () => {
+            const selectedRow = parseInt(layoutRowSelect.value, 10);
+            if (Number.isInteger(selectedRow) && currentClass) {
+                setSelectedLayoutRow(currentClass, selectedRow);
+                saveData();
+            }
+        });
+
+        btnAddRow.addEventListener('click', addRowToCurrentClass);
+        btnDeleteRow.addEventListener('click', deleteSelectedRowFromCurrentClass);
+        seatAdjustButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const pairNum = parseInt(btn.dataset.pair, 10);
+                const delta = parseInt(btn.dataset.delta, 10);
+                changeSeatCountForSelectedRow(pairNum, delta);
+            });
+        });
+
+        document.getElementById('btnRotate').addEventListener('click', () => {
+            if (!currentClass || !appData.classes[currentClass]) return;
+
+            // Visual Animation
+            classroomEl.classList.add('rotating');
+            
+            document.getElementById('btnRotate').disabled = true;
+            document.getElementById('btnRotate').innerText = "Rotating...";
+
+            setTimeout(() => {
+                let students = appData.classes[currentClass];
+                const rowOrder = getClassLayout(currentClass).map(r => r.row).sort((a, b) => a - b);
+                const rowMap = new Map();
+                rowOrder.forEach((rowNum, idx) => {
+                    const targetIndex = idx === 0 ? rowOrder.length - 1 : idx - 1;
+                    rowMap.set(rowNum, rowOrder[targetIndex]);
+                });
+                students.forEach(student => {
+                    if (rowMap.has(student.row)) student.row = rowMap.get(student.row);
+                });
+                normalizeStudentSeats(currentClass);
+
+                appData.last_rotation[currentClass] = new Date().toISOString().split('T')[0];
+                saveData();
+                renderClassroom();
+                
+                classroomEl.classList.remove('rotating');
+                document.getElementById('btnRotate').disabled = false;
+                document.getElementById('btnRotate').innerText = "🔄 Rotate Classroom";
+                showToast("Rotation Complete!");
+                
+            }, 600); // Wait for transition
+        });
+
+        document.getElementById('btnExport').addEventListener('click', () => {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `classes_data.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("Exported effectively!");
+        });
+
+        document.getElementById('btnImport').addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const importedData = JSON.parse(event.target.result);
+                    if (importedData.classes) {
+                        appData = importedData;
+                        ensureLayoutSchema();
+                        saveData();
+                        updateClassDropdown();
+                        updateLayoutRowDropdown();
+                        if (Object.keys(appData.classes).length > 0) {
+                            currentClass = Object.keys(appData.classes)[0];
+                            classSelect.value = currentClass;
+                            normalizeStudentSeats(currentClass);
+                            renderClassroom();
+                        }
+                        showToast("Data Imported Successfully!");
+                    } else {
+                        showToast("Invalid JSON format");
+                    }
+                } catch (err) {
+                    showToast("Error parsing JSON");
+                }
+            };
+            reader.readAsText(file);
+            fileInput.value = ''; // reset
+        });
+
+        // Start
+        initApp();
+    </script>
+</body>
+</html>

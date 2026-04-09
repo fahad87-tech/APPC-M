@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lorentz Force Lab — Fixed Physics</title>
+  <script>
+  const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+
+  document.documentElement.classList.add("password-locked");
+
+  const passwordGateStyle = document.createElement("style");
+  passwordGateStyle.textContent = `
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    #password-gate {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 9, 18, 0.88);
+      padding: 24px;
+      z-index: 9999;
+    }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card {
+      width: min(100%, 420px);
+      background: #101625;
+      border: 1px solid rgba(100,181,246,0.28);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      color: #e7edf7;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35);
+      background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px;
+    }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  `;
+  document.head.appendChild(passwordGateStyle);
+
+  function requestPassword(title, message) {
+    return new Promise(resolve => {
+      const existingGate = document.getElementById("password-gate");
+      if (existingGate) existingGate.remove();
+      const gate = document.createElement("div");
+      gate.id = "password-gate";
+      gate.innerHTML = `
+        <div id="password-gate-card">
+          <div id="password-gate-title">${title}</div>
+          <div id="password-gate-message">${message}</div>
+          <input id="password-gate-input" type="password" autocomplete="current-password">
+          <div id="password-gate-actions">
+            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
+            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
+          </div>
+        </div>`;
+      document.body.appendChild(gate);
+      const input = document.getElementById("password-gate-input");
+      const cancelButton = document.getElementById("password-gate-cancel");
+      const submitButton = document.getElementById("password-gate-submit");
+      const finish = value => { gate.remove(); resolve(value); };
+      cancelButton.addEventListener("click", () => finish(null));
+      submitButton.addEventListener("click", () => finish(input.value));
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") finish(input.value);
+        if (event.key === "Escape") finish(null);
+      });
+      window.requestAnimationFrame(() => input.focus());
+    });
+  }
+
+  async function verifyPageAccess() {
+    const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+    if (userInput === null) { window.location.href = "../index.html"; return; }
+    const encoder = new TextEncoder();
+    const data = encoder.encode(userInput);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+    if (hashHex === TARGET_HASH) { document.documentElement.classList.remove("password-locked"); }
+    else { alert("Incorrect password. Access denied."); window.location.href = "../index.html"; }
+  }
+
+  if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true }); }
+  else { verifyPageAccess(); }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#04070d;
+      --bg2:#07101b;
+      --panel:rgba(9,16,28,.84);
+      --card:rgba(16,25,45,.76);
+      --card2:rgba(11,18,33,.92);
+      --border:rgba(255,255,255,.07);
+      --accent:#38bdf8;
+      --accent2:#8b5cf6;
+      --green:#34d399;
+      --red:#fb7185;
+      --yellow:#fcd34d;
+      --text:#e6eefb;
+      --dim:rgba(180,194,220,.58);
+      --font:'Inter',system-ui,sans-serif;
+      --mono:'JetBrains Mono',monospace;
+      --r:16px;
+      --shadow:0 18px 50px rgba(0,0,0,.35);
+      --glow:0 0 25px rgba(56,189,248,.14);
+    }
+
+    html,body{height:100%;overflow:hidden}
+    body{
+      display:flex;
+      font-family:var(--font);
+      color:var(--text);
+      background:
+        radial-gradient(circle at 20% 15%, rgba(56,189,248,.06), transparent 25%),
+        radial-gradient(circle at 80% 12%, rgba(139,92,246,.06), transparent 22%),
+        linear-gradient(180deg,var(--bg2),var(--bg));
+    }
+
+    #sketch-holder{
+      flex:1;
+      position:relative;
+      overflow:hidden;
+    }
+    #sketch-holder canvas{
+      display:block!important;
+      width:100%!important;
+      height:100%!important;
+    }
+
+    #panel{
+      width:380px;
+      background:var(--panel);
+      backdrop-filter:blur(24px) saturate(1.25);
+      border-left:1px solid var(--border);
+      box-shadow:var(--shadow);
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      transition:width .35s cubic-bezier(.4,0,.2,1);
+      z-index:60;
+    }
+    #panel.collapsed{width:0;min-width:0}
+
+    #panelToggle{
+      position:fixed;
+      top:50%;
+      right:380px;
+      transform:translateY(-50%);
+      width:30px;height:62px;
+      border:none;
+      border-radius:10px 0 0 10px;
+      cursor:pointer;
+      color:#fff;
+      font-size:16px;
+      font-weight:800;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 10px 24px rgba(56,189,248,.22);
+      z-index:100;
+      transition:right .35s cubic-bezier(.4,0,.2,1),transform .15s;
+    }
+    #panelToggle:hover{transform:translateY(-50%) scale(1.03)}
+    #panelToggle.collapsed{right:0;border-radius:0 10px 10px 0}
+
+    .tabs{
+      display:flex;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:linear-gradient(180deg,rgba(255,255,255,.025),transparent);
+      flex-shrink:0;
+    }
+    .tab-btn{
+      flex:1;
+      padding:13px 0;
+      background:none;
+      border:none;
+      color:var(--dim);
+      font:700 12px var(--font);
+      letter-spacing:.45px;
+      cursor:pointer;
+      border-bottom:2px solid transparent;
+      transition:.2s;
+    }
+    .tab-btn:hover{color:var(--text)}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+    .tab-content{
+      display:none;
+      flex:1;
+      overflow-y:auto;
+      padding:14px 14px 20px;
+    }
+    .tab-content.active{
+      display:flex;
+      flex-direction:column;
+      gap:11px;
+    }
+
+    .cg{
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.025),transparent 28%),
+        var(--card);
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:var(--r);
+      padding:12px 13px;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,.025);
+    }
+    .cg h4{
+      font-size:10.5px;
+      text-transform:uppercase;
+      letter-spacing:1.25px;
+      color:var(--accent);
+      font-weight:800;
+      margin-bottom:8px;
+    }
+
+    label.c{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      font-size:12.5px;
+      color:var(--text);
+    }
+    label.c span.v{
+      font:600 11.5px var(--mono);
+      color:var(--accent);
+    }
+
+    select,
+    input[type=text],
+    textarea{
+      background:rgba(6,10,18,.94);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:10px;
+      font:500 12.5px var(--font);
+    }
+    select{
+      width:100%;
+      padding:8px 10px;
+      cursor:pointer;
+    }
+    select:focus,
+    input[type=text]:focus,
+    textarea:focus{
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(56,189,248,.08);
+    }
+
+    input[type=range]{
+      -webkit-appearance:none;
+      appearance:none;
+      width:100%;
+      height:6px;
+      border-radius:99px;
+      background:linear-gradient(90deg,rgba(56,189,248,.3),rgba(255,255,255,.06));
+      cursor:pointer;
+      margin-top:3px;
+    }
+    input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:16px;height:16px;
+      border-radius:50%;
+      background:linear-gradient(180deg,#73d9ff,#36bdf8);
+      border:1px solid rgba(255,255,255,.45);
+      box-shadow:0 0 12px rgba(56,189,248,.3);
+    }
+
+    .toggle-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:4px 0;
+      gap:10px;
+    }
+    .toggle-row span{
+      font-size:12.5px;
+      font-weight:600;
+    }
+    .toggle-sw{
+      position:relative;
+      width:42px;height:22px;
+      flex-shrink:0;
+    }
+    .toggle-sw input{opacity:0;width:0;height:0}
+    .toggle-sw .slider{
+      position:absolute;inset:0;
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:12px;
+      transition:.24s;
+      cursor:pointer;
+    }
+    .toggle-sw .slider::before{
+      content:'';
+      position:absolute;
+      width:16px;height:16px;
+      left:2px;top:2px;
+      border-radius:50%;
+      background:#fff;
+      box-shadow:0 1px 4px rgba(0,0,0,.35);
+      transition:.24s;
+    }
+    .toggle-sw input:checked + .slider{
+      background:linear-gradient(135deg,var(--accent),#62d6ff);
+      border-color:rgba(56,189,248,.55);
+    }
+    .toggle-sw input:checked + .slider::before{transform:translateX(19px)}
+
+    .btn-row{display:flex;gap:6px;flex-wrap:wrap}
+    .btn{
+      flex:1;
+      min-width:60px;
+      border:none;
+      border-radius:10px;
+      padding:9px 0;
+      font:700 12px var(--font);
+      cursor:pointer;
+      letter-spacing:.2px;
+      transition:.15s;
+    }
+    .btn:hover{filter:brightness(1.04)}
+    .btn:active{transform:scale(.97)}
+
+    .btn-play{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+    .btn-pause{background:linear-gradient(135deg,#facc15,#ca8a04);color:#111}
+    .btn-reset{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+    .btn-view{font-size:11.5px}
+    .btn-2d{background:linear-gradient(135deg,#8b5cf6,#7c3aed);color:#fff}
+    .btn-3d{background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff}
+
+    .speed-row{display:flex;gap:5px;flex-wrap:wrap}
+    .spd{
+      padding:5px 11px;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.02);
+      color:var(--dim);
+      font:700 11px var(--font);
+      cursor:pointer;
+      transition:.2s;
+    }
+    .spd.active{
+      color:#041018;
+      background:linear-gradient(135deg,var(--accent),#6ad8ff);
+      border-color:var(--accent);
+      box-shadow:0 0 12px rgba(56,189,248,.18);
+    }
+
+    .five-e{display:flex;flex-direction:column;height:100%}
+    .stu-bar{display:flex;gap:7px;align-items:center;margin-bottom:10px}
+    .stu-bar input{
+      flex:1;
+      padding:9px 11px;
+      font:500 13px var(--font);
+    }
+    .qcard{
+      flex:1;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.05);
+      border-radius:var(--r);
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+    }
+    .qcard .ph{
+      font:800 10.5px var(--font);
+      text-transform:uppercase;
+      letter-spacing:1.25px;
+      color:var(--accent2);
+      margin-bottom:5px;
+    }
+    .qcard .qt{
+      font-size:13px;
+      line-height:1.56;
+      margin-bottom:10px;
+    }
+    .qcard textarea{
+      flex:1;
+      resize:none;
+      min-height:90px;
+      padding:10px;
+    }
+    .cnav{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      margin-top:10px;
+    }
+    .cnav button{
+      width:30px;height:30px;
+      border:none;
+      border-radius:50%;
+      background:var(--card2);
+      border:1px solid rgba(255,255,255,.1);
+      color:var(--text);
+      cursor:pointer;
+      transition:.2s;
+    }
+    .cnav button:hover{
+      background:var(--accent);
+      color:#021119;
+      border-color:var(--accent);
+    }
+    .dots{display:flex;gap:5px}
+    .dot{
+      width:7px;height:7px;
+      border-radius:50%;
+      background:rgba(255,255,255,.16);
+      cursor:pointer;
+      transition:.2s;
+    }
+    .dot.active{
+      background:var(--accent);
+      transform:scale(1.35);
+      box-shadow:0 0 6px rgba(56,189,248,.55);
+    }
+    .exp-btn{
+      margin-top:10px;
+      border:none;
+      border-radius:10px;
+      padding:10px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff;
+      font:700 13px var(--font);
+      cursor:pointer;
+      transition:.15s;
+    }
+    .exp-btn:hover{transform:scale(1.02)}
+
+    #hud{
+      position:absolute;
+      top:14px;left:14px;
+      min-width:240px;
+      z-index:50;
+      pointer-events:none;
+      background:rgba(8,12,22,.74);
+      backdrop-filter:blur(14px) saturate(1.3);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:16px;
+      padding:13px 16px;
+      font:500 12px var(--mono);
+      line-height:1.78;
+      box-shadow:var(--glow);
+    }
+    #hud .hl{color:var(--accent)}
+    #hud .hg{color:var(--green)}
+    #hud .hr{color:var(--red)}
+    #hud .hy{color:var(--yellow)}
+
+    #fps-badge,#view-badge{
+      position:absolute;
+      top:14px;
+      z-index:50;
+      pointer-events:none;
+      background:rgba(8,12,22,.72);
+      border:1px solid rgba(255,255,255,.07);
+      backdrop-filter:blur(10px);
+      border-radius:999px;
+      padding:6px 14px;
+      box-shadow:0 8px 18px rgba(0,0,0,.2);
+    }
+    #fps-badge{
+      left:270px;
+      color:var(--green);
+      font:700 11px var(--mono);
+    }
+    #view-badge{
+      right:400px;
+      color:var(--accent2);
+      font:700 11.5px var(--font);
+      transition:right .35s;
+    }
+
+    #hint{
+      position:absolute;
+      bottom:14px;left:50%;
+      transform:translateX(-50%);
+      z-index:50;
+      pointer-events:none;
+      white-space:nowrap;
+      background:rgba(8,12,22,.62);
+      border:1px solid rgba(255,255,255,.05);
+      backdrop-filter:blur(8px);
+      border-radius:999px;
+      padding:6px 15px;
+      color:var(--dim);
+      font:500 11px var(--font);
+    }
+
+    #error-banner{
+      position:absolute;
+      top:58px;left:14px;right:14px;
+      z-index:100;
+      display:none;
+      background:rgba(239,68,68,.15);
+      border:1px solid rgba(239,68,68,.45);
+      color:#fecaca;
+      border-radius:10px;
+      padding:8px 12px;
+      font:700 12px var(--font);
+    }
+
+    ::-webkit-scrollbar{width:4px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(56,189,248,.28);border-radius:2px}
+  </style>
+</head>
+<body>
+  <div id="sketch-holder">
+    <div id="hud"></div>
+    <div id="fps-badge">-- FPS</div>
+    <div id="view-badge">3D Perspective</div>
+    <div id="hint">3D: Left-drag rotate · Right-drag pan · Scroll zoom · 2D: Left-drag pan · Scroll zoom</div>
+    <div id="error-banner"></div>
+  </div>
+
+  <button id="panelToggle" onclick="togglePanel()">◂</button>
+
+  <div id="panel">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="sim">Simulation</button>
+      <button class="tab-btn" data-tab="fiveE">5E Inquiry</button>
+    </div>
+
+    <div id="tab-sim" class="tab-content active">
+      <div class="cg">
+        <h4>Mode</h4>
+        <select id="modeSelect">
+          <option value="proton">Proton (+e)</option>
+          <option value="electron">Electron (−e)</option>
+          <option value="wire">Single Wire</option>
+          <option value="parallel_same">Parallel Wires — Same Direction</option>
+          <option value="parallel_opp">Parallel Wires — Opposite Direction</option>
+          <option value="boundary">Boundary Zone (Field Region)</option>
+        </select>
+      </div>
+
+      <div class="cg">
+        <h4>Magnetic Field</h4>
+        <label class="c">
+          Direction
+          <select id="bDir">
+            <option value="into">Into Page (−Z)</option>
+            <option value="out">Out of Page (+Z)</option>
+            <option value="north">North (+Y)</option>
+            <option value="south">South (−Y)</option>
+            <option value="east">East (+X)</option>
+            <option value="west">West (−X)</option>
+          </select>
+        </label>
+        <label class="c" style="margin-top:7px">
+          Magnitude <span class="v" id="bMagVal">0.50 T</span>
+          <input type="range" id="bMag" min="0.05" max="2" step="0.01" value="0.5" />
+        </label>
+      </div>
+
+      <div class="cg" id="chargeCtrl">
+        <h4>Charge Kinematics</h4>
+        <label class="c">
+          Speed <span class="v" id="speedVal">3.0</span>
+          <input type="range" id="speed" min="0.5" max="12" step="0.1" value="3" />
+        </label>
+        <label class="c" style="margin-top:5px">
+          Angle (XY Plane) <span class="v" id="angVal">0°</span>
+          <input type="range" id="ang" min="-180" max="180" step="1" value="0" />
+        </label>
+        <label class="c" style="margin-top:5px">
+          V<sub>z</sub> Component <span class="v" id="vzVal">0.0</span>
+          <input type="range" id="vz" min="-5" max="5" step="0.1" value="0" />
+        </label>
+      </div>
+
+      <div class="cg" id="wireCtrl" style="display:none">
+        <h4>Wire Parameters</h4>
+        <label class="c">
+          Current I₁ <span class="v" id="i1Val">5.0 A</span>
+          <input type="range" id="i1" min="0.1" max="20" step="0.1" value="5" />
+        </label>
+        <label class="c" id="i2C" style="margin-top:5px;display:none">
+          Current I₂ <span class="v" id="i2Val">5.0 A</span>
+          <input type="range" id="i2" min="0.1" max="20" step="0.1" value="5" />
+        </label>
+        <label class="c" id="sepC" style="margin-top:5px;display:none">
+          Separation <span class="v" id="sepVal">2.0 m</span>
+          <input type="range" id="sep" min="0.5" max="8" step="0.1" value="2" />
+        </label>
+      </div>
+
+      <div class="cg">
+        <h4>Overlays</h4>
+        <div class="toggle-row">
+          <span style="color:var(--green)">⟶ Velocity</span>
+          <label class="toggle-sw"><input type="checkbox" id="togVel" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span style="color:var(--red)">⟶ Force</span>
+          <label class="toggle-sw"><input type="checkbox" id="togForce" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span style="color:var(--accent)">⊗ / ⇢ Magnetic Field</span>
+          <label class="toggle-sw"><input type="checkbox" id="togB" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>◌ Trail</span>
+          <label class="toggle-sw"><input type="checkbox" id="togTrail" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>⊞ Grid</span>
+          <label class="toggle-sw"><input type="checkbox" id="togGrid" checked><span class="slider"></span></label>
+        </div>
+        <div class="toggle-row">
+          <span>╋ Axes</span>
+          <label class="toggle-sw"><input type="checkbox" id="togAxes"><span class="slider"></span></label>
+        </div>
+      </div>
+
+      <div class="cg">
+        <h4>Sim Speed</h4>
+        <div class="speed-row">
+          <button class="spd" data-spd="0.25">0.25×</button>
+          <button class="spd" data-spd="0.5">0.5×</button>
+          <button class="spd active" data-spd="1">1×</button>
+          <button class="spd" data-spd="2">2×</button>
+          <button class="spd" data-spd="4">4×</button>
+        </div>
+      </div>
+
+      <div class="cg">
+        <h4>Camera</h4>
+        <div class="btn-row">
+          <button class="btn btn-2d btn-view" id="btn2D">⊡ 2D Top-Down</button>
+          <button class="btn btn-3d btn-view" id="btn3D">◇ 3D Orbit</button>
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-top:4px">
+        <button class="btn btn-play" id="btnPlay">▶ Play</button>
+        <button class="btn btn-pause" id="btnPause">❚❚ Pause</button>
+        <button class="btn btn-reset" id="btnReset">↺ Reset</button>
+      </div>
+    </div>
+
+    <div id="tab-fiveE" class="tab-content">
+      <div class="five-e">
+        <div class="stu-bar">
+          <input type="text" id="studentName" placeholder="Student Name" />
+        </div>
+        <div class="qcard">
+          <div class="ph" id="qPhase">ENGAGE</div>
+          <div class="qt" id="qText">Loading...</div>
+          <textarea id="qAnswer" placeholder="Type your answer here..."></textarea>
+        </div>
+        <div class="cnav">
+          <button id="prevQ">◀</button>
+          <div class="dots" id="qDots"></div>
+          <button id="nextQ">▶</button>
+        </div>
+        <button class="exp-btn" id="exportDocx">📄 Export Answers to .docx</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const QS = [
+      {p:'ENGAGE',q:'A ball thrown in air follows a parabola. What shape do you think a charged particle traces inside a magnetic field, and why would it differ from a ball?'},
+      {p:'ENGAGE',q:'Imagine shrinking to proton size and flying through a magnetic field. Would you go straight? Describe what forces you would feel and how your path would curve.'},
+      {p:'EXPLORE',q:'Set B = "Into Page", angle = 0°, Vz = 0. Press Play. Describe the path in 2D view. Now increase Vz and switch to 3D view — what 3D shape do you see?'},
+      {p:'EXPLORE',q:'Switch to Electron with the same settings. Compare the path to the proton. Flip B to "Out of Page" — what changes and why?'},
+      {p:'EXPLAIN',q:'Write F = qv×B. For a proton moving +x with B in −z, use the right-hand rule to find F. Show each cross-product component step.'},
+      {p:'EXPLAIN',q:'Why does v⊥B give a circle, but adding v∥ to B give a helix? What controls the helix radius and pitch?'},
+      {p:'ELABORATE',q:'Cyclotron radius: r = mv⊥/(|q|B). Predict what happens if you double B, then double speed. Verify each prediction by adjusting sliders.'},
+      {p:'ELABORATE',q:'Use "Parallel Wires — Same Direction". Explain via Ampère law why they attract. Switch to opposite — what changes?'},
+      {p:'EVALUATE',q:'A proton enters 0.5 T (into page) at 3×10⁶ m/s ⊥ to B. Calculate r and T analytically. Compare with the HUD readout.'},
+      {p:'EVALUATE',q:'Name three devices using the Lorentz force (mass spectrometer, cyclotron, CRT). For each, explain which part of F = qv×B is exploited.'}
+    ];
+
+    const $ = id => document.getElementById(id);
+    const $v = id => parseFloat($(id).value);
+    const $ck = id => $(id).checked;
+    const $s = (id,t) => $(id).textContent = t;
+
+    function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+    function fmt(n,d=1){ return Number.isFinite(n) ? n.toFixed(d) : '—'; }
+
+    const MU0 = 4 * Math.PI * 1e-7;
+
+    const DT = 1 / 600;
+    const TRAIL_MAX = 1200;
+    const TRAIL_SAMPLE_DIST = 0.8;
+
+    const DISPLAY_SPEED_SCALE = 60;
+    const QM_PROTON = 2.4;
+    const QM_ELECTRON = -4.8;
+
+    let playing = false;
+    let simSpeed = 1;
+    let viewMode = '3d';
+
+    let sim;
+    let cam;
+
+    let fpsAvg = [];
+    let fpsSum = 0;
+    let acc = 0;
+
+    let answers = [];
+    let curQ = 0;
+
+    // 2D pan / zoom state
+    let pan2D = { x: 0, y: 0 };
+    let zoom2D = 1;
+    let isDragging2D = false;
+    let lastMouse2D = { x: 0, y: 0 };
+
+    function showError(msg){
+      const el = $('error-banner');
+      el.style.display = 'block';
+      el.textContent = msg;
+      console.error(msg);
+    }
+
+    window.addEventListener('error', e => {
+      showError('Runtime error: ' + e.message);
+    });
+
+    class Particle{
+      constructor(kind='proton'){
+        this.kind = kind;
+        this.charge = kind === 'electron' ? -1 : 1;
+        this.pos = {x:-140,y:0,z:0};
+        this.vel = {x:100,y:0,z:0};
+        this.trail = [];
+      }
+
+      setKind(kind){
+        this.kind = kind;
+        this.charge = kind === 'electron' ? -1 : 1;
+      }
+
+      appearance(){
+        if(this.kind === 'electron'){
+          return {
+            r:6.0,
+            core:[192,176,255],
+            glow:[139,92,246],
+            ring:[224,214,255]
+          };
+        }
+        return {
+          r:8.3,
+          core:[190,236,255],
+          glow:[14,165,233],
+          ring:[152,228,255]
+        };
+      }
+    }
+
+    class Simulation{
+      constructor(){
+        this.mode = 'proton';
+        this.p = new Particle('proton');
+        this._wireForce = 0;
+        this._wireText = '';
+      }
+
+      getB(){
+        const B = $v('bMag');
+        switch($('bDir').value){
+          case 'into':  return {x:0, y:0, z:-B};
+          case 'out':   return {x:0, y:0, z:B};
+          case 'north': return {x:0, y:B, z:0};
+          case 'south': return {x:0, y:-B, z:0};
+          case 'east':  return {x:B, y:0, z:0};
+          case 'west':  return {x:-B, y:0, z:0};
+          default:      return {x:0, y:0, z:0};
+        }
+      }
+
+      cross(a,b){
+        return {
+          x:a.y*b.z - a.z*b.y,
+          y:a.z*b.x - a.x*b.z,
+          z:a.x*b.y - a.y*b.x
+        };
+      }
+
+      dot(a,b){ return a.x*b.x + a.y*b.y + a.z*b.z; }
+
+      mag(v){ return Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z); }
+
+      qOverM(){
+        return this.p.kind === 'electron' ? QM_ELECTRON : QM_PROTON;
+      }
+
+      applyControlsToVelocity(preservePosition=true){
+        this.mode = $('modeSelect').value;
+
+        if(this.mode === 'proton' || this.mode === 'electron'){
+          if(this.p.kind !== this.mode){
+            this.p = new Particle(this.mode);
+          }else{
+            this.p.setKind(this.mode);
+          }
+
+          if(!preservePosition){
+            this.p.pos = {x:-140,y:0,z:0};
+            this.p.trail = [];
+          }
+
+          const ang = $v('ang') * Math.PI / 180;
+          const sp = $v('speed') * DISPLAY_SPEED_SCALE;
+          const vz = $v('vz') * DISPLAY_SPEED_SCALE;
+
+          this.p.vel = {
+            x: sp * Math.cos(ang),
+            y: sp * Math.sin(ang),
+            z: vz
+          };
+
+          if(this.p.trail.length === 0){
+            this.p.trail.push({...this.p.pos});
+          }
+        }
+
+        if(this.mode === 'boundary'){
+          this.p = new Particle('proton');
+          if(!preservePosition){
+            this.p.pos = {x:-280,y:0,z:0};
+            this.p.trail = [];
+          }
+          const ang = $v('ang') * Math.PI / 180;
+          const sp = $v('speed') * DISPLAY_SPEED_SCALE;
+          const vz = $v('vz') * DISPLAY_SPEED_SCALE;
+
+          this.p.vel = {
+            x: sp * Math.cos(ang),
+            y: sp * Math.sin(ang),
+            z: vz
+          };
+
+          if(this.p.trail.length === 0){
+            this.p.trail.push({...this.p.pos});
+          }
+        }
+      }
+
+      resetParticle(){
+        this.mode = $('modeSelect').value;
+        acc = 0;
+
+        if(this.mode === 'proton' || this.mode === 'electron'){
+          this.p = new Particle(this.mode);
+          this.p.pos = {x:-140,y:0,z:0};
+          this.p.trail = [{...this.p.pos}];
+          this.applyControlsToVelocity(true);
+        }else if(this.mode === 'boundary'){
+          this.p = new Particle('proton');
+          this.p.pos = {x:-280,y:0,z:0};
+          this.p.trail = [{...this.p.pos}];
+          this.applyControlsToVelocity(true);
+        }else{
+          this.p = new Particle('proton');
+          this.p.pos = {x:0,y:0,z:0};
+          this.p.vel = {x:0,y:0,z:0};
+          this.p.trail = [];
+        }
+      }
+
+      borisStep(p,dt){
+        const B = this.getB();
+        const qm = this.qOverM();
+
+        const tx = qm * B.x * dt * 0.5;
+        const ty = qm * B.y * dt * 0.5;
+        const tz = qm * B.z * dt * 0.5;
+
+        const t2 = tx*tx + ty*ty + tz*tz;
+        const sx = 2*tx / (1+t2);
+        const sy = 2*ty / (1+t2);
+        const sz = 2*tz / (1+t2);
+
+        const vx = p.vel.x, vy = p.vel.y, vz = p.vel.z;
+
+        const vpx = vx + (vy*tz - vz*ty);
+        const vpy = vy + (vz*tx - vx*tz);
+        const vpz = vz + (vx*ty - vy*tx);
+
+        p.vel.x = vx + (vpy*sz - vpz*sy);
+        p.vel.y = vy + (vpz*sx - vpx*sz);
+        p.vel.z = vz + (vpx*sy - vpy*sx);
+
+        p.pos.x += p.vel.x * dt;
+        p.pos.y += p.vel.y * dt;
+        p.pos.z += p.vel.z * dt;
+      }
+
+      update(rawDt){
+        if(!playing) return;
+        if(this.mode === 'wire' || this.mode === 'parallel_same' || this.mode === 'parallel_opp') return;
+
+        acc += rawDt * simSpeed;
+        if(acc > 0.12) acc = 0.12;
+
+        while(acc >= DT){
+          if(this.mode === 'boundary'){
+            const inside =
+              this.p.pos.x >= -150 && this.p.pos.x <= 150 &&
+              this.p.pos.y >= -150 && this.p.pos.y <= 150;
+            if(inside){
+              this.borisStep(this.p, DT);
+            }else{
+              this.p.pos.x += this.p.vel.x * DT;
+              this.p.pos.y += this.p.vel.y * DT;
+              this.p.pos.z += this.p.vel.z * DT;
+            }
+          }else{
+            this.borisStep(this.p, DT);
+          }
+
+          const tr = this.p.trail;
+          if(tr.length === 0){
+            tr.push({...this.p.pos});
+          }else{
+            const last = tr[tr.length-1];
+            const d = Math.abs(this.p.pos.x-last.x)+Math.abs(this.p.pos.y-last.y)+Math.abs(this.p.pos.z-last.z);
+            if(d > TRAIL_SAMPLE_DIST){
+              tr.push({...this.p.pos});
+              if(tr.length > TRAIL_MAX) tr.shift();
+            }
+          }
+
+          acc -= DT;
+        }
+      }
+
+      cyclotronInfo(){
+        const B = this.getB();
+        const Bm = this.mag(B);
+        if(Bm < 1e-9) return null;
+
+        const v = this.p.vel;
+        const vParScalar = this.dot(v,B)/Bm;
+        const bh = {x:B.x/Bm,y:B.y/Bm,z:B.z/Bm};
+        const vPerp = {
+          x:v.x - vParScalar*bh.x,
+          y:v.y - vParScalar*bh.y,
+          z:v.z - vParScalar*bh.z
+        };
+        const vp = this.mag(vPerp);
+        const w = Math.abs(this.qOverM()*Bm);
+        if(w < 1e-9) return null;
+
+        return {
+          R: vp / w,
+          T: 2*Math.PI / w,
+          pitch: (2*Math.PI / w) * Math.abs(vParScalar),
+          vPar: Math.abs(vParScalar),
+          w
+        };
+      }
+    }
+
+    function setup(){
+      try{
+        const holder = $('sketch-holder');
+        const cnv = createCanvas(holder.offsetWidth, holder.offsetHeight, WEBGL);
+        cnv.parent('sketch-holder');
+
+        pixelDensity(1);
+        frameRate(60);
+        setAttributes('antialias', true);
+
+        cam = createCamera();
+        sim = new Simulation();
+
+        init5E();
+        wireUI();
+        set3DView();
+        sim.resetParticle();
+        showQ();
+      }catch(err){
+        showError('Setup failed: ' + err.message);
+      }
+    }
+
+    function set2DView(){
+      viewMode = '2d';
+      $('view-badge').textContent = '2D Top-Down (XY)';
+    }
+
+    function set3DView(){
+      viewMode = '3d';
+      $('view-badge').textContent = '3D Perspective';
+    }
+
+    function configureCamera(){
+      if(viewMode === '2d'){
+        const halfW = (width / 2) * zoom2D;
+        const halfH = (height / 2) * zoom2D;
+        ortho(-halfW, halfW, -halfH, halfH, 1, 5000);
+        camera(pan2D.x, pan2D.y, 700, pan2D.x, pan2D.y, 0, 0, 1, 0);
+      }else{
+        perspective(PI/3, width/height, 1, 10000);
+        if(frameCount < 5){
+          camera(260,-220,420, 0,0,0, 0,1,0);
+        }
+        orbitControl(1,1,0.15,{disableTouchActions:true});
+      }
+    }
+
+    function mousePressed(){
+      if(viewMode === '2d' && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height){
+        isDragging2D = true;
+        lastMouse2D.x = mouseX;
+        lastMouse2D.y = mouseY;
+        return false;
+      }
+    }
+
+    function mouseDragged(){
+      if(viewMode === '2d' && isDragging2D){
+        const dx = mouseX - lastMouse2D.x;
+        const dy = mouseY - lastMouse2D.y;
+
+        pan2D.x -= dx * zoom2D;
+        pan2D.y -= dy * zoom2D;
+
+        lastMouse2D.x = mouseX;
+        lastMouse2D.y = mouseY;
+        return false;
+      }
+    }
+
+    function mouseReleased(){
+      isDragging2D = false;
+    }
+
+    function mouseWheel(event){
+      if(mouseX < 0 || mouseX > width || mouseY < 0 || mouseY > height) return;
+
+      if(viewMode === '2d'){
+        const factor = event.delta > 0 ? 1.08 : 0.92;
+        zoom2D *= factor;
+        zoom2D = clamp(zoom2D, 0.2, 5);
+        return false;
+      }
+    }
+
+    function draw(){
+      background(4,7,13);
+
+      const fr = frameRate();
+      fpsAvg.push(fr);
+      fpsSum += fr;
+      if(fpsAvg.length > 24) fpsSum -= fpsAvg.shift();
+      if(frameCount % 8 === 0 && fpsAvg.length){
+        $('fps-badge').textContent = Math.round(fpsSum / fpsAvg.length) + ' FPS';
+      }
+
+      updateReadouts();
+      configureCamera();
+      setupLights();
+
+      sim.update(deltaTime/1000);
+
+      if($ck('togGrid')) drawGrid();
+      if($ck('togAxes')) drawAxes();
+      if($ck('togB')) drawBFieldVisuals();
+
+      const m = $('modeSelect').value;
+      if(m === 'proton' || m === 'electron' || m === 'boundary'){
+        if(m === 'boundary') drawBoundaryZone();
+        if($ck('togTrail')) drawTrail();
+        drawCharge();
+        if($ck('togVel')) drawVelocityVector();
+        if($ck('togForce')) drawForceVector();
+      }else if(m === 'wire'){
+        drawSingleWire();
+      }else{
+        drawParallelWires();
+      }
+
+      updateHUD();
+    }
+
+    function updateReadouts(){
+      $s('bMagVal', $v('bMag').toFixed(2) + ' T');
+      $s('speedVal', $v('speed').toFixed(1));
+      $s('angVal', Math.round($v('ang')) + '°');
+      $s('vzVal', $v('vz').toFixed(1));
+      $s('i1Val', $v('i1').toFixed(1) + ' A');
+      $s('i2Val', $v('i2').toFixed(1) + ' A');
+      $s('sepVal', $v('sep').toFixed(1) + ' m');
+    }
+
+    function setupLights(){
+      ambientLight(58);
+      directionalLight(220,230,255, .35,-.4,-.8);
+      directionalLight(90,110,180, -.6,.4,-.3);
+      pointLight(220,240,255, 0,0,400);
+    }
+
+    function drawGrid(){
+      push();
+      strokeWeight(.65);
+      const S = 420, st = 40;
+      for(let i=-S;i<=S;i+=st){
+        stroke(255,255,255, i===0 ? 24 : 14);
+        line(i,-S,0, i,S,0);
+        line(-S,i,0, S,i,0);
+      }
+      pop();
+    }
+
+    function drawAxes(){
+      const L = 220;
+      push();
+      strokeWeight(1.3);
+      stroke(248,113,113,110); line(0,0,0, L,0,0);
+      stroke(52,211,153,110);  line(0,0,0, 0,L,0);
+      stroke(96,165,250,110);  line(0,0,0, 0,0,L);
+      pop();
+    }
+
+    function drawBFieldVisuals(){
+      const B = sim.getB();
+      const Bm = sim.mag(B);
+      if(Bm < 0.01) return;
+
+      const nx = B.x / Bm;
+      const ny = B.y / Bm;
+      const nz = B.z / Bm;
+      const sp = 95;
+      const rng = 3;
+
+      push();
+
+      if(Math.abs(nz) > 0.75){
+        for(let i=-rng;i<=rng;i++){
+          for(let j=-rng;j<=rng;j++){
+            const px = i*sp;
+            const py = j*sp;
+            push();
+            translate(px,py,0);
+
+            if(nz < 0){
+              stroke(120,190,255,72);
+              strokeWeight(1.05);
+              line(-4,-4,0, 4,4,0);
+              line(-4,4,0, 4,-4,0);
+            }else{
+              noStroke();
+              fill(120,190,255,85);
+              sphere(2.1,4,3);
+              fill(220,245,255,180);
+              sphere(.8,4,3);
+            }
+            pop();
+          }
+        }
+        pop();
+        return;
+      }
+
+      stroke(140,205,255,36);
+      strokeWeight(1.0);
+
+      for(let i=-rng;i<=rng;i++){
+        for(let j=-rng;j<=rng;j++){
+          let px,py,pz;
+          if(Math.abs(ny) > 0.75){
+            px = i*sp; py = 0; pz = j*sp;
+          }else{
+            px = 0; py = i*sp; pz = j*sp;
+          }
+
+          push();
+          translate(px,py,pz);
+          const len = 250;
+          line(-nx*len/2, -ny*len/2, -nz*len/2, nx*len/2, ny*len/2, nz*len/2);
+          pop();
+        }
+      }
+
+      pop();
+    }
+
+    function drawBoundaryZone(){
+      push();
+      noStroke();
+      fill(56,189,248,9);
+      box(300,300,160);
+
+      noFill();
+      stroke(56,189,248,48);
+      strokeWeight(1.15);
+      box(300,300,160);
+
+      stroke(56,189,248,26);
+      strokeWeight(1);
+      for(let i=-2;i<=2;i++){
+        for(let j=-2;j<=2;j++){
+          push();
+          translate(i*60,j*60,0);
+          line(-5,-5,0,5,5,0);
+          line(-5,5,0,5,-5,0);
+          pop();
+        }
+      }
+      pop();
+    }
+
+    function drawTrail(){
+      const tr = sim.p.trail;
+      if(tr.length < 2) return;
+
+      const electron = sim.p.kind === 'electron';
+
+      push();
+      noFill();
+
+      beginShape();
+      strokeWeight(3);
+      for(let i=0;i<tr.length;i+=2){
+        const f = i / tr.length;
+        stroke(
+          electron ? 196 : 186,
+          electron ? 181 : 230,
+          electron ? 253 : 253,
+          f * 175
+        );
+        vertex(tr[i].x, tr[i].y, tr[i].z);
+      }
+      endShape();
+
+      pop();
+    }
+
+    function drawCharge(){
+      const p = sim.p;
+      const a = p.appearance();
+
+      push();
+      translate(p.pos.x,p.pos.y,p.pos.z);
+      noStroke();
+
+      fill(a.glow[0],a.glow[1],a.glow[2],18);
+      sphere(a.r*2.6, 8, 6);
+
+      fill(a.glow[0],a.glow[1],a.glow[2],58);
+      sphere(a.r*1.7, 8, 6);
+
+      specularMaterial(a.core[0],a.core[1],a.core[2]);
+      emissiveMaterial(
+        Math.min(255,a.core[0]+10),
+        Math.min(255,a.core[1]+6),
+        Math.min(255,a.core[2]+6)
+      );
+      shininess(95);
+      sphere(a.r, 12, 10);
+
+      if(p.kind === 'electron'){
+        noFill();
+        stroke(a.ring[0],a.ring[1],a.ring[2],78);
+        strokeWeight(.8);
+        ellipse(0,0,a.r*3.1,a.r*3.1);
+      }
+
+      pop();
+    }
+
+    function drawVelocityVector(){
+      const p = sim.p;
+      drawArrow(p.pos.x,p.pos.y,p.pos.z, p.vel.x*.95,p.vel.y*.95,p.vel.z*.95, 52,211,153);
+    }
+
+    function drawForceVector(){
+      const p = sim.p;
+      const f = sim.cross(p.vel, sim.getB());
+      const s = 28;
+      const fx = f.x*s, fy = f.y*s, fz = f.z*s;
+      if(Math.abs(fx)+Math.abs(fy)+Math.abs(fz) < .2) return;
+      drawArrow(p.pos.x,p.pos.y,p.pos.z, fx,fy,fz, 251,113,133);
+    }
+
+    function orientConeAlong(dx,dy,dz){
+      const len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      if(len < 1e-8) return;
+
+      const vx = dx/len, vy = dy/len, vz = dz/len;
+      const axis = createVector(vz,0,-vx);
+      const m = axis.mag();
+      const angle = Math.acos(clamp(vy,-1,1));
+
+      if(m < 1e-8){
+        if(vy < 0) rotateZ(Math.PI);
+        return;
+      }
+
+      axis.normalize();
+      rotate(angle, axis);
+    }
+
+    function drawArrow(ox,oy,oz,dx,dy,dz,r,g,b){
+      const len = Math.sqrt(dx*dx + dy*dy + dz*dz);
+      if(len < .24) return;
+
+      push();
+      stroke(r,g,b,48); strokeWeight(4);
+      line(ox,oy,oz, ox+dx,oy+dy,oz+dz);
+      stroke(r,g,b,220); strokeWeight(2);
+      line(ox,oy,oz, ox+dx,oy+dy,oz+dz);
+
+      push();
+      translate(ox+dx,oy+dy,oz+dz);
+      orientConeAlong(dx,dy,dz);
+      noStroke();
+      fill(r,g,b,235);
+      cone(5.2,14,8,1,false);
+      pop();
+
+      pop();
+    }
+
+    function drawSingleWire(){
+      push();
+      stroke(255,200,60,34); strokeWeight(16); line(0,-380,0,0,380,0);
+      stroke(255,210,90,220); strokeWeight(5); line(0,-380,0,0,380,0);
+      push();
+      noStroke();
+      fill(255,205,75);
+      translate(0,320,0);
+      rotateX(PI);
+      cone(8,20);
+      pop();
+      pop();
+    }
+
+    function drawParallelWires(){
+      const d = $v('sep') * 40;
+      const same = $('modeSelect').value === 'parallel_same';
+
+      push();
+      stroke(255,200,60,34); strokeWeight(16); line(-d/2,-380,0,-d/2,380,0);
+      stroke(255,210,90,220); strokeWeight(5); line(-d/2,-380,0,-d/2,380,0);
+
+      stroke(167,139,250,34); strokeWeight(16); line(d/2,-380,0,d/2,380,0);
+      stroke(196,181,253,220); strokeWeight(5); line(d/2,-380,0,d/2,380,0);
+
+      noStroke();
+      fill(255,205,75);
+      push(); translate(-d/2,320,0); rotateX(PI); cone(8,20); pop();
+
+      fill(167,139,250);
+      if(same){
+        push(); translate(d/2,320,0); rotateX(PI); cone(8,20); pop();
+      }else{
+        push(); translate(d/2,-320,0); cone(8,20); pop();
+      }
+
+      pop();
+
+      const I1 = $v('i1'), I2 = $v('i2');
+      sim._wireForce = MU0 * I1 * I2 / (2*Math.PI*$v('sep'));
+      sim._wireText = same ? 'ATTRACT' : 'REPEL';
+    }
+
+    function updateHUD(){
+      const m = $('modeSelect').value;
+      let h = '';
+
+      h += `<span class="hl">Mode:</span> ${m.replace(/_/g,' ')}<br>`;
+      h += `<span class="hl">B:</span> ${$('bDir').value} · ${$v('bMag').toFixed(2)} T<br>`;
+
+      if(m === 'proton' || m === 'electron' || m === 'boundary'){
+        const p = sim.p;
+        h += `<span class="hg">Particle:</span> ${m === 'electron' ? 'electron' : 'proton'}<br>`;
+        h += `<span class="hg">|v|:</span> ${fmt(sim.mag(p.vel),1)} u/s<br>`;
+
+        const ci = sim.cyclotronInfo();
+        if(ci){
+          h += `<span class="hy">R<sub>c</sub>:</span> ${fmt(ci.R,1)} px<br>`;
+          h += `<span class="hy">T:</span> ${fmt(ci.T,3)} s<br>`;
+          h += `<span class="hy">ω:</span> ${fmt(ci.w,2)} rad/s<br>`;
+          if(ci.vPar > 0.5){
+            h += `<span class="hy">pitch:</span> ${fmt(ci.pitch,1)}<br>`;
+          }
+        }
+
+        const cr = sim.cross(p.vel, sim.getB());
+        h += `<span class="hr">|F| ∝</span> ${fmt(sim.mag(cr),1)}<br>`;
+        h += `<span class="hl">Pos:</span> (${fmt(p.pos.x,0)}, ${fmt(p.pos.y,0)}, ${fmt(p.pos.z,0)})`;
+      }
+
+      if(m === 'wire'){
+        h += `<span class="hg">I:</span> ${$v('i1').toFixed(1)} A<br>`;
+        h += `<span class="hl">Direction:</span> +y`;
+      }
+
+      if(m === 'parallel_same' || m === 'parallel_opp'){
+        h += `<span class="hg">I₁:</span> ${$v('i1').toFixed(1)} A · <span class="hg">I₂:</span> ${$v('i2').toFixed(1)} A<br>`;
+        h += `<span class="hy">d:</span> ${$v('sep').toFixed(1)} m<br>`;
+        h += `<span class="hr">F/L:</span> ${(sim._wireForce*1e6).toFixed(3)} μN/m<br>`;
+        h += `<span class="hl">${sim._wireText}</span>`;
+      }
+
+      $('hud').innerHTML = h;
+    }
+
+    function windowResized(){
+      const holder = $('sketch-holder');
+      resizeCanvas(holder.offsetWidth, holder.offsetHeight);
+      if(viewMode === '2d'){
+        const halfW = (width / 2) * zoom2D;
+        const halfH = (height / 2) * zoom2D;
+        ortho(-halfW, halfW, -halfH, halfH, 1, 5000);
+      }else{
+        perspective(PI/3, width/height, 1, 10000);
+      }
+    }
+
+    function init5E(){
+      try{
+        answers = JSON.parse(localStorage.getItem('lor_ans')) || [];
+      }catch(e){
+        answers = [];
+      }
+      while(answers.length < QS.length) answers.push('');
+
+      const dots = $('qDots');
+      dots.innerHTML = '';
+      QS.forEach((_,i)=>{
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === curQ ? ' active' : '');
+        d.addEventListener('click', ()=>{
+          saveAns();
+          curQ = i;
+          showQ();
+        });
+        dots.appendChild(d);
+      });
+
+      $('studentName').value = localStorage.getItem('lor_stu') || '';
+    }
+
+    function showQ(){
+      const q = QS[curQ];
+      $('qPhase').textContent = q.p;
+      $('qText').textContent = q.q;
+      $('qAnswer').value = answers[curQ] || '';
+      document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active', i === curQ));
+    }
+
+    function saveAns(){
+      answers[curQ] = $('qAnswer').value;
+      localStorage.setItem('lor_ans', JSON.stringify(answers));
+    }
+
+    function applyLiveChargeControls(){
+      if(['proton','electron','boundary'].includes($('modeSelect').value)){
+        const keepPos = true;
+        sim.applyControlsToVelocity(keepPos);
+      }
+    }
+
+    function wireUI(){
+      document.querySelectorAll('.tab-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+          btn.classList.add('active');
+          $('tab-' + btn.dataset.tab).classList.add('active');
+          if(btn.dataset.tab === 'fiveE') showQ();
+        });
+      });
+
+      $('modeSelect').addEventListener('change', ()=>{
+        updVis();
+        playing = false;
+        sim.resetParticle();
+      });
+
+      ['speed','ang','vz'].forEach(id=>{
+        $(id).addEventListener('input', ()=>{
+          applyLiveChargeControls();
+        });
+      });
+
+      ['bDir','bMag'].forEach(id=>{
+        $(id).addEventListener('input', ()=>{
+          sim.mode = $('modeSelect').value;
+          if(sim.mode === 'proton' || sim.mode === 'electron'){
+            sim.p.setKind(sim.mode);
+          }
+        });
+      });
+
+      $('btnPlay').addEventListener('click', ()=>playing=true);
+      $('btnPause').addEventListener('click', ()=>playing=false);
+      $('btnReset').addEventListener('click', ()=>{
+        playing = false;
+        sim.resetParticle();
+      });
+
+      $('btn2D').addEventListener('click', set2DView);
+      $('btn3D').addEventListener('click', set3DView);
+
+      document.querySelectorAll('.spd').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          document.querySelectorAll('.spd').forEach(x=>x.classList.remove('active'));
+          btn.classList.add('active');
+          simSpeed = parseFloat(btn.dataset.spd);
+        });
+      });
+
+      window.addEventListener('keydown', e=>{
+        if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+
+        if(e.code === 'Space'){
+          e.preventDefault();
+          playing = !playing;
+        }
+        if(e.code === 'KeyR'){
+          playing = false;
+          sim.resetParticle();
+        }
+        if(e.code === 'Digit2') set2DView();
+        if(e.code === 'Digit3') set3DView();
+      });
+
+      $('studentName').addEventListener('input', e=>{
+        localStorage.setItem('lor_stu', e.target.value);
+      });
+
+      $('qAnswer').addEventListener('input', e=>{
+        answers[curQ] = e.target.value;
+        localStorage.setItem('lor_ans', JSON.stringify(answers));
+      });
+
+      $('prevQ').addEventListener('click', ()=>{
+        saveAns();
+        curQ = (curQ - 1 + QS.length) % QS.length;
+        showQ();
+      });
+
+      $('nextQ').addEventListener('click', ()=>{
+        saveAns();
+        curQ = (curQ + 1) % QS.length;
+        showQ();
+      });
+
+      $('exportDocx').addEventListener('click', expDocx);
+
+      updVis();
+    }
+
+    function updVis(){
+      const m = $('modeSelect').value;
+      const isC = m === 'proton' || m === 'electron' || m === 'boundary';
+      const isW = m === 'wire';
+      const isP = m === 'parallel_same' || m === 'parallel_opp';
+
+      $('chargeCtrl').style.display = isC ? '' : 'none';
+      $('wireCtrl').style.display = (isW || isP) ? '' : 'none';
+      $('i2C').style.display = isP ? '' : 'none';
+      $('sepC').style.display = isP ? '' : 'none';
+    }
+
+    function expDocx(){
+      saveAns();
+
+      if(typeof docx === 'undefined'){
+        alert('DOCX library not loaded.');
+        return;
+      }
+
+      const name = $('studentName').value || 'Student';
+      const {Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType,BorderStyle} = docx;
+
+      const children = [
+        new Paragraph({
+          heading:HeadingLevel.HEADING_1,
+          alignment:AlignmentType.CENTER,
+          children:[new TextRun({text:'Lorentz Force Lab — 5E Inquiry',bold:true,size:34,color:'2563EB'})]
+        }),
+        new Paragraph({
+          alignment:AlignmentType.CENTER,
+          children:[new TextRun({text:`Student: ${name} | Date: ${new Date().toLocaleDateString()}`,size:22,color:'666666'})]
+        }),
+        new Paragraph({text:''})
+      ];
+
+      QS.forEach((q,i)=>{
+        children.push(new Paragraph({
+          heading:HeadingLevel.HEADING_2,
+          children:[
+            new TextRun({text:`[${q.p}] `,bold:true,color:'7C3AED',size:24}),
+            new TextRun({text:`Q${i+1}`,bold:true,size:24})
+          ]
+        }));
+        children.push(new Paragraph({
+          children:[new TextRun({text:q.q,italics:true,size:22})]
+        }));
+        children.push(new Paragraph({
+          children:[
+            new TextRun({text:'Answer: ',bold:true,size:22}),
+            new TextRun({text:answers[i] || '(no answer)',size:22})
+          ]
+        }));
+        children.push(new Paragraph({
+          border:{bottom:{style:BorderStyle.SINGLE,size:1,color:'CCCCCC'}},
+          children:[new TextRun({text:''})]
+        }));
+      });
+
+      Packer.toBlob(new Document({sections:[{children}]}))
+        .then(blob=>{
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `Lorentz_${name.replace(/\s+/g,'_')}.docx`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(()=>URL.revokeObjectURL(url),500);
+        })
+        .catch(err=>{
+          console.error(err);
+          alert('Failed to export DOCX.');
+        });
+    }
+
+    function togglePanel(){
+      const p = $('panel');
+      const b = $('panelToggle');
+      p.classList.toggle('collapsed');
+      b.classList.toggle('collapsed');
+      b.textContent = p.classList.contains('collapsed') ? '▸' : '◂';
+
+      setTimeout(()=>{
+        const holder = $('sketch-holder');
+        resizeCanvas(holder.offsetWidth, holder.offsetHeight);
+        b.style.right = p.classList.contains('collapsed') ? '0' : '380px';
+        $('view-badge').style.right = p.classList.contains('collapsed') ? '20px' : '400px';
+      }, 360);
+    }
+  </script>
+</body>
+</html>

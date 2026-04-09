@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Randomizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+body { background: linear-gradient(135deg, #1e130c, #9a8478); color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px; overflow-x: hidden; }
+
+h1 { font-size: 2.5rem; text-align: center; margin-bottom: 20px; background: linear-gradient(90deg, #f12711, #f5af19); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+
+.controls { background: rgba(255,255,255,0.05); padding: 16px 24px; border-radius: 16px; margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(10px); display: flex; gap: 16px; align-items: center; flex-wrap: wrap; justify-content: center; z-index: 10; }
+select { padding: 10px 16px; border-radius: 8px; border: none; background: rgba(0,0,0,0.3); color: white; font-size: 1rem; outline: none; cursor: pointer; min-width: 200px; }
+select:focus { border: 1px solid #f5af19; }
+
+.btn { padding: 12px 28px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 800; cursor: pointer; color: #fff; background: linear-gradient(135deg, #f12711, #f5af19); box-shadow: 0 4px 15px rgba(241, 39, 17, 0.4); transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+.btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(241, 39, 17, 0.6); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; background: #555; box-shadow: none; transform: none; }
+
+.wheel-container { position: relative; width: 500px; height: 500px; display: flex; justify-content: center; align-items: center; filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5)); }
+#wheel { width: 100%; height: 100%; border-radius: 50%; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); }
+.pointer { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 40px solid #fff; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); z-index: 5; }
+
+.winner-toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.5); background: rgba(0,0,0,0.85); color: #fff; padding: 40px 60px; border-radius: 20px; font-size: 3rem; font-weight: 900; opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); backdrop-filter: blur(10px); border: 2px solid #f5af19; text-align: center; z-index: 100; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+.winner-toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.winner-toast .sub { font-size: 1.2rem; font-weight: 400; opacity: 0.8; margin-top: 10px; color: #f5af19; }
+
+@media(max-width: 600px) { .wheel-container { width: 320px; height: 320px; } .winner-toast { padding: 20px 30px; font-size: 2rem; } }
+</style>
+</head>
+<body>
+
+<h1>🎯 Randomizer Wheel</h1>
+
+<div class="controls">
+  <select id="classSelect"></select>
+  <button class="btn" id="spinBtn">SPIN WHEEL!</button>
+</div>
+
+<div class="wheel-container">
+  <div class="pointer"></div>
+  <canvas id="wheel" width="800" height="800"></canvas>
+</div>
+
+<div class="winner-toast" id="winnerToast">
+  <div id="winnerText">Name</div>
+  <div class="sub">has been selected!</div>
+</div>
+
+<script>
+let appData = { classes: {} };
+let students = [];
+let colors = [];
+const RANDOMIZER_STATE_KEY = 'randomizerStateV1';
+
+const classSelect = document.getElementById('classSelect');
+const btnSpin = document.getElementById('spinBtn');
+const cvs = document.getElementById('wheel');
+const ctx = cvs.getContext('2d');
+const toast = document.getElementById('winnerToast');
+const toastText = document.getElementById('winnerText');
+
+const PALETTE = ['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6','#1abc9c','#e67e22','#e84393','#00b894','#6c5ce7','#fd79a8','#0984e3','#d63031','#55efc4','#fab1a0','#74b9ff'];
+
+// Angle logic
+let currentRot = 0;
+let isSpinning = false;
+
+function readSavedState() {
+  try {
+    const raw = localStorage.getItem(RANDOMIZER_STATE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch(e) {
+    return {};
+  }
+}
+
+function saveState(patch = {}) {
+  const prev = readSavedState();
+  const next = { ...prev, ...patch };
+  localStorage.setItem(RANDOMIZER_STATE_KEY, JSON.stringify(next));
+}
+
+function init() {
+  try {
+    const d = localStorage.getItem('classRotatorData');
+    if (d) appData = JSON.parse(d);
+    if (!appData.classes) appData.classes = {};
+  } catch(e) {}
+  
+  classSelect.innerHTML = '';
+  const names = Object.keys(appData.classes);
+  
+  if(names.length === 0) {
+    const opt = document.createElement('option');
+    opt.text = "No classes found";
+    classSelect.add(opt);
+    btnSpin.disabled = true;
+    drawEmpty();
+    return;
+  }
+  
+  names.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n; opt.text = n;
+    classSelect.add(opt);
+  });
+  
+  const savedState = readSavedState();
+  const savedClass = savedState.selectedClass;
+  const initialClass = savedClass && appData.classes[savedClass] ? savedClass : names[0];
+  classSelect.value = initialClass;
+  loadClass(initialClass);
+}
+
+classSelect.addEventListener('change', (e) => {
+  const selected = e.target.value;
+  saveState({ selectedClass: selected });
+  loadClass(selected);
+});
+
+function loadClass(name) {
+  if (isSpinning) return;
+  saveState({ selectedClass: name });
+  const list = appData.classes[name] || [];
+  students = list.map(s => typeof s === 'string' ? s : s.name);
+  if(students.length === 0) {
+    btnSpin.disabled = true; drawEmpty(); return;
+  }
+  btnSpin.disabled = false;
+  
+  colors = students.map((_, i) => PALETTE[i % PALETTE.length]);
+  currentRot = 0;
+  drawWheel(0);
+}
+
+function drawEmpty() {
+  ctx.clearRect(0, 0, 800, 800);
+  ctx.beginPath();
+  ctx.arc(400, 400, 390, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.fill();
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.stroke();
+  
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '600 30px "Segoe UI"';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText("Add a class first", 400, 400);
+}
+
+function drawWheel(angleOffset) {
+  ctx.clearRect(0, 0, 800, 800);
+  const cx = 400, cy = 400, r = 390;
+  
+  const total = students.length;
+  if(total === 0) return;
+  
+  const arcLen = (Math.PI * 2) / total;
+  
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(angleOffset);
+  
+  for(let i=0; i<total; i++) {
+    const start = i * arcLen;
+    const end = start + arcLen;
+    
+    ctx.beginPath();
+    ctx.moveTo(0,0);
+    ctx.arc(0, 0, r, start, end);
+    ctx.fillStyle = colors[i];
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Draw Text
+    ctx.save();
+    ctx.rotate(start + arcLen / 2);
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 26px "Segoe UI"';
+    
+    // Truncate name if too long
+    let n = students[i];
+    if(n.length > 20) n = n.substring(0, 18) + '...';
+    
+    // add drop shadow to text for contrast
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 4;
+    ctx.fillText(n, r - 30, 0);
+    ctx.restore();
+  }
+  
+  // Center peg
+  ctx.beginPath();
+  ctx.arc(0,0, 20, 0, Math.PI*2);
+  ctx.fillStyle = '#fff';
+  ctx.fill();
+  ctx.shadowBlur = 10;
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.beginPath();
+  ctx.arc(0,0, 12, 0, Math.PI*2);
+  ctx.fillStyle = '#1e130c';
+  ctx.fill();
+  
+  ctx.restore();
+}
+
+btnSpin.addEventListener('click', () => {
+  if(isSpinning || students.length === 0) return;
+  toast.classList.remove('show');
+  isSpinning = true;
+  classSelect.disabled = true;
+  btnSpin.disabled = true;
+  
+  const totalItems = students.length;
+  
+  // Random spins between 5 and 10 full rotations + random slice
+  const spinRotations = (Math.random() * 5 + 5) * Math.PI * 2;
+  const extraAngle = Math.random() * Math.PI * 2; 
+  const targetRot = currentRot + spinRotations + extraAngle;
+  
+  const dur = 4000 + Math.random() * 2000; // 4 to 6 seconds
+  let start = null;
+  
+  // Easing function: easeOutQuart
+  const easeOut = (t) => 1 - Math.pow(1 - t, 4);
+  
+  function animate(timestamp) {
+    if(!start) start = timestamp;
+    const p = Math.min((timestamp - start) / dur, 1.0);
+    const ease = easeOut(p);
+    
+    const r = currentRot + (targetRot - currentRot) * ease;
+    drawWheel(r);
+    
+    if(p < 1.0) {
+      requestAnimationFrame(animate);
+    } else {
+      currentRot = r % (Math.PI * 2); 
+      isSpinning = false;
+      classSelect.disabled = false;
+      btnSpin.disabled = false;
+      showWinner();
+    }
+  }
+  
+  requestAnimationFrame(animate);
+});
+
+function showWinner() {
+  const total = students.length;
+  // Wheel draws clockwise based on unit circle where 0 is right.
+  // The pointer is at the top (-PI/2).
+  // Calculate which slice ended up at rotation coordinate corresponding to the top.
+  const arcLen = (Math.PI * 2) / total;
+  
+  // Normalize currentRot to positive range equivalent
+  let normalizedRot = currentRot % (Math.PI * 2);
+  if (normalizedRot < 0) normalizedRot += Math.PI * 2;
+  
+  // The wedge that spans -PI/2 (top) when rotated by normalizedRot:
+  // pointer is at 270 degrees (3PI/2 rad in standard coords going bottom up, but canvas top is -PI/2 == 3PI/2).
+  let pointerAngle = (Math.PI * 1.5 - normalizedRot) % (Math.PI * 2);
+  if(pointerAngle < 0) pointerAngle += Math.PI * 2;
+  
+  const winnerIdx = Math.floor(pointerAngle / arcLen);
+  toastText.textContent = students[winnerIdx];
+  toast.classList.add('show');
+  
+  confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 }});
+  
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// Window init
+window.addEventListener('storage', () => init()); // listen for JSON updates
+init();
+
+</script>
+</body>
+</html>

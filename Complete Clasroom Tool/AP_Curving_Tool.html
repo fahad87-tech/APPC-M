@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP Curving Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
+body { background: radial-gradient(circle at top, #1e293b, #0f172a 60%); color: #e5e7eb; min-height: 100vh; padding: 16px; }
+.app-container { max-width: 1700px; margin: 0 auto; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 16px; backdrop-filter: blur(10px); box-shadow: 0 10px 35px rgba(0,0,0,0.35); }
+.header { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+h1 { font-size: 1.5rem; margin-bottom: 4px; }
+.subtitle { color: #94a3b8; font-size: 0.9rem; }
+.class-selector-container, .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.settings-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+.input-group { display: flex; flex-direction: column; gap: 4px; }
+.input-group label { font-size: 0.72rem; color: #cbd5e1; }
+.input-group input, .class-selector { background: rgba(30, 41, 59, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 8px 10px; outline: none; }
+.input-group input { width: 115px; }
+.assignment-input { width: 230px !important; }
+.class-selector { min-width: 220px; }
+.save-status { font-size: 0.78rem; color: #cbd5e1; min-height: 18px; }
+.btn { border: none; border-radius: 8px; padding: 9px 12px; font-size: 0.87rem; font-weight: 600; cursor: pointer; color: #fff; background: #3b82f6; }
+.btn:hover { filter: brightness(1.08); }
+.btn-secondary { background: #475569; }
+.btn-danger { background: #dc2626; }
+.btn-icon { width: 38px; }
+.table-container { overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); margin-bottom: 14px; }
+table { width: 100%; border-collapse: collapse; min-width: 1160px; table-layout: fixed; }
+thead th { position: sticky; top: 0; z-index: 2; background: #1e293b; color: #f1f5f9; text-align: left; padding: 11px; font-size: 0.9rem; letter-spacing: 0.03em; text-transform: uppercase; }
+tbody td { padding: 10px 11px; border-bottom: 1px solid rgba(255,255,255,0.08); vertical-align: middle; font-size: 1rem; }
+tbody tr:hover { background: rgba(59, 130, 246, 0.08); }
+.col-number { color: #93c5fd; width: 52px; }
+.col-name { font-weight: 600; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-input input { width: 84px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(30,41,59,0.85); color: #fff; font-size: 0.95rem; }
+.calculated { color: #f8fafc; }
+.highlight-score { font-weight: 700; color: #86efac; }
+.delete-btn { border: none; background: #dc2626; color: white; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; }
+.ap-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; border-radius: 999px; font-weight: 700; color: #fff; }
+.score-none { background: #64748b; }
+.score-1 { background: #dc2626; }
+.score-2 { background: #f97316; }
+.score-3 { background: #eab308; color: #111827; }
+.score-4 { background: #22c55e; }
+.score-5 { background: #3b82f6; }
+.legend-wrap { border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 12px; }
+.legend-wrap h3 { margin-bottom: 10px; font-size: 1rem; color: #cbd5e1; }
+.legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
+.legend-card { border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; background: rgba(30,41,59,0.6); }
+.legend-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.legend-title .badge { padding: 2px 8px; border-radius: 999px; font-size: 0.82rem; font-weight: 700; color: #fff; }
+.legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.legend-row label { width: 82px; font-size: 0.78rem; color: #cbd5e1; }
+.legend-row input { width: 85px; padding: 6px 7px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(15,23,42,0.8); color: #fff; }
+.modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,0.6); z-index: 20; }
+.modal.show { display: flex; }
+.modal-content { width: 92%; max-width: 440px; background: #0f172a; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; }
+.modal-header, .modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.modal-footer { border-bottom: none; border-top: 1px solid rgba(255,255,255,0.1); justify-content: flex-end; gap: 8px; }
+.modal-body { padding: 16px; }
+.modal-body input { width: 100%; }
+@media (max-width: 1000px) {
+  .header { flex-direction: column; align-items: stretch; }
+}
+</style>
+</head>
+<body>
+<div class="app-container">
+  <header class="header">
+    <div>
+      <h1>AP Curving Tool</h1>
+      <p class="subtitle">AP Curve Legend + Assignment Snapshots</p>
+    </div>
+    <div class="class-selector-container">
+      <select id="classSelector" class="class-selector"></select>
+      <button id="renameClassBtn" class="btn btn-secondary btn-icon" title="Rename Class">✎</button>
+      <button id="addClassBtn" class="btn btn-secondary btn-icon" title="Add Class">＋</button>
+      <button id="deleteClassBtn" class="btn btn-danger" title="Delete Class">Delete Class</button>
+    </div>
+    <div class="actions">
+      <button id="addStudentBtn" class="btn">Add Student</button>
+      <div class="settings-group">
+        <div class="input-group">
+          <label for="maxMcqInput">Max MCQ</label>
+          <input type="number" id="maxMcqInput" value="40" min="1">
+        </div>
+        <div class="input-group">
+          <label for="scaledMcqInput">Scaled MCQ</label>
+          <input type="number" id="scaledMcqInput" value="52" min="1">
+        </div>
+        <div class="input-group">
+          <label for="maxFrqInput">Max FRQ</label>
+          <input type="number" id="maxFrqInput" value="48" min="1">
+        </div>
+        <div class="input-group">
+          <label for="maxRawScoreInput">Max Raw Score</label>
+          <input type="number" id="maxRawScoreInput" value="100" min="1">
+        </div>
+      </div>
+      <div class="input-group">
+        <label for="assignmentNameInput">Assignment Name</label>
+        <input type="text" id="assignmentNameInput" class="assignment-input" placeholder="e.g. Unit 3 Test">
+      </div>
+      <button id="saveAssignmentBtn" class="btn">Save Assignment</button>
+      <button id="resetDataBtn" class="btn btn-secondary" title="Reset Current Class">Reset</button>
+      <button id="exportCsvBtn" class="btn btn-secondary" title="Export Class History CSV">Export CSV</button>
+      <div id="saveStatus" class="save-status"></div>
+    </div>
+  </header>
+
+  <div class="table-container">
+    <table id="gradesTable">
+      <thead>
+        <tr>
+          <th style="width: 50px;">#</th>
+          <th style="width: 250px;">Student Name</th>
+          <th style="width: 112px;">MCQ Score</th>
+          <th style="width: 112px;">FRQ Score</th>
+          <th style="width: 112px;">Scaled MCQ</th>
+          <th style="width: 112px;">Raw Score</th>
+          <th style="width: 112px;">Raw %</th>
+          <th style="width: 128px;">Curved Score (%)</th>
+          <th style="width: 88px;">AP Score</th>
+          <th style="width: 70px;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="studentList"></tbody>
+    </table>
+  </div>
+
+  <div class="legend-wrap">
+    <h3>Editable AP Curve Legend</h3>
+    <div id="curveLegendContainer" class="legend-grid"></div>
+  </div>
+</div>
+
+<div id="addStudentModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Add Student</h2>
+      <button class="btn btn-secondary close-modal">Close</button>
+    </div>
+    <div class="modal-body">
+      <div class="input-group">
+        <label for="newStudentName">Student Name</label>
+        <input type="text" id="newStudentName" placeholder="e.g. John Doe" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary cancel-modal">Cancel</button>
+      <button id="confirmAddStudent" class="btn">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const classSelector = document.getElementById('classSelector');
+  const studentListEl = document.getElementById('studentList');
+  const addStudentBtn = document.getElementById('addStudentBtn');
+  const resetDataBtn = document.getElementById('resetDataBtn');
+  const exportCsvBtn = document.getElementById('exportCsvBtn');
+  const renameClassBtn = document.getElementById('renameClassBtn');
+  const addClassBtn = document.getElementById('addClassBtn');
+  const deleteClassBtn = document.getElementById('deleteClassBtn');
+  const maxMcqInput = document.getElementById('maxMcqInput');
+  const scaledMcqInput = document.getElementById('scaledMcqInput');
+  const maxFrqInput = document.getElementById('maxFrqInput');
+  const maxRawScoreInput = document.getElementById('maxRawScoreInput');
+  const assignmentNameInput = document.getElementById('assignmentNameInput');
+  const saveAssignmentBtn = document.getElementById('saveAssignmentBtn');
+  const saveStatus = document.getElementById('saveStatus');
+  const curveLegendContainer = document.getElementById('curveLegendContainer');
+  const modal = document.getElementById('addStudentModal');
+  const closeModalBtn = document.querySelector('.close-modal');
+  const cancelModalBtn = document.querySelector('.cancel-modal');
+  const confirmAddBtn = document.getElementById('confirmAddStudent');
+  const newStudentNameInput = document.getElementById('newStudentName');
+  const STORAGE_KEY = 'ap_curving_local_data_v1';
+  const ROTATOR_STORAGE_KEY = 'classRotatorData';
+  const DEFAULT_CURVE_BANDS = [
+    { rawMin: 70, rawMax: 100, curveMin: 90, curveMax: 100, ap: 5 },
+    { rawMin: 54, rawMax: 69.9, curveMin: 75, curveMax: 89, ap: 4 },
+    { rawMin: 40, rawMax: 53.9, curveMin: 60, curveMax: 74, ap: 3 },
+    { rawMin: 25, rawMax: 39.9, curveMin: 30, curveMax: 59, ap: 2 },
+    { rawMin: 0, rawMax: 24.9, curveMin: 0, curveMax: 29, ap: 1 }
+  ];
+  const DEFAULT_STUDENTS_CLASS1 = [
+    'Cao, Zhiyuan(Jessica)', 'Chen, Haiwei(Harvey)', 'Cui, Hankun(Daniel)', 'Jiang, Haosen(Jerry)',
+    'Li, Yuyang (Micheal)', 'Pei, Jingzhou(Oscar)', 'Qu, Haibo (Lucas)', 'Wang, Han(Bright)',
+    'Wang, Jinghan (Jason)', 'Wang, Yunbo(Steven)', 'Xu, Shien(Steven)', 'Xu, Yuwei(Lisa)',
+    'Zhang, Jiazhen(Anthony)', 'Zhang, Ziye(Eason)', 'Zhao, Siqi(Steven Zhao)', 'Cerelia'
+  ];
+  const DEFAULT_STUDENTS_CLASS2 = [
+    'Cheng, Yitian(Timothy)', 'Li, Dong(Jasper)', 'Li, Qianran(Cindy)', 'Li, Zhe(Jackson)',
+    'Liu, Yuyin (Sam)', 'Luo, Yuhong', 'Mao, Zhengkang(Kang)', 'Miao, Yan (Helen)',
+    'Nie, Wenda(Nick)', 'Pu, Zihang(Andy)', 'Ruan, Zhenghao(Deo)', 'Shen, Duowei(Maxime)',
+    'Wang, Yihao(will)', 'Wang, Zijian(James)', 'Wang, Ziyan (Zoe)', 'Yang, Shijie(Nick)', 'Zhang, Ziye(Eason)', 'Bella'
+  ];
+
+  let currentClass = 'class1';
+  let appData = {
+    class1: {
+      label: 'APP1 (Class 1)',
+      sourceClassName: null,
+      settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: '' },
+      curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
+      assignments: [],
+      students: []
+    },
+    class2: {
+      label: 'APPC-M (Class 2)',
+      sourceClassName: null,
+      settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: '' },
+      curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
+      assignments: [],
+      students: []
+    }
+  };
+
+  init();
+
+  function init() {
+    loadData();
+    syncFromRotatorData();
+    pruneLegacyEmptyClasses();
+    pruneRedundantClasses();
+    setupEventListeners();
+    syncUIWithState();
+  }
+
+  function pruneRedundantClasses() {
+    const keys = Object.keys(appData);
+    const seenLabels = new Set();
+    const toDelete = [];
+    keys.forEach(k => {
+      const lbl = appData[k].label;
+      if (lbl === 'APP1 (Class 1)' || lbl === 'APPC-M (Class 2)') {
+        toDelete.push(k);
+      } else if (seenLabels.has(lbl)) {
+        toDelete.push(k);
+      } else {
+        seenLabels.add(lbl);
+      }
+    });
+    if (toDelete.length < keys.length) {
+      toDelete.forEach(k => delete appData[k]);
+    }
+    if (!appData[currentClass]) {
+      currentClass = Object.keys(appData)[0];
+    }
+    saveData();
+  }
+
+  function getRotatorClasses() {
+    try {
+      const raw = localStorage.getItem(ROTATOR_STORAGE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object' || !parsed.classes || typeof parsed.classes !== 'object') return {};
+      return parsed.classes;
+    } catch {
+      return {};
+    }
+  }
+
+  function toStudentRecord(item) {
+    if (typeof item === 'string') {
+      const name = item.trim();
+      if (!name) return null;
+      return { id: generateId(), name, mcq: '', frq: '' };
+    }
+    if (item && typeof item === 'object' && typeof item.name === 'string') {
+      const name = item.name.trim();
+      if (!name) return null;
+      return { id: generateId(), name, mcq: '', frq: '' };
+    }
+    return null;
+  }
+
+  function makeClassId(name) {
+    const normalized = String(name).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    return `rot_${normalized || generateId().slice(0, 8)}`;
+  }
+
+  function syncFromRotatorData() {
+    const classes = getRotatorClasses();
+    const classNames = Object.keys(classes);
+    if (!classNames.length) return;
+    classNames.forEach(className => {
+      const students = Array.isArray(classes[className]) ? classes[className].map(toStudentRecord).filter(Boolean) : [];
+      let existingId = Object.keys(appData).find(id => appData[id].label === className || appData[id].sourceClassName === className);
+      if (!existingId) {
+        const baseId = makeClassId(className);
+        let candidateId = baseId;
+        let suffix = 2;
+        while (appData[candidateId] && appData[candidateId].sourceClassName !== className) {
+          candidateId = `${baseId}_${suffix}`;
+          suffix += 1;
+        }
+        existingId = candidateId;
+        appData[existingId] = {
+          label: className,
+          sourceClassName: className,
+          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: '' },
+          curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
+          assignments: [],
+          students
+        };
+        return;
+      }
+      appData[existingId].label = className;
+      appData[existingId].sourceClassName = className;
+      const hasManualGrades = appData[existingId].students.some(s => String(s.mcq).trim() !== '' || String(s.frq).trim() !== '');
+      if (!hasManualGrades) appData[existingId].students = students;
+    });
+    if (!appData[currentClass]) currentClass = Object.keys(appData)[0];
+    saveData();
+  }
+
+  function hasAnyStudent(students) {
+    if (!Array.isArray(students)) return false;
+    return students.some(s => {
+      if (!s) return false;
+      if (typeof s === 'string') return s.trim().length > 0;
+      if (typeof s === 'object' && typeof s.name === 'string') return s.name.trim().length > 0;
+      return false;
+    });
+  }
+
+  function pruneLegacyEmptyClasses() {
+    const initialKeys = Object.keys(appData);
+    if (initialKeys.length <= 1) return;
+    let changed = false;
+    ['class1', 'class2'].forEach(key => {
+      const cls = appData[key];
+      if (!cls) return;
+      const hasStudents = hasAnyStudent(cls.students);
+      const hasAssignments = Array.isArray(cls.assignments) && cls.assignments.length > 0;
+      const isLegacy = !cls.sourceClassName;
+      if (isLegacy && !hasStudents && !hasAssignments && Object.keys(appData).length > 1) {
+        delete appData[key];
+        changed = true;
+      }
+    });
+    if (!changed) return;
+    if (!appData[currentClass]) currentClass = Object.keys(appData)[0];
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+  }
+
+  function loadData() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        appData = { ...appData, ...parsed };
+        Object.keys(appData).forEach(key => {
+          if (!appData[key].settings) appData[key].settings = { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: '' };
+          if (!Object.prototype.hasOwnProperty.call(appData[key].settings, 'assignmentName')) appData[key].settings.assignmentName = '';
+          if (!appData[key].label) appData[key].label = key;
+          if (!Object.prototype.hasOwnProperty.call(appData[key], 'sourceClassName')) appData[key].sourceClassName = null;
+          if (!Array.isArray(appData[key].curveBands)) appData[key].curveBands = JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS));
+          if (!Array.isArray(appData[key].assignments)) appData[key].assignments = [];
+          if (!Array.isArray(appData[key].students)) appData[key].students = [];
+        });
+        if (!appData[currentClass]) currentClass = Object.keys(appData)[0];
+      } catch {
+        loadDefaults();
+      }
+    } else {
+      loadDefaults();
+    }
+  }
+
+  function loadDefaults() {
+    const rotatorClasses = getRotatorClasses();
+    const classNames = Object.keys(rotatorClasses);
+    if (classNames.length) {
+      appData = {};
+      classNames.forEach(className => {
+        const classId = makeClassId(className);
+        appData[classId] = {
+          label: className,
+          sourceClassName: className,
+          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: '' },
+          curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
+          assignments: [],
+          students: (rotatorClasses[className] || []).map(toStudentRecord).filter(Boolean)
+        };
+      });
+      currentClass = Object.keys(appData)[0];
+      saveData();
+      return;
+    }
+    appData.class1.students = DEFAULT_STUDENTS_CLASS1.map(name => ({ id: generateId(), name, mcq: '', frq: '' }));
+    appData.class2.students = DEFAULT_STUDENTS_CLASS2.map(name => ({ id: generateId(), name, mcq: '', frq: '' }));
+    saveData();
+  }
+
+  function loadClassDefaults(cls) {
+    const sourceClassName = appData[cls]?.sourceClassName;
+    if (sourceClassName) {
+      const rotatorClasses = getRotatorClasses();
+      appData[cls].students = (rotatorClasses[sourceClassName] || []).map(toStudentRecord).filter(Boolean);
+      appData[cls].curveBands = JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS));
+      saveData();
+      return;
+    }
+    const defaults = cls === 'class1' ? DEFAULT_STUDENTS_CLASS1 : cls === 'class2' ? DEFAULT_STUDENTS_CLASS2 : [];
+    appData[cls].students = defaults.map(name => ({ id: generateId(), name, mcq: '', frq: '' }));
+    appData[cls].curveBands = JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS));
+    saveData();
+  }
+
+  function syncUIWithState() {
+    const state = appData[currentClass];
+    maxMcqInput.value = state.settings.maxMcq;
+    scaledMcqInput.value = state.settings.scaledMcq;
+    maxFrqInput.value = state.settings.maxFrq;
+    maxRawScoreInput.value = state.settings.maxRaw;
+    assignmentNameInput.value = state.settings.assignmentName || '';
+    renderClassSelector();
+    renderLegend();
+    renderTable();
+  }
+
+  function saveData() {
+    appData[currentClass].settings = {
+      maxMcq: parseFloat(maxMcqInput.value) || 40,
+      scaledMcq: parseFloat(scaledMcqInput.value) || 52,
+      maxFrq: parseFloat(maxFrqInput.value) || 48,
+      maxRaw: parseFloat(maxRawScoreInput.value) || 100,
+      assignmentName: assignmentNameInput.value.trim()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    syncOrderToOtherApp('curving_formula_app_data_v1');
+  }
+
+  function syncOrderToOtherApp(targetKey) {
+    try {
+      const saved = localStorage.getItem(targetKey);
+      if (!saved) return;
+      const otherData = JSON.parse(saved);
+      let changed = false;
+      Object.keys(appData).forEach(classId => {
+        if (otherData[classId] && otherData[classId].students && appData[classId].students) {
+          const newOrder = [];
+          const sourceStudents = appData[classId].students;
+          const targetStudents = otherData[classId].students;
+          sourceStudents.forEach(s => {
+            const matched = targetStudents.find(ts => ts.id === s.id || ts.name === s.name);
+            if (matched) newOrder.push(matched);
+            else newOrder.push({ id: s.id, name: s.name, mcq: '', frq: '' });
+          });
+          if (JSON.stringify(targetStudents.map(ts=>ts.name)) !== JSON.stringify(newOrder.map(n=>n.name))) {
+            otherData[classId].students = newOrder;
+            changed = true;
+          }
+        }
+      });
+      if (changed) {
+        localStorage.setItem(targetKey, JSON.stringify(otherData));
+      }
+    } catch {}
+  }
+
+  function renderClassSelector() {
+    classSelector.innerHTML = '';
+    Object.keys(appData).forEach(key => {
+      const opt = document.createElement('option');
+      opt.value = key;
+      opt.textContent = appData[key].label || key;
+      if (key === currentClass) opt.selected = true;
+      classSelector.appendChild(opt);
+    });
+    deleteClassBtn.disabled = Object.keys(appData).length <= 1;
+  }
+
+  function renderLegend() {
+    const state = appData[currentClass];
+    curveLegendContainer.innerHTML = '';
+    state.curveBands.forEach(band => {
+      const card = document.createElement('div');
+      card.className = 'legend-card';
+      card.innerHTML = `
+        <div class="legend-title"><strong>AP ${band.ap}</strong><span class="badge score-${band.ap}">${band.ap}</span></div>
+        <div class="legend-row"><label>Raw Min</label><input type="number" step="0.1" data-ap="${band.ap}" data-field="rawMin" value="${band.rawMin}"><label>Raw Max</label><input type="number" step="0.1" data-ap="${band.ap}" data-field="rawMax" value="${band.rawMax}"></div>
+        <div class="legend-row"><label>Curve Min</label><input type="number" step="0.1" data-ap="${band.ap}" data-field="curveMin" value="${band.curveMin}"><label>Curve Max</label><input type="number" step="0.1" data-ap="${band.ap}" data-field="curveMax" value="${band.curveMax}"></div>
+      `;
+      curveLegendContainer.appendChild(card);
+    });
+  }
+
+  function generateId() {
+    if (crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'id_' + Math.random().toString(36).slice(2);
+  }
+
+  function toNumber(v) {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : null;
+  }
+
+  function calculateCurve(rawPct) {
+    if (rawPct === null || Number.isNaN(rawPct)) return { curve: null, ap: null };
+    const bands = appData[currentClass].curveBands || [];
+    let targetBand = bands[bands.length - 1] || { rawMin: 0, rawMax: 100, curveMin: 0, curveMax: 100, ap: 1 };
+    for (const band of bands) {
+      if (rawPct >= band.rawMin && rawPct <= band.rawMax) {
+        targetBand = band;
+        break;
+      }
+    }
+    if (rawPct >= 100) return { curve: 100, ap: 5 };
+    const widthRaw = targetBand.rawMax - targetBand.rawMin || 1;
+    const widthCurve = targetBand.curveMax - targetBand.curveMin;
+    const curvedScore = ((rawPct - targetBand.rawMin) / widthRaw) * widthCurve + targetBand.curveMin;
+    return { curve: Math.max(0, Math.min(100, curvedScore)), ap: targetBand.ap };
+  }
+
+  function processStudentGrades(student) {
+    const mcq = toNumber(String(student.mcq).trim());
+    const frq = toNumber(String(student.frq).trim());
+    const state = appData[currentClass];
+    let scaledMcq = null;
+    let rawScore = null;
+    let rawPct = null;
+    let curve = null;
+    let ap = null;
+    const hasMcq = mcq !== null;
+    const hasFrq = frq !== null;
+    if (hasMcq) {
+      scaledMcq = (mcq / (state.settings.maxMcq || 40)) * (state.settings.scaledMcq || 52);
+    }
+    if (hasMcq || hasFrq) {
+      rawScore = (scaledMcq || 0) + (hasFrq ? frq : 0);
+      rawPct = (rawScore / (state.settings.maxRaw || 100)) * 100;
+      const curved = calculateCurve(rawPct);
+      curve = curved.curve;
+      ap = curved.ap;
+    }
+    return { scaledMcq, rawScore, rawPct, curve, ap };
+  }
+
+  function captureGradeInputFocus() {
+    const active = document.activeElement;
+    if (!active || active.tagName !== 'INPUT') return null;
+    if (!studentListEl.contains(active)) return null;
+    const id = active.dataset.id;
+    const field = active.dataset.field;
+    if (!id || !field) return null;
+    return {
+      id,
+      field,
+      start: typeof active.selectionStart === 'number' ? active.selectionStart : null,
+      end: typeof active.selectionEnd === 'number' ? active.selectionEnd : null
+    };
+  }
+
+  function restoreGradeInputFocus(focusInfo) {
+    if (!focusInfo) return;
+    const selector = `input[data-id="${focusInfo.id}"][data-field="${focusInfo.field}"]`;
+    const input = studentListEl.querySelector(selector);
+    if (!input) return;
+    input.focus();
+    if (focusInfo.start !== null && focusInfo.end !== null) input.setSelectionRange(focusInfo.start, focusInfo.end);
+  }
+
+  function renderTable() {
+    const focusInfo = captureGradeInputFocus();
+    const state = appData[currentClass];
+    studentListEl.innerHTML = '';
+    state.students.forEach((student, index) => {
+      const r = processStudentGrades(student);
+      const tr = document.createElement('tr');
+      tr.draggable = true;
+      tr.style.cursor = 'move';
+      
+      tr.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', index);
+        tr.style.opacity = '0.5';
+      });
+      tr.addEventListener('dragend', () => {
+        tr.style.opacity = '1';
+      });
+      tr.addEventListener('dragover', (e) => {
+        e.preventDefault();
+      });
+      tr.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'), 10);
+        const toIndex = index;
+        if (fromIndex !== toIndex && !isNaN(fromIndex)) {
+          const state = appData[currentClass];
+          const movedStudent = state.students.splice(fromIndex, 1)[0];
+          state.students.splice(toIndex, 0, movedStudent);
+          saveData();
+          renderTable();
+        }
+      });
+
+      const apClass = r.ap !== null ? `score-${r.ap}` : 'score-none';
+      tr.innerHTML = `
+        <td class="col-number">${index + 1}</td>
+        <td class="col-name" data-student-id="${student.id}" title="Click to edit name" style="cursor:pointer">${student.name}</td>
+        <td class="td-input"><input type="number" step="0.5" min="0" data-id="${student.id}" data-field="mcq" value="${student.mcq}"></td>
+        <td class="td-input"><input type="number" step="0.5" min="0" data-id="${student.id}" data-field="frq" value="${student.frq}"></td>
+        <td class="calculated">${r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : '-'}</td>
+        <td class="calculated highlight-score">${r.rawScore !== null ? r.rawScore.toFixed(1) : '-'}</td>
+        <td class="calculated highlight-score">${r.rawPct !== null ? r.rawPct.toFixed(1) + '%' : '-'}</td>
+        <td class="calculated highlight-score">${r.curve !== null ? r.curve.toFixed(1) + '%' : '-'}</td>
+        <td><span class="ap-badge ${apClass}">${r.ap !== null ? r.ap : '-'}</span></td>
+        <td><button class="delete-btn" data-id="${student.id}" title="Remove Student">✕</button></td>
+      `;
+      studentListEl.appendChild(tr);
+    });
+    restoreGradeInputFocus(focusInfo);
+  }
+
+  function updateRowDisplay(row, student) {
+    if (!row) return;
+    const r = processStudentGrades(student);
+    const apClass = r.ap !== null ? `score-${r.ap}` : 'score-none';
+    const cells = row.querySelectorAll('td');
+    if (cells.length < 9) return;
+    cells[4].textContent = r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : '-';
+    cells[5].textContent = r.rawScore !== null ? r.rawScore.toFixed(1) : '-';
+    cells[6].textContent = r.rawPct !== null ? r.rawPct.toFixed(1) + '%' : '-';
+    cells[7].textContent = r.curve !== null ? r.curve.toFixed(1) + '%' : '-';
+    const badge = cells[8].querySelector('.ap-badge');
+    if (badge) {
+      badge.className = `ap-badge ${apClass}`;
+      badge.textContent = r.ap !== null ? r.ap : '-';
+    }
+  }
+
+  function setupEventListeners() {
+    classSelector.addEventListener('change', (e) => {
+      currentClass = e.target.value;
+      syncUIWithState();
+    });
+    window.addEventListener('storage', (e) => {
+      if (e.key === ROTATOR_STORAGE_KEY) {
+        syncFromRotatorData();
+        syncUIWithState();
+      } else if (e.key === STORAGE_KEY) {
+        loadData();
+        syncUIWithState();
+      }
+    });
+    curveLegendContainer.addEventListener('input', (e) => {
+      const input = e.target.closest('input[data-ap]');
+      if (!input) return;
+      const ap = parseInt(input.dataset.ap, 10);
+      const field = input.dataset.field;
+      const val = parseFloat(input.value);
+      if (!Number.isFinite(val)) return;
+      const band = appData[currentClass].curveBands.find(b => b.ap === ap);
+      if (!band) return;
+      band[field] = val;
+      saveData();
+      renderTable();
+    });
+    studentListEl.addEventListener('input', (e) => {
+      if (e.target.tagName !== 'INPUT') return;
+      const id = e.target.dataset.id;
+      const field = e.target.dataset.field;
+      const student = appData[currentClass].students.find(s => s.id === id);
+      if (!student) return;
+      student[field] = e.target.value;
+      saveData();
+      updateRowDisplay(e.target.closest('tr'), student);
+    });
+    studentListEl.addEventListener('click', (e) => {
+      const nameTd = e.target.closest('td.col-name');
+      if (nameTd) {
+        const student = appData[currentClass].students.find(s => s.id === nameTd.dataset.studentId);
+        if (student) startNameEdit(nameTd, student);
+      }
+      const deleteBtn = e.target.closest('.delete-btn');
+      if (deleteBtn) {
+        const id = deleteBtn.dataset.id;
+        appData[currentClass].students = appData[currentClass].students.filter(s => s.id !== id);
+        saveData();
+        renderTable();
+      }
+    });
+    [maxMcqInput, scaledMcqInput, maxFrqInput, maxRawScoreInput].forEach(input => {
+      input.addEventListener('change', () => {
+        saveData();
+        renderTable();
+      });
+    });
+    assignmentNameInput.addEventListener('input', () => saveData());
+    saveAssignmentBtn.addEventListener('click', saveAssignmentSnapshot);
+    resetDataBtn.addEventListener('click', () => {
+      if (confirm('This will clear all entered grades and reset the student list for the current class. Continue?')) {
+        loadClassDefaults(currentClass);
+        syncUIWithState();
+      }
+    });
+    addStudentBtn.addEventListener('click', showModal);
+    closeModalBtn.addEventListener('click', hideModal);
+    cancelModalBtn.addEventListener('click', hideModal);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideModal(); });
+    confirmAddBtn.addEventListener('click', handleAddStudent);
+    newStudentNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleAddStudent(); });
+    exportCsvBtn.addEventListener('click', exportToCSV);
+    renameClassBtn.addEventListener('click', () => {
+      const newName = prompt('Rename class:', appData[currentClass].label || currentClass);
+      if (newName && newName.trim()) {
+        appData[currentClass].label = newName.trim();
+        saveData();
+        renderClassSelector();
+      }
+    });
+    addClassBtn.addEventListener('click', () => {
+      const name = prompt('New class name:');
+      if (!name || !name.trim()) return;
+      const id = 'class_' + generateId().slice(0, 8);
+      appData[id] = {
+        label: name.trim(),
+        sourceClassName: null,
+        settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: '' },
+        curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
+        assignments: [],
+        students: []
+      };
+      currentClass = id;
+      saveData();
+      syncUIWithState();
+    });
+    deleteClassBtn.addEventListener('click', () => {
+      if (Object.keys(appData).length <= 1) return;
+      const label = appData[currentClass].label || currentClass;
+      if (!confirm(`Delete "${label}" and all its data? This cannot be undone.`)) return;
+      delete appData[currentClass];
+      currentClass = Object.keys(appData)[0];
+      saveData();
+      syncUIWithState();
+    });
+  }
+
+  function startNameEdit(td, student) {
+    if (td.querySelector('input')) return;
+    const prev = student.name;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = prev;
+    input.style.cssText = 'width:100%;padding:0.35rem 0.5rem;font-size:inherit;font-weight:600;';
+    td.textContent = '';
+    td.appendChild(input);
+    input.focus();
+    input.select();
+    const commit = () => {
+      const val = input.value.trim();
+      student.name = val || prev;
+      saveData();
+      td.textContent = student.name;
+      td.title = 'Click to edit name';
+    };
+    input.addEventListener('blur', commit);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') input.blur();
+      if (e.key === 'Escape') { input.value = prev; input.blur(); }
+    });
+  }
+
+  function showModal() {
+    modal.classList.add('show');
+    newStudentNameInput.value = '';
+    setTimeout(() => newStudentNameInput.focus(), 40);
+  }
+
+  function hideModal() {
+    modal.classList.remove('show');
+  }
+
+  function handleAddStudent() {
+    const name = newStudentNameInput.value.trim();
+    if (!name) return;
+    appData[currentClass].students.push({ id: generateId(), name, mcq: '', frq: '' });
+    saveData();
+    renderTable();
+    hideModal();
+  }
+
+  function escapeCsvField(val) {
+    return `"${String(val).replace(/"/g, '""')}"`;
+  }
+
+  function getClassLabel() {
+    return appData[currentClass]?.label || currentClass;
+  }
+
+  function currentDateTimeIso() {
+    return new Date().toISOString();
+  }
+
+  function formatDateForFile(dateIso) {
+    return String(dateIso || '').replace(/[:.]/g, '-');
+  }
+
+  function buildAssignmentRows(assignmentName, savedAtIso) {
+    return appData[currentClass].students.map(student => {
+      const r = processStudentGrades(student);
+      return {
+        classLabel: getClassLabel(),
+        assignmentName,
+        savedAtIso,
+        studentName: student.name,
+        mcq: student.mcq || '',
+        frq: student.frq || '',
+        scaledMcq: r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : '',
+        rawScore: r.rawScore !== null ? r.rawScore.toFixed(1) : '',
+        rawPct: r.rawPct !== null ? r.rawPct.toFixed(1) : '',
+        curvedScore: r.curve !== null ? r.curve.toFixed(1) : '',
+        apScore: r.ap !== null ? r.ap : ''
+      };
+    });
+  }
+
+  function saveAssignmentSnapshot() {
+    const assignmentName = assignmentNameInput.value.trim();
+    if (!assignmentName) {
+      saveStatus.textContent = 'Enter assignment name first';
+      saveStatus.style.color = '#fda4af';
+      assignmentNameInput.focus();
+      return;
+    }
+    const savedAtIso = currentDateTimeIso();
+    const snapshotRows = buildAssignmentRows(assignmentName, savedAtIso);
+    appData[currentClass].assignments.push({
+      id: generateId(),
+      assignmentName,
+      savedAtIso,
+      rows: snapshotRows
+    });
+    saveData();
+    exportToCSV();
+    saveStatus.textContent = `Saved "${assignmentName}" at ${new Date(savedAtIso).toLocaleString()}`;
+    saveStatus.style.color = '#86efac';
+  }
+
+  function exportToCSV() {
+    const rows = [['Class Name', 'Assignment Name', 'Saved At', 'Student Name', 'MCQ Score', 'FRQ Score', 'Scaled MCQ', 'Raw Score', 'Raw %', 'Curved Score (%)', 'AP Score']];
+    const assignments = Array.isArray(appData[currentClass].assignments) ? appData[currentClass].assignments : [];
+    assignments.forEach(record => {
+      (record.rows || []).forEach(row => {
+        rows.push([
+          row.classLabel || getClassLabel(),
+          row.assignmentName || '',
+          row.savedAtIso || '',
+          row.studentName || '',
+          row.mcq || '',
+          row.frq || '',
+          row.scaledMcq || '',
+          row.rawScore || '',
+          row.rawPct || '',
+          row.curvedScore || '',
+          row.apScore || ''
+        ]);
+      });
+    });
+    if (rows.length === 1) {
+      saveStatus.textContent = 'No saved assignments yet. Click Save Assignment first.';
+      saveStatus.style.color = '#fda4af';
+      return;
+    }
+    const csvContent = rows.map(r => r.map(escapeCsvField).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const latestDate = assignments.length ? assignments[assignments.length - 1].savedAtIso : currentDateTimeIso();
+    link.download = `AP_Curves_${getClassLabel().replace(/[^\w-]+/g, '_')}_${formatDateForFile(latestDate)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+});
+</script>
+</body>
+</html>
