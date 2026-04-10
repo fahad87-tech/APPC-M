@@ -126,6 +126,43 @@ function saveState(next) {
   localStorage.setItem(RANDOM_GROUP_STATE_KEY, JSON.stringify(next));
 }
 
+function initializeClassData() {
+  try {
+    const existing = localStorage.getItem('classRotatorData');
+    if (existing) {
+      const parsed = JSON.parse(existing);
+      if (parsed.classes && Object.keys(parsed.classes).length > 0) {
+        return;
+      }
+    }
+    
+    fetch('students_data.json')
+      .then(res => res.json())
+      .then(data => {
+        if (data.classes) {
+          const classRotatorData = {
+            classes: data.classes,
+            last_rotation: {},
+            layouts: {},
+            layout_selection: {}
+          };
+          
+          Object.keys(data.classes).forEach(className => {
+            classRotatorData.layouts[className] = [
+              { row: 1, pairs: [2, 2, 2] },
+              { row: 2, pairs: [2, 2, 2] },
+              { row: 3, pairs: [2, 2, 2] }
+            ];
+            classRotatorData.layout_selection[className] = 1;
+          });
+          
+          localStorage.setItem('classRotatorData', JSON.stringify(classRotatorData));
+        }
+      })
+      .catch(err => console.error('Failed to load students_data.json:', err));
+  } catch(e) {}
+}
+
 function persistCurrentClassLayout() {
   const next = readState();
   const size = parseInt(groupSizeInput.value, 10);
@@ -181,6 +218,8 @@ function restoreClassLayout(name) {
 }
 
 function init() {
+  initializeClassData();
+  
   const savedState = readState();
   const size = parseInt(savedState.groupSize, 10);
   const groupCount = parseInt(savedState.groupCount, 10);

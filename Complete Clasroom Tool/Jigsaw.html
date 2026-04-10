@@ -271,6 +271,46 @@ let dragSrcGroup = -1, dragSrcIndex = -1, dragName = '';
 let dragSrcGroupHG = -1, dragSrcIndexHG = -1, dragObjHG = null;
 
 /* ============================================================
+   INITIALIZE CLASS DATA
+   ============================================================ */
+function initializeClassData() {
+  try {
+    const existing = localStorage.getItem('classRotatorData');
+    if (existing) {
+      const parsed = JSON.parse(existing);
+      if (parsed.classes && Object.keys(parsed.classes).length > 0) {
+        return;
+      }
+    }
+    
+    fetch('students_data.json')
+      .then(res => res.json())
+      .then(data => {
+        if (data.classes) {
+          const classRotatorData = {
+            classes: data.classes,
+            last_rotation: {},
+            layouts: {},
+            layout_selection: {}
+          };
+          
+          Object.keys(data.classes).forEach(className => {
+            classRotatorData.layouts[className] = [
+              { row: 1, pairs: [2, 2, 2] },
+              { row: 2, pairs: [2, 2, 2] },
+              { row: 3, pairs: [2, 2, 2] }
+            ];
+            classRotatorData.layout_selection[className] = 1;
+          });
+          
+          localStorage.setItem('classRotatorData', JSON.stringify(classRotatorData));
+        }
+      })
+      .catch(err => console.error('Failed to load students_data.json:', err));
+  } catch(e) {}
+}
+
+/* ============================================================
    CLASS MANAGER
    ============================================================ */
 function getSaved() {
@@ -950,6 +990,7 @@ function printGroups(which){
 /* ============================================================
    INIT
    ============================================================ */
+initializeClassData();
 renderClassTabs();
 </script>
 </body>

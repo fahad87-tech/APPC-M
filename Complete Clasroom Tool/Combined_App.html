@@ -7,6 +7,43 @@
   <script>
   const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
 
+  function initializeClassData() {
+    try {
+      const existing = localStorage.getItem('classRotatorData');
+      if (existing) {
+        const parsed = JSON.parse(existing);
+        if (parsed.classes && Object.keys(parsed.classes).length > 0) {
+          return;
+        }
+      }
+      
+      fetch('students_data.json')
+        .then(res => res.json())
+        .then(data => {
+          if (data.classes) {
+            const classRotatorData = {
+              classes: data.classes,
+              last_rotation: {},
+              layouts: {},
+              layout_selection: {}
+            };
+            
+            Object.keys(data.classes).forEach(className => {
+              classRotatorData.layouts[className] = [
+                { row: 1, pairs: [2, 2, 2] },
+                { row: 2, pairs: [2, 2, 2] },
+                { row: 3, pairs: [2, 2, 2] }
+              ];
+              classRotatorData.layout_selection[className] = 1;
+            });
+            
+            localStorage.setItem('classRotatorData', JSON.stringify(classRotatorData));
+          }
+        })
+        .catch(err => console.error('Failed to load students_data.json:', err));
+    } catch(e) {}
+  }
+
   document.documentElement.classList.add("password-locked");
 
   const passwordGateStyle = document.createElement("style");
@@ -93,6 +130,8 @@
 
   if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true }); }
   else { verifyPageAccess(); }
+  
+  initializeClassData();
   </script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
