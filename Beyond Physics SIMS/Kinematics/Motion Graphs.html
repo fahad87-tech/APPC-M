@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kinematics Motion Studio — Enhanced</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#050913;
+      --bg2:#0a1222;
+      --panel:rgba(10,17,32,.88);
+      --card:rgba(17,26,51,.78);
+      --card2:rgba(14,21,40,.92);
+      --accent:#38bdf8;
+      --accent2:#8b5cf6;
+      --green:#22c55e;
+      --red:#ef4444;
+      --orange:#f59e0b;
+      --blue:#60a5fa;
+      --violet:#a78bfa;
+      --text:#e8eefb;
+      --dim:rgba(185,196,220,.6);
+      --border:rgba(255,255,255,.08);
+      --font:'Inter',system-ui,sans-serif;
+      --mono:'JetBrains Mono',monospace;
+      --r:16px;
+      --shadow:0 18px 45px rgba(0,0,0,.35);
+      --glow:0 0 24px rgba(56,189,248,.12);
+    }
+    html,body{height:100%;overflow:hidden}
+    body{
+      background:
+        radial-gradient(circle at 18% 12%, rgba(56,189,248,.08), transparent 24%),
+        radial-gradient(circle at 82% 10%, rgba(139,92,246,.08), transparent 20%),
+        linear-gradient(180deg,#071120,#050913);
+      color:var(--text);
+      font-family:var(--font);
+      display:flex;
+      overflow:hidden;
+    }
+    #app{display:flex;width:100%;height:100%}
+    #stage{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      position:relative;
+      overflow:hidden;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px 16px;
+      border-bottom:1px solid rgba(255,255,255,.06);
+      background:rgba(7,12,22,.82);
+      backdrop-filter:blur(14px) saturate(1.2);
+      z-index:50;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .brand h1{
+      font-size:18px;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .brand p{
+      font-size:12px;
+      color:var(--dim);
+    }
+    .tabs{
+      display:flex;
+      gap:8px;
+    }
+    .tab-btn{
+      border:none;
+      border-radius:999px;
+      padding:9px 14px;
+      font:700 12px var(--font);
+      letter-spacing:.2px;
+      cursor:pointer;
+      color:var(--dim);
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.07);
+      transition:.18s;
+    }
+    .tab-btn.active{
+      color:#071018;
+      background:linear-gradient(135deg,var(--accent),#66d7ff);
+      border-color:rgba(56,189,248,.6);
+      box-shadow:0 0 14px rgba(56,189,248,.16);
+    }
+    #mainContent{
+      flex:1;
+      display:grid;
+      grid-template-columns:380px 1fr;
+      min-height:0;
+    }
+    #sidebar{
+      border-right:1px solid rgba(255,255,255,.06);
+      background:var(--panel);
+      backdrop-filter:blur(22px) saturate(1.15);
+      overflow:auto;
+      padding:14px;
+    }
+    #contentArea{
+      min-width:0;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      padding:14px;
+      gap:14px;
+      overflow:auto;
+    }
+    .panel{
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.02),transparent 24%),
+        var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+    .panel h3{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:1.2px;
+      color:var(--accent);
+      margin-bottom:10px;
+      font-weight:800;
+    }
+    .control{margin-bottom:14px}
+    .control label{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      font-size:13px;
+      font-weight:600;
+      margin-bottom:5px;
+    }
+    .control label span:last-child{
+      color:var(--accent);
+      font-family:var(--mono);
+      font-size:12px;
+    }
+    select, input[type=text], textarea{
+      width:100%;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.1);
+      background:rgba(5,10,18,.94);
+      color:var(--text);
+      padding:9px 10px;
+      font:500 13px var(--font);
+    }
+    select:focus, input[type=text]:focus, textarea:focus{
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(56,189,248,.08);
+    }
+    input[type=range]{
+      width:100%;
+      -webkit-appearance:none;
+      appearance:none;
+      height:6px;
+      border-radius:999px;
+      background:linear-gradient(90deg,rgba(56,189,248,.28),rgba(255,255,255,.08));
+      cursor:pointer;
+    }
+    input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:16px;height:16px;border-radius:50%;
+      background:linear-gradient(180deg,#71d8ff,#35bbf6);
+      border:1px solid rgba(255,255,255,.5);
+      box-shadow:0 0 10px rgba(56,189,248,.24);
+    }
+    .buttonRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .btn{
+      flex:1;
+      min-width:78px;
+      border:none;
+      border-radius:10px;
+      padding:10px 0;
+      cursor:pointer;
+      font:700 12px var(--font);
+      transition:.14s;
+    }
+    .btn:hover{filter:brightness(1.03)}
+    .btn:active{transform:scale(.97)}
+    .play{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+    .pause{background:linear-gradient(135deg,#facc15,#d97706);color:#111}
+    .reset{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+    .pillRow{
+      display:flex;
+      gap:6px;
+      flex-wrap:wrap;
+    }
+    .pill{
+      border:none;
+      border-radius:999px;
+      padding:7px 11px;
+      font:700 11px var(--font);
+      cursor:pointer;
+      color:var(--dim);
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+    }
+    .pill.active{
+      background:linear-gradient(135deg,var(--accent),#6ad8ff);
+      color:#041018;
+      border-color:rgba(56,189,248,.6);
+    }
+    .sceneWrap{
+      display:grid;
+      grid-template-columns:1fr 290px;
+      gap:14px;
+      min-height:330px;
+    }
+    #simCanvas{
+      width:100%;
+      height:100%;
+      min-height:340px;
+      display:block;
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.08);
+      background:#0c1528;
+      box-shadow:var(--shadow);
+    }
+    .hud{
+      display:grid;
+      gap:10px;
+    }
+    .stat{
+      background:var(--card2);
+      border:1px solid rgba(255,255,255,.07);
+      border-radius:14px;
+      padding:12px;
+    }
+    .stat .k{
+      font-size:11px;
+      letter-spacing:1px;
+      text-transform:uppercase;
+      color:var(--dim);
+      margin-bottom:4px;
+    }
+    .stat .v{
+      font-weight:800;
+      font-size:21px;
+    }
+    .graphs{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:14px;
+    }
+    .chartCard{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:10px;
+      height:255px;
+      box-shadow:var(--shadow);
+    }
+    .chartHead{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:6px;
+    }
+    .chartHead h4{
+      font-size:13px;
+      color:var(--text);
+      font-weight:700;
+    }
+    .chartSelect{
+      width:auto;
+      min-width:220px;
+      padding:7px 10px;
+      font-size:12px;
+    }
+    .simTab, .fiveETab{display:none;flex-direction:column;gap:14px}
+    .simTab.active, .fiveETab.active{display:flex}
+    .fiveEWrap{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:12px;
+    }
+    .qCard{
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:16px;
+      padding:16px;
+      min-height:320px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      box-shadow:var(--shadow);
+    }
+    .phase{
+      font-size:11px;
+      letter-spacing:1.2px;
+      text-transform:uppercase;
+      font-weight:800;
+      color:var(--accent2);
+    }
+    .question{
+      font-size:15px;
+      line-height:1.6;
+    }
+    .qCard textarea{
+      flex:1;
+      resize:none;
+      min-height:160px;
+    }
+    .qNav{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+    }
+    .qNav button{
+      width:34px;height:34px;border-radius:50%;
+      border:none;
+      cursor:pointer;
+      background:var(--card2);
+      color:var(--text);
+      border:1px solid rgba(255,255,255,.09);
+      font-weight:800;
+    }
+    .qNav button:hover{
+      background:var(--accent);
+      color:#041018;
+    }
+    .dots{
+      display:flex;
+      gap:6px;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:50%;
+      background:rgba(255,255,255,.18);
+      cursor:pointer;
+      transition:.15s;
+    }
+    .dot.active{
+      background:var(--accent);
+      transform:scale(1.3);
+      box-shadow:0 0 8px rgba(56,189,248,.35);
+    }
+    .exportBtn{
+      border:none;
+      border-radius:10px;
+      padding:11px 14px;
+      cursor:pointer;
+      font:700 13px var(--font);
+      color:#fff;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      align-self:flex-start;
+    }
+    .legend{
+      font-size:12px;
+      color:var(--dim);
+      line-height:1.5;
+    }
+    @media (max-width:1200px){
+      #mainContent{grid-template-columns:1fr}
+      .sceneWrap{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Kinematics Motion Studio</h1>
+        <p>Scalars vs vectors · real-time motion · synced graphs · inquiry tab</p>
+      </div>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="simTab">Simulation</button>
+        <button class="tab-btn" data-tab="fiveETab">5E Inquiry</button>
+      </div>
+    </div>
+
+    <div id="mainContent">
+      <aside id="sidebar">
+        <div class="panel">
+          <h3>Scenario</h3>
+          <div class="control">
+            <label><span>Object / World</span></label>
+            <select id="scenario">
+              <option value="car">Car on Road</option>
+              <option value="runner">Runner on Track</option>
+              <option value="train">Train on Rail</option>
+              <option value="drone">Drone on Flight Corridor</option>
+            </select>
+          </div>
+          <div class="legend">
+            Different scenarios change the visual world, while the same 1D kinematics governs the motion.
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Controls</h3>
+          <div class="control">
+            <label><span>Initial Position x₀</span><span id="x0Val">0 m</span></label>
+            <input id="x0" type="range" min="-80" max="80" step="1" value="0">
+          </div>
+          <div class="control">
+            <label><span>Initial Velocity v₀</span><span id="v0Val">10 m/s</span></label>
+            <input id="v0" type="range" min="-35" max="35" step="1" value="10">
+          </div>
+          <div class="control">
+            <label><span>Constant Acceleration a</span><span id="aVal">0 m/s²</span></label>
+            <input id="a" type="range" min="-12" max="12" step="0.5" value="0">
+          </div>
+          <div class="buttonRow">
+            <button class="btn play" id="playBtn">▶ Play</button>
+            <button class="btn pause" id="pauseBtn">❚❚ Pause</button>
+            <button class="btn reset" id="resetBtn">↺ Reset</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Preset Scenarios</h3>
+          <div class="pillRow">
+            <button class="pill" data-preset="cross">Cross Origin</button>
+            <button class="pill" data-preset="turn">Turn Around</button>
+            <button class="pill" data-preset="reverse">Reverse Start</button>
+            <button class="pill" data-preset="brake">Brake Hard</button>
+            <button class="pill" data-preset="coast">Steady Motion</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Vector Colors</h3>
+          <div class="legend">
+            Green arrow = <strong>Velocity</strong><br>
+            Red arrow = <strong>Acceleration</strong>
+          </div>
+        </div>
+      </aside>
+
+      <section id="contentArea">
+        <div id="simTab" class="simTab active">
+          <div class="sceneWrap">
+            <canvas id="simCanvas" width="1200" height="420"></canvas>
+
+            <div class="hud">
+              <div class="stat"><div class="k">Time</div><div class="v" id="timeReadout">0.00 s</div></div>
+              <div class="stat"><div class="k">Position</div><div class="v" id="posReadout">0.00 m</div></div>
+              <div class="stat"><div class="k">Displacement</div><div class="v" id="dispReadout">0.00 m</div></div>
+              <div class="stat"><div class="k">Distance</div><div class="v" id="distReadout">0.00 m</div></div>
+              <div class="stat"><div class="k">Velocity / Speed</div><div class="v" id="velReadout">0.00 / 0.00 m/s</div></div>
+              <div class="stat"><div class="k">Acceleration</div><div class="v" id="accReadout">0.00 m/s²</div></div>
+            </div>
+          </div>
+
+          <div class="graphs">
+            <div class="chartCard">
+              <div class="chartHead">
+                <h4>Graph 1 — Select View</h4>
+                <select id="graph1Mode" class="chartSelect">
+                  <option value="pos">Distance & Displacement</option>
+                  <option value="vel">Speed & Velocity</option>
+                  <option value="acc">Acceleration</option>
+                </select>
+              </div>
+              <canvas id="graph1Chart"></canvas>
+            </div>
+
+            <div class="chartCard">
+              <div class="chartHead">
+                <h4>Graph 2 — Speed & Velocity vs Time</h4>
+              </div>
+              <canvas id="velChart"></canvas>
+            </div>
+
+            <div class="chartCard">
+              <div class="chartHead">
+                <h4>Graph 3 — Acceleration vs Time</h4>
+              </div>
+              <canvas id="accChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div id="fiveETab" class="fiveETab">
+          <div class="panel">
+            <h3>Student Info</h3>
+            <input type="text" id="studentName" placeholder="Student Name">
+          </div>
+
+          <div class="fiveEWrap">
+            <div class="qCard">
+              <div class="phase" id="qPhase">ENGAGE</div>
+              <div class="question" id="qText">Loading question...</div>
+              <textarea id="qAnswer" placeholder="Type your response here..."></textarea>
+            </div>
+
+            <div class="qNav">
+              <button id="prevQ">◀</button>
+              <div class="dots" id="qDots"></div>
+              <button id="nextQ">▶</button>
+            </div>
+
+            <button class="exportBtn" id="exportDocx">📄 Export Answers to .docx</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+const QS = [
+  {p:'ENGAGE',q:'Two students watch the same moving car. One says, “It traveled 60 meters,” while the other says, “Its displacement is only 10 meters.” How can both be correct at the same time?'},
+  {p:'ENGAGE',q:'A runner circles a track and ends up where they started. Did they travel a distance? Did they have a displacement? Explain using your own words.'},
+  {p:'EXPLORE',q:'Set x₀ = -30 m, v₀ = +8 m/s, a = 0 m/s². Press Play. Describe how the position, distance, and displacement graphs compare. Why do some overlap?'},
+  {p:'EXPLORE',q:'Set x₀ = +20 m, v₀ = +12 m/s, a = -4 m/s². Watch the object slow down, stop, and reverse. What happens to velocity, speed, distance, and displacement during the reversal?'},
+  {p:'EXPLAIN',q:'Using the graphs, explain the difference between speed and velocity. Why can one graph go below zero while the other cannot?'},
+  {p:'EXPLAIN',q:'Explain why distance is always non-decreasing, even when the object changes direction. How does the graph prove this?'},
+  {p:'ELABORATE',q:'Imagine a car driving forward, braking hard to avoid an obstacle, stopping, then reversing into a parking spot. How would you configure x₀, v₀, and a to model part of this event?'},
+  {p:'ELABORATE',q:'Choose a different scenario (runner, train, or drone). Describe a realistic motion event that matches one of the graph shapes you observe.'},
+  {p:'EVALUATE',q:'If the velocity graph crosses zero at t = 3 s, what does that mean physically? What must the object be doing at that moment?'},
+  {p:'EVALUATE',q:'During a reversal, why does the displacement graph sometimes decrease while the distance graph still increases?'},
+  {p:'EVALUATE',q:'How can you tell from the acceleration graph whether velocity should be increasing, decreasing, or changing sign over time?'}
+];
+
+let answers = [];
+let curQ = 0;
+
+const $ = id => document.getElementById(id);
+
+const x0Slider = $('x0');
+const v0Slider = $('v0');
+const aSlider = $('a');
+const scenarioSelect = $('scenario');
+const graph1Mode = $('graph1Mode');
+
+const x0Val = $('x0Val');
+const v0Val = $('v0Val');
+const aVal = $('aVal');
+
+const timeReadout = $('timeReadout');
+const posReadout = $('posReadout');
+const dispReadout = $('dispReadout');
+const distReadout = $('distReadout');
+const velReadout = $('velReadout');
+const accReadout = $('accReadout');
+
+const simCanvas = $('simCanvas');
+const ctx = simCanvas.getContext('2d');
+
+let running = false;
+let lastTime = null;
+let chartFrameSkip = 0;
+
+const state = {
+  t: 0,
+  x0: 0,
+  v0: 10,
+  a: 0,
+  x: 0,
+  v: 10,
+  distance: 0,
+  displacement: 0,
+  lastX: 0,
+  cameraX: 0
+};
+
+function updateLabels(){
+  x0Val.textContent = `${parseFloat(x0Slider.value).toFixed(0)} m`;
+  v0Val.textContent = `${parseFloat(v0Slider.value).toFixed(0)} m/s`;
+  aVal.textContent = `${parseFloat(aSlider.value).toFixed(1)} m/s²`;
+}
+
+function resetSimulation(){
+  state.t = 0;
+  state.x0 = parseFloat(x0Slider.value);
+  state.v0 = parseFloat(v0Slider.value);
+  state.a = parseFloat(aSlider.value);
+  state.x = state.x0;
+  state.v = state.v0;
+  state.distance = 0;
+  state.displacement = 0;
+  state.lastX = state.x0;
+  state.cameraX = state.x0;
+  lastTime = null;
+  chartFrameSkip = 0;
+  clearCharts();
+  pushChartPoint();
+  updateReadouts();
+  drawScene();
+}
+
+function applyLiveControls(){
+  const nx0 = parseFloat(x0Slider.value);
+  const nv0 = parseFloat(v0Slider.value);
+  const na = parseFloat(aSlider.value);
+
+  if(state.t === 0){
+    state.x0 = nx0;
+    state.v0 = nv0;
+    state.a = na;
+    state.x = nx0;
+    state.v = nv0;
+    state.distance = 0;
+    state.displacement = 0;
+    state.lastX = nx0;
+    state.cameraX = nx0;
+    clearCharts();
+    pushChartPoint();
+    updateReadouts();
+    drawScene();
+  }else{
+    state.a = na;
+    state.v = nv0;
+  }
+}
+
+function step(dt){
+  const oldX = state.x;
+  state.t += dt;
+  state.x += state.v * dt + 0.5 * state.a * dt * dt;
+  state.v += state.a * dt;
+  state.displacement = state.x - state.x0;
+  state.distance += Math.abs(state.x - oldX);
+  state.lastX = oldX;
+  state.cameraX += (state.x - state.cameraX) * 0.08;
+}
+
+function updateReadouts(){
+  timeReadout.textContent = `${state.t.toFixed(2)} s`;
+  posReadout.textContent = `${state.x.toFixed(2)} m`;
+  dispReadout.textContent = `${state.displacement.toFixed(2)} m`;
+  distReadout.textContent = `${state.distance.toFixed(2)} m`;
+  velReadout.textContent = `${state.v.toFixed(2)} / ${Math.abs(state.v).toFixed(2)} m/s`;
+  accReadout.textContent = `${state.a.toFixed(2)} m/s²`;
+}
+
+function worldToScreen(x, w){
+  const scale = 8.6;
+  return w/2 + (x - state.cameraX) * scale;
+}
+
+function drawArrow(x,y,value,color,scale,label){
+  const len = Math.abs(value) * scale;
+  if(len < 3) return;
+  const dir = value >= 0 ? 1 : -1;
+  const ex = x + dir * len;
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 4;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 8;
+
+  ctx.beginPath();
+  ctx.moveTo(x,y);
+  ctx.lineTo(ex,y);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(ex,y);
+  ctx.lineTo(ex - dir * 11, y - 6);
+  ctx.lineTo(ex - dir * 11, y + 6);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+  ctx.font = 'bold 13px Inter';
+  ctx.fillText(label, ex + dir * 8, y - 8);
+  ctx.restore();
+}
+
+function drawBackgroundCar(w,h,roadY){
+  const sky = ctx.createLinearGradient(0,0,0,h);
+  sky.addColorStop(0,'#83d2ff');
+  sky.addColorStop(.55,'#eaf5ff');
+  sky.addColorStop(.56,'#bcc6d5');
+  sky.addColorStop(.60,'#38404d');
+  sky.addColorStop(1,'#232631');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0,0,w,h);
+
+  ctx.fillStyle = 'rgba(96,150,120,.25)';
+  ctx.beginPath();
+  ctx.moveTo(0,215);
+  for(let i=0;i<=w;i+=120){
+    ctx.lineTo(i, 205 + Math.sin((i + state.cameraX*4)/180) * 12);
+  }
+  ctx.lineTo(w,h);
+  ctx.lineTo(0,h);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = '#2c2f37';
+  ctx.fillRect(0,roadY,w,h-roadY);
+  ctx.fillStyle = '#585f6d';
+  ctx.fillRect(0,roadY,w,10);
+
+  ctx.strokeStyle = 'rgba(255,255,255,.92)';
+  ctx.lineWidth = 4;
+  ctx.setLineDash([24,18]);
+  ctx.beginPath();
+  ctx.moveTo(0, roadY + 50);
+  ctx.lineTo(w, roadY + 50);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  for(let i=-18;i<20;i++){
+    const wx = Math.floor(state.cameraX/10)*10 + i*22;
+    const sx = worldToScreen(wx,w);
+    ctx.strokeStyle = 'rgba(255,255,255,.2)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(sx, roadY - 14);
+    ctx.lineTo(sx, roadY - 36);
+    ctx.stroke();
+  }
+}
+
+function drawBackgroundRunner(w,h,groundY){
+  const grad = ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'#95f0bf');
+  grad.addColorStop(.55,'#f2fff7');
+  grad.addColorStop(.56,'#d2c3ac');
+  grad.addColorStop(.62,'#9c5231');
+  grad.addColorStop(1,'#78321e');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,w,h);
+
+  ctx.fillStyle = '#bf5b2c';
+  ctx.fillRect(0,groundY,w,70);
+
+  ctx.fillStyle = 'rgba(255,255,255,.92)';
+  for(let i=-24;i<28;i++){
+    const wx = Math.floor(state.cameraX/8)*8 + i*14;
+    const sx = worldToScreen(wx,w);
+    ctx.fillRect(sx,groundY+20,8,5);
+  }
+}
+
+function drawBackgroundTrain(w,h,railY){
+  const grad = ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'#afceff');
+  grad.addColorStop(.55,'#edf5ff');
+  grad.addColorStop(.56,'#c4ccd6');
+  grad.addColorStop(.63,'#4b525f');
+  grad.addColorStop(1,'#262d39');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,w,h);
+
+  ctx.fillStyle = '#3a3f49';
+  ctx.fillRect(0,railY,w,90);
+  ctx.fillStyle = '#8c93a0';
+  ctx.fillRect(0,railY+16,w,5);
+  ctx.fillRect(0,railY+44,w,5);
+
+  for(let i=-35;i<38;i++){
+    const wx = Math.floor(state.cameraX/6)*6 + i*10;
+    const sx = worldToScreen(wx,w);
+    ctx.fillStyle = '#6b4f3a';
+    ctx.fillRect(sx,railY+12,4,36);
+  }
+}
+
+function drawBackgroundDrone(w,h,lineY){
+  const grad = ctx.createLinearGradient(0,0,0,h);
+  grad.addColorStop(0,'#0f1b36');
+  grad.addColorStop(.45,'#17305a');
+  grad.addColorStop(.72,'#294870');
+  grad.addColorStop(1,'#3b6289');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,w,h);
+
+  ctx.fillStyle = 'rgba(255,255,255,.8)';
+  for(let i=0;i<55;i++){
+    const sx = (i*173)%w;
+    const sy = (i*97)%160;
+    ctx.fillRect(sx,sy,2,2);
+  }
+
+  ctx.strokeStyle = 'rgba(255,255,255,.16)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(0,lineY);
+  ctx.lineTo(w,lineY);
+  ctx.stroke();
+}
+
+function drawObjectCar(x,y){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.shadowColor = 'rgba(0,0,0,.25)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 6;
+
+  ctx.fillStyle = '#1d4ed8';
+  ctx.beginPath();
+  ctx.moveTo(-42,6);
+  ctx.lineTo(-36,-18);
+  ctx.lineTo(36,-18);
+  ctx.lineTo(42,6);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillRect(-44,0,88,18);
+
+  ctx.fillStyle = '#a5f3fc';
+  ctx.fillRect(-18,-14,36,12);
+
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  ctx.fillStyle = '#111827';
+  ctx.beginPath(); ctx.arc(-25,18,11,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(25,18,11,0,Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.beginPath(); ctx.arc(-25,18,4.8,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(25,18,4.8,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawObjectRunner(x,y){
+  const stride = Math.sin(state.t * (3 + Math.abs(state.v)*0.06));
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.strokeStyle = '#0f172a';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+
+  ctx.fillStyle = '#fbbf24';
+  ctx.beginPath();
+  ctx.arc(0,-36,9,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#111827';
+  ctx.beginPath();
+  ctx.moveTo(0,-28); ctx.lineTo(0,-6);
+  ctx.moveTo(0,-20); ctx.lineTo(-14 + stride*7,-6);
+  ctx.moveTo(0,-20); ctx.lineTo(14 - stride*7,-6);
+  ctx.moveTo(0,-6); ctx.lineTo(-13 - stride*9,22);
+  ctx.moveTo(0,-6); ctx.lineTo(13 + stride*9,22);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawObjectTrain(x,y){
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.shadowColor = 'rgba(0,0,0,.25)';
+  ctx.shadowBlur = 12;
+  ctx.shadowOffsetY = 6;
+
+  ctx.fillStyle = '#2563eb';
+  ctx.fillRect(-64,-34,128,38);
+  ctx.fillStyle = '#93c5fd';
+  [-42,-14,14,42].forEach(px=>ctx.fillRect(px,-26,18,13));
+  ctx.fillStyle = '#1e40af';
+  ctx.fillRect(44,-22,16,26);
+
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetY = 0;
+
+  ctx.fillStyle = '#111827';
+  [-44,-14,14,44].forEach(px=>{
+    ctx.beginPath(); ctx.arc(px,12,9.5,0,Math.PI*2); ctx.fill();
+  });
+  ctx.restore();
+}
+
+function drawObjectDrone(x,y){
+  const wob = Math.sin(state.t*7)*1.8;
+  ctx.save();
+  ctx.translate(x,y+wob);
+  ctx.strokeStyle = '#38bdf8';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.moveTo(-30,0); ctx.lineTo(30,0);
+  ctx.moveTo(0,-16); ctx.lineTo(0,16);
+  ctx.stroke();
+
+  ctx.fillStyle = '#0f172a';
+  ctx.beginPath(); ctx.arc(0,0,11,0,Math.PI*2); ctx.fill();
+
+  ctx.strokeStyle = '#a78bfa';
+  ctx.lineWidth = 2.5;
+  [[-30,-16],[30,-16],[-30,16],[30,16]].forEach(([px,py])=>{
+    ctx.beginPath();
+    ctx.arc(px,py,7,0,Math.PI*2);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function drawScene(){
+  const w = simCanvas.width;
+  const h = simCanvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  const scenario = scenarioSelect.value;
+  let baselineY = 0;
+
+  if(scenario === 'car'){
+    baselineY = h*0.60;
+    drawBackgroundCar(w,h,baselineY);
+  }else if(scenario === 'runner'){
+    baselineY = h*0.68;
+    drawBackgroundRunner(w,h,baselineY);
+  }else if(scenario === 'train'){
+    baselineY = h*0.62;
+    drawBackgroundTrain(w,h,baselineY);
+  }else{
+    baselineY = h*0.45;
+    drawBackgroundDrone(w,h,baselineY);
+  }
+
+  const originX = worldToScreen(0,w);
+  ctx.strokeStyle = 'rgba(255,255,255,.25)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(originX,18);
+  ctx.lineTo(originX,h-18);
+  ctx.stroke();
+
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 13px Inter';
+  ctx.fillText('Origin', originX + 8, 28);
+
+  for(let worldTick = Math.floor((state.cameraX-80)/20)*20; worldTick <= state.cameraX+80; worldTick += 20){
+    const sx = worldToScreen(worldTick, w);
+    ctx.strokeStyle = 'rgba(255,255,255,.08)';
+    ctx.beginPath();
+    ctx.moveTo(sx, baselineY+45);
+    ctx.lineTo(sx, baselineY+57);
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.55)';
+    ctx.font = '11px JetBrains Mono';
+    ctx.fillText(`${worldTick}`, sx-10, baselineY+72);
+  }
+
+  const objX = worldToScreen(state.x,w);
+  if(scenario === 'car') drawObjectCar(objX, baselineY+20);
+  else if(scenario === 'runner') drawObjectRunner(objX, baselineY+3);
+  else if(scenario === 'train') drawObjectTrain(objX, baselineY+26);
+  else drawObjectDrone(objX, baselineY);
+
+  const arrowBaseY =
+    scenario === 'car' ? baselineY - 22 :
+    scenario === 'runner' ? baselineY - 68 :
+    scenario === 'train' ? baselineY - 24 :
+    baselineY - 54;
+
+  drawArrow(objX, arrowBaseY, state.v, '#22c55e', 4.2, 'v');
+  drawArrow(objX, arrowBaseY - 28, state.a, '#ef4444', 10, 'a');
+
+  ctx.fillStyle = 'rgba(8,12,22,.68)';
+  ctx.fillRect(14,14,230,66);
+  ctx.fillStyle = '#e8eefb';
+  ctx.font = 'bold 13px Inter';
+  ctx.fillText(`Scenario: ${scenarioSelect.options[scenarioSelect.selectedIndex].text}`, 24, 34);
+  ctx.font = '12px JetBrains Mono';
+  ctx.fillStyle = 'rgba(232,238,251,.84)';
+  ctx.fillText(`x = ${state.x.toFixed(2)} m`, 24, 54);
+  ctx.fillText(`v = ${state.v.toFixed(2)} m/s`, 24, 70);
+}
+
+function baseChartOptions(title, yLabel){
+  return {
+    responsive:true,
+    maintainAspectRatio:false,
+    animation:false,
+    parsing:false,
+    normalized:true,
+    interaction:{mode:'nearest',intersect:false},
+    plugins:{
+      legend:{labels:{color:'#e8eefb'}},
+      title:{display:true,text:title,color:'#e8eefb',font:{size:15,weight:'bold'}}
+    },
+    scales:{
+      x:{
+        type:'linear',
+        title:{display:true,text:'Time (s)',color:'#e8eefb'},
+        ticks:{color:'#cbd5e1', maxTicksLimit:8},
+        grid:{color:'rgba(255,255,255,.08)'}
+      },
+      y:{
+        title:{display:true,text:yLabel,color:'#e8eefb'},
+        ticks:{color:'#cbd5e1', maxTicksLimit:7},
+        grid:{color:'rgba(255,255,255,.08)'}
+      }
+    }
+  };
+}
+
+const graph1Chart = new Chart($('graph1Chart'), {
+  type:'line',
+  data:{datasets:[]},
+  options: baseChartOptions('Graph 1', '')
+});
+
+const velChart = new Chart($('velChart'), {
+  type:'line',
+  data:{
+    datasets:[
+      {label:'Speed (scalar)', borderColor:'#a78bfa', backgroundColor:'#a78bfa', tension:.14, pointRadius:0, borderWidth:2, data:[]},
+      {label:'Velocity (vector)', borderColor:'#22c55e', backgroundColor:'#22c55e', tension:.14, pointRadius:0, borderWidth:2, data:[]}
+    ]
+  },
+  options: baseChartOptions('Graph 2: Speed and Velocity vs Time', 'm/s')
+});
+
+const accChart = new Chart($('accChart'), {
+  type:'line',
+  data:{
+    datasets:[
+      {label:'Acceleration (vector)', borderColor:'#ef4444', backgroundColor:'#ef4444', tension:0, pointRadius:0, borderWidth:2, data:[]}
+    ]
+  },
+  options: baseChartOptions('Graph 3: Acceleration vs Time', 'm/s²')
+});
+
+function updateGraph1Mode(){
+  const mode = graph1Mode.value;
+  if(mode === 'pos'){
+    graph1Chart.data.datasets = [
+      {label:'Distance (scalar)', borderColor:'#f59e0b', backgroundColor:'#f59e0b', tension:.16, pointRadius:0, borderWidth:2, data:posDataDistance},
+      {label:'Displacement (vector)', borderColor:'#60a5fa', backgroundColor:'#60a5fa', tension:.16, pointRadius:0, borderWidth:2, data:posDataDisplacement}
+    ];
+    graph1Chart.options.plugins.title.text = 'Graph 1: Distance and Displacement vs Time';
+    graph1Chart.options.scales.y.title.text = 'Meters (m)';
+  }else if(mode === 'vel'){
+    graph1Chart.data.datasets = [
+      {label:'Speed (scalar)', borderColor:'#a78bfa', backgroundColor:'#a78bfa', tension:.14, pointRadius:0, borderWidth:2, data:velDataSpeed},
+      {label:'Velocity (vector)', borderColor:'#22c55e', backgroundColor:'#22c55e', tension:.14, pointRadius:0, borderWidth:2, data:velDataVelocity}
+    ];
+    graph1Chart.options.plugins.title.text = 'Graph 1: Speed and Velocity vs Time';
+    graph1Chart.options.scales.y.title.text = 'm/s';
+  }else{
+    graph1Chart.data.datasets = [
+      {label:'Acceleration (vector)', borderColor:'#ef4444', backgroundColor:'#ef4444', tension:0, pointRadius:0, borderWidth:2, data:accData}
+    ];
+    graph1Chart.options.plugins.title.text = 'Graph 1: Acceleration vs Time';
+    graph1Chart.options.scales.y.title.text = 'm/s²';
+  }
+  graph1Chart.update('none');
+}
+
+const posDataDistance = [];
+const posDataDisplacement = [];
+const velDataSpeed = [];
+const velDataVelocity = [];
+const accData = [];
+
+function clearCharts(){
+  posDataDistance.length = 0;
+  posDataDisplacement.length = 0;
+  velDataSpeed.length = 0;
+  velDataVelocity.length = 0;
+  accData.length = 0;
+
+  velChart.data.datasets.forEach(ds=>ds.data = []);
+  accChart.data.datasets.forEach(ds=>ds.data = []);
+  updateGraph1Mode();
+  velChart.update('none');
+  accChart.update('none');
+}
+
+function pushChartPoint(){
+  const p1 = {x:state.t, y:state.distance};
+  const p2 = {x:state.t, y:state.displacement};
+  const p3 = {x:state.t, y:Math.abs(state.v)};
+  const p4 = {x:state.t, y:state.v};
+  const p5 = {x:state.t, y:state.a};
+
+  posDataDistance.push(p1);
+  posDataDisplacement.push(p2);
+  velDataSpeed.push(p3);
+  velDataVelocity.push(p4);
+  accData.push(p5);
+
+  velChart.data.datasets[0].data = velDataSpeed;
+  velChart.data.datasets[1].data = velDataVelocity;
+  accChart.data.datasets[0].data = accData;
+}
+
+function animate(ts){
+  if(running){
+    if(lastTime == null) lastTime = ts;
+    let dt = (ts - lastTime) / 1000;
+    lastTime = ts;
+    dt = Math.min(dt, 0.04);
+
+    step(dt);
+    chartFrameSkip++;
+    if(chartFrameSkip % 2 === 0){
+      pushChartPoint();
+      updateGraph1Mode();
+      velChart.update('none');
+      accChart.update('none');
+    }
+    updateReadouts();
+    drawScene();
+  }
+  requestAnimationFrame(animate);
+}
+
+function setPreset(name){
+  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active', p.dataset.preset === name));
+  if(name === 'cross'){
+    x0Slider.value = -30;
+    v0Slider.value = 8;
+    aSlider.value = 0;
+  }else if(name === 'turn'){
+    x0Slider.value = 20;
+    v0Slider.value = 12;
+    aSlider.value = -4;
+  }else if(name === 'reverse'){
+    x0Slider.value = -10;
+    v0Slider.value = -6;
+    aSlider.value = 2;
+  }else if(name === 'brake'){
+    x0Slider.value = 10;
+    v0Slider.value = 20;
+    aSlider.value = -6;
+  }else if(name === 'coast'){
+    x0Slider.value = 0;
+    v0Slider.value = 15;
+    aSlider.value = 0;
+  }
+  updateLabels();
+  resetSimulation();
+}
+
+function init5E(){
+  try{
+    answers = JSON.parse(localStorage.getItem('kin_answers')) || [];
+  }catch(e){ answers = []; }
+  while(answers.length < QS.length) answers.push('');
+
+  $('studentName').value = localStorage.getItem('kin_student') || '';
+
+  const dots = $('qDots');
+  dots.innerHTML = '';
+  QS.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===curQ ? ' active':'');
+    d.addEventListener('click', ()=>{
+      saveAnswer();
+      curQ = i;
+      showQuestion();
+    });
+    dots.appendChild(d);
+  });
+
+  showQuestion();
+}
+
+function saveAnswer(){
+  answers[curQ] = $('qAnswer').value;
+  localStorage.setItem('kin_answers', JSON.stringify(answers));
+}
+
+function showQuestion(){
+  const q = QS[curQ];
+  $('qPhase').textContent = q.p;
+  $('qText').textContent = q.q;
+  $('qAnswer').value = answers[curQ] || '';
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active', i===curQ));
+}
+
+function exportDocx(){
+  saveAnswer();
+  const name = $('studentName').value || 'Student';
+  if(typeof docx === 'undefined'){
+    alert('DOCX library not available.');
+    return;
+  }
+  const {Document,Packer,Paragraph,TextRun,HeadingLevel,AlignmentType,BorderStyle} = docx;
+  const children = [
+    new Paragraph({
+      heading:HeadingLevel.HEADING_1,
+      alignment:AlignmentType.CENTER,
+      children:[new TextRun({text:'Kinematics Lab — 5E Inquiry Responses', bold:true, size:34, color:'2563EB'})]
+    }),
+    new Paragraph({
+      alignment:AlignmentType.CENTER,
+      children:[new TextRun({text:`Student: ${name} | Date: ${new Date().toLocaleDateString()}`, size:22, color:'666666'})]
+    }),
+    new Paragraph({text:''})
+  ];
+
+  QS.forEach((q,i)=>{
+    children.push(new Paragraph({
+      heading:HeadingLevel.HEADING_2,
+      children:[
+        new TextRun({text:`[${q.p}] `, bold:true, color:'7C3AED', size:24}),
+        new TextRun({text:`Q${i+1}`, bold:true, size:24})
+      ]
+    }));
+    children.push(new Paragraph({children:[new TextRun({text:q.q, italics:true, size:22})]}));
+    children.push(new Paragraph({
+      children:[
+        new TextRun({text:'Answer: ', bold:true, size:22}),
+        new TextRun({text:answers[i] || '(no answer)', size:22})
+      ]
+    }));
+    children.push(new Paragraph({
+      border:{bottom:{style:BorderStyle.SINGLE,size:1,color:'CCCCCC'}},
+      children:[new TextRun({text:''})]
+    }));
+  });
+
+  Packer.toBlob(new Document({sections:[{children}]})).then(blob=>{
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Kinematics_${name.replace(/\s+/g,'_')}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 500);
+  }).catch(err=>{
+    console.error(err);
+    alert('Failed to export document.');
+  });
+}
+
+updateLabels();
+init5E();
+resetSimulation();
+requestAnimationFrame(animate);
+
+x0Slider.addEventListener('input', ()=>{ updateLabels(); applyLiveControls(); });
+v0Slider.addEventListener('input', ()=>{ updateLabels(); applyLiveControls(); });
+aSlider.addEventListener('input', ()=>{ updateLabels(); applyLiveControls(); });
+scenarioSelect.addEventListener('change', ()=> drawScene());
+graph1Mode.addEventListener('change', updateGraph1Mode);
+
+$('playBtn').addEventListener('click', ()=>{ running = true; });
+$('pauseBtn').addEventListener('click', ()=>{ running = false; lastTime = null; });
+$('resetBtn').addEventListener('click', ()=>{ running = false; resetSimulation(); });
+
+document.querySelectorAll('.pill').forEach(btn=>{
+  btn.addEventListener('click', ()=> setPreset(btn.dataset.preset));
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.simTab, .fiveETab').forEach(t=>t.classList.remove('active'));
+    btn.classList.add('active');
+    $(btn.dataset.tab).classList.add('active');
+  });
+});
+
+$('studentName').addEventListener('input', e=>{
+  localStorage.setItem('kin_student', e.target.value);
+});
+$('qAnswer').addEventListener('input', e=>{
+  answers[curQ] = e.target.value;
+  localStorage.setItem('kin_answers', JSON.stringify(answers));
+});
+$('prevQ').addEventListener('click', ()=>{
+  saveAnswer();
+  curQ = (curQ - 1 + QS.length) % QS.length;
+  showQuestion();
+});
+$('nextQ').addEventListener('click', ()=>{
+  saveAnswer();
+  curQ = (curQ + 1) % QS.length;
+  showQuestion();
+});
+$('exportDocx').addEventListener('click', exportDocx);
+
+updateGraph1Mode();
+</script>
+</body>
+</html>
