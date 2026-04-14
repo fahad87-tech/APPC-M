@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Relative Velocity Studio</title>
+  <style>
+    :root{
+      --bg:#0a0f1d;
+      --panel:#121a2b;
+      --panel2:#172338;
+      --panel3:#1d2b44;
+      --text:#e6eefc;
+      --muted:#94a3b8;
+      --line:rgba(255,255,255,.09);
+      --blue:#38bdf8;
+      --pink:#f472b6;
+      --gold:#fbbf24;
+      --shadow:0 10px 28px rgba(0,0,0,.28);
+      --radius:18px;
+      --gridMinor:rgba(255,255,255,.05);
+      --gridMajor:rgba(255,255,255,.10);
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      height:100%;
+      background:linear-gradient(180deg,#09101d,#0b1222 60%,#0c1427);
+      color:var(--text);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      overflow:hidden;
+    }
+
+    .shell{
+      display:grid;
+      grid-template-columns:380px 1fr;
+      height:100vh;
+      gap:14px;
+      padding:14px;
+    }
+
+    .sidebar,.content{
+      min-height:0;
+      min-width:0;
+    }
+
+    .sidebar{
+      background:linear-gradient(180deg,var(--panel),#0f1727);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:auto;
+      padding:16px;
+    }
+
+    .content{
+      display:grid;
+      grid-template-rows:auto 1fr auto auto;
+      gap:14px;
+      min-height:0;
+    }
+
+    .topbar{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      background:linear-gradient(180deg,var(--panel),#0f1727);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:12px 14px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .brand h1{
+      margin:0;
+      font-size:1.05rem;
+      font-weight:700;
+    }
+
+    .brand p{
+      margin:0;
+      color:var(--muted);
+      font-size:.83rem;
+    }
+
+    .top-controls{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+
+    .card{
+      background:linear-gradient(180deg,var(--panel),#10192b);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+
+    .canvas-card{
+      display:grid;
+      grid-template-rows:auto 1fr;
+      min-height:0;
+      overflow:hidden;
+    }
+
+    .canvas-head{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+    }
+
+    .canvas-head-left,
+    .canvas-head-right{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    .canvas-head-right{
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    .canvas-wrap{
+      position:relative;
+      min-height:0;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(56,189,248,.05), transparent 28%),
+        radial-gradient(circle at 80% 30%, rgba(244,114,182,.05), transparent 24%),
+        linear-gradient(180deg,#0a1020,#09101d);
+      overflow:hidden;
+    }
+
+    canvas{
+      display:block;
+      width:100%;
+      height:100%;
+    }
+
+    .below-sim-toolbar{
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      margin-top:-4px;
+    }
+
+    .bottom-area{
+      display:grid;
+      grid-template-columns:1fr;
+    }
+
+    .bottom-panel{
+      display:none;
+      overflow:hidden;
+    }
+
+    .bottom-panel.active{
+      display:block;
+    }
+
+    #mathPanel{ min-height:0; }
+    #graphsPanel{ min-height:420px; }
+
+    .split-bottom{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:14px;
+      min-height:0;
+      align-items:start;
+    }
+
+    .panel-pad{
+      padding:12px;
+      min-height:0;
+    }
+
+    .math-canvas-box{
+      height:220px;
+      overflow:hidden;
+    }
+
+    .math-top-info{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      padding:10px 12px 0;
+    }
+
+    .equation-line{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:8px;
+      font-size:15px;
+      font-weight:700;
+      line-height:1.2;
+    }
+
+    .eq-blue{color:var(--blue)}
+    .eq-pink{color:#d8dee9}
+    .eq-gold{color:var(--gold)}
+    .eq-white{color:#f8fbff}
+
+    .legend-box{
+      display:grid;
+      gap:6px;
+      padding:10px 12px 12px;
+      background:rgba(255,255,255,.025);
+      border-top:1px solid var(--line);
+    }
+
+    .legend-item{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:#d8e3f8;
+      line-height:1.35;
+    }
+
+    .legend-swatch{
+      width:12px;
+      height:12px;
+      border-radius:999px;
+      flex:0 0 auto;
+    }
+
+    .section{
+      margin-bottom:16px;
+      padding-bottom:14px;
+      border-bottom:1px solid var(--line);
+    }
+
+    .section:last-child{
+      border-bottom:none;
+      margin-bottom:0;
+      padding-bottom:0;
+    }
+
+    .section h2{
+      margin:0 0 10px;
+      font-size:.95rem;
+      font-weight:700;
+    }
+
+    .muted{
+      color:var(--muted);
+      font-size:.84rem;
+    }
+
+    .row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    .row3{
+      display:grid;
+      grid-template-columns:1fr 90px 90px;
+      gap:8px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    .stack{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    label{
+      font-size:.84rem;
+      color:#d7e2f6;
+    }
+
+    input[type="range"]{
+      width:100%;
+      accent-color:var(--blue);
+      cursor:pointer;
+    }
+
+    input[type="number"],
+    select{
+      width:100%;
+      border:none;
+      outline:none;
+      color:var(--text);
+      background:var(--panel3);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:10px;
+      padding:9px 10px;
+      font-size:.9rem;
+    }
+
+    button{
+      border:none;
+      outline:none;
+      cursor:pointer;
+      color:var(--text);
+      background:var(--panel3);
+      border:1px solid rgba(255,255,255,.08);
+      padding:9px 12px;
+      border-radius:12px;
+      font-weight:600;
+      transition:.18s ease;
+    }
+
+    button:hover{
+      transform:translateY(-1px);
+      background:#233452;
+    }
+
+    .btn-primary{
+      background:linear-gradient(180deg,#1f79d4,#1863ac);
+    }
+
+    .seg{
+      display:inline-flex;
+      gap:6px;
+      padding:4px;
+      background:#0f1727;
+      border:1px solid var(--line);
+      border-radius:14px;
+    }
+
+    .seg button{
+      background:transparent;
+      border:none;
+      padding:8px 12px;
+      border-radius:10px;
+      color:var(--muted);
+    }
+
+    .seg button.active{
+      color:#fff;
+      background:#233452;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:7px;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      font-size:.8rem;
+      color:#dce7fb;
+    }
+
+    .dot{
+      width:9px;height:9px;border-radius:50%;
+      display:inline-block;
+    }
+    .dot.a{background:var(--blue)}
+    .dot.b{background:#f472b6}
+    .dot.r{background:var(--gold)}
+
+    .readouts{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+
+    .readout-card{
+      background:linear-gradient(180deg,var(--panel),#10192a);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:10px 12px;
+      min-width:0;
+      min-height:114px;
+    }
+
+    .readout-card h3{
+      margin:0 0 8px;
+      font-size:.88rem;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+
+    .kv{
+      display:grid;
+      grid-template-columns:auto 1fr;
+      gap:5px 10px;
+      font-size:.8rem;
+      line-height:1.25;
+    }
+
+    .kv div:nth-child(odd){
+      color:var(--muted);
+    }
+
+    .mini-help{
+      position:absolute;
+      left:12px;
+      bottom:12px;
+      z-index:4;
+      background:rgba(9,15,29,.78);
+      border:1px solid rgba(255,255,255,.09);
+      backdrop-filter:blur(8px);
+      padding:9px 10px;
+      border-radius:12px;
+      font-size:.78rem;
+      color:#dbe5f6;
+      max-width:320px;
+      line-height:1.35;
+      pointer-events:none;
+    }
+
+    .paused-banner{
+      position:absolute;
+      top:12px;
+      right:12px;
+      z-index:4;
+      background:rgba(251,191,36,.12);
+      color:#fde68a;
+      border:1px solid rgba(251,191,36,.25);
+      padding:8px 10px;
+      border-radius:999px;
+      font-size:.8rem;
+      font-weight:700;
+      pointer-events:none;
+      display:none;
+    }
+
+    .paused-banner.show{
+      display:block;
+    }
+
+    .footer-note{
+      color:var(--muted);
+      font-size:.78rem;
+      line-height:1.45;
+    }
+
+    @media (max-width: 1100px){
+      html,body{ overflow:auto; }
+      .shell{
+        grid-template-columns:1fr;
+        grid-template-rows:auto 1fr;
+        overflow:auto;
+        height:auto;
+        min-height:100vh;
+      }
+      .readouts{ grid-template-columns:1fr; }
+      .split-bottom{ grid-template-columns:1fr; }
+      #graphsPanel{ min-height:460px; }
+      .content{ min-height:950px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="section">
+        <h2>Relative Velocity Studio</h2>
+        <div class="muted">
+          Explore relative motion in 1D and 2D. In 1D mode both objects move on the same horizontal line. You can pan, zoom, and click-hold on the simulation canvas to temporarily pause.
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Mode & Frame</h2>
+        <div class="stack" style="margin-bottom:10px;">
+          <label>Simulation Mode</label>
+          <div class="seg">
+            <button id="mode1dBtn" class="active" type="button">1D</button>
+            <button id="mode2dBtn" type="button">2D</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label for="frameSelect">Frame of Reference</label>
+          <select id="frameSelect">
+            <option value="ground">Ground</option>
+            <option value="a">Object A</option>
+            <option value="b">Object B</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Playback</h2>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="playPauseBtn" class="btn-primary" type="button">Pause</button>
+          <button id="resetBtn" type="button">Reset</button>
+          <button id="centerBtn" type="button">Reset View</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Object A</h2>
+        <div class="row3">
+          <label for="aSpeedRange">Speed (m/s)</label>
+          <input id="aSpeedRange" type="range" min="0" max="50" step="0.1" value="0" />
+          <input id="aSpeedNum" type="number" min="0" max="50" step="0.1" value="0" />
+        </div>
+        <div class="row3">
+          <label for="aAngleRange">Angle (°)</label>
+          <input id="aAngleRange" type="range" min="0" max="360" step="1" value="0" />
+          <input id="aAngleNum" type="number" min="0" max="360" step="1" value="0" />
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Object B</h2>
+        <div class="row3">
+          <label for="bSpeedRange">Speed (m/s)</label>
+          <input id="bSpeedRange" type="range" min="0" max="50" step="0.1" value="0" />
+          <input id="bSpeedNum" type="number" min="0" max="50" step="0.1" value="0" />
+        </div>
+        <div class="row3">
+          <label for="bAngleRange">Angle (°)</label>
+          <input id="bAngleRange" type="range" min="0" max="360" step="1" value="0" />
+          <input id="bAngleNum" type="number" min="0" max="360" step="1" value="0" />
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Quick Presets</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button type="button" data-preset="rest">Both at Rest</button>
+          <button type="button" data-preset="same">Same Direction</button>
+          <button type="button" data-preset="opp">Opposite</button>
+          <button type="button" data-preset="angled">Angled 2D</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Readouts</h2>
+        <div class="muted">
+          Relative velocity uses:
+          <strong style="color:#fff;"> V<sub>A/B</sub> = V<sub>A/G</sub> − V<sub>B/G</sub></strong>
+        </div>
+      </div>
+
+      <div class="footer-note">
+        Tips: The Opposite preset now stays in 1D, so both objects move on the same line in opposite directions.
+      </div>
+    </aside>
+
+    <main class="content">
+      <section class="topbar">
+        <div class="brand">
+          <h1>Relative Velocity Studio</h1>
+          <p>1D same-line motion · corrected opposite preset · pan/zoom enabled</p>
+        </div>
+        <div class="top-controls">
+          <div class="pill"><span class="dot a"></span>Object A</div>
+          <div class="pill"><span class="dot b"></span>Object B</div>
+          <div class="pill"><span class="dot r"></span>Relative</div>
+        </div>
+      </section>
+
+      <section class="canvas-card card">
+        <div class="canvas-head">
+          <div class="canvas-head-left">
+            <div class="pill">Frame: <strong id="hudFrame" style="margin-left:4px;">Ground</strong></div>
+            <div class="pill">Mode: <strong id="hudMode" style="margin-left:4px;">1D</strong></div>
+            <div class="pill">Zoom: <strong id="hudZoom" style="margin-left:4px;">1.00×</strong></div>
+          </div>
+          <div class="canvas-head-right">
+            <span>t = <strong id="hudTime" style="color:#fff;">0.0 s</strong></span>
+            <span>FPS ≈ <strong id="hudFps" style="color:#fff;">60</strong></span>
+          </div>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas id="simCanvas"></canvas>
+          <div class="paused-banner" id="holdPauseBanner">Paused while mouse is held down</div>
+          <div class="mini-help">
+            Drag to pan • Wheel to zoom • Hold mouse button to temporarily pause
+          </div>
+        </div>
+      </section>
+
+      <div class="below-sim-toolbar">
+        <div class="seg">
+          <button id="showMathBtn" class="active" type="button">Vector Math</button>
+          <button id="showGraphsBtn" type="button">Graphs</button>
+        </div>
+      </div>
+
+      <section class="bottom-area">
+        <div id="mathPanel" class="bottom-panel active card">
+          <div class="split-bottom panel-pad">
+            <div class="card" style="overflow:hidden;">
+              <div class="canvas-head">
+                <div><strong>Vector Math</strong></div>
+                <div class="muted">Clear subtraction layout</div>
+              </div>
+
+              <div class="math-top-info">
+                <div class="equation-line">
+                  <span class="eq-gold">V<sub>A/B</sub></span>
+                  <span class="eq-white">=</span>
+                  <span class="eq-blue">V<sub>A/G</sub></span>
+                  <span class="eq-white">+</span>
+                  <span class="eq-pink">(−V<sub>B/G</sub>)</span>
+                </div>
+                <div class="muted" style="font-size:12px;">
+                  Separate vectors are drawn in sequence so the subtraction is easier to read.
+                </div>
+              </div>
+
+              <div class="math-canvas-box">
+                <canvas id="mathCanvas"></canvas>
+              </div>
+
+              <div class="legend-box">
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:var(--blue);"></span>
+                  <span>Blue = velocity of A relative to ground</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:#d5dde9;"></span>
+                  <span>Gray = reverse of B used for subtraction</span>
+                </div>
+                <div class="legend-item">
+                  <span class="legend-swatch" style="background:var(--gold);"></span>
+                  <span>Gold = resultant velocity of A relative to B</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel-pad" style="padding:0;">
+              <div class="readouts">
+                <div class="readout-card">
+                  <h3><span class="dot a"></span>Object A</h3>
+                  <div class="kv">
+                    <div>|V<sub>A/G</sub>|</div><div id="ro_a_mag">0.0 m/s</div>
+                    <div>Angle</div><div id="ro_a_ang">0.0°</div>
+                    <div>Components</div><div id="ro_a_comp">(0.0, 0.0)</div>
+                  </div>
+                </div>
+
+                <div class="readout-card">
+                  <h3><span class="dot b"></span>Object B</h3>
+                  <div class="kv">
+                    <div>|V<sub>B/G</sub>|</div><div id="ro_b_mag">0.0 m/s</div>
+                    <div>Angle</div><div id="ro_b_ang">0.0°</div>
+                    <div>Components</div><div id="ro_b_comp">(0.0, 0.0)</div>
+                  </div>
+                </div>
+
+                <div class="readout-card">
+                  <h3><span class="dot r"></span>Relative</h3>
+                  <div class="kv">
+                    <div>|V<sub>A/B</sub>|</div><div id="ro_ab_mag">0.0 m/s</div>
+                    <div>Angle</div><div id="ro_ab_ang">0.0°</div>
+                    <div>V<sub>B/A</sub></div><div id="ro_ba_mag">0.0 m/s</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="graphsPanel" class="bottom-panel card">
+          <div class="panel-pad">
+            <div class="canvas-head" style="margin:-12px -12px 12px -12px;">
+              <div><strong>Graphs</strong></div>
+              <div class="muted">Larger graph area</div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+              <div class="card" style="height:120px; overflow:hidden;"><canvas id="graph1"></canvas></div>
+              <div class="card" style="height:120px; overflow:hidden;"><canvas id="graph2"></canvas></div>
+              <div class="card" style="height:120px; overflow:hidden;"><canvas id="graph3"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const $ = (id) => document.getElementById(id);
+
+      const ui = {
+        simCanvas: $('simCanvas'),
+        mathCanvas: $('mathCanvas'),
+        graph1: $('graph1'),
+        graph2: $('graph2'),
+        graph3: $('graph3'),
+
+        mode1dBtn: $('mode1dBtn'),
+        mode2dBtn: $('mode2dBtn'),
+        showMathBtn: $('showMathBtn'),
+        showGraphsBtn: $('showGraphsBtn'),
+        frameSelect: $('frameSelect'),
+
+        playPauseBtn: $('playPauseBtn'),
+        resetBtn: $('resetBtn'),
+        centerBtn: $('centerBtn'),
+
+        aSpeedRange: $('aSpeedRange'),
+        aSpeedNum: $('aSpeedNum'),
+        aAngleRange: $('aAngleRange'),
+        aAngleNum: $('aAngleNum'),
+
+        bSpeedRange: $('bSpeedRange'),
+        bSpeedNum: $('bSpeedNum'),
+        bAngleRange: $('bAngleRange'),
+        bAngleNum: $('bAngleNum'),
+
+        hudFrame: $('hudFrame'),
+        hudMode: $('hudMode'),
+        hudZoom: $('hudZoom'),
+        hudTime: $('hudTime'),
+        hudFps: $('hudFps'),
+
+        ro_a_mag: $('ro_a_mag'),
+        ro_a_ang: $('ro_a_ang'),
+        ro_a_comp: $('ro_a_comp'),
+
+        ro_b_mag: $('ro_b_mag'),
+        ro_b_ang: $('ro_b_ang'),
+        ro_b_comp: $('ro_b_comp'),
+
+        ro_ab_mag: $('ro_ab_mag'),
+        ro_ab_ang: $('ro_ab_ang'),
+        ro_ba_mag: $('ro_ba_mag'),
+
+        mathPanel: $('mathPanel'),
+        graphsPanel: $('graphsPanel'),
+        holdPauseBanner: $('holdPauseBanner')
+      };
+
+      const simCtx = ui.simCanvas.getContext('2d');
+      const mathCtx = ui.mathCanvas.getContext('2d');
+      const g1 = ui.graph1.getContext('2d');
+      const g2 = ui.graph2.getContext('2d');
+      const g3 = ui.graph3.getContext('2d');
+
+      const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+      const state = {
+        mode: '1d',
+        frame: 'ground',
+        lowerView: 'math',
+        time: 0,
+        playing: true,
+        holdPaused: false,
+
+        aStart: { x: -12, y: 0 },
+        bStart: { x:  12, y: 0 },
+        aPos:   { x: -12, y: 0 },
+        bPos:   { x:  12, y: 0 },
+
+        aVel: { x: 0, y: 0 },
+        bVel: { x: 0, y: 0 },
+
+        metersToPx: 20,
+        arrowScale: 4.0,
+
+        lastTs: 0,
+        fps: 60,
+
+        viewScale: 1,
+        panX: 0,
+        panY: 0,
+        minZoom: 0.45,
+        maxZoom: 3.2,
+        isPanning: false,
+        panPointerId: null,
+        panStartClientX: 0,
+        panStartClientY: 0,
+        panStartX: 0,
+        panStartY: 0,
+
+        history: [],
+        simW: 0,
+        simH: 0,
+        mathW: 0,
+        mathH: 0
+      };
+
+      function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+      function fmt(n, d = 1) { return Number(n).toFixed(d); }
+      function mag(v) { return Math.hypot(v.x, v.y); }
+      function add(a, b) { return { x: a.x + b.x, y: a.y + b.y }; }
+      function sub(a, b) { return { x: a.x - b.x, y: a.y - b.y }; }
+      function mul(v, s) { return { x: v.x * s, y: v.y * s }; }
+
+      function polar(magnitude, angleDeg) {
+        const r = angleDeg * Math.PI / 180;
+        return { x: magnitude * Math.cos(r), y: magnitude * Math.sin(r) };
+      }
+
+      function angleOf(v) {
+        if (mag(v) < 1e-9) return 0;
+        let a = Math.atan2(v.y, v.x) * 180 / Math.PI;
+        if (a < 0) a += 360;
+        return a;
+      }
+
+      function setCanvasSize(canvas, ctx) {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+        canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { w: rect.width, h: rect.height };
+      }
+
+      function resizeAll() {
+        const simSize = setCanvasSize(ui.simCanvas, simCtx);
+        state.simW = simSize.w;
+        state.simH = simSize.h;
+
+        const mathSize = setCanvasSize(ui.mathCanvas, mathCtx);
+        state.mathW = mathSize.w;
+        state.mathH = mathSize.h;
+
+        setCanvasSize(ui.graph1, g1);
+        setCanvasSize(ui.graph2, g2);
+        setCanvasSize(ui.graph3, g3);
+      }
+
+      function syncPair(rangeEl, numEl, onChange) {
+        const update = (value) => {
+          rangeEl.value = value;
+          numEl.value = value;
+          onChange(Number(value));
+        };
+        rangeEl.addEventListener('input', e => update(e.target.value));
+        numEl.addEventListener('input', e => update(e.target.value));
+      }
+
+      function applyVelocitiesFromUI() {
+        const aSpeed = Number(ui.aSpeedNum.value);
+        const aAngle = Number(ui.aAngleNum.value);
+        const bSpeed = Number(ui.bSpeedNum.value);
+        const bAngle = Number(ui.bAngleNum.value);
+
+        if (state.mode === '1d') {
+          const aDir = (Math.cos(aAngle * Math.PI / 180) >= 0) ? 1 : -1;
+          const bDir = (Math.cos(bAngle * Math.PI / 180) >= 0) ? 1 : -1;
+          state.aVel = { x: aSpeed * aDir, y: 0 };
+          state.bVel = { x: bSpeed * bDir, y: 0 };
+        } else {
+          state.aVel = polar(aSpeed, aAngle);
+          state.bVel = polar(bSpeed, bAngle);
+        }
+      }
+
+      function setMode(mode) {
+        state.mode = mode;
+        ui.mode1dBtn.classList.toggle('active', mode === '1d');
+        ui.mode2dBtn.classList.toggle('active', mode === '2d');
+        ui.hudMode.textContent = mode.toUpperCase();
+
+        if (mode === '1d') {
+          state.aPos.y = 0;
+          state.bPos.y = 0;
+          state.aStart.y = 0;
+          state.bStart.y = 0;
+        } else {
+          state.aPos.y = -8;
+          state.bPos.y = 8;
+          state.aStart.y = -8;
+          state.bStart.y = 8;
+        }
+        applyVelocitiesFromUI();
+      }
+
+      function setLowerView(view) {
+        state.lowerView = view;
+        ui.showMathBtn.classList.toggle('active', view === 'math');
+        ui.showGraphsBtn.classList.toggle('active', view === 'graphs');
+        ui.mathPanel.classList.toggle('active', view === 'math');
+        ui.graphsPanel.classList.toggle('active', view === 'graphs');
+        resizeAll();
+      }
+
+      function resetSimulation() {
+        state.time = 0;
+        state.aStart = state.mode === '1d' ? { x: -12, y: 0 } : { x: -10, y: -8 };
+        state.bStart = state.mode === '1d' ? { x: 12, y: 0 } : { x: 10, y: 8 };
+        state.aPos = { ...state.aStart };
+        state.bPos = { ...state.bStart };
+        state.history = [];
+        applyVelocitiesFromUI();
+        updateReadouts();
+      }
+
+      function resetView() {
+        state.viewScale = 1;
+        state.panX = 0;
+        state.panY = 0;
+        ui.hudZoom.textContent = '1.00×';
+      }
+
+      function getFrameCenterMeters() {
+        if (state.frame === 'a') return state.aPos;
+        if (state.frame === 'b') return state.bPos;
+        return { x: 0, y: 0 };
+      }
+
+      function worldToScreen(m) {
+        const center = getFrameCenterMeters();
+        return {
+          x: (m.x - center.x) * state.metersToPx * state.viewScale + state.simW / 2 + state.panX,
+          y: (m.y - center.y) * state.metersToPx * state.viewScale * -1 + state.simH / 2 + state.panY
+        };
+      }
+
+      function screenToWorld(sx, sy) {
+        const center = getFrameCenterMeters();
+        return {
+          x: ((sx - state.simW / 2 - state.panX) / (state.metersToPx * state.viewScale)) + center.x,
+          y: -((sy - state.simH / 2 - state.panY) / (state.metersToPx * state.viewScale)) + center.y
+        };
+      }
+
+      function roundRect(ctx, x, y, w, h, r, fill, stroke) {
+        ctx.beginPath();
+        ctx.moveTo(x+r, y);
+        ctx.arcTo(x+w, y, x+w, y+h, r);
+        ctx.arcTo(x+w, y+h, x, y+h, r);
+        ctx.arcTo(x, y+h, x, y, r);
+        ctx.arcTo(x, y, x+w, y, r);
+        ctx.closePath();
+        if (fill) ctx.fill();
+        if (stroke) ctx.stroke();
+      }
+
+      function drawGrid() {
+        const ctx = simCtx;
+        const minor = 1;
+        const major = 5;
+
+        const topLeft = screenToWorld(0, 0);
+        const bottomRight = screenToWorld(state.simW, state.simH);
+
+        const minX = Math.floor(Math.min(topLeft.x, bottomRight.x)) - 2;
+        const maxX = Math.ceil(Math.max(topLeft.x, bottomRight.x)) + 2;
+        const minY = Math.floor(Math.min(topLeft.y, bottomRight.y)) - 2;
+        const maxY = Math.ceil(Math.max(topLeft.y, bottomRight.y)) + 2;
+
+        for (let x = minX; x <= maxX; x += minor) {
+          const s = worldToScreen({ x, y: 0 }).x;
+          const isMajor = x % major === 0;
+          ctx.beginPath();
+          ctx.strokeStyle = isMajor ? css('--gridMajor') : css('--gridMinor');
+          ctx.lineWidth = isMajor ? 1.25 : 1;
+          ctx.moveTo(s, 0);
+          ctx.lineTo(s, state.simH);
+          ctx.stroke();
+        }
+
+        for (let y = minY; y <= maxY; y += minor) {
+          const s = worldToScreen({ x: 0, y }).y;
+          const isMajor = y % major === 0;
+          ctx.beginPath();
+          ctx.strokeStyle = isMajor ? css('--gridMajor') : css('--gridMinor');
+          ctx.lineWidth = isMajor ? 1.25 : 1;
+          ctx.moveTo(0, s);
+          ctx.lineTo(state.simW, s);
+          ctx.stroke();
+        }
+
+        const ox = worldToScreen({ x: 0, y: 0 }).x;
+        const oy = worldToScreen({ x: 0, y: 0 }).y;
+
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,.22)';
+        ctx.lineWidth = 1.6;
+        ctx.moveTo(ox, 0); ctx.lineTo(ox, state.simH);
+        ctx.moveTo(0, oy); ctx.lineTo(state.simW, oy);
+        ctx.stroke();
+      }
+
+      function draw3DObject(screenPos, color, label) {
+        const ctx = simCtx;
+        const r = Math.max(13, 18 * state.viewScale);
+        const ry = Math.max(10, r * 0.68);
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.ellipse(screenPos.x + 4, screenPos.y + 8, r * 0.95, ry * 0.55, 0, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,0,0,.28)';
+        ctx.fill();
+
+        const grad = ctx.createLinearGradient(screenPos.x - r, screenPos.y - ry, screenPos.x + r, screenPos.y + ry);
+        grad.addColorStop(0, 'rgba(255,255,255,.28)');
+        grad.addColorStop(.2, color);
+        grad.addColorStop(1, 'rgba(0,0,0,.55)');
+
+        ctx.beginPath();
+        ctx.ellipse(screenPos.x, screenPos.y, r, ry, -0.25, 0, Math.PI * 2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255,255,255,.22)';
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.ellipse(screenPos.x - r * .28, screenPos.y - ry * .30, r * .26, ry * .18, -0.45, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,.34)';
+        ctx.fill();
+
+        ctx.fillStyle = '#f8fbff';
+        ctx.font = `bold ${Math.max(12, 12 * state.viewScale)}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, screenPos.x, screenPos.y);
+        ctx.restore();
+      }
+
+      function drawArrow(ctx, x1, y1, x2, y2, color, width = 3, dashed = false) {
+        const dx = x2 - x1, dy = y2 - y1;
+        const len = Math.hypot(dx, dy);
+        if (len < 0.001) return;
+        const ux = dx / len, uy = dy / len;
+        const head = Math.min(16, Math.max(10, len * 0.22));
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = width;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        if (dashed) ctx.setLineDash([7, 6]);
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2 - ux * head, y2 - uy * head);
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - ux * head - uy * head * 0.45, y2 - uy * head + ux * head * 0.45);
+        ctx.lineTo(x2 - ux * head + uy * head * 0.45, y2 - uy * head - ux * head * 0.45);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawVectorLabel(ctx, x1, y1, x2, y2, text, color, offset = 16) {
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const dx = x2 - x1, dy = y2 - y1;
+        const len = Math.hypot(dx, dy) || 1;
+        const nx = -dy / len;
+        const ny = dx / len;
+
+        const tx = mx + nx * offset;
+        const ty = my + ny * offset;
+
+        ctx.save();
+        ctx.font = 'bold 12px sans-serif';
+        const padX = 8;
+        const metrics = ctx.measureText(text);
+        const w = metrics.width + padX * 2;
+        const h = 22;
+        ctx.fillStyle = 'rgba(10,15,29,.94)';
+        ctx.strokeStyle = 'rgba(255,255,255,.12)';
+        ctx.lineWidth = 1;
+        roundRect(ctx, tx - w/2, ty - h/2, w, h, 10, true, true);
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, tx, ty + 1);
+        ctx.restore();
+      }
+
+      function drawRelativeReadoutUnderSelected() {
+        const ctx = simCtx;
+        if (state.frame !== 'a' && state.frame !== 'b') return;
+
+        const aScreen = worldToScreen(state.aPos);
+        const bScreen = worldToScreen(state.bPos);
+        const vab = sub(state.aVel, state.bVel);
+        const vba = sub(state.bVel, state.aVel);
+
+        let anchor, lines, accent;
+        if (state.frame === 'a') {
+          anchor = aScreen;
+          accent = css('--blue');
+          lines = [
+            `V_A = ${fmt(mag(state.aVel))} m/s @ ${fmt(angleOf(state.aVel))}°`,
+            `V_A/B = ${fmt(mag(vab))} m/s @ ${fmt(angleOf(vab))}°`,
+            `V_B/A = ${fmt(mag(vba))} m/s @ ${fmt(angleOf(vba))}°`
+          ];
+        } else {
+          anchor = bScreen;
+          accent = '#f472b6';
+          lines = [
+            `V_B = ${fmt(mag(state.bVel))} m/s @ ${fmt(angleOf(state.bVel))}°`,
+            `V_A/B = ${fmt(mag(vab))} m/s @ ${fmt(angleOf(vab))}°`,
+            `V_B/A = ${fmt(mag(vba))} m/s @ ${fmt(angleOf(vba))}°`
+          ];
+        }
+
+        ctx.save();
+        ctx.font = '12px sans-serif';
+        const width = Math.max(...lines.map(t => ctx.measureText(t).width)) + 20;
+        const height = 22 * lines.length + 12;
+        const x = anchor.x - width / 2;
+        const y = anchor.y + 28;
+
+        ctx.fillStyle = 'rgba(8,12,20,.88)';
+        ctx.strokeStyle = accent;
+        ctx.lineWidth = 1.2;
+        roundRect(ctx, x, y, width, height, 12, true, true);
+
+        ctx.fillStyle = '#f5f8ff';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        lines.forEach((line, i) => {
+          ctx.fillText(line, x + 10, y + 16 + i * 22);
+        });
+        ctx.restore();
+      }
+
+      function drawScene() {
+        simCtx.clearRect(0, 0, state.simW, state.simH);
+        drawGrid();
+
+        const aScreen = worldToScreen(state.aPos);
+        const bScreen = worldToScreen(state.bPos);
+
+        if (state.mode === '1d') {
+          simCtx.save();
+          simCtx.strokeStyle = 'rgba(255,255,255,.18)';
+          simCtx.lineWidth = 2;
+          const y = worldToScreen({ x: 0, y: 0 }).y;
+          simCtx.beginPath();
+          simCtx.moveTo(0, y);
+          simCtx.lineTo(state.simW, y);
+          simCtx.stroke();
+          simCtx.restore();
+        }
+
+        draw3DObject(aScreen, css('--blue'), 'A');
+        draw3DObject(bScreen, '#f472b6', 'B');
+
+        const aTip = {
+          x: aScreen.x + state.aVel.x * state.arrowScale * state.viewScale,
+          y: aScreen.y - state.aVel.y * state.arrowScale * state.viewScale
+        };
+        const bTip = {
+          x: bScreen.x + state.bVel.x * state.arrowScale * state.viewScale,
+          y: bScreen.y - state.bVel.y * state.arrowScale * state.viewScale
+        };
+
+        drawArrow(simCtx, aScreen.x, aScreen.y, aTip.x, aTip.y, css('--blue'), 3);
+        drawArrow(simCtx, bScreen.x, bScreen.y, bTip.x, bTip.y, '#f472b6', 3);
+
+        if (mag(state.aVel) > 0.05) drawVectorLabel(simCtx, aScreen.x, aScreen.y, aTip.x, aTip.y, 'V_A/G', css('--blue'), 18);
+        if (mag(state.bVel) > 0.05) drawVectorLabel(simCtx, bScreen.x, bScreen.y, bTip.x, bTip.y, 'V_B/G', '#f472b6', 18);
+
+        const vab = sub(state.aVel, state.bVel);
+        if (mag(vab) > 0.05) {
+          const relTip = {
+            x: aScreen.x + vab.x * state.arrowScale * state.viewScale,
+            y: aScreen.y - vab.y * state.arrowScale * state.viewScale
+          };
+          drawArrow(simCtx, aScreen.x, aScreen.y, relTip.x, relTip.y, css('--gold'), 2.6, true);
+          drawVectorLabel(simCtx, aScreen.x, aScreen.y, relTip.x, relTip.y, 'V_A/B', css('--gold'), -18);
+        }
+
+        drawRelativeReadoutUnderSelected();
+        ui.holdPauseBanner.classList.toggle('show', state.holdPaused);
+      }
+
+      function drawMathPanel() {
+        mathCtx.clearRect(0, 0, state.mathW, state.mathH);
+        const ctx = mathCtx;
+        const w = state.mathW;
+        const h = state.mathH;
+
+        ctx.fillStyle = 'rgba(255,255,255,.02)';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,255,255,.08)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < w; x += 28) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, h);
+          ctx.stroke();
+        }
+        for (let y = 0; y < h; y += 28) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+          ctx.stroke();
+        }
+        ctx.restore();
+
+        const vAG = state.aVel;
+        const negVBG = mul(state.bVel, -1);
+        const vAB = sub(state.aVel, state.bVel);
+        const vBG = state.bVel;
+
+        const scale = 5.2;
+        const baseX = 58;
+        const baseY = h - 72;
+
+        const p0 = { x: baseX, y: baseY };
+        const p1 = { x: p0.x + vAG.x * scale, y: p0.y - vAG.y * scale };
+        const p2 = { x: p1.x + negVBG.x * scale, y: p1.y - negVBG.y * scale };
+        const p3 = { x: p0.x + vBG.x * scale, y: p0.y - vBG.y * scale };
+
+        if (mag(vAG) > 0.03) {
+          drawArrow(ctx, p0.x, p0.y, p1.x, p1.y, css('--blue'), 4);
+          drawVectorLabel(ctx, p0.x, p0.y, p1.x, p1.y, 'V_A/G', css('--blue'), -20);
+        }
+
+        if (mag(negVBG) > 0.03) {
+          drawArrow(ctx, p1.x, p1.y, p2.x, p2.y, '#d5dde9', 4);
+          drawVectorLabel(ctx, p1.x, p1.y, p2.x, p2.y, '−V_B/G', '#e5e7eb', 18);
+        }
+
+        if (mag(vAB) > 0.03) {
+          drawArrow(ctx, p0.x, p0.y, p2.x, p2.y, css('--gold'), 4);
+          drawVectorLabel(ctx, p0.x, p0.y, p2.x, p2.y, 'V_A/B', css('--gold'), -42);
+        }
+
+        if (mag(vBG) > 0.03) {
+          drawArrow(ctx, p0.x, p0.y, p3.x, p3.y, 'rgba(244,114,182,.45)', 2, true);
+          drawVectorLabel(ctx, p0.x, p0.y, p3.x, p3.y, 'V_B/G', '#f472b6', 22);
+        }
+
+        if (mag(vAG) <= 0.03 && mag(vBG) <= 0.03) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(255,255,255,.7)';
+          ctx.font = '13px sans-serif';
+          ctx.textAlign = 'left';
+          ctx.fillText('Both objects are at rest. Increase speed to see the vector construction.', 18, h / 2);
+          ctx.restore();
+        }
+      }
+
+      function pushHistory() {
+        state.history.push({
+          t: state.time,
+          ax: state.aPos.x,
+          ay: state.aPos.y,
+          bx: state.bPos.x,
+          by: state.bPos.y,
+          as: mag(state.aVel),
+          bs: mag(state.bVel)
+        });
+        if (state.history.length > 400) state.history.shift();
+      }
+
+      function drawGraph(ctx, title, seriesA, seriesB, colorA, colorB) {
+        const rect = ctx.canvas.getBoundingClientRect();
+        ctx.clearRect(0, 0, rect.width, rect.height);
+
+        const w = rect.width, h = rect.height;
+        ctx.fillStyle = 'rgba(255,255,255,.02)';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#e6eefc';
+        ctx.font = 'bold 13px sans-serif';
+        ctx.fillText(title, 12, 18);
+
+        const pad = { l: 42, r: 12, t: 28, b: 22 };
+        const gx = pad.l, gy = pad.t, gw = w - pad.l - pad.r, gh = h - pad.t - pad.b;
+
+        ctx.strokeStyle = 'rgba(255,255,255,.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+          const y = gy + gh * (i / 4);
+          ctx.beginPath(); ctx.moveTo(gx, y); ctx.lineTo(gx + gw, y); ctx.stroke();
+        }
+        ctx.beginPath();
+        ctx.moveTo(gx, gy);
+        ctx.lineTo(gx, gy + gh);
+        ctx.lineTo(gx + gw, gy + gh);
+        ctx.stroke();
+
+        if (state.history.length < 2) return;
+
+        const xs = state.history.map(p => p.t);
+        const vals = [...state.history.map(seriesA), ...state.history.map(seriesB)];
+        let minX = xs[0], maxX = xs[xs.length - 1];
+        let minY = Math.min(...vals), maxY = Math.max(...vals);
+
+        if (Math.abs(maxY - minY) < 0.001) { minY -= 1; maxY += 1; }
+        if (Math.abs(maxX - minX) < 0.001) maxX = minX + 1;
+
+        const sx = (t) => gx + (t - minX) / (maxX - minX) * gw;
+        const sy = (v) => gy + gh - (v - minY) / (maxY - minY) * gh;
+
+        function plot(getter, color) {
+          ctx.beginPath();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2;
+          state.history.forEach((p, i) => {
+            const x = sx(p.t), y = sy(getter(p));
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+        }
+
+        plot(seriesA, colorA);
+        plot(seriesB, colorB);
+
+        ctx.fillStyle = colorA;
+        ctx.fillRect(w - 130, 10, 10, 10);
+        ctx.fillStyle = '#dbe6f7';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('Object A', w - 114, 19);
+
+        ctx.fillStyle = colorB;
+        ctx.fillRect(w - 65, 10, 10, 10);
+        ctx.fillStyle = '#dbe6f7';
+        ctx.fillText('Object B', w - 49, 19);
+      }
+
+      function drawGraphs() {
+        drawGraph(g1, 'x-position (m)', p => p.ax, p => p.bx, css('--blue'), '#f472b6');
+        drawGraph(g2, 'y-position (m)', p => p.ay, p => p.by, css('--blue'), '#f472b6');
+        drawGraph(g3, 'speed (m/s)', p => p.as, p => p.bs, css('--blue'), '#f472b6');
+      }
+
+      function updateReadouts() {
+        const vab = sub(state.aVel, state.bVel);
+        const vba = sub(state.bVel, state.aVel);
+
+        ui.ro_a_mag.innerHTML = `${fmt(mag(state.aVel))} m/s`;
+        ui.ro_a_ang.innerHTML = `${fmt(angleOf(state.aVel))}°`;
+        ui.ro_a_comp.innerHTML = `(${fmt(state.aVel.x)}, ${fmt(state.aVel.y)})`;
+
+        ui.ro_b_mag.innerHTML = `${fmt(mag(state.bVel))} m/s`;
+        ui.ro_b_ang.innerHTML = `${fmt(angleOf(state.bVel))}°`;
+        ui.ro_b_comp.innerHTML = `(${fmt(state.bVel.x)}, ${fmt(state.bVel.y)})`;
+
+        ui.ro_ab_mag.innerHTML = `${fmt(mag(vab))} m/s`;
+        ui.ro_ab_ang.innerHTML = `${fmt(angleOf(vab))}°`;
+        ui.ro_ba_mag.innerHTML = `${fmt(mag(vba))} m/s`;
+
+        ui.hudFrame.textContent =
+          state.frame === 'ground' ? 'Ground' :
+          state.frame === 'a' ? 'Object A' : 'Object B';
+
+        ui.hudZoom.textContent = `${state.viewScale.toFixed(2)}×`;
+        ui.hudTime.textContent = `${fmt(state.time)} s`;
+        ui.hudFps.textContent = `${Math.round(state.fps)}`;
+      }
+
+      function step(dt) {
+        state.aPos = add(state.aPos, mul(state.aVel, dt));
+        state.bPos = add(state.bPos, mul(state.bVel, dt));
+        state.time += dt;
+        pushHistory();
+      }
+
+      function animate(ts) {
+        if (!state.lastTs) state.lastTs = ts;
+        const dtRaw = (ts - state.lastTs) / 1000;
+        state.lastTs = ts;
+        const dt = Math.min(0.033, dtRaw || 0.016);
+        state.fps = 1 / Math.max(0.0001, dt);
+
+        if (state.playing && !state.holdPaused) step(dt);
+
+        drawScene();
+        drawMathPanel();
+        drawGraphs();
+        updateReadouts();
+
+        requestAnimationFrame(animate);
+      }
+
+      function bindEvents() {
+        syncPair(ui.aSpeedRange, ui.aSpeedNum, applyVelocitiesFromUI);
+        syncPair(ui.aAngleRange, ui.aAngleNum, applyVelocitiesFromUI);
+        syncPair(ui.bSpeedRange, ui.bSpeedNum, applyVelocitiesFromUI);
+        syncPair(ui.bAngleRange, ui.bAngleNum, applyVelocitiesFromUI);
+
+        ui.mode1dBtn.addEventListener('click', () => {
+          setMode('1d');
+          resetSimulation();
+        });
+
+        ui.mode2dBtn.addEventListener('click', () => {
+          setMode('2d');
+          resetSimulation();
+        });
+
+        ui.showMathBtn.addEventListener('click', () => setLowerView('math'));
+        ui.showGraphsBtn.addEventListener('click', () => setLowerView('graphs'));
+
+        ui.frameSelect.addEventListener('change', () => {
+          state.frame = ui.frameSelect.value;
+        });
+
+        ui.playPauseBtn.addEventListener('click', () => {
+          state.playing = !state.playing;
+          ui.playPauseBtn.textContent = state.playing ? 'Pause' : 'Play';
+        });
+
+        ui.resetBtn.addEventListener('click', resetSimulation);
+        ui.centerBtn.addEventListener('click', resetView);
+
+        document.querySelectorAll('[data-preset]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const p = btn.getAttribute('data-preset');
+
+            if (p === 'rest') {
+              ui.aSpeedRange.value = ui.aSpeedNum.value = 0;
+              ui.bSpeedRange.value = ui.bSpeedNum.value = 0;
+              ui.aAngleRange.value = ui.aAngleNum.value = 0;
+              ui.bAngleRange.value = ui.bAngleNum.value = 0;
+              setMode('1d');
+            } else if (p === 'same') {
+              ui.aSpeedRange.value = ui.aSpeedNum.value = 18;
+              ui.bSpeedRange.value = ui.bSpeedNum.value = 9;
+              ui.aAngleRange.value = ui.aAngleNum.value = 0;
+              ui.bAngleRange.value = ui.bAngleNum.value = 0;
+              setMode('1d');
+            } else if (p === 'opp') {
+              ui.aSpeedRange.value = ui.aSpeedNum.value = 15;
+              ui.bSpeedRange.value = ui.bSpeedNum.value = 12;
+              ui.aAngleRange.value = ui.aAngleNum.value = 0;
+              ui.bAngleRange.value = ui.bAngleNum.value = 180;
+              setMode('1d'); /* FIXED: stay in 1D so both remain on same line */
+            } else if (p === 'angled') {
+              ui.aSpeedRange.value = ui.aSpeedNum.value = 20;
+              ui.bSpeedRange.value = ui.bSpeedNum.value = 16;
+              ui.aAngleRange.value = ui.aAngleNum.value = 35;
+              ui.bAngleRange.value = ui.bAngleNum.value = 155;
+              setMode('2d');
+            }
+
+            applyVelocitiesFromUI();
+            resetSimulation();
+          });
+        });
+
+        window.addEventListener('resize', resizeAll);
+
+        ui.simCanvas.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          const rect = ui.simCanvas.getBoundingClientRect();
+          const sx = e.clientX - rect.left;
+          const sy = e.clientY - rect.top;
+
+          const before = screenToWorld(sx, sy);
+          const factor = e.deltaY < 0 ? 1.12 : 0.89;
+          state.viewScale = clamp(state.viewScale * factor, state.minZoom, state.maxZoom);
+
+          const afterScreen = worldToScreen(before);
+          state.panX += sx - afterScreen.x;
+          state.panY += sy - afterScreen.y;
+          ui.hudZoom.textContent = `${state.viewScale.toFixed(2)}×`;
+        }, { passive: false });
+
+        ui.simCanvas.addEventListener('pointerdown', (e) => {
+          ui.simCanvas.setPointerCapture(e.pointerId);
+          state.holdPaused = true;
+          state.isPanning = true;
+          state.panPointerId = e.pointerId;
+          state.panStartClientX = e.clientX;
+          state.panStartClientY = e.clientY;
+          state.panStartX = state.panX;
+          state.panStartY = state.panY;
+        });
+
+        ui.simCanvas.addEventListener('pointermove', (e) => {
+          if (!state.isPanning || state.panPointerId !== e.pointerId) return;
+          state.panX = state.panStartX + (e.clientX - state.panStartClientX);
+          state.panY = state.panStartY + (e.clientY - state.panStartClientY);
+        });
+
+        function endPointer(e) {
+          if (state.panPointerId === e.pointerId) {
+            state.isPanning = false;
+            state.panPointerId = null;
+            state.holdPaused = false;
+          }
+        }
+
+        ui.simCanvas.addEventListener('pointerup', endPointer);
+        ui.simCanvas.addEventListener('pointercancel', endPointer);
+        ui.simCanvas.addEventListener('pointerleave', () => {
+          if (!state.isPanning) state.holdPaused = false;
+        });
+      }
+
+      function init() {
+        resizeAll();
+        bindEvents();
+        setMode('1d');
+        setLowerView('math');
+        state.frame = 'ground';
+        ui.frameSelect.value = 'ground';
+        resetSimulation();
+        requestAnimationFrame(animate);
+      }
+
+      init();
+    })();
+  </script>
+</body>
+</html>
