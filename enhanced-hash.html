@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Enhanced Hash Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 40px; background: #222; color: #fff; max-width: 800px; margin: 0 auto; }
+    input, button, select { padding: 10px; font-size: 16px; margin-top: 10px; width: 100%; box-sizing: border-box; }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 5px; color: #64b5f6; }
+    #result { margin-top: 20px; padding: 15px; background: #1a1a1a; border-radius: 5px; font-family: monospace; word-break: break-all; white-space: pre-wrap; }
+    .error { color: #ff6b6b; }
+    .success { color: #4caf50; }
+    .info { color: #64b5f6; font-size: 14px; margin-top: 5px; }
+    .password-strength { margin-top: 10px; height: 5px; background: #333; border-radius: 3px; overflow: hidden; }
+    .strength-bar { height: 100%; transition: width 0.3s, background 0.3s; }
+  </style>
+</head>
+<body>
+
+  <h2>🔒 Enhanced Password Hash Generator</h2>
+  <p>Generate secure PBKDF2-HMAC-SHA-256 hashes with salt for your APPC-M dashboard.</p>
+  
+  <div class="form-group">
+    <label for="password">Password:</label>
+    <input type="text" id="password" placeholder="Enter password...">
+    <div class="password-strength">
+      <div class="strength-bar" id="strengthBar"></div>
+    </div>
+    <div class="info" id="passwordInfo"></div>
+  </div>
+  
+  <div class="form-group">
+    <label for="salt">Custom Salt (optional, random salt will be generated if empty):</label>
+    <input type="text" id="salt" placeholder="Leave empty for random salt...">
+    <button onclick="generateRandomSalt()" style="width: auto; margin-top: 5px;">Generate Random Salt</button>
+  </div>
+  
+  <div class="form-group">
+    <label for="iterations">PBKDF2 Iterations:</label>
+    <select id="iterations">
+      <option value="10000">10,000 (Minimum)</option>
+      <option value="50000">50,000 (Balanced)</option>
+      <option value="100000" selected>100,000 (Recommended)</option>
+      <option value="250000">250,000 (High Security)</option>
+      <option value="500000">500,000 (Maximum)</option>
+    </select>
+  </div>
+  
+  <button onclick="generateHash()">Generate Secure Hash</button>
+  
+  <h3>Generated Output:</h3>
+  <div id="result"></div>
+  
+  <div class="info">
+    <h4>Usage Instructions:</h4>
+    <p>1. Copy the entire JSON output below</p>
+    <p>2. Replace the hardcoded hash in your HTML files with this JSON</p>
+    <p>3. Update your authentication code to use the new verifyPassword() method</p>
+  </div>
+
+  <script>
+    // Password strength checker
+    function checkPasswordStrength(password) {
+      let score = 0;
+      const bar = document.getElementById('strengthBar');
+      const info = document.getElementById('passwordInfo');
+      
+      if (!password) {
+        bar.style.width = '0%';
+        bar.style.background = '#333';
+        info.textContent = '';
+        return;
+      }
+      
+      // Length check
+      if (password.length >= 8) score += 1;
+      if (password.length >= 12) score += 1;
+      if (password.length >= 16) score += 1;
+      
+      // Character variety
+      if (/[A-Z]/.test(password)) score += 1;
+      if (/[a-z]/.test(password)) score += 1;
+      if (/\d/.test(password)) score += 1;
+      if (/[^A-Za-z0-9]/.test(password)) score += 1;
+      
+      // Common password check
+      const common = ['password', '123456', 'qwerty', 'letmein', 'welcome'];
+      if (common.includes(password.toLowerCase())) score = 0;
+      
+      // Update UI
+      const percent = Math.min(100, score * 20);
+      bar.style.width = percent + '%';
+      
+      if (score <= 2) {
+        bar.style.background = '#ff6b6b';
+        info.textContent = 'Weak password';
+        info.className = 'error';
+      } else if (score <= 4) {
+        bar.style.background = '#ffa726';
+        info.textContent = 'Moderate password';
+        info.className = 'info';
+      } else {
+        bar.style.background = '#4caf50';
+        info.textContent = 'Strong password';
+        info.className = 'success';
+      }
+    }
+    
+    // Generate random salt
+    function generateRandomSalt() {
+      const array = new Uint8Array(16);
+      crypto.getRandomValues(array);
+      const salt = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+      document.getElementById('salt').value = salt;
+    }
+    
+    // PBKDF2 hash generation
+    async function generateHash() {
+      const password = document.getElementById('password').value;
+      let salt = document.getElementById('salt').value;
+      const iterations = parseInt(document.getElementById('iterations').value);
+      const resultDiv = document.getElementById('result');
+      
+      if (!password) {
+        resultDiv.innerHTML = '<span class="error">Please enter a password</span>';
+        return;
+      }
+      
+      // Generate salt if not provided
+      if (!salt) {
+        salt = await generateRandomSalt();
+        document.getElementById('salt').value = salt;
+      }
+      
+      try {
+        resultDiv.innerHTML = '<span class="info">Generating hash... (this may take a moment)</span>';
+        
+        const encoder = new TextEncoder();
+        const passwordBuffer = encoder.encode(password);
+        const saltBuffer = encoder.encode(salt);
+        
+        // Import password as key
+        const key = await crypto.subtle.importKey(
+          'raw',
+          passwordBuffer,
+          { name: 'PBKDF2' },
+          false,
+          ['deriveBits']
+        );
+        
+        // Derive key using PBKDF2
+        const derivedBits = await crypto.subtle.deriveBits(
+          {
+            name: 'PBKDF2',
+            salt: saltBuffer,
+            iterations: iterations,
+            hash: 'SHA-256'
+          },
+          key,
+          32 * 8 // 256 bits
+        );
+        
+        // Convert to hex
+        const hashArray = Array.from(new Uint8Array(derivedBits));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        
+        // Create output object
+        const output = {
+          hash: hashHex,
+          salt: salt,
+          iterations: iterations,
+          algorithm: 'PBKDF2-HMAC-SHA-256',
+          keyLength: 32,
+          timestamp: new Date().toISOString()
+        };
+        
+        resultDiv.innerHTML = `<span class="success">Hash generated successfully!</span>\n\n` +
+          `<strong>Copy this JSON to your HTML file:</strong>\n\n` +
+          `<code>${JSON.stringify(output, null, 2)}</code>\n\n` +
+          `<strong>Verification code snippet:</strong>\n\n` +
+          `<code>// In your verifyWebsiteAccess function:\n` +
+          `const storedAuth = ${JSON.stringify(output, null, 2)};\n` +
+          `const isValid = await auth.verifyPassword(userInput, storedAuth.hash, storedAuth.salt, storedAuth.iterations);\n` +
+          `if (isValid) { /* Grant access */ }</code>`;
+          
+      } catch (error) {
+        resultDiv.innerHTML = `<span class="error">Error: ${error.message}</span>`;
+      }
+    }
+    
+    // Event listeners
+    document.getElementById('password').addEventListener('input', function() {
+      checkPasswordStrength(this.value);
+    });
+    
+    // Initialize
+    checkPasswordStrength('');
+  </script>
+  
+</body>
+</html>

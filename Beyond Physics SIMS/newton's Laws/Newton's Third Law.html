@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics: Newton's Third Law Laboratory</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        /* --- ENTERPRISE THEME & STYLING --- */
+        :root {
+            --bg-color: #07090F;
+            --panel-bg: rgba(18, 22, 31, 0.85);
+            --panel-border: rgba(0, 229, 255, 0.2);
+            --cart-a: #00E5FF; /* Neon Cyan */
+            --cart-b: #FF00FF; /* Neon Magenta */
+            --text-primary: #F0F6FC;
+            --text-muted: #8B949E;
+            --accent: #2979FF;
+            --danger: #FF3B30;
+            --success: #32D74B;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow: hidden;
+            width: 100vw; height: 100vh;
+        }
+
+        /* Fullscreen Canvas */
+        #sim-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 1;
+            cursor: grab;
+        }
+        #sim-canvas:active { cursor: grabbing; }
+
+        /* Floating HUD */
+        .hud-overlay {
+            position: absolute;
+            top: 25px; left: 25px;
+            z-index: 5;
+            pointer-events: none;
+        }
+        .hud-title { 
+            font-size: 28px; font-weight: 900; text-transform: uppercase; 
+            letter-spacing: 1.5px; text-shadow: 0 4px 20px rgba(0,0,0,0.9); 
+            color: #FFFFFF;
+        }
+        .hud-subtitle { font-size: 15px; color: var(--accent); margin-top: 4px; font-weight: 700; letter-spacing: 0.5px;}
+        .hud-controls { margin-top: 15px; font-family: 'Courier New', monospace; color: var(--text-primary); font-size: 13px; background: rgba(0,0,0,0.6); padding: 8px 12px; border-radius: 6px; display: inline-block; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 10px rgba(0,0,0,0.5);}
+
+        /* Collapsible Right Panel */
+        #right-panel {
+            position: absolute;
+            top: 15px; bottom: 15px; right: 15px;
+            width: 480px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--panel-border);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            box-shadow: -10px 10px 40px rgba(0,0,0,0.8);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #right-panel.closed { transform: translateX(calc(100% + 20px)); }
+
+        #panel-handle {
+            position: absolute;
+            left: -42px; top: 50%;
+            transform: translateY(-50%);
+            width: 42px; height: 100px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--panel-border);
+            border-right: none;
+            border-radius: 12px 0 0 12px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            box-shadow: -5px 0px 20px rgba(0,0,0,0.5);
+            color: var(--accent);
+            font-size: 22px;
+            transition: background 0.2s, color 0.2s;
+        }
+        #panel-handle:hover { background: rgba(30, 36, 48, 0.95); color: #fff; }
+
+        /* Tab Navigation */
+        .tab-header {
+            display: flex;
+            background: rgba(0,0,0,0.4);
+            border-bottom: 1px solid var(--panel-border);
+            border-radius: 12px 12px 0 0;
+        }
+        .tab-btn {
+            flex: 1; padding: 18px 10px; text-align: center;
+            cursor: pointer; font-weight: 800; font-size: 13px;
+            color: var(--text-muted); transition: 0.3s;
+            border-bottom: 3px solid transparent;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .tab-btn:hover { color: var(--text-primary); }
+        .tab-btn.active {
+            color: var(--text-primary);
+            border-bottom: 3px solid var(--accent);
+            background: linear-gradient(to top, rgba(41, 121, 255, 0.15), transparent);
+        }
+
+        .tab-content { display: none; flex: 1; overflow-y: auto; padding: 22px; }
+        .tab-content.active { display: flex; flex-direction: column; }
+        .tab-content::-webkit-scrollbar { width: 6px; }
+        .tab-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+        /* Form Controls */
+        fieldset {
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; padding: 16px;
+            background: rgba(0,0,0,0.5); margin-bottom: 16px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
+        }
+        legend { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); padding: 0 8px; letter-spacing: 0.5px;}
+
+        .ctrl-row { margin-bottom: 14px; }
+        .ctrl-label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-primary); margin-bottom: 8px; font-weight: 600;}
+        .val-a { color: var(--cart-a); font-family: 'Courier New', monospace; font-size: 15px; font-weight: bold; text-shadow: 0 0 5px rgba(0,229,255,0.4);}
+        .val-b { color: var(--cart-b); font-family: 'Courier New', monospace; font-size: 15px; font-weight: bold; text-shadow: 0 0 5px rgba(255,0,255,0.4);}
+        .val-k { color: #FFF; font-family: 'Courier New', monospace; font-size: 15px; font-weight: bold;}
+
+        input[type=range] { width: 100%; -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: #1A202C; border-radius: 3px; border: 1px solid rgba(255,255,255,0.05); }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
+            background: #fff; cursor: pointer; margin-top: -6px; box-shadow: 0 2px 8px rgba(0,0,0,0.8);
+        }
+        #sl-ma::-webkit-slider-thumb, #sl-va::-webkit-slider-thumb { background: var(--cart-a); box-shadow: 0 0 12px var(--cart-a); }
+        #sl-mb::-webkit-slider-thumb, #sl-vb::-webkit-slider-thumb { background: var(--cart-b); box-shadow: 0 0 12px var(--cart-b); }
+
+        select { width: 100%; background: #0D1117; color: #fff; border: 1px solid rgba(255,255,255,0.15); padding: 10px; border-radius: 6px; font-family: inherit; font-size: 14px; outline: none; cursor: pointer; font-weight: 600;}
+        select:hover { border-color: rgba(255,255,255,0.3); }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 10px; margin-bottom: 16px; }
+        button {
+            flex: 1; padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.05); color: #fff; font-weight: 800; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;
+        }
+        button:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.4);}
+        
+        .btn-play { background: rgba(46, 160, 67, 0.2); border-color: var(--success); color: var(--success); }
+        .btn-play:hover { background: rgba(46, 160, 67, 0.4); box-shadow: 0 4px 15px rgba(46, 160, 67, 0.5);}
+        .btn-pause { background: rgba(255, 149, 0, 0.2); border-color: #FF9500; color: #FF9500; }
+        .btn-pause:hover { background: rgba(255, 149, 0, 0.4); box-shadow: 0 4px 15px rgba(255, 149, 0, 0.5);}
+        .btn-action { background: linear-gradient(135deg, #0A84FF, #005bb5); border: none; }
+
+        /* Charts */
+        .chart-box {
+            background: rgba(0,0,0,0.6); border: 1px solid var(--panel-border);
+            border-radius: 8px; padding: 12px; margin-bottom: 15px; height: 180px;
+            box-shadow: inset 0 2px 15px rgba(0,0,0,0.6);
+        }
+
+        /* 5E Inquiry Panel */
+        .student-info { margin-bottom: 20px; }
+        .student-info label { font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; display: block; margin-bottom: 8px;}
+        .student-info input { width: 100%; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 12px; border-radius: 6px; font-size: 14px; outline: none; transition: 0.2s;}
+        .student-info input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.2);}
+
+        .q-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;}
+        .q-phase { font-size: 20px; font-weight: 900; color: var(--accent); text-transform: uppercase; letter-spacing: 2px;}
+        .q-counter { font-size: 14px; color: var(--text-muted); font-weight: bold; }
+        .q-prompt { font-size: 15px; line-height: 1.6; margin-bottom: 20px; background: rgba(41, 121, 255, 0.08); padding: 18px; border-left: 4px solid var(--accent); border-radius: 4px; color: #fff; font-weight: 500;}
+        
+        textarea {
+            width: 100%; height: 260px; background: rgba(0,0,0,0.7); color: #fff;
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 16px;
+            font-family: inherit; font-size: 14px; resize: none; margin-bottom: 15px; line-height: 1.6;
+        }
+        textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(41, 121, 255, 0.3); }
+        .nav-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;}
+        
+    </style>
+</head>
+<body>
+
+    <canvas id="sim-canvas"></canvas>
+
+    <div class="hud-overlay">
+        <div class="hud-title">Newton's Third Law</div>
+        <div class="hud-subtitle">High-Fidelity Dynamics Laboratory</div>
+        <div class="hud-controls" id="cam-hud">CAMERA | Zoom: 1.00x | Pan: Click & Drag</div>
+    </div>
+
+    <div id="right-panel">
+        <div id="panel-handle">▶</div>
+        
+        <div class="tab-header">
+            <div class="tab-btn active" data-target="tab-controls">Controls & Charts</div>
+            <div class="tab-btn" data-target="tab-inquiry">5E Inquiry Assignment</div>
+        </div>
+
+        <div id="tab-controls" class="tab-content active">
+            
+            <fieldset>
+                <legend>Experimental Scenario</legend>
+                <select id="scenario-sel" style="margin-bottom: 15px;">
+                    <option value="elastic">Elastic Collision (Spring Bumpers)</option>
+                    <option value="inelastic">Perfectly Inelastic (Velcro/Clay)</option>
+                    <option value="explosive">Explosive Separation (Compressed Spring)</option>
+                    <option value="wall">Rigid Wall Impact</option>
+                </select>
+                <div class="btn-group">
+                    <button id="btn-play" class="btn-play">▶ Play</button>
+                    <button id="btn-pause" class="btn-pause">⏸ Pause</button>
+                    <button id="btn-reset">⟲ Reset</button>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Dynamics Cart A (Cyan)</legend>
+                <div class="ctrl-row">
+                    <div class="ctrl-label"><span>Mass (m_A)</span><span id="val-ma" class="val-a">10.0 kg</span></div>
+                    <input type="range" id="sl-ma" min="1" max="10" step="0.5" value="10">
+                </div>
+                <div class="ctrl-row" style="margin-bottom: 0;">
+                    <div class="ctrl-label"><span>Initial Velocity (v_A)</span><span id="val-va" class="val-a">5.0 m/s</span></div>
+                    <input type="range" id="sl-va" min="-5" max="5" step="0.1" value="5">
+                </div>
+            </fieldset>
+
+            <fieldset id="fs-cartb">
+                <legend>Dynamics Cart B (Magenta)</legend>
+                <div class="ctrl-row">
+                    <div class="ctrl-label"><span>Mass (m_B)</span><span id="val-mb" class="val-b">2.0 kg</span></div>
+                    <input type="range" id="sl-mb" min="1" max="10" step="0.5" value="2">
+                </div>
+                <div class="ctrl-row" style="margin-bottom: 0;">
+                    <div class="ctrl-label"><span>Initial Velocity (v_B)</span><span id="val-vb" class="val-b">0.0 m/s</span></div>
+                    <input type="range" id="sl-vb" min="-5" max="5" step="0.1" value="0">
+                </div>
+            </fieldset>
+
+            <fieldset style="margin-bottom: 25px;">
+                <legend>Bumper Properties</legend>
+                <div class="ctrl-row" style="margin-bottom: 0;">
+                    <div class="ctrl-label"><span>Spring Constant (k)</span><span id="val-k" class="val-k">2000 N/m</span></div>
+                    <input type="range" id="sl-k" min="500" max="5000" step="100" value="2000">
+                </div>
+            </fieldset>
+
+            <div class="chart-box"><canvas id="chart-force"></canvas></div>
+            <div class="chart-box"><canvas id="chart-accel"></canvas></div>
+            <div class="chart-box"><canvas id="chart-vel"></canvas></div>
+        </div>
+
+        <div id="tab-inquiry" class="tab-content">
+            
+            <div class="student-info">
+                <label>Student Name</label>
+                <input type="text" id="student-name" placeholder="Enter your full name for the report...">
+            </div>
+
+            <div class="q-header">
+                <div class="q-phase" id="q-phase">ENGAGE</div>
+                <div class="q-counter" id="q-count">1 / 10</div>
+            </div>
+            <div class="q-prompt" id="q-prompt">Loading prompt...</div>
+            <textarea id="q-ans" placeholder="Construct your scientific reasoning here... (Auto-saves continuously)"></textarea>
+            
+            <div class="nav-row">
+                <button id="btn-q-prev" style="flex: 0 0 100px;">◀ Back</button>
+                <button id="btn-save" style="flex: 1; margin: 0 10px; background: rgba(50, 215, 75, 0.2); border-color: rgba(50, 215, 75, 0.5); color: #fff;">Save Answer</button>
+                <button id="btn-q-next" style="flex: 0 0 100px;">Next ▶</button>
+            </div>
+            <button id="btn-export" class="btn-action" style="padding: 16px; margin-top: auto; font-size: 14px;">📄 Export Report to .DOCX</button>
+        </div>
+    </div>
+
+<script>
+/**
+ * ============================================================================
+ * PHYSICS ENGINE
+ * Implements continuous sub-step integration (Semi-Implicit Euler) to accurately
+ * resolve the stiff differential equations of a spring collision without tunneling.
+ * ============================================================================
+ */
+class PhysicsEngine {
+    constructor() {
+        this.cartWidth = 2.0; // Logical meters
+        this.subSteps = 24;   // High resolution for accurate peak force capture
+        this.reset();
+    }
+
+    reset() {
+        this.t = 0;
+        this.running = false;
+        
+        this.scenario = document.getElementById('scenario-sel').value;
+        
+        this.mA = parseFloat(document.getElementById('sl-ma').value);
+        this.vA = parseFloat(document.getElementById('sl-va').value);
+        this.xA = -5.0;
+
+        this.mB = parseFloat(document.getElementById('sl-mb').value);
+        this.vB = parseFloat(document.getElementById('sl-vb').value);
+        this.xB = 5.0;
+
+        this.k = parseFloat(document.getElementById('sl-k').value);
+        this.damping = 2.0; // Minimal structural damping
+
+        // Handle specific scenarios
+        if (this.scenario === 'wall') {
+            this.mB = Infinity; 
+            this.vB = 0;
+            this.xB = 4.0;
+            document.getElementById('fs-cartb').style.display = 'none';
+        } else {
+            document.getElementById('fs-cartb').style.display = 'block';
+        }
+
+        if (this.scenario === 'explosive') {
+            this.xA = -0.5;
+            this.xB = 0.5;
+            this.vA = 0;
+            this.vB = 0;
+            // Overlap = w - (xB - xA) = 2.0 - 1.0 = +1.0m compression initially
+        }
+
+        this.fA = 0; this.fB = 0;
+        this.aA = 0; this.aB = 0;
+        this.isLatched = false;
+    }
+
+    updateFromUI() {
+        if (this.running) return; 
+        this.mA = parseFloat(document.getElementById('sl-ma').value);
+        this.vA = parseFloat(document.getElementById('sl-va').value);
+        if (this.scenario !== 'wall') {
+            this.mB = parseFloat(document.getElementById('sl-mb').value);
+            this.vB = parseFloat(document.getElementById('sl-vb').value);
+        }
+        if (this.scenario === 'explosive') { this.vA = 0; this.vB = 0; }
+        this.k = parseFloat(document.getElementById('sl-k').value);
+    }
+
+    step(frameDt) {
+        if (!this.running) return;
+
+        let dt = frameDt / this.subSteps;
+        
+        for (let i = 0; i < this.subSteps; i++) {
+            let dist = this.xB - this.xA;
+            let overlap = this.cartWidth - dist;
+            
+            this.fA = 0; this.fB = 0;
+            
+            if (overlap > 0) {
+                let n = 1; // Normal direction (A to B)
+                let relVel = this.vB - this.vA;
+                let f_mag = 0;
+                
+                if (this.scenario === 'elastic' || this.scenario === 'wall') {
+                    // Hooke's Law + internal damping
+                    f_mag = this.k * overlap - this.damping * relVel; 
+                    if (f_mag < 0) f_mag = 0; // Springs only push
+                } 
+                else if (this.scenario === 'inelastic') {
+                    this.isLatched = true;
+                }
+                else if (this.scenario === 'explosive') {
+                    f_mag = this.k * overlap;
+                    if (f_mag < 0) f_mag = 0; // Pushes until separation
+                }
+
+                if (this.isLatched) {
+                    // Critically damped spring holding them exactly at distance W
+                    let c = 2 * Math.sqrt(this.k * (this.mA * this.mB)/(this.mA + this.mB));
+                    f_mag = this.k * overlap - c * relVel;
+                }
+
+                this.fB = f_mag * n;
+                this.fA = -this.fB; // NEWTON'S THIRD LAW ENFORCEMENT
+            }
+
+            this.aA = this.fA / this.mA;
+            this.aB = (this.mB === Infinity) ? 0 : (this.fB / this.mB);
+
+            // Semi-Implicit Euler Integration
+            this.vA += this.aA * dt;
+            if (this.mB !== Infinity) this.vB += this.aB * dt;
+
+            this.xA += this.vA * dt;
+            if (this.mB !== Infinity) this.xB += this.vB * dt;
+
+            this.t += dt;
+        }
+    }
+}
+
+/**
+ * ============================================================================
+ * INTERACTIVE CAMERA
+ * ============================================================================
+ */
+class Camera {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.x = 0; this.y = 0; this.zoom = 1;
+        this.isDragging = false;
+        this.lastM = {x:0, y:0};
+
+        canvas.addEventListener('wheel', e => {
+            e.preventDefault();
+            this.zoom *= (e.deltaY > 0 ? 0.9 : 1.1);
+            this.zoom = Math.max(0.4, Math.min(this.zoom, 4));
+            this.updateHUD();
+        });
+
+        canvas.addEventListener('mousedown', e => { this.isDragging = true; this.lastM = {x: e.clientX, y: e.clientY}; });
+        window.addEventListener('mouseup', () => this.isDragging = false);
+        window.addEventListener('mousemove', e => {
+            if (!this.isDragging) return;
+            this.x += (e.clientX - this.lastM.x) / this.zoom;
+            this.y += (e.clientY - this.lastM.y) / this.zoom;
+            this.lastM = {x: e.clientX, y: e.clientY};
+        });
+    }
+    updateHUD() { 
+        document.getElementById('cam-hud').innerText = `CAMERA | Zoom: ${this.zoom.toFixed(2)}x | Pan: Drag`; 
+    }
+}
+
+/**
+ * ============================================================================
+ * HIGH-FIDELITY RENDERER
+ * Draws realistic PASCO-style dynamics carts, track, springs, and vectors.
+ * ============================================================================
+ */
+class Renderer {
+    constructor(canvas, engine, camera) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.engine = engine;
+        this.cam = camera;
+        this.ppm = 45; // Pixels per meter scale
+        this.resize();
+        window.addEventListener('resize', () => this.resize());
+    }
+
+    resize() {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+        this.cx = this.canvas.width / 2;
+        this.cy = this.canvas.height / 2;
+    }
+
+    drawGlowingArrow(fromX, fromY, toX, toY, color) {
+        const headlen = 16; 
+        const dx = toX - fromX; const dy = toY - fromY;
+        const angle = Math.atan2(dy, dx);
+        
+        this.ctx.shadowColor = color;
+        this.ctx.shadowBlur = 15;
+        this.ctx.strokeStyle = color; 
+        this.ctx.lineWidth = 5;
+        
+        this.ctx.beginPath(); this.ctx.moveTo(fromX, fromY); this.ctx.lineTo(toX, toY); this.ctx.stroke();
+        
+        this.ctx.fillStyle = color;
+        this.ctx.beginPath(); this.ctx.moveTo(toX, toY);
+        this.ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 7), toY - headlen * Math.sin(angle - Math.PI / 7));
+        this.ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 7), toY - headlen * Math.sin(angle + Math.PI / 7));
+        this.ctx.fill();
+        this.ctx.shadowBlur = 0; // reset
+    }
+
+    render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Deep space/lab background gradient with vignette
+        let bgGrad = this.ctx.createRadialGradient(this.cx, this.cy, 0, this.cx, this.cy, this.canvas.width);
+        bgGrad.addColorStop(0, '#111625');
+        bgGrad.addColorStop(1, '#050508');
+        this.ctx.fillStyle = bgGrad;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+        // Lab background grid lines
+        this.ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+        this.ctx.lineWidth = 1;
+        for(let i=0; i<this.canvas.width; i+=50) { this.ctx.beginPath(); this.ctx.moveTo(i,0); this.ctx.lineTo(i,this.canvas.height); this.ctx.stroke(); }
+        for(let i=0; i<this.canvas.height; i+=50) { this.ctx.beginPath(); this.ctx.moveTo(0,i); this.ctx.lineTo(this.canvas.width,i); this.ctx.stroke(); }
+
+        this.ctx.save();
+        this.ctx.translate(this.cx, this.cy + 150);
+        this.ctx.scale(this.cam.zoom, this.cam.zoom);
+        this.ctx.translate(this.cam.x, this.cam.y);
+
+        // Draw Extruded Aluminum Dynamics Track
+        const trackY = 0;
+        
+        // Track body
+        let tGrad = this.ctx.createLinearGradient(0, trackY, 0, trackY + 40);
+        tGrad.addColorStop(0, '#3a4454'); tGrad.addColorStop(0.5, '#1A1F2B'); tGrad.addColorStop(1, '#0f131c');
+        this.ctx.fillStyle = tGrad;
+        this.ctx.fillRect(-4000, trackY, 8000, 40);
+        
+        // T-Slots
+        this.ctx.fillStyle = '#0a0d14';
+        this.ctx.fillRect(-4000, trackY + 8, 8000, 6);
+        this.ctx.fillRect(-4000, trackY + 26, 8000, 6);
+
+        // Track highlights
+        this.ctx.strokeStyle = 'rgba(255,255,255,0.2)'; this.ctx.lineWidth = 1;
+        this.ctx.beginPath(); this.ctx.moveTo(-4000, trackY); this.ctx.lineTo(4000, trackY); this.ctx.stroke();
+
+        // Ruler markings (Etched look)
+        this.ctx.lineWidth = 1; 
+        this.ctx.fillStyle = 'rgba(255,255,255,0.6)'; this.ctx.font="11px sans-serif";
+        for (let i = -40; i <= 40; i++) {
+            let px = i * this.ppm;
+            this.ctx.strokeStyle = 'rgba(0,0,0,0.8)';
+            this.ctx.beginPath(); this.ctx.moveTo(px+1, trackY); this.ctx.lineTo(px+1, trackY + 12); this.ctx.stroke();
+            this.ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+            this.ctx.beginPath(); this.ctx.moveTo(px, trackY); this.ctx.lineTo(px, trackY + 12); this.ctx.stroke();
+            if(i % 5 === 0) {
+                this.ctx.fillText(i + "m", px - 10, trackY + 26);
+                this.ctx.beginPath(); this.ctx.moveTo(px, trackY); this.ctx.lineTo(px, trackY + 18); this.ctx.stroke();
+            }
+        }
+
+        let wPx = this.engine.cartWidth * this.ppm;
+        let hPx = wPx * 0.45;
+        let pxA = this.engine.xA * this.ppm;
+        let pxB = this.engine.xB * this.ppm;
+
+        const drawCart = (x, y, colorMain, label, mass, drawWall=false) => {
+            if(drawWall) {
+                // Render heavy rigid wall block
+                let grad = this.ctx.createLinearGradient(x, y-150, x+wPx, y);
+                grad.addColorStop(0, '#444'); grad.addColorStop(0.5, '#222'); grad.addColorStop(1, '#111');
+                this.ctx.fillStyle = grad; 
+                this.ctx.shadowColor = 'rgba(0,0,0,0.8)'; this.ctx.shadowBlur = 15;
+                this.ctx.fillRect(x - wPx/2, y - 200, wPx*1.5, 200);
+                this.ctx.shadowBlur = 0;
+                
+                // Wall rivets
+                this.ctx.fillStyle = '#000';
+                for(let r=0; r<4; r++) {
+                    this.ctx.beginPath(); this.ctx.arc(x - wPx/2 + 15, y - 180 + r*50, 4, 0, Math.PI*2); this.ctx.fill();
+                }
+
+                this.ctx.fillStyle = '#fff'; this.ctx.font="bold 22px sans-serif"; 
+                this.ctx.fillText("WALL", x-20, y-100);
+                return;
+            }
+            
+            // Cart Chassis (Anodized Aluminum look)
+            let grad = this.ctx.createLinearGradient(x, y-hPx, x, y);
+            grad.addColorStop(0, 'rgba(255,255,255,0.5)'); 
+            grad.addColorStop(0.2, colorMain);
+            grad.addColorStop(1, '#111');
+            
+            this.ctx.shadowColor = 'rgba(0,0,0,0.8)'; this.ctx.shadowBlur = 12; this.ctx.shadowOffsetY = 6;
+            this.ctx.fillStyle = grad;
+            
+            // Round corners slightly manually
+            this.ctx.beginPath();
+            this.ctx.roundRect ? this.ctx.roundRect(x - wPx/2, y - hPx - 8, wPx, hPx, 4) : this.ctx.fillRect(x - wPx/2, y - hPx - 8, wPx, hPx);
+            this.ctx.fill();
+            this.ctx.shadowBlur = 0; this.ctx.shadowOffsetY = 0;
+            
+            // Top highlight
+            this.ctx.strokeStyle = 'rgba(255,255,255,0.6)'; this.ctx.lineWidth = 1;
+            this.ctx.strokeRect(x - wPx/2 + 2, y - hPx - 6, wPx - 4, hPx - 4);
+            
+            // Photorealistic Wheels
+            const drawWheel = (wx) => {
+                // Tire
+                this.ctx.fillStyle = '#111'; 
+                this.ctx.beginPath(); this.ctx.arc(wx, y-5, 12, 0, Math.PI*2); this.ctx.fill();
+                // Rim
+                this.ctx.fillStyle = '#999'; 
+                this.ctx.beginPath(); this.ctx.arc(wx, y-5, 7, 0, Math.PI*2); this.ctx.fill();
+                // Axle
+                this.ctx.fillStyle = '#222'; 
+                this.ctx.beginPath(); this.ctx.arc(wx, y-5, 3, 0, Math.PI*2); this.ctx.fill();
+            };
+            drawWheel(x - wPx/3);
+            drawWheel(x + wPx/3);
+
+            // Label
+            this.ctx.fillStyle = '#fff'; this.ctx.font = "bold 20px sans-serif";
+            this.ctx.fillText(label, x - wPx/2 + 15, y - hPx/2);
+            this.ctx.font = "13px sans-serif";
+            this.ctx.fillText(`m=${mass}kg`, x - wPx/2 + 15, y - hPx/2 + 18);
+        };
+
+        drawCart(pxA, trackY, '#00b4d8', 'A', this.engine.mA);
+        drawCart(pxB, trackY, '#d100d1', 'B', this.engine.mB, this.engine.scenario==='wall');
+
+        // Render Bumper Spring & Interactive Force Vectors
+        let D = this.engine.xB - this.engine.xA;
+        if (D < this.engine.cartWidth && this.engine.scenario !== 'inelastic') {
+            let midX = (pxA + pxB) / 2;
+            
+            // Draw Realistic Coiled Spring using Parametric Sine Wave
+            this.ctx.strokeStyle = '#CBD5E1'; 
+            this.ctx.lineWidth = 3;
+            this.ctx.lineJoin = 'round';
+            
+            const startX = pxA + wPx/2;
+            const endX = pxB - wPx/2;
+            const springWidth = endX - startX;
+            const coils = 8;
+            
+            this.ctx.beginPath();
+            // Parametric drawing
+            for(let i=0; i<=coils * 20; i++) {
+                let t = i / (coils * 20);
+                let cx = startX + t * springWidth;
+                let cy = (trackY - hPx/2) + Math.sin(t * coils * Math.PI * 2) * 12;
+                if (i===0) this.ctx.moveTo(cx, cy);
+                else this.ctx.lineTo(cx, cy);
+            }
+            this.ctx.stroke();
+
+            // Render Newton's Third Law Force Vectors
+            const fScale = 0.012; 
+            if (Math.abs(this.engine.fA) > 10) {
+                let vecLenA = this.engine.fA * fScale;
+                this.drawGlowingArrow(pxA, trackY - hPx - 40, pxA + vecLenA, trackY - hPx - 40, '#00E5FF');
+            }
+            if (Math.abs(this.engine.fB) > 10) {
+                let vecLenB = this.engine.fB * fScale;
+                this.drawGlowingArrow(pxB, trackY - hPx - 65, pxB + vecLenB, trackY - hPx - 65, '#FF00FF');
+            }
+        }
+
+        this.ctx.restore();
+    }
+}
+
+/**
+ * ============================================================================
+ * GRAPH MANAGER
+ * Continuous Sliding Window Chart.js Implementation
+ * ============================================================================
+ */
+class GraphManager {
+    constructor(engine) {
+        this.engine = engine;
+        this.windowSize = 4; // Display last 4 seconds continuously
+        this.hist = { t: [], fA: [], fB: [], aA: [], aB: [], vA: [], vB: [] }; // CASING FIXED
+        
+        Chart.defaults.color = '#8B949E';
+        Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, sans-serif';
+
+        this.cForce = this.initChart('chart-force', 'Force vs Time (N)', '#00E5FF', '#FF00FF');
+        this.cAccel = this.initChart('chart-accel', 'Acceleration vs Time (m/s²)', '#00E5FF', '#FF00FF');
+        this.cVel = this.initChart('chart-vel', 'Velocity vs Time (m/s)', '#00E5FF', '#FF00FF');
+    }
+
+    initChart(id, title, colorA, colorB) {
+        const ctx = document.getElementById(id).getContext('2d');
+        return new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    { label: 'Cart A', data: [], borderColor: colorA, borderWidth: 2.5, pointRadius: 0, tension: 0.2 },
+                    { label: 'Cart B', data: [], borderColor: colorB, borderWidth: 2.5, pointRadius: 0, tension: 0.2 }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, animation: false,
+                plugins: { 
+                    legend: { display: false }, 
+                    title: { display: true, text: title, color: '#F0F6FC', padding: {top:0, bottom:5}, font: {size: 13, weight: 800} } 
+                },
+                scales: {
+                    x: { type: 'linear', display: true, min: 0, max: this.windowSize, ticks:{maxTicksLimit: 5, color: '#8B949E'}, grid: {color: 'rgba(255,255,255,0.05)'} },
+                    y: { grid: { color: 'rgba(255,255,255,0.08)' }, ticks: {color: '#8B949E'} }
+                }
+            }
+        });
+    }
+
+    update() {
+        if (!this.engine.running) return;
+
+        this.hist.t.push(this.engine.t);
+        this.hist.fA.push(this.engine.fA); this.hist.fB.push(this.engine.fB);
+        this.hist.aA.push(this.engine.aA); this.hist.aB.push(this.engine.aB); // Pushing to correctly cased aB
+        this.hist.vA.push(this.engine.vA); this.hist.vB.push(this.engine.vB); // Pushing to correctly cased vB
+
+        // Prevent memory leak (60fps * 10 seconds buffer)
+        if (this.hist.t.length > 600) {
+            for(let k in this.hist) this.hist[k].shift();
+        }
+
+        let maxT = Math.max(this.windowSize, this.engine.t);
+        let minT = Math.max(0, maxT - this.windowSize);
+
+        const pushData = (chart, dataA, dataB) => {
+            chart.options.scales.x.min = minT;
+            chart.options.scales.x.max = maxT;
+            chart.data.datasets[0].data = this.hist.t.map((t, i) => ({x: t, y: dataA[i]}));
+            chart.data.datasets[1].data = this.hist.t.map((t, i) => ({x: t, y: dataB[i]}));
+            chart.update('none'); // Critical: 'none' ensures continuous unbroken rendering
+        };
+
+        pushData(this.cForce, this.hist.fA, this.hist.fB);
+        pushData(this.cAccel, this.hist.aA, this.hist.aB); 
+        pushData(this.cVel, this.hist.vA, this.hist.vB);   
+    }
+
+    clear() {
+        this.hist = { t: [], fA: [], fB: [], aA: [], aB: [], vA: [], vB: [] }; // Clear properly cased objects
+        [this.cForce, this.cAccel, this.cVel].forEach(c => {
+            c.options.scales.x.min = 0; c.options.scales.x.max = this.windowSize;
+            c.data.datasets[0].data = []; c.data.datasets[1].data = [];
+            c.update('none');
+        });
+    }
+}
+
+/**
+ * ============================================================================
+ * 5E INQUIRY MODULE & UI MANAGER
+ * ============================================================================
+ */
+const INQUIRY_QUESTIONS = [
+    { stage: "Engage", prompt: "Predict: If Cart A is 10 kg (v = 5 m/s) and Cart B is 1 kg (v = 0 m/s), which cart will experience a greater maximum force during the collision?" },
+    { stage: "Engage", prompt: "Run the simulation with the parameters from Question 1. Look at the Force vs Time graph. What do you observe about the maximum forces on Cart A and Cart B? Does this match your prediction?" },
+    { stage: "Explore", prompt: "Change velocities so carts move toward each other, but keep masses different (e.g. 8kg vs 2kg). At the exact moment of collision, how does Force on A compare to Force on B?" },
+    { stage: "Explore", prompt: "Look closely at the Acceleration vs Time graph for the 8kg vs 2kg collision. While forces are identical in magnitude, what is the ratio of their peak accelerations?" },
+    { stage: "Explain", prompt: "State Newton's Third Law in your own words. Based on this, explain mathematically why the Force vs. Time graph always shows a perfect mirror image across the X-axis." },
+    { stage: "Explain", prompt: "Using Newton's Second Law (a=F/m), derive the algebraic ratio of the carts' accelerations (aA/aB) in terms of their masses during any point in the collision." },
+    { stage: "Elaborate", prompt: "The area under a Force-Time graph represents Impulse (J=∫Fdt). Because force curves are perfect mirror images, what can you conclude about the impulses exerted on Cart A and Cart B?" },
+    { stage: "Elaborate", prompt: "By the Impulse-Momentum Theorem (Δp=J), explain how Newton's Third Law directly proves the Law of Conservation of Momentum for this two-cart system." },
+    { stage: "Evaluate", prompt: "A common misconception is 'The heavier truck hits the smaller car harder, destroying it.' Rewrite this statement to be physically accurate, referencing Force and Acceleration." },
+    { stage: "Evaluate", prompt: "Predict what happens to the Force and Acceleration graphs if you double the 'Bumper Stiffness' (k). Test it. How does a stiffer bumper affect collision time and peak force?" }
+];
+
+class App {
+    constructor() {
+        this.engine = new PhysicsEngine();
+        this.camera = new Camera(document.getElementById('sim-canvas'));
+        this.renderer = new Renderer(document.getElementById('sim-canvas'), this.engine, this.camera);
+        this.graphs = new GraphManager(this.engine);
+        
+        this.bindEvents();
+        this.initInquiry();
+        
+        this.lastTime = performance.now();
+        requestAnimationFrame((t) => this.loop(t));
+    }
+
+    bindEvents() {
+        const updateUI = () => {
+            if (!this.engine.running) this.engine.updateFromUI();
+            document.getElementById('val-ma').innerText = parseFloat(document.getElementById('sl-ma').value).toFixed(1) + " kg";
+            document.getElementById('val-va').innerText = parseFloat(document.getElementById('sl-va').value).toFixed(1) + " m/s";
+            document.getElementById('val-mb').innerText = parseFloat(document.getElementById('sl-mb').value).toFixed(1) + " kg";
+            document.getElementById('val-vb').innerText = parseFloat(document.getElementById('sl-vb').value).toFixed(1) + " m/s";
+            document.getElementById('val-k').innerText  = document.getElementById('sl-k').value + " N/m";
+            
+            // If dragging sliders while stopped at t=0, reset history immediately so charts are ready
+            if(!this.engine.running && this.engine.t === 0) this.graphs.clear();
+        };
+        ['ma', 'va', 'mb', 'vb', 'k'].forEach(k => document.getElementById(`sl-${k}`).addEventListener('input', updateUI));
+
+        // Fixed Play Button logic: update UI params FIRST, then start.
+        document.getElementById('btn-play').addEventListener('click', () => { 
+            this.engine.updateFromUI(); 
+            this.engine.running = true; 
+        });
+        
+        document.getElementById('btn-pause').addEventListener('click', () => { 
+            this.engine.running = false; 
+        });
+        
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            this.engine.reset(); this.engine.updateFromUI(); this.graphs.clear();
+        });
+
+        document.getElementById('scenario-sel').addEventListener('change', () => {
+            this.engine.reset(); this.engine.updateFromUI(); this.graphs.clear();
+        });
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                e.target.classList.add('active');
+                document.getElementById(e.target.dataset.target).classList.add('active');
+            });
+        });
+
+        document.getElementById('panel-handle').addEventListener('click', () => {
+            const p = document.getElementById('right-panel');
+            p.classList.toggle('closed');
+            document.getElementById('panel-handle').innerText = p.classList.contains('closed') ? "◀" : "▶";
+        });
+    }
+
+    initInquiry() {
+        this.qIdx = 0;
+        this.answers = Array(10).fill("");
+        for(let i=0; i<10; i++) {
+            let saved = localStorage.getItem(`n3l_ap_ans_${i}`);
+            if (saved) this.answers[i] = saved;
+        }
+
+        // Restore student name if saved
+        const savedName = localStorage.getItem('n3l_ap_student_name');
+        if(savedName) document.getElementById('student-name').value = savedName;
+
+        const renderQ = () => {
+            document.getElementById('q-phase').innerText = INQUIRY_QUESTIONS[this.qIdx].stage;
+            document.getElementById('q-count').innerText = `${this.qIdx + 1} / 10`;
+            document.getElementById('q-prompt').innerText = INQUIRY_QUESTIONS[this.qIdx].prompt;
+            document.getElementById('q-ans').value = this.answers[this.qIdx];
+        };
+
+        document.getElementById('q-ans').addEventListener('input', (e) => {
+            this.answers[this.qIdx] = e.target.value;
+            localStorage.setItem(`n3l_ap_ans_${this.qIdx}`, e.target.value);
+        });
+
+        document.getElementById('student-name').addEventListener('input', (e) => {
+            localStorage.setItem('n3l_ap_student_name', e.target.value);
+        });
+
+        document.getElementById('btn-q-prev').addEventListener('click', () => { if(this.qIdx > 0) { this.qIdx--; renderQ(); }});
+        document.getElementById('btn-q-next').addEventListener('click', () => { if(this.qIdx < 9) { this.qIdx++; renderQ(); }});
+        
+        document.getElementById('btn-save').addEventListener('click', () => {
+            const btn = document.getElementById('btn-save');
+            btn.innerText = "Saved ✓";
+            setTimeout(() => btn.innerText = "Save Answer", 2000);
+        });
+
+        document.getElementById('btn-export').addEventListener('click', async () => {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const name = nameInput || prompt("Student Name for Report:", "Student") || "Student";
+            
+            if(typeof docx === 'undefined') return alert("Export library unavailable. Check internet connection.");
+            const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+            const children = [
+                new Paragraph({ text: "AP Physics: Newton's Third Law Report", heading: HeadingLevel.HEADING_1 }),
+                new Paragraph({ text: `Student: ${name} | Date: ${new Date().toLocaleDateString()}` }),
+                new Paragraph({ text: "" })
+            ];
+            INQUIRY_QUESTIONS.forEach((q, i) => {
+                children.push(new Paragraph({ text: `Q${i+1} [${q.stage}]: ${q.prompt}`, heading: HeadingLevel.HEADING_2 }));
+                children.push(new Paragraph({ text: this.answers[i] || "[No answer provided]" }));
+                children.push(new Paragraph({ text: "" }));
+            });
+            const doc = new Document({ sections: [{ properties: {}, children: children }] });
+            const blob = await Packer.toBlob(doc);
+            saveAs(blob, `N3L_Report_${name.replace(/\s+/g, '_')}.docx`);
+        });
+
+        renderQ();
+    }
+
+    loop(timestamp) {
+        let dt = (timestamp - this.lastTime) / 1000;
+        this.lastTime = timestamp;
+        if (dt > 0.1) dt = 0.1; // Cap delta to prevent huge jumps on tab switch
+
+        this.engine.step(dt);
+        this.renderer.render();
+        this.graphs.update();
+
+        requestAnimationFrame((t) => this.loop(t));
+    }
+}
+
+// Boot application
+window.onload = () => new App();
+
+</script>
+</body>
+</html>
