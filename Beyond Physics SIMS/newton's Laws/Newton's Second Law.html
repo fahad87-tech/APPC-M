@@ -4,14 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Newton's Second Law: Dynamics & Kinematics</title>
-    <script src="../../auth.js"></script>
     <script>
-   const AUTH_CONFIG = {
-     hash: "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4",
-     salt: "static_salt_for_legacy_compatibility",
-     iterations: 1,
-     legacy: true
-   };
+   const TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
 
    document.documentElement.classList.add("password-locked");
 
@@ -85,33 +79,21 @@
      });
    }
 
-    async function verifyPageAccess() {
-      const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
-      if (userInput === null) { window.location.href = "../index.html"; return; }
-      
-      // Legacy SHA-256 verification (for backward compatibility)
-      const encoder = new TextEncoder();
-      const data = encoder.encode(userInput);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-      
-      if (hashHex === AUTH_CONFIG.hash) { 
-        document.documentElement.classList.remove("password-locked");
-      } else { 
-        alert("Incorrect password. Access denied."); 
-        window.location.href = "../index.html"; 
-      }
-    }
+   async function verifyPageAccess() {
+     const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+     if (userInput === null) { window.location.href = "../index.html"; return; }
+     const encoder = new TextEncoder();
+     const data = encoder.encode(userInput);
+     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+     const hashArray = Array.from(new Uint8Array(hashBuffer));
+     const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+     if (hashHex === TARGET_HASH) { document.documentElement.classList.remove("password-locked"); }
+     else { alert("Incorrect password. Access denied."); window.location.href = "../index.html"; }
+   }
 
-    // Check for existing valid session first
-    if (auth && auth.isAuthenticated && auth.isAuthenticated()) {
-      document.documentElement.classList.remove("password-locked");
-    } else {
-      if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true }); }
-      else { verifyPageAccess(); }
-    }
-   </script>
+   if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true }); }
+   else { verifyPageAccess(); }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <script src="https://unpkg.com/docx@7.8.2/build/index.js" defer></script>
