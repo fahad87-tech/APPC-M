@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics Simulation: Friction & Experimental Design</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://unpkg.com/docx@7.8.2/build/index.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" defer></script>
+
+    <style>
+        /* CSS Reset & Variables */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-color: #1a1a2e;
+            --panel-bg: rgba(22, 28, 45, 0.92);
+            --border-color: rgba(0, 180, 216, 0.15);
+            --accent: #00b4d8;
+            --accent-hover: #0096c7;
+            --danger: #ff6b6b;
+            --success: #6bff8e;
+            --highlight: #ffd93d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #999999;
+            --text-muted: #666666;
+            --font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-stack);
+            font-size: 14px;
+            line-height: 1.5;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Tab Bar */
+        #top-tabs {
+            display: flex;
+            background: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        .top-tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .top-tab:hover { color: var(--text-primary); }
+        .top-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        /* Main View Containers */
+        #sim-view {
+            display: flex;
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        #inquiry-view {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            background: var(--bg-color);
+        }
+
+        /* Canvas */
+        #sim-canvas {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            cursor: grab;
+        }
+        #sim-canvas:active { cursor: grabbing; }
+
+        /* HUD */
+        #hud-badge {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 20, 40, 0.8);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            color: var(--text-primary);
+            z-index: 10;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Panels */
+        .panel {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 320px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+        #left-panel { left: 0; border-width: 0 1px 0 0; }
+        #right-panel { right: 0; border-width: 0 0 0 1px; }
+
+        .panel-header {
+            padding: 18px 20px;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.2);
+        }
+        .panel-content {
+            padding: 18px 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        /* Inner Tabs (Right Panel) */
+        .sub-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.2);
+        }
+        .sub-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--text-secondary);
+            border-bottom: 2px solid transparent;
+        }
+        .sub-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+        .sub-content { display: none; padding: 18px 20px; overflow-y: auto; flex: 1; }
+        .sub-content.active { display: block; }
+
+        /* Controls */
+        .control-group { margin-bottom: 16px; }
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .value-label { color: var(--accent); font-family: monospace; font-size: 12px; }
+        
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--accent);
+            margin-top: -6px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        select {
+            width: 100%;
+            padding: 8px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            font-family: var(--font-stack);
+        }
+
+        /* Buttons */
+        .btn-row { display: flex; gap: 8px; margin-bottom: 16px; }
+        button {
+            flex: 1;
+            padding: 8px 12px;
+            background: rgba(0, 180, 216, 0.1);
+            border: 1px solid var(--accent);
+            color: var(--text-primary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 10px rgba(0,180,216,0.4);
+            transform: scale(1.02);
+        }
+        button.danger { border-color: var(--danger); color: var(--danger); background: transparent; }
+        button.danger:hover { background: var(--danger); color: #fff; box-shadow: 0 0 10px rgba(255,107,107,0.4); }
+
+        /* Toggles */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .toggle-row input { margin-right: 8px; cursor: pointer; }
+
+        /* Telemetry */
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 9px;
+            margin-bottom: 16px;
+        }
+        .telemetry-cell {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            padding: 9px 12px;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+        .telemetry-label { font-size: 10px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; }
+        .telemetry-val { font-size: 12px; font-family: monospace; color: var(--highlight); }
+        .telemetry-flash { animation: flash 0.5s ease-out; }
+        @keyframes flash { 0% { background: rgba(255,217,61,0.3); } 100% { background: transparent; } }
+
+        .derived-box {
+            background: rgba(15,20,40,0.6);
+            border: 1px solid var(--border-color);
+            padding: 12px 14px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+        .derived-box h4 { font-size: 11px; margin-bottom: 8px; color: var(--text-secondary); }
+
+        /* Charts */
+        .chart-container {
+            background: rgba(15, 20, 40, 0.6);
+            border: 1px solid rgba(0, 180, 216, 0.15);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 16px;
+            height: 180px;
+            position: relative;
+        }
+
+        /* 5E Inquiry UI */
+        .inquiry-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .phase-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(0,180,216,0.2);
+            color: var(--accent);
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+        .question-text { font-size: 16px; margin-bottom: 16px; color: var(--text-primary); }
+        textarea {
+            width: 100%;
+            height: 120px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 4px;
+            font-family: var(--font-stack);
+            font-size: 14px;
+            margin-bottom: 16px;
+            resize: vertical;
+        }
+        details {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        summary { cursor: pointer; color: var(--accent); font-weight: bold; outline: none; }
+        .dots-container { display: flex; justify-content: center; gap: 8px; margin: 20px 0; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #333; cursor: pointer; }
+        .dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+    </style>
+</head>
+<body>
+
+    <div id="top-tabs">
+        <div class="top-tab active" data-view="sim-view">Simulation</div>
+        <div class="top-tab" data-view="inquiry-view">5E Inquiry</div>
+    </div>
+
+    <div id="sim-view">
+        <canvas id="sim-canvas"></canvas>
+        <div id="hud-badge">Zoom: 1.00× | Shift+Drag to Pan</div>
+
+        <div id="left-panel" class="panel">
+            <div class="panel-header">Controls</div>
+            <div class="panel-content">
+                
+                <div class="control-group">
+                    <div class="control-header"><span>Scenario Setup</span></div>
+                    <select id="scenario-select">
+                        <option value="default">Standard Ramp (Friction Experiment)</option>
+                        <option value="ice">Ice Ramp (Zero Friction)</option>
+                        <option value="sticky">High Friction Surface</option>
+                    </select>
+                </div>
+
+                <div class="btn-row">
+                    <button id="btn-play">▶ Play</button>
+                    <button id="btn-pause">⏸ Pause</button>
+                    <button id="btn-reset">⟲ Reset</button>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header"><span>Sim Speed</span></div>
+                    <div class="btn-row" style="margin-bottom: 0;">
+                        <button class="btn-speed" data-speed="0.25">0.25×</button>
+                        <button class="btn-speed active" data-speed="1" style="background:var(--accent);color:#000;">1×</button>
+                        <button class="btn-speed" data-speed="4">4×</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header"><span>Ramp Length (L)</span><span class="value-label" id="val-length">6.00 m</span></div>
+                    <input type="range" id="slider-length" min="2.0" max="15.0" step="0.5" value="6.0">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header"><span>Number of Blocks (Mass)</span><span class="value-label" id="val-mass">1 (0.50 kg)</span></div>
+                    <input type="range" id="slider-mass" min="1" max="10" step="1" value="1">
+                </div>
+                
+                <div class="control-group">
+                    <div class="control-header"><span>Ramp Angle (θ)</span><span class="value-label" id="val-angle">30.0°</span></div>
+                    <input type="range" id="slider-angle" min="5" max="85" step="0.5" value="30">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header"><span>Kinetic Friction (μ_k)</span><span class="value-label" id="val-mu">0.25</span></div>
+                    <input type="range" id="slider-mu" min="0" max="0.8" step="0.01" value="0.25">
+                </div>
+
+                <div class="control-group">
+                    <div class="control-header"><span>Target Distance (d)</span><span class="value-label" id="val-dist">1.00 m</span></div>
+                    <input type="range" id="slider-dist" min="0.5" max="15.0" step="0.1" value="1.0">
+                </div>
+
+                <fieldset class="derived-box" style="margin-top: 20px;">
+                    <legend style="font-size: 11px; color: var(--text-secondary);">Display Toggles</legend>
+                    <label class="toggle-row"><input type="checkbox" id="tog-vectors" checked> Show Force Vectors</label>
+                    <label class="toggle-row"><input type="checkbox" id="tog-labels" checked> Show Labels</label>
+                    <label class="toggle-row"><input type="checkbox" id="tog-trails" checked> Show Trails</label>
+                </fieldset>
+            </div>
+        </div>
+
+        <div id="right-panel" class="panel">
+            <div class="sub-tabs">
+                <div class="sub-tab active" data-target="tab-telemetry">TELEMETRY</div>
+                <div class="sub-tab" data-target="tab-charts">CHARTS</div>
+            </div>
+
+            <div id="tab-telemetry" class="sub-content active">
+                <div class="telemetry-grid">
+                    <div class="telemetry-cell">
+                        <span class="telemetry-label">Stopwatch Time</span>
+                        <span class="telemetry-val" id="tel-time">0.000 s</span>
+                    </div>
+                    <div class="telemetry-cell">
+                        <span class="telemetry-label">Distance (x)</span>
+                        <span class="telemetry-val" id="tel-x">0.000 m</span>
+                    </div>
+                    <div class="telemetry-cell">
+                        <span class="telemetry-label">Velocity (v)</span>
+                        <span class="telemetry-val" id="tel-v">0.000 m/s</span>
+                    </div>
+                    <div class="telemetry-cell">
+                        <span class="telemetry-label">Acceleration (a)</span>
+                        <span class="telemetry-val" id="tel-a">0.000 m/s²</span>
+                    </div>
+                </div>
+
+                <div class="derived-box">
+                    <h4>Force Analysis (Parallel)</h4>
+                    <div class="telemetry-grid" style="margin-bottom:0;">
+                        <div class="telemetry-cell">
+                            <span class="telemetry-label">Grav (mg·sinθ)</span>
+                            <span class="telemetry-val" id="tel-fgx">0.00 N</span>
+                        </div>
+                        <div class="telemetry-cell">
+                            <span class="telemetry-label">Friction (μ·Fn)</span>
+                            <span class="telemetry-val" id="tel-ff">0.00 N</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="derived-box">
+                    <h4>Force Analysis (Perpendicular)</h4>
+                    <div class="telemetry-grid" style="margin-bottom:0;">
+                        <div class="telemetry-cell">
+                            <span class="telemetry-label">Normal Force (Fn)</span>
+                            <span class="telemetry-val" id="tel-fn">0.00 N</span>
+                        </div>
+                        <div class="telemetry-cell">
+                            <span class="telemetry-label">Grav (mg·cosθ)</span>
+                            <span class="telemetry-val" id="tel-fgy">0.00 N</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-charts" class="sub-content" style="padding: 10px;">
+                <div class="chart-container">
+                    <canvas id="chart-kinematics"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-forces"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="chart-energy"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="inquiry-view">
+        <div class="inquiry-card">
+            <div class="btn-row" style="justify-content: space-between; border-bottom: 1px solid var(--border-color); padding-bottom: 16px; margin-bottom: 16px;">
+                <h2 style="color:var(--text-primary);">Experimental Design Report</h2>
+                <div>
+                    <button id="btn-clear-save" class="danger">Clear Saved</button>
+                    <button id="btn-export-docx" style="background:var(--accent); color:#000;">Export to DOCX</button>
+                    <button id="btn-export-csv">Export Data CSV</button>
+                </div>
+            </div>
+
+            <div id="q-container">
+                </div>
+
+            <div class="btn-row" style="margin-top: 20px;">
+                <button id="btn-prev-q">◀ Previous</button>
+                <button id="btn-save-q">Save Answer</button>
+                <button id="btn-next-q">Next ▶</button>
+            </div>
+            
+            <div class="dots-container" id="q-dots">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================================
+        // MODULE 1: PhysicsEngine
+        // ============================================================================
+        class PhysicsEngine {
+            constructor() {
+                this.time = 0;
+                this.running = false;
+                this.dt = 0; 
+                this.subSteps = 10;
+                
+                // Constants
+                this.g = 9.80;
+                this.m_unit = 0.50; // kg per block
+
+                // State
+                this.m = 0.50;
+                this.theta = 30 * Math.PI / 180;
+                this.mu = 0.25;
+                this.targetDist = 1.0;
+                this.rampLength = 6.0;
+
+                this.x = 0; // Distance traveled ALONG ramp
+                this.v = 0; 
+                this.a = 0;
+                
+                // 2D Coordinates for tracking block regardless of falling
+                this.posX = 0;
+                this.posY = 0;
+                this.vX = 0;
+                this.vY = 0;
+                this.onRamp = true;
+
+                this.stopwatch = 0;
+                this.timerActive = false;
+                this.hasReachedTarget = false;
+
+                // Forces
+                this.Fn = 0;
+                this.Fg_x = 0;
+                this.Fg_y = 0;
+                this.Ff = 0;
+                this.Fnet = 0;
+            }
+
+            setup(scenario) {
+                this.time = 0;
+                this.x = 0;
+                this.v = 0;
+                this.a = 0;
+                this.posX = 0;
+                this.posY = 0;
+                this.vX = 0;
+                this.vY = 0;
+                this.onRamp = true;
+                this.stopwatch = 0;
+                this.timerActive = false;
+                this.hasReachedTarget = false;
+                this.running = false;
+
+                if (scenario === 'ice') {
+                    document.getElementById('slider-mu').value = 0.0;
+                    this.mu = 0.0;
+                } else if (scenario === 'sticky') {
+                    document.getElementById('slider-mu').value = 0.7;
+                    this.mu = 0.7;
+                }
+
+                this.updateForces();
+            }
+
+            liveUpdate(key, val) {
+                if (key === 'mass') this.m = val * this.m_unit;
+                if (key === 'angle') this.theta = val * Math.PI / 180;
+                if (key === 'mu') this.mu = val;
+                if (key === 'dist') this.targetDist = val;
+                if (key === 'length') {
+                    this.rampLength = val;
+                    // Reset if the ramp length shrinks below the block's current position
+                    if (this.x > this.rampLength && this.onRamp) {
+                        this.setup('default'); 
+                    }
+                }
+                if (this.onRamp) this.updateForces();
+            }
+
+            updateForces() {
+                this.Fg_x = this.m * this.g * Math.sin(this.theta);
+                this.Fg_y = this.m * this.g * Math.cos(this.theta);
+                this.Fn = this.Fg_y; 
+                this.Ff = this.mu * this.Fn; 
+                
+                // Static check
+                if (this.v === 0 && this.Fg_x <= this.Ff) {
+                    this.Fnet = 0;
+                } else {
+                    this.Fnet = this.Fg_x - this.Ff; 
+                }
+                
+                this.a = this.Fnet / this.m;
+            }
+
+            step(dt) {
+                if (!this.running || dt === 0) return;
+                
+                dt = Math.min(dt, 0.05);
+                const subDt = dt / this.subSteps;
+
+                if (!this.timerActive && !this.hasReachedTarget && this.a > 0 && this.onRamp) {
+                    this.timerActive = true;
+                }
+
+                for (let i = 0; i < this.subSteps; i++) {
+                    if (this.onRamp) {
+                        this.updateForces();
+
+                        this.v += this.a * subDt;
+                        if (this.v < 0 && this.Fnet <= 0) {
+                            this.v = 0;
+                            this.a = 0;
+                        }
+
+                        this.x += this.v * subDt;
+                        
+                        // Update 2D coords relative to top of ramp
+                        this.posX = this.x * Math.cos(this.theta);
+                        this.posY = -this.x * Math.sin(this.theta); // Note: world coords, +y is UP
+
+                        // Check if block falls off the ramp
+                        if (this.x > this.rampLength) {
+                            this.onRamp = false;
+                            this.x = this.rampLength; // lock distance
+                            
+                            // Initialize projectile velocities
+                            this.vX = this.v * Math.cos(this.theta);
+                            this.vY = -this.v * Math.sin(this.theta);
+                            
+                            // Clear Ramp Forces
+                            this.Fn = 0;
+                            this.Ff = 0;
+                            this.Fnet = 0;
+                        }
+
+                        if (this.timerActive) {
+                            this.stopwatch += subDt;
+                            if (this.x >= this.targetDist) {
+                                this.timerActive = false;
+                                this.hasReachedTarget = true;
+                            }
+                        }
+
+                    } else {
+                        // Projectile Motion off the ramp
+                        this.vY -= this.g * subDt;
+                        this.posX += this.vX * subDt;
+                        this.posY += this.vY * subDt;
+
+                        this.v = Math.sqrt(this.vX*this.vX + this.vY*this.vY);
+                        this.a = this.g; // visually only tracking g 
+                    }
+
+                    this.time += subDt;
+                }
+            }
+
+            getState() {
+                return {
+                    time: this.time,
+                    stopwatch: this.stopwatch,
+                    x: this.x,
+                    posX: this.posX,
+                    posY: this.posY,
+                    v: this.v,
+                    a: this.onRamp ? this.a : this.g,
+                    Fg_x: this.onRamp ? this.Fg_x : 0,
+                    Fg_y: this.onRamp ? this.Fg_y : this.m * this.g,
+                    Fn: this.Fn,
+                    Ff: this.v > 0 ? this.Ff : (this.a > 0 ? this.Ff : this.Fg_x), 
+                    Fnet: this.onRamp ? this.Fnet : this.m * this.g,
+                    PE: this.m * this.g * ((15.0 + this.posY)), // Abstract max height relative to fall
+                    KE: 0.5 * this.m * this.v * this.v,
+                    Wf: this.Ff * this.x,
+                    numBlocks: this.m / this.m_unit,
+                    theta: this.theta,
+                    targetDist: this.targetDist,
+                    rampLength: this.rampLength,
+                    onRamp: this.onRamp
+                };
+            }
+        }
+
+        // ============================================================================
+        // MODULE 2: Camera
+        // ============================================================================
+        class Camera {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.offsetX = canvas.width / 2;
+                this.offsetY = canvas.height / 2;
+                this.zoom = 100; 
+                
+                this.isPanning = false;
+                this.startX = 0;
+                this.startY = 0;
+
+                this.bindEvents();
+                this.updateHUD();
+            }
+
+            worldToScreen(x, y) {
+                return {
+                    x: this.offsetX + x * this.zoom,
+                    y: this.offsetY - y * this.zoom 
+                };
+            }
+
+            screenToWorld(sx, sy) {
+                return {
+                    x: (sx - this.offsetX) / this.zoom,
+                    y: (this.offsetY - sy) / this.zoom
+                };
+            }
+
+            zoomBy(factor, focusX = this.canvas.width/2, focusY = this.canvas.height/2) {
+                const worldBefore = this.screenToWorld(focusX, focusY);
+                this.zoom *= factor;
+                this.zoom = Math.max(10, Math.min(this.zoom, 500)); 
+                
+                const worldAfter = this.screenToWorld(focusX, focusY);
+                this.offsetX += (worldAfter.x - worldBefore.x) * this.zoom;
+                this.offsetY -= (worldAfter.y - worldBefore.y) * this.zoom;
+                this.updateHUD();
+            }
+
+            pan(dx, dy) {
+                this.offsetX += dx;
+                this.offsetY += dy;
+            }
+
+            resetView() {
+                this.zoom = 70; // Zoomed out slightly to see the fall
+                this.offsetX = this.canvas.width / 2 - 150; 
+                this.offsetY = this.canvas.height / 2 - 150;
+                this.updateHUD();
+            }
+
+            updateHUD() {
+                const hud = document.getElementById('hud-badge');
+                if (hud) hud.textContent = `Zoom: ${(this.zoom/100).toFixed(2)}× | Shift+Drag to Pan`;
+            }
+
+            bindEvents() {
+                this.canvas.addEventListener('mousedown', (e) => {
+                    if (e.shiftKey || e.button === 1 || e.button === 2) {
+                        this.isPanning = true;
+                        this.startX = e.clientX;
+                        this.startY = e.clientY;
+                    }
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    if (this.isPanning) {
+                        const dx = e.clientX - this.startX;
+                        const dy = e.clientY - this.startY;
+                        this.pan(dx, dy);
+                        this.startX = e.clientX;
+                        this.startY = e.clientY;
+                    }
+                });
+
+                window.addEventListener('mouseup', () => { this.isPanning = false; });
+                this.canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+                this.canvas.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+                    this.zoomBy(zoomFactor, e.clientX, e.clientY);
+                });
+            }
+        }
+
+        // ============================================================================
+        // MODULE 3: Renderer
+        // ============================================================================
+        class Renderer {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.trailBuffer = [];
+            }
+
+            clear() {
+                const ctx = this.ctx;
+                ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                const grad = ctx.createLinearGradient(0, 0, 0, this.canvas.height);
+                grad.addColorStop(0, '#1a1a2e');
+                grad.addColorStop(1, '#16213e');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                for (let i = 0; i < this.canvas.width; i += 50) { ctx.moveTo(i, 0); ctx.lineTo(i, this.canvas.height); }
+                for (let j = 0; j < this.canvas.height; j += 50) { ctx.moveTo(0, j); ctx.lineTo(this.canvas.width, j); }
+                ctx.stroke();
+            }
+
+            drawVectors(cam, state, px, py) {
+                const ctx = this.ctx;
+                const scale = 0.5; 
+
+                const drawArrow = (x, y, dx, dy, color, label) => {
+                    if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1) return;
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + dx, y - dy); 
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+
+                    const angle = Math.atan2(-dy, dx);
+                    ctx.beginPath();
+                    ctx.moveTo(x + dx, y - dy);
+                    ctx.lineTo(x + dx - 10 * Math.cos(angle - Math.PI/6), y - dy - 10 * Math.sin(angle - Math.PI/6));
+                    ctx.lineTo(x + dx - 10 * Math.cos(angle + Math.PI/6), y - dy - 10 * Math.sin(angle + Math.PI/6));
+                    ctx.fillStyle = color;
+                    ctx.fill();
+
+                    if (document.getElementById('tog-labels').checked) {
+                        ctx.fillStyle = color;
+                        ctx.font = '12px system-ui';
+                        ctx.fillText(label, x + dx + 5, y - dy + 5);
+                    }
+                };
+
+                drawArrow(px, py, -state.Fn * Math.sin(state.theta) * scale, state.Fn * Math.cos(state.theta) * scale, '#ffd93d', 'Fn');
+                
+                const Fg = Math.sqrt(state.Fg_x*state.Fg_x + state.Fg_y*state.Fg_y);
+                drawArrow(px, py, 0, -Fg * scale, '#ff6b6b', 'Fg');
+
+                if (state.Ff > 0.01) {
+                    drawArrow(px, py, -state.Ff * Math.cos(state.theta) * scale, state.Ff * Math.sin(state.theta) * scale, '#00b4d8', 'Ff');
+                }
+            }
+
+            drawScene(cam, state) {
+                this.clear();
+                const ctx = this.ctx;
+                const theta = state.theta;
+                const L = state.rampLength;
+
+                const A = cam.worldToScreen(0, 0); 
+                const B = cam.worldToScreen(L * Math.cos(theta), -L * Math.sin(theta)); 
+                const C = cam.worldToScreen(0, -L * Math.sin(theta)); 
+
+                // Draw Solid Triangle Ramp
+                ctx.fillStyle = '#8B5A2B';
+                ctx.strokeStyle = '#5C4033';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(A.x, A.y);
+                ctx.lineTo(B.x, B.y);
+                ctx.lineTo(C.x, C.y);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Draw Floor extension
+                ctx.beginPath();
+                ctx.moveTo(0, C.y);
+                ctx.lineTo(this.canvas.width, C.y);
+                ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+                ctx.stroke();
+
+                // Draw distance marks and target sensor
+                ctx.save();
+                ctx.translate(A.x, A.y);
+                ctx.rotate(theta);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = '10px monospace';
+                for(let m = 0; m <= L; m += 0.5) {
+                    const mx = m * cam.zoom;
+                    ctx.fillRect(mx, 0, 2, 10);
+                    if (m > 0 && document.getElementById('tog-labels').checked) ctx.fillText(m.toFixed(1) + 'm', mx - 10, -5);
+                }
+
+                // Target Distance marker
+                if (state.targetDist <= L) {
+                    const d_px = state.targetDist * cam.zoom;
+                    ctx.fillStyle = 'rgba(107, 255, 142, 0.8)';
+                    ctx.fillRect(d_px, -20, 4, 40);
+                    if (document.getElementById('tog-labels').checked) {
+                        ctx.fillStyle = '#6bff8e';
+                        ctx.fillText('Sensor', d_px - 15, -25);
+                    }
+                }
+                ctx.restore();
+
+                // Draw Block(s)
+                const p = cam.worldToScreen(state.posX, state.posY);
+                const blockW = 0.4 * cam.zoom;
+                const blockH = 0.2 * cam.zoom;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(theta); // Keep block angled matching the ramp trajectory
+
+                for (let i = 0; i < state.numBlocks; i++) {
+                    const by = - (i + 1) * blockH;
+                    const grad = ctx.createLinearGradient(0, by, 0, by + blockH);
+                    grad.addColorStop(0, '#e8cc9b');
+                    grad.addColorStop(1, '#c29a53');
+                    ctx.fillStyle = grad;
+                    
+                    ctx.fillRect(0, by, blockW, blockH);
+                    ctx.strokeStyle = '#8B5A2B';
+                    ctx.strokeRect(0, by, blockW, blockH);
+                }
+                ctx.restore();
+
+                // Draw Vectors
+                if (state.onRamp && document.getElementById('tog-vectors').checked) {
+                    const cm_h = (state.numBlocks * blockH) / 2; 
+                    const cmScreenX = p.x + (blockW/2) * Math.cos(theta) - (-cm_h) * Math.sin(theta);
+                    const cmScreenY = p.y + (blockW/2) * Math.sin(theta) + (-cm_h) * Math.cos(theta);
+                    this.drawVectors(cam, state, cmScreenX, cmScreenY);
+                }
+
+                // Trails
+                if (document.getElementById('tog-trails').checked) {
+                    if (state.v > 0) {
+                        this.trailBuffer.push({ x: p.x + (blockW/2)*Math.cos(theta), y: p.y + (blockW/2)*Math.sin(theta) });
+                        if (this.trailBuffer.length > 200) this.trailBuffer.shift(); 
+                    }
+                    ctx.beginPath();
+                    for(let i=0; i<this.trailBuffer.length; i++) {
+                        if (i===0) ctx.moveTo(this.trailBuffer[i].x, this.trailBuffer[i].y);
+                        else ctx.lineTo(this.trailBuffer[i].x, this.trailBuffer[i].y);
+                    }
+                    ctx.strokeStyle = 'rgba(0, 180, 216, 0.4)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                } else {
+                    this.trailBuffer = [];
+                }
+            }
+        }
+
+        // ============================================================================
+        // MODULE 4: UIControls
+        // ============================================================================
+        class UIControls {
+            constructor(engine, camera) {
+                this.engine = engine;
+                this.camera = camera;
+                this.simSpeed = 1.0;
+                
+                this.bindInputs();
+                this.bindTabs();
+                this.updateLabels();
+            }
+
+            bindInputs() {
+                const b = (id, key, formatFn) => {
+                    const el = document.getElementById(id);
+                    el.addEventListener('input', (e) => {
+                        const val = parseFloat(e.target.value);
+                        this.engine.liveUpdate(key, val);
+                        document.getElementById(id.replace('slider-', 'val-')).textContent = formatFn(val);
+                        
+                        // Dynamically adjust Target Distance slider max to match Ramp Length
+                        if (key === 'length') {
+                            const distSlider = document.getElementById('slider-dist');
+                            distSlider.max = val;
+                            if (parseFloat(distSlider.value) > val) {
+                                distSlider.value = val;
+                                distSlider.dispatchEvent(new Event('input'));
+                            }
+                        }
+                    });
+                };
+
+                b('slider-mass', 'mass', v => `${v} (${(v*0.5).toFixed(2)} kg)`);
+                b('slider-length', 'length', v => `${v.toFixed(2)} m`);
+                b('slider-angle', 'angle', v => `${v.toFixed(1)}°`);
+                b('slider-mu', 'mu', v => v.toFixed(2));
+                b('slider-dist', 'dist', v => `${v.toFixed(2)} m`);
+
+                document.getElementById('scenario-select').addEventListener('change', (e) => {
+                    this.engine.setup(e.target.value);
+                    document.getElementById('slider-mu').value = this.engine.mu;
+                    document.getElementById('val-mu').textContent = this.engine.mu.toFixed(2);
+                });
+
+                document.getElementById('btn-play').addEventListener('click', () => this.engine.running = true);
+                document.getElementById('btn-pause').addEventListener('click', () => this.engine.running = false);
+                document.getElementById('btn-reset').addEventListener('click', () => {
+                    this.engine.setup(document.getElementById('scenario-select').value);
+                    window.dispatchEvent(new Event('simReset'));
+                });
+
+                document.querySelectorAll('.btn-speed').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.btn-speed').forEach(b => {
+                            b.classList.remove('active');
+                            b.style.background = 'rgba(0, 180, 216, 0.1)';
+                            b.style.color = 'var(--text-primary)';
+                        });
+                        e.target.classList.add('active');
+                        e.target.style.background = 'var(--accent)';
+                        e.target.style.color = '#000';
+                        this.simSpeed = parseFloat(e.target.dataset.speed);
+                    });
+                });
+            }
+
+            bindTabs() {
+                document.querySelectorAll('.top-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        document.querySelectorAll('.top-tab').forEach(t => t.classList.remove('active'));
+                        e.target.classList.add('active');
+                        const view = e.target.dataset.view;
+                        document.getElementById('sim-view').style.display = view === 'sim-view' ? 'flex' : 'none';
+                        document.getElementById('inquiry-view').style.display = view === 'inquiry-view' ? 'block' : 'none';
+                    });
+                });
+
+                document.querySelectorAll('.sub-tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
+                        e.target.classList.add('active');
+                        const target = e.target.dataset.target;
+                        document.querySelectorAll('.sub-content').forEach(c => c.classList.remove('active'));
+                        document.getElementById(target).classList.add('active');
+                    });
+                });
+            }
+
+            updateLabels() {
+                document.getElementById('slider-mass').dispatchEvent(new Event('input'));
+                document.getElementById('slider-length').dispatchEvent(new Event('input'));
+                document.getElementById('slider-angle').dispatchEvent(new Event('input'));
+                document.getElementById('slider-mu').dispatchEvent(new Event('input'));
+                document.getElementById('slider-dist').dispatchEvent(new Event('input'));
+            }
+
+            updateTelemetry(state) {
+                const fmt = (val, dec=3) => {
+                    if (Math.abs(val) < 1e-4 && val !== 0) return val.toExponential(2);
+                    return val.toFixed(dec);
+                };
+
+                const updateEl = (id, val, suffix) => {
+                    const el = document.getElementById(id);
+                    const newVal = `${fmt(val)} ${suffix}`;
+                    if (el.textContent !== newVal) {
+                        el.textContent = newVal;
+                        el.classList.remove('telemetry-flash');
+                        void el.offsetWidth; 
+                        el.classList.add('telemetry-flash');
+                    }
+                };
+
+                updateEl('tel-time', state.stopwatch, 's');
+                updateEl('tel-x', state.x, 'm');
+                updateEl('tel-v', state.v, 'm/s');
+                updateEl('tel-a', state.a, 'm/s²');
+
+                updateEl('tel-fgx', state.Fg_x, 'N');
+                updateEl('tel-fgy', state.Fg_y, 'N');
+                updateEl('tel-fn', state.Fn, 'N');
+                updateEl('tel-ff', state.Ff, 'N');
+            }
+        }
+
+        // ============================================================================
+        // MODULE 5: DataLogger
+        // ============================================================================
+        class DataLogger {
+            constructor() {
+                this.historyMax = 5000;
+                this.data = {
+                    t: [],
+                    x: [], v: [], a: [],
+                    PE: [], KE: [], Total: []
+                };
+                this.frameCount = 0;
+                this.initCharts();
+
+                window.addEventListener('simReset', () => this.reset());
+            }
+
+            initCharts() {
+                Chart.defaults.color = '#ccc';
+                Chart.defaults.font.family = "system-ui";
+                
+                const commonConfig = {
+                    type: 'line',
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        elements: { point: { radius: 0 }, line: { borderWidth: 2 } },
+                        scales: {
+                            x: {
+                                type: 'linear', min: 0,
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { callback: this.sciTickCallback, maxTicksLimit: 8 }
+                            },
+                            y: {
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: { callback: this.sciTickCallback }
+                            }
+                        },
+                        plugins: { legend: { labels: { boxWidth: 12, font: { size: 10 } } } }
+                    }
+                };
+
+                const ctxK = document.getElementById('chart-kinematics').getContext('2d');
+                this.chartK = new Chart(ctxK, { ...commonConfig, data: {
+                    datasets: [
+                        { label: 'x (m)', data: [], borderColor: '#6bff8e' },
+                        { label: 'v (m/s)', data: [], borderColor: '#00b4d8' },
+                        { label: 'a (m/s²)', data: [], borderColor: '#ffd93d' }
+                    ]
+                }});
+
+                const ctxF = document.getElementById('chart-forces').getContext('2d');
+                this.chartF = new Chart(ctxF, { ...commonConfig, data: {
+                    datasets: [
+                        { label: 'F_net (N)', data: [], borderColor: '#ff6b6b' },
+                        { label: 'F_fric (N)', data: [], borderColor: '#e0e0e0' }
+                    ]
+                }});
+
+                const ctxE = document.getElementById('chart-energy').getContext('2d');
+                this.chartE = new Chart(ctxE, { ...commonConfig, data: {
+                    datasets: [
+                        { label: 'PE (J)', data: [], borderColor: '#00b4d8' },
+                        { label: 'KE (J)', data: [], borderColor: '#ff6b6b' },
+                        { label: 'Total E (J)', data: [], borderColor: '#e0e0e0' }
+                    ]
+                }});
+            }
+
+            sciTickCallback(val) {
+                if (Math.abs(val) >= 1e4 || (Math.abs(val) > 0 && Math.abs(val) < 1e-3)) return val.toExponential(1);
+                return val.toPrecision(3);
+            }
+
+            sample(state) {
+                this.frameCount++;
+                if (this.frameCount % 4 !== 0) return;
+
+                this.data.t.push(state.time);
+                this.data.x.push(state.x);
+                this.data.v.push(state.v);
+                this.data.a.push(state.a);
+                this.data.PE.push(state.PE);
+                this.data.KE.push(state.KE);
+                this.data.Total.push(state.PE + state.KE + state.Wf); 
+
+                if (this.data.t.length > this.historyMax) {
+                    for(let key in this.data) {
+                        this.data[key] = this.data[key].filter((_, i) => i % 2 === 0);
+                    }
+                }
+
+                this.updateCharts(state.time, state);
+            }
+
+            updateCharts(tMax, state) {
+                this.chartK.data.datasets[0].data.push({x: state.time, y: state.x});
+                this.chartK.data.datasets[1].data.push({x: state.time, y: state.v});
+                this.chartK.data.datasets[2].data.push({x: state.time, y: state.a});
+                this.chartK.options.scales.x.max = Math.max(1, state.time);
+                this.chartK.update('none');
+
+                this.chartF.data.datasets[0].data.push({x: state.time, y: state.Fnet});
+                this.chartF.data.datasets[1].data.push({x: state.time, y: state.Ff});
+                this.chartF.options.scales.x.max = Math.max(1, state.time);
+                this.chartF.update('none');
+
+                const totalE = state.PE + state.KE + state.Wf;
+                this.chartE.data.datasets[0].data.push({x: state.time, y: state.PE});
+                this.chartE.data.datasets[1].data.push({x: state.time, y: state.KE});
+                this.chartE.data.datasets[2].data.push({x: state.time, y: totalE});
+                this.chartE.options.scales.x.max = Math.max(1, state.time);
+                this.chartE.update('none');
+            }
+
+            reset() {
+                for(let key in this.data) this.data[key] = [];
+                [this.chartK, this.chartF, this.chartE].forEach(c => {
+                    c.data.datasets.forEach(ds => ds.data = []);
+                    c.options.scales.x.max = 1;
+                    c.update('none');
+                });
+            }
+            
+            getCSV() {
+                if (this.data.t.length === 0) return "t,x,v,a,PE,KE,TotalE\n";
+                let csv = "Time(s),Position(m),Velocity(m/s),Acceleration(m/s^2),PE(J),KE(J),TotalE(J)\n";
+                for(let i=0; i<this.data.t.length; i++) {
+                    csv += `${this.data.t[i]},${this.data.x[i]},${this.data.v[i]},${this.data.a[i]},${this.data.PE[i]},${this.data.KE[i]},${this.data.Total[i]}\n`;
+                }
+                return csv;
+            }
+        }
+
+        // ============================================================================
+        // MODULE 6: ExportManager & 5E Inquiry
+        // ============================================================================
+        class ExportManager {
+            constructor(logger) {
+                this.logger = logger;
+                this.questions = [
+                    { phase: "ENGAGE", text: "1. The student claims that adding more blocks will increase the kinetic friction, causing the blocks to slide down slower. Do you agree or disagree? Justify conceptually.", hint: "Think about Newton's Second Law and how both gravitational force and mass change.", rubric: "Answers should recognize that both Fg_x and Ff scale with mass, so mass cancels out of the acceleration equation." },
+                    { phase: "ENGAGE", text: "2. Sketch a predicted graph of Acceleration vs. Mass for the block sliding down the ramp.", hint: "If mass cancels out, what does the graph look like?", rubric: "A horizontal line indicating constant acceleration regardless of mass." },
+                    { phase: "EXPLORE", text: "3. Run the simulation with 1 block, a 30° angle, and μ_k = 0.25. Record the time to travel 1.0 m. Then, change to 5 blocks and repeat. What do you observe?", hint: "Check the 'Stopwatch Time' in the Telemetry tab.", rubric: "Student should record identical times (~0.85s) and note that mass did not affect the time." },
+                    { phase: "EXPLORE", text: "4. Change the ramp angle to 60° and observe the Normal Force (Fn) and Frictional Force (Ff). How do they compare to the 30° trial?", hint: "Does a steeper ramp increase or decrease how hard the block presses into the wood?", rubric: "Fn decreases because cos(60) < cos(30). Consequently, Ff decreases." },
+                    { phase: "EXPLAIN", text: "5. Using Newton's Second Law, derive an algebraic expression for the acceleration of the block in terms of g, θ, and μ_k.", hint: "Start with ΣF = ma. What are the forces parallel to the ramp?", rubric: "mg*sin(θ) - μ_k*mg*cos(θ) = ma --> a = g(sin(θ) - μ_k*cos(θ))." },
+                    { phase: "EXPLAIN", text: "6. Based on your derived expression, explain theoretically why the student's original hypothesis about mass was incorrect.", hint: "Look at the variables present in your final equation for 'a'.", rubric: "The final equation a = g(sin(θ) - μ_k*cos(θ)) does not contain 'm', showing acceleration is mass-independent." },
+                    { phase: "ELABORATE", text: "7. Suppose the student wants to calculate μ_k using only the meterstick and stopwatch. Derive an expression for μ_k in terms of d, t, θ, and g.", hint: "First relate d, t, and a (kinematics). Then substitute 'a' into your equation from Q5 and solve for μ_k.", rubric: "a = 2d/t². 2d/t² = g(sinθ - μ_k*cosθ). Solving for μ_k yields: μ_k = tanθ - (2d)/(g*t²*cosθ)." },
+                    { phase: "ELABORATE", text: "8. A student suggests setting the ramp angle low enough so the block slides at a constant velocity. How would this simplify the calculation of μ_k?", hint: "If velocity is constant, what is the net force?", rubric: "a = 0, so mg*sinθ = μ_k*mg*cosθ. This simplifies to μ_k = tanθ." },
+                    { phase: "EVALUATE", text: "9. Set the simulation to angle = 25°, distance = 2.0 m, and μ_k = 0.30. Let the block slide and record the time. Use your equation from Q7 to calculate μ_k from your recorded d, t, and θ. Does it match the slider value?", hint: "Ensure you use radians or degree mode correctly on your calculator.", rubric: "Student calculates ~0.30. Small variations acceptable due to rounding time." },
+                    { phase: "EVALUATE", text: "10. In a real experiment, students notice the block tends to 'stutter' (stick-slip) as it slides down. Which physics concept, not perfectly modeled here, explains this phenomenon?", hint: "Think about the difference between static and kinetic friction coefficients.", rubric: "Difference between static (higher) and kinetic (lower) friction causes stick-slip behavior." }
+                ];
+                this.currentQ = 0;
+                this.buildUI();
+                this.loadSaved();
+
+                document.getElementById('btn-export-csv').addEventListener('click', () => {
+                    const blob = new Blob([this.logger.getCSV()], {type: "text/csv;charset=utf-8"});
+                    saveAs(blob, "friction_data.csv");
+                });
+
+                document.getElementById('btn-export-docx').addEventListener('click', () => this.exportDOCX());
+            }
+
+            buildUI() {
+                const container = document.getElementById('q-container');
+                const dots = document.getElementById('q-dots');
+                container.innerHTML = '';
+                dots.innerHTML = '';
+
+                this.questions.forEach((q, i) => {
+                    const div = document.createElement('div');
+                    div.id = `q-card-${i}`;
+                    div.style.display = i === 0 ? 'block' : 'none';
+                    div.innerHTML = `
+                        <div class="phase-badge">${q.phase} Phase</div>
+                        <div class="question-text">${q.text}</div>
+                        <textarea id="q-ans-${i}" placeholder="Type your response here..."></textarea>
+                        <details>
+                            <summary>Show Hint & Rubric</summary>
+                            <div style="margin-top: 8px;">
+                                <strong>Hint:</strong> ${q.hint}<br><br>
+                                <strong>Rubric:</strong> ${q.rubric}
+                            </div>
+                        </details>
+                    `;
+                    container.appendChild(div);
+
+                    const dot = document.createElement('div');
+                    dot.className = `dot ${i === 0 ? 'active' : ''}`;
+                    dot.addEventListener('click', () => this.goToQ(i));
+                    dots.appendChild(dot);
+
+                    setTimeout(() => {
+                        document.getElementById(`q-ans-${i}`).addEventListener('input', (e) => {
+                            localStorage.setItem(`sim_5e_q${i}`, e.target.value);
+                        });
+                    }, 0);
+                });
+
+                document.getElementById('btn-prev-q').addEventListener('click', () => this.goToQ(this.currentQ - 1));
+                document.getElementById('btn-next-q').addEventListener('click', () => this.goToQ(this.currentQ + 1));
+                
+                document.getElementById('btn-save-q').addEventListener('click', () => {
+                    const btn = document.getElementById('btn-save-q');
+                    btn.textContent = "Saved ✓";
+                    btn.style.background = "var(--success)";
+                    btn.style.color = "#000";
+                    setTimeout(() => {
+                        btn.textContent = "Save Answer";
+                        btn.style.background = "rgba(0,180,216,0.1)";
+                        btn.style.color = "var(--text-primary)";
+                    }, 1500);
+                });
+
+                document.getElementById('btn-clear-save').addEventListener('click', () => {
+                    if(confirm("Clear all saved answers?")) {
+                        this.questions.forEach((_, i) => {
+                            localStorage.removeItem(`sim_5e_q${i}`);
+                            document.getElementById(`q-ans-${i}`).value = '';
+                        });
+                    }
+                });
+            }
+
+            goToQ(idx) {
+                if(idx < 0 || idx >= this.questions.length) return;
+                document.getElementById(`q-card-${this.currentQ}`).style.display = 'none';
+                document.querySelectorAll('.dot')[this.currentQ].classList.remove('active');
+                
+                this.currentQ = idx;
+                
+                document.getElementById(`q-card-${this.currentQ}`).style.display = 'block';
+                document.querySelectorAll('.dot')[this.currentQ].classList.add('active');
+            }
+
+            loadSaved() {
+                this.questions.forEach((_, i) => {
+                    const saved = localStorage.getItem(`sim_5e_q${i}`);
+                    if(saved) document.getElementById(`q-ans-${i}`).value = saved;
+                });
+            }
+
+            async exportDOCX() {
+                const name = prompt("Enter your name for the report:") || "Student";
+                const date = new Date().toISOString().split('T')[0];
+
+                const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+                
+                const children = [
+                    new Paragraph({ text: "Friction Experimental Design — Simulation Report", heading: HeadingLevel.HEADING_1 }),
+                    new Paragraph({ text: `Name: ${name} | Date: ${date}`, spacing: { after: 400 } })
+                ];
+
+                this.questions.forEach((q, i) => {
+                    const ans = document.getElementById(`q-ans-${i}`).value || "(No answer provided)";
+                    children.push(
+                        new Paragraph({ text: q.text, heading: HeadingLevel.HEADING_3, spacing: { before: 200 } }),
+                        new Paragraph({ text: ans, spacing: { after: 200 } })
+                    );
+                });
+
+                const doc = new Document({ sections: [{ properties: {}, children }] });
+                const blob = await Packer.toBlob(doc);
+                saveAs(blob, `Friction_Report_${name.replace(/\s+/g, '_')}.docx`);
+            }
+        }
+
+        // ============================================================================
+        // MAIN EXECUTION LOOP
+        // ============================================================================
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('sim-canvas');
+            
+            // Resize handler
+            const resize = () => {
+                const container = document.getElementById('sim-view');
+                canvas.width = container.clientWidth;
+                canvas.height = container.clientHeight;
+            };
+            window.addEventListener('resize', resize);
+            resize();
+
+            // Instantiate Modules
+            const engine = new PhysicsEngine();
+            const camera = new Camera(canvas);
+            const renderer = new Renderer(canvas);
+            const ui = new UIControls(engine, camera);
+            const logger = new DataLogger();
+            const exporter = new ExportManager(logger);
+
+            // Initial Setup
+            engine.setup('default');
+            camera.resetView();
+
+            // Main Loop
+            let lastTime = performance.now();
+
+            const mainLoop = (time) => {
+                let dt = (time - lastTime) / 1000;
+                lastTime = time;
+
+                if (dt > 0.1) dt = 0.016;
+                dt *= ui.simSpeed;
+
+                if (engine.running) {
+                    engine.step(dt);
+                    logger.sample(engine.getState());
+                }
+
+                renderer.drawScene(camera, engine.getState());
+                ui.updateTelemetry(engine.getState());
+
+                requestAnimationFrame(mainLoop);
+            };
+
+            requestAnimationFrame(mainLoop);
+        });
+    </script>
+</body>
+</html>
