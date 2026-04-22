@@ -67,20 +67,21 @@ function showGate() {
           <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
         </div>
       </div>`;
-    // Append to body if available, else to html (head already has CSS)
-    const parent = document.body || document.documentElement;
-    parent.appendChild(gate);
-    const input = document.getElementById("password-gate-input");
-    const cancel = document.getElementById("password-gate-cancel");
-    const submit = document.getElementById("password-gate-submit");
-    const finish = v => { gate.remove(); resolve(v); };
-    cancel.addEventListener("click", () => finish(null));
-    submit.addEventListener("click", () => finish(input.value));
-    input.addEventListener("keydown", e => {
-      if (e.key === "Enter") finish(input.value);
-      if (e.key === "Escape") finish(null);
-    });
-    input.focus();
+    // Always append to document.body - wait for it if needed
+    document.addEventListener("DOMContentLoaded", function attachGate() {
+      document.body.appendChild(gate);
+      const input = document.getElementById("password-gate-input");
+      const cancel = document.getElementById("password-gate-cancel");
+      const submit = document.getElementById("password-gate-submit");
+      const finish = v => { gate.remove(); resolve(v); };
+      cancel.addEventListener("click", () => finish(null));
+      submit.addEventListener("click", () => finish(input.value));
+      input.addEventListener("keydown", e => {
+        if (e.key === "Enter") finish(input.value);
+        if (e.key === "Escape") finish(null);
+      });
+      input.focus();
+    }, { once: true });
   });
 }
 
