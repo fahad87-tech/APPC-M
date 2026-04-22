@@ -67,8 +67,8 @@ function showGate() {
           <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
         </div>
       </div>`;
-    // Always append to document.body - wait for it if needed
-    document.addEventListener("DOMContentLoaded", function attachGate() {
+    // Append to document.body - handle if already loaded
+    function attachGate() {
       document.body.appendChild(gate);
       const input = document.getElementById("password-gate-input");
       const cancel = document.getElementById("password-gate-cancel");
@@ -81,7 +81,12 @@ function showGate() {
         if (e.key === "Escape") finish(null);
       });
       input.focus();
-    }, { once: true });
+    }
+    if (document.body) {
+      attachGate();
+    } else {
+      document.addEventListener("DOMContentLoaded", attachGate, { once: true });
+    }
   });
 }
 
