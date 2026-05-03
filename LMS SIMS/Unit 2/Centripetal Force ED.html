@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centripetal Force Simulation - Advanced</title>
+    <script>
+        document.documentElement.classList.remove("password-locked");
+        var unlock = function() {
+            document.documentElement.classList.remove("password-locked");
+        };
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", unlock);
+        } else { unlock(); }
+        setTimeout(unlock, 100);
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0e27;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(66, 153, 225, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(159, 122, 234, 0.15) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(237, 100, 166, 0.1) 0px, transparent 50%);
+            padding: 20px;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 24px;
+            box-shadow: 
+                0 0 80px rgba(66, 153, 225, 0.2),
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 12px;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+            letter-spacing: -1px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            font-weight: 500;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .simulation-panel, .data-panel {
+            background: rgba(30, 41, 59, 0.6);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .canvas-container {
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.9) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .canvas-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            border-radius: 16px;
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(10px);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 12px;
+            background: rgba(10, 14, 39, 0.8);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .controls h3 {
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+
+        .control-group {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .control-group:hover {
+            background: rgba(15, 23, 42, 0.7);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #cbd5e1;
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+        }
+
+        .control-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            outline: none;
+            -webkit-appearance: none;
+            position: relative;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.2),
+                0 4px 12px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .control-group input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 
+                0 0 0 6px rgba(102, 126, 234, 0.3),
+                0 6px 16px rgba(102, 126, 234, 0.6);
+        }
+
+        .control-group input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 
+                0 0 0 4px rgba(102, 126, 234, 0.2),
+                0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .value-display {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            margin-left: 12px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            font-size: 0.95em;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85em;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-play:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(72, 187, 120, 0.6);
+        }
+
+        .btn-play.paused {
+            background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+            box-shadow: 0 4px 16px rgba(246, 173, 85, 0.4);
+        }
+
+        .btn-play.paused:hover {
+            box-shadow: 0 8px 24px rgba(246, 173, 85, 0.6);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+            box-shadow: 0 4px 16px rgba(245, 101, 101, 0.4);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(245, 101, 101, 0.6);
+        }
+
+        .metrics {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .metrics h3 {
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .metric-item:hover::before {
+            transform: translateX(100%);
+        }
+
+        .metric-item:nth-child(1) { border-left-color: #667eea; }
+        .metric-item:nth-child(2) { border-left-color: #48bb78; }
+        .metric-item:nth-child(3) { border-left-color: #f093fb; }
+        .metric-item:nth-child(4) { border-left-color: #4fd1c5; }
+        .metric-item:nth-child(5) { border-left-color: #f6ad55; }
+
+        .metric-item:hover {
+            background: rgba(15, 23, 42, 0.8);
+            transform: translateX(4px);
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: #94a3b8;
+            font-size: 0.95em;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.15em;
+        }
+
+        .chart-container {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .chart-header h3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+
+        .graph-tabs {
+            display: flex;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 6px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            flex-wrap: wrap;
+        }
+
+        .graph-tab {
+            padding: 10px 18px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .graph-tab:hover {
+            color: #cbd5e1;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .graph-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        #analysisInfo {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            line-height: 1.6;
+        }
+
+        #analysisInfo strong {
+            color: #cbd5e1;
+            font-size: 0.95em;
+        }
+
+        .analysis-value {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(56, 178, 172, 0.15) 0%, rgba(72, 187, 120, 0.15) 100%);
+            border-left: 4px solid #38b2ac;
+            padding: 20px;
+            margin-bottom: 24px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(56, 178, 172, 0.3);
+        }
+
+        .info-box h3 {
+            color: #4fd1c5;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .info-box p {
+            color: #cbd5e1;
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 16px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #48bb78;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 12px #48bb78;
+        }
+
+        .status-dot.paused {
+            background: #f6ad55;
+            box-shadow: 0 0 12px #f6ad55;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(0.9); }
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .graph-tab {
+                font-size: 0.75em;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌀 Centripetal Force Virtual Laboratory</h1>
+            <p>Real-time continuous plotting of physical relationships over time</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Left Panel: Simulation -->
+            <div class="simulation-panel">
+                <div class="info-box">
+                    <h3>⚡ Live Experiment</h3>
+                    <p>All graphs plot continuously with time. Adjust parameters and watch the relationships update in real-time. Toggle between different graph views to analyze various relationships.</p>
+                </div>
+
+                <div class="canvas-container">
+                    <canvas id="simulationCanvas" width="550" height="550"></canvas>
+                </div>
+
+                <div class="controls">
+                    <div class="status-indicator">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">Recording...</span>
+                    </div>
+
+                    <h3>🎛️ Experimental Controls</h3>
+                    
+                    <div class="control-group">
+                        <label>
+                            Number of Washers (Force): 
+                            <span class="value-display" id="washerDisplay">5</span>
+                        </label>
+                        <input type="range" id="washerSlider" min="1" max="15" value="5" step="1">
+                    </div>
+
+                    <div class="control-group">
+                        <label>
+                            Radius (m): 
+                            <span class="value-display" id="radiusDisplay">0.50</span>
+                        </label>
+                        <input type="range" id="radiusSlider" min="0.3" max="1.0" value="0.5" step="0.05">
+                    </div>
+
+                    <div class="control-group">
+                        <label>
+                            Stopper Mass (kg): 
+                            <span class="value-display" id="massDisplay">0.050</span>
+                        </label>
+                        <input type="range" id="massSlider" min="0.020" max="0.100" value="0.050" step="0.005">
+                    </div>
+
+                    <div class="control-group">
+                        <label>
+                            Washer Mass (kg each): 
+                            <span class="value-display" id="washerMassDisplay">0.010</span>
+                        </label>
+                        <input type="range" id="washerMassSlider" min="0.005" max="0.020" value="0.010" step="0.001">
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn-play" id="playPauseBtn" onclick="togglePlayPause()">⏸️ Pause</button>
+                        <button class="btn-danger" onclick="resetGraphs()">🔄 Reset Graphs</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Data Analysis -->
+            <div class="data-panel">
+                <div class="metrics">
+                    <h3>📈 Current Measurements</h3>
+                    <div class="metric-item">
+                        <span class="metric-label">Centripetal Force (Fc):</span>
+                        <span class="metric-value" id="forceValue">0.49 N</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Speed (v):</span>
+                        <span class="metric-value" id="speedValue">0.00 m/s</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Speed² (v²):</span>
+                        <span class="metric-value" id="speed2Value">0.00 m²/s²</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Period (T):</span>
+                        <span class="metric-value" id="periodValue">0.00 s</span>
+                    </div>
+                    <div class="metric-item">
+                        <span class="metric-label">Time Elapsed:</span>
+                        <span class="metric-value" id="timeValue">0.00 s</span>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>📊 Live Data Visualization</h3>
+                        <div class="graph-tabs">
+                            <button class="graph-tab active" onclick="switchGraph('fc-vs-v2')">Fc vs v²</button>
+                            <button class="graph-tab" onclick="switchGraph('fc-vs-v')">Fc vs v</button>
+                            <button class="graph-tab" onclick="switchGraph('v-vs-t')">v vs t</button>
+                        </div>
+                    </div>
+                    <canvas id="chartCanvas" width="550" height="400"></canvas>
+                    <div id="analysisInfo">
+                        <strong>Relationship:</strong> <span class="analysis-value" id="relationshipText">Linear: Fc = (m/r)v²</span><br>
+                        <strong>Current Graph:</strong> <span class="analysis-value" id="graphDescription">Shows linear relationship between centripetal force and velocity squared</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Constants
+        const g = 9.8;
+        const MAX_DATA_POINTS = 600;
+        const SAMPLE_RATE = 5;
+        
+        // Canvas setup
+        const canvas = document.getElementById('simulationCanvas');
+        const ctx = canvas.getContext('2d');
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        
+        // Simulation state
+        let angle = 0;
+        let animationId = null;
+        let isPlaying = true;
+        let timeElapsed = 0;
+        let frameCount = 0;
+        let currentGraph = 'fc-vs-v2';
+        
+        // Data storage for continuous plotting
+        let graphData = {
+            time: [],
+            force: [],
+            speed: [],
+            speed2: [],
+            radius: []
+        };
+        
+        // Get control elements
+        const washerSlider = document.getElementById('washerSlider');
+        const radiusSlider = document.getElementById('radiusSlider');
+        const massSlider = document.getElementById('massSlider');
+        const washerMassSlider = document.getElementById('washerMassSlider');
+        
+        // Update displays when sliders change
+        washerSlider.addEventListener('input', updateSimulation);
+        radiusSlider.addEventListener('input', updateSimulation);
+        massSlider.addEventListener('input', updateSimulation);
+        washerMassSlider.addEventListener('input', updateSimulation);
+        
+        function updateSimulation() {
+            const numWashers = parseInt(washerSlider.value);
+            const radius = parseFloat(radiusSlider.value);
+            const stopperMass = parseFloat(massSlider.value);
+            const washerMass = parseFloat(washerMassSlider.value);
+            
+            // Update displays
+            document.getElementById('washerDisplay').textContent = numWashers;
+            document.getElementById('radiusDisplay').textContent = radius.toFixed(2);
+            document.getElementById('massDisplay').textContent = stopperMass.toFixed(3);
+            document.getElementById('washerMassDisplay').textContent = washerMass.toFixed(3);
+            
+            // Calculate physics
+            const centripetalForce = numWashers * washerMass * g;
+            const speed = Math.sqrt((centripetalForce * radius) / stopperMass);
+            const speed2 = speed * speed;
+            const period = speed > 0 ? (2 * Math.PI * radius) / speed : 0;
+            const omega = speed / radius;
+            
+            // Update metric displays
+            document.getElementById('forceValue').textContent = centripetalForce.toFixed(2) + ' N';
+            document.getElementById('speedValue').textContent = speed.toFixed(2) + ' m/s';
+            document.getElementById('speed2Value').textContent = speed2.toFixed(2) + ' m²/s²';
+            document.getElementById('periodValue').textContent = period.toFixed(2) + ' s';
+            document.getElementById('timeValue').textContent = timeElapsed.toFixed(2) + ' s';
+            
+            return { centripetalForce, speed, speed2, period, omega, radius, stopperMass, numWashers };
+        }
+        
+        function recordDataPoint() {
+            if (!isPlaying) return;
+            
+            const params = updateSimulation();
+            
+            // Add data point
+            graphData.time.push(timeElapsed);
+            graphData.force.push(params.centripetalForce);
+            graphData.speed.push(params.speed);
+            graphData.speed2.push(params.speed2);
+            graphData.radius.push(params.radius);
+            
+            // Limit data points to prevent memory issues
+            if (graphData.time.length > MAX_DATA_POINTS) {
+                graphData.time.shift();
+                graphData.force.shift();
+                graphData.speed.shift();
+                graphData.speed2.shift();
+                graphData.radius.shift();
+            }
+        }
+        
+        function drawSimulation() {
+            const params = updateSimulation();
+            const radius = params.radius;
+            const omega = params.omega;
+            
+            // Clear canvas with dark gradient
+            const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, canvas.width/1.5);
+            gradient.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+            gradient.addColorStop(1, 'rgba(10, 14, 39, 0.98)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw grid
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.1)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, canvas.height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < canvas.height; i += 50) {
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(canvas.width, i);
+                ctx.stroke();
+            }
+            
+            const scale = 220;
+            const displayRadius = radius * scale;
+            
+            // Draw glow effect for path
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = 'rgba(102, 126, 234, 0.5)';
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.3)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, displayRadius, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+            
+            // Draw circular path with dashed line
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 8]);
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, displayRadius, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Update angle and time
+            if (isPlaying) {
+                timeElapsed += 0.016;
+                angle += omega * 0.016;
+                frameCount++;
+                
+                // Record data at reduced sample rate
+                if (frameCount % SAMPLE_RATE === 0) {
+                    recordDataPoint();
+                }
+            }
+            
+            // Calculate stopper position
+            const stopperX = centerX + displayRadius * Math.cos(angle);
+            const stopperY = centerY + displayRadius * Math.sin(angle);
+            
+            // Draw string with gradient
+            const stringGradient = ctx.createLinearGradient(centerX, centerY, stopperX, stopperY);
+            stringGradient.addColorStop(0, 'rgba(203, 213, 225, 0.6)');
+            stringGradient.addColorStop(1, 'rgba(148, 163, 184, 0.8)');
+            ctx.strokeStyle = stringGradient;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(stopperX, stopperY);
+            ctx.stroke();
+            
+            // Draw central tube with glow
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(102, 126, 234, 0.6)';
+            const tubeGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 15);
+            tubeGradient.addColorStop(0, '#667eea');
+            tubeGradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = tubeGradient;
+            ctx.fillRect(centerX - 12, centerY - 12, 24, 24);
+            ctx.shadowBlur = 0;
+            
+            // Draw motion trail
+            ctx.strokeStyle = 'rgba(102, 126, 234, 0.2)';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, displayRadius, angle - 0.5, angle);
+            ctx.stroke();
+            
+            // Draw stopper with advanced styling
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = 'rgba(236, 72, 153, 0.8)';
+            const stopperGradient = ctx.createRadialGradient(stopperX - 5, stopperY - 5, 0, stopperX, stopperY, 20);
+            stopperGradient.addColorStop(0, '#fbb6ce');
+            stopperGradient.addColorStop(0.5, '#ec4899');
+            stopperGradient.addColorStop(1, '#be185d');
+            ctx.fillStyle = stopperGradient;
+            ctx.beginPath();
+            ctx.arc(stopperX, stopperY, 18, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            
+            // Stopper outline
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw velocity vector with glow
+            const velX = -displayRadius * Math.sin(angle);
+            const velY = displayRadius * Math.cos(angle);
+            const velScale = 0.35;
+            
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(56, 189, 248, 0.8)';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 4;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(stopperX, stopperY);
+            ctx.lineTo(stopperX + velX * velScale, stopperY + velY * velScale);
+            ctx.stroke();
+            drawArrowHead(ctx, stopperX, stopperY, stopperX + velX * velScale, stopperY + velY * velScale, '#38bdf8');
+            ctx.shadowBlur = 0;
+            
+            // Draw centripetal force vector with glow
+            const fcX = -displayRadius * Math.cos(angle) * 0.35;
+            const fcY = -displayRadius * Math.sin(angle) * 0.35;
+            
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(52, 211, 153, 0.8)';
+            ctx.strokeStyle = '#34d399';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(stopperX, stopperY);
+            ctx.lineTo(stopperX + fcX, stopperY + fcY);
+            ctx.stroke();
+            drawArrowHead(ctx, stopperX, stopperY, stopperX + fcX, stopperY + fcY, '#34d399');
+            ctx.shadowBlur = 0;
+            
+            // Draw washers with modern styling
+            const washerY = centerY + 180;
+            const numWashers = parseInt(washerSlider.value);
+            
+            // String to washers with gradient
+            const washerStringGrad = ctx.createLinearGradient(centerX, centerY, centerX, washerY);
+            washerStringGrad.addColorStop(0, 'rgba(203, 213, 225, 0.4)');
+            washerStringGrad.addColorStop(1, 'rgba(148, 163, 184, 0.6)');
+            ctx.strokeStyle = washerStringGrad;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX, washerY);
+            ctx.stroke();
+            
+            // Draw washers with gradient and shadow
+            for (let i = 0; i < Math.min(numWashers, 12); i++) {
+                const washerGrad = ctx.createRadialGradient(centerX - 3, washerY + i * 9 - 3, 0, centerX, washerY + i * 9, 14);
+                washerGrad.addColorStop(0, '#fbbf24');
+                washerGrad.addColorStop(0.6, '#f59e0b');
+                washerGrad.addColorStop(1, '#d97706');
+                
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(251, 191, 36, 0.5)';
+                ctx.fillStyle = washerGrad;
+                ctx.beginPath();
+                ctx.arc(centerX, washerY + i * 9, 14, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+            
+            // Labels with better styling
+            ctx.font = 'bold 16px Inter, sans-serif';
+            
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            
+            ctx.fillStyle = '#38bdf8';
+            ctx.fillText('v', stopperX + velX * velScale + 15, stopperY + velY * velScale);
+            
+            ctx.fillStyle = '#34d399';
+            ctx.fillText('Fc', stopperX + fcX + 20, stopperY + fcY);
+            
+            ctx.fillStyle = '#cbd5e1';
+            ctx.fillText('Tube', centerX + 20, centerY - 5);
+            ctx.fillText('Washers', centerX + 25, washerY + 5);
+            
+            ctx.shadowBlur = 0;
+            
+            // Display radius with modern styling
+            ctx.strokeStyle = 'rgba(168, 85, 247, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(centerX + displayRadius, centerY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Radius label background
+            const radiusLabelX = centerX + displayRadius/2 - 45;
+            const radiusLabelY = centerY - 25;
+            ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+            ctx.fillRect(radiusLabelX, radiusLabelY, 90, 28);
+            ctx.strokeStyle = 'rgba(168, 85, 247, 0.5)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(radiusLabelX, radiusLabelY, 90, 28);
+            
+            ctx.fillStyle = '#a855f7';
+            ctx.font = 'bold 14px Inter, sans-serif';
+            ctx.fillText('r = ' + radius.toFixed(2) + ' m', radiusLabelX + 10, radiusLabelY + 18);
+            
+            updateChart();
+            animationId = requestAnimationFrame(drawSimulation);
+        }
+        
+        function drawArrowHead(ctx, fromX, fromY, toX, toY, color) {
+            const headLength = 12;
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = color;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLength * Math.cos(angle - Math.PI / 6), 
+                       toY - headLength * Math.sin(angle - Math.PI / 6));
+            ctx.lineTo(toX - headLength * Math.cos(angle + Math.PI / 6), 
+                       toY - headLength * Math.sin(angle + Math.PI / 6));
+            ctx.closePath();
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+        
+        function togglePlayPause() {
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playPauseBtn');
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            
+            if (isPlaying) {
+                btn.innerHTML = '⏸️ Pause';
+                btn.classList.remove('paused');
+                statusDot.classList.remove('paused');
+                statusText.textContent = 'Recording...';
+            } else {
+                btn.innerHTML = '▶️ Play';
+                btn.classList.add('paused');
+                statusDot.classList.add('paused');
+                statusText.textContent = 'Paused';
+            }
+        }
+        
+        function resetGraphs() {
+            graphData = {
+                time: [],
+                force: [],
+                speed: [],
+                speed2: [],
+                radius: []
+            };
+            timeElapsed = 0;
+            frameCount = 0;
+            updateChart();
+        }
+        
+        function switchGraph(graphType) {
+            currentGraph = graphType;
+            
+            // Update tab styling
+            document.querySelectorAll('.graph-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateGraphDescription();
+            updateChart();
+        }
+        
+        function updateGraphDescription() {
+            const relationshipText = document.getElementById('relationshipText');
+            const graphDescription = document.getElementById('graphDescription');
+            
+            switch(currentGraph) {
+                case 'fc-vs-v2':
+                    relationshipText.textContent = 'Linear: Fc = (m/r)v²';
+                    graphDescription.textContent = 'Shows linear relationship between centripetal force and velocity squared';
+                    break;
+                case 'fc-vs-v':
+                    relationshipText.textContent = 'Quadratic: Fc increases with v²';
+                    graphDescription.textContent = 'Shows parabolic relationship - force increases with square of velocity';
+                    break;
+                case 'v-vs-t':
+                    relationshipText.textContent = 'Time series: Speed over time';
+                    graphDescription.textContent = 'Shows how speed changes over time as parameters are adjusted';
+                    break;
+            }
+        }
+        
+        function updateChart() {
+            const chartCanvas = document.getElementById('chartCanvas');
+            const chartCtx = chartCanvas.getContext('2d');
+            
+            // Clear canvas with dark background
+            const bgGradient = chartCtx.createLinearGradient(0, 0, 0, chartCanvas.height);
+            bgGradient.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+            bgGradient.addColorStop(1, 'rgba(10, 14, 39, 0.95)');
+            chartCtx.fillStyle = bgGradient;
+            chartCtx.fillRect(0, 0, chartCanvas.width, chartCanvas.height);
+            
+            if (graphData.time.length === 0) {
+                chartCtx.fillStyle = '#64748b';
+                chartCtx.font = '18px Inter, sans-serif';
+                chartCtx.textAlign = 'center';
+                chartCtx.fillText('📊 Recording live data...', chartCanvas.width / 2, chartCanvas.height / 2);
+                return;
+            }
+            
+            let xData, yData, xLabel, yLabel, color;
+            
+            switch(currentGraph) {
+                case 'fc-vs-v2':
+                    xData = graphData.speed2;
+                    yData = graphData.force;
+                    xLabel = 'Speed² (m²/s²)';
+                    yLabel = 'Centripetal Force (N)';
+                    color = '#ec4899';
+                    break;
+                    
+                case 'fc-vs-v':
+                    xData = graphData.speed;
+                    yData = graphData.force;
+                    xLabel = 'Speed (m/s)';
+                    yLabel = 'Centripetal Force (N)';
+                    color = '#667eea';
+                    break;
+                    
+                case 'v-vs-t':
+                    xData = graphData.time;
+                    yData = graphData.speed;
+                    xLabel = 'Time (s)';
+                    yLabel = 'Speed (m/s)';
+                    color = '#48bb78';
+                    break;
+            }
+            
+            const maxX = Math.max(...xData, 0.001);
+            const minX = Math.min(...xData, 0);
+            const maxY = Math.max(...yData, 0.001);
+            const minY = Math.min(...yData, 0);
+            
+            const padding = 70;
+            const graphWidth = chartCanvas.width - 2 * padding;
+            const graphHeight = chartCanvas.height - 2 * padding;
+            
+            // Draw grid with glow
+            chartCtx.strokeStyle = 'rgba(102, 126, 234, 0.15)';
+            chartCtx.lineWidth = 1;
+            for (let i = 0; i <= 8; i++) {
+                const y = padding + (graphHeight / 8) * i;
+                chartCtx.beginPath();
+                chartCtx.moveTo(padding, y);
+                chartCtx.lineTo(chartCanvas.width - padding, y);
+                chartCtx.stroke();
+                
+                const x = padding + (graphWidth / 8) * i;
+                chartCtx.beginPath();
+                chartCtx.moveTo(x, padding);
+                chartCtx.lineTo(x, chartCanvas.height - padding);
+                chartCtx.stroke();
+            }
+            
+            // Draw axes with glow
+            chartCtx.shadowBlur = 10;
+            chartCtx.shadowColor = 'rgba(102, 126, 234, 0.5)';
+            chartCtx.strokeStyle = '#667eea';
+            chartCtx.lineWidth = 3;
+            chartCtx.beginPath();
+            chartCtx.moveTo(padding, padding);
+            chartCtx.lineTo(padding, chartCanvas.height - padding);
+            chartCtx.lineTo(chartCanvas.width - padding, chartCanvas.height - padding);
+            chartCtx.stroke();
+            chartCtx.shadowBlur = 0;
+            
+            // Draw axis labels
+            chartCtx.fillStyle = '#cbd5e1';
+            chartCtx.font = 'bold 14px Inter, sans-serif';
+            chartCtx.textAlign = 'center';
+            chartCtx.fillText(xLabel, chartCanvas.width / 2, chartCanvas.height - 25);
+            
+            chartCtx.save();
+            chartCtx.translate(25, chartCanvas.height / 2);
+            chartCtx.rotate(-Math.PI / 2);
+            chartCtx.fillText(yLabel, 0, 0);
+            chartCtx.restore();
+            
+            // Draw tick labels
+            chartCtx.fillStyle = '#94a3b8';
+            chartCtx.font = '12px Inter, sans-serif';
+            chartCtx.textAlign = 'right';
+            
+            for (let i = 0; i <= 5; i++) {
+                const y = chartCanvas.height - padding - (graphHeight / 5) * i;
+                const value = minY + (maxY - minY) * (i / 5);
+                chartCtx.fillText(value.toFixed(2), padding - 12, y + 5);
+            }
+            
+            chartCtx.textAlign = 'center';
+            for (let i = 0; i <= 5; i++) {
+                const x = padding + (graphWidth / 5) * i;
+                const value = minX + (maxX - minX) * (i / 5);
+                chartCtx.fillText(value.toFixed(2), x, chartCanvas.height - padding + 25);
+            }
+            
+            // Draw continuous line with gradient
+            if (xData.length > 1) {
+                chartCtx.beginPath();
+                
+                for (let i = 0; i < xData.length; i++) {
+                    const x = padding + ((xData[i] - minX) / (maxX - minX || 1)) * graphWidth;
+                    const y = chartCanvas.height - padding - ((yData[i] - minY) / (maxY - minY || 1)) * graphHeight;
+                    
+                    if (i === 0) {
+                        chartCtx.moveTo(x, y);
+                    } else {
+                        chartCtx.lineTo(x, y);
+                    }
+                }
+                
+                chartCtx.shadowBlur = 15;
+                chartCtx.shadowColor = color;
+                chartCtx.strokeStyle = color;
+                chartCtx.lineWidth = 3;
+                chartCtx.lineCap = 'round';
+                chartCtx.lineJoin = 'round';
+                chartCtx.stroke();
+                chartCtx.shadowBlur = 0;
+                
+                // Draw current point indicator
+                const lastX = padding + ((xData[xData.length - 1] - minX) / (maxX - minX || 1)) * graphWidth;
+                const lastY = chartCanvas.height - padding - ((yData[yData.length - 1] - minY) / (maxY - minY || 1)) * graphHeight;
+                
+                chartCtx.shadowBlur = 20;
+                chartCtx.shadowColor = color;
+                
+                const pointGradient = chartCtx.createRadialGradient(lastX, lastY, 0, lastX, lastY, 10);
+                pointGradient.addColorStop(0, color);
+                pointGradient.addColorStop(1, color + '80');
+                chartCtx.fillStyle = pointGradient;
+                
+                chartCtx.beginPath();
+                chartCtx.arc(lastX, lastY, 8, 0, 2 * Math.PI);
+                chartCtx.fill();
+                
+                chartCtx.shadowBlur = 0;
+                chartCtx.strokeStyle = '#fff';
+                chartCtx.lineWidth = 2;
+                chartCtx.stroke();
+            }
+        }
+        
+        // Start simulation
+        updateSimulation();
+        updateGraphDescription();
+        drawSimulation();
+    </script>
+</body>
+</html>
