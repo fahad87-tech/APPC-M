@@ -5,157 +5,51 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Artemis 2 Translunar Free-Return Trajectory Simulation</title>
 <script>
-  const SIMULATION_TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
-  
-  document.documentElement.classList.add("password-locked");
-  
-  const passwordGateStyle = document.createElement("style");
-  passwordGateStyle.textContent = `
-    html.password-locked body { overflow: hidden; }
-    html.password-locked body > * { visibility: hidden; }
-    html.password-locked body > #password-gate { visibility: visible; }
-    #password-gate {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(5, 9, 18, 0.92);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 24px;
-      z-index: 9999;
-      visibility: visible;
+    const SIM_AUTH = { hash: "feee36bf2debea8da4c9408e87c84120d79c1719d13185f42865e9aa4801f117", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
+
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
     }
-    #password-gate-card {
-      width: min(100%, 440px);
-      background: rgba(14, 20, 40, 0.85);
-      backdrop-filter: blur(40px);
-      -webkit-backdrop-filter: blur(40px);
-      border: 1px solid rgba(100,181,246,0.2);
-      border-radius: 24px;
-      padding: 32px;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) inset;
-      color: #e7edf7;
-      font-family: 'SF Pro Display', 'Segoe UI', system-ui, sans-serif;
-    }
-    #password-gate-title {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      background: linear-gradient(135deg, #64b5f6, #00e5ff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    #password-gate-message {
-      font-size: 14px;
-      color: rgba(255,255,255,0.6);
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-    #password-gate-input {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 14px;
-      border: 1px solid rgba(100,181,246,0.25);
-      background: rgba(255,255,255,0.06);
-      color: #fff;
-      font-size: 16px;
-      outline: none;
-      margin-bottom: 20px;
-      transition: all 0.3s;
-    }
-    #password-gate-input:focus {
-      border-color: #64b5f6;
-      box-shadow: 0 0 0 4px rgba(100,181,246,0.12);
-      background: rgba(255,255,255,0.08);
-    }
-    #password-gate-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-    }
-    .password-gate-button {
-      border: none;
-      border-radius: 12px;
-      padding: 11px 20px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    #password-gate-cancel {
-      background: rgba(255,255,255,0.08);
-      color: #d9e2f2;
-    }
-    #password-gate-cancel:hover { background: rgba(255,255,255,0.14); }
-    #password-gate-submit {
-      background: linear-gradient(135deg, #42a5f5, #00b8d4);
-      color: #000;
-      font-weight: 700;
-    }
-    #password-gate-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,180,216,0.35); }
-  `;
-  document.head.appendChild(passwordGateStyle);
-  
-  function requestPassword(title, message) {
-    return new Promise(resolve => {
-      const existingGate = document.getElementById("password-gate");
-      if (existingGate) existingGate.remove();
-      const gate = document.createElement("div");
-      gate.id = "password-gate";
-      gate.innerHTML = `
-        <div id="password-gate-card">
-          <div id="password-gate-title">${title}</div>
-          <div id="password-gate-message">${message}</div>
-          <input id="password-gate-input" type="password" autocomplete="current-password">
-          <div id="password-gate-actions">
-            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
-            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(gate);
-      const input = document.getElementById("password-gate-input");
-      const cancelButton = document.getElementById("password-gate-cancel");
-      const submitButton = document.getElementById("password-gate-submit");
-      const finish = value => { gate.remove(); resolve(value); };
-      cancelButton.addEventListener("click", () => finish(null));
-      submitButton.addEventListener("click", () => finish(input.value));
-      input.addEventListener("keydown", event => {
-        if (event.key === "Enter") finish(input.value);
-        if (event.key === "Escape") finish(null);
+
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
       });
-      window.requestAnimationFrame(() => input.focus());
-    });
-  }
-  
-  async function sha256Hex(value) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(value);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-  }
-  
-  async function verifySimulationAccess() {
-    const userInput = await requestPassword("Simulation Access", "Password required to access this simulation:");
-    if (userInput === null) { window.location.replace("index.html"); return; }
-    const hashHex = await sha256Hex(userInput);
-    if (hashHex === SIMULATION_TARGET_HASH) {
-      document.documentElement.classList.remove("password-locked");
-    } else {
-      alert("Incorrect password. Access denied.");
-      window.location.replace("index.html");
     }
-  }
-  
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", verifySimulationAccess, { once: true });
-  } else {
-    verifySimulationAccess();
-  }
-</script>
+
+    async function verifyPageAccess() {
+      const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+      if (userInput === null) { window.location.href = "../index.html"; return; }
+      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.href = "../index.html";
+      }
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+    } else {
+      verifyPageAccess();
+    }
+  </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 <script src="https://unpkg.com/docx@7.8.2/build/index.js" defer></script>

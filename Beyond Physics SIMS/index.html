@@ -5,159 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Physics Simulations Dashboard</title>
 <script>
-  const WEBSITE_TARGET_HASH = "028f0aff59e51eae7eae5d3feb4f72426eb597f2f38eafeaf9174e80e66735af";
-  const SIMULATION_TARGET_HASH = "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4";
+    const WEBSITE_AUTH = { hash: "198dc27ffe2b597fbf1422560c2d9451d4ee2251f9f7ca99cab4db71f8f4ecd5", salt: "7a02bab1f801f9d023e52d0be1168942", iterations: 100000 };
+    const SIM_AUTH = { hash: "feee36bf2debea8da4c9408e87c84120d79c1719d13185f42865e9aa4801f117", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
 
-  document.documentElement.classList.add("password-locked");
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
+    }
 
-  const passwordGateStyle = document.createElement("style");
-  passwordGateStyle.textContent = `
-    html.password-locked body { overflow: hidden; }
-    html.password-locked body > * { visibility: hidden; }
-    html.password-locked body > #password-gate { visibility: visible; }
-    #password-gate {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(5, 9, 18, 0.88);
-      padding: 24px;
-      z-index: 9999;
-      visibility: visible;
-    }
-    #password-gate-card {
-      width: min(100%, 420px);
-      background: #101625;
-      border: 1px solid rgba(100,181,246,0.28);
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-      color: #e7edf7;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    #password-gate-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-    #password-gate-message {
-      font-size: 14px;
-      color: rgba(255,255,255,0.72);
-      margin-bottom: 16px;
-      line-height: 1.5;
-    }
-    #password-gate-input {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(100,181,246,0.35);
-      background: rgba(255,255,255,0.05);
-      color: #fff;
-      font-size: 16px;
-      outline: none;
-      margin-bottom: 16px;
-    }
-    #password-gate-input:focus {
-      border-color: #64b5f6;
-      box-shadow: 0 0 0 3px rgba(100,181,246,0.16);
-    }
-    #password-gate-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-    }
-    .password-gate-button {
-      border: none;
-      border-radius: 10px;
-      padding: 10px 16px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    #password-gate-cancel {
-      background: rgba(255,255,255,0.08);
-      color: #d9e2f2;
-    }
-    #password-gate-submit {
-      background: #64b5f6;
-      color: #08101c;
-    }
-  `;
-  document.head.appendChild(passwordGateStyle);
-
-  function requestPassword(title, message) {
-    return new Promise(resolve => {
-      const existingGate = document.getElementById("password-gate");
-      if (existingGate) existingGate.remove();
-
-      const gate = document.createElement("div");
-      gate.id = "password-gate";
-      gate.innerHTML = `
-        <div id="password-gate-card">
-          <div id="password-gate-title">${title}</div>
-          <div id="password-gate-message">${message}</div>
-          <input id="password-gate-input" type="password" autocomplete="current-password">
-          <div id="password-gate-actions">
-            <button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button>
-            <button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(gate);
-
-      const input = document.getElementById("password-gate-input");
-      const cancelButton = document.getElementById("password-gate-cancel");
-      const submitButton = document.getElementById("password-gate-submit");
-
-      const finish = value => {
-        gate.remove();
-        resolve(value);
-      };
-
-      cancelButton.addEventListener("click", () => finish(null));
-      submitButton.addEventListener("click", () => finish(input.value));
-      input.addEventListener("keydown", event => {
-        if (event.key === "Enter") finish(input.value);
-        if (event.key === "Escape") finish(null);
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
       });
-
-      window.requestAnimationFrame(() => input.focus());
-    });
-  }
-
-  async function sha256Hex(value) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(value);
-    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-  }
-
-  async function verifyWebsiteAccess() {
-    const userInput = await requestPassword("Website Access", "Website password required:");
-
-    if (userInput === null) {
-      window.location.replace("about:blank");
-      return;
     }
 
-    const hashHex = await sha256Hex(userInput);
+    async function verifyWebsiteAccess() {
+      const userInput = await requestPassword("Website Access", "Website password required:");
+      if (userInput === null) { window.location.replace("about:blank"); return; }
+      if (await pbkdf2Verify(userInput, WEBSITE_AUTH.hash, WEBSITE_AUTH.salt, WEBSITE_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.replace("about:blank");
+      }
+    }
 
-    if (hashHex === WEBSITE_TARGET_HASH) {
-      document.documentElement.classList.remove("password-locked");
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
     } else {
-      alert("Incorrect password. Access denied.");
-      window.location.replace("about:blank");
+      verifyWebsiteAccess();
     }
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
-  } else {
-    verifyWebsiteAccess();
-  }
-</script>
+  </script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
