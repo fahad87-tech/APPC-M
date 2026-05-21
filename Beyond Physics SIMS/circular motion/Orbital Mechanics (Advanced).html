@@ -5,16 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>AP Physics 1 — Orbital Mechanics Simulation</title>
 <script>
-const SIM_AUTH = { $1596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+const SIM_AUTH = { hash: "596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
 document.documentElement.classList.add("password-locked");
 
-async function pbkdf2Verify(password, storedHash, salt, iterations) {
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, $1596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4" }, key, 256);
-  const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
-  return hex === storedHash;
-}
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+       const enc = new TextEncoder();
+       const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+       const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+       const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+       return hex === storedHash;
+     }
 
 const passwordGateStyle=document.createElement("style");
 passwordGateStyle.textContent=`
@@ -71,7 +71,6 @@ cursor:pointer
 #password-gate-cancel{background:rgba(255,255,255,.08);color:#d9e2f2}
 #password-gate-submit{background:#64b5f6;color:#08101c}
 `;
-document.head.appendChild(passwordGateStyle);
 
 function requestPassword(title,message){
 return new Promise(resolve=>{
