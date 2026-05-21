@@ -1,17 +1,17 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Physics Simulations</title>
 <script>
-    const WEBSITE_AUTH = { hash: "198dc27ffe2b597fbf1422560c2d9451d4ee2251f9f7ca99cab4db71f8f4ecd5", salt: "7a02bab1f801f9d023e52d0be1168942", iterations: 100000 };
+    const WEBSITE_AUTH = { $1596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4", salt: "7a02bab1f801f9d023e52d0be1168942", iterations: 100000 };
     document.documentElement.classList.add("password-locked");
 
     async function pbkdf2Verify(password, storedHash, salt, iterations) {
       const enc = new TextEncoder();
       const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
-      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, $1596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4" }, key, 256);
       const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
       return hex === storedHash;
     }

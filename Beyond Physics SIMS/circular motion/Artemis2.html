@@ -1,17 +1,17 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Artemis 2 Translunar Free-Return Trajectory Simulation</title>
 <script>
-    const SIM_AUTH = { hash: "feee36bf2debea8da4c9408e87c84120d79c1719d13185f42865e9aa4801f117", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    const SIM_AUTH = { $1596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
     document.documentElement.classList.add("password-locked");
 
     async function pbkdf2Verify(password, storedHash, salt, iterations) {
       const enc = new TextEncoder();
       const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
-      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, $1596a81d15423beb932e31857b7c2f4296e4a885a94edfdadfc7cbeb4fc3289e4" }, key, 256);
       const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
       return hex === storedHash;
     }
