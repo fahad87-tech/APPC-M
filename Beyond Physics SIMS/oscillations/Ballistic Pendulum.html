@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AP Physics C: Advanced Ballistic Pendulum</title>
     <script>
-    const SIM_AUTH = { hash: "846db8a6b7b7eb12de353e118546858eb3682725f37ef1b08b75820e50cadfe6"", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    const SIM_AUTH = { hash: "25f5ab523cebaec5f894883aec9d9cbd304c29e4dd3b8e70ad7f2f974b878a98", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
     document.documentElement.classList.add("password-locked");
 
     async function pbkdf2Verify(password, storedHash, salt, iterations) {
       const enc = new TextEncoder();
       const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
-      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "846db8a6b7b7eb12de353e118546858eb3682725f37ef1b08b75820e50cadfe6"" }, key, 256);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
       const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
       return hex === storedHash;
     }
