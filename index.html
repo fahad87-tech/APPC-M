@@ -49,6 +49,15 @@
     } else {
       verifyWebsiteAccess();
     }
+
+    // Re-verify password when page is restored from bfcache (back navigation)
+    window.addEventListener("pageshow", (event) => {
+      if (event.persisted) {
+        // Page was restored from back-forward cache
+        document.documentElement.classList.add("password-locked");
+        verifyWebsiteAccess();
+      }
+    });
   </script>
   <style id="password-gate-styles">
     html.password-locked body { overflow: hidden; }
