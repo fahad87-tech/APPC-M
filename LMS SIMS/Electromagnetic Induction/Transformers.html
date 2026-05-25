@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AC Transformer Simulation</title>
+    <style>
+        :root {
+            --bg-page: #0b0b1a;
+            --bg-canvas: #121224;
+            --text-primary: #f0f0f5;
+            --text-secondary: #8a8aab;
+            --accent-1: #00e5ff; /* Bright Cyan - Primary */
+            --accent-2: #ff477e; /* Bright Coral/Pink - Secondary */
+            --accent-3: #00ff88; /* Neon Green - Efficiency/Power */
+            --accent-4: #ffea00; /* Neon Gold - Flux */
+            --accent-5: #b983ff; /* Bright Purple - Core */
+            --grid-color: rgba(255, 255, 255, 0.04);
+            --panel-bg: rgba(20, 20, 35, 0.9);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --btn-idle: #22223b;
+            --btn-hover: #333355;
+            --btn-active: #444477;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #simCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-canvas);
+            z-index: 1;
+            cursor: grab;
+        }
+        #simCanvas:active { cursor: grabbing; }
+
+        /* Overlay */
+        #instructionsOverlay {
+            position: absolute;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(11, 11, 26, 0.85);
+            z-index: 100;
+            display: flex; justify-content: center; align-items: center;
+            backdrop-filter: blur(8px);
+            transition: opacity 0.5s ease;
+        }
+
+        .card {
+            background-color: #1a1a2e; border: 1px solid var(--panel-border);
+            border-radius: 16px; padding: 35px; max-width: 500px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            text-align: left;
+        }
+        .card h2 { color: var(--text-primary); margin-bottom: 15px; font-size: 26px; font-weight: 800; letter-spacing: 0.5px;}
+        .card ul { color: var(--text-secondary); margin-bottom: 20px; padding-left: 20px; line-height: 1.6; }
+        .card p.guiding { color: var(--accent-4); font-style: italic; margin-bottom: 25px; font-weight: 600; }
+
+        .btn-start {
+            background-color: var(--accent-1); color: #000; border: none;
+            padding: 14px 24px; font-size: 16px; font-weight: 800;
+            border-radius: 8px; cursor: pointer; width: 100%; transition: all 0.2s;
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+        }
+        .btn-start:hover { filter: brightness(1.2); box-shadow: 0 0 25px rgba(0, 229, 255, 0.6); }
+        .btn-start:active { transform: scale(0.98); }
+
+        /* Collapsible Panel */
+        #panelContainer {
+            position: absolute; top: 0; right: 0;
+            width: 360px; min-width: 320px; height: 100vh;
+            background-color: var(--panel-bg); backdrop-filter: blur(12px);
+            border-left: 1px solid var(--panel-border); z-index: 10;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+        #panelContainer.collapsed { transform: translateX(100%); }
+
+        #togglePanelBtn {
+            position: absolute; top: 50%; right: 360px; transform: translateY(-50%);
+            background-color: rgba(20, 20, 35, 0.9); border: 1px solid var(--panel-border); border-right: none;
+            color: var(--text-primary); width: 32px; height: 64px;
+            display: flex; justify-content: center; align-items: center;
+            cursor: pointer; border-radius: 8px 0 0 8px; z-index: 11;
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s;
+            font-size: 16px; backdrop-filter: blur(12px);
+        }
+        #togglePanelBtn:hover { background-color: var(--btn-hover); color: var(--accent-1); }
+        #togglePanelBtn.collapsed { right: 0px; }
+
+        /* App Tabs */
+        .app-tabs { display: flex; width: 100%; background: rgba(0,0,0,0.4); border-bottom: 1px solid var(--panel-border); }
+        .app-tab { flex: 1; padding: 15px 0; text-align: center; cursor: pointer; color: var(--text-secondary); font-weight: 700; font-size: 13px; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;}
+        .app-tab.active { color: var(--accent-1); border-bottom: 3px solid var(--accent-1); background: rgba(0, 229, 255, 0.05); }
+
+        /* Panel Content */
+        .view-section { display: none; flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .view-section.active { display: block; }
+        .view-section::-webkit-scrollbar { width: 6px; }
+        .view-section::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 3px; }
+
+        /* Transport Controls & View Toggles */
+        .control-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-transport {
+            flex: 1; background-color: var(--btn-idle); color: var(--text-primary);
+            border: 1px solid var(--panel-border); padding: 10px 0; border-radius: 6px;
+            cursor: pointer; font-weight: 600; transition: all 0.2s; text-align: center; font-size: 13px;
+        }
+        .btn-transport:hover { background-color: var(--btn-hover); }
+        .btn-transport:active { background-color: var(--btn-active); transform: scale(0.96); }
+        .btn-transport.active { background-color: rgba(0, 229, 255, 0.15); color: var(--accent-1); border-color: var(--accent-1); box-shadow: 0 0 10px rgba(0, 229, 255, 0.2) inset; }
+
+        .btn-toggle {
+            flex: 1; background-color: rgba(0,0,0,0.3); border: 1px solid var(--panel-border);
+            color: var(--text-secondary); padding: 8px; border-radius: 6px; cursor: pointer;
+            font-size: 12px; transition: all 0.2s; font-weight: 600;
+        }
+        .btn-toggle:hover { background-color: var(--btn-hover); color: var(--text-primary); }
+        .btn-toggle.active { background-color: rgba(255, 234, 0, 0.15); color: var(--accent-4); border-color: var(--accent-4); }
+
+        /* Data Panel & Graph */
+        .data-panel {
+            background-color: rgba(0,0,0,0.3); border-radius: 8px; padding: 12px;
+            margin-bottom: 15px; border: 1px solid var(--panel-border); display: flex; flex-direction: column; gap: 6px;
+        }
+        .data-row { display: flex; justify-content: space-between; font-size: 13px; align-items: center;}
+        .data-label { color: var(--text-secondary); font-weight: 500;}
+        .data-value { font-family: 'Courier New', Courier, monospace; font-size: 15px; font-weight: bold; text-shadow: 0 0 5px currentColor;}
+        .val-cyan { color: var(--accent-1); }
+        .val-coral { color: var(--accent-2); }
+        .val-green { color: var(--accent-3); }
+
+        .tabs { display: flex; border-bottom: 1px solid var(--panel-border); margin-bottom: 12px; }
+        .tab { padding: 8px 12px; cursor: pointer; color: var(--text-secondary); border-bottom: 2px solid transparent; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;}
+        .tab.active { color: var(--text-primary); border-bottom: 2px solid var(--accent-1); }
+        
+        .graph-container {
+            width: 100%; height: 160px; background-color: #0d0d1a; border: 1px solid var(--panel-border);
+            border-radius: 8px; margin-bottom: 20px; position: relative; box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+        }
+        #graphCanvas { width: 100%; height: 100%; cursor: crosshair; }
+        #graphTooltip {
+            position: absolute; background: rgba(10, 10, 20, 0.95); border: 1px solid var(--accent-1);
+            color: #fff; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-family: monospace;
+            pointer-events: none; display: none; white-space: nowrap; z-index: 5; box-shadow: 0 5px 15px rgba(0,229,255,0.2);
+        }
+
+        /* Sliders */
+        .slider-group { margin-bottom: 18px; }
+        .slider-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: var(--text-secondary); font-weight: 600;}
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; cursor: pointer; margin-top: -6px; box-shadow: 0 0 8px currentColor;}
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: var(--btn-idle); border-radius: 2px; }
+        input[type=range]:focus { outline: none; }
+        select { width: 100%; padding: 8px 10px; background-color: rgba(0,0,0,0.3); color: var(--text-primary); border: 1px solid var(--panel-border); border-radius: 6px; margin-bottom: 15px; outline: none; cursor: pointer; font-size: 13px; font-weight: 600;}
+
+        input.slider-cyan::-webkit-slider-thumb { background: var(--accent-1); color: var(--accent-1);}
+        input.slider-coral::-webkit-slider-thumb { background: var(--accent-2); color: var(--accent-2);}
+
+        /* 5E Assessment UI */
+        .assessment-header { margin-bottom: 20px; }
+        .assessment-header h3 { color: var(--text-primary); margin-bottom: 12px; font-size: 18px;}
+        .assessment-header input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid var(--panel-border); background: rgba(0,0,0,0.3); color: white; font-size: 14px; outline: none; transition: border-color 0.2s;}
+        .assessment-header input:focus { border-color: var(--accent-1); }
+        .q-item { margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+        .q-item label { display: block; color: var(--text-primary); margin-bottom: 10px; font-size: 13px; line-height: 1.5; font-weight: 500;}
+        .q-item textarea { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--panel-border); background: rgba(0,0,0,0.4); color: var(--text-primary); resize: vertical; font-size: 13px; transition: border-color 0.2s;}
+        .q-item textarea:focus { outline: none; border-color: var(--accent-1); box-shadow: 0 0 5px rgba(0,229,255,0.2);}
+
+        @media (max-width: 768px) {
+            #panelContainer { width: 100%; min-width: 100%; }
+            #togglePanelBtn { right: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="simCanvas"></canvas>
+
+    <div id="togglePanelBtn">▶</div>
+
+    <div id="panelContainer">
+        <div class="app-tabs">
+            <div class="app-tab active" data-target="simulationView">Simulation HUD</div>
+            <div class="app-tab" data-target="assessmentView">5E Assessment</div>
+        </div>
+
+        <!-- SIMULATION VIEW -->
+        <div id="simulationView" class="view-section active">
+            <div class="control-row">
+                <button id="btnPlay" class="btn-transport">Play</button>
+                <button id="btnPause" class="btn-transport active">Pause</button>
+                <button id="btnReset" class="btn-transport">Reset</button>
+            </div>
+            
+            <div class="control-row">
+                <button id="btnView2D" class="btn-toggle active">2D Schematic View</button>
+                <button id="btnView3D" class="btn-toggle">3D Core View</button>
+            </div>
+
+            <div class="control-row">
+                <button id="btnMeterV" class="btn-toggle active">Meter: Voltmeter</button>
+                <button id="btnMeterA" class="btn-toggle">Meter: Ammeter</button>
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="voltage">Voltage</div>
+                <div class="tab" data-tab="current">Current</div>
+                <div class="tab" data-tab="power">Power</div>
+            </div>
+            <div class="graph-container">
+                <canvas id="graphCanvas"></canvas>
+                <div id="graphTooltip"></div>
+            </div>
+
+            <div class="data-panel">
+                <div class="data-row"><span class="data-label">Vₚ (RMS):</span> <span class="data-value val-cyan" id="valVp">0.0 V</span></div>
+                <div class="data-row"><span class="data-label">Vₛ (RMS):</span> <span class="data-value val-coral" id="valVs">0.0 V</span></div>
+                <div class="data-row"><span class="data-label">Iₛ (RMS):</span> <span class="data-value val-coral" id="valIs">0.0 A</span></div>
+                <div class="data-row"><span class="data-label">Efficiency (η):</span> <span class="data-value val-green" id="valEff">0 %</span></div>
+            </div>
+
+            <div id="slidersContainer"></div>
+        </div>
+
+        <!-- 5E ASSESSMENT VIEW -->
+        <div id="assessmentView" class="view-section">
+            <div class="assessment-header">
+               <h3>Transformer Concept Check</h3>
+               <input type="text" id="studentName" placeholder="Enter Student Name...">
+            </div>
+            <div id="qList"></div>
+            <button id="btnExport" class="btn-start" style="margin-top: 5px; margin-bottom: 20px;">Export to .docx</button>
+        </div>
+    </div>
+
+    <div id="instructionsOverlay">
+        <div class="card">
+            <h2>AC Transformer Lab</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">Explore flux linkage, induction, and core materials with modern visualizations!</p>
+            <ul>
+                <li><strong>Pan & Zoom:</strong> Drag the background and scroll your mouse wheel.</li>
+                <li><strong>Interactive Graph:</strong> Hit <strong>Play</strong> to see the real-time wave forms. Hover over the graph to inspect exact values.</li>
+                <li><strong>2D vs 3D View:</strong> Switch to 3D to see the physical difference between solid and laminated iron cores.</li>
+            </ul>
+            <button class="btn-start" id="btnStart">Got it — Start Exploring</button>
+        </div>
+    </div>
+
+<script>
+/**
+ * Unified AP Physics 1 Transformer Simulation
+ * Includes seamless 2D/3D wiring, solid core fix, and 5E Exportable Tab.
+ * Features modernized "Neon HUD" canvas visuals.
+ */
+
+const state = {
+    t: 0,
+    dt: 1/60,
+    playing: false,
+    view3D: false,
+    meterMode: 'V',
+    activeTab: 'voltage',
+    camera: { x: 0, y: 0, zoom: 1 },
+    mouse: { x: 0, y: 0, isDown: false },
+    lastMouse: { x: 0, y: 0 },
+    history: [],
+    maxHistory: 200,
+    tooltipActive: false,
+    tooltipIdx: -1,
+    initialized: false
+};
+
+const params = {
+    vp_max: 120, freq: 1.0, np: 40, ns: 40, coreType: 2, r_load: 50,
+};
+
+const colors = {
+    primary: '#00e5ff', secondary: '#ff477e', power: '#00ff88',
+    flux: '#ffea00', core: '#7b62a3', coreDark: '#3a2b59',
+    bgCanvas: '#121224', grid: 'rgba(255, 255, 255, 0.04)', wire: '#8a8aab'
+};
+
+const coreProps = [
+    { k: 0.20, loss: 0.8, name: "Air Core (High Leakage)" },
+    { k: 0.85, loss: 0.5, name: "Solid Iron (High Eddy Loss)" },
+    { k: 0.98, loss: 0.02, name: "Laminated Iron (Efficient)" }
+];
+
+// --- DOM ELEMENTS ---
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+const graphCanvas = document.getElementById('graphCanvas');
+const graphCtx = graphCanvas.getContext('2d');
+const panelContainer = document.getElementById('panelContainer');
+const togglePanelBtn = document.getElementById('togglePanelBtn');
+const slidersContainer = document.getElementById('slidersContainer');
+const tooltip = document.getElementById('graphTooltip');
+
+// --- 5E QUESTIONS ---
+const questions = [
+    "What is the fundamental purpose of a transformer in an electrical circuit?",
+    "Explain the relationship between the number of turns in the primary coil (Nₚ) and the secondary coil (Nₛ) regarding voltage.",
+    "If a transformer has Nₚ = 100 and Nₛ = 200, is it a step-up or step-down transformer? Explain why.",
+    "A primary coil is supplied with 120 V and has 50 turns. If the secondary coil has 25 turns, calculate the secondary voltage.",
+    "According to the law of conservation of energy, how does the power in the primary coil compare to the ideal power in the secondary coil?",
+    "If a step-up transformer increases voltage, what must mathematically happen to the current in the secondary coil to conserve energy?",
+    "Describe the role of the magnetic field (magnetic flux) in a transformer. How does energy move from the primary to the secondary side without physical wires connecting them?",
+    "Why do transformers require an Alternating Current (AC) input to function, rather than Direct Current (DC)?",
+    "What does the term 'flux leakage' refer to, and how does the presence of a magnetic core affect it?",
+    "A load resistor of 100 Ω is connected to a 50 V secondary coil. Calculate the secondary current (Iₛ) and the power delivered to the load."
+];
+
+// --- UI SETUP ---
+const sliderConfig = [
+    { id: 'vp_max', label: 'Primary Amplitude (Vₚ)', min: 10, max: 240, step: 10, val: 120, unit: 'V', colorClass: 'slider-cyan' },
+    { id: 'freq', label: 'AC Frequency (f)', min: 0.5, max: 5.0, step: 0.1, val: 1.0, unit: 'Hz', colorClass: 'slider-cyan' },
+    { id: 'np', label: 'Primary Turns (Nₚ)', min: 10, max: 100, step: 5, val: 40, unit: '', colorClass: 'slider-cyan' },
+    { id: 'ns', label: 'Secondary Turns (Nₛ)', min: 10, max: 100, step: 5, val: 40, unit: '', colorClass: 'slider-coral' },
+    { id: 'r_load', label: 'Load Resistance (R)', min: 10, max: 200, step: 10, val: 50, unit: 'Ω', colorClass: 'slider-coral' }
+];
+
+function buildUI() {
+    // Sliders
+    const coreDiv = document.createElement('div');
+    coreDiv.className = 'slider-group';
+    coreDiv.innerHTML = `
+        <div class="slider-header"><span>Core Material</span></div>
+        <select id="selCoreType">
+            <option value="0">Air Core (Low Coupling)</option>
+            <option value="1">Solid Iron (High Eddy Losses)</option>
+            <option value="2" selected>Laminated Iron (High Efficiency)</option>
+        </select>
+    `;
+    slidersContainer.appendChild(coreDiv);
+    document.getElementById('selCoreType').addEventListener('change', (e) => {
+        params.coreType = parseInt(e.target.value);
+        state.history = []; 
+    });
+
+    sliderConfig.forEach(cfg => {
+        const div = document.createElement('div');
+        div.className = 'slider-group';
+        div.innerHTML = `
+            <div class="slider-header">
+                <span>${cfg.label}</span>
+                <span id="lbl_${cfg.id}">${cfg.val} ${cfg.unit}</span>
+            </div>
+            <input type="range" id="sl_${cfg.id}" min="${cfg.min}" max="${cfg.max}" step="${cfg.step}" value="${cfg.val}" class="${cfg.colorClass}">
+        `;
+        slidersContainer.appendChild(div);
+        document.getElementById(`sl_${cfg.id}`).addEventListener('input', (e) => {
+            params[cfg.id] = parseFloat(e.target.value);
+            document.getElementById(`lbl_${cfg.id}`).innerText = `${params[cfg.id]} ${cfg.unit}`;
+            if(cfg.id === 'np' || cfg.id === 'ns') state.history = [];
+        });
+    });
+
+    // Assessment Tab
+    const qList = document.getElementById('qList');
+    questions.forEach((q, i) => {
+        qList.innerHTML += `
+            <div class="q-item">
+                <label><strong>Q${i+1}:</strong> ${q}</label>
+                <textarea id="ans_${i}" rows="3" placeholder="Type your answer here..."></textarea>
+            </div>
+        `;
+    });
+}
+
+// --- PHYSICS ENGINE ---
+let currentPhys = { vp:0, vs:0, ip:0, is:0, pp:0, ps:0, flux:0 };
+
+function calculatePhysics(t) {
+    const omega = 2 * Math.PI * params.freq;
+    const vp = params.vp_max * Math.sin(omega * t);
+    const flux_amp = params.vp_max / (params.np * omega * 0.1); 
+    const flux = -flux_amp * Math.cos(omega * t);
+
+    const core = coreProps[params.coreType];
+    const vs = core.k * (params.ns / params.np) * vp;
+    const is = vs / params.r_load;
+    
+    const ps = vs * is; 
+    const p_loss = core.loss * (vp * vp) / 100; 
+    const pp = ps + p_loss; 
+    const ip = vp !== 0 ? Math.abs(pp / vp) * Math.sign(vp) : 0;
+
+    return { t, vp, vs, ip, is, pp, ps, flux };
+}
+
+function updatePhysics() {
+    state.t += state.dt;
+    currentPhys = calculatePhysics(state.t);
+    state.history.push(currentPhys);
+    if(state.history.length > state.maxHistory) state.history.shift();
+}
+
+function updateDataPanel() {
+    const rmsVp = params.vp_max / Math.SQRT2;
+    const rmsVs = (coreProps[params.coreType].k * (params.ns / params.np) * params.vp_max) / Math.SQRT2;
+    const rmsIs = rmsVs / params.r_load;
+    const avgPs = rmsVs * rmsIs;
+    const avgPloss = coreProps[params.coreType].loss * (rmsVp * rmsVp) / 100;
+    const avgPp = avgPs + avgPloss;
+    let eff = avgPp > 0.01 ? (avgPs / avgPp) * 100 : 0;
+
+    document.getElementById('valVp').innerText = `${rmsVp.toFixed(1)} V`;
+    document.getElementById('valVs').innerText = `${rmsVs.toFixed(1)} V`;
+    document.getElementById('valIs').innerText = `${rmsIs.toFixed(2)} A`;
+    document.getElementById('valEff').innerText = `${eff.toFixed(1)} %`;
+}
+
+// --- RENDERING ENGINE HELPER ---
+function setGlow(color, blur) {
+    ctx.shadowColor = color;
+    ctx.shadowBlur = blur;
+}
+function clearGlow() {
+    ctx.shadowBlur = 0;
+}
+
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const gRect = graphCanvas.parentElement.getBoundingClientRect();
+    if(gRect.width > 0) { graphCanvas.width = gRect.width; graphCanvas.height = gRect.height; }
+
+    if(!state.initialized) {
+        const panelW = panelContainer.classList.contains('collapsed') ? 0 : 360;
+        state.camera.x = (window.innerWidth - panelW) / 2;
+        state.camera.y = window.innerHeight / 2;
+        if (window.innerWidth < 800) state.camera.zoom = 0.6;
+        state.initialized = true;
+    }
+}
+
+function drawGrid() {
+    ctx.strokeStyle = colors.grid; ctx.lineWidth = 1.5;
+    const size = 50 * state.camera.zoom, offsetX = state.camera.x % size, offsetY = state.camera.y % size;
+    ctx.beginPath();
+    for(let x = offsetX; x < canvas.width; x += size) { ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); }
+    for(let y = offsetY; y < canvas.height; y += size) { ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); }
+    ctx.stroke();
+}
+
+function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGrid();
+    
+    ctx.save();
+    ctx.translate(state.camera.x, state.camera.y);
+    ctx.scale(state.camera.zoom, state.camera.zoom);
+
+    if (state.view3D) drawTransformer3D();
+    else drawTransformer2D();
+
+    ctx.restore();
+    
+    drawGraph();
+    updateDataPanel();
+}
+
+// --- GRAPH ENGINE ---
+function drawGraph() {
+    graphCtx.clearRect(0, 0, graphCanvas.width, graphCanvas.height);
+    if(state.history.length === 0 || !document.getElementById('simulationView').classList.contains('active')) return;
+
+    const w = graphCanvas.width, h = graphCanvas.height;
+    graphCtx.strokeStyle = 'rgba(255,255,255,0.1)'; graphCtx.lineWidth = 1;
+    graphCtx.beginPath(); graphCtx.moveTo(0, h/2); graphCtx.lineTo(w, h/2); graphCtx.stroke();
+
+    let maxVal = 10;
+    state.history.forEach(d => {
+        if(state.activeTab === 'voltage') maxVal = Math.max(maxVal, Math.abs(d.vp), Math.abs(d.vs));
+        if(state.activeTab === 'current') maxVal = Math.max(maxVal, Math.abs(d.ip), Math.abs(d.is));
+        if(state.activeTab === 'power') maxVal = Math.max(maxVal, Math.abs(d.pp), Math.abs(d.ps));
+    });
+    maxVal *= 1.2;
+
+    function plotLine(valKey, color) {
+        graphCtx.strokeStyle = color; graphCtx.lineWidth = 2.5; 
+        graphCtx.shadowColor = color; graphCtx.shadowBlur = 8;
+        graphCtx.beginPath();
+        for(let i=0; i<state.history.length; i++) {
+            const x = (i / state.maxHistory) * w, y = h/2 - (state.history[i][valKey] / maxVal) * (h/2);
+            if(i === 0) graphCtx.moveTo(x, y); else graphCtx.lineTo(x, y);
+        }
+        graphCtx.stroke();
+        graphCtx.shadowBlur = 0; // reset
+    }
+
+    if(state.activeTab === 'voltage') { plotLine('vp', colors.primary); plotLine('vs', colors.secondary); }
+    else if (state.activeTab === 'current') { plotLine('ip', colors.primary); plotLine('is', colors.secondary); }
+    else if (state.activeTab === 'power') { plotLine('pp', colors.primary); plotLine('ps', colors.power); }
+
+    if (state.tooltipActive && state.tooltipIdx >= 0 && state.tooltipIdx < state.history.length) {
+        const i = state.tooltipIdx, x = (i / state.maxHistory) * w;
+        graphCtx.strokeStyle = 'rgba(255,255,255,0.8)'; graphCtx.lineWidth = 1;
+        graphCtx.setLineDash([4,4]); graphCtx.beginPath(); graphCtx.moveTo(x, 0); graphCtx.lineTo(x, h); graphCtx.stroke(); graphCtx.setLineDash([]);
+        
+        const d = state.history[i];
+        let tipHtml = `t: ${d.t.toFixed(2)}s<br>`;
+        if(state.activeTab === 'voltage') tipHtml += `<span style="color:${colors.primary}">Vp: ${d.vp.toFixed(1)}V</span><br><span style="color:${colors.secondary}">Vs: ${d.vs.toFixed(1)}V</span>`;
+        else if (state.activeTab === 'current') tipHtml += `<span style="color:${colors.primary}">Ip: ${d.ip.toFixed(2)}A</span><br><span style="color:${colors.secondary}">Is: ${d.is.toFixed(2)}A</span>`;
+        else tipHtml += `<span style="color:${colors.primary}">Pin: ${d.pp.toFixed(1)}W</span><br><span style="color:${colors.power}">Pout: ${d.ps.toFixed(1)}W</span>`;
+        
+        tooltip.innerHTML = tipHtml; tooltip.style.left = `${Math.min(x + 10, w - 100)}px`; tooltip.style.top = `10px`;
+    }
+}
+
+// --- 2D RENDERING & CIRCUIT SYMBOLS ---
+function drawTransformer2D() {
+    const w = 240, h = 240, thick = 60;
+    const outR = { x: -w/2, y: -h/2, w: w, h: h }, inR  = { x: -w/2 + thick, y: -h/2 + thick, w: w - 2*thick, h: h - 2*thick };
+
+    // Circuits behind core
+    drawACSource(outR.x, 0, false);
+    drawLoadCircuit(outR.x + w, 0, false);
+
+    // Core
+    ctx.beginPath(); ctx.rect(outR.x, outR.y, outR.w, outR.h); ctx.rect(inR.x, inR.y, inR.w, inR.h);
+    if (params.coreType === 0) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 3; ctx.setLineDash([10, 10]); ctx.stroke(); ctx.setLineDash([]);
+    } else {
+        // Metallic Gradient Core
+        const coreGrad = ctx.createLinearGradient(outR.x, outR.y, outR.x + outR.w, outR.y + outR.h);
+        coreGrad.addColorStop(0, '#4a3b69');
+        coreGrad.addColorStop(0.5, '#7b62a3');
+        coreGrad.addColorStop(1, '#3a2b59');
+        ctx.fillStyle = coreGrad;
+        
+        setGlow(colors.core, 15);
+        ctx.fill("evenodd");
+        clearGlow();
+        
+        ctx.strokeStyle = colors.coreDark; ctx.lineWidth = 2; ctx.stroke();
+
+        if (params.coreType === 2) {
+            ctx.save(); ctx.clip("evenodd"); ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 1.5;
+            for(let y = outR.y; y < outR.y + outR.h; y += 8) { ctx.beginPath(); ctx.moveTo(outR.x, y); ctx.lineTo(outR.x + outR.w, y); ctx.stroke(); }
+            ctx.restore();
+        }
+        if (params.coreType === 1) {
+            const heat = Math.min(1, Math.abs(currentPhys.vp) / 150);
+            ctx.save(); ctx.clip("evenodd"); 
+            ctx.fillStyle = `rgba(255, 50, 50, ${heat * 0.6})`; 
+            ctx.fillRect(outR.x, outR.y, outR.w, outR.h); 
+            ctx.restore();
+        }
+    }
+
+    drawFluxLines2D(outR, thick);
+    drawCoil2D(outR.x, outR.y, thick, h, params.np, colors.primary);
+    drawCoil2D(outR.x + w - thick, outR.y, thick, h, params.ns, colors.secondary);
+}
+
+function drawFluxLines2D(outR, thick) {
+    const hw = outR.w/2, hh = outR.h/2, fluxNorm = Math.abs(currentPhys.vp / params.vp_max); 
+    const dashOffset = -state.t * 300 * Math.sign(currentPhys.vp); 
+    
+    ctx.lineWidth = 4; ctx.lineCap = "round"; ctx.strokeStyle = colors.flux;
+    
+    // Linked Flux with Neon Glow
+    ctx.globalAlpha = Math.min(1.0, fluxNorm * coreProps[params.coreType].k * 2 + 0.1);
+    setGlow(colors.flux, 15);
+    ctx.setLineDash([12, 20]); ctx.lineDashOffset = dashOffset;
+    
+    ctx.beginPath(); 
+    ctx.roundRect ? ctx.roundRect(-hw + thick/2, -hh + thick/2, outR.w - thick, outR.h - thick, 10) 
+                  : ctx.rect(-hw + thick/2, -hh + thick/2, outR.w - thick, outR.h - thick);
+    ctx.stroke();
+
+    const leakageFactor = 1.0 - coreProps[params.coreType].k;
+    if (leakageFactor > 0.1) {
+        ctx.globalAlpha = Math.min(1.0, fluxNorm * leakageFactor * 2 + 0.1);
+        ctx.setLineDash([8, 16]);
+        ctx.beginPath(); ctx.ellipse(-hw + thick/2, 0, thick*1.3, hh + 25, 0, -Math.PI/2, Math.PI/2, true); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(-hw + thick/2, 0, thick*0.9, hh - 15, 0, -Math.PI/2, Math.PI/2, true); ctx.stroke();
+    }
+    
+    ctx.setLineDash([]); ctx.globalAlpha = 1.0; clearGlow();
+}
+
+function drawCoil2D(x, y, w, h, turns, color) {
+    const vTurns = Math.min(turns, 30), spacing = 160 / vTurns; 
+    let currY = y + h/2 - 80; 
+    
+    // Build coil path
+    const path = new Path2D();
+    for(let i=0; i<vTurns; i++) {
+        path.bezierCurveTo(x + w + 25, currY, x + w + 25, currY + spacing/2, x + w/2, currY + spacing/2);
+        path.bezierCurveTo(x - 25, currY + spacing/2, x - 25, currY + spacing, x + w/2, currY + spacing);
+        currY += spacing;
+    }
+    
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    
+    // Outer colored glow stroke
+    ctx.strokeStyle = color; 
+    ctx.lineWidth = 7; 
+    setGlow(color, 15);
+    ctx.stroke(path);
+    
+    // Inner bright neon core
+    ctx.strokeStyle = '#ffffff'; 
+    ctx.lineWidth = 2.5; 
+    clearGlow();
+    ctx.stroke(path);
+}
+
+function drawACSource(cx, cy, is3D) {
+    const r = 28, ac_x = cx - 130;
+    const hookX = is3D ? cx - 15 : cx - 25;
+
+    ctx.strokeStyle = colors.wire; ctx.lineWidth = 4; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(ac_x, cy - r); ctx.lineTo(ac_x, cy - 80); ctx.lineTo(hookX, cy - 80);
+    ctx.moveTo(ac_x, cy + r); ctx.lineTo(ac_x, cy + 80); ctx.lineTo(hookX, cy + 80);
+    ctx.stroke();
+
+    // Source Ring
+    ctx.fillStyle = colors.bgCanvas; ctx.strokeStyle = colors.primary; ctx.lineWidth = 4;
+    setGlow(colors.primary, 10);
+    ctx.beginPath(); ctx.arc(ac_x, cy, r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+
+    // Sine Wave Inside
+    ctx.beginPath();
+    const phase = state.t * 2 * Math.PI * params.freq;
+    for (let i = -14; i <= 14; i++) {
+        const waveY = cy + Math.sin(i * 0.4 - phase) * 12;
+        if (i === -14) ctx.moveTo(ac_x + i, waveY); else ctx.lineTo(ac_x + i, waveY);
+    }
+    ctx.stroke();
+    clearGlow();
+
+    // Text HUD
+    ctx.fillStyle = colors.primary; ctx.font = "bold 14px monospace"; ctx.textAlign = "center";
+    ctx.fillText(`${params.vp_max} Vₚ`, ac_x, cy - r - 12);
+    ctx.fillText(`${params.freq.toFixed(1)} Hz`, ac_x, cy + r + 24);
+    ctx.fillStyle = '#ffffff'; ctx.font = "12px monospace"; ctx.fillText(`Inst: ${currentPhys.vp.toFixed(1)}V`, ac_x, cy + r + 42);
+}
+
+function drawLoadCircuit(cx, cy, is3D) {
+    const x = cx + 130, r = 24;
+    const hookX = is3D ? cx - 75 : cx + 25; 
+
+    ctx.strokeStyle = colors.wire; ctx.lineWidth = 4; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    ctx.beginPath();
+    ctx.moveTo(hookX, cy - 80); ctx.lineTo(x, cy - 80);
+    ctx.moveTo(hookX, cy + 80); ctx.lineTo(x, cy + 80);
+
+    let mx, my, mLabel, mVal;
+    if (state.meterMode === 'A') {
+        mx = x - 45; my = cy - 80; mLabel = 'A'; mVal = `${Math.abs(currentPhys.is).toFixed(2)} A`;
+        ctx.moveTo(x, cy - 80); ctx.lineTo(x, cy + 80); 
+    } else {
+        mx = x + 65; my = cy; mLabel = 'V'; mVal = `${Math.abs(currentPhys.vs).toFixed(1)} V`;
+        ctx.moveTo(x, cy - 80); ctx.lineTo(x, cy + 80); 
+        ctx.moveTo(x, cy - 80); ctx.lineTo(mx, cy - 80); ctx.lineTo(mx, my - r);
+        ctx.moveTo(x, cy + 80); ctx.lineTo(mx, cy + 80); ctx.lineTo(mx, my + r);
+    }
+    ctx.stroke();
+
+    // Resistor Glowing
+    const heat = Math.min(1, Math.abs(currentPhys.ps) / 200);
+    ctx.strokeStyle = `rgb(${138 + heat*117}, ${138 - heat*88}, ${171 - heat*121})`; 
+    if(heat > 0.1) setGlow('rgba(255,50,50,0.8)', heat * 20);
+    drawResistor(x, cy - 80, x, cy + 80);
+    clearGlow();
+
+    // Meter HUD
+    ctx.fillStyle = colors.bgCanvas; ctx.strokeStyle = colors.secondary; ctx.lineWidth = 4;
+    setGlow(colors.secondary, 10);
+    ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    clearGlow();
+    
+    ctx.fillStyle = colors.secondary; ctx.font = "bold 22px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText(mLabel, mx, my);
+    ctx.fillStyle = '#ffffff'; ctx.font = "bold 13px monospace"; ctx.textBaseline = "alphabetic";
+    ctx.fillText(mVal, mx + (state.meterMode==='V'?45:0), my + (state.meterMode==='V'?5:40));
+    ctx.fillStyle = colors.secondary; ctx.font = "bold 14px monospace"; ctx.textAlign = "center";
+    ctx.fillText(`${params.r_load} Ω`, x + 35, cy + 5);
+}
+
+function drawResistor(x1, y1, x2, y2) {
+    const points = 7, len = y2 - y1, step = len / points, width = 16;
+    ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(x1, y1);
+    for(let i=1; i<points; i++) ctx.lineTo(x1 + (i%2 === 1 ? width : -width), y1 + i*step);
+    ctx.lineTo(x2, y2); ctx.stroke();
+}
+
+// --- 3D RENDERING ENGINE ---
+function drawTransformer3D() {
+    const w = 240, h = 240, t = 60, x = -w/2, y = -h/2, maxDepth = 60;
+    const dx = 0.5, dy = -0.5;
+
+    drawACSource(x, 0, true);
+    drawLoadCircuit(x + w, 0, true);
+
+    drawCoil3DBack(x, y, t, h, params.np, colors.primary, maxDepth, dx, dy);
+    drawCoil3DBack(x + w - t, y, t, h, params.ns, colors.secondary, maxDepth, dx, dy);
+
+    if (params.coreType > 0) {
+        const isLaminated = (params.coreType === 2), numPlates = isLaminated ? 8 : 1, plateDepth = maxDepth / numPlates, plateGap = isLaminated ? 2 : 0;
+        ctx.lineWidth = 1;
+
+        for (let plate = numPlates - 1; plate >= 0; plate--) {
+            const zStart = plate * plateDepth, zEnd = zStart + plateDepth - plateGap;
+            for (let z = zEnd; z >= zStart; z -= 1) {
+                const px = x + z * dx, py = y + z * dy;
+                ctx.beginPath(); ctx.rect(px, py, w, h); ctx.rect(px + t, py + t, w - 2*t, h - 2*t);
+                
+                // Color Extrusion
+                if (params.coreType === 1 && z === 0) {
+                     const heat = Math.min(1, Math.abs(currentPhys.vp) / 150);
+                     ctx.fillStyle = `rgb(${123 + heat*100}, ${98 - heat*50}, ${163 - heat*50})`;
+                     if(heat>0.1) setGlow('red', heat*15);
+                } else {
+                     // Gradient depth shading
+                     const shade = 1 - (z / maxDepth) * 0.4;
+                     ctx.fillStyle = `rgb(${123*shade}, ${98*shade}, ${163*shade})`;
+                }
+                ctx.fill("evenodd");
+                clearGlow();
+                
+                if (isLaminated) {
+                    if (z === zEnd || z === zStart) { ctx.strokeStyle = colors.coreDark; ctx.stroke(); }
+                } else {
+                    if (z === zEnd || z === zStart) { ctx.strokeStyle = colors.coreDark; ctx.stroke(); }
+                    else { ctx.strokeStyle = ctx.fillStyle; ctx.stroke(); } 
+                }
+            }
+        }
+        if (!isLaminated) {
+            ctx.strokeStyle = colors.coreDark; ctx.beginPath();
+            ctx.moveTo(x, y); ctx.lineTo(x + maxDepth*dx, y + maxDepth*dy);
+            ctx.moveTo(x+w, y); ctx.lineTo(x+w + maxDepth*dx, y + maxDepth*dy);
+            ctx.moveTo(x, y+h); ctx.lineTo(x + maxDepth*dx, y+h + maxDepth*dy);
+            ctx.moveTo(x+w, y+h); ctx.lineTo(x+w + maxDepth*dx, y+h + maxDepth*dy);
+            ctx.moveTo(x+t, y+t); ctx.lineTo(x+t + maxDepth*dx, y+t + maxDepth*dy);
+            ctx.moveTo(x+w-t, y+t); ctx.lineTo(x+w-t + maxDepth*dx, y+t + maxDepth*dy);
+            ctx.moveTo(x+t, y+h-t); ctx.lineTo(x+t + maxDepth*dx, y+h-t + maxDepth*dy);
+            ctx.moveTo(x+w-t, y+h-t); ctx.lineTo(x+w-t + maxDepth*dx, y+h-t + maxDepth*dy);
+            ctx.stroke();
+        }
+    } else {
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 3; ctx.setLineDash([10, 10]);
+        ctx.beginPath(); ctx.rect(x, y, w, h); ctx.rect(x + t, y + t, w - 2*t, h - 2*t); ctx.stroke(); ctx.setLineDash([]);
+    }
+
+    drawCoil3DFront(x, y, t, h, params.np, colors.primary, maxDepth, dx, dy);
+    drawCoil3DFront(x + w - t, y, t, h, params.ns, colors.secondary, maxDepth, dx, dy);
+    
+    ctx.fillStyle = colors.primary; ctx.font = "bold 16px sans-serif"; ctx.textAlign="right"; ctx.fillText("INPUT (Primary)", x - 20, 0);
+    ctx.fillStyle = colors.secondary; ctx.textAlign="left"; ctx.fillText("OUTPUT (Secondary)", x + w + 20, 0);
+}
+
+function drawCoil3DFront(x, y, w, h, turns, color, depth, dx, dy) {
+    const vTurns = Math.min(turns, 25), spacing = 160 / vTurns; let currY = y + h/2 - 80;
+    
+    const path = new Path2D();
+    for(let i=0; i<vTurns; i++) {
+        path.moveTo(x - 20, currY); path.lineTo(x + w + 20, currY + spacing/2); path.lineTo(x + w + 20 + depth*dx, currY + spacing/2 + depth*dy);
+        currY += spacing;
+    }
+    
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+    // Outer Glow
+    ctx.strokeStyle = color; ctx.lineWidth = 7; setGlow(color, 15); ctx.stroke(path);
+    // Inner bright core
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.5; clearGlow(); ctx.stroke(path);
+}
+
+function drawCoil3DBack(x, y, w, h, turns, color, depth, dx, dy) {
+    ctx.strokeStyle = color; ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.lineJoin = "round";
+    const vTurns = Math.min(turns, 25), spacing = 160 / vTurns; let currY = y + h/2 - 80;
+    ctx.globalAlpha = 0.4; // Fade back wires heavily
+    ctx.beginPath();
+    for(let i=0; i<vTurns; i++) {
+        ctx.moveTo(x + w + 20 + depth*dx, currY + spacing/2 + depth*dy); ctx.lineTo(x - 10 + depth*dx, currY + spacing + depth*dy); ctx.lineTo(x - 20, currY + spacing);
+        currY += spacing;
+    }
+    ctx.stroke(); ctx.globalAlpha = 1.0;
+}
+
+// --- GAME LOOP & EVENTS ---
+function gameLoop() {
+    if(state.playing) updatePhysics();
+    render(); 
+    requestAnimationFrame(gameLoop);
+}
+
+function initInteractions() {
+    document.getElementById('btnStart').addEventListener('click', () => {
+        document.getElementById('instructionsOverlay').style.opacity = '0';
+        setTimeout(() => document.getElementById('instructionsOverlay').style.display = 'none', 500);
+        state.playing = true; updateUIState();
+    });
+
+    togglePanelBtn.addEventListener('click', () => {
+        panelContainer.classList.toggle('collapsed'); togglePanelBtn.classList.toggle('collapsed');
+        togglePanelBtn.innerText = panelContainer.classList.contains('collapsed') ? '◀' : '▶';
+    });
+
+    // Top Level Tabs
+    document.querySelectorAll('.app-tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            e.target.classList.add('active');
+            document.getElementById(e.target.dataset.target).classList.add('active');
+        });
+    });
+
+    // Transport & UI
+    document.getElementById('btnPlay').addEventListener('click', () => { state.playing = true; updateUIState(); });
+    document.getElementById('btnPause').addEventListener('click', () => { state.playing = false; updateUIState(); });
+    document.getElementById('btnReset').addEventListener('click', () => { state.t=0; state.history=[]; state.playing=false; updatePhysics(); updateUIState(); });
+    document.getElementById('btnView2D').addEventListener('click', () => { state.view3D = false; updateUIState(); });
+    document.getElementById('btnView3D').addEventListener('click', () => { state.view3D = true; updateUIState(); });
+    document.getElementById('btnMeterV').addEventListener('click', () => { state.meterMode = 'V'; updateUIState(); render(); });
+    document.getElementById('btnMeterA').addEventListener('click', () => { state.meterMode = 'A'; updateUIState(); render(); });
+
+    // Graph Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            e.target.classList.add('active'); state.activeTab = e.target.dataset.tab;
+        });
+    });
+
+    // Document Export
+    document.getElementById('btnExport').addEventListener('click', () => {
+        const studentName = document.getElementById('studentName').value || "Student";
+        let html = `<h2 style="text-align: center;">5E Transformer Assessment</h2><p><strong>Name:</strong> ${studentName}</p><p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p><hr>`;
+        questions.forEach((q, i) => {
+            const ans = document.getElementById(`ans_${i}`).value;
+            html += `<p><strong>Q${i+1}: ${q}</strong></p><p style="color: blue;">Answer: ${ans || "<em>No answer provided</em>"}</p><br>`;
+        });
+        const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Assessment Export</title></head><body>";
+        const footer = "</body></html>";
+        const blob = new Blob(['\ufeff', header + html + footer], { type: 'application/msword' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a'); link.href = url;
+        link.download = `Transformer_Assessment_${studentName.replace(/\s+/g, '_')}.doc`;
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    });
+
+    // Canvas panning/zooming
+    canvas.addEventListener('mousedown', (e) => { state.mouse.isDown = true; state.lastMouse.x = e.clientX; state.lastMouse.y = e.clientY; });
+    window.addEventListener('mouseup', () => { state.mouse.isDown = false; });
+    window.addEventListener('mousemove', (e) => {
+        if (!state.mouse.isDown) return;
+        state.camera.x += (e.clientX - state.lastMouse.x); state.camera.y += (e.clientY - state.lastMouse.y);
+        state.lastMouse.x = e.clientX; state.lastMouse.y = e.clientY;
+    });
+    canvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const zoomDelta = e.deltaY > 0 ? 0.9 : 1.1, newZoom = Math.max(0.3, Math.min(state.camera.zoom * zoomDelta, 3.0));
+        const actualDelta = newZoom / state.camera.zoom;
+        state.camera.x = e.clientX - (e.clientX - state.camera.x) * actualDelta; state.camera.y = e.clientY - (e.clientY - state.camera.y) * actualDelta;
+        state.camera.zoom = newZoom;
+    }, { passive: false });
+
+    graphCanvas.addEventListener('mousemove', (e) => {
+        const rect = graphCanvas.getBoundingClientRect(), x = e.clientX - rect.left, w = graphCanvas.width;
+        if (state.history.length === 0) return;
+        let idx = Math.round((x / w) * state.maxHistory);
+        state.tooltipIdx = Math.max(0, Math.min(idx, state.history.length - 1));
+        state.tooltipActive = true; tooltip.style.display = 'block';
+    });
+    graphCanvas.addEventListener('mouseleave', () => { state.tooltipActive = false; tooltip.style.display = 'none'; });
+}
+
+function updateUIState() {
+    document.getElementById('btnPlay').classList.toggle('active', state.playing);
+    document.getElementById('btnPause').classList.toggle('active', !state.playing);
+    document.getElementById('btnView2D').classList.toggle('active', !state.view3D);
+    document.getElementById('btnView3D').classList.toggle('active', state.view3D);
+    document.getElementById('btnMeterV').classList.toggle('active', state.meterMode === 'V');
+    document.getElementById('btnMeterA').classList.toggle('active', state.meterMode === 'A');
+}
+
+// --- INIT ---
+window.addEventListener('resize', resize);
+buildUI();
+initInteractions();
+resize();
+updatePhysics();
+requestAnimationFrame(gameLoop);
+
+</script>
+</body>
+</html>
