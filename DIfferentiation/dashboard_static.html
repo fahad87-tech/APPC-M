@@ -503,8 +503,9 @@ function calculateStrategyAverages(category) {
             });
         }
     });
+    // Sort by code (A1, A2... B1, B2... C1, C2...)
     return result.sort(function(a, b) {
-        return (b.avgFreq + b.avgEff) - (a.avgFreq + a.avgEff);
+        return a.key.localeCompare(b.key);
     });
 }
 
