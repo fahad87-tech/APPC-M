@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Differentiation Strategy Survey Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);min-height:100vh;color:#e2e8f0;padding:20px}
+.container{max-width:1400px;margin:0 auto}
+h1{text-align:center;font-size:1.8rem;margin-bottom:5px;background:linear-gradient(135deg,#60a5fa,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#94a3b8;margin-bottom:20px;font-size:.85rem}
+
+.tabs{display:flex;gap:4px;margin-bottom:24px;justify-content:center;flex-wrap:wrap}
+.tab-btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:.85rem;font-weight:600;background:rgba(30,41,59,.6);color:#94a3b8;transition:all .2s;border:1px solid rgba(148,163,184,.15)}
+.tab-btn:hover{background:rgba(30,41,59,.9);color:#e2e8f0}
+.tab-btn.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Glassmorphism Cards */
+.glass-card{background:rgba(30,41,59,.5);backdrop-filter:blur(10px);border:1px solid rgba(148,163,184,.15);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:all .3s}
+.glass-card:hover{border-color:rgba(96,165,250,.3);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.glass-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent)}
+
+/* Gradient backgrounds for different sections */
+.glass-blue{background:linear-gradient(135deg,rgba(59,130,246,.1),rgba(30,41,59,.5))}
+.glass-purple{background:linear-gradient(135deg,rgba(168,85,247,.1),rgba(30,41,59,.5))}
+.glass-pink{background:linear-gradient(135deg,rgba(236,72,153,.1),rgba(30,41,59,.5))}
+.glass-amber{background:linear-gradient(135deg,rgba(245,158,11,.1),rgba(30,41,59,.5))}
+.glass-emerald{background:linear-gradient(135deg,rgba(16,185,129,.1),rgba(30,41,59,.5))}
+.glass-cyan{background:linear-gradient(135deg,rgba(6,182,212,.1),rgba(30,41,59,.5))}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{padding:20px;text-align:center;position:relative}
+.stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.2rem}
+.stat-value{font-size:2.2rem;font-weight:700;background:linear-gradient(135deg,#fff,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{color:#94a3b8;font-size:.75rem;margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px;margin-bottom:24px}
+.chart-card{position:relative}
+.chart-title{font-size:1rem;font-weight:600;margin-bottom:12px;color:#f1f5f9;display:flex;align-items:center;gap:8px}
+.chart-title-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.chart-container{height:280px;position:relative}
+.chart-container.tall{height:400px}
+.chart-legend{margin-top:12px;padding:10px;background:rgba(15,23,42,.4);border-radius:8px;font-size:.75rem;color:#94a3b8;text-align:center;border:1px solid rgba(148,163,184,.1)}
+
+.full-width{grid-column:1/-1}
+
+.filter-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.filter-btn{padding:6px 14px;border-radius:6px;border:1px solid rgba(148,163,184,.2);cursor:pointer;font-size:.8rem;font-weight:500;background:rgba(30,41,59,.6);color:#94a3b8;transition:all .2s}
+.filter-btn:hover{background:rgba(30,41,59,.9);color:#e2e8f0}
+.filter-btn.active{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.filter-btn.content.active{background:#3b82f6}
+.filter-btn.process.active{background:#a855f7}
+.filter-btn.product.active{background:#ec4899}
+
+/* View toggle buttons */
+.view-toggle{display:flex;background:rgba(30,41,59,.8);border-radius:8px;padding:3px;gap:2px}
+.view-toggle button{padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:.75rem;font-weight:600;background:transparent;color:#94a3b8;transition:all .2s}
+.view-toggle button:hover{color:#e2e8f0}
+.view-toggle button.active{background:#10b981;color:#fff}
+
+/* Metric selector */
+.metric-select{padding:6px 10px;border-radius:6px;border:1px solid rgba(148,163,184,.2);background:rgba(30,41,59,.8);color:#e2e8f0;font-size:.75rem;cursor:pointer;outline:none}
+.metric-select:focus{border-color:#10b981}
+
+.strategy-table{width:100%;border-collapse:collapse}
+.strategy-table th,.strategy-table td{padding:10px 12px;text-align:left;border-bottom:1px solid rgba(148,163,184,.1)}
+.strategy-table th{color:#94a3b8;font-weight:500;font-size:.75rem;text-transform:uppercase;letter-spacing:.5px}
+.strategy-table tr:hover{background:rgba(96,165,250,.08)}
+.badge{padding:3px 10px;border-radius:6px;font-size:.7rem;font-weight:600}
+.badge-content{background:rgba(59,130,246,.2);color:#60a5fa;border:1px solid rgba(59,130,246,.3)}
+.badge-process{background:rgba(168,85,247,.2);color:#c084fc;border:1px solid rgba(168,85,247,.3)}
+.badge-product{background:rgba(236,72,153,.2);color:#f472b6;border:1px solid rgba(236,72,153,.3)}
+.bar-blue{height:6px;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:3px;display:inline-block}
+.bar-emerald{height:6px;background:linear-gradient(90deg,#10b981,#34d399);border-radius:3px;display:inline-block}
+
+.comment-card{background:rgba(30,41,59,.5);backdrop-filter:blur(8px);border:1px solid rgba(148,163,184,.1);border-radius:12px;padding:16px;margin-bottom:12px;transition:all .2s}
+.comment-card:hover{border-color:rgba(96,165,250,.3)}
+.comment-meta{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.comment-tag{padding:2px 8px;border-radius:4px;font-size:.7rem;font-weight:600}
+.comment-tag.dept{background:rgba(59,130,246,.15);color:#60a5fa}
+.comment-tag.grade{background:rgba(168,85,247,.15);color:#c084fc}
+.comment-text{color:#cbd5e1;font-size:.85rem;line-height:1.5}
+.comment-label{color:#64748b;font-size:.7rem;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+
+.search-box{width:100%;padding:10px 14px;border-radius:8px;border:1px solid rgba(148,163,184,.2);background:rgba(15,23,42,.8);color:#e2e8f0;font-size:.85rem;margin-bottom:16px;outline:none;backdrop-filter:blur(4px)}
+.search-box:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+
+.needs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px}
+.needs-card{position:relative}
+.needs-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(148,163,184,.08)}
+.needs-item:last-child{border-bottom:none}
+.needs-label{font-size:.85rem;color:#cbd5e1;flex:1;padding-right:12px}
+.needs-count{font-weight:700;font-size:.9rem;min-width:30px;text-align:right}
+.needs-count.amber{color:#fbbf24}
+.needs-count.cyan{color:#22d3ee}
+.needs-count.emerald{color:#34d399}
+.needs-bar{height:4px;background:rgba(148,163,184,.1);border-radius:2px;margin-top:6px;overflow:hidden}
+.needs-bar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.needs-bar-fill.amber{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.needs-bar-fill.cyan{background:linear-gradient(90deg,#06b6d4,#22d3ee)}
+.needs-bar-fill.emerald{background:linear-gradient(90deg,#10b981,#34d399)}
+
+/* Summary cards for Needs Assessment */
+.summary-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px}
+.summary-card{padding:20px;position:relative;overflow:hidden}
+.summary-card .glow{position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;filter:blur(30px);opacity:.3}
+.summary-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:1.1rem}
+.summary-title{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.summary-value{font-size:1.1rem;font-weight:700;color:#fff}
+.summary-desc{font-size:.7rem;color:#94a3b8;margin-top:4px}
+
+/* Action cards */
+.action-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px}
+.action-card{background:rgba(15,23,42,.4);border:1px solid rgba(148,163,184,.1);border-radius:10px;padding:14px;transition:all .2s}
+.action-card:hover{border-color:rgba(96,165,250,.3)}
+.action-number{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;margin-right:10px;flex-shrink:0}
+.action-title{font-size:.8rem;font-weight:600;margin-bottom:4px}
+.action-desc{font-size:.7rem;color:#94a3b8;line-height:1.4}
+
+.signature{text-align:right;color:#475569;font-size:.75rem;margin-top:30px;padding-top:16px;border-top:1px solid rgba(148,163,184,.1)}
+
+/* Dot size legend */
+.dot-legend{display:flex;align-items:center;gap:6px;font-size:.7rem;color:#64748b;margin-left:auto}
+.dot-legend span{display:inline-flex;align-items:center;gap:4px}
+.dot-sm{width:8px;height:8px;border-radius:50%;background:#94a3b8}
+.dot-md{width:12px;height:12px;border-radius:50%;background:#94a3b8}
+.dot-lg{width:16px;height:16px;border-radius:50%;background:#94a3b8}
+
+@media(max-width:768px){
+.charts-grid{grid-template-columns:1fr}
+h1{font-size:1.4rem}
+.tabs{gap:2px}
+.tab-btn{padding:8px 12px;font-size:.75rem}
+.needs-grid{grid-template-columns:1fr}
+.stats-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Differentiation Strategy Survey Dashboard</h1>
+<p class="subtitle">High School Teacher Assessment | May 2026 | 20 Respondents</p>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="switchTab('overview')">Overview</button>
+<button class="tab-btn" onclick="switchTab('strategy')">Strategy Analysis</button>
+<button class="tab-btn" onclick="switchTab('voices')">Teacher Voices</button>
+<button class="tab-btn" onclick="switchTab('needs')">Needs Assessment</button>
+</div>
+
+<!-- OVERVIEW TAB -->
+<div id="tab-overview" class="tab-content active">
+<div class="stats-grid" id="statsGrid"></div>
+<div class="charts-grid">
+<div class="chart-card glass-card glass-blue">
+<div class="chart-title">
+<div class="chart-title-icon" style="background:rgba(59,130,246,.2);color:#60a5fa">📊</div>
+Responses by Department
+</div>
+<div class="chart-container"><canvas id="deptChart"></canvas></div>
+<div class="chart-legend">
+<strong style="color:#60a5fa">Department Breakdown:</strong> Shows distribution of survey responses across academic departments. Use this to identify representation and potential data gaps.
+</div>
+</div>
+<div class="chart-card glass-card glass-purple">
+<div class="chart-title">
+<div class="chart-title-icon" style="background:rgba(168,85,247,.2);color:#c084fc">📈</div>
+Responses by Grade Level
+</div>
+<div class="chart-container"><canvas id="gradeChart"></canvas></div>
+<div class="chart-legend">
+<strong style="color:#c084fc">Grade Distribution:</strong> Displays which grade levels teachers work with. Multiple grades per teacher are counted separately.
+</div>
+</div>
+</div>
+</div>
+
+<!-- STRATEGY ANALYSIS TAB -->
+<div id="tab-strategy" class="tab-content">
+<div class="filter-bar">
+<div class="view-toggle">
+<button class="active" onclick="switchView('scatter')">⟨⟩ 2D Matrix</button>
+<button onclick="switchView('histogram')">▓ Histogram</button>
+</div>
+<select class="metric-select" id="histogramMetric" onchange="updateHistogram()" style="display:none">
+<option value="frequency">Frequency Distribution</option>
+<option value="effectiveness">Effectiveness Distribution</option>
+</select>
+<div class="dot-legend" id="scatterLegend">
+<span><span class="dot-sm"></span>Few</span>
+<span><span class="dot-md"></span>Some</span>
+<span><span class="dot-lg"></span>Many</span>
+<span style="margin-left:8px;color:#64748b">Dot size = teacher count</span>
+</div>
+</div>
+<div class="filter-bar" id="categoryFilters">
+<button class="filter-btn active" onclick="filterCategory('all')">All Strategies</button>
+<button class="filter-btn content" onclick="filterCategory('Content')">Content (A1-A5)</button>
+<button class="filter-btn process" onclick="filterCategory('Process')">Process (B1-B5)</button>
+<button class="filter-btn product" onclick="filterCategory('Product')">Product (C1-C5)</button>
+</div>
+<div class="charts-grid">
+<div class="chart-card glass-card full-width">
+<div class="chart-container tall" id="chartContainer">
+<canvas id="scatterChart"></canvas>
+</div>
+<div class="chart-legend" id="chartLegend">
+<strong style="color:#10b981">2D Matrix:</strong> Each dot represents a strategy. X-axis = average usage frequency, Y-axis = average effectiveness. Dot size indicates number of teachers using the strategy. Upper-right quadrant shows core strengths (high usage & high effectiveness).
+</div>
+</div>
+<div class="chart-card glass-card full-width">
+<div class="chart-title">
+<div class="chart-title-icon" style="background:rgba(168,85,247,.2);color:#c084fc">📋</div>
+Strategy Performance Table
+</div>
+<div style="max-height:400px;overflow-y:auto"><table class="strategy-table" id="strategyTable"><thead><tr><th>Code</th><th>Strategy</th><th>Category</th><th>Avg Freq</th><th>Avg Eff</th><th>Gap</th></tr></thead><tbody></tbody></table></div>
+<div class="chart-legend">
+<strong style="color:#c084fc">Performance Table:</strong> Gap = Effectiveness minus Frequency. Positive gap (green) means effectiveness exceeds usage. Negative gap (red) means usage exceeds perceived effectiveness - may need review.
+</div>
+</div>
+</div>
+</div>
+
+<!-- TEACHER VOICES TAB -->
+<div id="tab-voices" class="tab-content">
+<div class="filter-bar">
+<button class="filter-btn active" onclick="filterComments('all')">All</button>
+<button class="filter-btn" onclick="filterComments('topStrategy')">Top Strategy</button>
+<button class="filter-btn" onclick="filterComments('specialNeeds')">Special Needs</button>
+<button class="filter-btn" onclick="filterComments('interventions')">Interventions</button>
+<button class="filter-btn" onclick="filterComments('feedback')">Feedback</button>
+</div>
+<input type="text" class="search-box" placeholder="🔍 Search comments..." oninput="searchComments(this.value)" id="commentSearch">
+<div id="commentsContainer"></div>
+</div>
+
+<!-- NEEDS ASSESSMENT TAB -->
+<div id="tab-needs" class="tab-content">
+<div class="summary-cards">
+<div class="summary-card glass-card glass-amber">
+<div class="glow" style="background:#f59e0b"></div>
+<div class="summary-icon" style="background:rgba(245,158,11,.2);color:#fbbf24">🎓</div>
+<div class="summary-title" style="color:#fbbf24">Top Training Need</div>
+<div class="summary-value">Learning Differences Training</div>
+<div class="summary-desc">ADHD, Dyslexia, Autism support strategies</div>
+</div>
+<div class="summary-card glass-card glass-cyan">
+<div class="glow" style="background:#06b6d4"></div>
+<div class="summary-icon" style="background:rgba(6,182,212,.2);color:#22d3ee">⏰</div>
+<div class="summary-title" style="color:#22d3ee">Top Resource Need</div>
+<div class="summary-value">Collaborative Planning Time</div>
+<div class="summary-desc">Dedicated time for cross-department sharing</div>
+</div>
+<div class="summary-card glass-card glass-emerald">
+<div class="glow" style="background:#10b981"></div>
+<div class="summary-icon" style="background:rgba(16,185,129,.2);color:#34d399">👥</div>
+<div class="summary-title" style="color:#34d399">Resource Sharing</div>
+<div class="summary-value">High Willingness</div>
+<div class="summary-desc">Teachers ready to contribute to toolkit</div>
+</div>
+</div>
+
+<div class="needs-grid">
+<div class="needs-card glass-card glass-amber">
+<div class="chart-title">
+<div class="chart-title-icon" style="background:rgba(245,158,11,.2);color:#fbbf24">🙋</div>
+Administrative Support Requested
+</div>
+<div id="adminNeedsList"></div>
+<div class="chart-legend">
+<strong style="color:#fbbf24">What This Shows:</strong> Types of support teachers need from administration to better implement differentiation. Longer bars indicate higher demand.
+</div>
+</div>
+<div class="needs-card glass-card glass-cyan">
+<div class="chart-title">
+<div class="chart-title-icon" style="background:rgba(6,182,212,.2);color:#22d3ee">📊</div>
+How Teachers Measure Effectiveness
+</div>
+<div id="measuresList"></div>
+<div class="chart-legend">
+<strong style="color:#22d3ee">What This Shows:</strong> Methods teachers use to evaluate strategy effectiveness. Formative assessments dominate over standardized testing.
+</div>
+</div>
+<div class="needs-card glass-card glass-emerald">
+<div class="chart-title">
+<div class="chart-title-icon" style="background:rgba(16,185,129,.2);color:#34d399">🧰</div>
+Toolkit Contribution Willingness
+</div>
+<div class="chart-container" style="height:200px"><canvas id="toolkitChart"></canvas></div>
+<div class="chart-legend">
+<strong style="color:#34d399">What This Shows:</strong> Teacher willingness to contribute materials to a shared differentiation toolkit.
+</div>
+</div>
+</div>
+
+<div class="glass-card" style="margin-top:20px;padding:24px">
+<div class="chart-title">
+<div class="chart-title-icon" style="background:rgba(59,130,246,.2);color:#60a5fa">💡</div>
+Recommended Actions
+</div>
+<div class="action-grid">
+<div class="action-card" style="border-color:rgba(245,158,11,.2)">
+<div style="display:flex;align-items:center;margin-bottom:8px">
+<div class="action-number" style="background:rgba(245,158,11,.2);color:#fbbf24">1</div>
+<div class="action-title" style="color:#fbbf24">Professional Development</div>
+</div>
+<div class="action-desc">Schedule workshops on learning differences (ADHD, Dyslexia, Autism) with practical classroom strategies.</div>
+</div>
+<div class="action-card" style="border-color:rgba(6,182,212,.2)">
+<div style="display:flex;align-items:center;margin-bottom:8px">
+<div class="action-number" style="background:rgba(6,182,212,.2);color:#22d3ee">2</div>
+<div class="action-title" style="color:#22d3ee">Planning Time</div>
+</div>
+<div class="action-desc">Allocate dedicated collaborative planning periods for cross-department differentiation sharing.</div>
+</div>
+<div class="action-card" style="border-color:rgba(16,185,129,.2)">
+<div style="display:flex;align-items:center;margin-bottom:8px">
+<div class="action-number" style="background:rgba(16,185,129,.2);color:#34d399">3</div>
+<div class="action-title" style="color:#34d399">Toolkit Development</div>
+</div>
+<div class="action-desc">Launch lesson plan repository with teacher-contributed differentiated materials.</div>
+</div>
+<div class="action-card" style="border-color:rgba(168,85,247,.2)">
+<div style="display:flex;align-items:center;margin-bottom:8px">
+<div class="action-number" style="background:rgba(168,85,247,.2);color:#c084fc">4</div>
+<div class="action-title" style="color:#c084fc">Formative Assessment</div>
+</div>
+<div class="action-desc">Support exit ticket and formative check practices with templates and digital tools.</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="signature">Created by FR</div>
+</div>
+
+<script>
+const STRATEGIES = {
+A1:{title:'Tiered Reading/Texts',cat:'Content',desc:'Texts at varying reading levels'},
+A2:{title:'Multi-Modal Input',cat:'Content',desc:'Audio, visual, interactive alternatives'},
+A3:{title:'Vocabulary Scaffolding',cat:'Content',desc:'Word banks, bilingual glossaries'},
+A4:{title:'Graphic Organizers',cat:'Content',desc:'Structured frameworks for comprehension'},
+A5:{title:'Curriculum Compacting',cat:'Content',desc:'Mastery students skip ahead'},
+B1:{title:'Flexible Grouping',cat:'Process',desc:'Strategic grouping by readiness/skill'},
+B2:{title:'Tiered Assignments',cat:'Process',desc:'Different scaffolding levels'},
+B3:{title:'Pacing Adjustments',cat:'Process',desc:'Varying time for tasks'},
+B4:{title:'Frequent Formative Checks',cat:'Process',desc:'Exit tickets, whiteboards, polls'},
+B5:{title:'Learning Stations',cat:'Process',desc:'Rotating stations for activities'},
+C1:{title:'Choice Boards',cat:'Product',desc:'Students choose product format'},
+C2:{title:'Scaffolded Output',cat:'Product',desc:'Sentence starters, paragraph frames'},
+C3:{title:'Modified Rubrics',cat:'Product',desc:'Assess individual growth vs baseline'},
+C4:{title:'Alternative Testing',cat:'Product',desc:'Alternative assessment environments'},
+C5:{title:'Real-World Application',cat:'Product',desc:'Projects addressing real problems'}
+};
+
+// Category colors - Updated: Process=purple, Product=pink
+const CAT_COLORS = {
+Content:'#3b82f6',
+Process:'#a855f7',
+Product:'#ec4899'
+};
+
+const rawData=[
+{dept:'English / ELA',grades:['Grade 9','Grade 10'],freq:[5,10,6,2,8,10,2,5,8,1,9,8,1,4,6],eff:[5,10,6,2,8,8,2,5,8,1,7,10,1,4,6]},
+{dept:'English / ELA',grades:['Grade 11','Grade 12'],freq:[7,8,5,7,8,9,9,7,6,7,5,7,8,4,5],eff:[7,8,5,7,8,9,9,7,6,7,5,7,6,4,5]},
+{dept:'Humanities / Social Studies',grades:['Grade 9','Grade 10'],freq:[6,5,5,10,4,9,1,8,9,5,6,9,1,4,6],eff:[8,9,7,10,7,9,1,8,10,7,9,10,4,4,7]},
+{dept:'Humanities / Social Studies',grades:['Grade 10','Grade 11'],freq:[9,9,9,9,9,9,9,8,8,8,10,8,9,8,8],eff:[9,9,9,9,9,9,9,8,8,8,10,8,9,8,8]},
+{dept:'CLA',grades:['Grade 9','Grade 10','Grade 12'],freq:[5,9,5,6,4,7,5,9,6,7,8,9,6,4,6],eff:[5,8,5,6,4,6,5,7,6,6,7,8,6,4,6]},
+{dept:'CLA',grades:['Grade 10','Grade 11','Grade 12'],freq:[4,7,3,9,4,9,9,6,7,5,6,10,2,4,8],eff:[4,9,3,10,4,10,10,8,7,5,7,10,1,4,9]},
+{dept:'CLA',grades:['Grade 9','Grade 12'],freq:[3,6,1,8,8,8,8,7,5,5,8,8,6,4,6],eff:[3,6,1,8,8,8,8,7,5,5,8,8,6,4,6]},
+{dept:'Sciences',grades:['Grade 10','Grade 11','Grade 12'],freq:[7,10,5,10,8,9,9,6,8,4,10,7,7,9,8],eff:[5,10,3,10,8,7,7,4,7,3,9,7,7,9,8]},
+{dept:'Mathematics',grades:['Grade 9','Grade 10','Grade 12'],freq:[8,8,10,10,10,10,9,6,10,1,1,3,8,3,5],eff:[7,7,8,8,8,9,7,5,10,1,1,2,6,4,3]},
+{dept:'Arts / PE / Electives',grades:['Grade 11','Grade 12'],freq:[10,9,9,9,8,10,10,9,6,7,7,5,8,7,6],eff:[10,9,9,9,8,10,10,9,6,7,7,5,8,7,6]},
+{dept:'CLA',grades:['Grade 9','Grade 11'],freq:[7,9,7,7,4,10,8,7,10,9,8,9,9,9,10],eff:[8,9,8,8,6,10,10,9,10,9,8,9,9,9,10]},
+{dept:'Arts / PE / Electives',grades:['Grade 9','Grade 10','Grade 11','Grade 12'],freq:[6,10,9,10,10,10,10,10,10,10,9,5,10,10,10],eff:[5,10,9,8,10,10,10,10,10,10,9,5,10,10,10]},
+{dept:'Arts / PE / Electives',grades:['Grade 9','Grade 10','Grade 11','Grade 12'],freq:[8,9,7,8,9,9,8,9,8,9,9,8,8,7,9],eff:[8,9,7,8,9,9,8,9,8,9,9,8,8,7,9]},
+{dept:'Arts / PE / Electives',grades:['Grade 9','Grade 10','Grade 11','Grade 12'],freq:[2,8,8,10,7,7,5,10,2,6,7,7,7,7,7],eff:[2,7,7,7,5,3,2,7,2,3,5,5,5,5,5]},
+{dept:'Mathematics',grades:['Grade 9','Grade 10','Grade 11','Grade 12'],freq:[6,5,8,9,4,9,8,8,9,6,3,3,7,6,9],eff:[5,5,8,9,6,9,7,7,9,5,2,4,8,7,9]},
+{dept:'Mathematics',grades:['Grade 10','Grade 11','Grade 12'],freq:[6,9,10,5,10,10,10,10,10,10,1,10,8,10,6],eff:[10,10,10,10,10,10,10,10,10,10,1,10,5,10,10]},
+{dept:'Mathematics',grades:['Grade 10','Grade 11'],freq:[1,1,1,1,3,1,1,5,8,1,1,1,1,1,3],eff:[1,1,1,1,1,1,1,1,5,1,1,1,1,1,1]},
+{dept:'Mathematics',grades:['Grade 10','Grade 11','Grade 12'],freq:[1,5,3,10,2,8,3,8,9,7,4,4,1,3,5],eff:[1,8,6,10,2,10,3,9,10,9,10,10,1,7,9]},
+{dept:'Mathematics',grades:['Grade 9','Grade 10','Grade 11'],freq:[1,4,2,7,6,5,8,9,6,4,1,1,3,3,2],eff:[1,10,8,8,10,8,10,9,9,7,1,1,6,6,8]},
+{dept:'Mathematics',grades:['Grade 9','Grade 10','Grade 11'],freq:[2,8,10,10,6,10,8,10,8,5,8,1,10,6,10],eff:[5,10,7,10,9,10,10,10,10,7,10,1,10,6,10]}
+];
+
+const qualitativeData = [
+{id:1,dept:"English / ELA",grades:"Grade 9, Grade 10",topStrategy:"Differentiated expectations of output- Standard/ Honors/ G9/ G10...",specialNeeds:"This strategy could be applied to Special Needs students.",interventions:"Extra time for tasks/ different (non-digital) format for work (depending on the specific special need & on the specific learning objective.)",feedback:"Ideally, the school could establish a test-only computer collection (as is used for IELTS/ similar) to mitigate cheating in diagnostic /summative assessments to enable more accurate data of students' attainment (and progress.)"},
+{id:2,dept:"English / ELA",grades:"Grade 11, Grade 12",topStrategy:"Flexible Grouping, Tiered Assignments, Modified Rubrics",specialNeeds:"They address the needs of students with different ZPD",interventions:"Students are encouraged to make appointments with me for remediation and to bring up formative grades",feedback:"IXL software for G11"},
+{id:3,dept:"Humanities / Social Studies",grades:"Grade 9, Grade 10",topStrategy:"Graphic organizers improve scaffolding, comprehension, and help students stay focused and organized.",specialNeeds:"Graphic organizers help these students because, when designed well and used properly, they assist with organization of ideas and structure of writing.",interventions:"All of the interventions I use are listed above.",feedback:"If there is a database of students with IEPs (or similar) I am unaware of it. I intuitively know that some of my students have learning challenges, but I do not have details."},
+{id:4,dept:"Humanities / Social Studies",grades:"Grade 10, Grade 11",topStrategy:"I rely most on flexible grouping. It allows me to quickly match tasks to students' proficiency levels or mix them for peer support.",specialNeeds:"Flexible grouping directly supports special needs students by letting me adjust group size, peer support, and task difficulty based on their individual learning plans.",interventions:"I use personalized checklists and sensory breaks not listed above. These help special needs students track daily tasks independently and regulate attention spans.",feedback:"Student data sharing between departments needs to be more timely and structured, and more PD on using data for special needs students would be very helpful."},
+{id:5,dept:"CLA",grades:"Grade 9, Grade 10, Grade 12",topStrategy:"A2. Multi-Modal Input: Supplementing traditional text with audio, visual, or interactive alternatives - These methods can arouse students' interest.",specialNeeds:"Formulate differentiated assessment tasks or standards",interventions:"If there are extremely special students, completely different tasks and assessment methods need to be assigned.",feedback:"It is very difficult for us to stratify and group students based on their CLA academic levels."},
+{id:6,dept:"CLA",grades:"Grade 10, Grade 11, Grade 12",topStrategy:"C2 - Scaffolded Output",specialNeeds:"B2 - Tiered Assignments",interventions:"C2 A2 - Scaffolded Output and Multi-Modal Input",feedback:"No"},
+{id:7,dept:"CLA",grades:"Grade 9, Grade 12",topStrategy:"C2 - Scaffolded Output",specialNeeds:"Conduct periodic interviews with students.",interventions:"Ask students to submit learning reflections regularly to obtain information.",feedback:"Hope that the differentiation of Chinese learning can be taken into consideration."},
+{id:8,dept:"Sciences",grades:"Grade 10, Grade 11, Grade 12",topStrategy:"Supplementing traditional text with audio, visual, or interactive alternatives.",specialNeeds:"Individualized feedback on summative and formative works",interventions:"Individualized feedback on summative and formative works",feedback:"NA"},
+{id:9,dept:"Mathematics",grades:"Grade 9, Grade 10, Grade 12",topStrategy:"Frequent formative checks (whiteboards, computerized) allow me to immediately address misconceptions.",specialNeeds:"Whiteboards in intentional grouping really helps students overcome hurdles.",interventions:"Subtitles on any videos, non-linguistic representations",feedback:"N/A"},
+{id:10,dept:"Arts / PE / Electives",grades:"Grade 11, Grade 12",topStrategy:"B1 Flexible Grouping - Since my students have varying levels of ability, I prefer to group those with similar proficiency together.",specialNeeds:"Grouping by similar skill levels",interventions:"1) Chunking - breaking assignments into smaller steps with checkpoints; 2) Frequent comprehension checks using mini-whiteboards; 3) Sensory supports - fidget tools, noise-cancelling headphones",feedback:"N/A"},
+{id:11,dept:"CLA",grades:"Grade 9, Grade 11",topStrategy:"I rely most on Flexible Grouping because it allows me to quickly adjust support based on students' needs and promote peer learning within the same lesson.",specialNeeds:"For students with special needs, Flexible Grouping supports learning by providing peer support, adjusting task difficulty, and allowing different ways of participation.",interventions:"Peer Support / Peer Tutoring",feedback:"Differentiation is most effective when it is supported by clear, timely, and actionable student data, along with regular collaboration time for teachers."},
+{id:12,dept:"Arts / PE / Electives",grades:"Grade 9, Grade 10, Grade 11, Grade 12",topStrategy:"B1 Flexible Grouping - cause it's a music performance based class",specialNeeds:"Get to know the student, and have more individual instructions will solve most of the problem in this class.",interventions:"n/a",feedback:"n/a"},
+{id:13,dept:"Arts / PE / Electives",grades:"Grade 9, Grade 10, Grade 11, Grade 12",topStrategy:"Modified Rubrics: Adjusting grading criteria or rubrics to assess individual growth rather than a strict baseline standard.",specialNeeds:"Pacing Adjustments: Consistently varying the time allowed for students to complete in-class tasks or process new information.",interventions:"N/A",feedback:"N/A"},
+{id:14,dept:"Arts / PE / Electives",grades:"Grade 9, Grade 10, Grade 11, Grade 12",topStrategy:"Graphic Organizers",specialNeeds:"/",interventions:"/",feedback:"/"},
+{id:15,dept:"Mathematics",grades:"Grade 9, Grade 10, Grade 11, Grade 12",topStrategy:"Differentiating PROCESS, useful for math learning.",specialNeeds:"Allow students on their own learning pace.",interventions:"Use online platform/resources under supervision to enrich various needs.",feedback:"Encourage the engagement"},
+{id:16,dept:"Mathematics",grades:"Grade 10, Grade 11, Grade 12",topStrategy:"A2. ICT enables multispective representation in most of context that I taught, scaffolding students in different route of learning.",specialNeeds:"They can use a platform to assist their learning process in class.",interventions:"One on one tutoring",feedback:"None, thanks"},
+{id:17,dept:"Mathematics",grades:"Grade 10, Grade 11",topStrategy:"None. IMO maintaining consistency is the most effective strategy.",specialNeeds:"N/A",interventions:"N/A",feedback:"N/A"},
+{id:18,dept:"Mathematics",grades:"Grade 10, Grade 11, Grade 12",topStrategy:"Grouping. I can design the groups, either put students with the same math level in a group and assign them tasks that match their math level, or put students with different math levels in a group so they can help each other.",specialNeeds:"They feel comfortable when they work with students at the same level. They can also learn from peers.",interventions:"N/A",feedback:"N/A"},
+{id:19,dept:"Mathematics",grades:"Grade 9, Grade 10, Grade 11",topStrategy:"Tiered Assignments; They increase engagement.",specialNeeds:"They can work on the task and progress on their own pace.",interventions:"N/A",feedback:"N/A"},
+{id:20,dept:"Mathematics",grades:"Grade 9, Grade 10, Grade 11",topStrategy:"Flexible grouping. Students accepting new math concept with different pace, it would be more effective to let the students teach and learn from the peers.",specialNeeds:"Some of the ADHD students may struggle to understand or keep focus during the lecture. They get to question and learn again within groups effectively.",interventions:"Giving chances for makeup tests designed with highlighted questions or questions that break into details.",feedback:"NA"}
+];
+
+const adminNeeds = {
+"Targeted training on specific learning differences (ADHD, Dyslexia, Autism)":15,
+"A clearer communication protocol regarding newly admitted students":13,
+"Access to varied curricular resources (leveled texts, adaptive software)":12,
+"Dedicated collaborative planning time with department peers":10,
+"Training on co-teaching models or pushing-in support":8,
+"Other":2
+};
+
+const measures = {
+"Formative assessment data (exit tickets, quizzes)":17,
+"Observable student engagement and focus":14,
+"Direct student feedback/self-assessments":13,
+"Summative assessment grades":12,
+"Progress toward specific IEP/intervention goals":7,
+"Other":1
+};
+
+const toolkit = {Yes:2,Maybe:12,No:6};
+
+let currentCategory = 'all';
+let currentCommentFilter = 'all';
+let currentView = 'scatter';
+let scatterChartInstance = null;
+let histogramChartInstance = null;
+
+function calculateStats(){
+let deptCounts={},gradeCounts={};
+rawData.forEach(r=>{deptCounts[r.dept]=(deptCounts[r.dept]||0)+1;r.grades.forEach(g=>{gradeCounts[g]=(gradeCounts[g]||0)+1})});
+return{totalResponses:rawData.length,deptCounts,gradeCounts};
+}
+
+function calculateStrategyAverages(category='all'){
+let strategyData={};
+Object.keys(STRATEGIES).forEach(key=>{strategyData[key]={freqSum:0,effSum:0,countFreq:0,countEff:0}});
+rawData.forEach(r=>{
+r.freq.forEach((f,i)=>{
+let key=Object.keys(STRATEGIES)[i];
+if(f>0){strategyData[key].freqSum+=f;strategyData[key].countFreq++}
+});
+r.eff.forEach((e,i)=>{
+let key=Object.keys(STRATEGIES)[i];
+if(e>0){strategyData[key].effSum+=e;strategyData[key].countEff++}
+});
+});
+let result=[];
+Object.keys(STRATEGIES).forEach(key=>{
+let d=strategyData[key];
+let avgFreq=d.countFreq>0?parseFloat((d.freqSum/d.countFreq).toFixed(2)):0;
+let avgEff=d.countEff>0?parseFloat((d.effSum/d.countEff).toFixed(2)):0;
+let gap=parseFloat((avgEff-avgFreq).toFixed(2));
+if(category==='all'||STRATEGIES[key].cat===category){
+result.push({key,title:STRATEGIES[key].title,cat:STRATEGIES[key].cat,desc:STRATEGIES[key].desc,avgFreq,avgEff,gap,count:d.countFreq});
+}
+});
+return result.sort((a,b)=>(b.avgFreq+b.avgEff)-(a.avgFreq+a.avgEff));
+}
+
+function switchTab(tab){
+document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+document.querySelector('.tab-btn[onclick*="'+tab+'"]').classList.add('active');
+document.getElementById('tab-'+tab).classList.add('active');
+if(tab==='overview'){renderDeptChart();renderGradeChart()}
+if(tab==='strategy'){
+if(currentView==='scatter')renderScatterPlot();
+else renderHistogram();
+renderStrategyTable();
+}
+if(tab==='needs'){renderNeedsTab()}
+}
+
+function switchView(view){
+currentView=view;
+document.querySelectorAll('.view-toggle button').forEach(b=>b.classList.remove('active'));
+document.querySelector('.view-toggle button[onclick*="'+view+'"]').classList.add('active');
+document.getElementById('histogramMetric').style.display=view==='histogram'?'inline-block':'none';
+document.getElementById('scatterLegend').style.display=view==='scatter'?'flex':'none';
+
+if(view==='scatter'){
+renderScatterPlot();
+document.getElementById('chartLegend').innerHTML='<strong style="color:#10b981">2D Matrix:</strong> Each dot represents a strategy. X-axis = average usage frequency, Y-axis = average effectiveness. Dot size indicates number of teachers using the strategy. Upper-right quadrant shows core strengths (high usage & high effectiveness).';
+}else{
+renderHistogram();
+document.getElementById('chartLegend').innerHTML='<strong style="color:#a855f7">Histogram:</strong> Distribution of strategy scores (1-10) across all differentiation types. Toggle between Frequency and Effectiveness metrics. Filter by category using the buttons above.';
+}
+}
+
+function renderStats(){
+let stats=calculateStats();
+document.getElementById('statsGrid').innerHTML=`
+<div class="stat-card glass-card glass-blue">
+<div class="stat-icon" style="background:rgba(59,130,246,.2);color:#60a5fa">👥</div>
+<div class="stat-value">${stats.totalResponses}</div>
+<div class="stat-label">Total Responses</div>
+</div>
+<div class="stat-card glass-card glass-purple">
+<div class="stat-icon" style="background:rgba(168,85,247,.2);color:#c084fc">🏢</div>
+<div class="stat-value">${Object.keys(stats.deptCounts).length}</div>
+<div class="stat-label">Departments</div>
+</div>
+<div class="stat-card glass-card glass-pink">
+<div class="stat-icon" style="background:rgba(236,72,153,.2);color:#f472b6">📚</div>
+<div class="stat-value">${Object.keys(stats.gradeCounts).length}</div>
+<div class="stat-label">Grade Levels</div>
+</div>
+<div class="stat-card glass-card glass-emerald">
+<div class="stat-icon" style="background:rgba(16,185,129,.2);color:#34d399">🎯</div>
+<div class="stat-value">15</div>
+<div class="stat-label">Strategies Assessed</div>
+</div>`;
+}
+
+function renderDeptChart(){
+let stats=calculateStats();
+new Chart(document.getElementById('deptChart'),{
+type:'doughnut',
+data:{
+labels:Object.keys(stats.deptCounts),
+datasets:[{data:Object.values(stats.deptCounts),backgroundColor:['#3b82f6','#a855f7','#ec4899','#f59e0b','#10b981','#06b6d4','#6366f1'],borderWidth:0,hoverOffset:8}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{
+legend:{position:'right',labels:{color:'#94a3b8',font:{size:11},padding:12,usePointStyle:true}},
+tooltip:{backgroundColor:'rgba(15,23,42,.9)',titleColor:'#fff',bodyColor:'#cbd5e1',borderColor:'rgba(59,130,246,.3)',borderWidth:1,padding:12}
+}
+}
+});
+}
+
+function renderGradeChart(){
+let stats=calculateStats();
+let order=['Grade 9','Grade 10','Grade 11','Grade 12'];
+let sorted=order.filter(g=>stats.gradeCounts[g]);
+new Chart(document.getElementById('gradeChart'),{
+type:'bar',
+data:{
+labels:sorted,
+datasets:[{label:'Responses',data:sorted.map(g=>stats.gradeCounts[g]),backgroundColor:'rgba(168,85,247,.7)',hoverBackgroundColor:'rgba(168,85,247,.9)',borderRadius:8,barThickness:40}]
+},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+scales:{
+y:{beginAtZero:true,grid:{color:'rgba(148,163,184,.08)'},ticks:{color:'#94a3b8'}},
+x:{grid:{display:false},ticks:{color:'#94a3b8'}}
+},
+plugins:{
+legend:{display:false},
+tooltip:{backgroundColor:'rgba(15,23,42,.9)',titleColor:'#fff',bodyColor:'#cbd5e1',borderColor:'rgba(168,85,247,.3)',borderWidth:1}
+}
+}
+});
+}
+
+function renderScatterPlot(){
+let avgs=calculateStrategyAverages(currentCategory);
+let ctx=document.getElementById('scatterChart').getContext('2d');
+if(scatterChartInstance)scatterChartInstance.destroy();
+if(histogramChartInstance){histogramChartInstance.destroy();histogramChartInstance=null;}
+
+// Calculate teacher counts for sizing
+let maxCount=Math.max(...avgs.map(s=>s.count));
+
+let datasets=[];
+['Content','Process','Product'].forEach(cat=>{
+let catData=avgs.filter(s=>s.cat===cat);
+if(catData.length===0)return;
+datasets.push({
+label:cat+' Differentiation',
+data:catData.map(s=>({
+x:s.avgFreq,
+y:s.avgEff,
+label:s.key,
+title:s.title,
+desc:s.desc,
+count:s.count,
+radius:7+(s.count/maxCount)*6
+})),
+backgroundColor:CAT_COLORS[cat],
+borderColor:'#fff',
+borderWidth:1.5,
+pointRadius:catData.map(s=>7+(s.count/maxCount)*6),
+pointHoverRadius:catData.map(s=>10+(s.count/maxCount)*6)
+});
+});
+
+scatterChartInstance=new Chart(ctx,{
+type:'scatter',
+data:{datasets},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+scales:{
+x:{min:0,max:10,title:{display:true,text:'Average Usage Frequency',color:'#94a3b8',font:{weight:'600'}},grid:{color:'rgba(148,163,184,.08)',lineDash:[4,4]},ticks:{color:'#94a3b8'}},
+y:{min:0,max:10,title:{display:true,text:'Average Effectiveness',color:'#94a3b8',font:{weight:'600'}},grid:{color:'rgba(148,163,184,.08)',lineDash:[4,4]},ticks:{color:'#94a3b8'}}
+},
+plugins:{
+legend:{labels:{color:'#94a3b8',usePointStyle:true,padding:16}},
+tooltip:{
+backgroundColor:'rgba(15,23,42,.95)',
+titleColor:'#fff',
+bodyColor:'#cbd5e1',
+borderColor:'rgba(59,130,246,.4)',
+borderWidth:1,
+padding:14,
+callbacks:{
+title:function(ctx){let p=ctx[0].raw;return p.label+': '+p.title},
+label:function(ctx){let p=ctx.raw;return['Category: '+ctx.dataset.label.split(' ')[0],'Frequency: '+p.x.toFixed(1)+' / 10','Effectiveness: '+p.y.toFixed(1)+' / 10','Teachers: '+p.count]},
+afterBody:function(ctx){let p=ctx[0].raw;return['',p.desc]}
+}
+}
+}
+}
+});
+}
+
+function renderHistogram(){
+let avgs=calculateStrategyAverages(currentCategory);
+let ctx=document.getElementById('scatterChart').getContext('2d');
+if(scatterChartInstance){scatterChartInstance.destroy();scatterChartInstance=null;}
+if(histogramChartInstance)histogramChartInstance.destroy();
+
+let metric=document.getElementById('histogramMetric').value;
+let bins=[1,2,3,4,5,6,7,8,9,10];
+
+let datasets=[];
+['Content','Process','Product'].forEach(cat=>{
+if(currentCategory!=='all'&&currentCategory!==cat)return;
+let catData=avgs.filter(s=>s.cat===cat);
+let binCounts=bins.map(bin=>{
+let count=0;
+rawData.forEach(r=>{
+r[metric==='frequency'?'freq':'eff'].forEach((val,i)=>{
+let key=Object.keys(STRATEGIES)[i];
+if(STRATEGIES[key].cat===cat&&val===bin)count++;
+});
+});
+return count;
+});
+datasets.push({
+label:cat,
+data:binCounts,
+backgroundColor:CAT_COLORS[cat]+'99',
+borderColor:CAT_COLORS[cat],
+borderWidth:2,
+borderRadius:6
+});
+});
+
+histogramChartInstance=new Chart(ctx,{
+type:'bar',
+data:{labels:bins.map(b=>b+'-'+(b+1)),datasets},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+scales:{
+x:{grid:{color:'rgba(148,163,184,.08)'},ticks:{color:'#94a3b8'},title:{display:true,text:metric==='frequency'?'Usage Frequency Score':'Effectiveness Score',color:'#94a3b8',font:{weight:'600'}}},
+y:{beginAtZero:true,grid:{color:'rgba(148,163,184,.08)'},ticks:{color:'#94a3b8',stepSize:1},title:{display:true,text:'Number of Responses',color:'#94a3b8',font:{weight:'600'}}}
+},
+plugins:{
+legend:{labels:{color:'#94a3b8',usePointStyle:true,padding:16}},
+tooltip:{backgroundColor:'rgba(15,23,42,.9)',titleColor:'#fff',bodyColor:'#cbd5e1',borderColor:'rgba(168,85,247,.3)',borderWidth:1}
+}
+}
+});
+}
+
+function updateHistogram(){
+if(currentView==='histogram')renderHistogram();
+}
+
+function renderStrategyTable(){
+let avgs=calculateStrategyAverages(currentCategory);
+let tbody=document.querySelector('#strategyTable tbody');
+tbody.innerHTML='';
+avgs.forEach(s=>{
+let gapColor=s.gap>0?'#10b981':s.gap<0?'#ef4444':'#94a3b8';
+let gapSign=s.gap>0?'+':'';
+let catClass=s.cat==='Content'?'badge-content':s.cat==='Process'?'badge-process':'badge-product';
+tbody.innerHTML+=`<tr><td style="font-weight:700;color:#60a5fa">${s.key}</td><td>${s.title}</td><td><span class="badge ${catClass}">${s.cat}</span></td><td><div style="display:flex;align-items:center;gap:6px"><div class="bar-blue" style="width:${s.avgFreq*12}px"></div>${s.avgFreq}</div></td><td><div style="display:flex;align-items:center;gap:6px"><div class="bar-emerald" style="width:${s.avgEff*12}px"></div>${s.avgEff}</div></td><td style="color:${gapColor};font-weight:600">${gapSign}${s.gap}</td></tr>`;
+});
+}
+
+function filterCategory(cat){
+currentCategory=cat;
+document.querySelectorAll('#categoryFilters .filter-btn').forEach(b=>b.classList.remove('active'));
+document.querySelector('#categoryFilters .filter-btn[onclick*="'+cat+'"]').classList.add('active');
+if(currentView==='scatter')renderScatterPlot();
+else renderHistogram();
+renderStrategyTable();
+}
+
+function filterComments(filter){
+currentCommentFilter=filter;
+document.querySelectorAll('#tab-voices .filter-btn').forEach(b=>b.classList.remove('active'));
+document.querySelector('#tab-voices .filter-btn[onclick*="'+filter+'"]').classList.add('active');
+renderComments();
+}
+
+function searchComments(query){
+renderComments(query.toLowerCase());
+}
+
+function renderComments(searchQuery=''){
+let container=document.getElementById('commentsContainer');
+let comments=[];
+qualitativeData.forEach(d=>{
+if(currentCommentFilter==='all'||currentCommentFilter==='topStrategy'){if(d.topStrategy&&d.topStrategy!=='/'&&d.topStrategy!=='.'&&d.topStrategy!=='N/A'&&d.topStrategy!=='n/a'&&d.topStrategy!=='NA'&&d.topStrategy!=='No'){comments.push({id:d.id,dept:d.dept,grades:d.grades,label:'Top Strategy',text:d.topStrategy})}}
+if(currentCommentFilter==='all'||currentCommentFilter==='specialNeeds'){if(d.specialNeeds&&d.specialNeeds!=='/'&&d.specialNeeds!=='.'&&d.specialNeeds!=='N/A'&&d.specialNeeds!=='n/a'&&d.specialNeeds!=='NA'){comments.push({id:d.id,dept:d.dept,grades:d.grades,label:'Special Needs Support',text:d.specialNeeds})}}
+if(currentCommentFilter==='all'||currentCommentFilter==='interventions'){if(d.interventions&&d.interventions!=='/'&&d.interventions!=='.'&&d.interventions!=='N/A'&&d.interventions!=='n/a'&&d.interventions!=='NA'){comments.push({id:d.id,dept:d.dept,grades:d.grades,label:'Other Interventions',text:d.interventions})}}
+if(currentCommentFilter==='all'||currentCommentFilter==='feedback'){if(d.feedback&&d.feedback!=='/'&&d.feedback!=='.'&&d.feedback!=='N/A'&&d.feedback!=='n/a'&&d.feedback!=='NA'&&d.feedback!=='No'){comments.push({id:d.id,dept:d.dept,grades:d.grades,label:'Additional Feedback',text:d.feedback})}}
+});
+
+if(searchQuery){
+comments=comments.filter(c=>c.text.toLowerCase().includes(searchQuery)||c.dept.toLowerCase().includes(searchQuery)||c.label.toLowerCase().includes(searchQuery));
+}
+
+if(comments.length===0){
+container.innerHTML='<div style="text-align:center;padding:40px;color:#64748b">No comments match the current filters.</div>';
+return;
+}
+
+container.innerHTML=comments.map(c=>`
+<div class="comment-card">
+<div class="comment-label">${c.label}</div>
+<div class="comment-meta">
+<span class="comment-tag dept">${c.dept}</span>
+<span class="comment-tag grade">${c.grades}</span>
+<span style="color:#64748b;font-size:.7rem">ID #${c.id}</span>
+</div>
+<div class="comment-text">${c.text}</div>
+</div>`).join('');
+}
+
+function renderNeedsTab(){
+let needsList=document.getElementById('adminNeedsList');
+let maxNeeds=Math.max(...Object.values(adminNeeds));
+needsList.innerHTML=Object.entries(adminNeeds).map(([k,v])=>`
+<div class="needs-item">
+<div style="flex:1"><div class="needs-label">${k}</div><div class="needs-bar"><div class="needs-bar-fill amber" style="width:${(v/maxNeeds)*100}%"></div></div></div>
+<div class="needs-count amber">${v}</div>
+</div>`).join('');
+
+let measuresList=document.getElementById('measuresList');
+let maxMeasures=Math.max(...Object.values(measures));
+measuresList.innerHTML=Object.entries(measures).map(([k,v])=>`
+<div class="needs-item">
+<div style="flex:1"><div class="needs-label">${k}</div><div class="needs-bar"><div class="needs-bar-fill cyan" style="width:${(v/maxMeasures)*100}%"></div></div></div>
+<div class="needs-count cyan">${v}</div>
+</div>`).join('');
+
+new Chart(document.getElementById('toolkitChart'),{
+type:'doughnut',
+data:{labels:['Yes','Maybe','No'],datasets:[{data:[toolkit.Yes,toolkit.Maybe,toolkit.No],backgroundColor:['rgba(16,185,129,.8)','rgba(245,158,11,.8)','rgba(239,68,68,.8)'],borderWidth:0,hoverOffset:6}]},
+options:{
+responsive:true,
+maintainAspectRatio:false,
+plugins:{legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11},padding:16,usePointStyle:true}}}
+}
+});
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+renderStats();
+renderDeptChart();
+renderGradeChart();
+renderScatterPlot();
+renderStrategyTable();
+renderComments();
+renderNeedsTab();
+});
+</script>
+</body>
+</html>
