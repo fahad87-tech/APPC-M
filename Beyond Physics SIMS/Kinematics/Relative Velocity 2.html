@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics: Relative Velocity in 2D</title>
+    <style>
+        :root {
+            --bg: #0a0a1a;
+            --card: #12122a;
+            --input-bg: rgba(255, 255, 255, 0.06);
+            --accent-cyan: #00e5ff;
+            --accent-purple: #7c4dff;
+            --accent-pink: #ff4081;
+            --accent-amber: #ffd740;
+            --accent-green: #69f0ae;
+            --text: #e0e0e0;
+            --text-muted: #8888aa;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            padding: 0 20px;
+            max-width: 1500px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 26, 0.92);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+        }
+        .tab-btn {
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .header {
+            text-align: center;
+            padding: 28px 20px 16px;
+            background: linear-gradient(180deg, rgba(124, 77, 255, 0.10) 0%, transparent 100%);
+        }
+        .header h1 {
+            font-size: 30px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, #8888aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .header .domain-badge {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            background: rgba(124, 77, 255, 0.2);
+            color: var(--accent-purple);
+            border: 1px solid rgba(124, 77, 255, 0.3);
+        }
+        .header .description {
+            margin-top: 8px;
+            color: var(--text-muted);
+            font-size: 14px;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 16px;
+            padding: 20px;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+        .controls-panel {
+            width: 310px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            backdrop-filter: blur(10px);
+        }
+        .card h3 {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .slider-group { margin-bottom: 16px; }
+        .slider-group:last-child { margin-bottom: 0; }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+        .slider-label .value {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            color: var(--accent-cyan);
+            font-size: 13px;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.15);
+            outline: none;
+            transition: background 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+            transition: transform 0.15s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 14px;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        select:focus { border-color: var(--accent-cyan); }
+        select option {
+            background: #1a1a3a;
+            color: var(--text);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            font-family: inherit;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.14);
+            transform: translateY(-1px);
+        }
+        .btn.active {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+        }
+        .btn.reset {
+            background: rgba(255, 64, 129, 0.15);
+            color: var(--accent-pink);
+        }
+        .btn.reset:hover { background: rgba(255, 64, 129, 0.25); }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .radio-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 14px;
+        }
+        .radio-label:hover { background: rgba(255, 255, 255, 0.08); }
+        .radio-label input[type="radio"] {
+            accent-color: var(--accent-cyan);
+            width: 16px;
+            height: 16px;
+        }
+        .radio-label.selected {
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            background: rgba(0, 229, 255, 0.06);
+        }
+
+        .canvas-area { flex: 1; min-width: 0; }
+        .canvas-area canvas {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: #0a0a2a;
+            display: block;
+        }
+
+        .full-width {
+            max-width: 1500px;
+            margin: 0 auto;
+            padding: 0 20px 20px;
+        }
+        .datalogger-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .stat-box {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .stat-box .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .stat-box .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+        .stat-box .stat-value.positive { color: var(--accent-green); }
+        .stat-box .stat-value.negative { color: var(--accent-pink); }
+
+        .component-bar-container {
+            margin: 12px 0;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .component-bar-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        .component-bar-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 10px;
+        }
+        .component-bar-label {
+            font-size: 12px;
+            font-weight: 600;
+            min-width: 60px;
+            color: var(--text);
+        }
+        .component-bar-track {
+            flex: 1;
+            height: 18px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 9px;
+            position: relative;
+            overflow: hidden;
+        }
+        .component-bar-fill {
+            height: 100%;
+            border-radius: 9px;
+            transition: width 0.2s ease;
+            min-width: 0;
+        }
+        .component-bar-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            min-width: 70px;
+            text-align: right;
+            color: var(--text);
+        }
+
+        .data-table-container {
+            max-height: 220px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .data-table th {
+            position: sticky;
+            top: 0;
+            background: #1a1a3a;
+            padding: 8px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            z-index: 5;
+        }
+        .data-table td {
+            padding: 6px 8px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        .data-table tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
+        .data-table tr:hover { background: rgba(0, 229, 255, 0.04); }
+
+        .graphs-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+        }
+        .graph-card canvas {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            background: #0d0d22;
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .legend-color {
+            width: 16px;
+            height: 3px;
+            border-radius: 2px;
+        }
+
+        .assessment-section {
+            max-width: 950px;
+            margin: 0 auto;
+            padding: 20px 20px 40px;
+        }
+        .assessment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .assessment-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .assessment-header h2 span {
+            background: linear-gradient(135deg, #fff, #8888aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .student-name-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .student-name-group label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .student-name-group input[type="text"] {
+            padding: 8px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 14px;
+            width: 220px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        .student-name-group input[type="text"]:focus {
+            border-color: var(--accent-cyan);
+        }
+
+        .assessment-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text);
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--accent-cyan);
+        }
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .nav-slider {
+            flex: 1;
+            min-width: 120px;
+        }
+        .nav-slider input[type="range"] {
+            width: 100%;
+        }
+        .nav-counter {
+            font-size: 13px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            white-space: nowrap;
+            min-width: 80px;
+            text-align: center;
+        }
+        .progress-dots {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+        }
+        .progress-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: transparent;
+            transition: all 0.2s;
+        }
+        .progress-dot.answered {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+        }
+        .progress-dot.current {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
+        }
+
+        .assess-question {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 16px;
+            display: none;
+            backdrop-filter: blur(10px);
+        }
+        .assess-question.active { display: block; }
+        .q-phase {
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .q-number {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        .phase-badge {
+            font-size: 10px;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .phase-engage { background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan); }
+        .phase-explore { background: rgba(124, 77, 255, 0.15); color: var(--accent-purple); }
+        .phase-explain { background: rgba(255, 215, 64, 0.15); color: var(--accent-amber); }
+        .phase-elaborate { background: rgba(105, 240, 174, 0.15); color: var(--accent-green); }
+        .phase-evaluate { background: rgba(255, 64, 129, 0.15); color: var(--accent-pink); }
+
+        .q-text {
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.7;
+            color: var(--text);
+            margin-bottom: 20px;
+        }
+        .q-answer-area label {
+            display: block;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .q-answer-area textarea {
+            width: 100%;
+            min-height: 130px;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .q-answer-area textarea:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.1);
+        }
+        .q-answer-area textarea::placeholder {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .export-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding: 16px 20px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-top: 24px;
+        }
+        .export-bar .progress-text {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+        .export-bar .progress-text strong {
+            color: var(--accent-cyan);
+        }
+        .export-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-docx {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.3), rgba(0, 229, 255, 0.2));
+            color: #fff;
+            border: 1px solid rgba(124, 77, 255, 0.4);
+            font-family: inherit;
+        }
+        .btn-docx:hover {
+            background: linear-gradient(135deg, rgba(124, 77, 255, 0.5), rgba(0, 229, 255, 0.35));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(124, 77, 255, 0.2);
+        }
+        .btn-csv {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(0, 229, 255, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            font-family: inherit;
+        }
+        .btn-csv:hover {
+            background: rgba(0, 229, 255, 0.2);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--card);
+            border: 1px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: var(--text);
+            font-size: 14px;
+            z-index: 999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast.error {
+            border-color: var(--accent-pink);
+        }
+
+        @media (max-width: 900px) {
+            .main-layout {
+                flex-direction: column;
+            }
+            .controls-panel {
+                width: 100%;
+            }
+            .canvas-area canvas {
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="sim">Sim</button>
+        <button class="tab-btn" data-tab="assessment">Assessment</button>
+    </div>
+
+    <div id="tab-sim" class="tab-content active">
+
+        <div class="header">
+            <h1>Relative Velocity in 2D</h1>
+            <div class="domain-badge">Kinematics</div>
+            <p class="description">
+                Two cars approach an intersection. Observe how the velocity of one car appears from the frame of reference of the other. Toggle the observer, adjust speeds and directions, and analyze the relative velocity vector in real time.
+            </p>
+        </div>
+
+        <div class="main-layout">
+            <div class="controls-panel">
+                <div class="card">
+                    <h3>Car 1 — Northbound</h3>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Speed</span>
+                            <span class="value" id="val-v1">20.0 m/s</span>
+                        </div>
+                        <input type="range" id="slider-v1" min="5" max="50" step="0.5" value="20">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Car 2 — Adjustable</h3>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Speed</span>
+                            <span class="value" id="val-v2">15.0 m/s</span>
+                        </div>
+                        <input type="range" id="slider-v2" min="5" max="50" step="0.5" value="15">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Direction</span>
+                            <span class="value" id="val-dir">West</span>
+                        </div>
+                        <select id="select-dir">
+                            <option value="west" selected>West (180°)</option>
+                            <option value="east">East (0°)</option>
+                            <option value="north">North (90°)</option>
+                            <option value="south">South (270°)</option>
+                            <option value="custom">Custom Angle…</option>
+                        </select>
+                    </div>
+                    <div class="slider-group" id="custom-angle-group" style="display:none;">
+                        <div class="slider-label">
+                            <span>Custom Angle (from East)</span>
+                            <span class="value" id="val-custom-angle">180°</span>
+                        </div>
+                        <input type="range" id="slider-custom-angle" min="0" max="360" step="1" value="180">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Observer Perspective</h3>
+                    <div class="radio-group">
+                        <label class="radio-label selected" id="radio-observer-1">
+                            <input type="radio" name="observer" value="car1" checked>
+                            <span>Car 1 sees Car 2</span>
+                        </label>
+                        <label class="radio-label" id="radio-observer-2">
+                            <input type="radio" name="observer" value="car2">
+                            <span>Car 2 sees Car 1</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>View Mode</h3>
+                    <div class="radio-group">
+                        <label class="radio-label selected" id="radio-view-2d">
+                            <input type="radio" name="viewMode" value="2d" checked>
+                            <span>2D Intersection</span>
+                        </label>
+                        <label class="radio-label" id="radio-view-1d-headon">
+                            <input type="radio" name="viewMode" value="1d-headon">
+                            <span>1D Head-On</span>
+                        </label>
+                        <label class="radio-label" id="radio-view-1d-same">
+                            <input type="radio" name="viewMode" value="1d-same">
+                            <span>1D Same Direction</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Simulation</h3>
+                    <div class="btn-group">
+                        <button class="btn active" id="btn-play">▶ Play</button>
+                        <button class="btn" id="btn-step">⏭ Step</button>
+                        <button class="btn reset" id="btn-reset">↺ Reset</button>
+                    </div>
+                    <div class="slider-group" style="margin-top: 14px;">
+                        <div class="slider-label">
+                            <span>Simulation Speed</span>
+                            <span class="value" id="val-speed">1.0x</span>
+                        </div>
+                        <input type="range" id="slider-speed" min="0.25" max="4" step="0.25" value="1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="canvas-area">
+                <canvas id="simCanvas" width="900" height="550"></canvas>
+            </div>
+        </div>
+
+        <div class="full-width">
+            <div class="card">
+                <h3>Data Logger — Relative Velocity Analysis</h3>
+                <div class="datalogger-grid">
+                    <div class="stat-box">
+                        <div class="stat-label">Time (s)</div>
+                        <div class="stat-value" id="stat-time">0.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Car 1 Speed (m/s)</div>
+                        <div class="stat-value" id="stat-v1">20.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">Car 2 Speed (m/s)</div>
+                        <div class="stat-value" id="stat-v2">15.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">v_rel East (m/s)</div>
+                        <div class="stat-value" id="stat-vrel-x">0.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">v_rel North (m/s)</div>
+                        <div class="stat-value" id="stat-vrel-y">0.00</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-label">|v_rel| (m/s)</div>
+                        <div class="stat-value" id="stat-vrel-mag">0.00</div>
+                    </div>
+                </div>
+
+                <div class="component-bar-container">
+                    <div class="component-bar-title">Relative Velocity Components</div>
+                    <div class="component-bar-row">
+                        <span class="component-bar-label">East–West</span>
+                        <div class="component-bar-track">
+                            <div class="component-bar-fill" id="bar-ew" style="width:0%; background:linear-gradient(90deg,#69f0ae,#00e5ff);"></div>
+                        </div>
+                        <span class="component-bar-value" id="bar-ew-val">0.0 m/s</span>
+                    </div>
+                    <div class="component-bar-row">
+                        <span class="component-bar-label">North–South</span>
+                        <div class="component-bar-track">
+                            <div class="component-bar-fill" id="bar-ns" style="width:0%; background:linear-gradient(90deg,#7c4dff,#ff4081);"></div>
+                        </div>
+                        <span class="component-bar-value" id="bar-ns-val">0.0 m/s</span>
+                    </div>
+                </div>
+
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>t (s)</th>
+                                <th>v1 (m/s)</th>
+                                <th>v2 (m/s)</th>
+                                <th>v_rel_x (m/s)</th>
+                                <th>v_rel_y (m/s)</th>
+                                <th>|v_rel| (m/s)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-tbody"></tbody>
+                    </table>
+                </div>
+                <div style="margin-top:10px; display:flex; gap:8px;">
+                    <button class="btn-csv" onclick="exportCSV()">⬇ Export CSV</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="full-width">
+            <div class="graphs-row">
+                <div class="card graph-card">
+                    <h3>Relative Velocity Components vs Time</h3>
+                    <canvas id="graph1"></canvas>
+                    <div class="legend">
+                        <div class="legend-item"><span class="legend-color" style="background:#00e5ff;"></span> v_rel East</div>
+                        <div class="legend-item"><span class="legend-color" style="background:#7c4dff;"></span> v_rel North</div>
+                    </div>
+                </div>
+                <div class="card graph-card">
+                    <h3>Relative Velocity Magnitude vs Time</h3>
+                    <canvas id="graph2"></canvas>
+                    <div class="legend">
+                        <div class="legend-item"><span class="legend-color" style="background:#ffd740;"></span> |v_rel|</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-assessment" class="tab-content">
+        <div class="assessment-section">
+
+            <div class="assessment-header">
+                <h2>5E Formative Assessment — <span>Relative Velocity in 2D</span></h2>
+                <div class="student-name-group">
+                    <label for="student-name">Student Name:</label>
+                    <input type="text" id="student-name" placeholder="Enter your name...">
+                </div>
+            </div>
+
+            <div class="assessment-nav">
+                <button class="nav-btn" id="nav-prev" title="Previous question">&#8592;</button>
+                <div class="nav-slider">
+                    <input type="range" id="nav-slider" min="0" max="9" step="1" value="0">
+                </div>
+                <div class="nav-counter"><span id="nav-current">1</span> / 10</div>
+                <button class="nav-btn" id="nav-next" title="Next question">&#8594;</button>
+                <div class="progress-dots" id="progress-dots"></div>
+            </div>
+
+            <div class="assess-question active" data-q="0" data-correct="When switching observers, the relative velocity vector reverses direction. Mathematically, v₂₁ = -v₁₂. The magnitude remains the same, but the direction is exactly opposite. This demonstrates the two-way nature of relative velocity: the velocity of Car 2 as seen by Car 1 is the negative of the velocity of Car 1 as seen by Car 2.">
+                <div class="q-phase">
+                    <span class="phase-badge phase-engage">Engage</span>
+                    <span class="q-number">Question 1 of 10</span>
+                </div>
+                <div class="q-text">Run the simulation with any speeds. Toggle the observer between "Car 1 sees Car 2" and "Car 2 sees Car 1." Describe what happens to the relative velocity vector when you switch the observer. How does the direction change? What about the magnitude?</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="0"></textarea>
+                </div>
+            </div>
+
+            <div class="assess-question" data-q="1" data-correct="With Car 2 traveling West and Car 1 traveling North, the relative velocity of Car 2 as seen by Car 1 is v₂ - v₁. In component form (East, North): v₁ = (0, v₁), v₂ = (-v₂, 0), so v₂_rel = (-v₂, -v₁). This points Southwest (down and to the left). The magnitude is √(v₁² + v₂²).">
+                <div class="q-phase">
+                    <span class="phase-badge phase-engage">Engage</span>
+                    <span class="q-number">Question 2 of 10</span>
+                </div>
+                <div class="q-text">Set Car 2 to travel West and Car 1 to travel North. With Car 1 as the observer, in what direction does the relative velocity vector point? Explain in terms of the components (East/North) of v₂ - v₁.</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="1"></textarea>
+                </div>
+            </div>
+
+            <div class="assess-question" data-q="2" data-correct="|v_rel| = √(v₂² + v₁²) = √(20² + 30²) = √(400 + 900) = √1300 ≈ 36.06 m/s. The direction is tan⁻¹(30/20) = 56.3° south of west (or 236.3° measured counterclockwise from East).">
+                <div class="q-phase">
+                    <span class="phase-badge phase-explore">Explore</span>
+                    <span class="q-number">Question 3 of 10</span>
+                </div>
+                <div class="q-text">Before running the simulation: set v₁ = 30 m/s (Car 1 North), v₂ = 20 m/s (Car 2 West). Predict the magnitude of the relative velocity of Car 2 as seen by Car 1. Show your reasoning and then verify with the simulation.</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="2"></textarea>
+                </div>
+            </div>
+
+            <div class="assess-question" data-q="3" data-correct="When Car 2 travels East instead of West, the x-component of the relative velocity changes sign. With Car 1 North (0, v₁) and Car 2 East (v₂, 0), v₂_rel = (v₂, -v₁). The magnitude remains √(v₁² + v₂²) but the direction is now Southeast instead of Southwest.">
+                <div class="q-phase">
+                    <span class="phase-badge phase-explore">Explore</span>
+                    <span class="q-number">Question 4 of 10</span>
+                </div>
+                <div class="q-text">Keep v₁ = 30 m/s North and v₂ = 20 m/s. If you change Car 2 from West to East, how will the relative velocity vector change? Predict the new direction and magnitude before running the simulation. Verify with the simulation.</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="3"></textarea>
+                </div>
+            </div>
+
+            <div class="assess-question" data-q="4" data-correct="v₁ = (0, 25) m/s (North), v₂ = (-15, 0) m/s (West). v₂_rel = v₂ - v₁ = (-15, -25) m/s. |v₂_rel| = √(225 + 625) = √850 ≈ 29.15 m/s. Direction: θ = 180° + tan⁻¹(25/15) = 180° + 59.0° = 239.0° from East (or 59.0° south of west, i.e., Southwest).">
+                <div class="q-phase">
+                    <span class="phase-badge phase-explain">Explain</span>
+                    <span class="q-number">Question 5 of 10</span>
+                </div>
+                <div class="q-text">Calculate the velocity of Car 2 relative to Car 1 when Car 1 travels at 25 m/s North and Car 2 travels at 15 m/s West. Give your answer in component form (East, North), then find the magnitude and direction. Show all steps.</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="4"></textarea>
+                </div>
+            </div>
+
+            <div class="assess-question" data-q="5" data-correct="v₁ = (0, v₁) and v₂ = (v₂cosθ, v₂sinθ), where θ is measured counterclockwise from East. v₂_rel = v₂ - v₁ = (v₂cosθ, v₂sinθ - v₁). Magnitude: |v₂_rel| = √(v₂²cos²θ + (v₂sinθ - v₁)²) = √(v₂²cos²θ + v₂²sin²θ - 2v₁v₂sinθ + v₁²) = √(v₁² + v₂² - 2v₁v₂sinθ).">
+                <div class="q-phase">
+                    <span class="phase-badge phase-explain">Explain</span>
+                    <span class="q-number">Question 6 of 10</span>
+                </div>
+                <div class="q-text">Derive the general expression for the magnitude of the relative velocity |v₂ - v₁| when Car 1 travels North at speed v₁ and Car 2 travels at speed v₂ at an angle θ measured counterclockwise from East. Express your answer in terms of v₁, v₂, and θ.</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="5"></textarea>
+                </div>
+            </div>
+
+            <div class="assess-question" data-q="6" data-correct="If both cars travel in the same direction at the same speed, their relative velocity is zero. v₂ - v₁ = 0. Each car appears stationary as seen from the other. In the formula |v₂_rel| = √(v₁² + v₂² - 2v₁v₂sinθ), if θ = 90° (both moving North) and v₁ = v₂, then |v₂_rel| = √(v² + v² - 2v²) = 0.">
+                <div class="q-phase">
+                    <span class="phase-badge phase-elaborate">Elaborate</span>
+                    <span class="q-number">Question 7 of 10</span>
+                </div>
+                <div class="q-text">What happens to the relative velocity when both cars travel in the same direction (e.g., both North) at the same speed? Explain the physical meaning. Use the formula from Question 6 to support your answer.</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="6"></textarea>
+                </div>
+            </div>
+
+            <div class="assess-question" data-q="7" data-correct="As v₂ → 0, v₂_rel → -v₁. The relative velocity of Car 2 as seen by Car 1 becomes the negative of Car 1's velocity. This means Car 2 appears to move South at speed v₁ even though it's stationary in the ground frame. This shows that relative velocity depends entirely on the observer's motion — a stationary object can appear to move if the observer is moving.">
+                <div class="q-phase">
+                    <span class="phase-badge phase-elaborate">Elaborate</span>
+                    <span class="q-number">Question 8 of 10</span>
+                </div>
+                <div class="q-text">If Car 2's speed approaches zero (it is nearly stationary at the intersection), what is v₂ relative to v₁? Describe what Car 1's driver observes. Use the relative velocity formula to explain.</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="7"></textarea>
+                </div>
+            </div>
+
+            <div class="assess-question" data-q="8" data-correct="(a) v_A = (0, 25) m/s (North), v_B = (30sin30°, 30cos30°) = (15, 25.98) m/s. v_B_rel = v_B - v_A = (15, 25.98 - 25) = (15, 0.98) m/s. (b) |v_B_rel| = √(15² + 0.98²) = √(225 + 0.96) = √225.96 ≈ 15.03 m/s. Direction: tan⁻¹(0.98/15) ≈ 3.7° North of East. The two cars are nearly moving together, so the relative velocity is small and nearly Eastward.">
+                <div class="q-phase">
+                    <span class="phase-badge phase-evaluate">Evaluate</span>
+                    <span class="q-number">Question 9 of 10</span>
+                </div>
+                <div class="q-text">AP FRQ: Car A travels at 25 m/s North. Car B travels at 30 m/s at 30° East of North. (a) Find the velocity of Car B relative to Car A in component form. (b) Find the magnitude and direction of this relative velocity. Show all work and include units.</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="8"></textarea>
+                </div>
+            </div>
+
+            <div class="assess-question" data-q="9" data-correct="(a) v_police = (0, 40) m/s, v_suspect = (-35, 0) m/s. v_suspect_rel = v_suspect - v_police = (-35, -40) m/s. (b) |v_suspect_rel| = √(35² + 40²) = √(1225 + 1600) = √2825 ≈ 53.15 m/s. Direction: tan⁻¹(40/35) ≈ 48.8° south of west, or 228.8° counterclockwise from East (approximately Southwest). (c) If the suspect turns to travel directly away from the police car, they would be moving in the same direction as the police car (North). The relative velocity would be (0, 35 - 40) = (0, -5) m/s, meaning the suspect falls behind at 5 m/s. This is much smaller than the 53.15 m/s before turning.">
+                <div class="q-phase">
+                    <span class="phase-badge phase-evaluate">Evaluate</span>
+                    <span class="q-number">Question 10 of 10</span>
+                </div>
+                <div class="q-text">AP FRQ: A police car travels at 40 m/s North. A suspect's car travels at 35 m/s West. (a) Find the velocity of the suspect relative to the police in component form. (b) Calculate the magnitude and direction of this relative velocity. (c) If the suspect turns to travel directly North (away from the police), what is the new relative velocity? Compare the magnitudes and explain the difference.</div>
+                <div class="q-answer-area">
+                    <label>Your Answer</label>
+                    <textarea placeholder="Type your answer here..." data-q="9"></textarea>
+                </div>
+            </div>
+
+            <div class="export-bar">
+                <div class="progress-text">
+                    <strong id="answered-count">0</strong> of 10 questions answered
+                </div>
+                <div class="export-actions">
+                    <button class="btn-docx" onclick="exportToDocx()">⬇ Export Worksheet (.DOCX)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script>
+    // Ground perspective feature coming soon
+    // ═══════════════════════════════════════
+    // TAB SYSTEM
+    // ═══════════════════════════════════════
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // ═══════════════════════════════════════
+    // CONFIGURATION & STATE
+    // ═══════════════════════════════════════
+    const DT = 1 / 60;
+    const MAX_TRAIL = 300;
+    const DECIMATION = 3;
+    const POSITION_SCALE = 5;    // pixels per meter
+    const VECTOR_SCALE = 3;      // pixels per (m/s)
+    const CANVAS_W = 900;
+    const CANVAS_H = 550;
+    const CENTER_X = CANVAS_W / 2;
+    const CENTER_Y = CANVAS_H / 2;
+
+    let state = {
+        running: false,
+        time: 0,
+        speed: 1.0,
+        v1: 20,
+        v2: 15,
+        car2Direction: 'west',
+        customAngle: 180,
+        observerIsCar1: true,
+        viewMode: '2d',
+        car1Pos: { x: 0, y: -30 },
+        car2Pos: { x: 30, y: 0 },
+    };
+
+    const initialState = JSON.parse(JSON.stringify(state));
+
+    function getCar2AngleRad() {
+        switch (state.car2Direction) {
+            case 'west': return Math.PI;
+            case 'east': return 0;
+            case 'north': return Math.PI / 2;
+            case 'south': return -Math.PI / 2;
+            case 'custom': return state.customAngle * Math.PI / 180;
+            default: return Math.PI;
+        }
+    }
+
+    function getCar2Velocity() {
+        const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
+        if (is1D) {
+            if (state.viewMode === '1d-headon') {
+                // Head-on: Car 2 moves West (-x)
+                return { x: -state.v2, y: 0 };
+            } else {
+                // Same direction: Car 2 moves East (+x)
+                return { x: state.v2, y: 0 };
+            }
+        }
+        // 2D mode: use angle
+        const angle = getCar2AngleRad();
+        return {
+            x: state.v2 * Math.cos(angle),
+            y: state.v2 * Math.sin(angle)
+        };
+    }
+
+    function getCar1Velocity() {
+        const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
+        if (is1D) {
+            // 1D mode: Car 1 always moves East (+x)
+            return { x: state.v1, y: 0 };
+        }
+        // 2D mode: Car 1 moves North
+        return { x: 0, y: state.v1 };
+    }
+
+    function getRelativeVelocity() {
+        const v1 = getCar1Velocity();
+        const v2 = getCar2Velocity();
+        if (state.observerIsCar1) {
+            return { x: v2.x - v1.x, y: v2.y - v1.y };
+        } else {
+            return { x: v1.x - v2.x, y: v1.y - v2.y };
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // DATA LOGGER
+    // ═══════════════════════════════════════
+    const dataLogger = {
+        rows: [],
+        frameCount: 0,
+        log(t, v1, v2, vrelx, vrely, vrelmag) {
+            this.frameCount++;
+            if (this.frameCount % DECIMATION === 0) {
+                this.rows.push({ t, v1, v2, vrelx, vrely, vrelmag });
+            }
+        },
+        logFinal(t, v1, v2, vrelx, vrely, vrelmag) {
+            if (this.rows.length === 0 || this.rows[this.rows.length - 1].t !== t) {
+                this.rows.push({ t, v1, v2, vrelx, vrely, vrelmag });
+            }
+        },
+        reset() { this.rows = []; this.frameCount = 0; },
+        getCSV() {
+            const header = 'Time (s),v1 (m/s),v2 (m/s),v_rel_x (m/s),v_rel_y (m/s),|v_rel| (m/s)\n';
+            const data = this.rows.map(r =>
+                `${r.t.toFixed(3)},${r.v1.toFixed(3)},${r.v2.toFixed(3)},${r.vrelx.toFixed(3)},${r.vrely.toFixed(3)},${r.vrelmag.toFixed(3)}`
+            ).join('\n');
+            return header + data;
+        }
+    };
+
+    // ═══════════════════════════════════════
+    // CANVAS SETUP
+    // ═══════════════════════════════════════
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = CANVAS_W;
+    canvas.height = CANVAS_H;
+
+    // Camera offset — when following an observer, their position becomes the center
+    let cameraOffset = { x: 0, y: 0 };
+
+    function worldToCanvas(wx, wy) {
+        // Subtract camera offset so the observer stays centered
+        const relX = wx - cameraOffset.x;
+        const relY = wy - cameraOffset.y;
+        return {
+            x: CENTER_X + relX * POSITION_SCALE,
+            y: CENTER_Y - relY * POSITION_SCALE
+        };
+    }
+
+    function drawBackground() {
+        ctx.fillStyle = '#0a0a2a';
+        ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+        // Grid — offset by camera so it scrolls with the observer
+        ctx.strokeStyle = 'rgba(100, 100, 200, 0.06)';
+        ctx.lineWidth = 1;
+        const gridSpacing = 50;
+        const offsetX = (cameraOffset.x * POSITION_SCALE) % gridSpacing;
+        const offsetY = (cameraOffset.y * POSITION_SCALE) % gridSpacing;
+        for (let x = -gridSpacing + offsetX; x < CANVAS_W + gridSpacing; x += gridSpacing) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, CANVAS_H);
+            ctx.stroke();
+        }
+        for (let y = -gridSpacing + offsetY; y < CANVAS_H + gridSpacing; y += gridSpacing) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(CANVAS_W, y);
+            ctx.stroke();
+        }
+
+        // Roads — draw relative to camera (scrolls with observer)
+        const roadScreenPos = worldToCanvas(0, 0);
+        const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.lineWidth = 6;
+        ctx.setLineDash([]);
+
+        if (is1D) {
+            // 1D mode: single horizontal road at vertical center
+            ctx.beginPath();
+            ctx.moveTo(0, CENTER_Y);
+            ctx.lineTo(CANVAS_W, CENTER_Y);
+            ctx.stroke();
+
+            // Dashed center line
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(0, CENTER_Y);
+            ctx.lineTo(CANVAS_W, CENTER_Y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Road edge lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, CENTER_Y - 30);
+            ctx.lineTo(CANVAS_W, CENTER_Y - 30);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, CENTER_Y + 30);
+            ctx.lineTo(CANVAS_W, CENTER_Y + 30);
+            ctx.stroke();
+
+            // Compass labels
+            ctx.fillStyle = 'rgba(136, 136, 170, 0.6)';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('W', 20, CENTER_Y - 40);
+            ctx.fillText('E', CANVAS_W - 20, CENTER_Y - 40);
+        } else {
+            // 2D mode: intersection
+            // N-S Road
+            ctx.beginPath();
+            ctx.moveTo(roadScreenPos.x, 0);
+            ctx.lineTo(roadScreenPos.x, CANVAS_H);
+            ctx.stroke();
+
+            // E-W Road
+            ctx.beginPath();
+            ctx.moveTo(0, roadScreenPos.y);
+            ctx.lineTo(CANVAS_W, roadScreenPos.y);
+            ctx.stroke();
+
+            // Road dashed center lines
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(roadScreenPos.x, 0);
+            ctx.lineTo(roadScreenPos.x, CANVAS_H);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(0, roadScreenPos.y);
+            ctx.lineTo(CANVAS_W, roadScreenPos.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Intersection marker
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+            ctx.fillRect(roadScreenPos.x - 10, roadScreenPos.y - 10, 20, 20);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(roadScreenPos.x - 10, roadScreenPos.y - 10, 20, 20);
+
+            // Compass labels
+            ctx.fillStyle = 'rgba(136, 136, 170, 0.6)';
+            ctx.font = '12px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('N', roadScreenPos.x, 18);
+            ctx.fillText('S', roadScreenPos.x, CANVAS_H - 8);
+            ctx.fillText('W', 20, roadScreenPos.y + 4);
+            ctx.fillText('E', CANVAS_W - 20, roadScreenPos.y + 4);
+        }
+    }
+
+    function drawCar(x, y, color, label, isObserver) {
+        const pos = worldToCanvas(x, y);
+        const size = 22;
+
+        // Glow
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 15;
+
+        // Car body
+        const gradient = ctx.createRadialGradient(
+            pos.x - 3, pos.y - 3, 2,
+            pos.x, pos.y, size
+        );
+        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+        gradient.addColorStop(0.4, color);
+        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.roundRect(pos.x - size / 2, pos.y - size / 2, size, size, 6);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        // Border
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // Observer indicator
+        if (isObserver) {
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, size / 2 + 8, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Label
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 11px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, pos.x, pos.y - size / 2 - 6);
+    }
+
+    function drawVector(fromX, fromY, vx, vy, color, label) {
+        const start = worldToCanvas(fromX, fromY);
+        const vecLen = Math.sqrt(vx * vx + vy * vy);
+        if (vecLen < 0.5) return;
+
+        const endX = start.x + vx * VECTOR_SCALE;
+        const endY = start.y - vy * VECTOR_SCALE;
+
+        // Line
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 8;
+
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(endX, endY);
+        ctx.stroke();
+
+        // Arrowhead
+        const angle = Math.atan2(endY - start.y, endX - start.x);
+        const arrowSize = 12;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(endX, endY);
+        ctx.lineTo(endX - arrowSize * Math.cos(angle - Math.PI / 6), endY - arrowSize * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(endX - arrowSize * Math.cos(angle + Math.PI / 6), endY - arrowSize * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        // Label
+        if (label) {
+            ctx.fillStyle = color;
+            ctx.font = 'bold 12px JetBrains Mono, monospace';
+            ctx.textAlign = 'left';
+            const labelX = endX + 10;
+            const labelY = endY - 8;
+            ctx.fillText(label, labelX, labelY);
+        }
+    }
+
+    function drawVectors() {
+        const v1 = getCar1Velocity();
+        const v2 = getCar2Velocity();
+        const vrel = getRelativeVelocity();
+
+        // Car 1 velocity (cyan)
+        drawVector(state.car1Pos.x, state.car1Pos.y, v1.x, v1.y, '#00e5ff', `v₁ = ${state.v1.toFixed(1)} m/s`);
+
+        // Car 2 velocity (amber)
+        drawVector(state.car2Pos.x, state.car2Pos.y, v2.x, v2.y, '#ffd740', `v₂ = ${state.v2.toFixed(1)} m/s`);
+
+        // Relative velocity (purple) from observer
+        const observerPos = state.observerIsCar1 ? state.car1Pos : state.car2Pos;
+        const relColor = '#7c4dff';
+        const relMag = Math.sqrt(vrel.x * vrel.x + vrel.y * vrel.y);
+        drawVector(observerPos.x, observerPos.y, vrel.x, vrel.y, relColor, `v_rel = ${relMag.toFixed(1)} m/s`);
+
+        // Legend
+        ctx.font = '11px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(224, 224, 224, 0.7)';
+        ctx.textAlign = 'left';
+        let ly = 20;
+        ctx.fillStyle = '#00e5ff';
+        ctx.fillText('— v₁ (Car 1)', 20, ly);
+        ctx.fillStyle = '#ffd740';
+        ctx.fillText('— v₂ (Car 2)', 20, ly + 16);
+        ctx.fillStyle = '#7c4dff';
+        ctx.fillText('— v_rel (relative)', 20, ly + 32);
+    }
+
+    // ═══════════════════════════════════════
+    // PHYSICS ENGINE
+    // ═══════════════════════════════════════
+    const WORLD_RANGE = {
+        x: 100,
+        y: 70
+    };
+
+    function updatePhysics(dt) {
+        if (!state.running) return;
+        state.time += dt;
+
+        const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
+
+        if (is1D) {
+            // 1D mode: both cars on horizontal road
+            if (state.viewMode === '1d-headon') {
+                // Head-on: Car 1 moves East (+x), Car 2 moves West (-x)
+                state.car1Pos.x += state.v1 * dt;
+                state.car2Pos.x -= state.v2 * dt;
+            } else {
+                // Same direction: both move East (+x)
+                state.car1Pos.x += state.v1 * dt;
+                state.car2Pos.x += state.v2 * dt;
+            }
+            // Keep cars on the horizontal road (y = 0)
+            state.car1Pos.y = 0;
+            state.car2Pos.y = 0;
+
+            // Wrap around
+            if (state.car1Pos.x > WORLD_RANGE.x) state.car1Pos.x = -WORLD_RANGE.x;
+            if (state.car1Pos.x < -WORLD_RANGE.x) state.car1Pos.x = WORLD_RANGE.x;
+            if (state.car2Pos.x > WORLD_RANGE.x) state.car2Pos.x = -WORLD_RANGE.x;
+            if (state.car2Pos.x < -WORLD_RANGE.x) state.car2Pos.x = WORLD_RANGE.x;
+        } else {
+            // 2D mode: original behavior
+            // Car 1 moves North (+y in physics)
+            state.car1Pos.y += state.v1 * dt;
+
+            // Car 2 moves in its direction
+            const v2 = getCar2Velocity();
+            state.car2Pos.x += v2.x * dt;
+            state.car2Pos.y += v2.y * dt;
+
+            // Wrap around
+            if (state.car1Pos.y > WORLD_RANGE.y) state.car1Pos.y = -WORLD_RANGE.y;
+            if (state.car1Pos.y < -WORLD_RANGE.y) state.car1Pos.y = WORLD_RANGE.y;
+
+            if (state.car2Pos.x > WORLD_RANGE.x) state.car2Pos.x = -WORLD_RANGE.x;
+            if (state.car2Pos.x < -WORLD_RANGE.x) state.car2Pos.x = WORLD_RANGE.x;
+            if (state.car2Pos.y > WORLD_RANGE.y) state.car2Pos.y = -WORLD_RANGE.y;
+            if (state.car2Pos.y < -WORLD_RANGE.y) state.car2Pos.y = WORLD_RANGE.y;
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // STATS & DATA LOGGING
+    // ═══════════════════════════════════════
+    function updateStats() {
+        const v1 = getCar1Velocity();
+        const v2 = getCar2Velocity();
+        const vrel = getRelativeVelocity();
+        const relMag = Math.sqrt(vrel.x * vrel.x + vrel.y * vrel.y);
+
+        document.getElementById('stat-time').textContent = state.time.toFixed(2);
+        document.getElementById('stat-v1').textContent = state.v1.toFixed(2);
+        document.getElementById('stat-v2').textContent = state.v2.toFixed(2);
+
+        const vrelxEl = document.getElementById('stat-vrel-x');
+        const vrelyEl = document.getElementById('stat-vrel-y');
+        const vrelmagEl = document.getElementById('stat-vrel-mag');
+
+        vrelxEl.textContent = vrel.x.toFixed(2);
+        vrelxEl.className = 'stat-value' + (vrel.x > 0.05 ? ' positive' : vrel.x < -0.05 ? ' negative' : '');
+
+        vrelyEl.textContent = vrel.y.toFixed(2);
+        vrelyEl.className = 'stat-value' + (vrel.y > 0.05 ? ' positive' : vrel.y < -0.05 ? ' negative' : '');
+
+        vrelmagEl.textContent = relMag.toFixed(2);
+
+        // Component bars
+        const maxComponent = 100;
+        const ewWidth = Math.min(100, Math.abs(vrel.x) / maxComponent * 100);
+        const nsWidth = Math.min(100, Math.abs(vrel.y) / maxComponent * 100);
+
+        document.getElementById('bar-ew').style.width = ewWidth + '%';
+        document.getElementById('bar-ew').style.background =
+            vrel.x >= 0 ?
+            'linear-gradient(90deg, #69f0ae, #00e5ff)' :
+            'linear-gradient(90deg, #ff4081, #ffd740)';
+
+        document.getElementById('bar-ns').style.width = nsWidth + '%';
+        document.getElementById('bar-ns').style.background =
+            vrel.y >= 0 ?
+            'linear-gradient(90deg, #7c4dff, #69f0ae)' :
+            'linear-gradient(90deg, #ff4081, #7c4dff)';
+
+        document.getElementById('bar-ew-val').textContent =
+            (vrel.x >= 0 ? '+' : '') + vrel.x.toFixed(1) + ' m/s';
+        document.getElementById('bar-ns-val').textContent =
+            (vrel.y >= 0 ? '+' : '') + vrel.y.toFixed(1) + ' m/s';
+
+        // Log data
+        if (state.running) {
+            dataLogger.log(state.time, state.v1, state.v2, vrel.x, vrel.y, relMag);
+        }
+    }
+
+    function updateDataTable() {
+        const tbody = document.getElementById('data-tbody');
+        const recentRows = dataLogger.rows.slice(-50);
+        let html = '';
+        recentRows.forEach(row => {
+            html += `<tr>
+                <td>${row.t.toFixed(2)}</td>
+                <td>${row.v1.toFixed(1)}</td>
+                <td>${row.v2.toFixed(1)}</td>
+                <td>${row.vrelx.toFixed(2)}</td>
+                <td>${row.vrely.toFixed(2)}</td>
+                <td>${row.vrelmag.toFixed(2)}</td>
+            </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // ═══════════════════════════════════════
+    // GRAPHS
+    // ═══════════════════════════════════════
+    const graph1 = document.getElementById('graph1');
+    const graph1Ctx = graph1.getContext('2d');
+    const graph2 = document.getElementById('graph2');
+    const graph2Ctx = graph2.getContext('2d');
+
+    function resizeGraphs() {
+        graph1.width = graph1.clientWidth || 400;
+        graph1.height = 200;
+        graph2.width = graph2.clientWidth || 400;
+        graph2.height = 200;
+    }
+    window.addEventListener('resize', resizeGraphs);
+    resizeGraphs();
+
+    function drawGraph1() {
+        const ctx = graph1Ctx;
+        const w = graph1.width;
+        const h = graph1.height;
+
+        ctx.fillStyle = '#0d0d22';
+        ctx.fillRect(0, 0, w, h);
+
+        // Grid
+        ctx.strokeStyle = 'rgba(100, 100, 200, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = h * i / 4;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(w, y);
+            ctx.stroke();
+        }
+        for (let i = 0; i <= 6; i++) {
+            const x = w * i / 6;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, h);
+            ctx.stroke();
+        }
+
+        // Zero line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, h / 2);
+        ctx.lineTo(w, h / 2);
+        ctx.stroke();
+
+        if (dataLogger.rows.length < 2) return;
+
+        const rows = dataLogger.rows;
+        const times = rows.map(r => r.t);
+        const tMin = times[0];
+        const tMax = Math.max(times[times.length - 1], tMin + 1);
+        const tRange = tMax - tMin;
+
+        const vrelx = rows.map(r => r.vrelx);
+        const vrely = rows.map(r => r.vrely);
+        const allVals = [...vrelx, ...vrely];
+        const vMin = Math.min(...allVals, -1);
+        const vMax = Math.max(...allVals, 1);
+        const vRange = vMax - vMin;
+
+        function plotLine(data, color) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            data.forEach((val, i) => {
+                const x = (rows[i].t - tMin) / tRange * w;
+                const y = h - (val - vMin) / vRange * h;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        plotLine(vrelx, '#00e5ff');
+        plotLine(vrely, '#7c4dff');
+
+        // Axis labels
+        ctx.fillStyle = 'rgba(136, 136, 170, 0.8)';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Time (s)', w - 60, h - 6);
+        ctx.fillText(`v_rel_x: ${vrelx[vrelx.length-1].toFixed(1)} m/s`, 8, 14);
+        ctx.fillText(`v_rel_y: ${vrely[vrely.length-1].toFixed(1)} m/s`, 8, 28);
+    }
+
+    function drawGraph2() {
+        const ctx = graph2Ctx;
+        const w = graph2.width;
+        const h = graph2.height;
+
+        ctx.fillStyle = '#0d0d22';
+        ctx.fillRect(0, 0, w, h);
+
+        // Grid
+        ctx.strokeStyle = 'rgba(100, 100, 200, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = h * i / 4;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(w, y);
+            ctx.stroke();
+        }
+        for (let i = 0; i <= 6; i++) {
+            const x = w * i / 6;
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, h);
+            ctx.stroke();
+        }
+
+        if (dataLogger.rows.length < 2) return;
+
+        const rows = dataLogger.rows;
+        const times = rows.map(r => r.t);
+        const tMin = times[0];
+        const tMax = Math.max(times[times.length - 1], tMin + 1);
+        const tRange = tMax - tMin;
+
+        const mags = rows.map(r => r.vrelmag);
+        const vMax = Math.max(...mags, 1) * 1.15;
+
+        ctx.strokeStyle = '#ffd740';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#ffd740';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        mags.forEach((val, i) => {
+            const x = (rows[i].t - tMin) / tRange * w;
+            const y = h - (val / vMax) * h;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Value label
+        ctx.fillStyle = 'rgba(136, 136, 170, 0.8)';
+        ctx.font = '10px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`|v_rel| = ${mags[mags.length-1].toFixed(1)} m/s`, 8, 14);
+        ctx.fillText('Time (s)', w - 60, h - 6);
+    }
+
+    function updateGraphs() {
+        drawGraph1();
+        drawGraph2();
+        updateDataTable();
+    }
+
+    // ═══════════════════════════════════════
+    // RENDER
+    // ═══════════════════════════════════════
+    function render() {
+        // Update camera offset to follow the observer
+        const observer = state.observerIsCar1 ? state.car1Pos : state.car2Pos;
+        cameraOffset.x = observer.x;
+        cameraOffset.y = observer.y;
+
+        drawBackground();
+        drawCar(state.car1Pos.x, state.car1Pos.y, '#00b8d4', 'Car 1', state.observerIsCar1);
+        drawCar(state.car2Pos.x, state.car2Pos.y, '#ff7043', 'Car 2', !state.observerIsCar1);
+        drawVectors();
+        updateStats();
+        updateGraphs();
+    }
+
+    // ═══════════════════════════════════════
+    // UI CONTROLS
+    // ═══════════════════════════════════════
+    const btnPlay = document.getElementById('btn-play');
+    const btnStep = document.getElementById('btn-step');
+    const btnReset = document.getElementById('btn-reset');
+
+    btnPlay.addEventListener('click', () => {
+        state.running = !state.running;
+        btnPlay.textContent = state.running ? '⏸ Pause' : '▶ Play';
+        btnPlay.classList.toggle('active', state.running);
+    });
+
+    btnStep.addEventListener('click', () => {
+        state.running = false;
+        btnPlay.textContent = '▶ Play';
+        btnPlay.classList.remove('active');
+        state.time += DT;
+        state.car1Pos.y += state.v1 * DT;
+        const v2 = getCar2Velocity();
+        state.car2Pos.x += v2.x * DT;
+        state.car2Pos.y += v2.y * DT;
+        // Wrap
+        if (state.car1Pos.y > WORLD_RANGE.y) state.car1Pos.y = -WORLD_RANGE.y;
+        if (state.car1Pos.y < -WORLD_RANGE.y) state.car1Pos.y = WORLD_RANGE.y;
+        if (state.car2Pos.x > WORLD_RANGE.x) state.car2Pos.x = -WORLD_RANGE.x;
+        if (state.car2Pos.x < -WORLD_RANGE.x) state.car2Pos.x = WORLD_RANGE.x;
+        if (state.car2Pos.y > WORLD_RANGE.y) state.car2Pos.y = -WORLD_RANGE.y;
+        if (state.car2Pos.y < -WORLD_RANGE.y) state.car2Pos.y = WORLD_RANGE.y;
+        const vrel = getRelativeVelocity();
+        const relMag = Math.sqrt(vrel.x * vrel.x + vrel.y * vrel.y);
+        dataLogger.logFinal(state.time, state.v1, state.v2, vrel.x, vrel.y, relMag);
+        render();
+    });
+
+    btnReset.addEventListener('click', () => {
+        state.running = false;
+        btnPlay.textContent = '▶ Play';
+        btnPlay.classList.remove('active');
+        Object.assign(state, JSON.parse(JSON.stringify(initialState)));
+        dataLogger.reset();
+        render();
+    });
+
+    // Sliders
+    const sliderV1 = document.getElementById('slider-v1');
+    const sliderV2 = document.getElementById('slider-v2');
+    const sliderSpeed = document.getElementById('slider-speed');
+    const sliderCustomAngle = document.getElementById('slider-custom-angle');
+    const selectDir = document.getElementById('select-dir');
+    const customAngleGroup = document.getElementById('custom-angle-group');
+
+    sliderV1.addEventListener('input', () => {
+        state.v1 = parseFloat(sliderV1.value);
+        document.getElementById('val-v1').textContent = state.v1.toFixed(1) + ' m/s';
+    });
+
+    sliderV2.addEventListener('input', () => {
+        state.v2 = parseFloat(sliderV2.value);
+        document.getElementById('val-v2').textContent = state.v2.toFixed(1) + ' m/s';
+    });
+
+    sliderSpeed.addEventListener('input', () => {
+        state.speed = parseFloat(sliderSpeed.value);
+        document.getElementById('val-speed').textContent = state.speed.toFixed(2) + 'x';
+    });
+
+    sliderCustomAngle.addEventListener('input', () => {
+        state.customAngle = parseFloat(sliderCustomAngle.value);
+        document.getElementById('val-custom-angle').textContent = state.customAngle + '°';
+    });
+
+    selectDir.addEventListener('change', () => {
+        state.car2Direction = selectDir.value;
+        const dirNames = {
+            west: 'West',
+            east: 'East',
+            north: 'North',
+            south: 'South',
+            custom: 'Custom'
+        };
+        document.getElementById('val-dir').textContent = dirNames[state.car2Direction] || 'Custom';
+        customAngleGroup.style.display = state.car2Direction === 'custom' ? 'block' : 'none';
+
+        // Reset car2 position based on direction
+        resetCar2Position();
+    });
+
+    function resetCar2Position() {
+        const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
+        if (is1D) {
+            // 1D mode: cars start on opposite sides of the horizontal road
+            state.car1Pos = { x: -30, y: 0 };
+            state.car2Pos = { x: 30, y: 0 };
+        } else {
+            // 2D mode: original positions
+            const angle = getCar2AngleRad();
+            state.car2Pos = {
+                x: -25 * Math.cos(angle),
+                y: -25 * Math.sin(angle)
+            };
+            state.car1Pos = { x: 0, y: -30 };
+        }
+    }
+
+    // Observer radio buttons
+    const observerRadios = document.querySelectorAll('input[name="observer"]');
+    observerRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            state.observerIsCar1 = radio.value === 'car1';
+            document.getElementById('radio-observer-1').classList.toggle('selected', state.observerIsCar1);
+            document.getElementById('radio-observer-2').classList.toggle('selected', !state.observerIsCar1);
+            render(); // Immediately re-render with new camera position
+        });
+    });
+
+    // View mode radio buttons
+    const viewModeRadios = document.querySelectorAll('input[name="viewMode"]');
+    viewModeRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            state.viewMode = radio.value;
+            document.getElementById('radio-view-2d').classList.toggle('selected', radio.value === '2d');
+            document.getElementById('radio-view-1d-headon').classList.toggle('selected', radio.value === '1d-headon');
+            document.getElementById('radio-view-1d-same').classList.toggle('selected', radio.value === '1d-same');
+            resetCar2Position(); // Reset car positions for new view mode
+            render(); // Re-render to reflect view change
+        });
+    });
+
+    // ═══════════════════════════════════════
+    // MAIN ANIMATION LOOP
+    // ═══════════════════════════════════════
+    let lastTimestamp = 0;
+
+    function loop(timestamp) {
+        const elapsed = Math.min((timestamp - lastTimestamp) / 1000, 0.05);
+        lastTimestamp = timestamp;
+
+        if (state.running) {
+            const dt = DT * state.speed;
+            updatePhysics(dt);
+            // Log final data point
+            const vrel = getRelativeVelocity();
+            const relMag = Math.sqrt(vrel.x * vrel.x + vrel.y * vrel.y);
+            if (dataLogger.rows.length > 0) {
+                const lastRow = dataLogger.rows[dataLogger.rows.length - 1];
+                if (state.time - lastRow.t > 0.01) {
+                    dataLogger.log(state.time, state.v1, state.v2, vrel.x, vrel.y, relMag);
+                }
+            } else {
+                dataLogger.log(state.time, state.v1, state.v2, vrel.x, vrel.y, relMag);
+            }
+        }
+
+        render();
+        requestAnimationFrame(loop);
+    }
+
+    // ═══════════════════════════════════════
+    // CSV EXPORT
+    // ═══════════════════════════════════════
+    function exportCSV() {
+        const csv = dataLogger.getCSV();
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'relative_velocity_data.csv';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // ═══════════════════════════════════════
+    // ASSESSMENT NAVIGATION
+    // ═══════════════════════════════════════
+    const questions = document.querySelectorAll('.assess-question');
+    const navSlider = document.getElementById('nav-slider');
+    const navCurrent = document.getElementById('nav-current');
+    const navPrevBtn = document.getElementById('nav-prev');
+    const navNextBtn = document.getElementById('nav-next');
+    const dotsContainer = document.getElementById('progress-dots');
+    const answeredCountEl = document.getElementById('answered-count');
+
+    // Build progress dots
+    for (let i = 0; i < questions.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot' + (i === 0 ? ' current' : '');
+        dotsContainer.appendChild(dot);
+    }
+
+    function showQuestion(idx) {
+        questions.forEach((q, i) => {
+            q.classList.toggle('active', i === idx);
+        });
+        navSlider.value = idx;
+        navCurrent.textContent = idx + 1;
+        navPrevBtn.disabled = idx === 0;
+        navNextBtn.disabled = idx === questions.length - 1;
+        const dots = dotsContainer.querySelectorAll('.progress-dot');
+        dots.forEach((d, i) => {
+            d.classList.toggle('current', i === idx);
+        });
+    }
+
+    navSlider.addEventListener('input', () => showQuestion(parseInt(navSlider.value)));
+    navPrevBtn.addEventListener('click', () => showQuestion(Math.max(0, parseInt(navSlider.value) - 1)));
+    navNextBtn.addEventListener('click', () => showQuestion(Math.min(questions.length - 1, parseInt(navSlider.value) + 1)));
+
+    // Track answers
+    const textareas = document.querySelectorAll('.assess-question textarea');
+    const studentAnswers = new Array(10).fill('');
+
+    function updateAnsweredCount() {
+        let count = 0;
+        textareas.forEach((ta, i) => {
+            studentAnswers[i] = ta.value.trim();
+            if (studentAnswers[i].length > 0) count++;
+        });
+        answeredCountEl.textContent = count;
+        const dots = dotsContainer.querySelectorAll('.progress-dot');
+        textareas.forEach((ta, i) => {
+            dots[i].classList.toggle('answered', ta.value.trim().length > 0);
+        });
+    }
+
+    textareas.forEach(ta => {
+        ta.addEventListener('input', updateAnsweredCount);
+    });
+
+    // ═══════════════════════════════════════
+    // DOCX EXPORT
+    // ═══════════════════════════════════════
+    function showToast(message, isError) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.toggle('error', !!isError);
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function exportToDocx() {
+        const studentName = document.getElementById('student-name').value.trim() || 'Student';
+        const simTitle = 'Relative Velocity in 2D';
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        if (typeof docx === 'undefined' || typeof saveAs === 'undefined') {
+            showToast('Export libraries not loaded. Check your internet connection.', true);
+            return;
+        }
+
+        const { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle } = docx;
+
+        const phaseColors = {
+            'Engage': '00B8D4',
+            'Explore': '7C4DFF',
+            'Explain': 'FFD740',
+            'Elaborate': '69F0AE',
+            'Evaluate': 'FF4081'
+        };
+
+        const paragraphs = [];
+
+        paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: 'AP Physics 5E Formative Assessment', bold: true, size: 32, font: 'Calibri' })],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 200 }
+        }));
+
+        paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: simTitle, bold: true, size: 26, font: 'Calibri', color: '7C4DFF' })],
+            alignment: AlignmentType.CENTER,
+            spacing: { after: 300 }
+        }));
+
+        paragraphs.push(new Paragraph({
+            children: [
+                new TextRun({ text: 'Student: ', bold: true, size: 22, font: 'Calibri' }),
+                new TextRun({ text: studentName, size: 22, font: 'Calibri', color: '00B8D4' }),
+            ],
+            spacing: { after: 100 }
+        }));
+        paragraphs.push(new Paragraph({
+            children: [
+                new TextRun({ text: 'Date: ', bold: true, size: 22, font: 'Calibri' }),
+                new TextRun({ text: dateStr + ' at ' + timeStr, size: 22, font: 'Calibri' }),
+            ],
+            spacing: { after: 100 }
+        }));
+        paragraphs.push(new Paragraph({
+            children: [
+                new TextRun({ text: 'Questions Answered: ', bold: true, size: 22, font: 'Calibri' }),
+                new TextRun({ text: answeredCountEl.textContent + ' of 10', size: 22, font: 'Calibri' }),
+            ],
+            spacing: { after: 300 }
+        }));
+
+        paragraphs.push(new Paragraph({
+            border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } },
+            spacing: { after: 300 }
+        }));
+
+        const phaseLabels = ['Engage', 'Engage', 'Explore', 'Explore', 'Explain', 'Explain', 'Elaborate', 'Elaborate', 'Evaluate', 'Evaluate'];
+
+        questions.forEach((qEl, i) => {
+            const phase = phaseLabels[i];
+            const phaseColor = phaseColors[phase] || '333333';
+            const qText = qEl.querySelector('.q-text').textContent.trim();
+            const answer = studentAnswers[i] || '(No answer provided)';
+
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({ text: phase.toUpperCase() + ' ', bold: true, size: 18, font: 'Calibri', color: phaseColor }),
+                    new TextRun({ text: '— Question ' + (i + 1) + ' of 10', size: 18, font: 'Calibri', color: '888888' }),
+                ],
+                spacing: { before: 300, after: 100 }
+            }));
+
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: qText, bold: true, size: 22, font: 'Calibri' })],
+                spacing: { after: 200 }
+            }));
+
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: 'Your Answer: ', bold: true, size: 20, font: 'Calibri', color: '00B8D4' })],
+                spacing: { after: 80 }
+            }));
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: answer, size: 20, font: 'Calibri', italics: answer === '(No answer provided)' })],
+                spacing: { after: 200 }
+            }));
+
+            if (i < questions.length - 1) {
+                paragraphs.push(new Paragraph({
+                    border: { bottom: { style: BorderStyle.DASHED, size: 2, color: 'DDDDDD' } },
+                    spacing: { after: 200 }
+                }));
+            }
+        });
+
+        paragraphs.push(new Paragraph({
+            border: { top: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } },
+            spacing: { before: 400, after: 100 }
+        }));
+        paragraphs.push(new Paragraph({
+            children: [new TextRun({ text: 'Generated by AP Physics Simulator — Classroom Hub', size: 16, font: 'Calibri', color: 'AAAAAA', italics: true })],
+            alignment: AlignmentType.CENTER
+        }));
+
+        const doc = new Document({
+            sections: [{
+                properties: {},
+                children: paragraphs
+            }]
+        });
+
+        Packer.toBlob(doc).then(blob => {
+            const filename = simTitle.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_') + '_' +
+                studentName.replace(/\s+/g, '_') + '_Assessment.docx';
+            saveAs(blob, filename);
+            showToast('Worksheet exported successfully!');
+        }).catch(err => {
+            console.error(err);
+            showToast('Export failed. Please try again.', true);
+        });
+    }
+
+    // ═══════════════════════════════════════
+    // INITIALIZE
+    // ═══════════════════════════════════════
+    resetCar2Position();
+    render();
+    requestAnimationFrame(loop);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Vector Physics Engine & 5E Assessment</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070a13;
+            --card: #0f172a;
+            --card-border: #1e293b;
+            --accent-cyan: #00e5ff;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #f43f5e;
+            --accent-green: #10b981;
+            --accent-amber: #f59e0b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ═══════ TOP TAB BAR ═══════ */
+        .top-tab-bar {
+            display: flex;
+            gap: 4px;
+            padding: 10px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--card-border);
+            background: rgba(7, 10, 19, 0.92);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(16px);
+        }
+        .tab-btn {
+            padding: 10px 22px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
+        .tab-content { display: none; padding: 20px; animation: fadeIn 0.25s; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        #app {
+            max-width: 1380px;
+            margin: 0 auto;
+        }
+
+        /* ═══════ HEADER ═══════ */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 14px;
+        }
+        h1 {
+            font-size: 1.55rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .mode-tabs {
+            display: flex;
+            background: #0b0f19;
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--card-border);
+            gap: 4px;
+        }
+        .mode-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mode-btn:hover { color: var(--text); }
+        .mode-btn.active {
+            background: #1e293b;
+            color: var(--accent-cyan);
+            box-shadow: 0 2px 10px rgba(0,229,255,0.2);
+        }
+
+        /* ═══════ MAIN GRID ═══════ */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 16px;
+        }
+
+        /* ═══════ CANVAS AREA ═══════ */
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            background: #030712;
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        }
+        .canvas-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: #0f172a;
+            border-bottom: 1px solid var(--card-border);
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .toggle-btn {
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .toggle-btn:hover { color: var(--text); background: #334155; }
+        .toggle-btn.active {
+            background: #0284c7;
+            color: #fff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(2,132,199,0.4);
+        }
+
+        .canvas-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        .canvas-banner {
+            padding: 9px 14px;
+            background: #070a13;
+            border-top: 1px solid var(--card-border);
+            font-size: 0.82rem;
+            color: var(--accent-cyan);
+            font-family: 'Fira Code', monospace;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ═══════ SIDEBAR CONTROLS ═══════ */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 14px 16px;
+            border: 1px solid var(--card-border);
+        }
+        .card h3 {
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-group { margin-bottom: 12px; }
+        .slider-group:last-child { margin-bottom: 0; }
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.82rem;
+            margin-bottom: 4px;
+        }
+        .slider-header .val {
+            color: var(--accent-cyan);
+            font-family: 'Fira Code', monospace;
+            font-weight: 600;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            background: #1e293b;
+            border-radius: 4px;
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            border: 2px solid var(--bg);
+            box-shadow: 0 0 8px rgba(0,229,255,0.5);
+        }
+
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+        .btn {
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            color: var(--text);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            text-align: center;
+        }
+        .btn:hover { background: #334155; }
+        .btn.primary { background: #0284c7; color: #fff; border-color: #0284c7; }
+        .btn.primary:hover { background: #0369a1; box-shadow: 0 0 12px rgba(3,105,161,0.4); }
+        .btn.danger { border-color: #991b1b; color: #fca5a5; }
+        .btn.danger:hover { background: #991b1b; color: #fff; }
+
+        .vector-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .vector-item {
+            background: #070a13;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .vector-item.selected {
+            border-color: var(--accent-cyan);
+            background: rgba(0,229,255,0.08);
+        }
+        .color-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+        /* ═══════ ASSESSMENT TAB ═══════ */
+        .assessment-section {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .assessment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .assessment-header h2 { font-size: 1.4rem; font-weight: 700; }
+        .student-name-group { display: flex; align-items: center; gap: 10px; }
+        .student-name-group label { font-size: 0.85rem; color: var(--text-muted); }
+        .student-name-group input[type="text"] {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: #0f172a;
+            color: var(--text);
+            font-size: 0.9rem;
+            width: 220px;
+            outline: none;
+        }
+
+        .assessment-nav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 12px 16px;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+        }
+        .assessment-nav .nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: #1e293b;
+            color: var(--text);
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .assessment-nav .nav-slider { flex: 1; }
+        .assessment-nav .nav-counter { font-size: 0.85rem; font-family: 'Fira Code', monospace; color: var(--text-muted); min-width: 60px; text-align: center; }
+        .progress-dots { display: flex; gap: 6px; }
+        .progress-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--card-border); background: transparent; cursor: pointer; }
+        .progress-dot.answered { background: var(--accent-green); border-color: var(--accent-green); }
+        .progress-dot.current { border-color: var(--accent-cyan); box-shadow: 0 0 6px rgba(0,229,255,0.5); }
+
+        .assess-question {
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .assess-question.active { display: block; }
+        .assess-question .q-phase { margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .assess-question .q-number { font-size: 0.8rem; color: var(--text-muted); }
+        .assess-question .q-text { font-size: 0.95rem; font-weight: 500; line-height: 1.6; margin-bottom: 16px; }
+        .assess-question textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            background: #070a13;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: inherit;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+        }
+
+        .phase-badge {
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .phase-engage { background: rgba(0,229,255,0.15); color: var(--accent-cyan); }
+        .phase-explore { background: rgba(139,92,246,0.15); color: var(--accent-purple); }
+        .phase-explain { background: rgba(245,158,11,0.15); color: var(--accent-amber); }
+        .phase-elaborate { background: rgba(16,185,129,0.15); color: var(--accent-green); }
+        .phase-evaluate { background: rgba(244,63,94,0.15); color: var(--accent-pink); }
+
+        .export-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .btn-docx-export {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border: 1px solid #3b82f6;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.35);
+        }
+        .btn-docx-export:hover {
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(37,99,235,0.5);
+        }
+
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ═══════ TOP TAB BAR ═══════ -->
+    <div class="top-tab-bar">
+        <button class="tab-btn active" data-tab="sim">⚙ Sim</button>
+        <button class="tab-btn" data-tab="assessment">✏ Assessment</button>
+    </div>
+
+    <div id="app">
+        <!-- TAB: SIM -->
+        <div id="tab-sim" class="tab-content active">
+            <header>
+                <h1>⚡ Vector Physics Engine</h1>
+                <div class="mode-tabs">
+                    <button class="mode-btn active" id="tabAddition">➕ Addition</button>
+                    <button class="mode-btn" id="tabSubtraction">➖ Subtraction</button>
+                    <button class="mode-btn" id="tabVelocity">🚤 Velocity Motion</button>
+                    <button class="mode-btn" id="tabForce">💥 Force Acceleration</button>
+                </div>
+            </header>
+
+            <div class="main-grid">
+                <!-- CANVAS AREA -->
+                <div class="canvas-container">
+                    <div class="canvas-toolbar">
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button class="toggle-btn active" id="toggleGrid">🌐 Show Grid</button>
+                            <button class="toggle-btn active" id="toggleComponents">📐 Show Components</button>
+                            <button class="toggle-btn active" id="toggleLabels">🏷 Show Labels</button>
+                            <button class="toggle-btn active" id="toggleResultant">🟢 Show Resultant</button>
+                            <button class="toggle-btn active" id="toggleChaining">🔗 Auto-Attach Head-to-Tail</button>
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn primary" id="btnPlay">▶ Play Motion</button>
+                            <button class="btn danger" id="btnReset">↺ Reset All</button>
+                        </div>
+                    </div>
+
+                    <div class="canvas-wrap">
+                        <canvas id="simCanvas" width="900" height="600"></canvas>
+                    </div>
+
+                    <div class="canvas-banner">
+                        <span id="bannerStatus">✨ CLICK ANYWHERE on grid to set HEAD of Vector 1 starting at origin (0,0)!</span>
+                        <span id="bannerMetrics">R_net = 0.00</span>
+                    </div>
+                </div>
+
+                <!-- SIDEBAR CONTROLS -->
+                <div class="sidebar">
+                    <!-- ACTIVE VECTOR CARD -->
+                    <div class="card">
+                        <h3>
+                            <span style="display:flex; align-items:center; gap:6px;">
+                                <span class="color-dot" id="activeDot" style="background:#00e5ff;"></span>
+                                <span id="activeTitle">Active Vector</span>
+                            </span>
+                            <button class="btn danger" id="btnDeleteActive" style="font-size:0.7rem; padding:3px 8px; flex:none;">🗑 Delete</button>
+                        </h3>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span>Magnitude (|V|)</span>
+                                <span class="val" id="valActiveMag">5.0</span>
+                            </div>
+                            <input type="range" id="sliderActiveMag" min="0.5" max="14" step="0.5" value="5">
+                        </div>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span>Angle (θ)</span>
+                                <span class="val" id="valActiveAngle">30°</span>
+                            </div>
+                            <input type="range" id="sliderActiveAngle" min="0" max="360" step="1" value="30">
+                        </div>
+                    </div>
+
+                    <!-- VECTOR CHAIN LIST -->
+                    <div class="card">
+                        <h3>
+                            <span>📌 Vector Chain List</span>
+                            <button class="btn primary" id="btnAddVector" style="font-size:0.7rem; padding:3px 8px; flex:none;">+ Add Vector</button>
+                        </h3>
+                        <div class="vector-list" id="vectorList"></div>
+                    </div>
+
+                    <!-- PHYSICS SUMMARY CARD -->
+                    <div class="card">
+                        <h3>📊 Physics Summary</h3>
+                        <div style="font-family:'Fira Code', monospace; font-size:0.8rem; line-height:1.6; color:#cbd5e1;" id="summaryContent">
+                            No vectors on canvas.<br>
+                            Click grid to add Vector 1!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: ASSESSMENT -->
+        <div id="tab-assessment" class="tab-content">
+            <div class="assessment-section">
+
+                <div class="assessment-header">
+                    <h2>5E Formative Assessment — Vector Physics</h2>
+                    <div class="student-name-group">
+                        <label for="student-name">Student Name:</label>
+                        <input type="text" id="student-name" placeholder="Enter your name...">
+                    </div>
+                </div>
+
+                <div class="assessment-nav">
+                    <button class="nav-btn" id="nav-prev">←</button>
+                    <div class="nav-slider">
+                        <input type="range" id="nav-slider" min="0" max="9" step="1" value="0">
+                    </div>
+                    <div class="nav-counter"><span id="nav-current">1</span> / 10</div>
+                    <button class="nav-btn" id="nav-next">→</button>
+                    <div class="progress-dots" id="progress-dots"></div>
+                </div>
+
+                <!-- 10 Questions -->
+                <div class="assess-question active" data-q="0">
+                    <div class="q-phase"><span class="phase-badge phase-engage">Engage</span><span class="q-number">Question 1 of 10</span></div>
+                    <div class="q-text">Click on the grid to create vectors A and B. Describe what you observe about the resultant vector R compared to vectors A and B. Why is |R| less than the scalar sum |A|+|B|?</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="assess-question" data-q="1">
+                    <div class="q-phase"><span class="phase-badge phase-engage">Engage</span><span class="q-number">Question 2 of 10</span></div>
+                    <div class="q-text">Toggle "Show Components" on. Describe the x- and y-components of a vector. Write the Pythagorean equation connecting Vx, Vy, and magnitude |V|.</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="assess-question" data-q="2">
+                    <div class="q-phase"><span class="phase-badge phase-explore">Explore</span><span class="q-number">Question 3 of 10</span></div>
+                    <div class="q-text">Create two perpendicular vectors (|V₁| = 6, |V₂| = 8 at 90°). Explore different angles to find when the resultant magnitude is maximized or minimized.</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="assess-question" data-q="3">
+                    <div class="q-phase"><span class="phase-badge phase-explore">Explore</span><span class="q-number">Question 4 of 10</span></div>
+                    <div class="q-text">Create two equal magnitude vectors (|V₁| = |V₂| = 4) at angles 0° and 60°. Predict the resultant angle θ_R before looking. Explain your reasoning.</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="assess-question" data-q="4">
+                    <div class="q-phase"><span class="phase-badge phase-explain">Explain</span><span class="q-number">Question 5 of 10</span></div>
+                    <div class="q-text">Switch mode to <strong>Vector Subtraction</strong>. Explain how vector difference D = V1 - V2 is represented geometrically compared to vector addition V1 + V2.</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="assess-question" data-q="5">
+                    <div class="q-phase"><span class="phase-badge phase-explain">Explain</span><span class="q-number">Question 6 of 10</span></div>
+                    <div class="q-text">For V₁ = 6 units at 0° and V₂ = 8 units at 60°, compute V₁ + V₂ algebraically using components step by step.</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="assess-question" data-q="6">
+                    <div class="q-phase"><span class="phase-badge phase-elaborate">Elaborate</span><span class="q-number">Question 7 of 10</span></div>
+                    <div class="q-text">Switch Mode to <strong>Velocity Motion</strong>. Press ▶ Play. How does net velocity vector v_net dictate the path and speed of the vehicle across space?</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="assess-question" data-q="7">
+                    <div class="q-phase"><span class="phase-badge phase-elaborate">Elaborate</span><span class="q-number">Question 8 of 10</span></div>
+                    <div class="q-text">Switch Mode to <strong>Force Acceleration</strong>. Create F₁ = 5 N and F₂ = 3 N. How does net force F_net dictate mass block acceleration (a = F_net / m)?</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="assess-question" data-q="8">
+                    <div class="q-phase"><span class="phase-badge phase-evaluate">Evaluate</span><span class="q-number">Question 9 of 10</span></div>
+                    <div class="q-text">How would you apply a 3rd counter-force F₃ to achieve static equilibrium (F_net = 0)? Explain magnitude and direction required.</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="assess-question" data-q="9">
+                    <div class="q-phase"><span class="phase-badge phase-evaluate">Evaluate</span><span class="q-number">Question 10 of 10</span></div>
+                    <div class="q-text">Click on the grid to create 3 or more chained vectors. Calculate resultant R_net = ΣV analytically and verify with the simulation.</div>
+                    <textarea placeholder="Type your response here..."></textarea>
+                </div>
+
+                <div class="export-bar">
+                    <div style="font-size:0.85rem; color:var(--text-muted)">Questions answered: <strong id="answered-count" style="color:var(--accent-cyan)">0</strong> / 10</div>
+                    <button class="btn-docx-export" id="btnExportAnswers">📘 Download Formatted DOCX Report (.docx)</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        'use strict';
+
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Mode buttons
+        const tabAddition = document.getElementById('tabAddition');
+        const tabSubtraction = document.getElementById('tabSubtraction');
+        const tabVelocity = document.getElementById('tabVelocity');
+        const tabForce = document.getElementById('tabForce');
+
+        // Toggles
+        const toggleGrid = document.getElementById('toggleGrid');
+        const toggleComponents = document.getElementById('toggleComponents');
+        const toggleLabels = document.getElementById('toggleLabels');
+        const toggleResultant = document.getElementById('toggleResultant');
+        const toggleChaining = document.getElementById('toggleChaining');
+
+        // Buttons & Sliders
+        const btnPlay = document.getElementById('btnPlay');
+        const btnReset = document.getElementById('btnReset');
+        const btnAddVector = document.getElementById('btnAddVector');
+        const btnDeleteActive = document.getElementById('btnDeleteActive');
+        const sliderActiveMag = document.getElementById('sliderActiveMag');
+        const sliderActiveAngle = document.getElementById('sliderActiveAngle');
+        const valActiveMag = document.getElementById('valActiveMag');
+        const valActiveAngle = document.getElementById('valActiveAngle');
+        const activeDot = document.getElementById('activeDot');
+        const activeTitle = document.getElementById('activeTitle');
+        const vectorListEl = document.getElementById('vectorList');
+
+        const bannerStatus = document.getElementById('bannerStatus');
+        const bannerMetrics = document.getElementById('bannerMetrics');
+        const summaryContent = document.getElementById('summaryContent');
+
+        // Modes: 'addition' | 'subtraction' | 'velocity' | 'force'
+        let currentMode = 'addition';
+
+        // Toggles State
+        let showGrid = true;
+        let showComponents = true;
+        let showLabels = true;
+        let showResultant = true;
+        let autoChain = true;
+
+        const palette = ['#00e5ff', '#8b5cf6', '#f43f5e', '#f59e0b', '#10b981', '#ec4899'];
+
+        // INITIAL STATE: NO VECTORS TO BEGIN WITH!
+        let vectors = [];
+        let selectedId = null;
+
+        let dragMode = null;
+        let dragTarget = null;
+        let dragOffset = { x: 0, y: 0 };
+        let createStartPt = null;
+
+        let isPlaying = false;
+        let lastTimestamp = 0;
+
+        let physObj = { x: 0, y: 0, vx: 0, vy: 0, ax: 0, ay: 0, path: [] };
+
+        const scalePx = 35;
+        function toPx(uX, uY) {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            return { x: cx + uX * scalePx, y: cy - uY * scalePx };
+        }
+        function toUnit(px, py) {
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            return { x: (px - cx) / scalePx, y: (cy - py) / scalePx };
+        }
+
+        function getTip(v) {
+            const r = v.angle * Math.PI / 180;
+            return { x: v.originX + v.mag * Math.cos(r), y: v.originY + v.mag * Math.sin(r) };
+        }
+
+        function updatePhysics() {
+            // First vector ALWAYS has origin at (0,0)!
+            if (vectors.length > 0) {
+                vectors[0].originX = 0;
+                vectors[0].originY = 0;
+            }
+
+            // Auto Head-to-Tail attachment for subsequent vectors
+            if (autoChain && vectors.length > 1) {
+                for (let i = 1; i < vectors.length; i++) {
+                    const prevTip = getTip(vectors[i - 1]);
+                    vectors[i].originX = prevTip.x;
+                    vectors[i].originY = prevTip.y;
+                }
+            }
+
+            const active = vectors.find(v => v.id === selectedId) || (vectors.length > 0 ? vectors[0] : null);
+            if (active) {
+                selectedId = active.id;
+                activeDot.style.background = active.color;
+                activeTitle.textContent = active.name;
+
+                if (dragMode !== 'head') {
+                    sliderActiveMag.value = active.mag;
+                    sliderActiveAngle.value = active.angle;
+                }
+                valActiveMag.textContent = active.mag.toFixed(1);
+                valActiveAngle.textContent = active.angle.toFixed(0) + '°';
+                btnDeleteActive.disabled = false;
+                sliderActiveMag.disabled = false;
+                sliderActiveAngle.disabled = false;
+            } else {
+                selectedId = null;
+                activeDot.style.background = '#888';
+                activeTitle.textContent = 'No Vector Selected';
+                valActiveMag.textContent = '0.0';
+                valActiveAngle.textContent = '0°';
+                btnDeleteActive.disabled = true;
+                sliderActiveMag.disabled = true;
+                sliderActiveAngle.disabled = true;
+            }
+
+            let netVx = 0, netVy = 0;
+            vectors.forEach(v => {
+                if (v.visible) {
+                    const r = v.angle * Math.PI / 180;
+                    netVx += v.mag * Math.cos(r);
+                    netVy += v.mag * Math.sin(r);
+                }
+            });
+
+            const magR = Math.hypot(netVx, netVy);
+            let angleR = Math.atan2(netVy, netVx) * 180 / Math.PI;
+            if (angleR < 0) angleR += 360;
+
+            bannerMetrics.textContent = `|R_net| = ${magR.toFixed(2)} (${angleR.toFixed(0)}°)`;
+
+            if (vectors.length === 0) {
+                bannerStatus.textContent = '✨ CLICK ANYWHERE on grid to draw Vector 1 starting at origin (0,0)!';
+                summaryContent.innerHTML = `
+                    No vectors on canvas.<br>
+                    Click grid to create <strong>Vector 1</strong> starting at origin (0,0)!
+                `;
+            } else if (currentMode === 'addition') {
+                bannerStatus.textContent = '➕ Vector Addition Mode: Resultant R_net = ΣV (Head-to-Tail Chain)';
+                summaryContent.innerHTML = `
+                    Mode: <strong>Vector Addition</strong><br>
+                    Vectors Count: ${vectors.length}<br>
+                    R_net Vx: ${netVx.toFixed(2)}, Vy: ${netVy.toFixed(2)}<br>
+                    <strong>|R_net| = ${magR.toFixed(2)} @ ${angleR.toFixed(1)}°</strong>
+                `;
+            } else if (currentMode === 'subtraction') {
+                const v1 = vectors[0];
+                const v2 = vectors[1] || vectors[0];
+                const r1 = v1.angle * Math.PI / 180;
+                const r2 = v2.angle * Math.PI / 180;
+                const dx = v1.mag * Math.cos(r1) - (vectors.length > 1 ? v2.mag * Math.cos(r2) : 0);
+                const dy = v1.mag * Math.sin(r1) - (vectors.length > 1 ? v2.mag * Math.sin(r2) : 0);
+                const magD = Math.hypot(dx, dy);
+
+                bannerStatus.textContent = vectors.length > 1 ? `➖ Vector Subtraction Mode: Difference D = ${v1.name} - ${v2.name}` : '➖ Vector Subtraction: Click grid to add Vector 2!';
+                summaryContent.innerHTML = `
+                    Mode: <strong>Vector Subtraction</strong><br>
+                    D = ${v1.name} − ${vectors.length > 1 ? v2.name : '0'}<br>
+                    Dx: ${dx.toFixed(2)}, Dy: ${dy.toFixed(2)}<br>
+                    <strong>|D| = ${magD.toFixed(2)}</strong>
+                `;
+            } else if (currentMode === 'velocity') {
+                bannerStatus.textContent = isPlaying
+                    ? `🚤 Velocity Motion: Vehicle moving at v_net = ${magR.toFixed(2)} m/s`
+                    : `🚤 Velocity Mode: Press ▶ Play to drive object at v_net = ${magR.toFixed(2)} m/s`;
+                summaryContent.innerHTML = `
+                    Mode: <strong>Velocity Motion (m/s)</strong><br>
+                    Object Net Velocity: ${magR.toFixed(2)} m/s<br>
+                    vx: ${netVx.toFixed(2)} m/s, vy: ${netVy.toFixed(2)} m/s<br>
+                    Position: (${physObj.x.toFixed(1)}, ${physObj.y.toFixed(1)})
+                `;
+            } else if (currentMode === 'force') {
+                const mass = 1.0;
+                const accel = magR / mass;
+                bannerStatus.textContent = isPlaying
+                    ? `💥 Force Acceleration: 1.0 kg mass accelerating at a = ${accel.toFixed(2)} m/s²`
+                    : `💥 Force Mode: Press ▶ Play to accelerate 1 kg block under F_net = ${magR.toFixed(2)} N`;
+                summaryContent.innerHTML = `
+                    Mode: <strong>Force Acceleration (N)</strong><br>
+                    Mass: 1.0 kg | F_net: ${magR.toFixed(2)} N<br>
+                    <strong>Accel a = F/m: ${accel.toFixed(2)} m/s²</strong><br>
+                    Velocity: ${Math.hypot(physObj.vx, physObj.vy).toFixed(2)} m/s
+                `;
+            }
+
+            renderVectorList();
+        }
+
+        // ============================================================
+        // ENHANCED GRAPHICS ENGINE: Gradients, Glows, 3D Objects & Grid
+        // ============================================================
+        function render() {
+            const w = canvas.width;
+            const h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const cx = w / 2;
+            const cy = h / 2;
+
+            // 1. Sleek Background Mesh Grid
+            if (showGrid) {
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+                ctx.lineWidth = 1;
+                for (let x = cx % scalePx; x < w; x += scalePx) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+                }
+                for (let y = cy % scalePx; y < h; y += scalePx) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                }
+
+                // Major coordinate axes with cyan/violet ambient glow
+                ctx.save();
+                ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+                ctx.lineWidth = 1.8;
+                ctx.shadowColor = '#38bdf8';
+                ctx.shadowBlur = 8;
+                ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+                ctx.restore();
+            }
+
+            // Origin Glowing Halo
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#38bdf8';
+            ctx.shadowColor = '#38bdf8';
+            ctx.shadowBlur = 12;
+            ctx.fill();
+            ctx.restore();
+
+            // Label Badge Drawer
+            function drawBadge(px, py, text, color) {
+                if (!showLabels) return;
+                ctx.font = '600 11px Inter, sans-serif';
+                const m = ctx.measureText(text);
+                const tw = m.width;
+                const th = 12;
+                const pad = 6;
+
+                const bgW = tw + pad * 2;
+                const bgH = th + pad * 2;
+                const bgX = px - bgW / 2;
+                const bgY = py - bgH / 2;
+
+                ctx.save();
+                ctx.fillStyle = 'rgba(7, 10, 19, 0.92)';
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.roundRect(bgX, bgY, bgW, bgH, 6);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#ffffff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, px, py + 1);
+                ctx.restore();
+            }
+
+            // Enhanced Vector Arrow Drawer with Gradients & Radial Glowing Tips
+            function drawVector(origUnitX, origUnitY, vx, vy, color, label, isSelected = false, dash = []) {
+                const s = toPx(origUnitX, origUnitY);
+                const e = toPx(origUnitX + vx, origUnitY + vy);
+                const dx = e.x - s.x;
+                const dy = e.y - s.y;
+                const len = Math.hypot(dx, dy);
+
+                if (len < 2) return;
+
+                ctx.save();
+
+                const grad = ctx.createLinearGradient(s.x, s.y, e.x, e.y);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(1, color);
+
+                ctx.strokeStyle = grad;
+                ctx.fillStyle = color;
+                ctx.lineWidth = isSelected ? 4.5 : 2.8;
+
+                if (dash.length > 0) ctx.setLineDash(dash);
+
+                if (isSelected) {
+                    ctx.shadowColor = color;
+                    ctx.shadowBlur = 14;
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(e.x, e.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                const angle = Math.atan2(dy, dx);
+                const headLen = 12;
+                ctx.beginPath();
+                ctx.moveTo(e.x, e.y);
+                ctx.lineTo(e.x - headLen * Math.cos(angle - 0.4), e.y - headLen * Math.sin(angle - 0.4));
+                ctx.lineTo(e.x - headLen * Math.cos(angle + 0.4), e.y - headLen * Math.sin(angle + 0.4));
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(e.x, e.y, 7.5, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.8;
+                ctx.stroke();
+
+                ctx.restore();
+
+                if (label) {
+                    const midX = (s.x + e.x) / 2;
+                    const midY = (s.y + e.y) / 2;
+                    const nx = -dy / len;
+                    const ny = dx / len;
+                    const offset = 26;
+
+                    const magVal = Math.hypot(vx, vy).toFixed(1);
+                    drawBadge(midX + nx * offset, midY + ny * offset, `${label} (${magVal})`, color);
+                }
+            }
+
+            let sumVx = 0, sumVy = 0;
+            vectors.forEach(v => {
+                if (!v.visible) return;
+                const r = v.angle * Math.PI / 180;
+                const vx = v.mag * Math.cos(r);
+                const vy = v.mag * Math.sin(r);
+
+                drawVector(v.originX, v.originY, vx, vy, v.color, v.name, v.id === selectedId);
+
+                if (showComponents && v.id === selectedId) {
+                    drawVector(v.originX, v.originY, vx, 0, '#00e5ff', `${v.name}_x (${vx >= 0 ? '+' : ''}${vx.toFixed(1)})`, false, [3, 3]);
+                    drawVector(v.originX + vx, v.originY, 0, vy, '#8b5cf6', `${v.name}_y (${vy >= 0 ? '+' : ''}${vy.toFixed(1)})`, false, [3, 3]);
+                }
+
+                sumVx += vx;
+                sumVy += vy;
+            });
+
+            if (showResultant && currentMode !== 'subtraction' && vectors.length > 0 && (sumVx !== 0 || sumVy !== 0)) {
+                drawVector(0, 0, sumVx, sumVy, '#10b981', 'R_net', true);
+            }
+
+            if (currentMode === 'subtraction' && vectors.length >= 2) {
+                const v1 = vectors[0];
+                const v2 = vectors[1];
+                const r1 = v1.angle * Math.PI / 180;
+                const r2 = v2.angle * Math.PI / 180;
+                const v1x = v1.mag * Math.cos(r1);
+                const v1y = v1.mag * Math.sin(r1);
+                const v2x = v2.mag * Math.cos(r2);
+                const v2y = v2.mag * Math.sin(r2);
+
+                const tip2 = getTip(v2);
+                drawVector(tip2.x, tip2.y, v1x - v2x, v1y - v2y, '#f43f5e', 'D = V1-V2', true, [4, 4]);
+            }
+
+            if (isPlaying || physObj.path.length > 1) {
+                ctx.save();
+                if (physObj.path.length > 1) {
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+                    ctx.lineWidth = 2.5;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    physObj.path.forEach((pt, i) => {
+                        const p = toPx(pt.x, pt.y);
+                        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+                    });
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+
+                const cur = toPx(physObj.x, physObj.y);
+                ctx.translate(cur.x, cur.y);
+
+                if (currentMode === 'velocity') {
+                    const heading = Math.atan2(-physObj.vy, physObj.vx);
+                    ctx.rotate(heading);
+
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(0, 229, 255, 0.15)';
+                    ctx.beginPath();
+                    ctx.moveTo(16, 0);
+                    ctx.lineTo(45, -16);
+                    ctx.lineTo(45, 16);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+
+                    if (isPlaying) {
+                        ctx.fillStyle = '#ff4081';
+                        ctx.shadowColor = '#ff4081';
+                        ctx.shadowBlur = 14;
+                        ctx.beginPath();
+                        ctx.moveTo(-10, 0);
+                        ctx.lineTo(-22, -6);
+                        ctx.lineTo(-18, 0);
+                        ctx.lineTo(-22, 6);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+
+                    ctx.fillStyle = '#00e5ff';
+                    ctx.shadowColor = '#00e5ff';
+                    ctx.shadowBlur = 14;
+                    ctx.beginPath();
+                    ctx.moveTo(16, 0);
+                    ctx.lineTo(-10, -10);
+                    ctx.lineTo(-6, 0);
+                    ctx.lineTo(-10, 10);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                } else if (currentMode === 'force') {
+                    ctx.save();
+                    ctx.shadowColor = '#f59e0b';
+                    ctx.shadowBlur = 16;
+
+                    const bGrad = ctx.createLinearGradient(-14, -14, 14, 14);
+                    bGrad.addColorStop(0, '#fde68a');
+                    bGrad.addColorStop(0.5, '#f59e0b');
+                    bGrad.addColorStop(1, '#b45309');
+
+                    ctx.fillStyle = bGrad;
+                    ctx.fillRect(-14, -14, 28, 28);
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeRect(-14, -14, 28, 28);
+
+                    ctx.fillStyle = '#000000';
+                    ctx.font = 'bold 11px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('1kg', 0, 0);
+                    ctx.restore();
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 8, 0, Math.PI * 2);
+                    ctx.fillStyle = '#10b981';
+                    ctx.shadowColor = '#10b981';
+                    ctx.shadowBlur = 14;
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        // ============================================================
+        // Interactivity Engine: FIRST VECTOR ALWAYS TAILS AT ORIGIN (0,0)
+        // ============================================================
+        function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
+            const A = px - x1; const B = py - y1;
+            const C = x2 - x1; const D = y2 - y1;
+            const dot = A * C + B * D;
+            const lenSq = C * C + D * D;
+            let param = -1;
+            if (lenSq !== 0) param = dot / lenSq;
+            let xx, yy;
+            if (param < 0) { xx = x1; yy = y1; }
+            else if (param > 1) { xx = x2; yy = y2; }
+            else { xx = x1 + param * C; yy = y1 + param * D; }
+            return Math.hypot(px - xx, py - yy);
+        }
+
+        function getCoords(e) {
+            const r = canvas.getBoundingClientRect();
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (cx - r.left) * (canvas.width / r.width),
+                y: (cy - r.top) * (canvas.height / r.height)
+            };
+        }
+
+        canvas.addEventListener('mousedown', pointerDown);
+        canvas.addEventListener('mousemove', pointerMove);
+        window.addEventListener('mouseup', pointerUp);
+
+        canvas.addEventListener('touchstart', pointerDown, { passive: false });
+        canvas.addEventListener('touchmove', pointerMove, { passive: false });
+        window.addEventListener('touchend', pointerUp);
+
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return;
+            if ((e.key === 'Delete' || e.key === 'Backspace') && vectors.length > 0) {
+                deleteVector(selectedId);
+            }
+        });
+
+        function pointerDown(e) {
+            const pt = getCoords(e);
+            const clickUnit = toUnit(pt.x, pt.y);
+
+            // Check hit test on existing vectors
+            for (let i = vectors.length - 1; i >= 0; i--) {
+                const v = vectors[i];
+                if (!v.visible) continue;
+
+                const r = v.angle * Math.PI / 180;
+                const vx = v.mag * Math.cos(r);
+                const vy = v.mag * Math.sin(r);
+
+                const s = toPx(v.originX, v.originY);
+                const head = toPx(v.originX + vx, v.originY + vy);
+
+                if (Math.hypot(pt.x - head.x, pt.y - head.y) < 18) {
+                    dragMode = 'head';
+                    dragTarget = v;
+                    selectedId = v.id;
+                    createStartPt = { x: v.originX, y: v.originY };
+                    updatePhysics();
+                    render();
+                    e.preventDefault();
+                    return;
+                }
+
+                const dist = pointToSegmentDistance(pt.x, pt.y, s.x, s.y, head.x, head.y);
+                if (dist < 16 || Math.hypot(pt.x - s.x, pt.y - s.y) < 18) {
+                    // Note: If translation is attempted on vector 1, origin remains 0,0 if autoChain is active
+                    dragMode = 'translate';
+                    dragTarget = v;
+                    selectedId = v.id;
+                    dragOffset = { x: clickUnit.x - v.originX, y: clickUnit.y - v.originY };
+                    updatePhysics();
+                    render();
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            // CREATING A NEW VECTOR:
+            // IF NO VECTORS EXIST, THE FIRST VECTOR TAIL ALWAYS STARTS AT ORIGIN (0,0)!
+            let tailX = 0, tailY = 0;
+            if (vectors.length > 0) {
+                const lastTip = getTip(vectors[vectors.length - 1]);
+                tailX = lastTip.x;
+                tailY = lastTip.y;
+            } else {
+                tailX = 0;
+                tailY = 0;
+            }
+
+            const dx = clickUnit.x - tailX;
+            const dy = clickUnit.y - tailY;
+            const mag = Math.min(14.0, Math.max(0.5, Math.hypot(dx, dy)));
+            let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            if (angle < 0) angle += 360;
+
+            const newId = 'V_' + Date.now();
+            const color = palette[vectors.length % palette.length];
+            const newVec = {
+                id: newId,
+                name: `Vector ${vectors.length + 1}`,
+                mag: mag,
+                angle: Math.round(angle),
+                color: color,
+                originX: tailX,
+                originY: tailY,
+                visible: true
+            };
+
+            vectors.push(newVec);
+            selectedId = newId;
+            dragMode = 'head';
+            dragTarget = newVec;
+            createStartPt = { x: tailX, y: tailY };
+
+            updatePhysics();
+            render();
+            e.preventDefault();
+        }
+
+        function pointerMove(e) {
+            if (!dragMode || !dragTarget) return;
+            const pt = getCoords(e);
+            const uPt = toUnit(pt.x, pt.y);
+            const v = dragTarget;
+
+            if (dragMode === 'head') {
+                const origX = createStartPt ? createStartPt.x : v.originX;
+                const origY = createStartPt ? createStartPt.y : v.originY;
+                const dx = uPt.x - origX;
+                const dy = uPt.y - origY;
+
+                v.mag = Math.min(14.0, Math.max(0.5, Math.hypot(dx, dy)));
+                let a = Math.atan2(dy, dx) * 180 / Math.PI;
+                if (a < 0) a += 360;
+                v.angle = Math.round(a);
+            } else if (dragMode === 'translate') {
+                // First vector tail stays pinned at origin (0,0) if autoChain is true
+                if (vectors[0].id === v.id && autoChain) {
+                    v.originX = 0;
+                    v.originY = 0;
+                } else {
+                    v.originX = Math.round((uPt.x - dragOffset.x) * 2) / 2;
+                    v.originY = Math.round((uPt.y - dragOffset.y) * 2) / 2;
+                }
+            }
+
+            updatePhysics();
+            render();
+            e.preventDefault();
+        }
+
+        function pointerUp() {
+            dragMode = null;
+            dragTarget = null;
+            createStartPt = null;
+            renderVectorList();
+        }
+
+        // ============================================================
+        // Sidebar Controls & Toggles
+        // ============================================================
+        function renderVectorList() {
+            vectorListEl.innerHTML = '';
+            if (vectors.length === 0) {
+                vectorListEl.innerHTML = `<div style="color:var(--text-muted); font-size:0.8rem; padding:8px 4px; text-align:center;">No vectors yet. Click canvas to add Vector 1!</div>`;
+                return;
+            }
+
+            vectors.forEach(v => {
+                const item = document.createElement('div');
+                item.className = `vector-item ${v.id === selectedId ? 'selected' : ''}`;
+                item.innerHTML = `
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <span class="color-dot" style="background:${v.color};"></span>
+                        <strong>${v.name}</strong>
+                    </span>
+                    <span style="font-family:monospace; color:var(--text-muted);">
+                        |V|=${v.mag.toFixed(1)}, ${v.angle.toFixed(0)}°
+                    </span>
+                `;
+                item.addEventListener('click', () => {
+                    selectedId = v.id;
+                    updatePhysics();
+                    render();
+                });
+                vectorListEl.appendChild(item);
+            });
+        }
+
+        function deleteVector(id) {
+            vectors = vectors.filter(v => v.id !== id);
+            if (selectedId === id) selectedId = vectors.length > 0 ? vectors[0].id : null;
+            updatePhysics();
+            render();
+        }
+
+        btnAddVector.addEventListener('click', () => {
+            let startX = 0, startY = 0;
+            if (vectors.length > 0) {
+                const lastTip = getTip(vectors[vectors.length - 1]);
+                startX = lastTip.x;
+                startY = lastTip.y;
+            } else {
+                startX = 0;
+                startY = 0;
+            }
+
+            const newId = 'V_' + Date.now();
+            vectors.push({
+                id: newId,
+                name: `Vector ${vectors.length + 1}`,
+                mag: 4.0,
+                angle: 30,
+                color: palette[vectors.length % palette.length],
+                originX: startX,
+                originY: startY,
+                visible: true
+            });
+            selectedId = newId;
+            updatePhysics();
+            render();
+        });
+
+        btnDeleteActive.addEventListener('click', () => {
+            if (selectedId) deleteVector(selectedId);
+        });
+
+        sliderActiveMag.addEventListener('input', () => {
+            const v = vectors.find(x => x.id === selectedId);
+            if (v) { v.mag = parseFloat(sliderActiveMag.value); updatePhysics(); render(); }
+        });
+
+        sliderActiveAngle.addEventListener('input', () => {
+            const v = vectors.find(x => x.id === selectedId);
+            if (v) { v.angle = parseFloat(sliderActiveAngle.value); updatePhysics(); render(); }
+        });
+
+        tabAddition.addEventListener('click', () => setMode('addition'));
+        tabSubtraction.addEventListener('click', () => setMode('subtraction'));
+        tabVelocity.addEventListener('click', () => setMode('velocity'));
+        tabForce.addEventListener('click', () => setMode('force'));
+
+        function setMode(mode) {
+            currentMode = mode;
+            [tabAddition, tabSubtraction, tabVelocity, tabForce].forEach(b => b.classList.remove('active'));
+            if (mode === 'addition') tabAddition.classList.add('active');
+            if (mode === 'subtraction') tabSubtraction.classList.add('active');
+            if (mode === 'velocity') tabVelocity.classList.add('active');
+            if (mode === 'force') tabForce.classList.add('active');
+
+            resetObjectMotion();
+            updatePhysics();
+            render();
+        }
+
+        toggleGrid.addEventListener('click', () => {
+            showGrid = !showGrid;
+            toggleGrid.classList.toggle('active', showGrid);
+            render();
+        });
+
+        toggleComponents.addEventListener('click', () => {
+            showComponents = !showComponents;
+            toggleComponents.classList.toggle('active', showComponents);
+            render();
+        });
+
+        toggleLabels.addEventListener('click', () => {
+            showLabels = !showLabels;
+            toggleLabels.classList.toggle('active', showLabels);
+            render();
+        });
+
+        toggleResultant.addEventListener('click', () => {
+            showResultant = !showResultant;
+            toggleResultant.classList.toggle('active', showResultant);
+            render();
+        });
+
+        toggleChaining.addEventListener('click', () => {
+            autoChain = !autoChain;
+            toggleChaining.classList.toggle('active', autoChain);
+            updatePhysics();
+            render();
+        });
+
+        function resetObjectMotion() {
+            let startX = 0, startY = 0;
+            if (vectors.length > 0) {
+                startX = vectors[0].originX;
+                startY = vectors[0].originY;
+            }
+            physObj = { x: startX, y: startY, vx: 0, vy: 0, ax: 0, ay: 0, path: [{ x: startX, y: startY }] };
+        }
+
+        btnPlay.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            btnPlay.classList.toggle('active', isPlaying);
+            btnPlay.textContent = isPlaying ? '⏸ Pause Motion' : '▶ Play Motion';
+            if (isPlaying && physObj.path.length <= 1) resetObjectMotion();
+            updatePhysics();
+        });
+
+        btnReset.addEventListener('click', () => {
+            isPlaying = false;
+            btnPlay.classList.remove('active');
+            btnPlay.textContent = '▶ Play Motion';
+            vectors = []; // EMPTY VECTORS INITIAL STATE!
+            selectedId = null;
+            resetObjectMotion();
+            updatePhysics();
+            render();
+        });
+
+        // ════════════════════════════════════════════════════════════
+        // 5E Assessment Engine & FORMATTED .DOCX EXPORT
+        // ════════════════════════════════════════════════════════════
+        const topTabBtns = document.querySelectorAll('.top-tab-bar .tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        topTabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.dataset.tab;
+                topTabBtns.forEach(b => b.classList.toggle('active', b === btn));
+                tabContents.forEach(c => c.classList.toggle('active', c.id === `tab-${target}`));
+            });
+        });
+
+        const qElements = document.querySelectorAll('.assess-question');
+        const navSlider = document.getElementById('nav-slider');
+        const navCurrent = document.getElementById('nav-current');
+        const navPrev = document.getElementById('nav-prev');
+        const navNext = document.getElementById('nav-next');
+        const progressDots = document.getElementById('progress-dots');
+        const answeredCountEl = document.getElementById('answered-count');
+        const btnExportAnswers = document.getElementById('btnExportAnswers');
+
+        let currentQIndex = 0;
+        const totalQ = qElements.length;
+
+        for (let i = 0; i < totalQ; i++) {
+            const dot = document.createElement('div');
+            dot.className = `progress-dot ${i === 0 ? 'current' : ''}`;
+            dot.dataset.idx = i;
+            dot.addEventListener('click', () => showQuestion(i));
+            progressDots.appendChild(dot);
+        }
+
+        function showQuestion(idx) {
+            currentQIndex = idx;
+            qElements.forEach((el, i) => el.classList.toggle('active', i === idx));
+            navSlider.value = idx;
+            navCurrent.textContent = idx + 1;
+            navPrev.disabled = idx === 0;
+            navNext.disabled = idx === totalQ - 1;
+
+            const dots = progressDots.querySelectorAll('.progress-dot');
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('current', i === idx);
+            });
+            updateAnswerProgress();
+        }
+
+        function updateAnswerProgress() {
+            let answeredCount = 0;
+            const dots = progressDots.querySelectorAll('.progress-dot');
+            qElements.forEach((q, i) => {
+                const ta = q.querySelector('textarea');
+                const hasText = ta && ta.value.trim().length > 0;
+                if (hasText) answeredCount++;
+                dots[i].classList.toggle('answered', hasText);
+            });
+            answeredCountEl.textContent = answeredCount;
+        }
+
+        navPrev.addEventListener('click', () => { if (currentQIndex > 0) showQuestion(currentQIndex - 1); });
+        navNext.addEventListener('click', () => { if (currentQIndex < totalQ - 1) showQuestion(currentQIndex + 1); });
+        navSlider.addEventListener('input', () => showQuestion(parseInt(navSlider.value, 10)));
+
+        document.querySelectorAll('.assess-question textarea').forEach(ta => {
+            ta.addEventListener('input', updateAnswerProgress);
+        });
+
+        // Formatted Word .DOCX Document Exporter
+        btnExportAnswers.addEventListener('click', () => {
+            const studentName = document.getElementById('student-name').value.trim() || 'Student';
+            const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            let docHtml = `
+                <html xmlns:o='urn:schemas-microsoft-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset='utf-8'>
+                    <title>Vector Physics Assessment - ${studentName}</title>
+                    <style>
+                        body { font-family: 'Calibri', 'Arial', sans-serif; margin: 40px; color: #1e293b; background-color: #ffffff; }
+                        .doc-header { border-bottom: 3px solid #0284c7; padding-bottom: 12px; margin-bottom: 24px; }
+                        h1 { color: #0f172a; font-size: 24pt; margin: 0 0 6px 0; }
+                        .subtitle { color: #0284c7; font-size: 13pt; font-weight: bold; margin: 0; }
+                        .meta-table { width: 100%; margin-top: 16px; border-collapse: collapse; background-color: #f8fafc; border: 1px solid #e2e8f0; }
+                        .meta-table td { padding: 10px 14px; font-size: 11pt; }
+                        .meta-label { font-weight: bold; color: #475569; width: 140px; }
+                        .question-card { margin-bottom: 24px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; page-break-inside: avoid; }
+                        .q-header { background-color: #f1f5f9; padding: 10px 14px; border-bottom: 1px solid #cbd5e1; font-weight: bold; color: #0f172a; }
+                        .phase-badge { display: inline-block; padding: 3px 8px; background-color: #0284c7; color: #ffffff; font-size: 9pt; border-radius: 4px; text-transform: uppercase; margin-right: 8px; }
+                        .q-body { padding: 14px; font-size: 11pt; line-height: 1.5; color: #334155; }
+                        .answer-box { background-color: #faf5ff; border-left: 4px solid #8b5cf6; padding: 12px 14px; margin-top: 10px; font-style: italic; color: #1e1b4b; }
+                        .no-answer { color: #94a3b8; font-style: italic; }
+                    </style>
+                </head>
+                <body>
+                    <div class="doc-header">
+                        <h1>AP Physics 1: Vector Mechanics Assessment</h1>
+                        <p class="subtitle">Interactive Vector Navigation & Formative 5E Evaluation</p>
+                        <table class="meta-table">
+                            <tr>
+                                <td class="meta-label">Student Name:</td>
+                                <td><strong>${studentName}</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="meta-label">Submission Date:</td>
+                                <td>${dateStr}</td>
+                            </tr>
+                            <tr>
+                                <td class="meta-label">Course:</td>
+                                <td>AP Physics 1 — Kinematics & Vector Dynamics</td>
+                            </tr>
+                        </table>
+                    </div>
+            `;
+
+            qElements.forEach((q, i) => {
+                const phaseText = q.querySelector('.phase-badge').innerText.trim();
+                const qText = q.querySelector('.q-text').innerText.trim();
+                const ta = q.querySelector('textarea');
+                const answer = ta ? ta.value.trim() : '';
+
+                docHtml += `
+                    <div class="question-card">
+                        <div class="q-header">
+                            <span class="phase-badge">${phaseText}</span> Question ${i + 1} of 10
+                        </div>
+                        <div class="q-body">
+                            <p style="margin:0 0 8px 0; font-weight:bold;">${qText}</p>
+                            <div class="answer-box">
+                                <strong>Student Response:</strong><br>
+                                ${answer ? answer.replace(/\n/g, '<br>') : '<span class="no-answer">No response provided.</span>'}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            docHtml += `</body></html>`;
+
+            const blob = new Blob(['\ufeff' + docHtml], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Vector_Physics_Assessment_${studentName.replace(/\s+/g, '_')}.docx`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        function loop(timestamp) {
+            if (!lastTimestamp) lastTimestamp = timestamp;
+            const dt = (timestamp - lastTimestamp) / 1000;
+            lastTimestamp = timestamp;
+
+            if (isPlaying) {
+                let netVx = 0, netVy = 0;
+                vectors.forEach(v => {
+                    if (v.visible) {
+                        const r = v.angle * Math.PI / 180;
+                        netVx += v.mag * Math.cos(r);
+                        netVy += v.mag * Math.sin(r);
+                    }
+                });
+
+                if (currentMode === 'velocity' || currentMode === 'addition') {
+                    physObj.vx = netVx;
+                    physObj.vy = netVy;
+                    physObj.x += physObj.vx * dt;
+                    physObj.y += physObj.vy * dt;
+                } else if (currentMode === 'force') {
+                    const mass = 1.0;
+                    physObj.ax = netVx / mass;
+                    physObj.ay = netVy / mass;
+                    physObj.vx += physObj.ax * dt;
+                    physObj.vy += physObj.ay * dt;
+                    physObj.x += physObj.vx * dt;
+                    physObj.y += physObj.vy * dt;
+                } else {
+                    physObj.vx = netVx;
+                    physObj.vy = netVy;
+                    physObj.x += physObj.vx * dt;
+                    physObj.y += physObj.vy * dt;
+                }
+
+                physObj.path.push({ x: physObj.x, y: physObj.y });
+                if (physObj.path.length > 200) physObj.path.shift();
+            }
+
+            render();
+            requestAnimationFrame(loop);
+        }
+
+        function init() {
+            resetObjectMotion();
+            updatePhysics();
+            showQuestion(0);
+            requestAnimationFrame(loop);
+        }
+
+        init();
+    </script>
+</body>
+</html>
