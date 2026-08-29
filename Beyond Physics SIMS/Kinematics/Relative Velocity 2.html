@@ -757,6 +757,10 @@
                 <div class="card">
                     <h3>Observer Perspective</h3>
                     <div class="radio-group">
+                        <label class="radio-label" id="radio-observer-ground">
+                            <input type="radio" name="observer" value="ground">
+                            <span>Ground Observer (Ground Frame)</span>
+                        </label>
                         <label class="radio-label selected" id="radio-observer-1">
                             <input type="radio" name="observer" value="car1" checked>
                             <span>Car 1 sees Car 2</span>
@@ -764,6 +768,20 @@
                         <label class="radio-label" id="radio-observer-2">
                             <input type="radio" name="observer" value="car2">
                             <span>Car 2 sees Car 1</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Vector Visualizer</h3>
+                    <div class="radio-group">
+                        <label class="radio-label selected" id="label-chk-components">
+                            <input type="checkbox" id="chk-components" checked style="accent-color:var(--accent-cyan);">
+                            <span>Component Projections</span>
+                        </label>
+                        <label class="radio-label" id="label-chk-triangle">
+                            <input type="checkbox" id="chk-triangle" style="accent-color:var(--accent-cyan);">
+                            <span>Vector Addition Triangle</span>
                         </label>
                     </div>
                 </div>
@@ -1091,8 +1109,10 @@
         v2: 15,
         car2Direction: 'west',
         customAngle: 180,
-        observerIsCar1: true,
+        observer: 'car1', // 'ground', 'car1', or 'car2'
         viewMode: '2d',
+        showComponents: true,
+        showTriangle: false,
         car1Pos: { x: 0, y: -30 },
         car2Pos: { x: 30, y: 0 },
     };
@@ -1114,14 +1134,11 @@
         const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
         if (is1D) {
             if (state.viewMode === '1d-headon') {
-                // Head-on: Car 2 moves West (-x)
                 return { x: -state.v2, y: 0 };
             } else {
-                // Same direction: Car 2 moves East (+x)
                 return { x: state.v2, y: 0 };
             }
         }
-        // 2D mode: use angle
         const angle = getCar2AngleRad();
         return {
             x: state.v2 * Math.cos(angle),
@@ -1132,20 +1149,61 @@
     function getCar1Velocity() {
         const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
         if (is1D) {
-            // 1D mode: Car 1 always moves East (+x)
             return { x: state.v1, y: 0 };
         }
-        // 2D mode: Car 1 moves North
         return { x: 0, y: state.v1 };
     }
 
     function getRelativeVelocity() {
         const v1 = getCar1Velocity();
         const v2 = getCar2Velocity();
-        if (state.observerIsCar1) {
-            return { x: v2.x - v1.x, y: v2.y - v1.y };
-        } else {
+        if (state.observer === 'car2') {
             return { x: v1.x - v2.x, y: v1.y - v2.y };
+        } else {
+            // Used for Car 1 frame and Ground frame relative velocity analysis (v2 - v1)
+            return { x: v2.x - v1.x, y: v2.y - v1.y };
+        }
+    }
+
+    // ═══════════════════════════════════════
+    // PARTICLE TRAIL ENGINE
+    // ═══════════════════════════════════════
+    let particles = [];
+    function spawnExhaust(x, y, vx, vy, color) {
+        if (Math.random() < 0.35) return;
+        const speed = Math.sqrt(vx * vx + vy * vy);
+        if (speed < 0.1) return;
+        const dirX = vx / speed;
+        const dirY = vy / speed;
+        particles.push({
+            x: x - dirX * 3.2 + (Math.random() - 0.5) * 1.2,
+            y: y - dirY * 3.2 + (Math.random() - 0.5) * 1.2,
+            vx: -dirX * 2.5 + (Math.random() - 0.5) * 1.5,
+            vy: -dirY * 2.5 + (Math.random() - 0.5) * 1.5,
+            life: 1.0,
+            size: Math.random() * 3.5 + 2,
+            color: color
+        });
+    }
+
+    function updateAndDrawParticles(dt) {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.life -= dt * 2.2;
+            if (p.life <= 0) {
+                particles.splice(i, 1);
+                continue;
+            }
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            const sPos = worldToCanvas(p.x, p.y);
+            ctx.save();
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.life * 0.35;
+            ctx.beginPath();
+            ctx.arc(sPos.x, sPos.y, p.size * (1.4 - p.life * 0.4), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
         }
     }
 
@@ -1177,18 +1235,16 @@
     };
 
     // ═══════════════════════════════════════
-    // CANVAS SETUP
+    // CANVAS SETUP & CAMERA
     // ═══════════════════════════════════════
     const canvas = document.getElementById('simCanvas');
     const ctx = canvas.getContext('2d');
     canvas.width = CANVAS_W;
     canvas.height = CANVAS_H;
 
-    // Camera offset — when following an observer, their position becomes the center
     let cameraOffset = { x: 0, y: 0 };
 
     function worldToCanvas(wx, wy) {
-        // Subtract camera offset so the observer stays centered
         const relX = wx - cameraOffset.x;
         const relY = wy - cameraOffset.y;
         return {
@@ -1198,13 +1254,14 @@
     }
 
     function drawBackground() {
-        ctx.fillStyle = '#0a0a2a';
+        // Deep modern background
+        ctx.fillStyle = '#08081c';
         ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-        // Grid — offset by camera so it scrolls with the observer
-        ctx.strokeStyle = 'rgba(100, 100, 200, 0.06)';
+        // Tech grid offset by camera
+        ctx.strokeStyle = 'rgba(80, 100, 180, 0.07)';
         ctx.lineWidth = 1;
-        const gridSpacing = 50;
+        const gridSpacing = 40;
         const offsetX = (cameraOffset.x * POSITION_SCALE) % gridSpacing;
         const offsetY = (cameraOffset.y * POSITION_SCALE) % gridSpacing;
         for (let x = -gridSpacing + offsetX; x < CANVAS_W + gridSpacing; x += gridSpacing) {
@@ -1220,156 +1277,389 @@
             ctx.stroke();
         }
 
-        // Roads — draw relative to camera (scrolls with observer)
         const roadScreenPos = worldToCanvas(0, 0);
         const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
+        const roadWidth = 76;
 
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-        ctx.lineWidth = 6;
         ctx.setLineDash([]);
 
         if (is1D) {
-            // 1D mode: single horizontal road at vertical center
+            // 1D Road Asphalt Surface
+            ctx.fillStyle = '#121226';
+            ctx.fillRect(0, CENTER_Y - roadWidth / 2, CANVAS_W, roadWidth);
+
+            // Road Edge Curbs
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.3)';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(0, CENTER_Y);
-            ctx.lineTo(CANVAS_W, CENTER_Y);
+            ctx.moveTo(0, CENTER_Y - roadWidth / 2);
+            ctx.lineTo(CANVAS_W, CENTER_Y - roadWidth / 2);
+            ctx.moveTo(0, CENTER_Y + roadWidth / 2);
+            ctx.lineTo(CANVAS_W, CENTER_Y + roadWidth / 2);
             ctx.stroke();
 
             // Dashed center line
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([10, 10]);
+            ctx.strokeStyle = '#ffd740';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([12, 10]);
             ctx.beginPath();
             ctx.moveTo(0, CENTER_Y);
             ctx.lineTo(CANVAS_W, CENTER_Y);
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Road edge lines
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, CENTER_Y - 30);
-            ctx.lineTo(CANVAS_W, CENTER_Y - 30);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(0, CENTER_Y + 30);
-            ctx.lineTo(CANVAS_W, CENTER_Y + 30);
-            ctx.stroke();
-
-            // Compass labels
-            ctx.fillStyle = 'rgba(136, 136, 170, 0.6)';
-            ctx.font = '12px Inter, sans-serif';
+            // Labels
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.font = '600 12px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('W', 20, CENTER_Y - 40);
-            ctx.fillText('E', CANVAS_W - 20, CENTER_Y - 40);
+            ctx.fillText('WEST (–x)', 45, CENTER_Y - roadWidth / 2 - 10);
+            ctx.fillText('EAST (+x)', CANVAS_W - 45, CENTER_Y - roadWidth / 2 - 10);
         } else {
-            // 2D mode: intersection
-            // N-S Road
+            // 2D Intersection Roads Asphalt Surface
+            ctx.fillStyle = '#121226';
+            // Vertical road (North-South)
+            ctx.fillRect(roadScreenPos.x - roadWidth / 2, 0, roadWidth, CANVAS_H);
+            // Horizontal road (East-West)
+            ctx.fillRect(0, roadScreenPos.y - roadWidth / 2, CANVAS_W, roadWidth);
+
+            // Curb Edges
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+            ctx.lineWidth = 2;
+
+            // N-S curbs
             ctx.beginPath();
-            ctx.moveTo(roadScreenPos.x, 0);
-            ctx.lineTo(roadScreenPos.x, CANVAS_H);
+            ctx.moveTo(roadScreenPos.x - roadWidth / 2, 0);
+            ctx.lineTo(roadScreenPos.x - roadWidth / 2, CANVAS_H);
+            ctx.moveTo(roadScreenPos.x + roadWidth / 2, 0);
+            ctx.lineTo(roadScreenPos.x + roadWidth / 2, CANVAS_H);
+            // E-W curbs
+            ctx.moveTo(0, roadScreenPos.y - roadWidth / 2);
+            ctx.lineTo(CANVAS_W, roadScreenPos.y - roadWidth / 2);
+            ctx.moveTo(0, roadScreenPos.y + roadWidth / 2);
+            ctx.lineTo(CANVAS_W, roadScreenPos.y + roadWidth / 2);
             ctx.stroke();
 
-            // E-W Road
+            // Double Yellow Center Lines
+            ctx.strokeStyle = '#ffd740';
+            ctx.lineWidth = 1.5;
+            // Vertical double yellow
             ctx.beginPath();
-            ctx.moveTo(0, roadScreenPos.y);
-            ctx.lineTo(CANVAS_W, roadScreenPos.y);
+            ctx.moveTo(roadScreenPos.x - 2, 0);
+            ctx.lineTo(roadScreenPos.x - 2, CANVAS_H);
+            ctx.moveTo(roadScreenPos.x + 2, 0);
+            ctx.lineTo(roadScreenPos.x + 2, CANVAS_H);
+            // Horizontal double yellow
+            ctx.moveTo(0, roadScreenPos.y - 2);
+            ctx.lineTo(CANVAS_W, roadScreenPos.y - 2);
+            ctx.moveTo(0, roadScreenPos.y + 2);
+            ctx.lineTo(CANVAS_W, roadScreenPos.y + 2);
             ctx.stroke();
 
-            // Road dashed center lines
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([10, 10]);
-            ctx.beginPath();
-            ctx.moveTo(roadScreenPos.x, 0);
-            ctx.lineTo(roadScreenPos.x, CANVAS_H);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(0, roadScreenPos.y);
-            ctx.lineTo(CANVAS_W, roadScreenPos.y);
-            ctx.stroke();
-            ctx.setLineDash([]);
+            // Crosswalk Zebra Stripes
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+            const stripeW = 6, stripeGap = 6;
+            // North Crosswalk
+            for (let x = roadScreenPos.x - roadWidth / 2 + 4; x < roadScreenPos.x + roadWidth / 2 - 4; x += stripeW + stripeGap) {
+                ctx.fillRect(x, roadScreenPos.y - roadWidth / 2 - 18, stripeW, 14);
+            }
+            // South Crosswalk
+            for (let x = roadScreenPos.x - roadWidth / 2 + 4; x < roadScreenPos.x + roadWidth / 2 - 4; x += stripeW + stripeGap) {
+                ctx.fillRect(x, roadScreenPos.y + roadWidth / 2 + 4, stripeW, 14);
+            }
+            // West Crosswalk
+            for (let y = roadScreenPos.y - roadWidth / 2 + 4; y < roadScreenPos.y + roadWidth / 2 - 4; y += stripeW + stripeGap) {
+                ctx.fillRect(roadScreenPos.x - roadWidth / 2 - 18, y, 14, stripeW);
+            }
+            // East Crosswalk
+            for (let y = roadScreenPos.y - roadWidth / 2 + 4; y < roadScreenPos.y + roadWidth / 2 - 4; y += stripeW + stripeGap) {
+                ctx.fillRect(roadScreenPos.x + roadWidth / 2 + 4, y, 14, stripeW);
+            }
 
-            // Intersection marker
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
-            ctx.fillRect(roadScreenPos.x - 10, roadScreenPos.y - 10, 20, 20);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(roadScreenPos.x - 10, roadScreenPos.y - 10, 20, 20);
-
-            // Compass labels
-            ctx.fillStyle = 'rgba(136, 136, 170, 0.6)';
-            ctx.font = '12px Inter, sans-serif';
+            // Compass Labels
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.font = 'bold 12px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('N', roadScreenPos.x, 18);
-            ctx.fillText('S', roadScreenPos.x, CANVAS_H - 8);
-            ctx.fillText('W', 20, roadScreenPos.y + 4);
-            ctx.fillText('E', CANVAS_W - 20, roadScreenPos.y + 4);
+            ctx.fillText('N', roadScreenPos.x, 22);
+            ctx.fillText('S', roadScreenPos.x, CANVAS_H - 12);
+            ctx.fillText('W', 22, roadScreenPos.y + 4);
+            ctx.fillText('E', CANVAS_W - 22, roadScreenPos.y + 4);
         }
-    }
 
-    function drawCar(x, y, color, label, isObserver) {
-        const pos = worldToCanvas(x, y);
-        const size = 22;
+        // Ground Observer Radar Station Marker (at 0,0)
+        const originPos = worldToCanvas(0, 0);
+        ctx.save();
+        if (state.observer === 'ground') {
+            // Radar pulse animation rings
+            const pulse = (state.time * 40) % 60;
+            ctx.strokeStyle = 'rgba(105, 240, 174, ' + (1 - pulse / 60) + ')';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(originPos.x, originPos.y, pulse, 0, Math.PI * 2);
+            ctx.stroke();
 
-        // Glow
-        ctx.shadowColor = color;
-        ctx.shadowBlur = 15;
+            // Radar sweep beam
+            const sweepAngle = state.time * 2;
+            const sweepGrad = ctx.createConicGradient(sweepAngle, originPos.x, originPos.y);
+            sweepGrad.addColorStop(0, 'rgba(105, 240, 174, 0.25)');
+            sweepGrad.addColorStop(0.15, 'rgba(105, 240, 174, 0)');
+            sweepGrad.addColorStop(1, 'rgba(105, 240, 174, 0)');
+            ctx.fillStyle = sweepGrad;
+            ctx.beginPath();
+            ctx.arc(originPos.x, originPos.y, 65, 0, Math.PI * 2);
+            ctx.fill();
 
-        // Car body
-        const gradient = ctx.createRadialGradient(
-            pos.x - 3, pos.y - 3, 2,
-            pos.x, pos.y, size
-        );
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
-        gradient.addColorStop(0.4, color);
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.5)');
+            // Ground Station Pin
+            ctx.shadowColor = '#69f0ae';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = '#69f0ae';
+            ctx.beginPath();
+            ctx.arc(originPos.x, originPos.y, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
 
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.roundRect(pos.x - size / 2, pos.y - size / 2, size, size, 6);
-        ctx.fill();
+            // Outer ring
+            ctx.strokeStyle = '#69f0ae';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(originPos.x, originPos.y, 12, 0, Math.PI * 2);
+            ctx.stroke();
 
-        ctx.shadowBlur = 0;
+            // Label badge
+            ctx.fillStyle = 'rgba(10, 10, 26, 0.85)';
+            ctx.strokeStyle = '#69f0ae';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(originPos.x - 65, originPos.y + 18, 130, 22, 6);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#69f0ae';
+            ctx.font = 'bold 10px JetBrains Mono, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('GROUND OBSERVER (0,0)', originPos.x, originPos.y + 32);
+        } else {
+            // Subtle origin marker
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.beginPath();
+            ctx.arc(originPos.x, originPos.y, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        ctx.restore();
 
-        // Border
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        // Canvas HUD (Top-Right Badge)
+        ctx.save();
+        const hudX = CANVAS_W - 200, hudY = 16;
+        ctx.fillStyle = 'rgba(12, 12, 32, 0.85)';
+        ctx.strokeStyle = state.observer === 'ground' ? '#69f0ae' : (state.observer === 'car1' ? '#00e5ff' : '#ffd740');
         ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(hudX, hudY, 184, 38, 10);
+        ctx.fill();
         ctx.stroke();
 
-        // Observer indicator
-        if (isObserver) {
-            ctx.strokeStyle = '#00e5ff';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([4, 3]);
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, size / 2 + 8, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '9px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('REFERENCE FRAME', hudX + 12, hudY + 14);
 
-        // Label
-        ctx.fillStyle = '#fff';
+        ctx.fillStyle = ctx.strokeStyle;
         ctx.font = 'bold 11px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(label, pos.x, pos.y - size / 2 - 6);
+        const frameName = state.observer === 'ground' ? 'Ground Frame (Fixed)' : (state.observer === 'car1' ? 'Car 1 Frame (Moving)' : 'Car 2 Frame (Moving)');
+        ctx.fillText(frameName, hudX + 12, hudY + 30);
+        ctx.restore();
     }
 
-    function drawVector(fromX, fromY, vx, vy, color, label) {
+    function drawCar(x, y, vx, vy, color, label, isObserver) {
+        const pos = worldToCanvas(x, y);
+        const heading = Math.atan2(-vy, vx); // canvas angle (y grows down)
+
+        ctx.save();
+        ctx.translate(pos.x, pos.y);
+
+        // Observer Targeting Reticle Halo
+        if (isObserver) {
+            const pulse = 24 + Math.sin(state.time * 6) * 3;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = 10;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.arc(0, 0, pulse, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.shadowBlur = 0;
+
+            // Reticle label
+            ctx.fillStyle = color;
+            ctx.font = 'bold 9px JetBrains Mono, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('OBSERVER', 0, -pulse - 6);
+        }
+
+        ctx.rotate(heading);
+
+        const carLength = 38;
+        const carWidth = 22;
+
+        // Front Headlight Beam Cones
+        const lightGrad = ctx.createLinearGradient(carLength / 2, 0, carLength / 2 + 50, 0);
+        lightGrad.addColorStop(0, 'rgba(255, 255, 220, 0.35)');
+        lightGrad.addColorStop(1, 'rgba(255, 255, 220, 0)');
+
+        ctx.fillStyle = lightGrad;
+        // Left light cone
+        ctx.beginPath();
+        ctx.moveTo(carLength / 2, -6);
+        ctx.lineTo(carLength / 2 + 55, -18);
+        ctx.lineTo(carLength / 2 + 55, -1);
+        ctx.closePath();
+        ctx.fill();
+
+        // Right light cone
+        ctx.beginPath();
+        ctx.moveTo(carLength / 2, 6);
+        ctx.lineTo(carLength / 2 + 55, 1);
+        ctx.lineTo(carLength / 2 + 55, 18);
+        ctx.closePath();
+        ctx.fill();
+
+        // Rubber Tires (4 wheels)
+        ctx.fillStyle = '#151515';
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1;
+        const wheelW = 10, wheelH = 4;
+        // Front Left Wheel
+        ctx.fillRect(carLength * 0.25 - wheelW / 2, -carWidth / 2 - 2, wheelW, wheelH);
+        ctx.strokeRect(carLength * 0.25 - wheelW / 2, -carWidth / 2 - 2, wheelW, wheelH);
+        // Front Right Wheel
+        ctx.fillRect(carLength * 0.25 - wheelW / 2, carWidth / 2 - 2, wheelW, wheelH);
+        ctx.strokeRect(carLength * 0.25 - wheelW / 2, carWidth / 2 - 2, wheelW, wheelH);
+        // Rear Left Wheel
+        ctx.fillRect(-carLength * 0.28 - wheelW / 2, -carWidth / 2 - 2, wheelW, wheelH);
+        ctx.strokeRect(-carLength * 0.28 - wheelW / 2, -carWidth / 2 - 2, wheelW, wheelH);
+        // Rear Right Wheel
+        ctx.fillRect(-carLength * 0.28 - wheelW / 2, carWidth / 2 - 2, wheelW, wheelH);
+        ctx.strokeRect(-carLength * 0.28 - wheelW / 2, carWidth / 2 - 2, wheelW, wheelH);
+
+        // Metallic Car Body Gradient
+        ctx.shadowColor = color;
+        ctx.shadowBlur = 12;
+
+        const bodyGrad = ctx.createLinearGradient(-carLength / 2, 0, carLength / 2, 0);
+        bodyGrad.addColorStop(0, color);
+        bodyGrad.addColorStop(0.5, '#ffffff');
+        bodyGrad.addColorStop(1, color);
+
+        ctx.fillStyle = bodyGrad;
+        ctx.beginPath();
+        ctx.roundRect(-carLength / 2, -carWidth / 2, carLength, carWidth, 6);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Windshield Glass
+        ctx.fillStyle = '#0a1a2f';
+        ctx.beginPath();
+        ctx.roundRect(carLength * 0.05, -carWidth / 2 + 3, 10, carWidth - 6, 3);
+        ctx.fill();
+
+        // Rear Glass
+        ctx.fillStyle = '#0a1a2f';
+        ctx.beginPath();
+        ctx.roundRect(-carLength * 0.35, -carWidth / 2 + 4, 7, carWidth - 8, 2);
+        ctx.fill();
+
+        // Roof Panel
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        ctx.fillRect(-carLength * 0.18, -carWidth / 2 + 4, carLength * 0.3, carWidth - 8);
+
+        // Side Mirrors
+        ctx.fillStyle = color;
+        ctx.fillRect(carLength * 0.15, -carWidth / 2 - 4, 3, 4);
+        ctx.fillRect(carLength * 0.15, carWidth / 2, 3, 4);
+
+        // Headlight bulbs (bright white)
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(carLength / 2 - 1, -carWidth / 2 + 4, 2.5, 0, Math.PI * 2);
+        ctx.arc(carLength / 2 - 1, carWidth / 2 - 4, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Red Taillights at rear
+        ctx.fillStyle = '#ff1744';
+        ctx.shadowColor = '#ff1744';
+        ctx.shadowBlur = 6;
+        ctx.fillRect(-carLength / 2 - 1, -carWidth / 2 + 3, 3, 4);
+        ctx.fillRect(-carLength / 2 - 1, carWidth / 2 - 7, 3, 4);
+        ctx.shadowBlur = 0;
+
+        ctx.restore();
+
+        // Car Label Badge (unrotated, crisp text)
+        ctx.save();
+        ctx.fillStyle = 'rgba(10, 10, 26, 0.8)';
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(pos.x - 30, pos.y - 32, 60, 16, 4);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = color;
+        ctx.font = 'bold 10px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, pos.x, pos.y - 20);
+        ctx.restore();
+    }
+
+    function drawVector(fromX, fromY, vx, vy, color, label, showComponents) {
         const start = worldToCanvas(fromX, fromY);
         const vecLen = Math.sqrt(vx * vx + vy * vy);
-        if (vecLen < 0.5) return;
+        if (vecLen < 0.2) return;
 
         const endX = start.x + vx * VECTOR_SCALE;
         const endY = start.y - vy * VECTOR_SCALE;
 
-        // Line
+        // Component Projections
+        if (showComponents && Math.abs(vx) > 0.5 && Math.abs(vy) > 0.5) {
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.globalAlpha = 0.5;
+
+            // X-component projection line (horizontal)
+            ctx.beginPath();
+            ctx.moveTo(start.x, start.y);
+            ctx.lineTo(endX, start.y);
+            ctx.stroke();
+
+            // Y-component projection line (vertical)
+            ctx.beginPath();
+            ctx.moveTo(endX, start.y);
+            ctx.lineTo(endX, endY);
+            ctx.stroke();
+
+            // Component values text
+            ctx.fillStyle = color;
+            ctx.font = '9px JetBrains Mono, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(`v_x=${vx.toFixed(1)}`, (start.x + endX) / 2, start.y + (vy > 0 ? 14 : -6));
+            ctx.fillText(`v_y=${vy.toFixed(1)}`, endX + (vx > 0 ? 20 : -20), (start.y + endY) / 2);
+
+            ctx.restore();
+        }
+
+        // Vector Shaft Line
+        ctx.save();
         ctx.strokeStyle = color;
-        ctx.lineWidth = 2.5;
+        ctx.lineWidth = 3;
         ctx.lineCap = 'round';
         ctx.shadowColor = color;
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 10;
 
         ctx.beginPath();
         ctx.moveTo(start.x, start.y);
@@ -1378,7 +1668,7 @@
 
         // Arrowhead
         const angle = Math.atan2(endY - start.y, endX - start.x);
-        const arrowSize = 12;
+        const arrowSize = 13;
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.moveTo(endX, endY);
@@ -1389,45 +1679,93 @@
 
         ctx.shadowBlur = 0;
 
-        // Label
+        // Label Badge
         if (label) {
+            ctx.font = 'bold 11px JetBrains Mono, monospace';
+            const metrics = ctx.measureText(label);
+            const boxW = metrics.width + 12;
+            const labelX = endX + (vx >= 0 ? 10 : -boxW - 10);
+            const labelY = endY + (vy >= 0 ? -10 : 18);
+
+            ctx.fillStyle = 'rgba(10, 10, 30, 0.85)';
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(labelX, labelY - 12, boxW, 16, 4);
+            ctx.fill();
+            ctx.stroke();
+
             ctx.fillStyle = color;
-            ctx.font = 'bold 12px JetBrains Mono, monospace';
             ctx.textAlign = 'left';
-            const labelX = endX + 10;
-            const labelY = endY - 8;
-            ctx.fillText(label, labelX, labelY);
+            ctx.fillText(label, labelX + 6, labelY);
         }
+        ctx.restore();
     }
 
     function drawVectors() {
         const v1 = getCar1Velocity();
         const v2 = getCar2Velocity();
         const vrel = getRelativeVelocity();
-
-        // Car 1 velocity (cyan)
-        drawVector(state.car1Pos.x, state.car1Pos.y, v1.x, v1.y, '#00e5ff', `v₁ = ${state.v1.toFixed(1)} m/s`);
-
-        // Car 2 velocity (amber)
-        drawVector(state.car2Pos.x, state.car2Pos.y, v2.x, v2.y, '#ffd740', `v₂ = ${state.v2.toFixed(1)} m/s`);
-
-        // Relative velocity (purple) from observer
-        const observerPos = state.observerIsCar1 ? state.car1Pos : state.car2Pos;
-        const relColor = '#7c4dff';
         const relMag = Math.sqrt(vrel.x * vrel.x + vrel.y * vrel.y);
-        drawVector(observerPos.x, observerPos.y, vrel.x, vrel.y, relColor, `v_rel = ${relMag.toFixed(1)} m/s`);
 
-        // Legend
+        if (state.observer === 'ground') {
+            // Ground Frame: Draw both absolute ground vectors
+            drawVector(state.car1Pos.x, state.car1Pos.y, v1.x, v1.y, '#00e5ff', `v₁ = ${state.v1.toFixed(1)} m/s`, state.showComponents);
+            drawVector(state.car2Pos.x, state.car2Pos.y, v2.x, v2.y, '#ffd740', `v₂ = ${state.v2.toFixed(1)} m/s`, state.showComponents);
+
+            // Relative vector between Car 1 and Car 2
+            drawVector(state.car1Pos.x, state.car1Pos.y, vrel.x, vrel.y, '#7c4dff', `v₂/₁ = ${relMag.toFixed(1)} m/s`, false);
+        } else if (state.observer === 'car1') {
+            // Car 1 Frame: Car 1 sees Car 2
+            drawVector(state.car1Pos.x, state.car1Pos.y, v1.x, v1.y, '#00e5ff', `v₁ (Ground) = ${state.v1.toFixed(1)} m/s`, false);
+            drawVector(state.car1Pos.x, state.car1Pos.y, vrel.x, vrel.y, '#7c4dff', `v_rel = ${relMag.toFixed(1)} m/s`, state.showComponents);
+        } else {
+            // Car 2 Frame: Car 2 sees Car 1
+            drawVector(state.car2Pos.x, state.car2Pos.y, v2.x, v2.y, '#ffd740', `v₂ (Ground) = ${state.v2.toFixed(1)} m/s`, false);
+            drawVector(state.car2Pos.x, state.car2Pos.y, vrel.x, vrel.y, '#7c4dff', `v_rel = ${relMag.toFixed(1)} m/s`, state.showComponents);
+        }
+
+        // Vector Addition Triangle overlay: v1 + v_rel = v2
+        if (state.showTriangle) {
+            ctx.save();
+            const p1 = worldToCanvas(state.car1Pos.x, state.car1Pos.y);
+            const p1v1 = worldToCanvas(state.car1Pos.x + v1.x * VECTOR_SCALE / POSITION_SCALE, state.car1Pos.y + v1.y * VECTOR_SCALE / POSITION_SCALE);
+            const p2 = worldToCanvas(state.car2Pos.x, state.car2Pos.y);
+
+            ctx.strokeStyle = 'rgba(105, 240, 174, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p1v1.x, p1v1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.fillStyle = '#69f0ae';
+            ctx.font = 'bold 10px JetBrains Mono, monospace';
+            ctx.fillText('v₁ + v₂/₁ = v₂', (p1.x + p2.x) / 2, (p1.y + p2.y) / 2 - 10);
+            ctx.restore();
+        }
+
+        // Vector Legend Box (Bottom Left)
+        ctx.save();
+        ctx.fillStyle = 'rgba(10, 10, 28, 0.85)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(16, CANVAS_H - 74, 180, 58, 8);
+        ctx.fill();
+        ctx.stroke();
+
         ctx.font = '11px Inter, sans-serif';
-        ctx.fillStyle = 'rgba(224, 224, 224, 0.7)';
-        ctx.textAlign = 'left';
-        let ly = 20;
         ctx.fillStyle = '#00e5ff';
-        ctx.fillText('— v₁ (Car 1)', 20, ly);
+        ctx.fillText('— v₁ (Car 1 Ground)', 26, CANVAS_H - 54);
         ctx.fillStyle = '#ffd740';
-        ctx.fillText('— v₂ (Car 2)', 20, ly + 16);
+        ctx.fillText('— v₂ (Car 2 Ground)', 26, CANVAS_H - 36);
         ctx.fillStyle = '#7c4dff';
-        ctx.fillText('— v_rel (relative)', 20, ly + 32);
+        ctx.fillText('— v_rel (Relative)', 26, CANVAS_H - 18);
+        ctx.restore();
     }
 
     // ═══════════════════════════════════════
@@ -1445,36 +1783,27 @@
         const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
 
         if (is1D) {
-            // 1D mode: both cars on horizontal road
             if (state.viewMode === '1d-headon') {
-                // Head-on: Car 1 moves East (+x), Car 2 moves West (-x)
                 state.car1Pos.x += state.v1 * dt;
                 state.car2Pos.x -= state.v2 * dt;
             } else {
-                // Same direction: both move East (+x)
                 state.car1Pos.x += state.v1 * dt;
                 state.car2Pos.x += state.v2 * dt;
             }
-            // Keep cars on the horizontal road (y = 0)
             state.car1Pos.y = 0;
             state.car2Pos.y = 0;
 
-            // Wrap around
             if (state.car1Pos.x > WORLD_RANGE.x) state.car1Pos.x = -WORLD_RANGE.x;
             if (state.car1Pos.x < -WORLD_RANGE.x) state.car1Pos.x = WORLD_RANGE.x;
             if (state.car2Pos.x > WORLD_RANGE.x) state.car2Pos.x = -WORLD_RANGE.x;
             if (state.car2Pos.x < -WORLD_RANGE.x) state.car2Pos.x = WORLD_RANGE.x;
         } else {
-            // 2D mode: original behavior
-            // Car 1 moves North (+y in physics)
             state.car1Pos.y += state.v1 * dt;
 
-            // Car 2 moves in its direction
             const v2 = getCar2Velocity();
             state.car2Pos.x += v2.x * dt;
             state.car2Pos.y += v2.y * dt;
 
-            // Wrap around
             if (state.car1Pos.y > WORLD_RANGE.y) state.car1Pos.y = -WORLD_RANGE.y;
             if (state.car1Pos.y < -WORLD_RANGE.y) state.car1Pos.y = WORLD_RANGE.y;
 
@@ -1510,7 +1839,6 @@
 
         vrelmagEl.textContent = relMag.toFixed(2);
 
-        // Component bars
         const maxComponent = 100;
         const ewWidth = Math.min(100, Math.abs(vrel.x) / maxComponent * 100);
         const nsWidth = Math.min(100, Math.abs(vrel.y) / maxComponent * 100);
@@ -1532,7 +1860,6 @@
         document.getElementById('bar-ns-val').textContent =
             (vrel.y >= 0 ? '+' : '') + vrel.y.toFixed(1) + ' m/s';
 
-        // Log data
         if (state.running) {
             dataLogger.log(state.time, state.v1, state.v2, vrel.x, vrel.y, relMag);
         }
@@ -1580,7 +1907,6 @@
         ctx.fillStyle = '#0d0d22';
         ctx.fillRect(0, 0, w, h);
 
-        // Grid
         ctx.strokeStyle = 'rgba(100, 100, 200, 0.1)';
         ctx.lineWidth = 1;
         for (let i = 0; i <= 4; i++) {
@@ -1598,7 +1924,6 @@
             ctx.stroke();
         }
 
-        // Zero line
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
         ctx.lineWidth = 1;
         ctx.beginPath();
@@ -1640,7 +1965,6 @@
         plotLine(vrelx, '#00e5ff');
         plotLine(vrely, '#7c4dff');
 
-        // Axis labels
         ctx.fillStyle = 'rgba(136, 136, 170, 0.8)';
         ctx.font = '10px Inter, sans-serif';
         ctx.textAlign = 'left';
@@ -1657,7 +1981,6 @@
         ctx.fillStyle = '#0d0d22';
         ctx.fillRect(0, 0, w, h);
 
-        // Grid
         ctx.strokeStyle = 'rgba(100, 100, 200, 0.1)';
         ctx.lineWidth = 1;
         for (let i = 0; i <= 4; i++) {
@@ -1700,7 +2023,6 @@
         ctx.stroke();
         ctx.shadowBlur = 0;
 
-        // Value label
         ctx.fillStyle = 'rgba(136, 136, 170, 0.8)';
         ctx.font = '10px Inter, sans-serif';
         ctx.textAlign = 'left';
@@ -1715,24 +2037,40 @@
     }
 
     // ═══════════════════════════════════════
-    // RENDER
+    // RENDER MAIN LOOP
     // ═══════════════════════════════════════
     function render() {
-        // Update camera offset to follow the observer
-        const observer = state.observerIsCar1 ? state.car1Pos : state.car2Pos;
-        cameraOffset.x = observer.x;
-        cameraOffset.y = observer.y;
+        if (state.observer === 'ground') {
+            cameraOffset.x = 0;
+            cameraOffset.y = 0;
+        } else if (state.observer === 'car1') {
+            cameraOffset.x = state.car1Pos.x;
+            cameraOffset.y = state.car1Pos.y;
+        } else if (state.observer === 'car2') {
+            cameraOffset.x = state.car2Pos.x;
+            cameraOffset.y = state.car2Pos.y;
+        }
 
         drawBackground();
-        drawCar(state.car1Pos.x, state.car1Pos.y, '#00b8d4', 'Car 1', state.observerIsCar1);
-        drawCar(state.car2Pos.x, state.car2Pos.y, '#ff7043', 'Car 2', !state.observerIsCar1);
+        updateAndDrawParticles(DT * state.speed);
+
+        const v1 = getCar1Velocity();
+        const v2 = getCar2Velocity();
+
+        if (state.running) {
+            spawnExhaust(state.car1Pos.x, state.car1Pos.y, v1.x, v1.y, '#00e5ff');
+            spawnExhaust(state.car2Pos.x, state.car2Pos.y, v2.x, v2.y, '#ffd740');
+        }
+
+        drawCar(state.car1Pos.x, state.car1Pos.y, v1.x, v1.y, '#00e5ff', 'Car 1', state.observer === 'car1');
+        drawCar(state.car2Pos.x, state.car2Pos.y, v2.x, v2.y, '#ffd740', 'Car 2', state.observer === 'car2');
         drawVectors();
         updateStats();
         updateGraphs();
     }
 
     // ═══════════════════════════════════════
-    // UI CONTROLS
+    // UI CONTROLS & LISTENERS
     // ═══════════════════════════════════════
     const btnPlay = document.getElementById('btn-play');
     const btnStep = document.getElementById('btn-step');
@@ -1753,7 +2091,7 @@
         const v2 = getCar2Velocity();
         state.car2Pos.x += v2.x * DT;
         state.car2Pos.y += v2.y * DT;
-        // Wrap
+
         if (state.car1Pos.y > WORLD_RANGE.y) state.car1Pos.y = -WORLD_RANGE.y;
         if (state.car1Pos.y < -WORLD_RANGE.y) state.car1Pos.y = WORLD_RANGE.y;
         if (state.car2Pos.x > WORLD_RANGE.x) state.car2Pos.x = -WORLD_RANGE.x;
@@ -1771,6 +2109,7 @@
         btnPlay.textContent = '▶ Play';
         btnPlay.classList.remove('active');
         Object.assign(state, JSON.parse(JSON.stringify(initialState)));
+        particles = [];
         dataLogger.reset();
         render();
     });
@@ -1815,18 +2154,15 @@
         document.getElementById('val-dir').textContent = dirNames[state.car2Direction] || 'Custom';
         customAngleGroup.style.display = state.car2Direction === 'custom' ? 'block' : 'none';
 
-        // Reset car2 position based on direction
         resetCar2Position();
     });
 
     function resetCar2Position() {
         const is1D = state.viewMode === '1d-headon' || state.viewMode === '1d-same';
         if (is1D) {
-            // 1D mode: cars start on opposite sides of the horizontal road
             state.car1Pos = { x: -30, y: 0 };
             state.car2Pos = { x: 30, y: 0 };
         } else {
-            // 2D mode: original positions
             const angle = getCar2AngleRad();
             state.car2Pos = {
                 x: -25 * Math.cos(angle),
@@ -1836,16 +2172,37 @@
         }
     }
 
-    // Observer radio buttons
+    // Observer Radio Handlers
     const observerRadios = document.querySelectorAll('input[name="observer"]');
     observerRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            state.observerIsCar1 = radio.value === 'car1';
-            document.getElementById('radio-observer-1').classList.toggle('selected', state.observerIsCar1);
-            document.getElementById('radio-observer-2').classList.toggle('selected', !state.observerIsCar1);
-            render(); // Immediately re-render with new camera position
+            state.observer = radio.value;
+            const elGround = document.getElementById('radio-observer-ground');
+            if (elGround) elGround.classList.toggle('selected', state.observer === 'ground');
+            document.getElementById('radio-observer-1').classList.toggle('selected', state.observer === 'car1');
+            document.getElementById('radio-observer-2').classList.toggle('selected', state.observer === 'car2');
+            render();
         });
     });
+
+    // Vector Overlay Checkboxes
+    const chkComponents = document.getElementById('chk-components');
+    if (chkComponents) {
+        chkComponents.addEventListener('change', () => {
+            state.showComponents = chkComponents.checked;
+            document.getElementById('label-chk-components').classList.toggle('selected', state.showComponents);
+            render();
+        });
+    }
+
+    const chkTriangle = document.getElementById('chk-triangle');
+    if (chkTriangle) {
+        chkTriangle.addEventListener('change', () => {
+            state.showTriangle = chkTriangle.checked;
+            document.getElementById('label-chk-triangle').classList.toggle('selected', state.showTriangle);
+            render();
+        });
+    }
 
     // View mode radio buttons
     const viewModeRadios = document.querySelectorAll('input[name="viewMode"]');
