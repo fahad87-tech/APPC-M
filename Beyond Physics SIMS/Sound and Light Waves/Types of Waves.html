@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics: Wave Mechanics - Strings, Springs & EM Fields</title>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --bg: #070814;
+            --card: #101226;
+            --card-hover: #161833;
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --accent-cyan: #00e5ff;
+            --accent-purple: #7c4dff;
+            --accent-pink: #ff4081;
+            --accent-amber: #ffd740;
+            --accent-green: #69f0ae;
+            --text: #f0f2ff;
+            --text-muted: #8a8cae;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            padding: 0 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(7, 8, 20, 0.94);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+        }
+        .tab-btn {
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 24px 6px;
+            max-width: 1600px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, rgba(0, 229, 255, 0.05) 0%, transparent 100%);
+        }
+        .header h1 {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #a0a5d0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+        .header .domain-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            background: rgba(0, 229, 255, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.25);
+        }
+        .header .description {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .main-layout {
+            display: flex;
+            gap: 16px;
+            padding: 6px 24px 24px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        .controls-panel {
+            width: 320px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+        .card h3 {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 5px;
+        }
+
+        .wave-type-selector { display: flex; flex-direction: column; gap: 6px; }
+        .wave-type-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .wave-type-btn:hover { background: var(--card-hover); border-color: rgba(255,255,255,0.2); }
+        .wave-type-btn.active {
+            background: rgba(0, 229, 255, 0.12);
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+        }
+
+        .radio-options { display: flex; flex-direction: column; gap: 6px; }
+        .option-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-label:hover { background: var(--card-hover); }
+        .option-label.selected {
+            background: rgba(0, 229, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: #ffffff;
+        }
+        .option-label input[type="radio"] { accent-color: var(--accent-cyan); }
+
+        .slider-group { margin-bottom: 12px; transition: all 0.2s; }
+        .slider-group:last-child { margin-bottom: 0; }
+        .slider-label { display: flex; justify-content: space-between; font-size: 11px; font-weight: 500; margin-bottom: 4px; }
+        .slider-label .value { font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan); font-weight: 600; }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 5px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+            transition: transform 0.1s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        .btn-group { display: flex; gap: 8px; }
+        .btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--input-bg);
+            color: var(--text);
+            text-align: center;
+        }
+        .btn:hover { background: rgba(255, 255, 255, 0.12); }
+        .btn.active { background: var(--accent-cyan); color: #000; border-color: var(--accent-cyan); box-shadow: 0 0 12px rgba(0, 229, 255, 0.3); }
+        .btn.reset { background: rgba(255, 64, 129, 0.15); color: var(--accent-pink); border-color: rgba(255, 64, 129, 0.3); }
+        .btn.trigger { background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(124,77,255,0.2)); color: var(--accent-cyan); border-color: var(--accent-cyan); font-weight: 700; }
+
+        .toggle-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            padding: 6px;
+            background: var(--input-bg);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
+        .toggle-item input[type="checkbox"] { accent-color: var(--accent-cyan); }
+
+        .canvas-area {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #05060e;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
+        }
+        canvas#simCanvas {
+            display: block;
+            width: 100%;
+            height: 520px;
+        }
+
+        .stats-banner {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 10px;
+        }
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+        .stat-card .label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; }
+        .stat-card .value { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; color: var(--accent-cyan); }
+
+        .energy-bar-wrap {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 14px;
+        }
+        .energy-bar-track {
+            width: 100%;
+            height: 18px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 9px;
+            overflow: hidden;
+            display: flex;
+            margin-top: 4px;
+        }
+        .energy-bar-seg {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #000;
+            transition: width 0.1s;
+        }
+        .energy-ke { background: var(--accent-green); }
+        .energy-pe { background: var(--accent-purple); color: #fff; }
+
+        /* Assessment Tab */
+        .assessment-section { max-width: 900px; margin: 0 auto; padding: 20px 20px 50px; }
+        .assessment-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+        .assessment-header h2 { font-size: 20px; font-weight: 700; }
+        .student-name-group { display: flex; align-items: center; gap: 10px; }
+        .student-name-group input[type="text"] { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 14px; width: 220px; outline: none; }
+        .student-name-group input[type="text"]:focus { border-color: var(--accent-cyan); }
+        .assessment-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+        .assess-question { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 16px; display: none; }
+        .assess-question.active { display: block; }
+        .assess-question .q-text { font-size: 15px; font-weight: 500; line-height: 1.6; margin-bottom: 14px; }
+        .assess-question textarea { width: 100%; min-height: 110px; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 14px; line-height: 1.6; resize: vertical; outline: none; }
+        .assess-question textarea:focus { border-color: var(--accent-cyan); }
+        .btn-docx { padding: 10px 24px; border-radius: 10px; border: 1px solid rgba(0,229,255,0.4); background: linear-gradient(135deg, rgba(0,229,255,0.2), rgba(124,77,255,0.2)); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .btn-docx:hover { background: linear-gradient(135deg, rgba(0,229,255,0.35), rgba(124,77,255,0.35)); }
+
+        @media (max-width: 960px) {
+            .main-layout { flex-direction: column; }
+            .controls-panel { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- TAB BAR -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="sim">〰 Simulation Workspace</button>
+        <button class="tab-btn" data-tab="assessment">📝 5E Assessment Worksheet</button>
+    </div>
+
+    <!-- TAB 1: SIMULATION WORKSPACE -->
+    <div id="tab-sim" class="tab-content active">
+        <div class="header">
+            <div>
+                <h1>Wave Mechanics: Strings, Sound & EM Light</h1>
+                <p class="description">High-realism physics engine. Drag on-screen ruler to measure wavelength λ directly!</p>
+            </div>
+            <div class="domain-badge">Kinematics · 120 FPS Engine</div>
+        </div>
+
+        <div class="main-layout">
+            <!-- CONTROLS PANEL -->
+            <div class="controls-panel">
+                <!-- WAVE TYPE -->
+                <div class="card">
+                    <h3>Wave Medium</h3>
+                    <div class="wave-type-selector">
+                        <button class="wave-type-btn active" data-type="transverse">〰 Transverse (String)</button>
+                        <button class="wave-type-btn" data-type="longitudinal">↔ Longitudinal (Sound Air / Spring)</button>
+                        <button class="wave-type-btn" data-type="em">⚡ Electromagnetic (Light Field)</button>
+                    </div>
+                </div>
+
+                <!-- END BOUNDARY CONDITION -->
+                <div class="card">
+                    <h3>Boundary Condition</h3>
+                    <div class="radio-options">
+                        <label class="option-label" id="opt-bound-fixed">
+                            <input type="radio" name="boundary" value="fixed">
+                            <span>Fixed End 🔒 (Inverted Reflection)</span>
+                        </label>
+                        <label class="option-label" id="opt-bound-free">
+                            <input type="radio" name="boundary" value="free">
+                            <span>Free End ⭕ (Upright Reflection)</span>
+                        </label>
+                        <label class="option-label selected" id="opt-bound-none">
+                            <input type="radio" name="boundary" value="none" checked>
+                            <span>No End ♾️ (Open Window)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- DRIVER ENGINE -->
+                <div class="card">
+                    <h3>Driver Engine</h3>
+                    <div class="radio-options" style="margin-bottom: 8px;">
+                        <label class="option-label selected" id="opt-drive-sine">
+                            <input type="radio" name="driver" value="sine" checked>
+                            <span>Continuous Oscillator</span>
+                        </label>
+                        <label class="option-label" id="opt-drive-pulse">
+                            <input type="radio" name="driver" value="pulse">
+                            <span>Manual Pulse Generator</span>
+                        </label>
+                    </div>
+                    <button class="btn trigger" id="btn-fire-pulse" style="display:none; width: 100%;">⚡ Fire Pulse</button>
+                </div>
+
+                <!-- PHYSICAL PARAMETERS -->
+                <div class="card">
+                    <h3>Physical Parameters</h3>
+
+                    <!-- EM Vacuum Badge -->
+                    <div id="badge-em-info" style="display:none; font-size:11px; color:var(--accent-pink); background:rgba(255,64,129,0.12); border:1px solid rgba(255,64,129,0.3); padding:8px 10px; border-radius:8px; margin-bottom:10px; text-align:center; font-weight:600;">
+                        ⚡ Light Wave in Vacuum<br><span style="font-size:10px; color:var(--text-muted); font-weight:normal;">Speed c = 3.0 × 10⁸ m/s (No Tension / Mass Density)</span>
+                    </div>
+
+                    <div class="slider-group" id="group-tension">
+                        <div class="slider-label"><span>Tension / Stiffness (T)</span><span class="value" id="val-tension">1.0 N</span></div>
+                        <input type="range" id="slider-tension" min="0.1" max="100.0" step="0.1" value="1.0">
+                    </div>
+                    <div class="slider-group" id="group-density">
+                        <div class="slider-label"><span>Linear Mass Density (μ)</span><span class="value" id="val-density">0.100 kg/m</span></div>
+                        <input type="range" id="slider-density" min="0.002" max="0.100" step="0.002" value="0.100">
+                    </div>
+                    <div class="slider-group" id="group-amplitude">
+                        <div class="slider-label"><span>Amplitude (A)</span><span class="value" id="val-amplitude">0.25 m</span></div>
+                        <input type="range" id="slider-amplitude" min="0.02" max="0.50" step="0.01" value="0.25">
+                    </div>
+                    <div class="slider-group" id="group-frequency">
+                        <div class="slider-label"><span>Frequency (f)</span><span class="value" id="val-frequency">1.5 Hz</span></div>
+                        <input type="range" id="slider-frequency" min="0.2" max="4.0" step="0.1" value="1.5">
+                    </div>
+                    <div class="slider-group" id="group-damping">
+                        <div class="slider-label"><span>Damping Coefficient (γ)</span><span class="value" id="val-damping">0.00</span></div>
+                        <input type="range" id="slider-damping" min="0.0" max="0.50" step="0.01" value="0.00">
+                    </div>
+                </div>
+
+                <!-- PLAYBACK & VISUAL TOOLS -->
+                <div class="card">
+                    <h3>Playback & Visual Tools</h3>
+                    <div class="btn-group" style="margin-bottom: 10px;">
+                        <button class="btn active" id="btn-play">▶ Play</button>
+                        <button class="btn" id="btn-step">⏭ Step</button>
+                        <button class="btn reset" id="btn-reset">↺ Reset</button>
+                    </div>
+                    <div class="slider-group" style="margin-bottom: 10px;">
+                        <div class="slider-label"><span>Sim Speed</span><span class="value" id="val-speed">1.0x</span></div>
+                        <input type="range" id="slider-speed" min="0.25" max="3.0" step="0.25" value="1.0">
+                    </div>
+                    <div class="toggle-grid">
+                        <label class="toggle-item"><input type="checkbox" id="chk-ruler" checked> 📏 Show Ruler</label>
+                        <label class="toggle-item"><input type="checkbox" id="chk-grid" checked> 🌐 Show Grid</label>
+                        <label class="toggle-item"><input type="checkbox" id="chk-vectors" checked> ↗️ Vectors</label>
+                        <label class="toggle-item"><input type="checkbox" id="chk-nodes" checked> 📍 Node Tags</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANVAS & REAL-TIME READOUTS -->
+            <div class="canvas-area">
+                <div class="canvas-container">
+                    <canvas id="simCanvas"></canvas>
+                </div>
+
+                <!-- REAL-TIME STATS BANNER -->
+                <div class="stats-banner">
+                    <div class="stat-card"><div class="label">Time</div><div class="value" id="stat-time">0.00 s</div></div>
+                    <div class="stat-card"><div class="label">Wave Speed (v)</div><div class="value" id="stat-speed">3.16 m/s</div></div>
+                    <div class="stat-card"><div class="label">Wavelength (λ)</div><div class="value" id="stat-wavelength">2.11 m</div></div>
+                    <div class="stat-card"><div class="label">Midpoint Position</div><div class="value" id="stat-disp">0.00 m</div></div>
+                    <div class="stat-card"><div class="label">Midpoint Velocity</div><div class="value" id="stat-vel">0.00 m/s</div></div>
+                    <div class="stat-card"><div class="label">Total Energy</div><div class="value" id="stat-energy">0.00 J</div></div>
+                </div>
+
+                <!-- ENERGY DISTRIBUTION BAR -->
+                <div class="energy-bar-wrap">
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:1px;">
+                        <span>Kinetic Energy (KE)</span>
+                        <span>Potential Energy (PE)</span>
+                    </div>
+                    <div class="energy-bar-track">
+                        <div class="energy-bar-seg energy-ke" id="bar-ke" style="width:50%;">KE: 50%</div>
+                        <div class="energy-bar-seg energy-pe" id="bar-pe" style="width:50%;">PE: 50%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: 5E ASSESSMENT WORKSHEET -->
+    <div id="tab-assessment" class="tab-content">
+        <div class="assessment-section">
+            <div class="assessment-header">
+                <div>
+                    <h2>5E Formative Assessment: Wave Mechanics</h2>
+                    <p style="color:var(--text-muted); font-size:13px; margin-top:4px;">Transverse, Longitudinal & EM Waves Exploration</p>
+                </div>
+                <div class="student-name-group">
+                    <label for="student-name">Student Name:</label>
+                    <input type="text" id="student-name" placeholder="Enter full name...">
+                </div>
+            </div>
+
+            <div class="assessment-nav">
+                <button class="nav-btn" id="q-prev">◀</button>
+                <div class="nav-slider" style="font-size:13px; font-weight:600; color:var(--accent-cyan);" id="q-title-badge">1. ENGAGE</div>
+                <button class="nav-btn" id="q-next">▶</button>
+            </div>
+
+            <div class="assess-question active" data-q="0">
+                <div style="color:var(--accent-cyan); font-size:12px; font-weight:700; margin-bottom:8px;">1. ENGAGE</div>
+                <div class="q-text">When you shake a rope vertically, the wave travels horizontally down the length of the rope. Why does the wave travel forward even though individual rope particles move only up and down? Explain in terms of tension and particle coupling.</div>
+                <textarea id="ans-0" placeholder="Type your explanation here..."></textarea>
+            </div>
+
+            <div class="assess-question" data-q="1">
+                <div style="color:var(--accent-purple); font-size:12px; font-weight:700; margin-bottom:8px;">2. EXPLORE</div>
+                <div class="q-text">Set Tension (T) to 1.0 N and Linear Density (μ) to 0.100 kg/m. Measure the wavelength λ using the on-screen ruler for Frequency f = 1.5 Hz. How does changing frequency affect wavelength and wave speed?</div>
+                <textarea id="ans-1" placeholder="Type your observation and measurements here..."></textarea>
+            </div>
+
+            <div class="assess-question" data-q="2">
+                <div style="color:var(--accent-amber); font-size:12px; font-weight:700; margin-bottom:8px;">3. EXPLAIN</div>
+                <div class="q-text">Compare a Transverse string wave with a Longitudinal sound wave. How do particle displacements differ relative to the direction of wave propagation? Explain why the longitudinal driver piston moves horizontally left-and-right.</div>
+                <textarea id="ans-2" placeholder="Type your response here..."></textarea>
+            </div>
+
+            <div class="assess-question" data-q="3">
+                <div style="color:var(--accent-green); font-size:12px; font-weight:700; margin-bottom:8px;">4. ELABORATE</div>
+                <div class="q-text">Compare Fixed End reflection (inverted wave) with Free End reflection (upright wave). Explain why a fixed end reflects inverted using Newton's Third Law.</div>
+                <textarea id="ans-3" placeholder="Type your physics reasoning here..."></textarea>
+            </div>
+
+            <div class="assess-question" data-q="4">
+                <div style="color:var(--accent-pink); font-size:12px; font-weight:700; margin-bottom:8px;">5. EVALUATE</div>
+                <div class="q-text">In an Electromagnetic (Light) wave, describe the geometric relationship between the Electric field vector E, Magnetic field vector B, and the Poynting propagation vector S.</div>
+                <textarea id="ans-4" placeholder="Type your answer here..."></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+                <span style="font-size:13px; color:var(--text-muted);" id="q-counter">Question 1 of 5</span>
+                <button class="btn-docx" id="btn-export-docx">📄 Export Worksheet to Word (.DOCX)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ENGINE -->
+    <script>
+    // ═══════════════════════════════════════
+    // SIMULATION STATE & PHYSICAL CONSTANTS
+    // ═══════════════════════════════════════
+    let waveType = 'transverse'; // 'transverse', 'longitudinal', 'em'
+    let boundaryEnd = 'none';    // DEFAULT: 'none' (Open Window / No End)
+    let driverMode = 'sine';     // 'sine', 'pulse'
+
+    let state = {
+        running: true,
+        time: 0,
+        speed: 1.0,
+        tension: 1.0,        // Transverse default tension: 1.0 N
+        linearDensity: 0.100, // Transverse default density: 0.100 kg/m (Max!)
+        amplitude: 0.25,     // Transverse default amplitude: 0.25 m
+        frequency: 1.5,      // Transverse default frequency: 1.5 Hz
+        damping: 0.00,       // Default damping: 0.00
+        pulseTriggerTime: -100,
+        // Visual Toggles
+        showRuler: true,
+        showGrid: true,
+        showVectors: true,
+        showNodes: true
+    };
+
+    // DRAGGABLE RULER TOOL STATE
+    let ruler = {
+        x: 180,
+        y: 400,
+        lengthPx: 320,
+        isDragging: false,
+        dragOffsetX: 0,
+        dragOffsetY: 0
+    };
+
+    // GAS PARTICLES MEDIUM FOR SOUND WAVES
+    const NUM_GAS_PARTICLES = 240;
+    const gasParticles = [];
+    for (let i = 0; i < NUM_GAS_PARTICLES; i++) {
+        gasParticles.push({
+            x0: Math.random() * 10.0,
+            offsetY: (Math.random() - 0.5) * 80
+        });
+    }
+
+    // ═══════════════════════════════════════
+    // CANVAS & HIGH-DPI SETUP
+    // ═══════════════════════════════════════
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+    const STRING_LENGTH = 10.0;
+
+    function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function getCanvasSize() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        return { w: rect.width, h: rect.height };
+    }
+
+    function mapToCanvas(x, y) {
+        const { w, h } = getCanvasSize();
+        const marginX = 85;
+        const marginY = 85;
+        const cx = marginX + (x / STRING_LENGTH) * (w - 2 * marginX);
+        const cy = h / 2 - y * (h - 2 * marginY) / 2;
+        return { cx, cy };
+    }
+
+    // ═══════════════════════════════════════
+    // DYNAMIC MODE DEFAULTS & UI CONTROLS VISIBILITY
+    // ═══════════════════════════════════════
+    function setModeDefaults(type) {
+        const groupTension = document.getElementById('group-tension');
+        const groupDensity = document.getElementById('group-density');
+        const groupDamping = document.getElementById('group-damping');
+        const badgeEM = document.getElementById('badge-em-info');
+
+        if (type === 'transverse') {
+            state.tension = 1.0;
+            state.linearDensity = 0.100;
+            state.amplitude = 0.25;
+            state.frequency = 1.5;
+            state.damping = 0.00;
+
+            groupTension.style.display = 'block';
+            groupDensity.style.display = 'block';
+            groupDamping.style.display = 'block';
+            if (badgeEM) badgeEM.style.display = 'none';
+
+        } else if (type === 'longitudinal') {
+            state.tension = 6.0;
+            state.linearDensity = 0.100;
+            state.amplitude = 0.50; // MAX Amplitude!
+            state.frequency = 1.5;
+            state.damping = 0.00;
+
+            groupTension.style.display = 'block';
+            groupDensity.style.display = 'block';
+            groupDamping.style.display = 'block';
+            if (badgeEM) badgeEM.style.display = 'none';
+
+        } else if (type === 'em') {
+            state.amplitude = 0.25;
+            state.frequency = 1.5;
+
+            // Hide Tension, Linear Density, Damping for EM Waves
+            groupTension.style.display = 'none';
+            groupDensity.style.display = 'none';
+            groupDamping.style.display = 'none';
+            if (badgeEM) badgeEM.style.display = 'block';
+        }
+
+        // Update Slider inputs & readouts
+        document.getElementById('slider-tension').value = state.tension;
+        document.getElementById('val-tension').textContent = state.tension.toFixed(1) + ' N';
+
+        document.getElementById('slider-density').value = state.linearDensity;
+        document.getElementById('val-density').textContent = state.linearDensity.toFixed(3) + ' kg/m';
+
+        document.getElementById('slider-amplitude').value = state.amplitude;
+        document.getElementById('val-amplitude').textContent = state.amplitude.toFixed(2) + ' m';
+
+        document.getElementById('slider-frequency').value = state.frequency;
+        document.getElementById('val-frequency').textContent = state.frequency.toFixed(1) + ' Hz';
+
+        document.getElementById('slider-damping').value = state.damping;
+        document.getElementById('val-damping').textContent = state.damping.toFixed(2);
+    }
+
+    // ═══════════════════════════════════════
+    // ANALYTICAL WAVE SUPERPOSITION PHYSICS ENGINE
+    // ═══════════════════════════════════════
+    function getWaveSpeed() {
+        if (waveType === 'em') return 40.0;
+        return Math.sqrt(state.tension / state.linearDensity);
+    }
+
+    function getWavelength() {
+        return getWaveSpeed() / state.frequency;
+    }
+
+    function driverSignal(t) {
+        if (t < 0) return 0;
+        if (driverMode === 'sine') {
+            const ramp = Math.min(1.0, t * 2.0);
+            return state.amplitude * Math.sin(2 * Math.PI * state.frequency * t) * ramp;
+        } else {
+            const pulseWidth = 0.4 / state.frequency;
+            const arg = (t - pulseWidth) / (pulseWidth * 0.35);
+            if (t <= pulseWidth * 2.5) {
+                return state.amplitude * Math.exp(-arg * arg);
+            }
+            return 0;
+        }
+    }
+
+    function getWaveDisplacement(x, t) {
+        const v = getWaveSpeed();
+        const gamma = state.damping * 0.15;
+        const L = STRING_LENGTH;
+        let totalY = 0;
+
+        const tInc = (driverMode === 'pulse') ? (t - (state.pulseTriggerTime > 0 ? state.pulseTriggerTime : 0)) : t;
+        const tDelayInc = tInc - x / v;
+        if (tDelayInc > 0) {
+            totalY += driverSignal(tDelayInc) * Math.exp(-gamma * x);
+        }
+
+        if (boundaryEnd !== 'none') {
+            const tDelayRef1 = tInc - (2 * L - x) / v;
+            if (tDelayRef1 > 0) {
+                const phase1 = (boundaryEnd === 'fixed') ? -1.0 : 1.0;
+                totalY += phase1 * driverSignal(tDelayRef1) * Math.exp(-gamma * (2 * L - x));
+            }
+
+            const tDelayRef2 = tInc - (2 * L + x) / v;
+            if (tDelayRef2 > 0) {
+                const phase2 = (boundaryEnd === 'fixed') ? 1.0 : 1.0;
+                totalY += phase2 * driverSignal(tDelayRef2) * Math.exp(-gamma * (2 * L + x));
+            }
+        }
+
+        return totalY;
+    }
+
+    function calculateEnergies() {
+        const dx = 0.05;
+        const N = Math.floor(STRING_LENGTH / dx);
+        const mu = state.linearDensity;
+        const T = state.tension;
+        const dtSample = 0.002;
+
+        let ke = 0, pe = 0;
+        for (let i = 0; i < N; i++) {
+            const x = i * dx;
+            const yCurrent = getWaveDisplacement(x, state.time);
+            const yNext = getWaveDisplacement(x, state.time + dtSample);
+            const vel = (yNext - yCurrent) / dtSample;
+
+            ke += 0.5 * mu * vel * vel * dx;
+
+            if (i < N - 1) {
+                const yRight = getWaveDisplacement(x + dx, state.time);
+                const slope = (yRight - yCurrent) / dx;
+                pe += 0.5 * T * slope * slope * dx;
+            }
+        }
+        return { ke, pe, total: ke + pe };
+    }
+
+    // ═══════════════════════════════════════
+    // RENDERING ENGINE
+    // ═══════════════════════════════════════
+    function drawBackground() {
+        const { w, h } = getCanvasSize();
+        ctx.fillStyle = '#05060e';
+        ctx.fillRect(0, 0, w, h);
+
+        if (state.showGrid) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.lineWidth = 1;
+            for (let x = 0; x < w; x += 40) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+            }
+            for (let y = 0; y < h; y += 40) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+        }
+
+        const leftPt = mapToCanvas(0, 0);
+        const rightPt = mapToCanvas(STRING_LENGTH, 0);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(leftPt.cx, h / 2);
+        ctx.lineTo(rightPt.cx, h / 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    function drawDriverEngine() {
+        const { h } = getCanvasSize();
+        const leftPt = mapToCanvas(0, 0);
+        const valDriver = getWaveDisplacement(0, state.time);
+
+        if (waveType === 'transverse') {
+            const pt = mapToCanvas(0, valDriver);
+            ctx.fillStyle = '#1c1e38';
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 2;
+            ctx.fillRect(leftPt.cx - 26, pt.cy - 20, 22, 40);
+            ctx.strokeRect(leftPt.cx - 26, pt.cy - 20, 22, 40);
+
+            ctx.strokeStyle = 'rgba(136, 136, 170, 0.4)';
+            ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.moveTo(leftPt.cx - 15, h / 2 - 110); ctx.lineTo(leftPt.cx - 15, h / 2 + 110); ctx.stroke();
+
+            ctx.fillStyle = '#00e5ff';
+            ctx.beginPath(); ctx.arc(leftPt.cx - 4, pt.cy, 6, 0, Math.PI * 2); ctx.fill();
+
+        } else if (waveType === 'longitudinal') {
+            const horizDisp = valDriver * 50;
+            const pistonX = leftPt.cx - 20 + horizDisp;
+
+            ctx.strokeStyle = 'rgba(255, 215, 64, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(leftPt.cx - 60, h / 2 - 50, 60, 100);
+
+            ctx.fillStyle = '#ffd740';
+            ctx.shadowColor = '#ffd740';
+            ctx.shadowBlur = 10;
+            ctx.fillRect(pistonX, h / 2 - 45, 12, 90);
+            ctx.shadowBlur = 0;
+
+            ctx.strokeStyle = '#8888aa';
+            ctx.lineWidth = 4;
+            ctx.beginPath(); ctx.moveTo(pistonX - 50, h / 2); ctx.lineTo(pistonX, h / 2); ctx.stroke();
+
+            ctx.fillStyle = '#ffd740';
+            ctx.font = '9px JetBrains Mono, monospace';
+            ctx.fillText('↔ Piston Driver', leftPt.cx - 58, h / 2 + 65);
+
+        } else if (waveType === 'em') {
+            ctx.fillStyle = '#ff4081';
+            ctx.strokeStyle = '#ff4081';
+            ctx.lineWidth = 3;
+
+            const ptTop = mapToCanvas(0, valDriver);
+            const ptBot = mapToCanvas(0, -valDriver);
+
+            ctx.beginPath(); ctx.moveTo(leftPt.cx - 12, ptTop.cy); ctx.lineTo(leftPt.cx - 12, ptBot.cy); ctx.stroke();
+
+            ctx.fillStyle = '#00e5ff';
+            ctx.beginPath(); ctx.arc(leftPt.cx - 12, ptTop.cy, 8, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ff4081';
+            ctx.beginPath(); ctx.arc(leftPt.cx - 12, ptBot.cy, 8, 0, Math.PI * 2); ctx.fill();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.fillText('+', leftPt.cx - 15, ptTop.cy + 3);
+            ctx.fillText('-', leftPt.cx - 14, ptBot.cy + 3);
+        }
+    }
+
+    function drawBoundarySupport() {
+        const { h } = getCanvasSize();
+        const rightPt = mapToCanvas(STRING_LENGTH, 0);
+
+        if (boundaryEnd === 'fixed') {
+            ctx.fillStyle = '#ff4081';
+            ctx.fillRect(rightPt.cx, h / 2 - 45, 10, 90);
+            ctx.fillStyle = '#ff4081';
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.fillText('Fixed Clamp 🔒', rightPt.cx - 30, h / 2 + 62);
+        } else if (boundaryEnd === 'free') {
+            ctx.strokeStyle = '#69f0ae';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(rightPt.cx + 2, h / 2 - 80);
+            ctx.lineTo(rightPt.cx + 2, h / 2 + 80);
+            ctx.stroke();
+
+            const yEnd = getWaveDisplacement(STRING_LENGTH, state.time);
+            const ptEnd = mapToCanvas(STRING_LENGTH, yEnd);
+            ctx.fillStyle = '#69f0ae';
+            ctx.beginPath();
+            ctx.arc(ptEnd.cx + 2, ptEnd.cy, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#69f0ae';
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.fillText('Free Ring ⭕', rightPt.cx - 25, h / 2 + 62);
+        } else {
+            ctx.fillStyle = '#7c4dff';
+            ctx.font = 'bold 11px Inter, sans-serif';
+            ctx.fillText('Open Window ♾️', rightPt.cx - 40, h / 2 + 62);
+        }
+    }
+
+    function drawTransverseWave() {
+        const numPoints = 250;
+        const dx = STRING_LENGTH / (numPoints - 1);
+
+        ctx.shadowColor = '#00e5ff';
+        ctx.shadowBlur = 12;
+        ctx.strokeStyle = '#00e5ff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        for (let i = 0; i < numPoints; i++) {
+            const x = i * dx;
+            const y = getWaveDisplacement(x, state.time);
+            const pt = mapToCanvas(x, y);
+            if (i === 0) ctx.moveTo(pt.cx, pt.cy);
+            else ctx.lineTo(pt.cx, pt.cy);
+        }
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        for (let i = 0; i < numPoints; i += 8) {
+            const x = i * dx;
+            const y = getWaveDisplacement(x, state.time);
+            const pt = mapToCanvas(x, y);
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(pt.cx, pt.cy, 3, 0, Math.PI * 2); ctx.fill();
+        }
+
+        if (state.showVectors) {
+            const sampleIndices = [Math.floor(numPoints * 0.25), Math.floor(numPoints * 0.5), Math.floor(numPoints * 0.75)];
+            const dtSample = 0.002;
+            sampleIndices.forEach(idx => {
+                const x = idx * dx;
+                const y = getWaveDisplacement(x, state.time);
+                const yPrev = getWaveDisplacement(x, state.time - dtSample);
+                const yNext = getWaveDisplacement(x, state.time + dtSample);
+                const vel = (yNext - yPrev) / (2 * dtSample);
+                const acc = (yNext - 2 * y + yPrev) / (dtSample * dtSample);
+
+                const pt = mapToCanvas(x, y);
+
+                const vy = vel * 12;
+                if (Math.abs(vy) > 0.5) {
+                    ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(pt.cx, pt.cy); ctx.lineTo(pt.cx, pt.cy - vy); ctx.stroke();
+                }
+
+                const ay = acc * 1.5;
+                if (Math.abs(ay) > 0.5) {
+                    ctx.strokeStyle = '#ff4081'; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.moveTo(pt.cx, pt.cy); ctx.lineTo(pt.cx + 16, pt.cy - ay); ctx.stroke();
+                }
+            });
+        }
+
+        if (state.showNodes && driverMode === 'sine' && state.damping === 0) {
+            ctx.font = '10px JetBrains Mono, monospace';
+            const wavelength = getWavelength();
+            for (let x = 0; x <= STRING_LENGTH; x += wavelength / 4) {
+                const isNode = Math.abs(Math.sin(2 * Math.PI * x / wavelength)) < 0.1;
+                const pt = mapToCanvas(x, 0);
+                if (isNode) {
+                    ctx.fillStyle = '#ffd740';
+                    ctx.fillText('N', pt.cx - 4, pt.cy - 12);
+                }
+            }
+        }
+    }
+
+    function drawLongitudinalWave() {
+        const { h } = getCanvasSize();
+        const numCoils = 50;
+        const leftPt = mapToCanvas(0, 0);
+        const rightPt = mapToCanvas(STRING_LENGTH, 0);
+        const barY = h / 2 + 55;
+
+        ctx.fillStyle = 'rgba(255,255,255,0.04)';
+        ctx.fillRect(leftPt.cx, barY, rightPt.cx - leftPt.cx, 26);
+
+        for (let i = 0; i < numCoils - 1; i++) {
+            const x0_1 = (i / numCoils) * STRING_LENGTH;
+            const x0_2 = ((i + 1) / numCoils) * STRING_LENGTH;
+
+            const u1 = getWaveDisplacement(x0_1, state.time) * 45;
+            const u2 = getWaveDisplacement(x0_2, state.time) * 45;
+
+            const pt1 = mapToCanvas(x0_1, 0);
+            const pt2 = mapToCanvas(x0_2, 0);
+
+            const screenX1 = pt1.cx + u1;
+            const screenX2 = pt2.cx + u2;
+            const dxCoil = screenX2 - screenX1;
+            const eqDx = (rightPt.cx - leftPt.cx) / numCoils;
+            const densityRatio = eqDx / Math.max(0.1, dxCoil);
+
+            let color = 'rgba(255, 215, 64, 0.3)';
+            if (densityRatio > 1.15) {
+                color = `rgba(0, 229, 255, ${Math.min(1.0, (densityRatio - 1) * 2.5)})`;
+            } else if (densityRatio < 0.85) {
+                color = `rgba(255, 64, 129, ${Math.min(1.0, (1 - densityRatio) * 2.5)})`;
+            }
+            ctx.fillStyle = color;
+            ctx.fillRect(screenX1, barY, Math.max(1, dxCoil), 26);
+
+            ctx.strokeStyle = '#ffd740';
+            ctx.lineWidth = 2.0;
+            ctx.shadowColor = '#ffd740';
+            ctx.shadowBlur = 4;
+            ctx.beginPath();
+            ctx.ellipse((screenX1 + screenX2) / 2, h / 2 - 25, Math.abs(dxCoil) / 2 + 1, 22, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        gasParticles.forEach(p => {
+            const u = getWaveDisplacement(p.x0, state.time) * 45;
+            const pt = mapToCanvas(p.x0, 0);
+            const px = pt.cx + u;
+            const py = h / 2 + p.offsetY;
+
+            ctx.fillStyle = 'rgba(0, 229, 255, 0.75)';
+            ctx.beginPath();
+            ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        ctx.font = 'bold 11px Inter, sans-serif';
+        ctx.fillStyle = '#00e5ff';
+        ctx.fillText('■ COMPRESSION (High Particle Density)', leftPt.cx + 10, barY + 42);
+        ctx.fillStyle = '#ff4081';
+        ctx.fillText('■ RAREFACTION (Low Particle Density)', leftPt.cx + 280, barY + 42);
+    }
+
+    function drawEMWave() {
+        const { h } = getCanvasSize();
+        const numEM = 40;
+        const leftPt = mapToCanvas(0, 0);
+
+        for (let i = 0; i < numEM; i++) {
+            const x = (i / numEM) * STRING_LENGTH;
+            const pt = mapToCanvas(x, 0);
+            const eField = getWaveDisplacement(x, state.time) * 110;
+            const bField = getWaveDisplacement(x, state.time) * 75;
+
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#00e5ff';
+            ctx.shadowBlur = 5;
+            ctx.beginPath(); ctx.moveTo(pt.cx, h / 2); ctx.lineTo(pt.cx, h / 2 - eField); ctx.stroke();
+
+            const zX = pt.cx + bField * 0.55;
+            const zY = h / 2 + bField * 0.35;
+            ctx.strokeStyle = '#ff4081';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#ff4081';
+            ctx.shadowBlur = 5;
+            ctx.beginPath(); ctx.moveTo(pt.cx, h / 2); ctx.lineTo(zX, zY); ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        ctx.fillStyle = '#ffd740';
+        ctx.font = 'bold 11px JetBrains Mono, monospace';
+        ctx.fillText('⚡ Poynting Vector S = (1/μ₀) E × B (Light Propagation Direction)', leftPt.cx + 10, 35);
+    }
+
+    function drawRuler() {
+        if (!state.showRuler) return;
+        const { w } = getCanvasSize();
+
+        ctx.save();
+        ctx.translate(ruler.x, ruler.y);
+
+        ctx.fillStyle = 'rgba(255, 215, 64, 0.15)';
+        ctx.strokeStyle = '#ffd740';
+        ctx.lineWidth = 2;
+        ctx.shadowColor = '#ffd740';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(0, 0, ruler.lengthPx, 40);
+        ctx.strokeRect(0, 0, ruler.lengthPx, 40);
+        ctx.shadowBlur = 0;
+
+        const meterPx = (w - 170) / STRING_LENGTH;
+        ctx.fillStyle = '#ffd740';
+        ctx.strokeStyle = '#ffd740';
+        ctx.lineWidth = 1;
+        ctx.font = '9px JetBrains Mono, monospace';
+
+        for (let px = 0; px <= ruler.lengthPx; px += 10) {
+            const isMajor = (px % 50 === 0);
+            const tickH = isMajor ? 14 : 7;
+            ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, tickH); ctx.stroke();
+
+            if (isMajor) {
+                const meters = (px / meterPx).toFixed(1);
+                ctx.fillText(meters + 'm', px - 8, 26);
+            }
+        }
+
+        ctx.font = 'bold 10px Inter, sans-serif';
+        ctx.fillText('📏 DRAG RULER TO MEASURE λ', 10, 36);
+
+        ctx.restore();
+    }
+
+    canvas.addEventListener('mousedown', e => {
+        if (!state.showRuler) return;
+        const rect = canvas.getBoundingClientRect();
+        const mx = e.clientX - rect.left;
+        const my = e.clientY - rect.top;
+
+        if (mx >= ruler.x && mx <= ruler.x + ruler.lengthPx && my >= ruler.y && my <= ruler.y + 40) {
+            ruler.isDragging = true;
+            ruler.dragOffsetX = mx - ruler.x;
+            ruler.dragOffsetY = my - ruler.y;
+        }
+    });
+
+    canvas.addEventListener('mousemove', e => {
+        if (ruler.isDragging) {
+            const rect = canvas.getBoundingClientRect();
+            ruler.x = e.clientX - rect.left - ruler.dragOffsetX;
+            ruler.y = e.clientY - rect.top - ruler.dragOffsetY;
+        }
+    });
+
+    window.addEventListener('mouseup', () => { ruler.isDragging = false; });
+
+    // ═══════════════════════════════════════
+    // RENDER LOOP & STATS READOUT
+    // ═══════════════════════════════════════
+    function updateStats() {
+        const v = getWaveSpeed();
+        const lambda = getWavelength();
+        const midY = getWaveDisplacement(STRING_LENGTH / 2, state.time);
+
+        const dtSample = 0.002;
+        const midYNext = getWaveDisplacement(STRING_LENGTH / 2, state.time + dtSample);
+        const midVel = (midYNext - midY) / dtSample;
+
+        const energies = calculateEnergies();
+
+        document.getElementById('stat-time').textContent = state.time.toFixed(2) + ' s';
+
+        if (waveType === 'em') {
+            document.getElementById('stat-speed').textContent = '3.0×10⁸ m/s';
+        } else {
+            document.getElementById('stat-speed').textContent = v.toFixed(1) + ' m/s';
+        }
+
+        document.getElementById('stat-wavelength').textContent = lambda.toFixed(2) + ' m';
+        document.getElementById('stat-disp').textContent = midY.toFixed(3) + ' m';
+        document.getElementById('stat-vel').textContent = midVel.toFixed(3) + ' m/s';
+        document.getElementById('stat-energy').textContent = energies.total.toFixed(3) + ' J';
+
+        const kePct = energies.total > 0 ? (energies.ke / energies.total * 100) : 50;
+        const pePct = energies.total > 0 ? (energies.pe / energies.total * 100) : 50;
+        document.getElementById('bar-ke').style.width = kePct.toFixed(0) + '%';
+        document.getElementById('bar-ke').textContent = 'KE: ' + energies.ke.toFixed(2) + 'J';
+        document.getElementById('bar-pe').style.width = pePct.toFixed(0) + '%';
+        document.getElementById('bar-pe').textContent = 'PE: ' + energies.pe.toFixed(2) + 'J';
+    }
+
+    function render() {
+        drawBackground();
+        drawDriverEngine();
+        drawBoundarySupport();
+
+        if (waveType === 'transverse') drawTransverseWave();
+        else if (waveType === 'longitudinal') drawLongitudinalWave();
+        else if (waveType === 'em') drawEMWave();
+
+        drawRuler();
+    }
+
+    let lastTime = performance.now();
+    function loop(ts) {
+        const dt = Math.min((ts - lastTime) / 1000, 0.05);
+        lastTime = ts;
+
+        if (state.running) {
+            state.time += dt * state.speed;
+        }
+
+        render();
+        updateStats();
+
+        requestAnimationFrame(loop);
+    }
+    requestAnimationFrame(loop);
+
+    // ═══════════════════════════════════════
+    // UI CONTROLS & EVENT LISTENERS
+    // ═══════════════════════════════════════
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+        });
+    });
+
+    document.querySelectorAll('.wave-type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.wave-type-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            waveType = btn.dataset.type;
+            setModeDefaults(waveType);
+        });
+    });
+
+    document.querySelectorAll('input[name="boundary"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            boundaryEnd = radio.value;
+            document.querySelectorAll('input[name="boundary"]').forEach(r => {
+                r.closest('.option-label').classList.toggle('selected', r.checked);
+            });
+        });
+    });
+
+    const btnFirePulse = document.getElementById('btn-fire-pulse');
+    document.querySelectorAll('input[name="driver"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            driverMode = radio.value;
+            document.querySelectorAll('input[name="driver"]').forEach(r => {
+                r.closest('.option-label').classList.toggle('selected', r.checked);
+            });
+            btnFirePulse.style.display = (driverMode === 'pulse') ? 'block' : 'none';
+        });
+    });
+
+    btnFirePulse.addEventListener('click', () => {
+        state.pulseTriggerTime = state.time;
+        if (!state.running) state.running = true;
+    });
+
+    document.getElementById('btn-play').addEventListener('click', () => {
+        state.running = !state.running;
+        document.getElementById('btn-play').textContent = state.running ? '⏸ Pause' : '▶ Play';
+        document.getElementById('btn-play').classList.toggle('active', state.running);
+    });
+
+    document.getElementById('btn-step').addEventListener('click', () => {
+        state.running = false;
+        document.getElementById('btn-play').textContent = '▶ Play';
+        document.getElementById('btn-play').classList.remove('active');
+        state.time += 0.05 * state.speed;
+        render();
+    });
+
+    document.getElementById('btn-reset').addEventListener('click', () => {
+        state.running = false;
+        state.time = 0;
+        state.pulseTriggerTime = -100;
+        document.getElementById('btn-play').textContent = '▶ Play';
+        document.getElementById('btn-play').classList.remove('active');
+        render();
+    });
+
+    document.getElementById('slider-tension').addEventListener('input', e => {
+        state.tension = parseFloat(e.target.value);
+        document.getElementById('val-tension').textContent = state.tension.toFixed(1) + ' N';
+    });
+    document.getElementById('slider-density').addEventListener('input', e => {
+        state.linearDensity = parseFloat(e.target.value);
+        document.getElementById('val-density').textContent = state.linearDensity.toFixed(3) + ' kg/m';
+    });
+    document.getElementById('slider-amplitude').addEventListener('input', e => {
+        state.amplitude = parseFloat(e.target.value);
+        document.getElementById('val-amplitude').textContent = state.amplitude.toFixed(2) + ' m';
+    });
+    document.getElementById('slider-frequency').addEventListener('input', e => {
+        state.frequency = parseFloat(e.target.value);
+        document.getElementById('val-frequency').textContent = state.frequency.toFixed(1) + ' Hz';
+    });
+    document.getElementById('slider-damping').addEventListener('input', e => {
+        state.damping = parseFloat(e.target.value);
+        document.getElementById('val-damping').textContent = state.damping.toFixed(2);
+    });
+    document.getElementById('slider-speed').addEventListener('input', e => {
+        state.speed = parseFloat(e.target.value);
+        document.getElementById('val-speed').textContent = state.speed.toFixed(2) + 'x';
+    });
+
+    document.getElementById('chk-ruler').addEventListener('change', e => state.showRuler = e.target.checked);
+    document.getElementById('chk-grid').addEventListener('change', e => state.showGrid = e.target.checked);
+    document.getElementById('chk-vectors').addEventListener('change', e => state.showVectors = e.target.checked);
+    document.getElementById('chk-nodes').addEventListener('change', e => state.showNodes = e.target.checked);
+
+    // ═══════════════════════════════════════
+    // 5E ASSESSMENT WORKSHEET & DOCX EXPORT
+    // ═══════════════════════════════════════
+    let currentQ = 0;
+    const totalQ = 5;
+    const qTitles = ['1. ENGAGE', '2. EXPLORE', '3. EXPLAIN', '4. ELABORATE', '5. EVALUATE'];
+
+    function updateQuestionView() {
+        document.querySelectorAll('.assess-question').forEach((q, idx) => {
+            q.classList.toggle('active', idx === currentQ);
+        });
+        document.getElementById('q-title-badge').textContent = qTitles[currentQ];
+        document.getElementById('q-counter').textContent = `Question ${currentQ + 1} of ${totalQ}`;
+        document.getElementById('q-prev').disabled = (currentQ === 0);
+        document.getElementById('q-next').disabled = (currentQ === totalQ - 1);
+    }
+
+    document.getElementById('q-prev').addEventListener('click', () => {
+        if (currentQ > 0) { currentQ--; updateQuestionView(); }
+    });
+    document.getElementById('q-next').addEventListener('click', () => {
+        if (currentQ < totalQ - 1) { currentQ++; updateQuestionView(); }
+    });
+
+    document.getElementById('btn-export-docx').addEventListener('click', () => {
+        const { Document, Paragraph, TextRun, HeadingLevel, Packer } = docx;
+        const studentName = document.getElementById('student-name').value || 'Student';
+
+        const docChildren = [
+            new Paragraph({ text: '5E Formative Assessment: Wave Mechanics', heading: HeadingLevel.HEADING_1 }),
+            new Paragraph({ children: [new TextRun({ text: `Student Name: ${studentName}`, bold: true })] }),
+            new Paragraph({ text: '' })
+        ];
+
+        const qTexts = [
+            '1. ENGAGE: Why does the wave travel forward even though individual rope particles move up and down?',
+            '2. EXPLORE: Describe observations of frequency, wavelength, and wave speed using the on-screen ruler.',
+            '3. EXPLAIN: Compare Transverse and Longitudinal waves. Define Compressions and Rarefactions.',
+            '4. ELABORATE: Explain Fixed End vs Free End reflections using Newton\'s Third Law.',
+            '5. EVALUATE: Describe the geometric orientation of Electric field E, Magnetic field B, and Poynting vector S in EM waves.'
+        ];
+
+        for (let i = 0; i < totalQ; i++) {
+            const ans = document.getElementById(`ans-${i}`).value || '[No answer provided]';
+            docChildren.push(new Paragraph({ children: [new TextRun({ text: qTexts[i], bold: true })] }));
+            docChildren.push(new Paragraph({ text: `Answer: ${ans}` }));
+            docChildren.push(new Paragraph({ text: '' }));
+        }
+
+        Packer.toBlob(new Document({ sections: [{ children: docChildren }] })).then(blob => {
+            saveAs(blob, `Wave_Mechanics_Assessment_${studentName.replace(/\s+/g, '_')}.docx`);
+        });
+    });
+
+    // INITIALIZATION WITH DEFAULT MODE (TRANSVERSE)
+    setModeDefaults('transverse');
+    </script>
+</body>
+</html>
