@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UCM ↔ SHM Simulation</title>
 <script>
-    const SIM_AUTH = { hash: "25f5ab523cebaec5f894883aec9d9cbd304c29e4dd3b8e70ad7f2f974b878a98", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    const SIM_AUTH = { hash: "02d191096e57800e776d181411f8438fbbf68b5645f77667552a0c0956ef30ff", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
     document.documentElement.classList.add("password-locked");
 
     async function pbkdf2Verify(password, storedHash, salt, iterations) {
