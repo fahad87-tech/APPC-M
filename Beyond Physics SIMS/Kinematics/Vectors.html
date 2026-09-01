@@ -953,8 +953,13 @@
             vectors.forEach(v => {
                 if (!v.visible) return;
                 const r = v.angle * Math.PI / 180;
-                const vx = v.mag * Math.cos(r);
-                const vy = v.mag * Math.sin(r);
+                let vx = v.mag * Math.cos(r);
+                let vy = v.mag * Math.sin(r);
+
+                if (currentMode === 'subtraction' && v === vectors[1]) {
+                    vx = -vx;
+                    vy = -vy;
+                }
 
                 drawVector(v.originX, v.originY, vx, vy, v.color, v.name, v.id === selectedId);
 
@@ -981,8 +986,7 @@
                 const v2x = v2.mag * Math.cos(r2);
                 const v2y = v2.mag * Math.sin(r2);
 
-                const tip2 = getTip(v2);
-                drawVector(tip2.x, tip2.y, v1x - v2x, v1y - v2y, '#f43f5e', 'D = V1-V2', true, [4, 4]);
+                drawVector(0, 0, v1x - v2x, v1y - v2y, '#f43f5e', 'D = V1-V2', true, [4, 4]);
             }
 
             if (isPlaying || physObj.path.length > 1) {
