@@ -612,6 +612,8 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script>
         'use strict';
 
@@ -1465,51 +1467,45 @@
         });
 
         // Formatted Word .DOCX Document Exporter
-        btnExportAnswers.addEventListener('click', () => {
+        btnExportAnswers.addEventListener('click', async () => {
+            if (typeof docx === 'undefined') {
+                alert('The .docx export library is unavailable right now.');
+                return;
+            }
+
             const studentName = document.getElementById('student-name').value.trim() || 'Student';
             const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-            let docHtml = `
-                <html xmlns:o='urn:schemas-microsoft-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-                <head>
-                    <meta charset='utf-8'>
-                    <title>Vector Physics Assessment - ${studentName}</title>
-                    <style>
-                        body { font-family: 'Calibri', 'Arial', sans-serif; margin: 40px; color: #1e293b; background-color: #ffffff; }
-                        .doc-header { border-bottom: 3px solid #0284c7; padding-bottom: 12px; margin-bottom: 24px; }
-                        h1 { color: #0f172a; font-size: 24pt; margin: 0 0 6px 0; }
-                        .subtitle { color: #0284c7; font-size: 13pt; font-weight: bold; margin: 0; }
-                        .meta-table { width: 100%; margin-top: 16px; border-collapse: collapse; background-color: #f8fafc; border: 1px solid #e2e8f0; }
-                        .meta-table td { padding: 10px 14px; font-size: 11pt; }
-                        .meta-label { font-weight: bold; color: #475569; width: 140px; }
-                        .question-card { margin-bottom: 24px; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; page-break-inside: avoid; }
-                        .q-header { background-color: #f1f5f9; padding: 10px 14px; border-bottom: 1px solid #cbd5e1; font-weight: bold; color: #0f172a; }
-                        .phase-badge { display: inline-block; padding: 3px 8px; background-color: #0284c7; color: #ffffff; font-size: 9pt; border-radius: 4px; text-transform: uppercase; margin-right: 8px; }
-                        .q-body { padding: 14px; font-size: 11pt; line-height: 1.5; color: #334155; }
-                        .answer-box { background-color: #faf5ff; border-left: 4px solid #8b5cf6; padding: 12px 14px; margin-top: 10px; font-style: italic; color: #1e1b4b; }
-                        .no-answer { color: #94a3b8; font-style: italic; }
-                    </style>
-                </head>
-                <body>
-                    <div class="doc-header">
-                        <h1>AP Physics 1: Vector Mechanics Assessment</h1>
-                        <p class="subtitle">Interactive Vector Navigation & Formative 5E Evaluation</p>
-                        <table class="meta-table">
-                            <tr>
-                                <td class="meta-label">Student Name:</td>
-                                <td><strong>${studentName}</strong></td>
-                            </tr>
-                            <tr>
-                                <td class="meta-label">Submission Date:</td>
-                                <td>${dateStr}</td>
-                            </tr>
-                            <tr>
-                                <td class="meta-label">Course:</td>
-                                <td>AP Physics 1 — Kinematics & Vector Dynamics</td>
-                            </tr>
-                        </table>
-                    </div>
-            `;
+            const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType } = docx;
+
+            const children = [];
+
+            children.push(new Paragraph({
+                text: 'AP Physics 1: Vector Mechanics Assessment',
+                heading: HeadingLevel.HEADING_1,
+                spacing: { after: 200 }
+            }));
+
+            children.push(new Paragraph({
+                text: 'Interactive Vector Navigation & Formative 5E Evaluation',
+                heading: HeadingLevel.HEADING_2,
+                spacing: { after: 300 }
+            }));
+
+            children.push(new Paragraph({
+                text: `Student Name: ${studentName}`,
+                spacing: { after: 100 }
+            }));
+
+            children.push(new Paragraph({
+                text: `Submission Date: ${dateStr}`,
+                spacing: { after: 100 }
+            }));
+
+            children.push(new Paragraph({
+                text: 'Course: AP Physics 1 — Kinematics & Vector Dynamics',
+                spacing: { after: 300 }
+            }));
 
             qElements.forEach((q, i) => {
                 const phaseText = q.querySelector('.phase-badge').innerText.trim();
@@ -1517,31 +1513,36 @@
                 const ta = q.querySelector('textarea');
                 const answer = ta ? ta.value.trim() : '';
 
-                docHtml += `
-                    <div class="question-card">
-                        <div class="q-header">
-                            <span class="phase-badge">${phaseText}</span> Question ${i + 1} of 10
-                        </div>
-                        <div class="q-body">
-                            <p style="margin:0 0 8px 0; font-weight:bold;">${qText}</p>
-                            <div class="answer-box">
-                                <strong>Student Response:</strong><br>
-                                ${answer ? answer.replace(/\n/g, '<br>') : '<span class="no-answer">No response provided.</span>'}
-                            </div>
-                        </div>
-                    </div>
-                `;
+                children.push(new Paragraph({
+                    text: `${phaseText} — Question ${i + 1} of 10`,
+                    heading: HeadingLevel.HEADING_3,
+                    spacing: { before: 200, after: 100 }
+                }));
+
+                children.push(new Paragraph({
+                    text: qText,
+                    spacing: { after: 100 }
+                }));
+
+                children.push(new Paragraph({
+                    text: answer ? `Student Response:\n${answer}` : 'Student Response: (no response)',
+                    spacing: { after: 200 }
+                }));
             });
 
-            docHtml += `</body></html>`;
+            const doc = new Document({
+                sections: [{
+                    children: children
+                }]
+            });
 
-            const blob = new Blob(['\ufeff' + docHtml], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Vector_Physics_Assessment_${studentName.replace(/\s+/g, '_')}.docx`;
-            a.click();
-            URL.revokeObjectURL(url);
+            try {
+                const blob = await Packer.toBlob(doc);
+                saveAs(blob, `Vector_Physics_Assessment_${studentName.replace(/\s+/g, '_')}.docx`);
+            } catch (err) {
+                console.error('DOCX export failed:', err);
+                alert('Failed to generate .docx. Please try again.');
+            }
         });
 
         function loop(timestamp) {
