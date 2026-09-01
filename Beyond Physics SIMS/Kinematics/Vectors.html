@@ -455,6 +455,7 @@
                             <button class="toggle-btn active" id="toggleLabels">🏷 Show Labels</button>
                             <button class="toggle-btn active" id="toggleResultant">🟢 Show Resultant</button>
                             <button class="toggle-btn active" id="toggleChaining">🔗 Auto-Attach Head-to-Tail</button>
+                            <button class="toggle-btn" id="togglePan">✋ Pan</button>
                         </div>
                         <div style="display:flex; gap:6px;">
                             <button class="btn primary" id="btnPlay">▶ Play Motion</button>
@@ -632,6 +633,7 @@
         const toggleLabels = document.getElementById('toggleLabels');
         const toggleResultant = document.getElementById('toggleResultant');
         const toggleChaining = document.getElementById('toggleChaining');
+        const togglePan = document.getElementById('togglePan');
 
         // Buttons & Sliders
         const btnPlay = document.getElementById('btnPlay');
@@ -676,16 +678,22 @@
 
         let physObj = { x: 0, y: 0, vx: 0, vy: 0, ax: 0, ay: 0, path: [] };
 
+        let panX = 0;
+        let panY = 0;
+        let isPanning = false;
+        let panStart = { x: 0, y: 0 };
+        let panStartOffset = { x: 0, y: 0 };
+
         const scalePx = 35;
         function toPx(uX, uY) {
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            return { x: cx + uX * scalePx, y: cy - uY * scalePx };
+            return { x: cx + (uX - panX) * scalePx, y: cy - (uY - panY) * scalePx };
         }
         function toUnit(px, py) {
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            return { x: (px - cx) / scalePx, y: (cy - py) / scalePx };
+            return { x: (px - cx) / scalePx + panX, y: (cy - py) / scalePx + panY };
         }
 
         function getTip(v) {
@@ -815,17 +823,18 @@
             const h = canvas.height;
             ctx.clearRect(0, 0, w, h);
 
-            const cx = w / 2;
-            const cy = h / 2;
+            const originPx = toPx(0, 0);
 
             // 1. Sleek Background Mesh Grid
             if (showGrid) {
                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
                 ctx.lineWidth = 1;
-                for (let x = cx % scalePx; x < w; x += scalePx) {
+                const startX = originPx.x % scalePx;
+                const startY = originPx.y % scalePx;
+                for (let x = startX; x < w; x += scalePx) {
                     ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
                 }
-                for (let y = cy % scalePx; y < h; y += scalePx) {
+                for (let y = startY; y < h; y += scalePx) {
                     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
                 }
 
@@ -835,15 +844,15 @@
                 ctx.lineWidth = 1.8;
                 ctx.shadowColor = '#38bdf8';
                 ctx.shadowBlur = 8;
-                ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(w, cy); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, originPx.y); ctx.lineTo(w, originPx.y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(originPx.x, 0); ctx.lineTo(originPx.x, h); ctx.stroke();
                 ctx.restore();
             }
 
             // Origin Glowing Halo
             ctx.save();
             ctx.beginPath();
-            ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+            ctx.arc(originPx.x, originPx.y, 5, 0, Math.PI * 2);
             ctx.fillStyle = '#38bdf8';
             ctx.shadowColor = '#38bdf8';
             ctx.shadowBlur = 12;
@@ -1121,10 +1130,26 @@
             if ((e.key === 'Delete' || e.key === 'Backspace') && vectors.length > 0) {
                 deleteVector(selectedId);
             }
+            const panStep = 1.0;
+            if (e.key === 'ArrowUp') { panY += panStep; updatePhysics(); render(); e.preventDefault(); }
+            if (e.key === 'ArrowDown') { panY -= panStep; updatePhysics(); render(); e.preventDefault(); }
+            if (e.key === 'ArrowLeft') { panX -= panStep; updatePhysics(); render(); e.preventDefault(); }
+            if (e.key === 'ArrowRight') { panX += panStep; updatePhysics(); render(); e.preventDefault(); }
         });
 
         function pointerDown(e) {
             const pt = getCoords(e);
+
+            // Middle mouse button or pan mode -> start panning
+            if (e.button === 1 || (e.button === 0 && togglePan.classList.contains('active'))) {
+                isPanning = true;
+                panStart = { x: pt.x, y: pt.y };
+                panStartOffset = { x: panX, y: panY };
+                canvas.style.cursor = 'grabbing';
+                e.preventDefault();
+                return;
+            }
+
             const clickUnit = toUnit(pt.x, pt.y);
 
             // Check hit test on existing vectors
@@ -1207,6 +1232,18 @@
         }
 
         function pointerMove(e) {
+            if (isPanning) {
+                const pt = getCoords(e);
+                const dx = pt.x - panStart.x;
+                const dy = pt.y - panStart.y;
+                panX = panStartOffset.x - dx / scalePx;
+                panY = panStartOffset.y + dy / scalePx;
+                updatePhysics();
+                render();
+                e.preventDefault();
+                return;
+            }
+
             if (!dragMode || !dragTarget) return;
             const pt = getCoords(e);
             const uPt = toUnit(pt.x, pt.y);
@@ -1239,6 +1276,8 @@
         }
 
         function pointerUp() {
+            isPanning = false;
+            canvas.style.cursor = togglePan.classList.contains('active') ? 'grab' : 'crosshair';
             dragMode = null;
             dragTarget = null;
             createStartPt = null;
@@ -1373,6 +1412,12 @@
             render();
         });
 
+        togglePan.addEventListener('click', () => {
+            const isActive = togglePan.classList.toggle('active');
+            canvas.style.cursor = isActive ? 'grab' : 'crosshair';
+            render();
+        });
+
         function resetObjectMotion() {
             let startX = 0, startY = 0;
             if (vectors.length > 0) {
@@ -1396,6 +1441,8 @@
             btnPlay.textContent = '▶ Play Motion';
             vectors = []; // EMPTY VECTORS INITIAL STATE!
             selectedId = null;
+            panX = 0;
+            panY = 0;
             resetObjectMotion();
             updatePhysics();
             render();
