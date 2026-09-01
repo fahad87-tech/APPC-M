@@ -1556,11 +1556,17 @@
 
             if (isPlaying) {
                 let netVx = 0, netVy = 0;
-                vectors.forEach(v => {
-                    if (v.visible) {
-                        const r = v.angle * Math.PI / 180;
-                        netVx += v.mag * Math.cos(r);
-                        netVy += v.mag * Math.sin(r);
+                vectors.forEach((v, idx) => {
+                    if (!v.visible) return;
+                    const r = v.angle * Math.PI / 180;
+                    const vx = v.mag * Math.cos(r);
+                    const vy = v.mag * Math.sin(r);
+                    if (currentMode === 'subtraction' && idx === 1) {
+                        netVx -= vx;
+                        netVy -= vy;
+                    } else {
+                        netVx += vx;
+                        netVy += vy;
                     }
                 });
 
@@ -1577,7 +1583,7 @@
                     physObj.vy += physObj.ay * dt;
                     physObj.x += physObj.vx * dt;
                     physObj.y += physObj.vy * dt;
-                } else {
+                } else if (currentMode === 'subtraction') {
                     physObj.vx = netVx;
                     physObj.vy = netVy;
                     physObj.x += physObj.vx * dt;
