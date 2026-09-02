@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wave Propagation: Wavefronts &amp; Rays</title>
+    <script>
+        const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+        document.documentElement.classList.add("password-locked");
+
+        async function pbkdf2Verify(password, storedHash, salt, iterations) {
+          const enc = new TextEncoder();
+          const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+          const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+          const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+          return hex === storedHash;
+        }
+
+        function requestPassword(title, message) {
+          return new Promise(resolve => {
+            const existingGate = document.getElementById("password-gate");
+            if (existingGate) existingGate.remove();
+            const gate = document.createElement("div");
+            gate.id = "password-gate";
+            gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+            document.body.appendChild(gate);
+            const input = document.getElementById("password-gate-input");
+            const finish = value => { gate.remove(); resolve(value); };
+            document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+            document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+            input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+            window.requestAnimationFrame(() => input.focus());
+          });
+        }
+
+        async function verifyWebsiteAccess() {
+          const userInput = await requestPassword("Simulation Access", "Password required:");
+          if (userInput === null) { window.location.replace("about:blank"); return; }
+          if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+            document.documentElement.classList.remove("password-locked");
+          } else {
+            alert("Incorrect password. Access denied.");
+            window.location.replace("about:blank");
+          }
+        }
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
+        } else {
+          verifyWebsiteAccess();
+        }
+      </script>
+      <style id="password-gate-styles">
+        html.password-locked body { overflow: hidden; }
+        html.password-locked body > * { visibility: hidden; }
+        html.password-locked body > #password-gate { visibility: visible; }
+        #password-gate {
+          position: fixed;
+          inset: 0;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          background: rgba(5, 9, 18, 0.88);
+          padding: 24px;
+          z-index: 9999;
+        }
+        html.password-locked #password-gate { display: flex; visibility: visible; }
+        #password-gate-card {
+          width: min(100%, 420px);
+          background: #101625;
+          border: 1px solid rgba(100,181,246,0.28);
+          border-radius: 18px;
+          padding: 24px;
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+          color: #e7edf7;
+          font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+        #password-gate-input {
+          width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35);
+          background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px;
+          box-sizing: border-box;
+        }
+        #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+        #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+        .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+        #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+        #password-gate-submit { background: #64b5f6; color: #08101c; }
+      </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #040612;
+            --card-solid: #0b0e26;
+            --glass: rgba(14, 17, 40, 0.75);
+            --input-bg: rgba(255, 255, 255, 0.05);
+            --cyan: #00f0ff;
+            --purple: #8a5cf6;
+            --pink: #ff3b81;
+            --amber: #ffcb2b;
+            --green: #4ade80;
+            --text: #f1f3f9;
+            --text-muted: #8288a8;
+            --border: rgba(255, 255, 255, 0.09);
+            --glow-cyan: rgba(0, 240, 255, 0.25);
+            --glow-purple: rgba(138, 92, 246, 0.25);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+        
+        /* ─── Tab Bar ─── */
+        .tab-bar { display: flex; gap: 0; padding: 0 24px; max-width: 1500px; margin: 0 auto; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; background: rgba(4,6,18,0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+        .tab-btn { padding: 16px 30px; font-size: 13px; font-weight: 600; color: var(--text-muted); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.25s; letter-spacing: 0.8px; text-transform: uppercase; }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); text-shadow: 0 0 20px var(--glow-cyan); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* ─── Header ─── */
+        .header { text-align: center; padding: 28px 24px 16px; background: radial-gradient(ellipse at 50% 0%, rgba(138,92,246,0.14) 0%, transparent 70%); }
+        .header h1 { font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #ffffff 30%, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; }
+        .header .badge { display: inline-block; margin-top: 8px; padding: 4px 16px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; background: linear-gradient(135deg, rgba(138,92,246,0.2), rgba(0,240,255,0.12)); color: #c084fc; border: 1px solid rgba(138,92,246,0.3); }
+        .header p { margin-top: 8px; color: var(--text-muted); font-size: 13.5px; max-width: 640px; margin-left: auto; margin-right: auto; line-height: 1.6; }
+        
+        /* ─── Layout ─── */
+        .main-layout { display: flex; gap: 18px; padding: 16px 24px; max-width: 1500px; margin: 0 auto; }
+        .canvas-wrap { flex: 1; min-width: 0; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .canvas-wrap canvas { width: 100%; aspect-ratio: 1 / 1; max-width: 680px; border-radius: 16px; border: 1px solid var(--border); display: block; background: #02040a; box-shadow: 0 14px 50px rgba(0,0,0,0.7), 0 0 35px rgba(0,240,255,0.06); cursor: default; }
+        .controls { width: 310px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+        
+        /* ─── Cards ─── */
+        .card { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+        .card h3 { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+        
+        /* ─── Mode Toggle ─── */
+        .mode-toggle { display: flex; gap: 6px; margin-bottom: 14px; }
+        .mode-btn { flex: 1; padding: 10px 4px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.02); color: var(--text-muted); font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.25s cubic-bezier(.4,0,.2,1); text-align: center; }
+        .mode-btn:hover:not(.active) { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); color: var(--text); }
+        .mode-btn.active { background: linear-gradient(135deg, rgba(138,92,246,0.28), rgba(0,240,255,0.18)); border-color: rgba(138,92,246,0.55); color: #d8b4fe; box-shadow: 0 0 20px var(--glow-purple), inset 0 0 15px rgba(138,92,246,0.12); }
+        
+        /* ─── Sliders ─── */
+        .slider-group { margin-bottom: 12px; }
+        .slider-group:last-child { margin-bottom: 0; }
+        .slider-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
+        .slider-label .val { font-family: 'JetBrains Mono', monospace; color: var(--cyan); font-size: 12px; font-weight: 600; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.12); outline: none; transition: background 0.2s; }
+        input[type="range"]:hover { background: rgba(255,255,255,0.2); }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--purple)); cursor: pointer; box-shadow: 0 0 12px rgba(0,240,255,0.4); transition: transform 0.15s, box-shadow 0.15s; }
+        input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); box-shadow: 0 0 18px rgba(0,240,255,0.6); }
+        
+        /* ─── Buttons ─── */
+        .btn-row { display: flex; gap: 8px; }
+        .btn { flex: 1; padding: 9px 12px; border: none; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.25s cubic-bezier(.4,0,.2,1); background: rgba(255,255,255,0.08); color: var(--text); letter-spacing: 0.3px; text-align: center; }
+        .btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+        .btn.active { background: linear-gradient(135deg, var(--cyan), #00b8d4); color: #040814; font-weight: 700; box-shadow: 0 4px 18px rgba(0,240,255,0.3); }
+        .btn.reset { background: rgba(255,59,129,0.15); color: var(--pink); border: 1px solid rgba(255,59,129,0.25); }
+        .btn.reset:hover { background: rgba(255,59,129,0.25); }
+        
+        /* ─── Checkboxes ─── */
+        .chk { display: flex; align-items: center; gap: 8px; margin-top: 10px; cursor: pointer; }
+        .chk input { accent-color: var(--cyan); cursor: pointer; width: 15px; height: 15px; }
+        .chk label { font-size: 12px; color: var(--text-muted); cursor: pointer; transition: color 0.2s; user-select: none; }
+        .chk:hover label { color: var(--text); }
+        
+        /* ─── Stats & Data Logger ─── */
+        .stats-wrap { max-width: 1500px; margin: 0 auto; padding: 0 24px 24px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+        .stat { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px; text-align: center; border: 1px solid rgba(255,255,255,0.05); }
+        .stat .sl { font-size: 9px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 4px; }
+        .stat .sv { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: var(--cyan); }
+        .graphs-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+        .graph-card { background: var(--card-solid); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+        .graph-card h4 { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 8px; }
+        .graph-card canvas { width: 100%; height: 130px; display: block; }
+        
+        /* ─── Assessment ─── */
+        .assess { max-width: 880px; margin: 0 auto; padding: 24px 24px 50px; }
+        .assess-head { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+        .assess-head h2 { font-size: 20px; font-weight: 600; }
+        .assess-head h2 span { background: linear-gradient(135deg, #fff, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .name-input { display: flex; align-items: center; gap: 10px; }
+        .name-input label { font-size: 13px; color: var(--text-muted); }
+        .name-input input { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 14px; width: 200px; outline: none; transition: border-color 0.2s; }
+        .name-input input:focus { border-color: var(--cyan); }
+        .assess-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding: 12px 16px; background: var(--card-solid); border: 1px solid var(--border); border-radius: 12px; flex-wrap: wrap; }
+        .nav-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: var(--text); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .nav-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--cyan); }
+        .nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+        .nav-slider { flex: 1; min-width: 100px; }
+        .nav-counter { font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); min-width: 60px; text-align: center; }
+        .dots { display: flex; gap: 5px; }
+        .dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.12); background: transparent; transition: all 0.25s; }
+        .dot.answered { background: var(--green); border-color: var(--green); }
+        .dot.current { border-color: var(--cyan); box-shadow: 0 0 8px var(--glow-cyan); }
+        .q-card { background: var(--card-solid); border: 1px solid var(--border); border-radius: 16px; padding: 24px; display: none; }
+        .q-card.active { display: block; }
+        .q-phase { margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .q-num { font-size: 11px; color: var(--text-muted); }
+        .q-text { font-size: 15px; font-weight: 500; line-height: 1.7; margin-bottom: 16px; }
+        .q-area label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); margin-bottom: 6px; }
+        .q-area textarea { width: 100%; min-height: 110px; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 14px; font-family: inherit; line-height: 1.6; resize: vertical; outline: none; transition: border-color 0.2s; }
+        .q-area textarea:focus { border-color: var(--cyan); }
+        .q-area textarea::placeholder { color: rgba(255,255,255,0.18); }
+        .phase { font-size: 10px; padding: 3px 10px; border-radius: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; }
+        .p-engage { background: rgba(0,240,255,0.12); color: var(--cyan); }
+        .p-explore { background: rgba(138,92,246,0.12); color: var(--purple); }
+        .p-explain { background: rgba(255,203,43,0.12); color: var(--amber); }
+        .p-elaborate { background: rgba(74,222,128,0.12); color: var(--green); }
+        .p-evaluate { background: rgba(255,59,129,0.12); color: var(--pink); }
+        .export-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; background: var(--card-solid); border: 1px solid var(--border); border-radius: 12px; margin-top: 18px; }
+        .export-bar .prog { font-size: 13px; color: var(--text-muted); }
+        .export-bar .prog strong { color: var(--cyan); }
+        
+        /* ─── Legend Overlay ─── */
+        .legend { position: absolute; bottom: 14px; left: 14px; display: flex; gap: 14px; padding: 8px 14px; border-radius: 10px; background: rgba(4,6,18,0.88); backdrop-filter: blur(10px); border: 1px solid var(--border); font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+        .drag-hint { position: absolute; top: 14px; left: 14px; padding: 6px 12px; border-radius: 8px; background: rgba(0,240,255,0.1); border: 1px solid rgba(0,240,255,0.25); color: var(--cyan); font-size: 11px; font-weight: 500; letter-spacing: 0.3px; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="sim">Simulation</button>
+        <button class="tab-btn" data-tab="assessment">Assessment</button>
+    </div>
+
+    <div id="tab-sim" class="tab-content active">
+        <div class="header">
+            <h1>Wave Propagation: Wavefronts &amp; Rays</h1>
+            <div class="badge">Waves &amp; Oscillations</div>
+            <p>Observe how periodic disturbances propagate through a medium as expanding wavefronts. Toggle rays to see the direction of wave propagation—always perpendicular to the wavefronts. Drag the Probe anywhere on the canvas!</p>
+        </div>
+        <div class="main-layout">
+            <div class="canvas-wrap">
+                <canvas id="simCanvas" width="600" height="600"></canvas>
+                <div class="drag-hint">💡 Drag Probe anywhere to sample displacement</div>
+                <div class="legend">
+                    <div class="legend-item"><div class="legend-swatch" style="background:linear-gradient(135deg,#00f0ff,#ffffff);"></div> Wave Crest</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#020718; border:1px solid #1a2342;"></div> Trough</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#ffcb2b;"></div> Source</div>
+                    <div class="legend-item"><div class="legend-swatch" style="background:#00f0ff; border-radius:50%;"></div> Probe</div>
+                </div>
+            </div>
+            <div class="controls">
+                <div class="card">
+                    <h3>Source Mode</h3>
+                    <div class="mode-toggle">
+                        <button class="mode-btn active" id="mode-point">Point Source</button>
+                        <button class="mode-btn" id="mode-plane">Plane Wave</button>
+                        <button class="mode-btn" id="mode-dual">Dual Sources</button>
+                    </div>
+                    <h3>Wave Parameters</h3>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>Wave Speed (v)</span><span class="val" id="v-speed">5.0 cm/s</span></div>
+                        <input type="range" id="s-speed" min="1" max="15" step="0.5" value="5">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>Frequency (f)</span><span class="val" id="v-freq">2.0 Hz</span></div>
+                        <input type="range" id="s-freq" min="0.5" max="4" step="0.1" value="2">
+                    </div>
+                    <div class="slider-group" id="sep-group" style="opacity:0.35;pointer-events:none;">
+                        <div class="slider-label"><span>Source Separation</span><span class="val" id="v-sep">3.0 cm</span></div>
+                        <input type="range" id="s-sep" min="1.0" max="8" step="0.2" value="3">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>Amplitude (A)</span><span class="val" id="v-amp">1.0</span></div>
+                        <input type="range" id="s-amp" min="0.2" max="2" step="0.1" value="1">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label"><span>Damping</span><span class="val" id="v-damp">0.00</span></div>
+                        <input type="range" id="s-damp" min="0" max="0.2" step="0.01" value="0">
+                    </div>
+                    <div class="chk"><input type="checkbox" id="chk-contours" checked><label for="chk-contours">Show Wavefront Contours</label></div>
+                    <div class="chk"><input type="checkbox" id="chk-rays"><label for="chk-rays">Show Rays (Perpendicular)</label></div>
+                </div>
+                <div class="card">
+                    <h3>Playback</h3>
+                    <div class="btn-row">
+                        <button class="btn" id="btn-play">▶ Play</button>
+                        <button class="btn" id="btn-step">⏭ Step</button>
+                        <button class="btn reset" id="btn-reset">↺ Reset</button>
+                    </div>
+                    <div class="slider-group" style="margin-top:12px;">
+                        <div class="slider-label"><span>Speed</span><span class="val" id="v-simspeed">1.0×</span></div>
+                        <input type="range" id="s-simspeed" min="0.25" max="3" step="0.25" value="1">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="stats-wrap">
+            <div class="card" style="margin-bottom:0;">
+                <h3>Data Logger</h3>
+                <div class="stats-grid">
+                    <div class="stat"><div class="sl">Time</div><div class="sv" id="st-time">0.00 s</div></div>
+                    <div class="stat"><div class="sl">Probe u</div><div class="sv" id="st-probe">0.000</div></div>
+                    <div class="stat"><div class="sl">Wavelength λ</div><div class="sv" id="st-lam">2.50 cm</div></div>
+                    <div class="stat"><div class="sl">Wave Speed</div><div class="sv" id="st-v">5.0 cm/s</div></div>
+                    <div class="stat"><div class="sl">Frequency</div><div class="sv" id="st-f">2.0 Hz</div></div>
+                    <div class="stat"><div class="sl">Mode</div><div class="sv" id="st-mode" style="font-size:13px;">Point</div></div>
+                </div>
+                <div class="graphs-row">
+                    <div class="graph-card"><h4>Probe Displacement vs Time</h4><canvas id="g-probe"></canvas></div>
+                    <div class="graph-card"><h4>Cross-Section Profile</h4><canvas id="g-profile"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-assessment" class="tab-content">
+        <div class="assess">
+            <div class="assess-head">
+                <h2>5E Assessment — <span>Wavefronts &amp; Rays</span></h2>
+                <div class="name-input"><label for="sname">Name:</label><input type="text" id="sname" placeholder="Your name…"></div>
+            </div>
+            <div class="assess-nav">
+                <button class="nav-btn" id="nav-prev">&#8592;</button>
+                <div class="nav-slider"><input type="range" id="nav-sl" min="0" max="7" step="1" value="0"></div>
+                <div class="nav-counter"><span id="nav-cur">1</span> / <span id="nav-tot">8</span></div>
+                <button class="nav-btn" id="nav-next">&#8594;</button>
+                <div class="dots" id="dots"></div>
+            </div>
+
+            <div class="q-card active" data-q="0">
+                <div class="q-phase"><span class="phase p-engage">Engage</span><span class="q-num">Question 1 of 8</span></div>
+                <div class="q-text">Run the Point Source simulation and press Play. Describe the shape of the wavefronts expanding from the source. What does each glowing ring represent?</div>
+                <div class="q-area"><label>Your Answer</label><textarea placeholder="Type your answer here…" data-q="0"></textarea></div>
+            </div>
+            <div class="q-card" data-q="1">
+                <div class="q-phase"><span class="phase p-engage">Engage</span><span class="q-num">Question 2 of 8</span></div>
+                <div class="q-text">Toggle "Show Rays". In what direction do the ray arrows point? Describe their geometric relationship to the expanding circular wavefronts.</div>
+                <div class="q-area"><label>Your Answer</label><textarea placeholder="Type your answer here…" data-q="1"></textarea></div>
+            </div>
+            <div class="q-card" data-q="2">
+                <div class="q-phase"><span class="phase p-explore">Explore</span><span class="q-num">Question 3 of 8</span></div>
+                <div class="q-text">Switch to Plane Wave mode. How are plane wavefronts shaped compared to point source wavefronts? Describe the direction and alignment of the rays in Plane Wave mode.</div>
+                <div class="q-area"><label>Your Answer</label><textarea placeholder="Type your answer here…" data-q="2"></textarea></div>
+            </div>
+            <div class="q-card" data-q="3">
+                <div class="q-phase"><span class="phase p-explore">Explore</span><span class="q-num">Question 4 of 8</span></div>
+                <div class="q-text">Set wave speed to 5.0 cm/s and increase Frequency from 1.0 Hz to 3.0 Hz. How does the distance between adjacent wavefront crests (wavelength λ) change? Record your values from the Data Logger.</div>
+                <div class="q-area"><label>Your Answer</label><textarea placeholder="Type your answer here…" data-q="3"></textarea></div>
+            </div>
+            <div class="q-card" data-q="4">
+                <div class="q-phase"><span class="phase p-explain">Explain</span><span class="q-num">Question 5 of 8</span></div>
+                <div class="q-text">Explain why a localized disturbance in a uniform medium produces circular wavefronts. Why do waves travel outward at equal speeds in all directions?</div>
+                <div class="q-area"><label>Your Answer</label><textarea placeholder="Type your answer here…" data-q="4"></textarea></div>
+            </div>
+            <div class="q-card" data-q="5">
+                <div class="q-phase"><span class="phase p-explain">Explain</span><span class="q-num">Question 6 of 8</span></div>
+                <div class="q-text">Define a <strong>wavefront</strong> and a <strong>ray</strong> in your own words. Why are rays defined to be perpendicular to wavefronts?</div>
+                <div class="q-area"><label>Your Answer</label><textarea placeholder="Type your answer here…" data-q="5"></textarea></div>
+            </div>
+            <div class="q-card" data-q="6">
+                <div class="q-phase"><span class="phase p-elaborate">Elaborate</span><span class="q-num">Question 7 of 8</span></div>
+                <div class="q-text">Observe a small section of a circular wavefront very far from its source. How does its curvature compare to a wavefront near the source? How does this explain why sunlight arriving at Earth is modeled as plane waves?</div>
+                <div class="q-area"><label>Your Answer</label><textarea placeholder="Type your answer here…" data-q="6"></textarea></div>
+            </div>
+            <div class="q-card" data-q="7">
+                <div class="q-phase"><span class="phase p-evaluate">Evaluate</span><span class="q-num">Question 8 of 8</span></div>
+                <div class="q-text">Switch to Dual Sources mode and press Play. What happens when two expanding wavefronts cross paths? Describe what you observe where crest meets crest versus where crest meets trough.</div>
+                <div class="q-area"><label>Your Answer</label><textarea placeholder="Type your answer here…" data-q="7"></textarea></div>
+            </div>
+
+            <div class="export-bar">
+                <div class="prog"><strong id="ans-count">0</strong> of 8 questions answered</div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('tab-' + b.dataset.tab).classList.add('active');
+}));
+
+// ════════════════════════════════════════
+// ASSESSMENT NAV
+// ════════════════════════════════════════
+const qCards = document.querySelectorAll('.q-card');
+const navSl = document.getElementById('nav-sl');
+const dotsEl = document.getElementById('dots');
+for (let i = 0; i < qCards.length; i++) { const d = document.createElement('div'); d.className = 'dot' + (i === 0 ? ' current' : ''); dotsEl.appendChild(d); }
+function showQ(idx) {
+    qCards.forEach((q, i) => q.classList.toggle('active', i === idx));
+    navSl.value = idx;
+    document.getElementById('nav-cur').textContent = idx + 1;
+    document.getElementById('nav-prev').disabled = idx === 0;
+    document.getElementById('nav-next').disabled = idx === qCards.length - 1;
+    dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('current', i === idx));
+}
+navSl.addEventListener('input', () => showQ(+navSl.value));
+document.getElementById('nav-prev').addEventListener('click', () => showQ(Math.max(0, +navSl.value - 1)));
+document.getElementById('nav-next').addEventListener('click', () => showQ(Math.min(qCards.length - 1, +navSl.value + 1)));
+const tas = document.querySelectorAll('.q-card textarea');
+function updateAns() {
+    let c = 0; tas.forEach(t => { if (t.value.trim()) c++; });
+    document.getElementById('ans-count').textContent = c;
+    dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('answered', tas[i] && tas[i].value.trim().length > 0));
+}
+tas.forEach(t => t.addEventListener('input', updateAns));
+
+// ════════════════════════════════════════
+// STATE & CONFIG
+// ════════════════════════════════════════
+const DOMAIN = 24;          // cm physical domain width/height
+const CANVAS_SIZE = 600;    // Native internal buffer resolution
+
+const S = {
+    running: false, time: 0, speed: 1,
+    mode: 'point',
+    v: 5, f: 2, sep: 3, amp: 1, damp: 0,
+    contours: true, rays: false,
+    probePos: { x: 6, y: 0 }  // cm relative to center
+};
+
+// Canvas Setup
+const canvas = document.getElementById('simCanvas');
+canvas.width = CANVAS_SIZE;
+canvas.height = CANVAS_SIZE;
+const ctx = canvas.getContext('2d');
+
+// Image Buffer for 1:1 Crisp Pixel Rendering
+const imgData = ctx.createImageData(CANVAS_SIZE, CANVAS_SIZE);
+const pix = imgData.data;
+
+// Precomputed Distance Grids
+let distGridPoint = new Float32Array(CANVAS_SIZE * CANVAS_SIZE);
+let distGridDual1 = new Float32Array(CANVAS_SIZE * CANVAS_SIZE);
+let distGridDual2 = new Float32Array(CANVAS_SIZE * CANVAS_SIZE);
+let distGridPlane = new Float32Array(CANVAS_SIZE * CANVAS_SIZE);
+const uField = new Float32Array(CANVAS_SIZE * CANVAS_SIZE);
+
+function initDistanceGrids() {
+    const half = CANVAS_SIZE / 2;
+    const scale = DOMAIN / CANVAS_SIZE;
+    let idx = 0;
+
+    for (let py = 0; py < CANVAS_SIZE; py++) {
+        const y = (py - half) * scale;
+        const y2 = y * y;
+        const absY = Math.abs(y);
+
+        for (let px = 0; px < CANVAS_SIZE; px++) {
+            const x = (px - half) * scale;
+            
+            distGridPoint[idx] = Math.sqrt(x * x + y2);
+            distGridPlane[idx] = absY;
+
+            const x1 = x + S.sep / 2;
+            const x2 = x - S.sep / 2;
+            distGridDual1[idx] = Math.sqrt(x1 * x1 + y2);
+            distGridDual2[idx] = Math.sqrt(x2 * x2 + y2);
+
+            idx++;
+        }
+    }
+}
+initDistanceGrids();
+
+// ════════════════════════════════════════
+// HIGH-FIDELITY REALISTIC WAVE ENGINE
+// ════════════════════════════════════════
+function computeAndRenderWaves() {
+    const { v, f, amp, damp, mode, time, running } = S;
+    const omega = 2 * Math.PI * f;
+    const k = omega / v;
+    const t = time;
+    const maxWaveRadius = v * t; // Waves expand outward at speed v
+    const totalPixels = CANVAS_SIZE * CANVAS_SIZE;
+    const W = CANVAS_SIZE;
+
+    const invAmp = mode === 'dual' ? 0.5 / amp : 1.0 / amp;
+
+    // 1. Calculate displacement field uField
+    // If t === 0 (or not started), medium is calm (u = 0)
+    if (t <= 0.0001) {
+        uField.fill(0);
+    } else if (mode === 'point') {
+        for (let i = 0; i < totalPixels; i++) {
+            const r = distGridPoint[i];
+            if (r > maxWaveRadius) {
+                uField[i] = 0; // Wavefront has not reached here yet!
+            } else {
+                const decay = damp > 0 ? Math.exp(-damp * r) : 1;
+                const env = 1 / Math.max(1, Math.sqrt(r * 0.45));
+                uField[i] = amp * env * decay * Math.sin(k * r - omega * t);
+            }
+        }
+    } else if (mode === 'plane') {
+        for (let i = 0; i < totalPixels; i++) {
+            const d = distGridPlane[i];
+            if (d > maxWaveRadius) {
+                uField[i] = 0; // Wavefront has not reached here yet!
+            } else {
+                const decay = damp > 0 ? Math.exp(-damp * d) : 1;
+                uField[i] = amp * decay * Math.sin(k * d - omega * t);
+            }
+        }
+    } else {
+        // Dual Sources
+        for (let i = 0; i < totalPixels; i++) {
+            const r1 = distGridDual1[i];
+            const r2 = distGridDual2[i];
+            const u1 = (r1 <= maxWaveRadius) ? (1 / Math.max(1, Math.sqrt(r1 * 0.45))) * (damp > 0 ? Math.exp(-damp * r1) : 1) * Math.sin(k * r1 - omega * t) : 0;
+            const u2 = (r2 <= maxWaveRadius) ? (1 / Math.max(1, Math.sqrt(r2 * 0.45))) * (damp > 0 ? Math.exp(-damp * r2) : 1) * Math.sin(k * r2 - omega * t) : 0;
+            uField[i] = amp * (u1 + u2);
+        }
+    }
+
+    // 2. Realistic Water Rendering with Caustics & Refinement
+    let ptr = 0;
+    for (let py = 0; py < W; py++) {
+        const isEdgeY = py === 0 || py === W - 1;
+        for (let px = 0; px < W; px++) {
+            const i = py * W + px;
+            const u = uField[i];
+            const normU = Math.max(-1, Math.min(1, u * invAmp)); // -1 to +1
+
+            // Surface Slope (Gradient) for Realistic Lighting Refraction
+            let gx = 0, gy = 0;
+            if (!isEdgeY && px > 0 && px < W - 1) {
+                gx = (uField[i + 1] - uField[i - 1]) * 4.0;
+                gy = (uField[i + W] - uField[i - W]) * 4.0;
+            }
+
+            // Directional Light Source from Top-Left (3D Caustic Effect)
+            const light = 1.0 + (gx * 0.4 + gy * 0.4);
+            const l = Math.max(0.15, Math.min(1.85, light));
+
+            // Base Water Color Interpolation:
+            // Trough (-1): Deep dark navy #020718
+            // Equilibrium (0): Rich ocean blue #071e42
+            // Crest (+1): Electric cyan #00f0ff
+            let r, g, b;
+            if (normU > 0) {
+                const t = normU;
+                r = 7 + t * (0 - 7);
+                g = 30 + t * (240 - 30);
+                b = 66 + t * (255 - 66);
+            } else {
+                const t = -normU;
+                r = 7 + t * (2 - 7);
+                g = 30 + t * (7 - 30);
+                b = 66 + t * (24 - 66);
+            }
+
+            // Apply 3D Lighting
+            r *= l;
+            g *= l;
+            b *= l;
+
+            // Specular Caustic Highlight on Crest Peaks
+            if (normU > 0.3) {
+                const highlight = Math.pow((normU - 0.3) / 0.7, 2.5) * l * 180;
+                r += highlight * 0.85;
+                g += highlight * 0.95;
+                b += highlight;
+            }
+
+            pix[ptr]     = Math.min(255, Math.max(0, r)) | 0;
+            pix[ptr + 1] = Math.min(255, Math.max(0, g)) | 0;
+            pix[ptr + 2] = Math.min(255, Math.max(0, b)) | 0;
+            pix[ptr + 3] = 255;
+
+            ptr += 4;
+        }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+}
+
+// ════════════════════════════════════════
+// VECTOR OVERLAYS (Wavefront Contours, Rays, Markers)
+// ════════════════════════════════════════
+function drawWavefrontContours() {
+    if (!S.contours || S.time <= 0.0001) return;
+    const W = CANVAS_SIZE, H = CANVAS_SIZE;
+    const step = 2;
+    const thresh = S.amp * 0.5 * (S.mode === 'dual' ? 1.4 : 1.0);
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+
+    for (let py = step; py < H - step; py += step) {
+        const row = py * W;
+        for (let px = step; px < W - step; px += step) {
+            const idx = row + px;
+            const v = uField[idx];
+            const vr = uField[idx + step];
+            const vd = uField[idx + step * W];
+
+            if ((v >= thresh) !== (vr >= thresh)) {
+                const frac = (thresh - v) / (vr - v);
+                ctx.moveTo(px + frac * step, py);
+                ctx.lineTo(px + frac * step, py + step);
+            }
+            if ((v >= thresh) !== (vd >= thresh)) {
+                const frac = (thresh - v) / (vd - v);
+                ctx.moveTo(px, py + frac * step);
+                ctx.lineTo(px + step, py + frac * step);
+            }
+        }
+    }
+    ctx.stroke();
+    ctx.restore();
+}
+
+function drawArrowhead(ex, ey, ux, uy) {
+    ctx.save();
+    ctx.fillStyle = '#ffcb2b';
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = '#ffcb2b';
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - ux * 10 + uy * 4.5, ey - uy * 10 - ux * 4.5);
+    ctx.lineTo(ex - ux * 10 - uy * 4.5, ey - uy * 10 + ux * 4.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+}
+
+function drawRayLine(sx, sy, ex, ey) {
+    const dx = ex - sx, dy = ey - sy;
+    const len = Math.sqrt(dx * dx + dy * dy);
+    if (len < 10) return;
+    const ux = dx / len, uy = dy / len;
+
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+
+    drawArrowhead(ex, ey, ux, uy);
+}
+
+function drawRays() {
+    if (!S.rays) return;
+    const W = CANVAS_SIZE, H = CANVAS_SIZE;
+    const cx = W / 2, cy = H / 2;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255, 203, 43, 0.75)';
+    ctx.lineWidth = 2.0;
+    ctx.setLineDash([7, 5]);
+
+    if (S.mode === 'point') {
+        const numRays = 12;
+        const maxR = W * 0.44;
+        for (let i = 0; i < numRays; i++) {
+            const angle = (i / numRays) * Math.PI * 2;
+            const sx = cx + Math.cos(angle) * 14;
+            const sy = cy + Math.sin(angle) * 14;
+            const ex = cx + Math.cos(angle) * maxR;
+            const ey = cy + Math.sin(angle) * maxR;
+            drawRayLine(sx, sy, ex, ey);
+        }
+    } else if (S.mode === 'plane') {
+        const numRays = 7;
+        const maxR = H * 0.44;
+        for (let i = 0; i < numRays; i++) {
+            const x = W * 0.12 + i * (W * 0.76 / (numRays - 1));
+            drawRayLine(x, cy - 10, x, cy - maxR);
+            drawRayLine(x, cy + 10, x, cy + maxR);
+        }
+    } else {
+        // Dual Sources
+        const sepPx = (S.sep / DOMAIN) * W;
+        const numRays = 8;
+        const maxR = W * 0.35;
+        const sources = [cx - sepPx / 2, cx + sepPx / 2];
+
+        for (const sxPos of sources) {
+            for (let i = 0; i < numRays; i++) {
+                const angle = (i / numRays) * Math.PI * 2;
+                const sx = sxPos + Math.cos(angle) * 12;
+                const sy = cy + Math.sin(angle) * 12;
+                const ex = sxPos + Math.cos(angle) * maxR;
+                const ey = cy + Math.sin(angle) * maxR;
+                drawRayLine(sx, sy, ex, ey);
+            }
+        }
+    }
+
+    ctx.restore();
+}
+
+function drawMarkers() {
+    const W = CANVAS_SIZE, H = CANVAS_SIZE;
+    const cx = W / 2, cy = H / 2;
+
+    ctx.save();
+
+    // Source Render
+    if (S.mode === 'plane') {
+        ctx.strokeStyle = '#ffcb2b';
+        ctx.lineWidth = 3.5;
+        ctx.shadowBlur = 16;
+        ctx.shadowColor = '#ffcb2b';
+        ctx.beginPath();
+        ctx.moveTo(W * 0.05, cy);
+        ctx.lineTo(W * 0.95, cy);
+        ctx.stroke();
+    } else if (S.mode === 'dual') {
+        const sepPx = (S.sep / DOMAIN) * W;
+        for (const sx of [cx - sepPx / 2, cx + sepPx / 2]) {
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#ffcb2b';
+            ctx.fillStyle = '#ffcb2b';
+            ctx.beginPath(); ctx.arc(sx, cy, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+        }
+    } else {
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#ffcb2b';
+        ctx.fillStyle = '#ffcb2b';
+        ctx.beginPath(); ctx.arc(cx, cy, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+
+    // Draggable Probe Marker
+    const probePx = cx + (S.probePos.x / DOMAIN) * W;
+    const probePy = cy + (S.probePos.y / DOMAIN) * W;
+
+    // Glowing halo around probe
+    ctx.shadowBlur = 16;
+    ctx.shadowColor = '#00f0ff';
+    ctx.fillStyle = '#00f0ff';
+    ctx.beginPath(); ctx.arc(probePx, probePy, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2.0; ctx.stroke();
+
+    // Drag handle outer ring
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(probePx, probePy, 13, 0, Math.PI * 2); ctx.stroke();
+
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffffff';
+    ctx.font = '600 12px Inter, sans-serif';
+    ctx.fillText('Probe', probePx + 16, probePy + 4);
+
+    ctx.restore();
+}
+
+// ════════════════════════════════════════
+// INTERACTIVE PROBE DRAGGING
+// ════════════════════════════════════════
+let isDraggingProbe = false;
+
+function getCanvasCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const xPx = (clientX - rect.left) * (CANVAS_SIZE / rect.width);
+    const yPx = (clientY - rect.top) * (CANVAS_SIZE / rect.height);
+    return { xPx, yPx };
+}
+
+function checkProbeHover(xPx, yPx) {
+    const W = CANVAS_SIZE;
+    const cx = W / 2, cy = W / 2;
+    const probePx = cx + (S.probePos.x / DOMAIN) * W;
+    const probePy = cy + (S.probePos.y / DOMAIN) * W;
+    const dist = Math.hypot(xPx - probePx, yPx - probePy);
+    return dist <= 24; // 24px hit radius
+}
+
+canvas.addEventListener('mousedown', e => {
+    const { xPx, yPx } = getCanvasCoords(e);
+    if (checkProbeHover(xPx, yPx)) {
+        isDraggingProbe = true;
+        canvas.style.cursor = 'grabbing';
+    }
+});
+
+window.addEventListener('mousemove', e => {
+    const { xPx, yPx } = getCanvasCoords(e);
+    if (isDraggingProbe) {
+        const W = CANVAS_SIZE;
+        const cx = W / 2, cy = W / 2;
+        // Convert to physical cm
+        let xCm = ((xPx - cx) / W) * DOMAIN;
+        let yCm = ((yPx - cy) / W) * DOMAIN;
+        // Clamp to domain bounds
+        const limit = DOMAIN * 0.46;
+        S.probePos.x = Math.max(-limit, Math.min(limit, xCm));
+        S.probePos.y = Math.max(-limit, Math.min(limit, yCm));
+        probeHist.length = 0; // Reset historical probe buffer on drag
+    } else {
+        canvas.style.cursor = checkProbeHover(xPx, yPx) ? 'grab' : 'default';
+    }
+});
+
+window.addEventListener('mouseup', () => {
+    if (isDraggingProbe) {
+        isDraggingProbe = false;
+        canvas.style.cursor = 'grab';
+    }
+});
+
+// Touch support for drag
+canvas.addEventListener('touchstart', e => {
+    const { xPx, yPx } = getCanvasCoords(e);
+    if (checkProbeHover(xPx, yPx)) {
+        isDraggingProbe = true;
+        e.preventDefault();
+    }
+}, { passive: false });
+
+window.addEventListener('touchmove', e => {
+    if (isDraggingProbe) {
+        const { xPx, yPx } = getCanvasCoords(e);
+        const W = CANVAS_SIZE;
+        const cx = W / 2, cy = W / 2;
+        let xCm = ((xPx - cx) / W) * DOMAIN;
+        let yCm = ((yPx - cy) / W) * DOMAIN;
+        const limit = DOMAIN * 0.46;
+        S.probePos.x = Math.max(-limit, Math.min(limit, xCm));
+        S.probePos.y = Math.max(-limit, Math.min(limit, yCm));
+        probeHist.length = 0;
+        e.preventDefault();
+    }
+}, { passive: false });
+
+window.addEventListener('touchend', () => { isDraggingProbe = false; });
+
+// ════════════════════════════════════════
+// MINI GRAPHS
+// ════════════════════════════════════════
+class MiniGraph {
+    constructor(id, xLbl, yLbl, col) {
+        this.c = document.getElementById(id);
+        this.x = this.c.getContext('2d');
+        this.xLbl = xLbl; this.yLbl = yLbl; this.col = col;
+        this._resize();
+    }
+    _resize() {
+        const r = this.c.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        this.c.width = r.width * dpr;
+        this.c.height = r.height * dpr;
+        this.x.scale(dpr, dpr);
+        this.W = r.width; this.H = r.height;
+    }
+    draw(data, xk, yk, yMin, yMax) {
+        const ctx = this.x, W = this.W, H = this.H;
+        const dpr = window.devicePixelRatio || 1;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, W, H);
+        if (data.length < 2) return;
+        
+        const p = { l: 40, r: 10, t: 10, b: 24 };
+        const pw = W - p.l - p.r, ph = H - p.t - p.b;
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(p.l, p.t); ctx.lineTo(p.l, p.t + ph); ctx.lineTo(p.l + pw, p.t + ph); ctx.stroke();
+        
+        ctx.fillStyle = '#8288a8'; ctx.font = '10px Inter'; ctx.textAlign = 'center';
+        ctx.fillText(this.xLbl, p.l + pw / 2, H - 4);
+        ctx.save(); ctx.translate(10, p.t + ph / 2); ctx.rotate(-Math.PI / 2); ctx.fillText(this.yLbl, 0, 0); ctx.restore();
+
+        ctx.textAlign = 'right'; ctx.font = '9px JetBrains Mono';
+        for (let i = 0; i <= 4; i++) {
+            const yv = yMin + ((yMax - yMin) * i / 4);
+            const y = p.t + ph - (i / 4) * ph;
+            ctx.fillStyle = '#626888'; ctx.fillText(yv.toFixed(1), p.l - 5, y + 3);
+            ctx.strokeStyle = 'rgba(255,255,255,0.04)'; ctx.beginPath(); ctx.moveTo(p.l, y); ctx.lineTo(p.l + pw, y); ctx.stroke();
+        }
+
+        const xMin = data[0][xk], xMax = data[data.length - 1][xk];
+        const xRange = xMax - xMin || 1, yRange = yMax - yMin || 1;
+        ctx.strokeStyle = this.col; ctx.lineWidth = 2.0; ctx.lineJoin = 'round';
+        ctx.shadowBlur = 8; ctx.shadowColor = this.col;
+        ctx.beginPath();
+        for (let i = 0; i < data.length; i++) {
+            const x = p.l + ((data[i][xk] - xMin) / xRange) * pw;
+            const y = p.t + ph - ((data[i][yk] - yMin) / yRange) * ph;
+            i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke(); ctx.shadowBlur = 0;
+    }
+}
+
+// ════════════════════════════════════════
+// PROBE DATA & STATS
+// ════════════════════════════════════════
+const probeHist = [];
+const MAX_HIST = 250;
+
+function getProbeDisplacement() {
+    const W = CANVAS_SIZE;
+    const probePx = Math.round((S.probePos.x / DOMAIN + 0.5) * W);
+    const probePy = Math.round((S.probePos.y / DOMAIN + 0.5) * W);
+    if (probePx >= 0 && probePx < W && probePy >= 0 && probePy < W) {
+        return uField[probePy * W + probePx];
+    }
+    return 0;
+}
+
+function updateStats() {
+    const lam = S.v / S.f;
+    const pu = getProbeDisplacement();
+    document.getElementById('st-time').textContent = S.time.toFixed(2) + ' s';
+    document.getElementById('st-probe').textContent = pu.toFixed(3);
+    document.getElementById('st-lam').textContent = lam.toFixed(2) + ' cm';
+    document.getElementById('st-v').textContent = S.v.toFixed(1) + ' cm/s';
+    document.getElementById('st-f').textContent = S.f.toFixed(1) + ' Hz';
+    const names = { point: 'Point', plane: 'Plane', dual: 'Dual' };
+    document.getElementById('st-mode').textContent = names[S.mode];
+
+    probeHist.push({ t: S.time, u: pu });
+    if (probeHist.length > MAX_HIST) probeHist.shift();
+}
+
+// ════════════════════════════════════════
+// INIT & MAIN ANIMATION LOOP
+// ════════════════════════════════════════
+let gProbe, gProfile;
+requestAnimationFrame(() => {
+    gProbe = new MiniGraph('g-probe', 'Time (s)', 'u', '#00f0ff');
+    gProfile = new MiniGraph('g-profile', 'Distance (cm)', 'u', '#8a5cf6');
+});
+window.addEventListener('resize', () => { if (gProbe) gProbe._resize(); if (gProfile) gProfile._resize(); });
+
+let lastTs = 0, frameCount = 0;
+
+function frame(ts) {
+    if (lastTs === 0) lastTs = ts;
+    const dt = Math.min((ts - lastTs) / 1000, 0.05);
+    lastTs = ts;
+
+    if (S.running) {
+        S.time += dt * S.speed;
+    }
+
+    // Render Wave Engine
+    computeAndRenderWaves();
+    drawWavefrontContours();
+    drawRays();
+    drawMarkers();
+    updateStats();
+
+    // Throttled Graph Updates
+    frameCount++;
+    if (frameCount % 3 === 0 && gProbe) {
+        const a = S.amp * (S.mode === 'dual' ? 2 : 1) * 1.25;
+        gProbe.draw(probeHist, 't', 'u', -a, a);
+
+        // Cross-Section Profile sampling along x=0 to right edge
+        const profile = [];
+        const W = CANVAS_SIZE;
+        const half = W / 2;
+        const scale = DOMAIN / W;
+        for (let r = 0; r < half - 2; r += 2) {
+            profile.push({ r: r * scale, u: uField[half * W + half + r] });
+        }
+        gProfile.draw(profile, 'r', 'u', -a, a);
+    }
+
+    requestAnimationFrame(frame);
+}
+
+// ════════════════════════════════════════
+// CONTROLS & LISTENERS
+// ════════════════════════════════════════
+const bindSlider = (sid, vid, key, fmt) => {
+    document.getElementById(sid).addEventListener('input', e => {
+        S[key] = parseFloat(e.target.value);
+        document.getElementById(vid).textContent = fmt(S[key]);
+        if (key === 'sep') initDistanceGrids();
+    });
+};
+bindSlider('s-speed', 'v-speed', 'v', v => v.toFixed(1) + ' cm/s');
+bindSlider('s-freq',  'v-freq',  'f', v => v.toFixed(1) + ' Hz');
+bindSlider('s-sep',   'v-sep',   'sep', v => v.toFixed(1) + ' cm');
+bindSlider('s-amp',   'v-amp',   'amp', v => v.toFixed(1));
+bindSlider('s-damp',  'v-damp',  'damp', v => v.toFixed(2));
+bindSlider('s-simspeed', 'v-simspeed', 'speed', v => v.toFixed(1) + '×');
+
+document.getElementById('chk-contours').addEventListener('change', e => S.contours = e.target.checked);
+document.getElementById('chk-rays').addEventListener('change', e => S.rays = e.target.checked);
+
+function setMode(m) {
+    S.mode = m;
+    document.getElementById('mode-point').classList.toggle('active', m === 'point');
+    document.getElementById('mode-plane').classList.toggle('active', m === 'plane');
+    document.getElementById('mode-dual').classList.toggle('active', m === 'dual');
+    const sg = document.getElementById('sep-group');
+    sg.style.opacity = m === 'dual' ? '1' : '0.35';
+    sg.style.pointerEvents = m === 'dual' ? 'auto' : 'none';
+    resetSim();
+}
+document.getElementById('mode-point').addEventListener('click', () => setMode('point'));
+document.getElementById('mode-plane').addEventListener('click', () => setMode('plane'));
+document.getElementById('mode-dual').addEventListener('click', () => setMode('dual'));
+
+document.getElementById('btn-play').addEventListener('click', () => {
+    S.running = !S.running;
+    const b = document.getElementById('btn-play');
+    b.textContent = S.running ? '⏸ Pause' : '▶ Play';
+    b.classList.toggle('active', S.running);
+});
+document.getElementById('btn-step').addEventListener('click', () => {
+    S.running = false;
+    document.getElementById('btn-play').textContent = '▶ Play';
+    document.getElementById('btn-play').classList.remove('active');
+    S.time += 0.02;
+});
+
+function resetSim() {
+    S.time = 0; S.running = false; lastTs = 0;
+    probeHist.length = 0;
+    document.getElementById('btn-play').textContent = '▶ Play';
+    document.getElementById('btn-play').classList.remove('active');
+}
+document.getElementById('btn-reset').addEventListener('click', resetSim);
+
+// START ENGINE
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
