@@ -404,50 +404,34 @@ function exportToWord() {
         const textarea = qCard.querySelector('textarea');
         const answerText = textarea ? textarea.value.trim() : '';
 
-        const ansFormatted = answerText ? answerText.replace(/\n/g, '<br>') : '<span style="color:#94a3b8; font-style:italic;">[No answer provided]</span>';
+        const ansFormatted = answerText ? answerText.replace(/\n/g, '<br>') : '<em style="color:#718096;">[No answer provided]</em>';
 
         qHtml += `
-            <div style="margin-bottom:18pt; padding:12pt; border-left:4pt solid #0284c7; background-color:#f0f9ff; border-radius:4pt;">
-                <div style="font-size:9pt; font-weight:bold; text-transform:uppercase; color:#0369a1; letter-spacing:1pt; margin-bottom:4pt;">${phase} — ${qNum}</div>
-                <div style="font-size:11pt; font-weight:bold; color:#0f172a; margin-bottom:8pt; line-height:1.5;">${qText}</div>
-                <div style="background-color:#ffffff; border:1pt solid #cbd5e1; padding:10pt; border-radius:4pt; color:#0f172a; font-size:10.5pt; line-height:1.6;">${ansFormatted}</div>
+            <div style="margin-bottom:16px; padding:12px; background-color:#f8fafc; border-left:4px solid #0284c7; border-radius:4px;">
+                <p style="font-size:10pt; font-weight:bold; color:#0369a1; text-transform:uppercase; margin:0 0 4px 0;">${phase} — ${qNum}</p>
+                <p style="font-size:11pt; font-weight:bold; color:#0f172a; margin:0 0 8px 0;">${qText}</p>
+                <p style="font-size:10.5pt; color:#1e293b; background-color:#ffffff; padding:8px; border:1px solid #cbd5e1; margin:0;">${ansFormatted}</p>
             </div>
         `;
     });
 
-    const docContent = `
-        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-        <head>
-        <meta charset='utf-8'>
-        <title>${simTitle} — Student Assessment</title>
-        <style>
-            body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #1e293b; line-height: 1.5; margin: 1in; }
-            h1 { font-size: 20pt; color: #0f172a; border-bottom: 2pt solid #0284c7; padding-bottom: 6pt; margin-bottom: 12pt; }
-            .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20pt; }
-            .meta-table td { padding: 6pt 10pt; background-color: #f8fafc; border: 1pt solid #e2e8f0; font-size: 10.5pt; }
-            .meta-label { font-weight: bold; color: #475569; width: 120pt; }
-        </style>
-        </head>
-        <body>
-            <h1>${simTitle} — Student Assessment</h1>
-            <table class="meta-table">
-                <tr><td class="meta-label">Student Name:</td><td>${studentName}</td></tr>
-                <tr><td class="meta-label">Date:</td><td>${formattedDate}</td></tr>
-                <tr><td class="meta-label">Course / Topic:</td><td>AP &amp; Honors Physics — Waves &amp; Oscillations</td></tr>
-            </table>
-            ${qHtml}
-        </body>
-        </html>
+    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Doppler Effect Assessment</title></head><body style=\"font-family: Arial, sans-serif; padding: 20px;\">";
+    const metaInfo = `
+        <h2 style="color: #0f172a; border-bottom: 2px solid #0284c7; padding-bottom: 8px;">${simTitle} — Student Assessment</h2>
+        <p style="font-size: 11pt;"><strong>Student Name:</strong> ${studentName}<br><strong>Date:</strong> ${formattedDate}</p>
+        <hr style="border: 0; border-top: 1px solid #cbd5e1; margin-bottom: 20px;">
     `;
+    const footer = "</body></html>";
 
+    const docContent = header + metaInfo + qHtml + footer;
     const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${simTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${studentName.replace(/[^a-zA-Z0-9]/g, '_')}.docx`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Doppler_Effect_Assessment_${studentName.replace(/\s+/g, '_')}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
 }
 
