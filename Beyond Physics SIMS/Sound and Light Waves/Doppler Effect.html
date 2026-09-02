@@ -351,6 +351,7 @@
 
             <div class="export-bar">
                 <div class="prog"><strong id="ans-count">0</strong> of 8 questions answered</div>
+                <button class="btn btn-primary" id="btn-export-doc" style="width:auto; padding:9px 20px; background:linear-gradient(135deg, var(--cyan), #00b8d4); color:#040814; font-weight:700;">📄 Export to Word (.docx)</button>
             </div>
         </div>
     </div>
@@ -388,6 +389,69 @@ function updateAns() {
     dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('answered', tas[i] && tas[i].value.trim().length > 0));
 }
 tas.forEach(t => t.addEventListener('input', updateAns));
+
+function exportToWord() {
+    const nameInput = document.getElementById('sname');
+    const studentName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Student';
+    const formattedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const simTitle = "Doppler Effect & Wavefront Dynamics";
+
+    let qHtml = '';
+    document.querySelectorAll('.q-card').forEach((qCard, idx) => {
+        const phase = qCard.querySelector('.phase')?.textContent || '';
+        const qNum = qCard.querySelector('.q-num')?.textContent || `Question ${idx + 1}`;
+        const qText = qCard.querySelector('.q-text')?.textContent || '';
+        const textarea = qCard.querySelector('textarea');
+        const answerText = textarea ? textarea.value.trim() : '';
+
+        const ansFormatted = answerText ? answerText.replace(/\n/g, '<br>') : '<span style="color:#94a3b8; font-style:italic;">[No answer provided]</span>';
+
+        qHtml += `
+            <div style="margin-bottom:18pt; padding:12pt; border-left:4pt solid #0284c7; background-color:#f0f9ff; border-radius:4pt;">
+                <div style="font-size:9pt; font-weight:bold; text-transform:uppercase; color:#0369a1; letter-spacing:1pt; margin-bottom:4pt;">${phase} — ${qNum}</div>
+                <div style="font-size:11pt; font-weight:bold; color:#0f172a; margin-bottom:8pt; line-height:1.5;">${qText}</div>
+                <div style="background-color:#ffffff; border:1pt solid #cbd5e1; padding:10pt; border-radius:4pt; color:#0f172a; font-size:10.5pt; line-height:1.6;">${ansFormatted}</div>
+            </div>
+        `;
+    });
+
+    const docContent = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+        <meta charset='utf-8'>
+        <title>${simTitle} — Student Assessment</title>
+        <style>
+            body { font-family: 'Calibri', 'Segoe UI', Arial, sans-serif; font-size: 11pt; color: #1e293b; line-height: 1.5; margin: 1in; }
+            h1 { font-size: 20pt; color: #0f172a; border-bottom: 2pt solid #0284c7; padding-bottom: 6pt; margin-bottom: 12pt; }
+            .meta-table { width: 100%; border-collapse: collapse; margin-bottom: 20pt; }
+            .meta-table td { padding: 6pt 10pt; background-color: #f8fafc; border: 1pt solid #e2e8f0; font-size: 10.5pt; }
+            .meta-label { font-weight: bold; color: #475569; width: 120pt; }
+        </style>
+        </head>
+        <body>
+            <h1>${simTitle} — Student Assessment</h1>
+            <table class="meta-table">
+                <tr><td class="meta-label">Student Name:</td><td>${studentName}</td></tr>
+                <tr><td class="meta-label">Date:</td><td>${formattedDate}</td></tr>
+                <tr><td class="meta-label">Course / Topic:</td><td>AP &amp; Honors Physics — Waves &amp; Oscillations</td></tr>
+            </table>
+            ${qHtml}
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${simTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${studentName.replace(/[^a-zA-Z0-9]/g, '_')}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+document.getElementById('btn-export-doc').addEventListener('click', exportToWord);
 
 // ════════════════════════════════════════
 // STATE & CONFIG
