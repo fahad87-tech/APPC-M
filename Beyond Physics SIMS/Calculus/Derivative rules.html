@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculus Rules — Interactive Derivative Explorer</title>
+  <script>
+    const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
+    }
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
+      });
+    }
+    async function verifyWebsiteAccess() {
+      const userInput = await requestPassword("Simulation Access", "Password required:");
+      if (userInput === null) { window.location.replace("about:blank"); return; }
+      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.replace("about:blank");
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
+    } else {
+      verifyWebsiteAccess();
+    }
+  </script>
+  <style id="password-gate-styles">
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
+    #password-gate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5, 9, 18, 0.88); padding: 24px; z-index: 9999; }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card { width: min(100%, 420px); background: #101625; border: 1px solid rgba(100,181,246,0.28); border-radius: 18px; padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); color: #e7edf7; font-family: 'Segoe UI', Arial, sans-serif; }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px; box-sizing: border-box; }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  </style>
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --card: #12122a;
+      --border: rgba(255,255,255,0.08);
+      --text: #f0f3f8;
+      --dim: #7a889e;
+      --f-col: #4fc3f7;
+      --g-col: #81c784;
+      --h-col: #ff7043;
+      --hp-col: #ffd740;
+      --hpp-col: #80deea;
+      --tan-col: #e040fb;
+      --dec1: rgba(171,71,188,0.25);
+      --dec2: rgba(38,198,218,0.25);
+      --crit-max: #ef5350;
+      --crit-min: #66bb6a;
+      --inflect: #80deea;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+    /* Header */
+    header{background:var(--card);border-bottom:1px solid var(--border);padding:8px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .title{font-weight:700;font-size:1rem;white-space:nowrap}
+    .rule-nav{display:flex;gap:6px;flex:1;justify-content:center}
+    .rule-btn{background:transparent;border:1px solid var(--border);color:var(--dim);padding:5px 14px;border-radius:6px;cursor:pointer;font-weight:600;font-size:.82rem;transition:all .2s}
+    .rule-btn:hover{border-color:rgba(79,195,247,0.4);color:#ccc}
+    .rule-btn.active{background:rgba(79,195,247,0.15);border-color:var(--f-col);color:var(--f-col)}
+    .hdr-btns{display:flex;gap:6px}
+    .btn{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:500;transition:all .2s}
+    .btn:hover{background:rgba(255,255,255,0.12)}
+    .btn.active-mode{background:rgba(255,215,64,0.15);border-color:var(--hp-col);color:var(--hp-col)}
+
+    /* Layout */
+    .main{display:flex;flex:1;overflow:hidden}
+    .center{flex:1;display:flex;flex-direction:column;padding:10px 12px;gap:8px;overflow-y:auto}
+    aside{width:280px;background:var(--card);border-left:1px solid var(--border);padding:12px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;flex-shrink:0}
+
+    /* Formula bar */
+    .formula-bar{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 14px;display:flex;align-items:center;gap:18px;font-family:'Cascadia Code','Fira Code',monospace;font-size:.85rem;flex-wrap:wrap}
+
+    /* Toggle strip */
+    .toggles{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 14px;font-size:.8rem;flex-wrap:wrap}
+    .tgl{display:inline-flex;align-items:center;gap:5px;cursor:pointer;user-select:none;transition:opacity .2s}
+    .tgl input{accent-color:currentColor}
+
+    /* Canvas */
+    .canvas-wrap{background:#050510;border:1px solid var(--border);border-radius:8px;flex:1;min-height:300px;position:relative;cursor:crosshair}
+    .canvas-wrap canvas{width:100%;height:100%;display:block}
+
+    /* Info box */
+    .info-box{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--hp-col);border-radius:8px;padding:8px 14px;font-size:.84rem;line-height:1.5}
+    .pill{display:inline-block;padding:1px 5px;border-radius:3px;background:rgba(0,0,0,0.5);font-family:monospace;font-size:.85em}
+
+    /* Quiz overlay */
+    .quiz-bar{display:none;background:linear-gradient(135deg,rgba(255,215,64,0.08),rgba(255,112,67,0.08));border:1px solid rgba(255,215,64,0.2);border-radius:8px;padding:8px 14px;align-items:center;gap:12px;font-size:.85rem}
+    .quiz-bar.active{display:flex}
+    .quiz-input{background:rgba(0,0,0,0.4);border:1px solid var(--border);color:#fff;padding:4px 10px;border-radius:4px;width:80px;font-size:.9rem;text-align:center}
+    .quiz-feedback{font-weight:600;min-width:120px}
+
+    /* Comparison overlay */
+    .compare-label{position:absolute;top:6px;padding:3px 10px;border-radius:4px;font-size:.75rem;font-weight:700;pointer-events:none;z-index:2}
+
+    /* Sidebar */
+    .sb-section{display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--border);padding-bottom:10px}
+    .sb-title{font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--dim);font-weight:600}
+    .sl-row{display:flex;flex-direction:column;gap:2px}
+    .sl-labels{display:flex;justify-content:space-between;font-size:.78rem}
+    input[type="range"]{width:100%;accent-color:var(--f-col);cursor:pointer;height:18px}
+    select{background:#0a0a1a;border:1px solid var(--border);color:#fff;padding:5px 8px;border-radius:5px;font-size:.82rem}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="title">Calculus Rules Explorer</div>
+  <div class="rule-nav">
+    <button class="rule-btn active" data-rule="product">Product [ f·g ]</button>
+    <button class="rule-btn" data-rule="quotient">Quotient [ f/g ]</button>
+    <button class="rule-btn" data-rule="chain">Chain [ f(g) ]</button>
+  </div>
+  <div class="hdr-btns">
+    <button class="btn" id="compareBtn">Compare</button>
+    <button class="btn" id="quizBtn">Quiz Me</button>
+    <button class="btn" id="playBtn">⏸ Pause</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="center">
+    <div class="formula-bar">
+      <div><span style="color:var(--f-col)">f(x)</span> = <strong id="eqF">0.5x²</strong></div>
+      <div><span style="color:var(--g-col)">g(x)</span> = <strong id="eqG">x + 1</strong></div>
+      <div><span style="color:var(--h-col)">h(x)</span> = <strong id="eqH">(0.5x²)(x+1)</strong></div>
+    </div>
+
+    <div class="toggles">
+      <strong style="color:var(--dim)">Show:</strong>
+      <label class="tgl" style="color:var(--f-col)"><input type="checkbox" id="showF" checked> f(x)</label>
+      <label class="tgl" style="color:var(--g-col)"><input type="checkbox" id="showG" checked> g(x)</label>
+      <label class="tgl" style="color:var(--h-col)"><input type="checkbox" id="showH" checked> h(x)</label>
+      <label class="tgl" style="color:var(--hp-col)"><input type="checkbox" id="showHp" checked> h′(x)</label>
+      <label class="tgl" style="color:var(--hpp-col)"><input type="checkbox" id="showHpp"> h″(x)</label>
+      <label class="tgl" style="color:var(--tan-col)"><input type="checkbox" id="showTan" checked> Tangent</label>
+      <label class="tgl" style="color:#ab47bc"><input type="checkbox" id="showDecomp"> Decompose</label>
+      <label class="tgl" style="color:var(--crit-max)"><input type="checkbox" id="showCrits"> Critical Pts</label>
+      <label class="tgl" style="color:rgba(255,215,64,0.7)"><input type="checkbox" id="showTrail" checked> Trail</label>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="mainCanvas"></canvas>
+    </div>
+
+    <div class="quiz-bar" id="quizBar">
+      <span>🎯 What is h′(<strong id="quizX">0</strong>)?</span>
+      <input class="quiz-input" id="quizInput" type="number" step="0.1" placeholder="?">
+      <button class="btn" id="quizCheck">Check</button>
+      <button class="btn" id="quizReveal">Reveal</button>
+      <span class="quiz-feedback" id="quizFeedback"></span>
+      <span style="margin-left:auto;color:var(--dim)" id="quizScore">Score: 0/0</span>
+    </div>
+
+    <div class="info-box" id="stepBox">Click on the graph or let the sweep run…</div>
+  </div>
+
+  <aside>
+    <div class="sb-section">
+      <div class="sb-title">Functions</div>
+      <label style="font-size:.78rem;color:var(--f-col)">f(x):</label>
+      <select id="typeF">
+        <option value="parabola">Parabola: A·x²</option>
+        <option value="sin">Sine: A·sin(x)</option>
+        <option value="exp">Exponential: A·eˣ</option>
+        <option value="cubic">Cubic: A·x³</option>
+        <option value="sqrt">Root: A·√|x|</option>
+      </select>
+      <label style="font-size:.78rem;color:var(--g-col);margin-top:2px">g(x):</label>
+      <select id="typeG">
+        <option value="line">Line: B·x + C</option>
+        <option value="cos">Cosine: B·cos(x) + C</option>
+        <option value="ln">Log: B·ln|x| + C</option>
+        <option value="recip">Reciprocal: B/x + C</option>
+      </select>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Parameters</div>
+      <div class="sl-row">
+        <div class="sl-labels"><span style="color:var(--f-col)">A (scale f)</span><span id="txtA">0.5</span></div>
+        <input type="range" id="slA" min="0.1" max="3.0" step="0.1" value="0.5">
+      </div>
+      <div class="sl-row">
+        <div class="sl-labels"><span style="color:var(--g-col)">B (scale g)</span><span id="txtB">1.0</span></div>
+        <input type="range" id="slB" min="0.2" max="3.0" step="0.1" value="1.0">
+      </div>
+      <div class="sl-row">
+        <div class="sl-labels"><span style="color:var(--g-col)">C (shift g)</span><span id="txtC">1.0</span></div>
+        <input type="range" id="slC" min="-3.0" max="3.0" step="0.5" value="1.0">
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Playback</div>
+      <div class="sl-row">
+        <div class="sl-labels"><span>Sweep Speed</span><span id="txtSpeed">1.0</span></div>
+        <input type="range" id="slSpeed" min="0.2" max="3.0" step="0.1" value="1.0">
+      </div>
+      <div class="sl-row">
+        <div class="sl-labels"><span>X Range</span><span id="txtW">8</span></div>
+        <input type="range" id="slW" min="4" max="16" step="1" value="8">
+      </div>
+    </div>
+
+    <div class="sb-section" style="border:none">
+      <div class="sb-title">Legend</div>
+      <div style="font-size:.75rem;line-height:1.8">
+        <div><span style="color:var(--f-col)">━━</span> f(x) — base function</div>
+        <div><span style="color:var(--g-col)">━━</span> g(x) — second function</div>
+        <div><span style="color:var(--h-col)">━━</span> h(x) — combined result</div>
+        <div><span style="color:var(--hp-col)">╌╌</span> h′(x) — first derivative</div>
+        <div><span style="color:var(--hpp-col)">┈┈</span> h″(x) — second derivative</div>
+        <div><span style="color:var(--tan-col)">━━</span> tangent slope line</div>
+        <div>◆<span style="color:var(--crit-max)"> max</span> / <span style="color:var(--crit-min)">min</span> — critical points</div>
+        <div>●<span style="color:var(--inflect)"> inflection</span> — h″=0</div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────
+const S = {
+  rule: 'product', compareRule: null,
+  typeF: 'parabola', typeG: 'line',
+  A: 0.5, B: 1.0, C: 1.0,
+  speed: 1.0, W: 8, x0: -4,
+  playing: true, dragging: false,
+  vis: { f:true, g:true, h:true, hp:true, hpp:false, tan:true, decomp:false, crits:false, trail:true },
+  quizMode: false, quizX: 0, quizCorrect: 0, quizTotal: 0,
+  trail: []  // [{x, y}] for sweep trail
+};
+
+// ─── Functions & Derivatives ─────────────────────────────────────
+function fFn(x) {
+  switch(S.typeF) {
+    case 'parabola': return S.A * x * x;
+    case 'sin':      return S.A * Math.sin(x);
+    case 'exp':      return S.A * Math.exp(Math.min(x, 6));
+    case 'cubic':    return S.A * x * x * x;
+    case 'sqrt':     return S.A * Math.sqrt(Math.abs(x));
+    default: return 0;
+  }
+}
+function dfFn(x) {
+  switch(S.typeF) {
+    case 'parabola': return 2 * S.A * x;
+    case 'sin':      return S.A * Math.cos(x);
+    case 'exp':      return S.A * Math.exp(Math.min(x, 6));
+    case 'cubic':    return 3 * S.A * x * x;
+    case 'sqrt':     return Math.abs(x) < 0.001 ? 0 : S.A * 0.5 / Math.sqrt(Math.abs(x)) * Math.sign(x);
+    default: return 0;
+  }
+}
+function gFn(x) {
+  switch(S.typeG) {
+    case 'line':  return S.B * x + S.C;
+    case 'cos':   return S.B * Math.cos(x) + S.C;
+    case 'ln':    return Math.abs(x) < 0.01 ? NaN : S.B * Math.log(Math.abs(x)) + S.C;
+    case 'recip': return Math.abs(x) < 0.01 ? NaN : S.B / x + S.C;
+    default: return 0;
+  }
+}
+function dgFn(x) {
+  switch(S.typeG) {
+    case 'line':  return S.B;
+    case 'cos':   return -S.B * Math.sin(x);
+    case 'ln':    return Math.abs(x) < 0.01 ? NaN : S.B / x;
+    case 'recip': return Math.abs(x) < 0.01 ? NaN : -S.B / (x * x);
+    default: return 0;
+  }
+}
+
+function hFn(x, rule) {
+  rule = rule || S.rule;
+  const fv = fFn(x), gv = gFn(x);
+  if (rule === 'product') return fv * gv;
+  if (rule === 'quotient') return Math.abs(gv) < 0.02 ? NaN : fv / gv;
+  if (rule === 'chain') return fFn(gv);
+  return 0;
+}
+function dhFn(x, rule) {
+  rule = rule || S.rule;
+  const fv = fFn(x), gv = gFn(x), dfv = dfFn(x), dgv = dgFn(x);
+  if (rule === 'product') return dfv * gv + fv * dgv;
+  if (rule === 'quotient') return Math.abs(gv) < 0.02 ? NaN : (dfv * gv - fv * dgv) / (gv * gv);
+  if (rule === 'chain') return dfFn(gv) * dgv;
+  return 0;
+}
+
+// Numerical second derivative
+function ddhFn(x, rule) {
+  const eps = 0.001;
+  const d1 = dhFn(x + eps, rule);
+  const d2 = dhFn(x - eps, rule);
+  return (!isFinite(d1) || !isFinite(d2)) ? NaN : (d1 - d2) / (2 * eps);
+}
+
+// Decomposition parts for visualization
+function decompParts(x, rule) {
+  rule = rule || S.rule;
+  const fv = fFn(x), gv = gFn(x), dfv = dfFn(x), dgv = dgFn(x);
+  if (rule === 'product') return { p1: dfv * gv, p2: fv * dgv, l1: "f′·g", l2: "f·g′" };
+  if (rule === 'quotient') return { p1: dfv * gv, p2: -fv * dgv, l1: "f′·g", l2: "-f·g′" };
+  if (rule === 'chain') return { p1: dfFn(gv), p2: dgv, l1: "f′(g)", l2: "g′" };
+  return { p1:0, p2:0, l1:"", l2:"" };
+}
+
+// ─── Formula display strings ─────────────────────────────────────
+function getFormulaText() {
+  const fLabels = { parabola:`${S.A.toFixed(1)}x²`, sin:`${S.A.toFixed(1)}sin(x)`, exp:`${S.A.toFixed(1)}eˣ`, cubic:`${S.A.toFixed(1)}x³`, sqrt:`${S.A.toFixed(1)}√|x|` };
+  const sc = S.C >= 0 ? `+ ${S.C.toFixed(1)}` : `− ${Math.abs(S.C).toFixed(1)}`;
+  const gLabels = { line:`${S.B.toFixed(1)}x ${sc}`, cos:`${S.B.toFixed(1)}cos(x) ${sc}`, ln:`${S.B.toFixed(1)}ln|x| ${sc}`, recip:`${S.B.toFixed(1)}/x ${sc}` };
+  const sf = fLabels[S.typeF], sg = gLabels[S.typeG];
+  let sh = '';
+  if (S.rule === 'product') sh = `(${sf})·(${sg})`;
+  else if (S.rule === 'quotient') sh = `(${sf}) / (${sg})`;
+  else sh = `f(${sg})`;
+  return { sf, sg, sh };
+}
+
+// ─── Canvas setup ────────────────────────────────────────────────
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvasWrap');
+
+function syncDpi() {
+  const r = wrap.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = r.width * dpr;
+  canvas.height = r.height * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', syncDpi);
+syncDpi();
+
+function toSX(x, w) { return ((x + S.W/2) / S.W) * w; }
+function toSY(y, cH, yr) { return cH/2 - (y/yr) * (cH/2); }
+function fromSX(px, w) { return (px / w) * S.W - S.W/2; }
+
+// ─── Find critical & inflection points ───────────────────────────
+function findZeroCrossings(fn, rule) {
+  const pts = [];
+  const halfW = S.W / 2;
+  const step = S.W / 400;
+  let prev = fn(-halfW, rule);
+  for (let x = -halfW + step; x <= halfW; x += step) {
+    const cur = fn(x, rule);
+    if (isFinite(prev) && isFinite(cur) && prev * cur < 0) {
+      // Bisect
+      let lo = x - step, hi = x;
+      for (let i = 0; i < 20; i++) {
+        const mid = (lo + hi) / 2;
+        const mv = fn(mid, rule);
+        if (!isFinite(mv)) break;
+        if (mv * fn(lo, rule) < 0) hi = mid; else lo = mid;
+      }
+      const xz = (lo + hi) / 2;
+      pts.push(xz);
+    }
+    prev = cur;
+  }
+  return pts;
+}
+
+// ─── Draw ────────────────────────────────────────────────────────
+function draw() {
+  const r = wrap.getBoundingClientRect();
+  const w = r.width, cH = r.height;
+  const yr = 8;
+  ctx.clearRect(0, 0, w, cH);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let gx = Math.ceil(-S.W/2); gx <= Math.floor(S.W/2); gx++) {
+    const px = toSX(gx, w);
+    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, cH); ctx.stroke();
+  }
+  for (let gy = -yr; gy <= yr; gy += 2) {
+    const py = toSY(gy, cH, yr);
+    ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  const ax0 = toSY(0, cH, yr), ay0 = toSX(0, w);
+  ctx.beginPath(); ctx.moveTo(0, ax0); ctx.lineTo(w, ax0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ay0, 0); ctx.lineTo(ay0, cH); ctx.stroke();
+
+  // Axis numbers
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '10px system-ui';
+  ctx.textAlign = 'center';
+  for (let gx = Math.ceil(-S.W/2); gx <= Math.floor(S.W/2); gx++) {
+    if (gx === 0) continue;
+    ctx.fillText(gx, toSX(gx, w), ax0 + 13);
+  }
+  ctx.textAlign = 'right';
+  for (let gy = -yr; gy <= yr; gy += 2) {
+    if (gy === 0) continue;
+    ctx.fillText(gy, ay0 - 5, toSY(gy, cH, yr) + 4);
+  }
+
+  // Helper: plot a function curve
+  function plotCurve(fn, color, dash, lw, rule) {
+    ctx.save();
+    ctx.strokeStyle = color; ctx.lineWidth = lw || 2.5;
+    if (dash) ctx.setLineDash(dash);
+    ctx.beginPath();
+    let pen = false;
+    for (let px = 0; px <= w; px += 1.5) {
+      const x = fromSX(px, w);
+      const y = fn(x, rule);
+      if (!isFinite(y) || Math.abs(y) > yr * 3) { pen = false; continue; }
+      const py = toSY(y, cH, yr);
+      if (!pen) { ctx.moveTo(px, py); pen = true; } else ctx.lineTo(px, py);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Comparison mode: draw comparison rule on right half with dimmed style
+  if (S.compareRule && S.compareRule !== S.rule) {
+    ctx.save();
+    ctx.globalAlpha = 0.35;
+    plotCurve(hFn, '#ff7043', null, 2, S.compareRule);
+    plotCurve(dhFn, '#ffd740', [5,5], 1.5, S.compareRule);
+    ctx.restore();
+    // Labels
+    ctx.save();
+    ctx.font = '600 11px system-ui';
+    ctx.fillStyle = 'rgba(255,112,67,0.9)';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Active: ${S.rule}`, 8, 18);
+    ctx.fillStyle = 'rgba(255,112,67,0.4)';
+    ctx.fillText(`Compare: ${S.compareRule}`, 8, 32);
+    ctx.restore();
+  }
+
+  // Decomposition shading
+  if (S.vis.decomp && (S.vis.hp || S.vis.tan)) {
+    // Part 1 (purple fill)
+    ctx.save();
+    ctx.fillStyle = 'rgba(171,71,188,0.12)';
+    ctx.beginPath();
+    ctx.moveTo(0, ax0);
+    for (let px = 0; px <= w; px += 2) {
+      const x = fromSX(px, w);
+      const d = decompParts(x);
+      const y = isFinite(d.p1) ? d.p1 : 0;
+      ctx.lineTo(px, toSY(Math.max(-yr, Math.min(yr, y)), cH, yr));
+    }
+    ctx.lineTo(w, ax0);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    // Part 2 (cyan fill)
+    ctx.save();
+    ctx.fillStyle = 'rgba(38,198,218,0.12)';
+    ctx.beginPath();
+    ctx.moveTo(0, ax0);
+    for (let px = 0; px <= w; px += 2) {
+      const x = fromSX(px, w);
+      const d = decompParts(x);
+      const y = isFinite(d.p2) ? d.p2 : 0;
+      ctx.lineTo(px, toSY(Math.max(-yr, Math.min(yr, y)), cH, yr));
+    }
+    ctx.lineTo(w, ax0);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    // Part curve lines
+    plotCurve((x) => decompParts(x).p1, '#ab47bc', [3,3], 1.5);
+    plotCurve((x) => decompParts(x).p2, '#26c6da', [3,3], 1.5);
+  }
+
+  // Main curves
+  if (S.vis.f) plotCurve((x) => fFn(x), '#4fc3f7', null, 2.5);
+  if (S.vis.g) plotCurve((x) => gFn(x), '#81c784', null, 2.5);
+  if (S.vis.h) plotCurve((x) => hFn(x), '#ff7043', null, 2.5);
+  if (S.vis.hp) plotCurve((x) => dhFn(x), '#ffd740', [6,4], 2);
+  if (S.vis.hpp) plotCurve((x) => ddhFn(x), '#80deea', [2,4], 1.5);
+
+  // Critical points
+  if (S.vis.crits) {
+    const crits = findZeroCrossings(dhFn);
+    crits.forEach(xc => {
+      const yc = hFn(xc);
+      const hpp = ddhFn(xc);
+      if (!isFinite(yc) || Math.abs(yc) > yr * 2) return;
+      const px = toSX(xc, w), py = toSY(yc, cH, yr);
+      const isMax = hpp < 0;
+      ctx.save();
+      ctx.fillStyle = isMax ? '#ef5350' : '#66bb6a';
+      ctx.shadowColor = ctx.fillStyle;
+      ctx.shadowBlur = 8;
+      // Diamond shape
+      ctx.beginPath();
+      ctx.moveTo(px, py - 7); ctx.lineTo(px + 5, py); ctx.lineTo(px, py + 7); ctx.lineTo(px - 5, py);
+      ctx.closePath(); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.font = '600 9px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(isMax ? 'MAX' : 'MIN', px, py - 11);
+      ctx.restore();
+    });
+
+    // Inflection points
+    if (S.vis.hpp) {
+      const infls = findZeroCrossings(ddhFn);
+      infls.forEach(xi => {
+        const yi = hFn(xi);
+        if (!isFinite(yi) || Math.abs(yi) > yr * 2) return;
+        const px = toSX(xi, w), py = toSY(yi, cH, yr);
+        ctx.save();
+        ctx.fillStyle = '#80deea';
+        ctx.shadowColor = '#80deea'; ctx.shadowBlur = 6;
+        ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.font = '600 9px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('INFLECT', px, py - 10);
+        ctx.restore();
+      });
+    }
+  }
+
+  // Sweep trail
+  if (S.vis.trail && S.trail.length > 1) {
+    ctx.save();
+    for (let i = 1; i < S.trail.length; i++) {
+      const alpha = (i / S.trail.length) * 0.5;
+      const p = S.trail[i - 1], c = S.trail[i];
+      if (!isFinite(p.y) || !isFinite(c.y)) continue;
+      ctx.strokeStyle = `rgba(255,215,64,${alpha})`;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(toSX(p.x, w), toSY(p.y, cH, yr));
+      ctx.lineTo(toSX(c.x, w), toSY(c.y, cH, yr));
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // ─── Sweep point visuals ───────────────────────────────────────
+  const sweepActive = S.vis.hp || S.vis.tan;
+  if (sweepActive) {
+    const curH = hFn(S.x0);
+    const curSlope = dhFn(S.x0);
+    const scX = toSX(S.x0, w);
+
+    if (isFinite(curH) && Math.abs(curH) < yr * 3) {
+      const scY = toSY(curH, cH, yr);
+
+      // Vertical guide
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.setLineDash([2, 4]);
+      ctx.beginPath(); ctx.moveTo(scX, 0); ctx.lineTo(scX, cH); ctx.stroke();
+      ctx.restore();
+
+      // Tangent line
+      if (S.vis.tan && isFinite(curSlope)) {
+        const span = 1.8;
+        ctx.save();
+        ctx.strokeStyle = '#e040fb'; ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(toSX(S.x0 - span, w), toSY(curH + curSlope * (-span), cH, yr));
+        ctx.lineTo(toSX(S.x0 + span, w), toSY(curH + curSlope * span, cH, yr));
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // White dot on h(x)
+      ctx.save();
+      ctx.fillStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(scX, scY, 4.5, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+
+      // Gold dot on h'(x)
+      if (S.vis.hp && isFinite(curSlope) && Math.abs(curSlope) < yr * 3) {
+        const scYp = toSY(curSlope, cH, yr);
+        // Connecting dash
+        ctx.save();
+        ctx.strokeStyle = 'rgba(255,215,64,0.3)'; ctx.lineWidth = 1.5; ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(scX, scY); ctx.lineTo(scX, scYp); ctx.stroke();
+        ctx.restore();
+        // Dot
+        ctx.save();
+        ctx.fillStyle = '#ffd740'; ctx.shadowColor = '#ffd740'; ctx.shadowBlur = 10;
+        ctx.beginPath(); ctx.arc(scX, scYp, 5.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      }
+
+      // Readout tooltip
+      if (!S.quizMode) {
+        ctx.save();
+        const bx = Math.min(scX + 14, w - 155), by = Math.max(scY - 44, 6);
+        ctx.fillStyle = 'rgba(10,10,26,0.88)';
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+        ctx.beginPath(); ctx.roundRect(bx, by, 148, 36, 5); ctx.fill(); ctx.stroke();
+        ctx.font = '600 10px monospace'; ctx.textAlign = 'left';
+        ctx.fillStyle = '#ffd740'; ctx.fillText(`x = ${S.x0.toFixed(2)}`, bx + 6, by + 14);
+        ctx.fillStyle = '#ff7043'; ctx.fillText(`h = ${curH.toFixed(2)}`, bx + 6, by + 28);
+        if (isFinite(curSlope)) { ctx.fillStyle = '#ffd740'; ctx.fillText(`h′= ${curSlope.toFixed(2)}`, bx + 80, by + 28); }
+        ctx.restore();
+      }
+
+      // Decomposition labels at sweep point
+      if (S.vis.decomp) {
+        const d = decompParts(S.x0);
+        ctx.save();
+        ctx.font = '600 10px system-ui'; ctx.textAlign = 'left';
+        const lx = Math.min(scX + 14, w - 100), ly = Math.max(scY + 20, cH - 40);
+        if (isFinite(d.p1)) { ctx.fillStyle = '#ab47bc'; ctx.fillText(`${d.l1} = ${d.p1.toFixed(2)}`, lx, ly); }
+        if (isFinite(d.p2)) { ctx.fillStyle = '#26c6da'; ctx.fillText(`${d.l2} = ${d.p2.toFixed(2)}`, lx, ly + 14); }
+        ctx.restore();
+      }
+    }
+  }
+
+  // Quiz mode indicator
+  if (S.quizMode) {
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,215,64,0.08)';
+    ctx.fillRect(0, 0, w, cH);
+    // X marker
+    const qx = toSX(S.quizX, w);
+    ctx.strokeStyle = 'rgba(255,215,64,0.6)'; ctx.lineWidth = 2; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(qx, 0); ctx.lineTo(qx, cH); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#ffd740'; ctx.font = '700 12px system-ui'; ctx.textAlign = 'center';
+    ctx.fillText(`x = ${S.quizX.toFixed(1)}`, qx, 20);
+    ctx.restore();
+  }
+}
+
+// ─── Explanation box ─────────────────────────────────────────────
+function updateExplanation() {
+  if (S.quizMode) return;
+  const box = document.getElementById('stepBox');
+  const x = S.x0, fv = fFn(x), gv = gFn(x), dfv = dfFn(x), dgv = dgFn(x), slope = dhFn(x);
+  const p = (v) => isFinite(v) ? v.toFixed(2) : '—';
+  const pill = (v, c) => `<span class="pill" style="color:${c}">${p(v)}</span>`;
+
+  if (S.rule === 'product') {
+    const t1 = dfv * gv, t2 = fv * dgv;
+    box.innerHTML = `<strong>Product Rule:</strong> (f·g)′ = f′·g + f·g′ &nbsp;|&nbsp;
+      x=${pill(x,'#fff')} → f′·g = ${pill(t1,'#ab47bc')} + f·g′ = ${pill(t2,'#26c6da')}
+      = <strong>${p(slope)}</strong>`;
+  } else if (S.rule === 'quotient') {
+    box.innerHTML = `<strong>Quotient Rule:</strong> (f/g)′ = (f′g − fg′) / g² &nbsp;|&nbsp;
+      x=${pill(x,'#fff')} → slope = <strong>${isFinite(slope) ? p(slope) : '<span style="color:#ef5350">undefined</span>'}</strong>`;
+  } else {
+    const outer = dfFn(gv);
+    box.innerHTML = `<strong>Chain Rule:</strong> (f(g))′ = f′(g)·g′ &nbsp;|&nbsp;
+      x=${pill(x,'#fff')} → f′(g)=${pill(outer,'#ab47bc')} × g′=${pill(dgv,'#26c6da')}
+      = <strong>${p(slope)}</strong>`;
+  }
+}
+
+// ─── UI Refresh ──────────────────────────────────────────────────
+function refreshUI() {
+  const f = getFormulaText();
+  document.getElementById('eqF').innerText = f.sf;
+  document.getElementById('eqG').innerText = f.sg;
+  document.getElementById('eqH').innerText = f.sh;
+  S.trail = []; // Reset trail on param change
+}
+
+// ─── Event Wiring ────────────────────────────────────────────────
+document.getElementById('typeF').addEventListener('change', e => { S.typeF = e.target.value; refreshUI(); });
+document.getElementById('typeG').addEventListener('change', e => { S.typeG = e.target.value; refreshUI(); });
+
+document.getElementById('slA').addEventListener('input', e => { S.A = +e.target.value; document.getElementById('txtA').innerText = S.A.toFixed(1); refreshUI(); });
+document.getElementById('slB').addEventListener('input', e => { S.B = +e.target.value; document.getElementById('txtB').innerText = S.B.toFixed(1); refreshUI(); });
+document.getElementById('slC').addEventListener('input', e => { S.C = +e.target.value; document.getElementById('txtC').innerText = S.C.toFixed(1); refreshUI(); });
+document.getElementById('slSpeed').addEventListener('input', e => { S.speed = +e.target.value; document.getElementById('txtSpeed').innerText = S.speed.toFixed(1); });
+document.getElementById('slW').addEventListener('input', e => { S.W = +e.target.value; document.getElementById('txtW').innerText = S.W; S.trail = []; refreshUI(); });
+
+// Rule buttons
+document.querySelectorAll('.rule-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.rule-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    S.rule = btn.dataset.rule;
+    S.x0 = -S.W / 2;
+    S.trail = [];
+    refreshUI();
+  });
+});
+
+// Toggle checkboxes
+const toggleMap = [
+  ['showF','f'],['showG','g'],['showH','h'],['showHp','hp'],['showHpp','hpp'],
+  ['showTan','tan'],['showDecomp','decomp'],['showCrits','crits'],['showTrail','trail']
+];
+toggleMap.forEach(([id, key]) => {
+  document.getElementById(id).addEventListener('change', e => { S.vis[key] = e.target.checked; });
+});
+
+// Play/Pause
+const playBtn = document.getElementById('playBtn');
+playBtn.addEventListener('click', () => {
+  S.playing = !S.playing;
+  playBtn.innerText = S.playing ? '⏸ Pause' : '▶ Play';
+});
+
+// Click/Drag on canvas
+canvas.addEventListener('mousedown', e => {
+  S.dragging = true;
+  const r = wrap.getBoundingClientRect();
+  S.x0 = fromSX(e.clientX - r.left, r.width);
+  S.trail = [];
+  updateExplanation();
+});
+canvas.addEventListener('mousemove', e => {
+  if (!S.dragging) return;
+  const r = wrap.getBoundingClientRect();
+  S.x0 = fromSX(e.clientX - r.left, r.width);
+  updateExplanation();
+});
+window.addEventListener('mouseup', () => { S.dragging = false; });
+
+// Compare mode
+const compareBtn = document.getElementById('compareBtn');
+compareBtn.addEventListener('click', () => {
+  if (S.compareRule) {
+    S.compareRule = null;
+    compareBtn.classList.remove('active-mode');
+    compareBtn.innerText = 'Compare';
+  } else {
+    // Cycle to next rule for comparison
+    const rules = ['product', 'quotient', 'chain'];
+    const idx = rules.indexOf(S.rule);
+    S.compareRule = rules[(idx + 1) % 3];
+    compareBtn.classList.add('active-mode');
+    compareBtn.innerText = `vs ${S.compareRule}`;
+  }
+});
+
+// Quiz mode
+const quizBtn = document.getElementById('quizBtn');
+const quizBar = document.getElementById('quizBar');
+quizBtn.addEventListener('click', () => {
+  S.quizMode = !S.quizMode;
+  quizBtn.classList.toggle('active-mode', S.quizMode);
+  quizBar.classList.toggle('active', S.quizMode);
+  if (S.quizMode) newQuizQuestion();
+});
+
+function newQuizQuestion() {
+  S.quizX = Math.round((Math.random() * (S.W - 2) - S.W/2 + 1) * 10) / 10;
+  document.getElementById('quizX').innerText = S.quizX.toFixed(1);
+  document.getElementById('quizInput').value = '';
+  document.getElementById('quizFeedback').innerText = '';
+  document.getElementById('quizFeedback').style.color = '';
+}
+
+document.getElementById('quizCheck').addEventListener('click', () => {
+  const guess = parseFloat(document.getElementById('quizInput').value);
+  const actual = dhFn(S.quizX);
+  const fb = document.getElementById('quizFeedback');
+  S.quizTotal++;
+  if (!isNaN(guess) && isFinite(actual) && Math.abs(guess - actual) < 0.5) {
+    S.quizCorrect++;
+    fb.innerText = `✓ Correct! (${actual.toFixed(2)})`;
+    fb.style.color = '#66bb6a';
+    setTimeout(newQuizQuestion, 1500);
+  } else {
+    fb.innerText = `✗ Answer: ${isFinite(actual) ? actual.toFixed(2) : 'undefined'}`;
+    fb.style.color = '#ef5350';
+    setTimeout(newQuizQuestion, 2500);
+  }
+  document.getElementById('quizScore').innerText = `Score: ${S.quizCorrect}/${S.quizTotal}`;
+});
+
+document.getElementById('quizReveal').addEventListener('click', () => {
+  const actual = dhFn(S.quizX);
+  const fb = document.getElementById('quizFeedback');
+  fb.innerText = `h′(${S.quizX.toFixed(1)}) = ${isFinite(actual) ? actual.toFixed(2) : 'undefined'}`;
+  fb.style.color = '#ffd740';
+  S.quizTotal++;
+  document.getElementById('quizScore').innerText = `Score: ${S.quizCorrect}/${S.quizTotal}`;
+  setTimeout(newQuizQuestion, 2500);
+});
+
+// ─── Animation loop ──────────────────────────────────────────────
+const MAX_TRAIL = 200;
+let lastT = performance.now();
+function animate(t) {
+  let dt = (t - lastT) / 1000;
+  lastT = t;
+  if (dt > 0.05) dt = 0.05;
+
+  const sweepOn = S.vis.hp || S.vis.tan;
+  if (S.playing && sweepOn && !S.dragging && !S.quizMode) {
+    S.x0 += S.speed * dt;
+    if (S.x0 > S.W / 2) {
+      S.x0 = -S.W / 2;
+      S.trail = [];
+    }
+    // Record trail
+    if (S.vis.trail) {
+      const sv = dhFn(S.x0);
+      if (isFinite(sv) && Math.abs(sv) < 30) {
+        S.trail.push({ x: S.x0, y: sv });
+        if (S.trail.length > MAX_TRAIL) S.trail.shift();
+      }
+    }
+    updateExplanation();
+  }
+
+  draw();
+  requestAnimationFrame(animate);
+}
+
+refreshUI();
+requestAnimationFrame(animate);
+</script>
+</body>
+</html>
