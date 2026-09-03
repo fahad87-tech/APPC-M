@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP Physics: Standing Waves — Strings & Sound Pipes</title>
+<script>
+    const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
+    }
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
+      });
+    }
+    async function verifyWebsiteAccess() {
+      const userInput = await requestPassword("Simulation Access", "Password required:");
+      if (userInput === null) { window.location.replace("about:blank"); return; }
+      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.replace("about:blank");
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
+    } else {
+      verifyWebsiteAccess();
+    }
+  </script>
+  <style id="password-gate-styles">
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
+    #password-gate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5, 9, 18, 0.88); padding: 24px; z-index: 9999; }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card { width: min(100%, 420px); background: #101625; border: 1px solid rgba(100,181,246,0.28); border-radius: 18px; padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); color: #e7edf7; font-family: 'Segoe UI', Arial, sans-serif; }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px; box-sizing: border-box; }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #050714;
+    --card: rgba(13, 17, 38, 0.78);
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --cyan: #00f0ff;
+    --purple: #8a5cf6;
+    --pink: #ff3b81;
+    --amber: #ffcb2b;
+    --green: #4ade80;
+    --text: #e2e8f0;
+    --text-muted: #94a3b8;
+    --border: rgba(255, 255, 255, 0.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+.tab-bar { display: flex; gap: 4px; padding: 0 20px; max-width: 1500px; margin: 0 auto; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(5, 7, 20, 0.92); backdrop-filter: blur(14px); z-index: 100; }
+.tab-btn { padding: 14px 28px; font-size: 14px; font-weight: 600; color: var(--text-muted); background: transparent; border: none; border-bottom: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.header { text-align: center; padding: 20px 20px 10px; background: radial-gradient(circle at top, rgba(0, 240, 255, 0.1), transparent 70%); }
+.header h1 { font-size: 26px; font-weight: 700; background: linear-gradient(135deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header .domain-badge { display: inline-block; margin-top: 6px; padding: 4px 14px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; background: rgba(0, 240, 255, 0.12); color: var(--cyan); border: 1px solid rgba(0, 240, 255, 0.25); }
+.header .description { margin-top: 6px; color: var(--text-muted); font-size: 13px; max-width: 760px; margin-left: auto; margin-right: auto; line-height: 1.5; }
+
+.main-layout { display: flex; gap: 16px; padding: 16px 20px; max-width: 1500px; margin: 0 auto; }
+.controls-panel { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.35); }
+.card h3 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+
+.slider-group { margin-bottom: 12px; }
+.slider-group:last-child { margin-bottom: 0; }
+.slider-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.slider-label .value { font-family: 'JetBrains Mono', monospace; color: var(--cyan); font-weight: 600; }
+input[type="range"] { -webkit-appearance: none; width: 100%; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.15); outline: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--cyan); cursor: pointer; box-shadow: 0 0 10px rgba(0, 240, 255, 0.5); }
+
+.dropdown-group select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 13px; font-weight: 600; outline: none; cursor: pointer; }
+.dropdown-group select:focus { border-color: var(--cyan); }
+
+.checkbox-group { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.checkbox-label { display: flex; align-items: center; gap: 10px; font-size: 12px; cursor: pointer; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--border); transition: all 0.2s; }
+.checkbox-label:hover { background: rgba(255, 255, 255, 0.04); }
+.checkbox-label input[type="checkbox"] { accent-color: var(--cyan); }
+
+.btn-group { display: flex; gap: 8px; }
+.btn { flex: 1; padding: 10px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: rgba(255, 255, 255, 0.08); color: var(--text); }
+.btn:hover { background: rgba(255, 255, 255, 0.15); }
+.btn.active { background: linear-gradient(135deg, var(--cyan), #00b8d4); color: #040814; }
+.btn.reset { background: rgba(255, 59, 129, 0.15); color: var(--pink); border: 1px solid rgba(255, 59, 129, 0.3); }
+
+.canvas-area { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+.canvas-wrap { position: relative; width: 100%; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; background: #03040c; box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
+canvas { width: 100%; height: auto; display: block; }
+
+.stats-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.stat-box { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px; text-align: center; }
+.stat-box .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 4px; }
+.stat-box .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 600; color: var(--cyan); }
+
+.info-note { background: rgba(138, 92, 246, 0.12); border: 1px solid rgba(138, 92, 246, 0.3); color: #c084fc; padding: 8px 12px; border-radius: 8px; font-size: 11px; font-weight: 500; margin-top: 8px; line-height: 1.4; }
+
+/* Assessment Styling */
+.assessment-section { max-width: 900px; margin: 0 auto; padding: 20px 20px 40px; }
+.assessment-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+.assessment-header h2 { font-size: 20px; font-weight: 600; }
+.student-name-group { display: flex; align-items: center; gap: 10px; }
+.student-name-group label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+.student-name-group input[type="text"] { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 14px; width: 220px; outline: none; }
+.student-name-group input[type="text"]:focus { border-color: var(--cyan); }
+
+.assessment-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.assessment-nav .nav-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.assessment-nav .nav-btn:hover { background: rgba(255,255,255,0.12); border-color: var(--cyan); }
+.assessment-nav .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.assessment-nav .nav-slider { flex: 1; }
+.assessment-nav .nav-counter { font-size: 13px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); min-width: 70px; text-align: center; }
+.progress-dots { display: flex; gap: 6px; }
+.progress-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--border); background: transparent; }
+.progress-dot.answered { background: var(--green); border-color: var(--green); }
+.progress-dot.current { border-color: var(--cyan); box-shadow: 0 0 6px rgba(0,240,255,0.5); }
+
+.assess-question { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 16px; display: none; }
+.assess-question.active { display: block; }
+.assess-question .q-number { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.assess-question .q-text { font-size: 15px; font-weight: 500; line-height: 1.6; color: var(--text); margin-bottom: 14px; }
+.assess-question .q-answer-area textarea { width: 100%; min-height: 110px; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 14px; resize: vertical; outline: none; line-height: 1.5; }
+.assess-question .q-answer-area textarea:focus { border-color: var(--cyan); }
+
+.export-bar { display: flex; justify-content: space-between; align-items: center; padding: 14px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.phase-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; text-transform: uppercase; margin-bottom: 8px; display: inline-block; }
+.phase-engage { background: rgba(0,240,255,0.15); color: var(--cyan); }
+.phase-explore { background: rgba(138,92,246,0.15); color: var(--purple); }
+.phase-explain { background: rgba(255,203,43,0.15); color: var(--amber); }
+.phase-elaborate { background: rgba(74,222,128,0.15); color: var(--green); }
+.phase-evaluate { background: rgba(255,59,129,0.15); color: var(--pink); }
+</style>
+</head>
+<body>
+
+<div class="tab-bar">
+    <button class="tab-btn active" data-tab="sim">Simulation</button>
+    <button class="tab-btn" data-tab="assessment">Assessment</button>
+</div>
+
+<div id="tab-sim" class="tab-content active">
+    <div class="header">
+        <h1>Standing Waves: Strings & Sound Pipes</h1>
+        <div class="domain-badge">AP Physics 1 — Unit 6: Superposition & Standing Waves</div>
+        <p class="description">Strings feature <strong>transverse displacement waves</strong>, while sound pipes feature <strong>longitudinal air molecule oscillations & pressure density waves</strong>!</p>
+    </div>
+
+    <div class="main-layout">
+        <div class="controls-panel">
+            <div class="card">
+                <h3>Medium Selection</h3>
+                <div class="dropdown-group">
+                    <select id="medium-select">
+                        <option value="string" selected>Vibrating String (Fixed-Fixed)</option>
+                        <option value="open">Open Sound Pipe (Open-Open)</option>
+                        <option value="closed">Closed Sound Pipe (Closed-Open)</option>
+                    </select>
+                </div>
+                <div class="info-note" id="closed-pipe-note" style="display:none;">ℹ Closed pipes automatically restrict harmonic slider to valid odd modes (n = 1, 3, 5, 7, 9)</div>
+            </div>
+
+            <div class="card">
+                <h3>Wave Parameters</h3>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Harmonic (n)</span><span class="value" id="val-n">1</span></div>
+                    <input type="range" id="slider-n" min="1" max="10" step="1" value="1">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Amplitude A</span><span class="value" id="val-A">2.5 cm</span></div>
+                    <input type="range" id="slider-A" min="0.5" max="5.0" step="0.1" value="2.5">
+                </div>
+                <div class="slider-group" id="group-string-controls">
+                    <div class="slider-label"><span>Tension T</span><span class="value" id="val-T">100 N</span></div>
+                    <input type="range" id="slider-T" min="10" max="250" step="1" value="100">
+                    <div class="slider-label" style="margin-top:8px;"><span>Linear Density μ</span><span class="value" id="val-mu">10.0 g/m</span></div>
+                    <input type="range" id="slider-mu" min="1.0" max="50.0" step="0.5" value="10.0">
+                </div>
+                <div class="slider-group" id="group-pipe-controls" style="display:none;">
+                    <div class="slider-label"><span>Speed of Sound</span><span class="value" id="val-vs">343 m/s</span></div>
+                    <input type="range" id="slider-vs" min="300" max="400" step="1" value="343">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Medium Length L</span><span class="value" id="val-L">2.0 m</span></div>
+                    <input type="range" id="slider-L" min="0.5" max="5.0" step="0.1" value="2.0">
+                </div>
+                <div class="slider-group">
+                    <div class="slider-label"><span>Animation Speed</span><span class="value" id="val-ts">1.0×</span></div>
+                    <input type="range" id="slider-ts" min="0.05" max="2.0" step="0.05" value="1.0">
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Display Overlays</h3>
+                <div class="checkbox-group">
+                    <label class="checkbox-label"><input type="checkbox" id="chk-nodes" checked> Show Nodes (N) & Antinodes (A)</label>
+                    <label class="checkbox-label"><input type="checkbox" id="chk-envelope" checked> Show Envelope Bounds</label>
+                    <label class="checkbox-label"><input type="checkbox" id="chk-ruler" checked> Show Interactive Measuring Ruler</label>
+                    <label class="checkbox-label" id="lbl-chk-particles" style="display:none;"><input type="checkbox" id="chk-particles" checked> Show Air Molecule Particles</label>
+                    <label class="checkbox-label" id="lbl-chk-dispcurve" style="display:none;"><input type="checkbox" id="chk-dispcurve"> Show Displacement Curve Overlay</label>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Playback</h3>
+                <div class="btn-group">
+                    <button class="btn active" id="btn-play">Pause</button>
+                    <button class="btn reset" id="btn-reset">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="canvas-area">
+            <div class="canvas-wrap">
+                <canvas id="simCanvas" width="1000" height="520"></canvas>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-box">
+                    <div class="stat-label">Frequency (f)</div>
+                    <div class="stat-value" id="stat-freq">50.0 Hz</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Wavelength (λ)</div>
+                    <div class="stat-value" id="stat-lambda">4.00 m</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Wave Speed (v)</div>
+                    <div class="stat-value" id="stat-v">100 m/s</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Displacement N / A</div>
+                    <div class="stat-value" id="stat-na">2 N / 1 A</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="tab-assessment" class="tab-content">
+    <div class="assessment-section">
+        <div class="assessment-header">
+            <h2>5E Student Assessment — Standing Waves & Sound Pipes</h2>
+            <div class="student-name-group">
+                <label for="student-name">Student Name:</label>
+                <input type="text" id="student-name" placeholder="Enter full name...">
+            </div>
+        </div>
+
+        <div class="assessment-nav">
+            <button class="nav-btn" id="nav-prev">←</button>
+            <div class="nav-slider"><input type="range" id="nav-slider" min="0" max="9" step="1" value="0"></div>
+            <div class="nav-counter"><span id="nav-current">1</span> / <span id="nav-total">10</span></div>
+            <button class="nav-btn" id="nav-next">→</button>
+            <div class="progress-dots" id="progress-dots"></div>
+        </div>
+
+        <div class="assess-question active" data-q="0">
+            <div class="phase-badge phase-engage">Engage — Question 1 of 10</div>
+            <div class="q-text">A guitar string of length 0.65 m produces a fundamental frequency of 330 Hz. What is the wave speed on the string?</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="0"></textarea></div>
+        </div>
+        <div class="assess-question" data-q="1">
+            <div class="phase-badge phase-engage">Engage — Question 2 of 10</div>
+            <div class="q-text">Why does a pipe closed at one end produce only odd harmonics (n = 1, 3, 5...)?</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="1"></textarea></div>
+        </div>
+        <div class="assess-question" data-q="2">
+            <div class="phase-badge phase-explore">Explore — Question 3 of 10</div>
+            <div class="q-text">For the current settings (L, T, μ), calculate the fundamental frequency of the string using f₁ = √(T/μ) / (2L).</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="2"></textarea></div>
+        </div>
+        <div class="assess-question" data-q="3">
+            <div class="phase-badge phase-explore">Explore — Question 4 of 10</div>
+            <div class="q-text">Set n = 3 on the string. How many displacement nodes (including endpoints) and antinodes do you observe?</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="3"></textarea></div>
+        </div>
+        <div class="assess-question" data-q="4">
+            <div class="phase-badge phase-explain">Explain — Question 5 of 10</div>
+            <div class="q-text">The standing wave on a string is produced by the superposition of two traveling waves. Describe their properties (frequency, amplitude, direction).</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="4"></textarea></div>
+        </div>
+        <div class="assess-question" data-q="5">
+            <div class="phase-badge phase-explain">Explain — Question 6 of 10</div>
+            <div class="q-text">At a displacement node inside an acoustic pipe, air molecules remain stationary. What happens to the acoustic air pressure at that location?</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="5"></textarea></div>
+        </div>
+        <div class="assess-question" data-q="6">
+            <div class="phase-badge phase-elaborate">Elaborate — Question 7 of 10</div>
+            <div class="q-text">If you double the tension on a string while holding length and mass density constant, by what factor does the fundamental frequency change?</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="6"></textarea></div>
+        </div>
+        <div class="assess-question" data-q="7">
+            <div class="phase-badge phase-elaborate">Elaborate — Question 8 of 10</div>
+            <div class="q-text">An organ pipe 1.5 m long, closed at one end, plays its 3rd harmonic (n = 3). Calculate its frequency given v_sound = 343 m/s.</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="7"></textarea></div>
+        </div>
+        <div class="assess-question" data-q="8">
+            <div class="phase-badge phase-evaluate">Evaluate — Question 9 of 10</div>
+            <div class="q-text">Derive the allowed wavelengths for a pipe open at both ends. Show that λₙ = 2L/n for n = 1, 2, 3...</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="8"></textarea></div>
+        </div>
+        <div class="assess-question" data-q="9">
+            <div class="phase-badge phase-evaluate">Evaluate — Question 10 of 10</div>
+            <div class="q-text">A string (L = 0.8 m, μ = 0.005 kg/m, T = 80 N) is plucked. Find (a) wave speed v, (b) fundamental f₁, and (c) describe the node/antinode layout for n = 2.</div>
+            <div class="q-answer-area"><label>Your Answer</label><textarea placeholder="Type your answer here..." data-q="9"></textarea></div>
+        </div>
+
+        <div class="export-bar">
+            <div class="progress-text"><strong id="answered-count">0</strong> of 10 questions answered</div>
+            <button class="btn btn-primary" id="btn-export-doc" style="width:auto; padding:9px 20px; background:linear-gradient(135deg, var(--cyan), #00b8d4); color:#040814; font-weight:700;">📄 Export to Word (.doc)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// SIMULATION STATE & PHYSICS ENGINE
+// ════════════════════════════════════════
+const S = {
+    running: true,
+    time: 0,
+    ts: 1.0,
+    medium: 'string',
+    n: 1,
+    A: 2.5,
+    T: 100,
+    mu: 10.0,
+    vs: 343,
+    L: 2.0,
+    showNodes: true,
+    showEnvelope: true,
+    showParticles: true,
+    showDispCurve: false,
+    showRuler: true,
+    ruler: {
+        x1Frac: 0.25, // fraction of L
+        x2Frac: 0.75, // fraction of L
+        yOffset: 65,  // Y offset relative to center
+        dragging: null // 'handle1' | 'handle2' | 'body' | null
+    }
+};
+
+function getNormalizedMedium() {
+    if (S.medium === 'open' || S.medium === 'open_pipe') return 'open';
+    if (S.medium === 'closed' || S.medium === 'closed_pipe') return 'closed';
+    return 'string';
+}
+
+let airParticles = [];
+function initAirParticles() {
+    airParticles = [];
+    const rows = 14;
+    const cols = 100;
+    for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+            airParticles.push({
+                xFrac: (c + 0.5) / cols + (Math.random() - 0.5) * 0.004,
+                yFrac: (r + 0.5) / rows + (Math.random() - 0.5) * 0.015,
+                size: 2.0 + Math.random() * 0.8,
+                brownianSeed: Math.random() * 1000
+            });
+        }
+    }
+}
+initAirParticles();
+
+function getPhysics() {
+    let v, lambda, f;
+    const med = getNormalizedMedium();
+
+    if (med === 'closed' && S.n % 2 === 0) {
+        S.n = Math.max(1, S.n - 1);
+        const sliderN = document.getElementById('slider-n');
+        if (sliderN) { sliderN.value = S.n; document.getElementById('val-n').textContent = S.n; }
+    }
+
+    if (med === 'string') {
+        const muKg = S.mu / 1000;
+        v = Math.sqrt(S.T / muKg);
+        lambda = (2 * S.L) / S.n;
+        f = (S.n * v) / (2 * S.L);
+    } else if (med === 'open') {
+        v = S.vs;
+        lambda = (2 * S.L) / S.n;
+        f = (S.n * v) / (2 * S.L);
+    } else {
+        v = S.vs;
+        lambda = (4 * S.L) / S.n;
+        f = (S.n * v) / (4 * S.L);
+    }
+
+    return { v, lambda, f, isValid: true };
+}
+
+function getVisualOmega() {
+    const phys = getPhysics();
+    const fVis = 1.5 * Math.pow(phys.f / 50.0, 0.3);
+    return 2 * Math.PI * fVis;
+}
+
+function getNormalizedDisplacement(xFrac, t) {
+    const w = getVisualOmega();
+    const med = getNormalizedMedium();
+
+    if (med === 'string') {
+        const k = S.n * Math.PI;
+        return Math.sin(k * xFrac) * Math.cos(w * t);
+    } else if (med === 'open') {
+        const k = S.n * Math.PI;
+        return Math.cos(k * xFrac) * Math.cos(w * t);
+    } else {
+        const k = (S.n * Math.PI) / 2;
+        return Math.sin(k * xFrac) * Math.cos(w * t);
+    }
+}
+
+function getNormalizedEnvelope(xFrac) {
+    const med = getNormalizedMedium();
+    if (med === 'string') {
+        return Math.abs(Math.sin(S.n * Math.PI * xFrac));
+    } else if (med === 'open') {
+        return Math.abs(Math.cos(S.n * Math.PI * xFrac));
+    } else {
+        return Math.abs(Math.sin((S.n * Math.PI / 2) * xFrac));
+    }
+}
+
+function getNormalizedPressure(xFrac, t) {
+    const w = getVisualOmega();
+    const med = getNormalizedMedium();
+
+    if (med === 'open') {
+        return Math.sin(S.n * Math.PI * xFrac) * Math.cos(w * t);
+    } else {
+        return Math.cos((S.n * Math.PI / 2) * xFrac) * Math.cos(w * t);
+    }
+}
+
+function getNodeAntinodePositions() {
+    const nodes = [];
+    const antinodes = [];
+    const med = getNormalizedMedium();
+
+    if (med === 'string') {
+        for (let i = 0; i <= S.n; i++) nodes.push((i / S.n) * S.L);
+        for (let i = 0; i < S.n; i++) antinodes.push(((i + 0.5) / S.n) * S.L);
+    } else if (med === 'open') {
+        for (let i = 0; i < S.n; i++) nodes.push(((i + 0.5) / S.n) * S.L);
+        for (let i = 0; i <= S.n; i++) antinodes.push((i / S.n) * S.L);
+    } else {
+        const m = (S.n + 1) / 2;
+        for (let i = 0; i < m; i++) nodes.push(((2 * i) / S.n) * S.L);
+        for (let i = 0; i < m; i++) antinodes.push(((2 * i + 1) / S.n) * S.L);
+    }
+    return { nodes, antinodes };
+}
+
+// ════════════════════════════════════════
+// HIGH-DPI CANVAS RENDERER & INTERACTIVE RULER
+// ════════════════════════════════════════
+const canvas = document.getElementById('simCanvas');
+const ctx = canvas.getContext('2d');
+
+function setupHighDPI() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width > 0) {
+        canvas.width = rect.width * dpr;
+        canvas.height = (rect.width * 0.52) * dpr;
+        ctx.scale(dpr, dpr);
+    }
+}
+setupHighDPI();
+window.addEventListener('resize', setupHighDPI);
+
+function updateControlVisibility() {
+    const med = getNormalizedMedium();
+    const isString = (med === 'string');
+    const isClosed = (med === 'closed');
+
+    document.getElementById('group-string-controls').style.display = isString ? 'block' : 'none';
+    document.getElementById('group-pipe-controls').style.display = !isString ? 'block' : 'none';
+    document.getElementById('lbl-chk-particles').style.display = !isString ? 'flex' : 'none';
+    document.getElementById('lbl-chk-dispcurve').style.display = !isString ? 'flex' : 'none';
+    document.getElementById('closed-pipe-note').style.display = isClosed ? 'block' : 'none';
+
+    const sliderN = document.getElementById('slider-n');
+    if (sliderN) {
+        if (isClosed) {
+            if (S.n % 2 === 0) S.n = Math.max(1, S.n - 1);
+            sliderN.step = "2";
+            sliderN.min = "1";
+            sliderN.max = "9";
+            sliderN.value = S.n;
+            document.getElementById('val-n').textContent = S.n;
+        } else {
+            sliderN.step = "1";
+            sliderN.min = "1";
+            sliderN.max = "10";
+        }
+    }
+}
+
+function render() {
+    const dpr = window.devicePixelRatio || 1;
+    const wLogical = canvas.width / dpr;
+    const hLogical = canvas.height / dpr;
+
+    ctx.clearRect(0, 0, wLogical, hLogical);
+
+    const marginX = 90;
+    const pipeW = wLogical - 2 * marginX;
+    const pipeH = 150;
+    const centerY = hLogical / 2;
+
+    const maxPixelAmp = (S.A / 5.0) * 52;
+    const phys = getPhysics();
+    const med = getNormalizedMedium();
+
+    // Deep Dark Radial Background
+    const bgGrad = ctx.createRadialGradient(wLogical / 2, centerY, 50, wLogical / 2, centerY, wLogical / 1.2);
+    bgGrad.addColorStop(0, '#0a0d24');
+    bgGrad.addColorStop(1, '#03040c');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, wLogical, hLogical);
+
+    // Subtle Precision Grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < wLogical; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, hLogical); ctx.stroke(); }
+    for (let y = 0; y < hLogical; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(wLogical, y); ctx.stroke(); }
+
+    if (med === 'string') {
+        // Render 3D Metallic Anchor Posts
+        const drawAnchorPost = (px) => {
+            const grad = ctx.createLinearGradient(px - 14, 0, px, 0);
+            grad.addColorStop(0, '#1e293b');
+            grad.addColorStop(0.5, '#475569');
+            grad.addColorStop(1, '#0f172a');
+            ctx.fillStyle = grad;
+            ctx.fillRect(px - 14, centerY - 90, 14, 180);
+
+            ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 1.5;
+            ctx.strokeRect(px - 14, centerY - 90, 14, 180);
+
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath(); ctx.arc(px - 7, centerY - 75, 3, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(px - 7, centerY + 75, 3, 0, Math.PI * 2); ctx.fill();
+        };
+        drawAnchorPost(marginX);
+        drawAnchorPost(marginX + pipeW + 14);
+
+        // Center Equilibrium Line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath(); ctx.moveTo(marginX, centerY); ctx.lineTo(marginX + pipeW, centerY); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Envelope Bounds
+        if (S.showEnvelope) {
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.05)';
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.25)';
+            ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+
+            ctx.beginPath();
+            for (let i = 0; i <= 200; i++) {
+                const xFrac = i / 200;
+                const env = getNormalizedEnvelope(xFrac) * maxPixelAmp;
+                const px = marginX + xFrac * pipeW;
+                if (i === 0) ctx.moveTo(px, centerY - env); else ctx.lineTo(px, centerY - env);
+            }
+            for (let i = 200; i >= 0; i--) {
+                const xFrac = i / 200;
+                const env = getNormalizedEnvelope(xFrac) * maxPixelAmp;
+                const px = marginX + xFrac * pipeW;
+                ctx.lineTo(px, centerY + env);
+            }
+            ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.setLineDash([]);
+        }
+
+        // Multi-Layer Glowing Neon Vibrating String Curve
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.4)';
+        ctx.lineWidth = 9;
+        ctx.shadowBlur = 20; ctx.shadowColor = '#00f0ff';
+        ctx.beginPath();
+        for (let i = 0; i <= 300; i++) {
+            const xFrac = i / 300;
+            const y = getNormalizedDisplacement(xFrac, S.time) * maxPixelAmp;
+            const px = marginX + xFrac * pipeW;
+            if (i === 0) ctx.moveTo(px, centerY - y); else ctx.lineTo(px, centerY - y);
+        }
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+    } else {
+        // Acoustic Sound Tube (PURE LONGITUDINAL SOUND WAVE)
+        const tubeTop = centerY - pipeH / 2;
+
+        // 1. Dynamic Acoustic Pressure Heatmap Background
+        const pressureGrad = ctx.createLinearGradient(marginX, 0, marginX + pipeW, 0);
+        const gradStops = 40;
+        for (let i = 0; i <= gradStops; i++) {
+            const xFrac = i / gradStops;
+            const pVal = getNormalizedPressure(xFrac, S.time);
+            const absP = Math.abs(pVal);
+
+            let r, g, b, alpha;
+            if (pVal > 0) {
+                r = Math.round(15 + 240 * absP);
+                g = Math.round(20 + 39 * absP);
+                b = Math.round(40 + 89 * absP);
+                alpha = 0.08 + 0.45 * absP;
+            } else {
+                r = Math.round(15 + 0 * absP);
+                g = Math.round(20 + 220 * absP);
+                b = Math.round(40 + 215 * absP);
+                alpha = 0.08 + 0.45 * absP;
+            }
+            pressureGrad.addColorStop(xFrac, `rgba(${r}, ${g}, ${b}, ${alpha})`);
+        }
+        ctx.fillStyle = pressureGrad;
+        ctx.fillRect(marginX, tubeTop, pipeW, pipeH);
+
+        // 2. 3D Acrylic Glass Tube Body
+        const grad = ctx.createLinearGradient(0, tubeTop, 0, tubeTop + pipeH);
+        grad.addColorStop(0, 'rgba(40, 55, 80, 0.7)');
+        grad.addColorStop(0.15, 'rgba(90, 115, 145, 0.15)');
+        grad.addColorStop(0.5, 'rgba(10, 16, 32, 0.4)');
+        grad.addColorStop(0.85, 'rgba(40, 55, 80, 0.2)');
+        grad.addColorStop(1, 'rgba(10, 16, 32, 0.8)');
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(marginX, tubeTop, pipeW, pipeH);
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.45)'; ctx.lineWidth = 2.5;
+        ctx.strokeRect(marginX, tubeTop, pipeW, pipeH);
+
+        // Glass Reflection Specular Light Beam
+        const sheenGrad = ctx.createLinearGradient(0, tubeTop + 6, 0, tubeTop + 24);
+        sheenGrad.addColorStop(0, 'rgba(255, 255, 255, 0.25)');
+        sheenGrad.addColorStop(1, 'rgba(255, 255, 255, 0.02)');
+        ctx.fillStyle = sheenGrad;
+        ctx.fillRect(marginX, tubeTop + 6, pipeW, 18);
+
+        // Pipe Ends (Flanges & Stoppers)
+        if (med === 'open') {
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.35)'; ctx.strokeStyle = 'rgba(0, 240, 255, 0.7)';
+            ctx.beginPath(); ctx.ellipse(marginX, centerY, 8, pipeH / 2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            ctx.beginPath(); ctx.ellipse(marginX + pipeW, centerY, 8, pipeH / 2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        } else {
+            // Closed end wall stopper
+            const stopperGrad = ctx.createLinearGradient(marginX - 16, 0, marginX, 0);
+            stopperGrad.addColorStop(0, '#991b1b');
+            stopperGrad.addColorStop(0.5, '#ff3b81');
+            stopperGrad.addColorStop(1, '#7f1d1d');
+            ctx.fillStyle = stopperGrad;
+            ctx.fillRect(marginX - 16, tubeTop - 6, 16, pipeH + 12);
+            ctx.strokeStyle = '#ff3b81'; ctx.lineWidth = 2.5; ctx.strokeRect(marginX - 16, tubeTop - 6, 16, pipeH + 12);
+
+            ctx.fillStyle = '#ff3b81'; ctx.font = '700 11px Inter'; ctx.fillText('CLOSED END WALL', marginX - 110, centerY + 4);
+
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.35)'; ctx.strokeStyle = 'rgba(0, 240, 255, 0.7)';
+            ctx.beginPath(); ctx.ellipse(marginX + pipeW, centerY, 8, pipeH / 2, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+
+        // 3. Air Molecule Longitudinal Particles
+        if (S.showParticles) {
+            const compPath = new Path2D();
+            const rarefPath = new Path2D();
+
+            airParticles.forEach(p => {
+                const xFrac = p.xFrac;
+                const disp = getNormalizedDisplacement(xFrac, S.time);
+
+                const thermalJitter = Math.sin(S.time * 6 + p.brownianSeed) * 0.0012;
+                const px = marginX + (xFrac + thermalJitter + (disp * maxPixelAmp * 0.35) / pipeW) * pipeW;
+                const py = tubeTop + p.yFrac * pipeH;
+
+                const pVal = getNormalizedPressure(xFrac, S.time);
+                if (pVal > 0) {
+                    compPath.moveTo(px + p.size, py);
+                    compPath.arc(px, py, p.size, 0, Math.PI * 2);
+                } else {
+                    rarefPath.moveTo(px + p.size, py);
+                    rarefPath.arc(px, py, p.size, 0, Math.PI * 2);
+                }
+            });
+
+            ctx.fillStyle = '#ff3b81'; ctx.fill(compPath);
+            ctx.fillStyle = '#00f0ff'; ctx.fill(rarefPath);
+        }
+
+        // 4. Longitudinal Displacement Envelope Guides
+        if (S.showEnvelope) {
+            ctx.strokeStyle = 'rgba(138, 92, 246, 0.5)';
+            ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+
+            ctx.beginPath();
+            for (let i = 0; i <= 200; i++) {
+                const xFrac = i / 200;
+                const env = getNormalizedEnvelope(xFrac) * maxPixelAmp;
+                const px = marginX + xFrac * pipeW;
+                if (i === 0) ctx.moveTo(px, centerY - env); else ctx.lineTo(px, centerY - env);
+            }
+            for (let i = 200; i >= 0; i--) {
+                const xFrac = i / 200;
+                const env = getNormalizedEnvelope(xFrac) * maxPixelAmp;
+                const px = marginX + xFrac * pipeW;
+                ctx.lineTo(px, centerY + env);
+            }
+            ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+        }
+
+        // 5. Optional Displacement Graph Overlay
+        if (S.showDispCurve) {
+            ctx.strokeStyle = '#8a5cf6'; ctx.lineWidth = 2.5; ctx.setLineDash([6, 3]);
+            ctx.beginPath();
+            for (let i = 0; i <= 200; i++) {
+                const xFrac = i / 200;
+                const y = getNormalizedDisplacement(xFrac, S.time) * maxPixelAmp;
+                const px = marginX + xFrac * pipeW;
+                if (i === 0) ctx.moveTo(px, centerY - y); else ctx.lineTo(px, centerY - y);
+            }
+            ctx.stroke(); ctx.setLineDash([]);
+        }
+    }
+
+    // Nodes (N) and Antinodes (A) Markers
+    if (S.showNodes) {
+        const { nodes, antinodes } = getNodeAntinodePositions();
+
+        nodes.forEach(xPos => {
+            const px = marginX + (xPos / S.L) * pipeW;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 12; ctx.shadowColor = '#ffffff';
+            ctx.beginPath(); ctx.arc(px, centerY, 6, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+
+            // Pill Badge
+            ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.roundRect(px - 14, centerY + 34, 28, 20, 6); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#ffffff'; ctx.font = '700 11px JetBrains Mono'; ctx.textAlign = 'center';
+            ctx.fillText('N', px, centerY + 48);
+        });
+
+        antinodes.forEach(xPos => {
+            const px = marginX + (xPos / S.L) * pipeW;
+
+            ctx.fillStyle = '#ffcb2b';
+            ctx.shadowBlur = 12; ctx.shadowColor = '#ffcb2b';
+            ctx.beginPath(); ctx.arc(px, centerY, 6, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+
+            // Pill Badge
+            ctx.fillStyle = '#0f172a'; ctx.strokeStyle = '#ffcb2b'; ctx.lineWidth = 1.5;
+            ctx.beginPath(); ctx.roundRect(px - 14, centerY - 54, 28, 20, 6); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = '#ffcb2b'; ctx.font = '700 11px JetBrains Mono'; ctx.textAlign = 'center';
+            ctx.fillText('A', px, centerY - 40);
+        });
+        ctx.textAlign = 'left';
+    }
+
+    // ════════════════════════════════════════
+    // INTERACTIVE MEASURING RULER RENDER
+    // ════════════════════════════════════════
+    if (S.showRuler) {
+        const rulerY = centerY + S.ruler.yOffset;
+        const rulerH = 34;
+
+        // Ruler Acrylic Background Bar
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(marginX - 10, rulerY, pipeW + 20, rulerH, 8); ctx.fill(); ctx.stroke();
+
+        // Meter & Centimeter Scale Ticks
+        const numTicks = 20; // 0.1m increments
+        for (let i = 0; i <= numTicks; i++) {
+            const tickFrac = i / numTicks;
+            const tx = marginX + tickFrac * pipeW;
+            const distM = tickFrac * S.L;
+            const isMajor = (i % 2 === 0);
+
+            ctx.strokeStyle = isMajor ? 'rgba(0, 240, 255, 0.8)' : 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = isMajor ? 1.5 : 1;
+            ctx.beginPath();
+            ctx.moveTo(tx, rulerY + (isMajor ? 0 : 6));
+            ctx.lineTo(tx, rulerY + (isMajor ? 16 : 10));
+            ctx.stroke();
+
+            if (isMajor && i < numTicks) {
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.9)';
+                ctx.font = '600 9px JetBrains Mono';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${distM.toFixed(1)}m`, tx, rulerY + 28);
+            }
+        }
+
+        // Caliper Position Calculations
+        const c1X = marginX + S.ruler.xFrac1 * pipeW;
+        const c2X = marginX + S.ruler.xFrac2 * pipeW;
+
+        const realDistM = Math.abs(S.ruler.xFrac2 - S.ruler.xFrac1) * S.L;
+        const distInLambda = phys.lambda > 0 ? (realDistM / phys.lambda) : 0;
+
+        // Dashed Vertical Caliper Guide Lines
+        ctx.strokeStyle = '#ffcb2b'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(c1X, centerY - 80); ctx.lineTo(c1X, rulerY + rulerH + 8); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(c2X, centerY - 80); ctx.lineTo(c2X, rulerY + rulerH + 8); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Caliper Handles (Draggable Knobs)
+        const drawCaliperKnob = (cx, label) => {
+            ctx.fillStyle = '#ffcb2b';
+            ctx.shadowBlur = 10; ctx.shadowColor = '#ffcb2b';
+            ctx.beginPath(); ctx.arc(cx, rulerY + rulerH / 2, 8, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+            ctx.fillStyle = '#0f172a'; ctx.font = '700 9px JetBrains Mono'; ctx.textAlign = 'center';
+            ctx.fillText(label, cx, rulerY + rulerH / 2 + 3);
+        };
+        drawCaliperKnob(c1X, 'X1');
+        drawCaliperKnob(c2X, 'X2');
+
+        // Measurement Readout Pill Badge
+        const midX = (c1X + c2X) / 2;
+        const badgeY = rulerY - 26;
+
+        ctx.fillStyle = 'rgba(7, 10, 26, 0.92)';
+        ctx.strokeStyle = '#ffcb2b'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.roundRect(midX - 110, badgeY, 220, 22, 11); ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle = '#ffcb2b'; ctx.font = '700 11px JetBrains Mono'; ctx.textAlign = 'center';
+        ctx.fillText(`Δx = ${realDistM.toFixed(2)} m  (${distInLambda.toFixed(2)} λ)`, midX, badgeY + 15);
+    }
+}
+
+// ════════════════════════════════════════
+// MOUSE & TOUCH DRAGGING FOR CALIPERS
+// ════════════════════════════════════════
+let isDraggingRuler = false;
+let dragTarget = null; // 'c1' | 'c2'
+
+function getCanvasMousePos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const x = (e.clientX - rect.left) * (canvas.width / (rect.width * dpr));
+    const y = (e.clientY - rect.top) * (canvas.height / (rect.height * dpr));
+    return { x, y };
+}
+
+canvas.addEventListener('mousedown', e => {
+    if (!S.showRuler) return;
+    const { x, y } = getCanvasMousePos(e);
+    const dpr = window.devicePixelRatio || 1;
+    const wLogical = canvas.width / dpr;
+    const hLogical = canvas.height / dpr;
+    const marginX = 90;
+    const pipeW = wLogical - 2 * marginX;
+    const centerY = hLogical / 2;
+    const rulerY = centerY + S.ruler.yOffset;
+
+    const c1X = marginX + S.ruler.xFrac1 * pipeW;
+    const c2X = marginX + S.ruler.xFrac2 * pipeW;
+
+    // Check hit on Caliper Handle X1 or X2
+    if (Math.hypot(x - c1X, y - (rulerY + 17)) < 22) {
+        isDraggingRuler = true; dragTarget = 'c1';
+    } else if (Math.hypot(x - c2X, y - (rulerY + 17)) < 22) {
+        isDraggingRuler = true; dragTarget = 'c2';
+    }
+});
+
+canvas.addEventListener('mousemove', e => {
+    if (!S.showRuler) return;
+    const { x, y } = getCanvasMousePos(e);
+    const dpr = window.devicePixelRatio || 1;
+    const wLogical = canvas.width / dpr;
+    const hLogical = canvas.height / dpr;
+    const marginX = 90;
+    const pipeW = wLogical - 2 * marginX;
+    const centerY = hLogical / 2;
+    const rulerY = centerY + S.ruler.yOffset;
+
+    const c1X = marginX + S.ruler.xFrac1 * pipeW;
+    const c2X = marginX + S.ruler.xFrac2 * pipeW;
+
+    if (Math.hypot(x - c1X, y - (rulerY + 17)) < 22 || Math.hypot(x - c2X, y - (rulerY + 17)) < 22) {
+        canvas.style.cursor = 'ew-resize';
+    } else {
+        canvas.style.cursor = 'default';
+    }
+
+    if (isDraggingRuler && dragTarget) {
+        const frac = Math.max(0, Math.min(1, (x - marginX) / pipeW));
+        if (dragTarget === 'c1') S.ruler.xFrac1 = frac;
+        if (dragTarget === 'c2') S.ruler.xFrac2 = frac;
+    }
+});
+
+window.addEventListener('mouseup', () => {
+    isDraggingRuler = false; dragTarget = null;
+});
+
+// ════════════════════════════════════════
+// ANIMATION LOOP & STATS UPDATE
+// ════════════════════════════════════════
+let lastTime = performance.now();
+
+function frame(now) {
+    const dt = (now - lastTime) / 1000;
+    lastTime = now;
+
+    if (S.running) {
+        S.time += dt * S.ts;
+    }
+
+    render();
+    updateStatsDisplay();
+    requestAnimationFrame(frame);
+}
+
+function updateStatsDisplay() {
+    const phys = getPhysics();
+    const { nodes, antinodes } = getNodeAntinodePositions();
+
+    document.getElementById('stat-freq').textContent = `${phys.f.toFixed(1)} Hz`;
+    document.getElementById('stat-lambda').textContent = `${phys.lambda.toFixed(2)} m`;
+    document.getElementById('stat-v').textContent = `${phys.v.toFixed(1)} m/s`;
+    document.getElementById('stat-na').textContent = `${nodes.length} N / ${antinodes.length} A`;
+}
+
+// ════════════════════════════════════════
+// CONTROLS & LISTENERS
+// ════════════════════════════════════════
+document.getElementById('medium-select').addEventListener('change', e => {
+    S.medium = e.target.value;
+    updateControlVisibility();
+});
+
+const bindSlider = (sid, vid, key, fmt) => {
+    document.getElementById(sid).addEventListener('input', e => {
+        S[key] = parseFloat(e.target.value);
+        if (key === 'n') {
+            const med = getNormalizedMedium();
+            if (med === 'closed' && S.n % 2 === 0) S.n = Math.max(1, S.n - 1);
+            e.target.value = S.n;
+        }
+        document.getElementById(vid).textContent = fmt(S[key]);
+    });
+};
+bindSlider('slider-n',  'val-n',  'n',  v => v.toFixed(0));
+bindSlider('slider-A',  'val-A',  'A',  v => v.toFixed(1) + ' cm');
+bindSlider('slider-T',  'val-T',  'T',  v => v.toFixed(0) + ' N');
+bindSlider('slider-mu', 'val-mu', 'mu', v => v.toFixed(1) + ' g/m');
+bindSlider('slider-vs', 'val-vs', 'vs', v => v.toFixed(0) + ' m/s');
+bindSlider('slider-L',  'val-L',  'L',  v => v.toFixed(1) + ' m');
+bindSlider('slider-ts', 'val-ts', 'ts', v => v.toFixed(1) + '×');
+
+document.getElementById('chk-nodes').addEventListener('change', e => S.showNodes = e.target.checked);
+document.getElementById('chk-envelope').addEventListener('change', e => S.showEnvelope = e.target.checked);
+document.getElementById('chk-ruler').addEventListener('change', e => S.showRuler = e.target.checked);
+document.getElementById('chk-particles').addEventListener('change', e => S.showParticles = e.target.checked);
+document.getElementById('chk-dispcurve').addEventListener('change', e => S.showDispCurve = e.target.checked);
+
+document.getElementById('btn-play').addEventListener('click', () => {
+    S.running = !S.running;
+    const b = document.getElementById('btn-play');
+    b.textContent = S.running ? 'Pause' : 'Play';
+    b.classList.toggle('active', S.running);
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+    S.time = 0; S.running = true;
+    document.getElementById('btn-play').textContent = 'Pause';
+    document.getElementById('btn-play').classList.add('active');
+});
+
+// ════════════════════════════════════════
+// TABS & ASSESSMENT NAV
+// ════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('tab-' + b.dataset.tab).classList.add('active');
+}));
+
+const qCards = document.querySelectorAll('.assess-question');
+const navSl = document.getElementById('nav-slider');
+const dotsEl = document.getElementById('progress-dots');
+for (let i = 0; i < qCards.length; i++) { const d = document.createElement('div'); d.className = 'progress-dot' + (i === 0 ? ' current' : ''); dotsEl.appendChild(d); }
+
+function showQ(idx) {
+    qCards.forEach((q, i) => q.classList.toggle('active', i === idx));
+    navSl.value = idx;
+    document.getElementById('nav-current').textContent = idx + 1;
+    document.getElementById('nav-prev').disabled = idx === 0;
+    document.getElementById('nav-next').disabled = idx === qCards.length - 1;
+    dotsEl.querySelectorAll('.progress-dot').forEach((d, i) => d.classList.toggle('current', i === idx));
+}
+navSl.addEventListener('input', () => showQ(+navSl.value));
+document.getElementById('nav-prev').addEventListener('click', () => showQ(Math.max(0, +navSl.value - 1)));
+document.getElementById('nav-next').addEventListener('click', () => showQ(Math.min(qCards.length - 1, +navSl.value + 1)));
+
+const tas = document.querySelectorAll('.assess-question textarea');
+function updateAns() {
+    let c = 0; tas.forEach(t => { if (t.value.trim()) c++; });
+    document.getElementById('answered-count').textContent = c;
+    dotsEl.querySelectorAll('.progress-dot').forEach((d, i) => d.classList.toggle('answered', tas[i] && tas[i].value.trim().length > 0));
+}
+tas.forEach(t => t.addEventListener('input', updateAns));
+
+// Word Export
+function exportToWord() {
+    const nameInput = document.getElementById('student-name');
+    const studentName = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : 'Student';
+    const formattedDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const simTitle = "Standing Waves: Strings & Sound Pipes";
+
+    let qHtml = '';
+    document.querySelectorAll('.assess-question').forEach((qCard, idx) => {
+        const phase = qCard.querySelector('.phase-badge')?.textContent || `Question ${idx + 1}`;
+        const qText = qCard.querySelector('.q-text')?.textContent || '';
+        const textarea = qCard.querySelector('textarea');
+        const answerText = textarea ? textarea.value.trim() : '';
+
+        const ansFormatted = answerText ? answerText.replace(/\n/g, '<br>') : '<em style="color:#718096;">[No answer provided]</em>';
+
+        qHtml += `
+            <div style="margin-bottom:16px; padding:12px; background-color:#f8fafc; border-left:4px solid #0284c7; border-radius:4px;">
+                <p style="font-size:10pt; font-weight:bold; color:#0369a1; text-transform:uppercase; margin:0 0 4px 0;">${phase}</p>
+                <p style="font-size:11pt; font-weight:bold; color:#0f172a; margin:0 0 8px 0;">${qText}</p>
+                <p style="font-size:10.5pt; color:#1e293b; background-color:#ffffff; padding:8px; border:1px solid #cbd5e1; margin:0;">${ansFormatted}</p>
+            </div>
+        `;
+    });
+
+    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Standing Waves Assessment</title></head><body style=\"font-family: Arial, sans-serif; padding: 20px;\">";
+    const metaInfo = `
+        <h2 style="color: #0f172a; border-bottom: 2px solid #0284c7; padding-bottom: 8px;">${simTitle} — Student Assessment</h2>
+        <p style="font-size: 11pt;"><strong>Student Name:</strong> ${studentName}<br><strong>Date:</strong> ${formattedDate}</p>
+        <hr style="border: 0; border-top: 1px solid #cbd5e1; margin-bottom: 20px;">
+    `;
+    const footer = "</body></html>";
+
+    const docContent = header + metaInfo + qHtml + footer;
+    const blob = new Blob(['\ufeff', docContent], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Standing_Waves_Assessment_${studentName.replace(/\s+/g, '_')}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+document.getElementById('btn-export-doc').addEventListener('click', exportToWord);
+
+// INITIALIZE CONTROL VISIBILITY & START ENGINE
+updateControlVisibility();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
