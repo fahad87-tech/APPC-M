@@ -1,0 +1,2673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Physics Graphical Linearization Lab</title>
+  <script>
+    const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
+    }
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
+      });
+    }
+    async function verifyWebsiteAccess() {
+      const userInput = await requestPassword("Simulation Access", "Password required:");
+      if (userInput === null) { window.location.replace("about:blank"); return; }
+      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.replace("about:blank");
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
+    } else {
+      verifyWebsiteAccess();
+    }
+  </script>
+  <style id="password-gate-styles">
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
+    #password-gate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5, 9, 18, 0.88); padding: 24px; z-index: 9999; }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card { width: min(100%, 420px); background: #101625; border: 1px solid rgba(100,181,246,0.28); border-radius: 18px; padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); color: #e7edf7; font-family: 'Segoe UI', Arial, sans-serif; }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px; box-sizing: border-box; }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #06060f;
+      --bg-gradient: linear-gradient(135deg, #06060f 0%, #0d0d24 50%, #0a0f1a 100%);
+      --card-surface: rgba(18, 18, 42, 0.75);
+      --card-surface-solid: #12122a;
+      --card-elevated: rgba(26, 26, 58, 0.8);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-border-hover: rgba(255, 255, 255, 0.18);
+      --text-main: #e8ecf4;
+      --text-muted: #7a85a0;
+      --text-dim: #4a5268;
+      --cyan: #4fc3f7;
+      --cyan-glow: rgba(79, 195, 247, 0.35);
+      --green: #aed581;
+      --green-bright: #7cfc00;
+      --green-glow: rgba(174, 213, 129, 0.3);
+      --amber: #ffd740;
+      --pass: #66bb6a;
+      --fail: #ef5350;
+      --fail-glow: rgba(239, 83, 80, 0.3);
+      --purple: #b388ff;
+      --purple-glow: rgba(179, 136, 255, 0.25);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ─────────────────────────────────────────── */
+    header {
+      background: rgba(12, 12, 30, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 8px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 50;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      font-size: 0.6rem;
+      background: linear-gradient(135deg, rgba(79,195,247,0.15), rgba(179,136,255,0.15));
+      color: var(--cyan);
+      border: 1px solid rgba(79,195,247,0.3);
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 700;
+    }
+
+    .header-center {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    select, button { font-family: inherit; }
+
+    .app-select {
+      background: rgba(26,26,58,0.9);
+      border: 1px solid var(--glass-border-hover);
+      color: var(--text-main);
+      padding: 5px 10px;
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .app-select:hover { border-color: var(--cyan); }
+
+    .mode-toggle-group {
+      display: flex;
+      background: rgba(0,0,0,0.4);
+      padding: 2px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px 11px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+    }
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(79,195,247,0.15), rgba(179,136,255,0.12));
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+
+    .header-actions { display: flex; gap: 6px; }
+
+    .btn {
+      background: rgba(26,26,58,0.8);
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+      padding: 5px 11px;
+      border-radius: 7px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--glass-border-hover);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, rgba(79,195,247,0.18), rgba(179,136,255,0.12));
+      border-color: rgba(79,195,247,0.4);
+      color: var(--cyan);
+    }
+    .btn-replay {
+      background: linear-gradient(135deg, rgba(174,213,129,0.15), rgba(79,195,247,0.1));
+      border-color: rgba(174,213,129,0.4);
+      color: var(--green);
+    }
+    .btn-clear {
+      background: rgba(239, 83, 80, 0.15);
+      border-color: rgba(239, 83, 80, 0.4);
+      color: var(--fail);
+    }
+    .btn-clear:hover {
+      background: rgba(239, 83, 80, 0.25);
+      border-color: var(--fail);
+    }
+
+    .btn-toggle-slope {
+      background: rgba(255, 215, 64, 0.12);
+      border: 1px solid rgba(255, 215, 64, 0.4);
+      color: var(--amber);
+      padding: 2px 8px;
+      border-radius: 5px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-right: 6px;
+    }
+    .btn-toggle-slope:hover {
+      background: rgba(255, 215, 64, 0.25);
+      border-color: var(--amber);
+    }
+    .btn-toggle-slope.off {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: var(--glass-border);
+      color: var(--text-dim);
+    }
+
+    /* ── Workspace ───────────────────────────────────────── */
+    .workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .main-viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      gap: 8px;
+      overflow: hidden;
+      transition: margin-right 0.3s cubic-bezier(0.16,1,0.3,1);
+    }
+
+    /* ── Transform Strip ─────────────────────────────────── */
+    .transform-strip {
+      background: var(--card-surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 7px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .strip-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .strip-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .target-mode-selector {
+      display: flex;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid var(--glass-border);
+      border-radius: 7px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .target-mode-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 3px 9px;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .target-mode-btn.active {
+      background: rgba(79, 195, 247, 0.2);
+      color: var(--cyan);
+      border: 1px solid rgba(79, 195, 247, 0.4);
+    }
+
+    .transform-btn-group {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .t-btn {
+      background: rgba(26,26,58,0.7);
+      border: 1px solid var(--glass-border);
+      color: var(--text-muted);
+      padding: 4px 12px;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      font-family: 'Inter', monospace;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
+      position: relative;
+      overflow: hidden;
+    }
+    .t-btn::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      border-radius: 9px;
+      background: radial-gradient(circle at center, var(--green-glow), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: -1;
+    }
+    .t-btn:hover {
+      border-color: var(--green);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(174,213,129,0.15);
+    }
+    .t-btn:hover::before { opacity: 1; }
+    .t-btn.active {
+      background: linear-gradient(135deg, rgba(174,213,129,0.2), rgba(79,195,247,0.1));
+      border-color: var(--green);
+      color: var(--green);
+      font-weight: 700;
+      box-shadow: 0 0 16px rgba(174,213,129,0.15);
+    }
+    .t-btn.correct-pulse {
+      animation: correctPulse 0.8s ease-out;
+    }
+    @keyframes correctPulse {
+      0% { box-shadow: 0 0 0 0 rgba(102,187,106,0.6); }
+      70% { box-shadow: 0 0 0 12px rgba(102,187,106,0); }
+      100% { box-shadow: 0 0 0 0 rgba(102,187,106,0); }
+    }
+
+    /* ── Dual Plot Row ──────────────────────────────────── */
+    .plots-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .plot-card {
+      background: var(--card-surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .plot-header {
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.015);
+      border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      flex-shrink: 0;
+    }
+
+    .plot-title {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .color-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .state-badge {
+      font-size: 0.65rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.4s;
+    }
+    .state-badge.raw {
+      background: rgba(79,195,247,0.12);
+      color: var(--cyan);
+      border: 1px solid rgba(79,195,247,0.3);
+    }
+    .state-badge.transformed {
+      background: rgba(174,213,129,0.12);
+      color: var(--green);
+      border: 1px solid rgba(174,213,129,0.3);
+    }
+    .state-badge.cleared {
+      background: rgba(239,83,80,0.12);
+      color: var(--fail);
+      border: 1px solid rgba(239,83,80,0.3);
+    }
+    .state-badge.animating {
+      background: rgba(255,215,64,0.12);
+      color: var(--amber);
+      border: 1px solid rgba(255,215,64,0.3);
+    }
+
+    /* OLS Fit Sub-Bar */
+    .ols-fit-bar {
+      background: rgba(10, 10, 26, 0.95);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: 'Inter', monospace;
+      font-size: 0.73rem;
+      flex-shrink: 0;
+    }
+
+    .ols-fit-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .canvas-container {
+      position: relative;
+      flex: 1;
+      min-height: 180px;
+      background: radial-gradient(ellipse at center, #0a0a1f 0%, #050510 100%);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .empty-prompt-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      pointer-events: none;
+      background: rgba(6, 6, 15, 0.7);
+      backdrop-filter: blur(4px);
+    }
+    .empty-prompt-icon {
+      font-size: 2rem;
+      color: var(--cyan);
+      opacity: 0.6;
+    }
+
+    .r2-badge {
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      transition: all 0.4s;
+    }
+
+    .hud-tooltip {
+      position: absolute;
+      background: rgba(10,10,26,0.92);
+      border: 1px solid var(--glass-border-hover);
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-family: 'Inter', monospace;
+      font-size: 0.72rem;
+      pointer-events: none;
+      display: none;
+      z-index: 100;
+      white-space: nowrap;
+      backdrop-filter: blur(6px);
+    }
+
+    /* ── Bottom Row ──────────────────────────────────────── */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.1fr;
+      gap: 8px;
+      flex-shrink: 0;
+      max-height: 195px;
+      min-height: 145px;
+    }
+
+    .panel-card {
+      background: var(--card-surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      overflow: hidden;
+    }
+
+    .panel-title {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    /* ── Residual Mini Canvas ────────────────────────────── */
+    .residual-canvas-wrap {
+      flex: 1;
+      min-height: 55px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 6px;
+      border: 1px solid var(--glass-border);
+      position: relative;
+    }
+
+    /* ── Data Table ──────────────────────────────────────── */
+    .table-container {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      background: rgba(0,0,0,0.2);
+    }
+    .table-container::-webkit-scrollbar { width: 4px; }
+    .table-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Inter', monospace;
+      font-size: 0.72rem;
+      text-align: right;
+    }
+    th, td { padding: 3px 6px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    th {
+      background: rgba(255,255,255,0.025);
+      color: var(--text-muted);
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+      font-size: 0.68rem;
+    }
+    tr.hovered { background: rgba(79,195,247,0.12); }
+    td.hl { color: var(--green); background: rgba(174,213,129,0.04); }
+
+    /* ── Solver Panel & Step-by-Step Algebra ─────────────── */
+    .solver-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 0.75rem;
+      line-height: 1.35;
+      overflow-y: auto;
+    }
+
+    .equation-preview {
+      font-family: 'Inter', monospace;
+      background: rgba(0,0,0,0.3);
+      padding: 5px 9px;
+      border-radius: 6px;
+      border-left: 3px solid var(--cyan);
+      font-size: 0.75rem;
+    }
+
+    .algebra-steps-card {
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-family: 'Inter', monospace;
+      font-size: 0.7rem;
+    }
+    .algebra-step {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      padding: 1px 0;
+      border-bottom: 1px dotted rgba(255,255,255,0.04);
+    }
+    .algebra-step.highlight {
+      color: var(--green-bright);
+      font-weight: 700;
+      border-bottom: none;
+    }
+
+    .feedback-banner {
+      padding: 6px 10px;
+      border-radius: 7px;
+      font-size: 0.76rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      transition: all 0.4s;
+    }
+    .feedback-banner.success {
+      background: rgba(102,187,106,0.12);
+      border: 1px solid var(--pass);
+      color: #c8e6c9;
+    }
+    .feedback-banner.wrong {
+      background: rgba(239,83,80,0.1);
+      border: 1px solid var(--fail);
+      color: #ffcdd2;
+    }
+
+    .constant-badge {
+      background: rgba(255,215,64,0.1);
+      border: 1px solid var(--amber);
+      color: var(--amber);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: 'Inter', monospace;
+      font-weight: 700;
+      font-size: 0.78rem;
+      align-self: flex-start;
+      transition: all 0.3s;
+    }
+
+    /* ── Drawer & Collapse Button Fix ───────────────────── */
+    .drawer {
+      width: 280px;
+      background: rgba(14,14,34,0.95);
+      backdrop-filter: blur(16px);
+      border-left: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 40;
+    }
+    .drawer.collapsed {
+      transform: translateX(280px);
+    }
+
+    .drawer-toggle {
+      position: absolute;
+      left: -32px;
+      top: 14px;
+      width: 32px;
+      height: 34px;
+      background: rgba(26, 26, 58, 0.95);
+      border: 1px solid var(--glass-border-hover);
+      border-right: none;
+      border-radius: 7px 0 0 7px;
+      color: var(--cyan);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      transition: all 0.2s;
+      z-index: 100;
+      box-shadow: -4px 0 12px rgba(0,0,0,0.3);
+    }
+    .drawer-toggle:hover {
+      color: #fff;
+      background: rgba(79, 195, 247, 0.25);
+      border-color: var(--cyan);
+    }
+
+    .drawer-content {
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .drawer-content::-webkit-scrollbar { width: 3px; }
+    .drawer-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+    .control-group { display: flex; flex-direction: column; gap: 3px; }
+    .control-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .control-val {
+      font-family: 'Inter', monospace;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      outline: none;
+      -webkit-appearance: none;
+      accent-color: var(--cyan);
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan-glow);
+      cursor: pointer;
+    }
+
+    .drawer-section-title {
+      font-weight: 700;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--glass-border);
+      padding-bottom: 4px;
+    }
+
+    .tip-box {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      background: rgba(79,195,247,0.04);
+      border: 1px solid rgba(79,195,247,0.1);
+      border-radius: 6px;
+      padding: 6px 8px;
+    }
+
+    /* ── Guided Mode Steps ───────────────────────────────── */
+    .guided-steps {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .guided-steps.active { display: flex; }
+    .g-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      padding: 4px 6px;
+      border-radius: 5px;
+      transition: all 0.3s;
+      line-height: 1.3;
+    }
+    .g-step.current {
+      color: var(--text-main);
+      background: rgba(79,195,247,0.06);
+      border: 1px solid rgba(79,195,247,0.15);
+    }
+    .g-step.done { color: var(--pass); }
+    .g-step-num {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .g-step.current .g-step-num {
+      background: rgba(79,195,247,0.2);
+      color: var(--cyan);
+    }
+    .g-step.done .g-step-num {
+      background: rgba(102,187,106,0.2);
+      color: var(--pass);
+    }
+
+    /* ── Particles ───────────────────────────────────────── */
+    .particle-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand-title">
+      Physics Linearizer <span class="brand-badge">Dual-Plot Lab Engine</span>
+    </div>
+    <div class="header-center">
+      <select id="scenarioSelect" class="app-select">
+        <optgroup label="Physics Experiments">
+          <option value="pendulum">Simple Pendulum: T vs L</option>
+          <option value="kinematics">Kinematics: d vs t</option>
+          <option value="boyle">Boyle's Law: P vs V</option>
+          <option value="coulomb">Coulomb's Law: F vs r</option>
+        </optgroup>
+        <optgroup label="Pure Mathematics">
+          <option value="square">Quadratic: y = A·x²</option>
+          <option value="sqrt">Square Root: y = A·√x</option>
+          <option value="inverse">Inverse: y = A / x</option>
+          <option value="invsquare">Inverse Square: y = A / x²</option>
+        </optgroup>
+      </select>
+      <div class="mode-toggle-group">
+        <button class="mode-btn active" id="modeExplore">Explore</button>
+        <button class="mode-btn" id="modeChallenge">Challenge</button>
+        <button class="mode-btn" id="modeGuided">Guided</button>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-clear" id="btnClearGraphB" title="Clear Graph B back to un-transformed state">🧹 Clear Graph B</button>
+      <button class="btn btn-replay" id="btnReplay" title="Replay the transformation animation">⟳ Replay Morph</button>
+      <button class="btn" id="btnResample">Resample Noise</button>
+      <button class="btn btn-primary" id="btnExport">Export CSV</button>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <div class="main-viewport" id="mainViewport">
+
+      <!-- Transform Strip -->
+      <div class="transform-strip">
+        <div class="strip-left">
+          <div class="strip-label">
+            <span>Linearization Target:</span>
+          </div>
+          <div class="target-mode-selector">
+            <button class="target-mode-btn active" id="targetModeX">X-Axis [ X' ]</button>
+            <button class="target-mode-btn" id="targetModeY">Y-Axis [ Y' ]</button>
+            <button class="target-mode-btn" id="targetModeLog">Log-Log [ ln y vs ln x ]</button>
+          </div>
+          <div class="strip-label" style="margin-left: 6px;">
+            <span>Mapping:</span>
+            <strong id="currentMappingLabel" style="color: var(--green);">X' = x</strong>
+          </div>
+        </div>
+
+        <div class="transform-btn-group" id="transformBtnContainer">
+          <button class="t-btn active" data-transform="x">[ x ]</button>
+          <button class="t-btn" data-transform="x2">[ x² ]</button>
+          <button class="t-btn" data-transform="sqrt">[ √x ]</button>
+          <button class="t-btn" data-transform="inv_x">[ 1/x ]</button>
+          <button class="t-btn" data-transform="inv_x2">[ 1/x² ]</button>
+          <button class="t-btn" data-transform="x3">[ x³ ]</button>
+        </div>
+      </div>
+
+      <!-- DUAL PLOT ROW -->
+      <div class="plots-row">
+        <!-- GRAPH A: Raw Experimental Plot -->
+        <div class="plot-card">
+          <div class="plot-header">
+            <div class="plot-title">
+              <span class="color-dot" style="background: var(--cyan);"></span>
+              Graph A: Experimental Raw Plot (<span id="rawPlotLabelY">y</span> vs <span id="rawPlotLabelX">x</span>)
+            </div>
+            <span class="state-badge raw">RAW FUNCTION</span>
+          </div>
+          <div class="canvas-container" id="containerA">
+            <canvas id="canvasA"></canvas>
+            <div class="hud-tooltip" id="tooltipA"></div>
+          </div>
+        </div>
+
+        <!-- GRAPH B: Transformed Linearization Plot -->
+        <div class="plot-card">
+          <div class="plot-header">
+            <div class="plot-title">
+              <span class="color-dot" style="background: var(--green);"></span>
+              Graph B: Transformed Linearization (<span id="transPlotLabelY">y</span> vs <span id="transPlotLabelX">X'</span>)
+            </div>
+            <div style="display: flex; align-items: center;">
+              <button class="btn-toggle-slope" id="btnToggleSlope" title="Toggle Slope Triangle on Graph B">📐 Slope Triangle: ON</button>
+              <span class="state-badge transformed" id="stateBadgeB">TRANSFORMED</span>
+            </div>
+          </div>
+
+          <!-- OLS FIT SUB-BAR (CLEAN, UNOBSTRUCTED BAR OUTSIDE CANVAS) -->
+          <div class="ols-fit-bar">
+            <div class="ols-fit-item">
+              <span style="color: var(--text-muted); font-weight: 600;">OLS Fit:</span>
+              <span id="statFitEq" style="color: var(--green); font-weight: 700;">—</span>
+            </div>
+            <div class="ols-fit-item">
+              <span style="color: var(--text-muted); font-weight: 600;">R² Score:</span>
+              <span id="statR2" class="r2-badge">—</span>
+            </div>
+            <div class="ols-fit-item" style="color: var(--text-dim);" id="statInterpretation">Select a transform</div>
+          </div>
+
+          <div class="canvas-container" id="containerB">
+            <canvas id="canvasB"></canvas>
+            <div class="particle-container" id="particleContainer"></div>
+            <div class="empty-prompt-overlay" id="emptyPromptOverlay" style="display: none;">
+              <div class="empty-prompt-icon">📈</div>
+              <div>Graph B Cleared</div>
+              <div style="font-size: 0.75rem; color: var(--text-dim);">Select a transformation button above to plot and linearize</div>
+            </div>
+            <div class="hud-tooltip" id="tooltipB"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row: Data Table / Residual Plot / Solver -->
+      <div class="bottom-row">
+        <!-- Data Table -->
+        <div class="panel-card">
+          <div class="panel-title">
+            <span>Synchronized Data Points</span>
+            <span style="font-size: 0.65rem; font-family: monospace; color: var(--text-dim);" id="tableSummaryN">N = 10</span>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th id="thRawX">x</th>
+                  <th id="thTransX" style="color: var(--green);">X'</th>
+                  <th id="thRawY">y</th>
+                  <th>Residual</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Residual Plot -->
+        <div class="panel-card">
+          <div class="panel-title">
+            <span>Residual Analysis</span>
+            <span style="font-size: 0.65rem; color: var(--text-dim);" id="residualVerdict">—</span>
+          </div>
+          <div class="residual-canvas-wrap">
+            <canvas id="residualCanvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Solver / Feedback & Algebra Breakdown -->
+        <div class="panel-card">
+          <div class="panel-title">
+            <span id="panelModeHeading">Constant Extraction</span>
+            <span id="badgeTargetLinearizer" style="display: none; font-size: 0.65rem; color: var(--amber);">Find the line!</span>
+          </div>
+          <div class="solver-box">
+            <div class="equation-preview" id="mathTheoryBox">Theory: y = f(x)</div>
+
+            <!-- Step-by-Step Algebra Breakdown -->
+            <div class="algebra-steps-card" id="algebraBreakdownCard">
+              <div class="algebra-step" id="algStep1"><span>1. Linearized Eq:</span><strong>—</strong></div>
+              <div class="algebra-step" id="algStep2"><span>2. Slope Match:</span><strong>m = ΔY'/ΔX'</strong></div>
+              <div class="algebra-step highlight" id="algStep3"><span>3. Parameter:</span><strong>—</strong></div>
+            </div>
+
+            <div id="feedbackContainer" class="feedback-banner" style="display: none;">
+              <strong id="feedbackTitle">Analysis</strong>
+              <span id="feedbackText">Select the right transformation.</span>
+            </div>
+            <div id="constantExtractionContainer" style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-size: 0.7rem; color: var(--text-muted);">Extracted Physical Constant:</div>
+              <div class="constant-badge" id="constantBadge">Analyzing...</div>
+            </div>
+            <!-- Guided Steps -->
+            <div class="guided-steps" id="guidedSteps">
+              <div class="g-step current" id="gStep1"><span class="g-step-num">1</span><span>Observe Graph A curve shape.</span></div>
+              <div class="g-step" id="gStep2"><span class="g-step-num">2</span><span>Select linearization target (X-axis, Y-axis, or Log-Log).</span></div>
+              <div class="g-step" id="gStep3"><span class="g-step-num">3</span><span>Check slope triangle ΔY'/ΔX' on Graph B line.</span></div>
+              <div class="g-step" id="gStep4"><span class="g-step-num">4</span><span>Follow step-by-step algebra to extract the constant!</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Drawer Sidebar -->
+    <aside class="drawer" id="controlDrawer">
+      <button class="drawer-toggle" id="drawerToggleBtn" title="Toggle Controls">◀</button>
+      <div class="drawer-content">
+        <div class="drawer-section-title">Experiment Controls</div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Data Points (N)</span>
+            <span class="control-val" id="valN">10</span>
+          </div>
+          <input type="range" id="sliderN" min="5" max="25" step="1" value="10">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Noise (σ)</span>
+            <span class="control-val" id="valNoise">2.0%</span>
+          </div>
+          <input type="range" id="sliderNoise" min="0" max="15" step="0.5" value="2.0">
+        </div>
+
+        <div class="control-group">
+          <div class="control-header">
+            <span>Animation Speed</span>
+            <span class="control-val" id="valSpeed">1.0×</span>
+          </div>
+          <input type="range" id="sliderSpeed" min="0.3" max="3.0" step="0.1" value="1.0">
+        </div>
+
+        <div class="drawer-section-title" style="margin-top: 6px;">Physical Parameter</div>
+
+        <div class="control-group" id="groupParam1">
+          <div class="control-header">
+            <span id="labelParam1">True Parameter</span>
+            <span class="control-val" id="valParam1">9.80</span>
+          </div>
+          <input type="range" id="sliderParam1" min="1.0" max="20.0" step="0.1" value="9.8">
+        </div>
+
+        <div class="tip-box">
+          <strong>💡 Linearization Tip:</strong><br>
+          Graph A shows raw $y$ vs $x$. Linearize using X-axis, Y-axis (e.g. $T^2$ vs $L$), or Log-Log ($\ln y$ vs $\ln x$). Watch the interactive Slope Triangle ($\Delta Y' / \Delta X'$) on Graph B!
+        </div>
+      </div>
+    </aside>
+  </div>
+
+<script>
+/* =========================================================================
+   1. PhysicsModel: Scenario configs + data generation
+   ========================================================================= */
+class PhysicsModel {
+  constructor() {
+    this.scenario = 'pendulum';
+    this.N = 10;
+    this.noisePercent = 2.0;
+    this.param1 = 9.80;
+    this.cachedRawData = [];
+  }
+
+  getScenarioConfig() {
+    const configs = {
+      pendulum: {
+        name: "Period of a Simple Pendulum",
+        rawXLabel: "Length L (m)", rawYLabel: "Period T (s)", transYLabel: "T (s)",
+        paramName: "Local Gravity g (m/s²)",
+        paramMin: 1.6, paramMax: 24.8, paramStep: 0.1, paramDefault: 9.8,
+        xRange: [0.2, 2.5], correctTransform: 'sqrt', correctYTransform: 'y2',
+        theoryFormula: "T = 2π √(L / g)",
+        linearizedEquation: "X-Axis: T vs √L  |  Y-Axis: T² vs L  ⇒  Slope m = 4π²/g",
+        calculateY: (L, g) => 2 * Math.PI * Math.sqrt(L / g),
+        extractConstant: (m, mode) => {
+          if (mode === 'y_mode') return m > 0 ? (4 * Math.PI * Math.PI) / m : 0;
+          return (m > 0) ? (4 * Math.PI * Math.PI) / (m * m) : 0;
+        },
+        getAlgebraSteps: (m, mode) => {
+          if (mode === 'y_mode') {
+            const gVal = m > 0 ? (4 * Math.PI * Math.PI) / m : 0;
+            return {
+              step1: "T² = (4π²/g) · L",
+              step2: `Slope m = 4π²/g = ${m.toFixed(3)}`,
+              step3: `g = 4π²/m = 39.478 / ${m.toFixed(3)} = ${gVal.toFixed(3)} m/s²`
+            };
+          } else {
+            const gVal = m > 0 ? (4 * Math.PI * Math.PI) / (m * m) : 0;
+            return {
+              step1: "T = (2π/√g) · √L",
+              step2: `Slope m = 2π/√g = ${m.toFixed(3)}`,
+              step3: `g = 4π²/m² = 39.478 / (${m.toFixed(3)})² = ${gVal.toFixed(3)} m/s²`
+            };
+          }
+        },
+        constantLabel: "Extracted g = "
+      },
+      kinematics: {
+        name: "Constant Acceleration from Rest",
+        rawXLabel: "Time t (s)", rawYLabel: "Position d (m)", transYLabel: "d (m)",
+        paramName: "Acceleration a (m/s²)",
+        paramMin: 0.5, paramMax: 10.0, paramStep: 0.5, paramDefault: 4.0,
+        xRange: [0.5, 5.0], correctTransform: 'x2', correctYTransform: 'sqrt_y',
+        theoryFormula: "d = ½ a · t²",
+        linearizedEquation: "X-Axis: d vs t²  |  Y-Axis: √d vs t  ⇒  Slope m = √(a/2)",
+        calculateY: (t, a) => 0.5 * a * t * t,
+        extractConstant: (m, mode) => mode === 'y_mode' ? 2 * m * m : 2 * m,
+        getAlgebraSteps: (m, mode) => {
+          if (mode === 'y_mode') {
+            const aVal = 2 * m * m;
+            return {
+              step1: "√d = √(a/2) · t",
+              step2: `Slope m = √(a/2) = ${m.toFixed(3)}`,
+              step3: `a = 2m² = 2 · (${m.toFixed(3)})² = ${aVal.toFixed(3)} m/s²`
+            };
+          } else {
+            const aVal = 2 * m;
+            return {
+              step1: "d = (½a) · t²",
+              step2: `Slope m = ½a = ${m.toFixed(3)}`,
+              step3: `a = 2m = 2 · ${m.toFixed(3)} = ${aVal.toFixed(3)} m/s²`
+            };
+          }
+        },
+        constantLabel: "Extracted a = "
+      },
+      boyle: {
+        name: "Boyle's Law (Ideal Gas)",
+        rawXLabel: "Volume V (L)", rawYLabel: "Pressure P (kPa)", transYLabel: "P (kPa)",
+        paramName: "nRT Product (J)",
+        paramMin: 50, paramMax: 500, paramStep: 10, paramDefault: 200,
+        xRange: [1.0, 10.0], correctTransform: 'inv_x', correctYTransform: 'inv_y',
+        theoryFormula: "P = (nRT) / V",
+        linearizedEquation: "P vs 1/V  ⇒  Slope m = nRT",
+        calculateY: (V, nRT) => nRT / V,
+        extractConstant: (m, mode) => mode === 'y_mode' ? (m !== 0 ? 1 / m : 0) : m,
+        getAlgebraSteps: (m, mode) => ({
+          step1: "P = (nRT) · (1/V)",
+          step2: `Slope m = nRT = ${m.toFixed(3)}`,
+          step3: `nRT = ${m.toFixed(1)} J`
+        }),
+        constantLabel: "Extracted nRT = "
+      },
+      coulomb: {
+        name: "Coulomb's Law Electrostatic Force",
+        rawXLabel: "Separation r (m)", rawYLabel: "Force F (N)", transYLabel: "F (N)",
+        paramName: "Force Scale k·q₁·q₂",
+        paramMin: 1.0, paramMax: 20.0, paramStep: 1.0, paramDefault: 10.0,
+        xRange: [0.5, 4.0], correctTransform: 'inv_x2', correctYTransform: 'inv_sqrt_y',
+        theoryFormula: "F = (k q₁ q₂) / r²",
+        linearizedEquation: "F vs 1/r²  ⇒  Slope m = k q₁ q₂",
+        calculateY: (r, kqq) => kqq / (r * r),
+        extractConstant: (m) => m,
+        getAlgebraSteps: (m) => ({
+          step1: "F = (k q₁ q₂) · (1/r²)",
+          step2: `Slope m = k q₁ q₂ = ${m.toFixed(3)}`,
+          step3: `k q₁ q₂ = ${m.toFixed(3)}`
+        }),
+        constantLabel: "Extracted k·q₁·q₂ = "
+      },
+      square: {
+        name: "Quadratic Growth",
+        rawXLabel: "x", rawYLabel: "y", transYLabel: "y",
+        paramName: "Coefficient A",
+        paramMin: 0.5, paramMax: 5.0, paramStep: 0.5, paramDefault: 2.0,
+        xRange: [0.5, 5.0], correctTransform: 'x2', correctYTransform: 'sqrt_y',
+        theoryFormula: "y = A · x²",
+        linearizedEquation: "y vs x²  ⇒  Slope m = A",
+        calculateY: (x, A) => A * x * x,
+        extractConstant: (m, mode) => mode === 'y_mode' ? m * m : m,
+        getAlgebraSteps: (m) => ({
+          step1: "y = A · (x²)",
+          step2: `Slope m = A = ${m.toFixed(3)}`,
+          step3: `A = ${m.toFixed(3)}`
+        }),
+        constantLabel: "Extracted A = "
+      },
+      sqrt: {
+        name: "Square Root",
+        rawXLabel: "x", rawYLabel: "y", transYLabel: "y",
+        paramName: "Coefficient A",
+        paramMin: 0.5, paramMax: 5.0, paramStep: 0.5, paramDefault: 2.5,
+        xRange: [0.5, 10.0], correctTransform: 'sqrt', correctYTransform: 'y2',
+        theoryFormula: "y = A · √x",
+        linearizedEquation: "y vs √x  ⇒  Slope m = A",
+        calculateY: (x, A) => A * Math.sqrt(x),
+        extractConstant: (m, mode) => mode === 'y_mode' ? Math.sqrt(m) : m,
+        getAlgebraSteps: (m) => ({
+          step1: "y = A · (√x)",
+          step2: `Slope m = A = ${m.toFixed(3)}`,
+          step3: `A = ${m.toFixed(3)}`
+        }),
+        constantLabel: "Extracted A = "
+      },
+      inverse: {
+        name: "Inverse Rational",
+        rawXLabel: "x", rawYLabel: "y", transYLabel: "y",
+        paramName: "Coefficient A",
+        paramMin: 1.0, paramMax: 20.0, paramStep: 1.0, paramDefault: 8.0,
+        xRange: [0.5, 8.0], correctTransform: 'inv_x', correctYTransform: 'inv_y',
+        theoryFormula: "y = A / x",
+        linearizedEquation: "y vs 1/x  ⇒  Slope m = A",
+        calculateY: (x, A) => A / x,
+        extractConstant: (m) => m,
+        getAlgebraSteps: (m) => ({
+          step1: "y = A · (1/x)",
+          step2: `Slope m = A = ${m.toFixed(3)}`,
+          step3: `A = ${m.toFixed(3)}`
+        }),
+        constantLabel: "Extracted A = "
+      },
+      invsquare: {
+        name: "Inverse Square",
+        rawXLabel: "x", rawYLabel: "y", transYLabel: "y",
+        paramName: "Coefficient A",
+        paramMin: 1.0, paramMax: 30.0, paramStep: 1.0, paramDefault: 12.0,
+        xRange: [0.6, 5.0], correctTransform: 'inv_x2', correctYTransform: 'inv_sqrt_y',
+        theoryFormula: "y = A / x²",
+        linearizedEquation: "y vs 1/x²  ⇒  Slope m = A",
+        calculateY: (x, A) => A / (x * x),
+        extractConstant: (m) => m,
+        getAlgebraSteps: (m) => ({
+          step1: "y = A · (1/x²)",
+          step2: `Slope m = A = ${m.toFixed(3)}`,
+          step3: `A = ${m.toFixed(3)}`
+        }),
+        constantLabel: "Extracted A = "
+      }
+    };
+    return configs[this.scenario];
+  }
+
+  generateGaussianNoise() {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  }
+
+  generateDataset() {
+    const conf = this.getScenarioConfig();
+    const [xMin, xMax] = conf.xRange;
+    const pts = [];
+    const step = (xMax - xMin) / (this.N - 1);
+    for (let i = 0; i < this.N; i++) {
+      const x = xMin + i * step;
+      const yTrue = conf.calculateY(x, this.param1);
+      const noiseFraction = (this.noisePercent / 100) * this.generateGaussianNoise();
+      let yMeas = yTrue * (1 + noiseFraction);
+      if (yMeas < 0) yMeas = 0.001;
+      pts.push({ x, y: yMeas, yTrue });
+    }
+    this.cachedRawData = pts;
+    return pts;
+  }
+}
+
+/* =========================================================================
+   2. RegressionEngine: Transforms + OLS
+   ========================================================================= */
+class RegressionEngine {
+  static applyTransform(val, key) {
+    if (!Number.isFinite(val) || val <= 0 && (key.startsWith('inv') || key.startsWith('sqrt') || key === 'ln')) return NaN;
+    switch (key) {
+      case 'x': case 'y': return val;
+      case 'x2': case 'y2': return val * val;
+      case 'sqrt': case 'sqrt_y': return Math.sqrt(val);
+      case 'inv_x': case 'inv_y': return 1 / val;
+      case 'inv_x2': case 'inv_y2': return 1 / (val * val);
+      case 'x3': return val * val * val;
+      case 'ln': return Math.log(val);
+      default: return val;
+    }
+  }
+
+  static getTransformLabel(key, raw = "x") {
+    switch (key) {
+      case 'x': case 'y': return raw;
+      case 'x2': case 'y2': return `${raw}²`;
+      case 'sqrt': case 'sqrt_y': return `√${raw}`;
+      case 'inv_x': case 'inv_y': return `1/${raw}`;
+      case 'inv_x2': case 'inv_y2': return `1/${raw}²`;
+      case 'x3': return `${raw}³`;
+      case 'ln': return `ln(${raw})`;
+      default: return raw;
+    }
+  }
+
+  static computeOLS(rawPoints, xTransformKey, yTransformKey = 'y') {
+    const transformedData = [];
+    let sumX = 0, sumY = 0, sumXX = 0, sumYY = 0, sumXY = 0, validN = 0;
+
+    for (let i = 0; i < rawPoints.length; i++) {
+      const { x, y } = rawPoints[i];
+      const Xp = this.applyTransform(x, xTransformKey);
+      const Yp = this.applyTransform(y, yTransformKey);
+      if (!Number.isFinite(Xp) || !Number.isFinite(Yp)) continue;
+
+      transformedData.push({ rawX: x, Xprime: Xp, rawY: y, Yprime: Yp, y: Yp, idx: i + 1 });
+      sumX += Xp; sumY += Yp; sumXX += Xp * Xp; sumYY += Yp * Yp; sumXY += Xp * Yp;
+      validN++;
+    }
+
+    if (validN < 2) return { m: 0, b: 0, r2: 0, transformedData, residuals: [] };
+    const denom = validN * sumXX - sumX * sumX;
+    const m = Math.abs(denom) < 1e-12 ? 0 : (validN * sumXY - sumX * sumY) / denom;
+    const b = (sumY - m * sumX) / validN;
+    const numR2 = (validN * sumXY - sumX * sumY) ** 2;
+    const denomR2 = (validN * sumXX - sumX * sumX) * (validN * sumYY - sumY * sumY);
+    let r2 = (denomR2 <= 0 || !Number.isFinite(denomR2)) ? 0 : numR2 / denomR2;
+    r2 = Math.max(0, Math.min(1, r2));
+    const residuals = transformedData.map(pt => pt.Yprime - (m * pt.Xprime + b));
+    return { m, b, r2, transformedData, residuals };
+  }
+}
+
+/* =========================================================================
+   3. GraphARenderer: Graph A (Raw Plot)
+   ========================================================================= */
+class GraphARenderer {
+  constructor() {
+    this.canvas = document.getElementById('canvasA');
+    this.ctx = this.canvas.getContext('2d');
+    this.tooltip = document.getElementById('tooltipA');
+    this.dpr = window.devicePixelRatio || 1;
+    this.pad = { top: 25, right: 25, bottom: 45, left: 55 };
+    this.activePoints = [];
+    this.hoveredIdx = -1;
+    this.resize();
+    this._bindHover();
+  }
+
+  resize() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.W = rect.width;
+    this.H = rect.height;
+    this.canvas.width = this.W * this.dpr;
+    this.canvas.height = this.H * this.dpr;
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(this.dpr, this.dpr);
+  }
+
+  _bindHover() {
+    this.canvas.addEventListener('mousemove', (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      this.hoveredIdx = -1;
+      let minD = 15;
+      for (let i = 0; i < this.activePoints.length; i++) {
+        const pt = this.activePoints[i];
+        const d = Math.hypot(pt.sx - mx, pt.sy - my);
+        if (d < minD) { minD = d; this.hoveredIdx = i; }
+      }
+      if (this.hoveredIdx >= 0) {
+        const pt = this.activePoints[this.hoveredIdx];
+        this.tooltip.style.display = 'block';
+        this.tooltip.style.left = `${pt.sx + 12}px`;
+        this.tooltip.style.top = `${pt.sy - 12}px`;
+        this.tooltip.innerHTML = `(${pt.x.toFixed(3)}, ${pt.y.toFixed(3)})`;
+        syncHoverAcrossAll(this.hoveredIdx);
+      } else {
+        this.tooltip.style.display = 'none';
+        syncHoverAcrossAll(-1);
+      }
+    });
+    this.canvas.addEventListener('mouseleave', () => {
+      this.hoveredIdx = -1;
+      this.tooltip.style.display = 'none';
+      syncHoverAcrossAll(-1);
+    });
+  }
+
+  computeBounds(points) {
+    let minX = 0, maxX = Math.max(...points.map(p => p.x));
+    let minY = 0, maxY = Math.max(...points.map(p => p.y));
+    maxX += maxX * 0.08;
+    maxY += maxY * 0.08;
+    return { minX, maxX, minY, maxY };
+  }
+
+  toScreen(x, y, b) {
+    const pw = this.W - this.pad.left - this.pad.right;
+    const ph = this.H - this.pad.top - this.pad.bottom;
+    const sx = this.pad.left + ((x - b.minX) / (b.maxX - b.minX)) * pw;
+    const sy = this.H - this.pad.bottom - ((y - b.minY) / (b.maxY - b.minY)) * ph;
+    return { sx, sy };
+  }
+
+  render(points, config) {
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.W, this.H);
+    if (!points || !points.length) return;
+
+    const b = this.computeBounds(points);
+    this._drawGrid(b, config.rawXLabel, config.rawYLabel);
+
+    // ── PROPRONOUNCED PALE DOTTED THEORETICAL FUNCTION CURVE ──
+    ctx.save();
+    ctx.strokeStyle = 'rgba(79, 195, 247, 0.85)';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([6, 6]);
+    ctx.shadowColor = 'rgba(79, 195, 247, 0.5)';
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i <= 100; i++) {
+      const cx = b.minX + (i / 100) * (b.maxX - b.minX);
+      if (cx <= 0 && config.theoryFormula.includes('/')) continue;
+      const cy = config.calculateY(cx, model.param1);
+      if (!Number.isFinite(cy) || cy > b.maxY * 2) continue;
+      const { sx, sy } = this.toScreen(cx, cy, b);
+      if (!started) { ctx.moveTo(sx, sy); started = true; }
+      else ctx.lineTo(sx, sy);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    // Scatter Points
+    this.activePoints = [];
+    for (let i = 0; i < points.length; i++) {
+      const pt = points[i];
+      const { sx, sy } = this.toScreen(pt.x, pt.y, b);
+      this.activePoints.push({ sx, sy, x: pt.x, y: pt.y });
+      const isHovered = (i === this.hoveredIdx || i === globalHoverIdx);
+
+      ctx.save();
+      ctx.fillStyle = isHovered ? '#7cfc00' : '#4fc3f7';
+      ctx.shadowColor = isHovered ? '#7cfc00' : '#4fc3f7';
+      ctx.shadowBlur = isHovered ? 18 : 6;
+      ctx.beginPath();
+      ctx.arc(sx, sy, isHovered ? 6.5 : 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  _drawGrid(b, xLabel, yLabel) {
+    const ctx = this.ctx;
+    const p = this.pad;
+    const pw = this.W - p.left - p.right;
+    const ph = this.H - p.top - p.bottom;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.strokeRect(p.left, p.top, pw, ph);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '10px Inter, monospace';
+    ctx.textAlign = 'center';
+
+    const xTicks = 5;
+    for (let i = 0; i <= xTicks; i++) {
+      const val = b.minX + (i / xTicks) * (b.maxX - b.minX);
+      const { sx } = this.toScreen(val, b.minY, b);
+      ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+      ctx.beginPath(); ctx.moveTo(sx, p.top); ctx.lineTo(sx, this.H - p.bottom); ctx.stroke();
+      ctx.fillText(val.toFixed(val > 10 ? 0 : 2), sx, this.H - p.bottom + 15);
+    }
+
+    const yTicks = 5;
+    ctx.textAlign = 'right';
+    for (let j = 0; j <= yTicks; j++) {
+      const val = b.minY + (j / yTicks) * (b.maxY - b.minY);
+      const { sy } = this.toScreen(b.minX, val, b);
+      ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+      ctx.beginPath(); ctx.moveTo(p.left, sy); ctx.lineTo(this.W - p.right, sy); ctx.stroke();
+      ctx.fillText(val.toFixed(val > 10 ? 0 : 2), p.left - 6, sy + 3);
+    }
+
+    ctx.font = '11px Inter, sans-serif';
+    ctx.fillStyle = '#7a85a0';
+    ctx.textAlign = 'center';
+    ctx.fillText(xLabel, p.left + pw / 2, this.H - 8);
+
+    ctx.save();
+    ctx.translate(13, p.top + ph / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText(yLabel, 0, 0);
+    ctx.restore();
+    ctx.restore();
+  }
+}
+
+/* =========================================================================
+   4. GraphBRenderer: Graph B (Transformed Plot with Slope Triangle)
+   ========================================================================= */
+class GraphBRenderer {
+  constructor() {
+    this.canvas = document.getElementById('canvasB');
+    this.ctx = this.canvas.getContext('2d');
+    this.tooltip = document.getElementById('tooltipB');
+    this.dpr = window.devicePixelRatio || 1;
+    this.pad = { top: 25, right: 25, bottom: 45, left: 55 };
+
+    this.animT = 1;
+    this.animating = false;
+    this.animSpeed = 1.0;
+    this.cleared = false;
+    this.showSlopeTriangle = true;
+
+    this.pointStates = [];
+    this.axisBoundsFrom = null;
+    this.axisBoundsTo = null;
+    this.xLabelFrom = '';
+    this.xLabelTo = '';
+    this.yLabelFrom = '';
+    this.yLabelTo = '';
+    this.targetRegression = null;
+    this.hoveredIdx = -1;
+
+    this.showGhosts = false;
+    this.arrowOpacity = 0;
+    this.particles = [];
+
+    this.resize();
+    this._bindHover();
+  }
+
+  resize() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.W = rect.width;
+    this.H = rect.height;
+    this.canvas.width = this.W * this.dpr;
+    this.canvas.height = this.H * this.dpr;
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(this.dpr, this.dpr);
+  }
+
+  clearGraph() {
+    this.cleared = true;
+    this.targetRegression = null;
+    this.pointStates = [];
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.W, this.H);
+
+    document.getElementById('emptyPromptOverlay').style.display = 'flex';
+    document.getElementById('stateBadgeB').textContent = 'CLEARED';
+    document.getElementById('stateBadgeB').className = 'state-badge cleared';
+    document.getElementById('statFitEq').innerText = '—';
+    document.getElementById('statR2').innerText = '—';
+    document.getElementById('statR2').style.background = 'transparent';
+    document.getElementById('statInterpretation').textContent = 'Graph B cleared';
+  }
+
+  _bindHover() {
+    this.canvas.addEventListener('mousemove', (e) => {
+      if (this.cleared) return;
+      const rect = this.canvas.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      this.hoveredIdx = -1;
+      let minD = 15;
+      for (let i = 0; i < this.pointStates.length; i++) {
+        const ps = this.pointStates[i];
+        const cx = this._lerpVal(ps.rawScreenX, ps.transScreenX, this.animT);
+        const cy = this._lerpVal(ps.rawScreenY, ps.transScreenY, this.animT);
+        const d = Math.hypot(cx - mx, cy - my);
+        if (d < minD) { minD = d; this.hoveredIdx = i; }
+      }
+      if (this.hoveredIdx >= 0) {
+        const ps = this.pointStates[this.hoveredIdx];
+        const cx = this._lerpVal(ps.rawScreenX, ps.transScreenX, this.animT);
+        const cy = this._lerpVal(ps.rawScreenY, ps.transScreenY, this.animT);
+        this.tooltip.style.display = 'block';
+        this.tooltip.style.left = `${cx + 12}px`;
+        this.tooltip.style.top = `${cy - 12}px`;
+        const xv = this._lerpVal(ps.rawDataX, ps.transDataX, this.animT);
+        const yv = this._lerpVal(ps.rawDataY, ps.transDataY, this.animT);
+        this.tooltip.innerHTML = `(${xv.toFixed(3)}, ${yv.toFixed(3)})`;
+        syncHoverAcrossAll(this.hoveredIdx);
+      } else {
+        this.tooltip.style.display = 'none';
+        syncHoverAcrossAll(-1);
+      }
+      if (!this.animating) this._renderFrame();
+    });
+    this.canvas.addEventListener('mouseleave', () => {
+      this.hoveredIdx = -1;
+      this.tooltip.style.display = 'none';
+      syncHoverAcrossAll(-1);
+    });
+  }
+
+  _lerpVal(a, b, t) { return a + (b - a) * t; }
+  _easeInOutCubic(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
+
+  _computeBounds(xVals, yVals) {
+    let minX = Math.min(0, ...xVals);
+    let maxX = Math.max(...xVals);
+    let minY = Math.min(0, ...yVals);
+    let maxY = Math.max(...yVals);
+    const sx = (maxX - minX) || 1;
+    const sy = (maxY - minY) || 1;
+    maxX += sx * 0.08;
+    maxY += sy * 0.08;
+    return { minX, maxX, minY, maxY };
+  }
+
+  _toScreen(x, y, b) {
+    const pw = this.W - this.pad.left - this.pad.right;
+    const ph = this.H - this.pad.top - this.pad.bottom;
+    const sx = this.pad.left + ((x - b.minX) / (b.maxX - b.minX)) * pw;
+    const sy = this.H - this.pad.bottom - ((y - b.minY) / (b.maxY - b.minY)) * ph;
+    return { sx, sy };
+  }
+
+  _lerpBounds(bFrom, bTo, t) {
+    return {
+      minX: this._lerpVal(bFrom.minX, bTo.minX, t),
+      maxX: this._lerpVal(bFrom.maxX, bTo.maxX, t),
+      minY: this._lerpVal(bFrom.minY, bTo.minY, t),
+      maxY: this._lerpVal(bFrom.maxY, bTo.maxY, t)
+    };
+  }
+
+  prepareAnimation(rawPoints, xTransformKey, yTransformKey, regression, config, prevXKey, prevYKey) {
+    this.cleared = false;
+    document.getElementById('emptyPromptOverlay').style.display = 'none';
+    this.targetRegression = regression;
+    const { transformedData } = regression;
+
+    const fromXVals = [], fromYVals = [], toXVals = [], toYVals = [];
+    this.pointStates = [];
+
+    for (let i = 0; i < transformedData.length; i++) {
+      const td = transformedData[i];
+      const fromX = RegressionEngine.applyTransform(td.rawX, prevXKey);
+      const fromY = RegressionEngine.applyTransform(td.rawY, prevYKey);
+      if (!Number.isFinite(fromX) || !Number.isFinite(fromY)) continue;
+
+      fromXVals.push(fromX); fromYVals.push(fromY);
+      toXVals.push(td.Xprime); toYVals.push(td.Yprime);
+
+      this.pointStates.push({
+        rawDataX: fromX, transDataX: td.Xprime,
+        rawDataY: fromY, transDataY: td.Yprime,
+        rawScreenX: 0, rawScreenY: 0,
+        transScreenX: 0, transScreenY: 0
+      });
+    }
+
+    this.axisBoundsFrom = this._computeBounds(fromXVals, fromYVals);
+    this.axisBoundsTo = this._computeBounds(toXVals, toYVals);
+
+    for (const ps of this.pointStates) {
+      const from = this._toScreen(ps.rawDataX, ps.rawDataY, this.axisBoundsFrom);
+      ps.rawScreenX = from.sx; ps.rawScreenY = from.sy;
+      const to = this._toScreen(ps.transDataX, ps.dataY || ps.transDataY, this.axisBoundsTo);
+      ps.transScreenX = to.sx; ps.transScreenY = to.sy;
+    }
+
+    this.xLabelFrom = RegressionEngine.getTransformLabel(prevXKey, config.rawXLabel.split(' ')[0]);
+    this.xLabelTo = RegressionEngine.getTransformLabel(xTransformKey, config.rawXLabel.split(' ')[0]);
+    this.yLabelFrom = RegressionEngine.getTransformLabel(prevYKey, config.rawYLabel.split(' ')[0]);
+    this.yLabelTo = RegressionEngine.getTransformLabel(yTransformKey, config.rawYLabel.split(' ')[0]);
+    this.config = config;
+  }
+
+  startAnimation(onComplete) {
+    this.animT = 0;
+    this.animating = true;
+    this.showGhosts = true;
+    this.arrowOpacity = 1;
+    this.particles = [];
+
+    const badge = document.getElementById('stateBadgeB');
+    badge.textContent = 'MORPHING';
+    badge.className = 'state-badge animating';
+
+    const startTime = performance.now();
+    const duration = 1200 / this.animSpeed;
+
+    const animate = (now) => {
+      const elapsed = now - startTime;
+      const rawT = Math.min(1, elapsed / duration);
+      this.animT = this._easeInOutCubic(rawT);
+
+      this.arrowOpacity = rawT < 0.7 ? 1 : Math.max(0, 1 - (rawT - 0.7) / 0.3);
+      this._renderFrame();
+
+      if (rawT < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        this.animT = 1;
+        this.animating = false;
+        this.arrowOpacity = 0;
+        this._renderFrame();
+        if (onComplete) onComplete();
+      }
+    };
+    requestAnimationFrame(animate);
+  }
+
+  renderInstant(rawPoints, xTransformKey, yTransformKey, regression, config) {
+    this.cleared = false;
+    document.getElementById('emptyPromptOverlay').style.display = 'none';
+    this.targetRegression = regression;
+    const { transformedData } = regression;
+
+    const xVals = transformedData.map(p => p.Xprime);
+    const yVals = transformedData.map(p => p.Yprime);
+    this.axisBoundsTo = this._computeBounds(xVals, yVals);
+    this.axisBoundsFrom = this.axisBoundsTo;
+
+    this.pointStates = transformedData.map(td => ({
+      rawDataX: td.Xprime, transDataX: td.Xprime,
+      rawDataY: td.Yprime, transDataY: td.Yprime,
+      rawScreenX: this._toScreen(td.Xprime, td.Yprime, this.axisBoundsTo).sx,
+      rawScreenY: this._toScreen(td.Xprime, td.Yprime, this.axisBoundsTo).sy,
+      transScreenX: this._toScreen(td.Xprime, td.Yprime, this.axisBoundsTo).sx,
+      transScreenY: this._toScreen(td.Xprime, td.Yprime, this.axisBoundsTo).sy
+    }));
+
+    this.xLabelTo = RegressionEngine.getTransformLabel(xTransformKey, config.rawXLabel.split(' ')[0]);
+    this.xLabelFrom = this.xLabelTo;
+    this.yLabelTo = RegressionEngine.getTransformLabel(yTransformKey, config.rawYLabel.split(' ')[0]);
+    this.yLabelFrom = this.yLabelTo;
+    this.config = config;
+    this.animT = 1;
+    this.showGhosts = false;
+    this.arrowOpacity = 0;
+    this._renderFrame();
+  }
+
+  _renderFrame() {
+    if (this.cleared) return;
+    const ctx = this.ctx;
+    const t = this.animT;
+    ctx.clearRect(0, 0, this.W, this.H);
+    if (!this.pointStates.length || !this.axisBoundsFrom || !this.axisBoundsTo) return;
+
+    const b = this._lerpBounds(this.axisBoundsFrom, this.axisBoundsTo, t);
+    this._drawGrid(b, t);
+
+    // ── BEST FIT LINE ──
+    if (this.targetRegression) {
+      const { m, b: intercept } = this.targetRegression;
+      const lineProgress = Math.min(1, Math.max(0, (t - 0.15) / 0.6));
+      ctx.save();
+      ctx.globalAlpha = lineProgress * 0.95;
+      ctx.strokeStyle = '#aed581';
+      ctx.lineWidth = 2.5;
+      ctx.shadowColor = 'rgba(174,213,129,0.5)';
+      ctx.shadowBlur = 10 * lineProgress;
+      ctx.beginPath();
+      const xL1 = this.axisBoundsTo.minX;
+      const xL2 = this.axisBoundsTo.minX + (this.axisBoundsTo.maxX - this.axisBoundsTo.minX) * lineProgress;
+      const p1 = this._toScreen(xL1, m * xL1 + intercept, b);
+      const p2 = this._toScreen(xL2, m * xL2 + intercept, b);
+      ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke();
+      ctx.restore();
+
+      // ── INTERACTIVE SLOPE TRIANGLE (ΔY' / ΔX') ──
+      if (t === 1 && this.targetRegression.r2 > 0.8 && this.showSlopeTriangle) {
+        this._drawSlopeTriangle(ctx, b, m, intercept);
+      }
+    }
+
+    // ── ARROWS ──
+    if (this.arrowOpacity > 0.01 && t > 0.02 && t < 0.98) {
+      for (const ps of this.pointStates) {
+        const startX = ps.rawScreenX; const startY = ps.rawScreenY;
+        const curX = this._lerpVal(ps.rawScreenX, ps.transScreenX, t);
+        const curY = this._lerpVal(ps.rawScreenY, ps.transScreenY, t);
+        if (Math.hypot(curX - startX, curY - startY) < 3) continue;
+
+        ctx.save();
+        ctx.globalAlpha = this.arrowOpacity * 0.75;
+        ctx.strokeStyle = '#ffd740';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(startX, startY); ctx.lineTo(curX, curY); ctx.stroke();
+
+        const angle = Math.atan2(curY - startY, curX - startX);
+        ctx.fillStyle = '#ffd740';
+        ctx.beginPath();
+        ctx.moveTo(curX, curY);
+        ctx.lineTo(curX - 7 * Math.cos(angle - 0.4), curY - 7 * Math.sin(angle - 0.4));
+        ctx.lineTo(curX - 7 * Math.cos(angle + 0.4), curY - 7 * Math.sin(angle + 0.4));
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // ── POINTS ──
+    for (let i = 0; i < this.pointStates.length; i++) {
+      const ps = this.pointStates[i];
+      const cx = this._lerpVal(ps.rawScreenX, ps.transScreenX, t);
+      const cy = this._lerpVal(ps.rawScreenY, ps.transScreenY, t);
+      const isHovered = (i === this.hoveredIdx || i === globalHoverIdx);
+
+      ctx.save();
+      const ptColor = isHovered ? '#7cfc00' : '#aed581';
+      ctx.fillStyle = ptColor;
+      ctx.shadowColor = ptColor;
+      ctx.shadowBlur = isHovered ? 18 : 7;
+      ctx.beginPath();
+      ctx.arc(cx, cy, isHovered ? 6.5 : 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    this._renderParticles(ctx);
+  }
+
+  _drawSlopeTriangle(ctx, b, m, intercept) {
+    const x1 = b.minX + (b.maxX - b.minX) * 0.25;
+    const x2 = b.minX + (b.maxX - b.minX) * 0.75;
+    const y1 = m * x1 + intercept;
+    const y2 = m * x2 + intercept;
+
+    const p1 = this._toScreen(x1, y1, b);
+    const p2 = this._toScreen(x2, y2, b);
+    const pCorner = this._toScreen(x2, y1, b);
+
+    const deltaX = x2 - x1;
+    const deltaY = y2 - y1;
+
+    ctx.save();
+    // Shaded triangle area
+    ctx.fillStyle = 'rgba(174, 213, 129, 0.08)';
+    ctx.beginPath();
+    ctx.moveTo(p1.sx, p1.sy);
+    ctx.lineTo(pCorner.sx, pCorner.sy);
+    ctx.lineTo(p2.sx, p2.sy);
+    ctx.closePath();
+    ctx.fill();
+
+    // Dashed legs
+    ctx.strokeStyle = '#ffd740';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+
+    // Run (ΔX')
+    ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(pCorner.sx, pCorner.sy); ctx.stroke();
+    // Rise (ΔY')
+    ctx.beginPath(); ctx.moveTo(pCorner.sx, pCorner.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Leg Labels
+    ctx.font = '10px Inter, monospace';
+    ctx.fillStyle = '#ffd740';
+    ctx.textAlign = 'center';
+    ctx.fillText(`ΔX' = ${deltaX.toFixed(2)}`, (p1.sx + pCorner.sx) / 2, pCorner.sy + 14);
+
+    ctx.textAlign = 'left';
+    ctx.fillText(`ΔY' = ${deltaY.toFixed(2)}`, pCorner.sx + 6, (pCorner.sy + p2.sy) / 2);
+
+    // Slope Badge Callout
+    const midX = (p1.sx + p2.sx) / 2;
+    const midY = (p1.sy + p2.sy) / 2;
+    ctx.fillStyle = 'rgba(10, 10, 26, 0.9)';
+    ctx.strokeStyle = 'rgba(255, 215, 64, 0.5)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(midX - 55, midY - 26, 110, 20, 4);
+    ctx.fill(); ctx.stroke();
+
+    ctx.fillStyle = '#7cfc00';
+    ctx.font = 'bold 10px Inter, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Slope m = ${m.toFixed(3)}`, midX, midY - 12);
+
+    ctx.restore();
+  }
+
+  _drawGrid(b, t) {
+    const ctx = this.ctx;
+    const p = this.pad;
+    const pw = this.W - p.left - p.right;
+    const ph = this.H - p.top - p.bottom;
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.strokeRect(p.left, p.top, pw, ph);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.font = '10px Inter, monospace';
+    ctx.textAlign = 'center';
+
+    const xTicks = 5;
+    for (let i = 0; i <= xTicks; i++) {
+      const val = b.minX + (i / xTicks) * (b.maxX - b.minX);
+      const { sx } = this._toScreen(val, b.minY, b);
+      ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+      ctx.beginPath(); ctx.moveTo(sx, p.top); ctx.lineTo(sx, this.H - p.bottom); ctx.stroke();
+      ctx.fillText(val.toFixed(val > 10 ? 0 : 2), sx, this.H - p.bottom + 15);
+    }
+
+    const yTicks = 5;
+    ctx.textAlign = 'right';
+    for (let j = 0; j <= yTicks; j++) {
+      const val = b.minY + (j / yTicks) * (b.maxY - b.minY);
+      const { sy } = this._toScreen(b.minX, val, b);
+      ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+      ctx.beginPath(); ctx.moveTo(p.left, sy); ctx.lineTo(this.W - p.right, sy); ctx.stroke();
+      ctx.fillText(val.toFixed(val > 10 ? 0 : 2), p.left - 6, sy + 3);
+    }
+
+    ctx.font = '11px Inter, sans-serif';
+    ctx.fillStyle = '#7a85a0';
+    ctx.textAlign = 'center';
+    ctx.fillText(t >= 0.5 ? this.xLabelTo : this.xLabelFrom, p.left + pw / 2, this.H - 8);
+
+    ctx.save();
+    ctx.translate(13, p.top + ph / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText(t >= 0.5 ? this.yLabelTo : this.yLabelFrom, 0, 0);
+    ctx.restore();
+    ctx.restore();
+  }
+
+  spawnParticles() {
+    const cx = this.W / 2; const cy = this.H / 2;
+    for (let i = 0; i < 35; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 1.5 + Math.random() * 3;
+      this.particles.push({
+        x: cx, y: cy, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+        life: 1, decay: 0.015 + Math.random() * 0.015, size: 2 + Math.random() * 3,
+        color: ['#66bb6a', '#aed581', '#ffd740', '#4fc3f7', '#b388ff'][Math.floor(Math.random() * 5)]
+      });
+    }
+    this._animateParticles();
+  }
+
+  _animateParticles() {
+    if (!this.particles.length) return;
+    this.particles = this.particles.filter(p => {
+      p.x += p.vx; p.y += p.vy; p.vy += 0.04; p.life -= p.decay;
+      return p.life > 0;
+    });
+    this._renderFrame();
+    if (this.particles.length > 0) requestAnimationFrame(() => this._animateParticles());
+  }
+
+  _renderParticles(ctx) {
+    for (const p of this.particles) {
+      ctx.save();
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 6;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+
+/* =========================================================================
+   5. ResidualPlotRenderer
+   ========================================================================= */
+class ResidualPlotRenderer {
+  constructor() {
+    this.canvas = document.getElementById('residualCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.dpr = window.devicePixelRatio || 1;
+    this.pad = { top: 8, right: 10, bottom: 8, left: 10 };
+  }
+
+  resize() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.W = rect.width;
+    this.H = rect.height;
+    this.canvas.width = this.W * this.dpr;
+    this.canvas.height = this.H * this.dpr;
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.scale(this.dpr, this.dpr);
+  }
+
+  clear() {
+    this.resize();
+    this.ctx.clearRect(0, 0, this.W, this.H);
+    document.getElementById('residualVerdict').textContent = '—';
+  }
+
+  render(regression) {
+    if (!regression || !regression.transformedData) { this.clear(); return; }
+    this.resize();
+    const ctx = this.ctx;
+    ctx.clearRect(0, 0, this.W, this.H);
+
+    const { transformedData, residuals } = regression;
+    if (!transformedData || transformedData.length < 2) return;
+
+    const xVals = transformedData.map(p => p.Xprime);
+    const minX = Math.min(...xVals);
+    const maxX = Math.max(...xVals);
+    const maxR = Math.max(...residuals.map(Math.abs)) || 1;
+    const p = this.pad;
+    const pw = this.W - p.left - p.right;
+    const ph = this.H - p.top - p.bottom;
+
+    const zeroY = p.top + ph / 2;
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath(); ctx.moveTo(p.left, zeroY); ctx.lineTo(this.W - p.right, zeroY); ctx.stroke();
+    ctx.setLineDash([]);
+
+    let signChanges = 0;
+    for (let i = 1; i < residuals.length; i++) {
+      if (residuals[i] * residuals[i - 1] < 0) signChanges++;
+    }
+    const isRandom = signChanges >= Math.floor(residuals.length * 0.3);
+    const verdict = document.getElementById('residualVerdict');
+    verdict.textContent = isRandom ? '✓ Random' : '⚠ Patterned';
+    verdict.style.color = isRandom ? 'var(--pass)' : 'var(--fail)';
+
+    for (let i = 0; i < transformedData.length; i++) {
+      const xNorm = (xVals[i] - minX) / (maxX - minX || 1);
+      const rNorm = residuals[i] / maxR;
+      const sx = p.left + xNorm * pw;
+      const sy = zeroY - rNorm * (ph / 2) * 0.85;
+
+      const absFrac = Math.abs(residuals[i]) / maxR;
+      const barColor = absFrac < 0.3 ? 'rgba(102,187,106,0.6)' : absFrac < 0.6 ? 'rgba(255,215,64,0.6)' : 'rgba(239,83,80,0.6)';
+      ctx.strokeStyle = barColor;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(sx, zeroY); ctx.lineTo(sx, sy); ctx.stroke();
+
+      ctx.fillStyle = (i === globalHoverIdx) ? '#7cfc00' : barColor.replace('0.6', '0.95');
+      ctx.beginPath();
+      ctx.arc(sx, sy, (i === globalHoverIdx) ? 5 : 3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+}
+
+/* =========================================================================
+   6. TableManager
+   ========================================================================= */
+class TableManager {
+  constructor() {
+    this.tbody = document.getElementById('dataTableBody');
+    this.countElem = document.getElementById('tableSummaryN');
+  }
+
+  clear() {
+    this.tbody.innerHTML = '';
+  }
+
+  update(rawPoints, regression) {
+    this.tbody.innerHTML = '';
+    this.countElem.innerText = `N = ${rawPoints.length}`;
+    if (!regression) return;
+    const { transformedData, residuals } = regression;
+
+    for (let i = 0; i < transformedData.length; i++) {
+      const item = transformedData[i];
+      const res = residuals[i];
+      const row = document.createElement('tr');
+      if (i === globalHoverIdx) row.classList.add('hovered');
+      row.dataset.idx = i;
+      row.innerHTML = `
+        <td style="color:var(--text-dim)">${item.idx}</td>
+        <td>${item.rawX.toFixed(3)}</td>
+        <td class="hl">${item.Xprime.toFixed(3)}</td>
+        <td>${item.rawY.toFixed(3)}</td>
+        <td style="color:${Math.abs(res) < 0.1 ? 'var(--pass)' : 'var(--amber)'}">${(res >= 0 ? '+' : '') + res.toFixed(3)}</td>
+      `;
+      row.addEventListener('mouseenter', () => syncHoverAcrossAll(i));
+      row.addEventListener('mouseleave', () => syncHoverAcrossAll(-1));
+      this.tbody.appendChild(row);
+    }
+  }
+}
+
+/* =========================================================================
+   7. GuidedModeManager & ChallengeManager
+   ========================================================================= */
+class GuidedModeManager {
+  constructor() {
+    this.step = 0;
+    this.container = document.getElementById('guidedSteps');
+    this.steps = [
+      document.getElementById('gStep1'),
+      document.getElementById('gStep2'),
+      document.getElementById('gStep3'),
+      document.getElementById('gStep4')
+    ];
+  }
+
+  activate() { this.container.classList.add('active'); this.setStep(0); }
+  deactivate() { this.container.classList.remove('active'); }
+
+  setStep(n) {
+    this.step = n;
+    this.steps.forEach((s, i) => {
+      s.classList.remove('current', 'done');
+      if (i < n) s.classList.add('done');
+      else if (i === n) s.classList.add('current');
+    });
+  }
+
+  onTransformApplied(r2) {
+    if (this.step < 2) this.setStep(2);
+    if (r2 > 0.96) this.setStep(3);
+  }
+}
+
+class ChallengeManager {
+  constructor() {
+    this.isChallengeMode = false;
+    this.isGuidedMode = false;
+    this.feedbackBanner = document.getElementById('feedbackContainer');
+    this.feedbackTitle = document.getElementById('feedbackTitle');
+    this.feedbackText = document.getElementById('feedbackText');
+    this.constantBadge = document.getElementById('constantBadge');
+  }
+
+  setMode(mode) {
+    this.isChallengeMode = (mode === 'challenge');
+    this.isGuidedMode = (mode === 'guided');
+    const badge = document.getElementById('badgeTargetLinearizer');
+    const heading = document.getElementById('panelModeHeading');
+
+    if (this.isChallengeMode) {
+      heading.innerText = "Linearization Challenge";
+      badge.style.display = 'inline-block';
+      this.feedbackBanner.style.display = 'flex';
+      this.feedbackBanner.className = 'feedback-banner';
+      this.feedbackTitle.innerText = "Target:";
+      this.feedbackText.innerText = "Select a transform that linearizes Graph B.";
+    } else {
+      heading.innerText = "Constant Extraction";
+      badge.style.display = 'none';
+      this.feedbackBanner.style.display = 'none';
+    }
+  }
+
+  evaluateGuess(currentX, currentY, correctX, correctY, r2, slope, config, targetMode) {
+    if (this.isGuidedMode || !this.isChallengeMode) {
+      this._updateSolver(slope, r2, config, targetMode);
+      return;
+    }
+
+    this.feedbackBanner.style.display = 'flex';
+    let isCorrect = false;
+
+    if (targetMode === 'x_mode') isCorrect = (currentX === correctX);
+    else if (targetMode === 'y_mode') isCorrect = (currentY === correctY);
+    else if (targetMode === 'log_mode') isCorrect = true;
+
+    if (isCorrect && r2 > 0.96) {
+      this.feedbackBanner.className = 'feedback-banner success';
+      this.feedbackTitle.innerText = "✓ Perfectly Linearized!";
+      this.feedbackText.innerText = `Graph B yields straight fit R² = ${r2.toFixed(4)}.`;
+      const extractedVal = config.extractConstant(slope, targetMode);
+      this.constantBadge.style.display = 'inline-block';
+      this.constantBadge.style.borderColor = 'var(--pass)';
+      this.constantBadge.style.color = 'var(--pass)';
+      this.constantBadge.innerHTML = `${config.constantLabel}<strong>${extractedVal.toFixed(3)}</strong> (True: ${model.param1.toFixed(3)})`;
+    } else {
+      this.feedbackBanner.className = 'feedback-banner wrong';
+      this.feedbackTitle.innerText = "✗ Not Linear";
+      this.feedbackText.innerText = `R² = ${r2.toFixed(4)} — curvature remains in Graph B. Try another transform.`;
+      this.constantBadge.style.display = 'none';
+    }
+    this._updateAlgebraCard(slope, r2, config, targetMode);
+  }
+
+  _updateSolver(slope, r2, config, targetMode) {
+    this.feedbackBanner.style.display = 'none';
+    this.constantBadge.style.display = 'inline-block';
+    if (r2 > 0.96) {
+      const val = config.extractConstant(slope, targetMode);
+      this.constantBadge.style.borderColor = 'var(--pass)';
+      this.constantBadge.style.color = 'var(--pass)';
+      this.constantBadge.innerHTML = `${config.constantLabel}<strong>${val.toFixed(3)}</strong> (True: ${model.param1.toFixed(2)})`;
+    } else {
+      this.constantBadge.style.borderColor = 'var(--amber)';
+      this.constantBadge.style.color = 'var(--amber)';
+      this.constantBadge.innerHTML = `R² = ${r2.toFixed(3)} — not linear yet.`;
+    }
+    this._updateAlgebraCard(slope, r2, config, targetMode);
+  }
+
+  _updateAlgebraCard(slope, r2, config, targetMode) {
+    if (config.getAlgebraSteps && r2 > 0.8) {
+      const steps = config.getAlgebraSteps(slope, targetMode);
+      document.getElementById('algStep1').innerHTML = `<span>1. Linearized Eq:</span><strong>${steps.step1}</strong>`;
+      document.getElementById('algStep2').innerHTML = `<span>2. Slope Match:</span><strong>${steps.step2}</strong>`;
+      document.getElementById('algStep3').innerHTML = `<span>3. Parameter:</span><strong>${steps.step3}</strong>`;
+    } else {
+      document.getElementById('algStep1').innerHTML = `<span>1. Linearized Eq:</span><strong>—</strong>`;
+      document.getElementById('algStep2').innerHTML = `<span>2. Slope Match:</span><strong>m = ΔY'/ΔX'</strong>`;
+      document.getElementById('algStep3').innerHTML = `<span>3. Parameter:</span><strong>Select valid transform</strong>`;
+    }
+  }
+}
+
+/* =========================================================================
+   8. ExportManager & Global Hover Sync
+   ========================================================================= */
+let globalHoverIdx = -1;
+function syncHoverAcrossAll(idx) {
+  globalHoverIdx = idx;
+  graphA.render(model.cachedRawData, model.getScenarioConfig());
+  graphB._renderFrame();
+  if (currentRegression) residualPlot.render(currentRegression);
+
+  const rows = document.querySelectorAll('#dataTableBody tr');
+  rows.forEach(r => {
+    if (parseInt(r.dataset.idx) === idx) r.classList.add('hovered');
+    else r.classList.remove('hovered');
+  });
+}
+
+class ExportManager {
+  static exportCSV(rawPoints, reg, scenario, xTransform, yTransform) {
+    if (!rawPoints || !rawPoints.length) return;
+    const headers = ["Index","Raw_X","X_Prime","Raw_Y","Y_Prime","Y_Fit","Residual"];
+    const rows = [headers.join(",")];
+    const { transformedData, m, b } = reg;
+    for (let i = 0; i < transformedData.length; i++) {
+      const pt = transformedData[i];
+      const yFit = m * pt.Xprime + b;
+      rows.push([pt.idx, pt.rawX.toFixed(5), pt.Xprime.toFixed(5), pt.rawY.toFixed(5), pt.Yprime.toFixed(5), yFit.toFixed(5), (pt.Yprime - yFit).toFixed(5)].join(","));
+    }
+    const csv = "data:text/csv;charset=utf-8," + encodeURIComponent(rows.join("\n"));
+    const a = document.createElement('a');
+    a.setAttribute('href', csv);
+    a.setAttribute('download', `linearization_${scenario}_${xTransform}_${yTransform}_${Date.now()}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+}
+
+/* =========================================================================
+   9. Main App Orchestrator
+   ========================================================================= */
+const model = new PhysicsModel();
+const graphA = new GraphARenderer();
+const graphB = new GraphBRenderer();
+const residualPlot = new ResidualPlotRenderer();
+const tableMgr = new TableManager();
+const challengeMgr = new ChallengeManager();
+const guidedMgr = new GuidedModeManager();
+
+let currentXTransform = 'x';
+let currentYTransform = 'y';
+let previousXTransform = 'x';
+let previousYTransform = 'y';
+let currentTargetMode = 'x_mode';
+let currentRegression = null;
+let currentMode = 'explore';
+
+function syncUIWithScenario() {
+  const config = model.getScenarioConfig();
+  const sParam = document.getElementById('sliderParam1');
+  sParam.min = config.paramMin;
+  sParam.max = config.paramMax;
+  sParam.step = config.paramStep;
+  sParam.value = config.paramDefault;
+  model.param1 = config.paramDefault;
+
+  document.getElementById('labelParam1').innerText = config.paramName;
+  document.getElementById('valParam1').innerText = config.paramDefault.toFixed(1);
+
+  document.getElementById('mathTheoryBox').innerHTML = `
+    <div><strong>Theory:</strong> <code>${config.theoryFormula}</code></div>
+    <div style="font-size:0.72rem;color:var(--text-muted);margin-top:2px">Target: <code>${config.linearizedEquation}</code></div>
+  `;
+
+  document.getElementById('rawPlotLabelX').innerText = config.rawXLabel;
+  document.getElementById('rawPlotLabelY').innerText = config.rawYLabel;
+  document.getElementById('transPlotLabelY').innerText = config.transYLabel;
+  document.getElementById('thRawX').innerText = config.rawXLabel;
+  document.getElementById('thRawY').innerText = config.rawYLabel;
+
+  updateTransformButtonLabels();
+}
+
+function updateTransformButtonLabels() {
+  const container = document.getElementById('transformBtnContainer');
+  container.innerHTML = '';
+
+  if (currentTargetMode === 'x_mode') {
+    document.getElementById('currentMappingLabel').innerText = `X' = ${RegressionEngine.getTransformLabel(currentXTransform, "x")}`;
+    const btnData = [
+      { key: 'x', label: '[ x ]' },
+      { key: 'x2', label: '[ x² ]' },
+      { key: 'sqrt', label: '[ √x ]' },
+      { key: 'inv_x', label: '[ 1/x ]' },
+      { key: 'inv_x2', label: '[ 1/x² ]' },
+      { key: 'x3', label: '[ x³ ]' }
+    ];
+    btnData.forEach(b => {
+      const btn = document.createElement('button');
+      btn.className = `t-btn ${b.key === currentXTransform ? 'active' : ''}`;
+      btn.innerText = b.label;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.t-btn').forEach(el => el.classList.remove('active'));
+        btn.classList.add('active');
+        currentYTransform = 'y';
+        performTransformWithAnimation(b.key, 'y');
+      });
+      container.appendChild(btn);
+    });
+  } else if (currentTargetMode === 'y_mode') {
+    document.getElementById('currentMappingLabel').innerText = `Y' = ${RegressionEngine.getTransformLabel(currentYTransform, "y")}`;
+    const btnData = [
+      { key: 'y', label: '[ y ]' },
+      { key: 'y2', label: '[ y² ]' },
+      { key: 'sqrt_y', label: '[ √y ]' },
+      { key: 'inv_y', label: '[ 1/y ]' },
+      { key: 'inv_y2', label: '[ 1/y² ]' }
+    ];
+    btnData.forEach(b => {
+      const btn = document.createElement('button');
+      btn.className = `t-btn ${b.key === currentYTransform ? 'active' : ''}`;
+      btn.innerText = b.label;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.t-btn').forEach(el => el.classList.remove('active'));
+        btn.classList.add('active');
+        currentXTransform = 'x';
+        performTransformWithAnimation('x', b.key);
+      });
+      container.appendChild(btn);
+    });
+  } else if (currentTargetMode === 'log_mode') {
+    document.getElementById('currentMappingLabel').innerText = `ln(y) vs ln(x)`;
+    const btn = document.createElement('button');
+    btn.className = 't-btn active';
+    btn.innerText = '[ ln(y) vs ln(x) ]';
+    btn.addEventListener('click', () => {
+      performTransformWithAnimation('ln', 'ln');
+    });
+    container.appendChild(btn);
+  }
+}
+
+function updateStatsOverlay(reg, xKey, yKey, config) {
+  if (!reg) return;
+  const { m, b, r2 } = reg;
+  const sign = b >= 0 ? '+' : '−';
+  const ySym = RegressionEngine.getTransformLabel(yKey, "Y");
+  const xSym = RegressionEngine.getTransformLabel(xKey, "X");
+  document.getElementById('statFitEq').innerText = `${ySym} = ${m.toFixed(3)}·${xSym} ${sign} ${Math.abs(b).toFixed(3)}`;
+
+  const r2Elem = document.getElementById('statR2');
+  r2Elem.innerText = r2.toFixed(4);
+  if (r2 > 0.96) {
+    r2Elem.style.background = 'rgba(102,187,106,0.2)';
+    r2Elem.style.color = 'var(--pass)';
+  } else if (r2 > 0.8) {
+    r2Elem.style.background = 'rgba(255,215,64,0.2)';
+    r2Elem.style.color = 'var(--amber)';
+  } else {
+    r2Elem.style.background = 'rgba(239,83,80,0.2)';
+    r2Elem.style.color = 'var(--fail)';
+  }
+
+  const interp = document.getElementById('statInterpretation');
+  if (r2 > 0.96) interp.textContent = '✓ Excellent linear fit!';
+  else if (r2 > 0.8) interp.textContent = '~ Moderate linearity';
+  else interp.textContent = '✗ Curved fit in Graph B';
+}
+
+function performTransformWithAnimation(newXTransform, newYTransform) {
+  const config = model.getScenarioConfig();
+  const rawPoints = model.cachedRawData;
+  if (!rawPoints.length) return;
+
+  previousXTransform = currentXTransform;
+  previousYTransform = currentYTransform;
+  currentXTransform = newXTransform;
+  currentYTransform = newYTransform;
+
+  currentRegression = RegressionEngine.computeOLS(rawPoints, currentXTransform, currentYTransform);
+  const { r2, m } = currentRegression;
+
+  const transXLabel = RegressionEngine.getTransformLabel(currentXTransform, config.rawXLabel.split(' ')[0]);
+  const transYLabel = RegressionEngine.getTransformLabel(currentYTransform, config.rawYLabel.split(' ')[0]);
+
+  document.getElementById('transPlotLabelX').innerText = transXLabel;
+  document.getElementById('transPlotLabelY').innerText = transYLabel;
+  document.getElementById('thTransX').innerText = `X' (${transXLabel})`;
+  document.getElementById('currentMappingLabel').innerText = `${transYLabel} vs ${transXLabel}`;
+
+  graphA.render(rawPoints, config);
+
+  graphB.prepareAnimation(rawPoints, currentXTransform, currentYTransform, currentRegression, config, previousXTransform, previousYTransform);
+  graphB.startAnimation(() => {
+    const badge = document.getElementById('stateBadgeB');
+    if (currentXTransform === 'x' && currentYTransform === 'y') {
+      badge.textContent = 'RAW DATA';
+      badge.className = 'state-badge raw';
+    } else {
+      badge.textContent = 'TRANSFORMED';
+      badge.className = 'state-badge transformed';
+    }
+
+    let isMatch = false;
+    if (currentTargetMode === 'x_mode' && currentXTransform === config.correctTransform) isMatch = true;
+    if (currentTargetMode === 'y_mode' && currentYTransform === config.correctYTransform) isMatch = true;
+    if (currentTargetMode === 'log_mode') isMatch = true;
+
+    if (isMatch && r2 > 0.96) {
+      graphB.spawnParticles();
+      const activeBtn = document.querySelector('.t-btn.active');
+      if (activeBtn) {
+        activeBtn.classList.add('correct-pulse');
+        setTimeout(() => activeBtn.classList.remove('correct-pulse'), 900);
+      }
+    }
+  });
+
+  updateStatsOverlay(currentRegression, currentXTransform, currentYTransform, config);
+  tableMgr.update(rawPoints, currentRegression);
+  residualPlot.render(currentRegression);
+  challengeMgr.evaluateGuess(currentXTransform, currentYTransform, config.correctTransform, config.correctYTransform, r2, m, config, currentTargetMode);
+
+  if (currentMode === 'guided') guidedMgr.onTransformApplied(r2);
+}
+
+function renderInstantNoAnimation() {
+  const config = model.getScenarioConfig();
+  const rawPoints = model.cachedRawData.length ? model.cachedRawData : model.generateDataset();
+  currentRegression = RegressionEngine.computeOLS(rawPoints, currentXTransform, currentYTransform);
+  const { r2, m } = currentRegression;
+
+  const transXLabel = RegressionEngine.getTransformLabel(currentXTransform, config.rawXLabel.split(' ')[0]);
+  const transYLabel = RegressionEngine.getTransformLabel(currentYTransform, config.rawYLabel.split(' ')[0]);
+
+  document.getElementById('transPlotLabelX').innerText = transXLabel;
+  document.getElementById('transPlotLabelY').innerText = transYLabel;
+  document.getElementById('thTransX').innerText = `X' (${transXLabel})`;
+  document.getElementById('currentMappingLabel').innerText = `${transYLabel} vs ${transXLabel}`;
+
+  const badge = document.getElementById('stateBadgeB');
+  if (currentXTransform === 'x' && currentYTransform === 'y') {
+    badge.textContent = 'RAW DATA';
+    badge.className = 'state-badge raw';
+  } else {
+    badge.textContent = 'TRANSFORMED';
+    badge.className = 'state-badge transformed';
+  }
+
+  graphA.render(rawPoints, config);
+  graphB.renderInstant(rawPoints, currentXTransform, currentYTransform, currentRegression, config);
+  updateStatsOverlay(currentRegression, currentXTransform, currentYTransform, config);
+  tableMgr.update(rawPoints, currentRegression);
+  residualPlot.render(currentRegression);
+  challengeMgr.evaluateGuess(currentXTransform, currentYTransform, config.correctTransform, config.correctYTransform, r2, m, config, currentTargetMode);
+}
+
+// ── Event Wiring ──
+
+window.addEventListener('resize', () => {
+  graphA.resize();
+  graphB.resize();
+  residualPlot.resize();
+  if (!graphB.cleared) renderInstantNoAnimation();
+});
+
+document.getElementById('scenarioSelect').addEventListener('change', (e) => {
+  model.scenario = e.target.value;
+  currentXTransform = 'x';
+  currentYTransform = 'y';
+  previousXTransform = 'x';
+  previousYTransform = 'y';
+  syncUIWithScenario();
+  model.generateDataset();
+  renderInstantNoAnimation();
+  if (currentMode === 'guided') guidedMgr.setStep(0);
+});
+
+document.getElementById('targetModeX').addEventListener('click', () => {
+  document.getElementById('targetModeX').classList.add('active');
+  document.getElementById('targetModeY').classList.remove('active');
+  document.getElementById('targetModeLog').classList.remove('active');
+  currentTargetMode = 'x_mode';
+  currentXTransform = 'x'; currentYTransform = 'y';
+  updateTransformButtonLabels();
+  renderInstantNoAnimation();
+});
+
+document.getElementById('targetModeY').addEventListener('click', () => {
+  document.getElementById('targetModeY').classList.add('active');
+  document.getElementById('targetModeX').classList.remove('active');
+  document.getElementById('targetModeLog').classList.remove('active');
+  currentTargetMode = 'y_mode';
+  currentXTransform = 'x'; currentYTransform = 'y';
+  updateTransformButtonLabels();
+  renderInstantNoAnimation();
+});
+
+document.getElementById('targetModeLog').addEventListener('click', () => {
+  document.getElementById('targetModeLog').classList.add('active');
+  document.getElementById('targetModeX').classList.remove('active');
+  document.getElementById('targetModeY').classList.remove('active');
+  currentTargetMode = 'log_mode';
+  currentXTransform = 'ln'; currentYTransform = 'ln';
+  updateTransformButtonLabels();
+  performTransformWithAnimation('ln', 'ln');
+});
+
+document.getElementById('btnClearGraphB').addEventListener('click', () => {
+  graphB.clearGraph();
+  residualPlot.clear();
+  currentRegression = null;
+  document.querySelectorAll('.t-btn').forEach(b => b.classList.remove('active'));
+});
+
+document.getElementById('btnToggleSlope').addEventListener('click', (e) => {
+  graphB.showSlopeTriangle = !graphB.showSlopeTriangle;
+  const btn = e.currentTarget;
+  if (graphB.showSlopeTriangle) {
+    btn.classList.remove('off');
+    btn.classList.add('active');
+    btn.innerHTML = '📐 Slope Triangle: ON';
+  } else {
+    btn.classList.remove('active');
+    btn.classList.add('off');
+    btn.innerHTML = '📐 Slope Triangle: OFF';
+  }
+  if (!graphB.cleared) graphB._renderFrame();
+});
+
+document.getElementById('modeExplore').addEventListener('click', () => {
+  currentMode = 'explore';
+  document.getElementById('modeExplore').classList.add('active');
+  document.getElementById('modeChallenge').classList.remove('active');
+  document.getElementById('modeGuided').classList.remove('active');
+  challengeMgr.setMode('explore');
+  guidedMgr.deactivate();
+  if (!graphB.cleared) renderInstantNoAnimation();
+});
+
+document.getElementById('modeChallenge').addEventListener('click', () => {
+  currentMode = 'challenge';
+  document.getElementById('modeChallenge').classList.add('active');
+  document.getElementById('modeExplore').classList.remove('active');
+  document.getElementById('modeGuided').classList.remove('active');
+  challengeMgr.setMode('challenge');
+  guidedMgr.deactivate();
+  if (!graphB.cleared) renderInstantNoAnimation();
+});
+
+document.getElementById('modeGuided').addEventListener('click', () => {
+  currentMode = 'guided';
+  document.getElementById('modeGuided').classList.add('active');
+  document.getElementById('modeExplore').classList.remove('active');
+  document.getElementById('modeChallenge').classList.remove('active');
+  challengeMgr.setMode('guided');
+  guidedMgr.activate();
+  if (!graphB.cleared) renderInstantNoAnimation();
+});
+
+document.getElementById('btnReplay').addEventListener('click', () => {
+  const config = model.getScenarioConfig();
+  const rawPoints = model.cachedRawData;
+  const regX = RegressionEngine.computeOLS(rawPoints, 'x', 'y');
+  graphB.renderInstant(rawPoints, 'x', 'y', regX, config);
+  const savedX = currentXTransform;
+  const savedY = currentYTransform;
+  previousXTransform = 'x'; previousYTransform = 'y';
+  currentXTransform = 'x'; currentYTransform = 'y';
+  setTimeout(() => {
+    performTransformWithAnimation(savedX, savedY);
+  }, 150);
+});
+
+document.getElementById('btnResample').addEventListener('click', () => {
+  model.generateDataset();
+  renderInstantNoAnimation();
+});
+
+document.getElementById('btnExport').addEventListener('click', () => {
+  if (currentRegression) {
+    ExportManager.exportCSV(model.cachedRawData, currentRegression, model.scenario, currentXTransform, currentYTransform);
+  }
+});
+
+// Sliders
+document.getElementById('sliderN').addEventListener('input', (e) => {
+  model.N = parseInt(e.target.value);
+  document.getElementById('valN').innerText = model.N;
+  model.generateDataset();
+  renderInstantNoAnimation();
+});
+
+document.getElementById('sliderNoise').addEventListener('input', (e) => {
+  model.noisePercent = parseFloat(e.target.value);
+  document.getElementById('valNoise').innerText = `${model.noisePercent.toFixed(1)}%`;
+  model.generateDataset();
+  renderInstantNoAnimation();
+});
+
+document.getElementById('sliderParam1').addEventListener('input', (e) => {
+  model.param1 = parseFloat(e.target.value);
+  document.getElementById('valParam1').innerText = model.param1.toFixed(1);
+  model.generateDataset();
+  renderInstantNoAnimation();
+});
+
+document.getElementById('sliderSpeed').addEventListener('input', (e) => {
+  graphB.animSpeed = parseFloat(e.target.value);
+  document.getElementById('valSpeed').innerText = `${graphB.animSpeed.toFixed(1)}×`;
+});
+
+// Drawer collapse fix
+const drawer = document.getElementById('controlDrawer');
+const drawerToggleBtn = document.getElementById('drawerToggleBtn');
+const mainViewport = document.getElementById('mainViewport');
+
+drawerToggleBtn.addEventListener('click', () => {
+  const isCollapsed = drawer.classList.toggle('collapsed');
+  drawerToggleBtn.innerText = isCollapsed ? '▶' : '◀';
+  if (isCollapsed) {
+    mainViewport.style.marginRight = '0px';
+  } else {
+    mainViewport.style.marginRight = '280px';
+  }
+  setTimeout(() => {
+    graphA.resize();
+    graphB.resize();
+    residualPlot.resize();
+    if (!graphB.cleared) renderInstantNoAnimation();
+  }, 320);
+});
+
+// Initialize default layout margin
+mainViewport.style.marginRight = '280px';
+
+// Boot
+syncUIWithScenario();
+model.generateDataset();
+renderInstantNoAnimation();
+</script>
+</body>
+</html>
