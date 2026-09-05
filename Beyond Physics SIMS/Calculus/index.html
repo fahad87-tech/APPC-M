@@ -1,0 +1,3759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave Energy & Dynamics — Multi-Wave AP/Honors Explorer</title>
+
+  <!-- CDNs as specified in prompt -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <!-- KaTeX for Flawless Mathematical Typography -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --surface: #101426;
+      --card: #141933;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(0, 229, 255, 0.4);
+      --text: #f0f3f8;
+      --dim: #8b9bb4;
+      --col-wave-a: #00e5ff;       /* Cyan */
+      --col-wave-b: #ff3366;       /* Red / Pink */
+      --col-wave-c: #b388ff;       /* Purple */
+      --col-energy: #ffd740;       /* Amber */
+      --col-vel: #00e5ff;          /* Velocity Vector */
+      --col-acc: #ff4081;          /* Acceleration Vector */
+      --col-success: #10b981;
+      --col-danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ─── Top Header ────────────────────────────────────────────── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 7px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      gap: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.02rem;
+      letter-spacing: 0.3px;
+    }
+    .brand-icon {
+      font-size: 1.25rem;
+      color: var(--col-wave-a);
+      filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.5));
+    }
+    .header-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--dim);
+      padding: 5px 14px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab-btn:hover {
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .tab-btn.active {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: var(--col-wave-a);
+      color: var(--col-wave-a);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #fff;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn.active-state {
+      background: rgba(255, 215, 64, 0.15);
+      border-color: var(--col-energy);
+      color: var(--col-energy);
+    }
+    .btn-export {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: #34d399;
+    }
+    .btn-export:hover {
+      background: rgba(16, 185, 129, 0.25);
+      border-color: #10b981;
+    }
+
+    /* ─── Interactive Demonstration Bar ────────────────────────── */
+    .demo-bar {
+      background: linear-gradient(90deg, rgba(16, 20, 38, 0.95), rgba(20, 25, 50, 0.95));
+      border-bottom: 1px solid rgba(0, 229, 255, 0.25);
+      padding: 8px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .demo-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--col-energy);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .demo-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-demo {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--dim);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .btn-demo:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-demo.active {
+      background: rgba(255, 215, 64, 0.18);
+      border-color: var(--col-energy);
+      color: #ffd740;
+      box-shadow: 0 0 12px rgba(255, 215, 64, 0.2);
+    }
+    .demo-formula-box {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ─── Metric Strip ───────────────────────────────────────────── */
+    .metric-strip {
+      background: rgba(16, 20, 38, 0.75);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      font-family: 'JetBrains Mono', 'Cascadia Code', monospace;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+    .metric-group {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .metric-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .metric-label { color: var(--dim); }
+    .metric-val { color: #fff; font-weight: 700; }
+    .pill {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.06);
+      font-weight: 600;
+    }
+
+    /* ─── Main Workspace Layout ──────────────────────────────────── */
+    .main-workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Left & Center Viewport */
+    .sim-viewport {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 10px 14px;
+      gap: 10px;
+      overflow-y: auto;
+      min-width: 0;
+    }
+
+    /* Demonstration Callout Banner */
+    .demo-callout-banner {
+      background: rgba(14, 19, 39, 0.9);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-left: 4px solid var(--col-energy);
+      border-radius: 8px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+    .demo-callout-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 700;
+    }
+    .demo-callout-body {
+      color: #cbd5e1;
+    }
+    .demo-metric-pills {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+    }
+    .demo-metric-pill {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 8px;
+    }
+
+    /* Three Side-by-Side Panels */
+    .wave-panels-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      min-height: 220px;
+      flex: 1;
+    }
+    .wave-panel-card {
+      background: #060814;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .wave-panel-card:hover { border-color: rgba(255, 255, 255, 0.18); }
+    .wave-panel-card.card-wave-a { border-top: 3px solid var(--col-wave-a); }
+    .wave-panel-card.card-wave-b { border-top: 3px solid var(--col-wave-b); }
+    .wave-panel-card.card-wave-c { border-top: 3px solid var(--col-wave-c); }
+
+    .wave-panel-header {
+      padding: 6px 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+    }
+    .wave-title {
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .wave-badge {
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+    .badge-a { background: rgba(0, 229, 255, 0.15); color: var(--col-wave-a); }
+    .badge-b { background: rgba(255, 51, 102, 0.15); color: var(--col-wave-b); }
+    .badge-c { background: rgba(179, 136, 255, 0.15); color: var(--col-wave-c); }
+
+    .canvas-container {
+      flex: 1;
+      position: relative;
+      min-height: 140px;
+      cursor: crosshair;
+    }
+    .canvas-container canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .wave-panel-footer {
+      padding: 6px 10px;
+      background: rgba(0, 0, 0, 0.4);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.74rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .energy-bar-wrap {
+      height: 6px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      position: relative;
+    }
+    .energy-bar-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.08s ease;
+      border-radius: 3px;
+    }
+    .fill-a { background: var(--col-wave-a); box-shadow: 0 0 8px var(--col-wave-a); }
+    .fill-b { background: var(--col-wave-b); box-shadow: 0 0 8px var(--col-wave-b); }
+    .fill-c { background: var(--col-wave-c); box-shadow: 0 0 8px var(--col-wave-c); }
+
+    /* Superimposed Wave Profile Strip Card */
+    .strip-card {
+      background: #060814;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      height: 130px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .strip-header {
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      font-weight: 600;
+    }
+    .strip-legend {
+      display: flex;
+      gap: 12px;
+    }
+    .legend-tag {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+    }
+    .legend-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* ─── Right Sidebar ──────────────────────────────────────────── */
+    aside.sidebar {
+      width: 360px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    /* Cards in Sidebar */
+    .sidebar-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--dim);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Slider Row */
+    .sl-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .sl-hdr {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+    }
+    .sl-name { color: var(--text); font-weight: 500; }
+    .sl-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+    }
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+      accent-color: var(--col-wave-a);
+    }
+    input[type="range"]#slFreqB { accent-color: var(--col-wave-b); }
+    input[type="range"]#slFreqC { accent-color: var(--col-wave-c); }
+
+    /* Toggle Switches Group */
+    .toggles-group {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .toggle-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--dim);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .toggle-chip:hover { color: #fff; border-color: rgba(255,255,255,0.2); }
+    .toggle-chip.active {
+      background: rgba(0, 229, 255, 0.12);
+      border-color: var(--col-wave-a);
+      color: var(--col-wave-a);
+    }
+
+    /* Chart Containers */
+    .chart-box {
+      height: 160px;
+      position: relative;
+      width: 100%;
+    }
+
+    /* ─── Assessment Viewport (Full Overlay/Tab Mode) ─────────────── */
+    .assessment-view {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      z-index: 50;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 18px 24px;
+      gap: 16px;
+    }
+    .assessment-view.active { display: flex; }
+
+    .assess-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .assess-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .assess-chip {
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid var(--col-wave-a);
+      color: var(--col-wave-a);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+    }
+
+    .five-e-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 8px;
+    }
+    .five-e-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--dim);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .five-e-btn:hover { color: #fff; }
+    .five-e-btn.active {
+      background: rgba(255, 215, 64, 0.15);
+      border-color: var(--col-energy);
+      color: var(--col-energy);
+    }
+
+    .questions-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .assess-question {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .q-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.74rem;
+    }
+    .q-type-badge {
+      background: rgba(255, 255, 255, 0.07);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      color: var(--dim);
+    }
+    .q-text {
+      font-size: 0.92rem;
+      font-weight: 500;
+      line-height: 1.45;
+    }
+    .q-interactive {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .q-input {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      width: 260px;
+    }
+    .q-input:focus { border-color: var(--col-wave-a); }
+    .q-check-btn {
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--col-wave-a);
+      color: var(--col-wave-a);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+    .q-check-btn:hover { background: rgba(0, 229, 255, 0.25); }
+    .q-status {
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .q-status.correct { color: var(--col-success); }
+    .q-status.incorrect { color: var(--col-danger); }
+
+    /* ─── Physical Demonstration Viewport (Ruler & Tuning Fork) ─── */
+    .physical-demo-view {
+      position: absolute;
+      inset: 0;
+      background: var(--bg);
+      z-index: 40;
+      display: none;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 16px 22px;
+      gap: 14px;
+    }
+    .physical-demo-view.active { display: flex; }
+
+    .demo-view-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .demo-view-title {
+      font-size: 1.22rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .demo-subtabs {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-subtab {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--dim);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-subtab:hover { color: #fff; }
+    .btn-subtab.active {
+      background: rgba(0, 229, 255, 0.15);
+      border-color: var(--col-wave-a);
+      color: var(--col-wave-a);
+    }
+
+    .demo-banner-card {
+      background: rgba(14, 19, 39, 0.95);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-left: 4px solid var(--col-energy);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.86rem;
+      line-height: 1.5;
+    }
+
+    .demo-canvas-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 380px;
+      position: relative;
+    }
+    .demo-canvas-container {
+      width: 100%;
+      height: 350px;
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+    #canvasPhysicalDemo {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .demo-controls-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .demo-ctrl-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .demo-btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .btn-rig-action {
+      background: rgba(0, 229, 255, 0.15);
+      border: 1px solid var(--col-wave-a);
+      color: var(--col-wave-a);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-rig-action:hover {
+      background: rgba(0, 229, 255, 0.25);
+    }
+    .btn-rig-action.active {
+      background: rgba(255, 215, 64, 0.2);
+      border-color: var(--col-energy);
+      color: #ffd740;
+    }
+
+    /* ─── Footer ─────────────────────────────────────────────────── */
+    footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 5px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: var(--dim);
+      flex-shrink: 0;
+    }
+    .shortcuts-hint {
+      display: flex;
+      gap: 12px;
+    }
+    .kbd {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 5px;
+      font-family: monospace;
+      color: #fff;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.22); }
+  </style>
+</head>
+<body>
+
+<!-- ─── Top Control Bar ────────────────────────────────────────── -->
+<header>
+  <div class="brand">
+    <span class="brand-icon">∿</span>
+    <span>Wave Energy & Dynamics</span>
+    <span class="pill" style="color:var(--col-wave-a); font-size:0.7rem;">AP Physics 1</span>
+  </div>
+
+  <div class="header-nav">
+    <button class="tab-btn active" id="tabBtnLab" data-view="lab">🔬 3-Wave Lab</button>
+    <button class="tab-btn" id="tabBtnPhysicalDemo" data-view="demo">🧪 Physical Demos (Ruler & Water Splash)</button>
+    <button class="tab-btn" id="tabBtnAssess" data-view="assess">📝 5E Assessment</button>
+  </div>
+
+  <div class="header-actions">
+    <button class="btn" id="btnPlayPause">⏸ Pause</button>
+    <button class="btn" id="btnReset">↺ Reset</button>
+    <button class="btn btn-export" id="btnExportCSV">📥 Export CSV</button>
+  </div>
+</header>
+
+<!-- ─── Interactive Guided Demonstration Scenarios Strip ───────── -->
+<div class="demo-bar">
+  <div class="demo-title">
+    <span>💡 Live Demonstration:</span>
+  </div>
+  <div class="demo-buttons">
+    <button class="btn-demo active" data-demo="amplitude">📈 1. Amplitude (A → 2A = 4× Energy)</button>
+    <button class="btn-demo" data-demo="frequency">⚡ 2. Frequency (f → 2f = 4× Energy)</button>
+    <button class="btn-demo" data-demo="wavelength">〰 3. Wavelength (λ ∝ 1/f & E ∝ 1/λ)</button>
+    <button class="btn-demo" data-demo="compound">🚀 4. Compound Scaling (2A & 2f = 16× Energy)</button>
+  </div>
+  <div class="demo-formula-box">
+    <span style="color:var(--dim);">Total Energy / λ:</span>
+    <strong id="demoFormulaText" style="color:var(--col-energy);">$E = \frac{1}{2}\mu\omega^2 A^2 \lambda \propto f^2 \cdot A^2$</strong>
+  </div>
+</div>
+
+<!-- ─── Shared Dynamics Metric Strip ───────────────────────────── -->
+<div class="metric-strip">
+  <div class="metric-group">
+    <div class="metric-item">
+      <span class="metric-label">Tension T:</span>
+      <span class="metric-val" id="topValT">50.0 N</span>
+    </div>
+    <div class="metric-item">
+      <span class="metric-label">Density μ:</span>
+      <span class="metric-val" id="topValMu">0.010 kg/m</span>
+    </div>
+    <div class="metric-item">
+      <span class="metric-label">Wave Speed v = √(T/μ):</span>
+      <span class="metric-val" id="topValV" style="color:var(--col-wave-a);">70.71 m/s</span>
+    </div>
+  </div>
+  <div class="metric-group">
+    <div class="metric-item">
+      <span class="metric-label">Wave A Energy:</span>
+      <span class="metric-val" id="topValEA" style="color:var(--col-wave-a);">0.00 J</span>
+    </div>
+    <div class="metric-item">
+      <span class="metric-label">Wave B Energy:</span>
+      <span class="metric-val" id="topValEB" style="color:var(--col-wave-b);">0.00 J</span>
+    </div>
+    <div class="metric-item">
+      <span class="metric-label">Wave C Energy:</span>
+      <span class="metric-val" id="topValEC" style="color:var(--col-wave-c);">0.00 J</span>
+    </div>
+    <div class="metric-item">
+      <span class="metric-label">Energy Drift:</span>
+      <span class="pill" id="topValDrift" style="color:var(--col-success);">0.00%</span>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Main Workspace ─────────────────────────────────────────── -->
+<div class="main-workspace">
+
+  <!-- Left / Center Simulation Viewport -->
+  <main class="sim-viewport">
+    <!-- Dynamic Demonstration Explanation Banner -->
+    <div class="demo-callout-banner" id="demoCalloutBanner">
+      <div class="demo-callout-header">
+        <span id="demoBannerTitle" style="color:var(--col-energy); font-size:0.9rem;">
+          Demonstration 1: Amplitude Scaling (E ∝ A²)
+        </span>
+        <span class="pill" id="demoRatioBadge" style="background:rgba(255,215,64,0.18); color:#ffd740; font-size:0.75rem;">
+          Energy Ratio: EB / EA = 4.00×
+        </span>
+      </div>
+      <div class="demo-callout-body" id="demoBannerBody">
+        Comparing Wave A at baseline amplitude (A = 0.03 m) vs Wave B at double amplitude (A = 0.06 m). Because transverse speed dy/dt is proportional to A, kinetic energy (½μ(dy/dt)²) scales as A², yielding exactly 4× total mechanical energy!
+      </div>
+      <div class="demo-metric-pills">
+        <div class="demo-metric-pill"><span style="color:var(--col-wave-a);">Wave A:</span> <span id="demoPillA">A = 0.03m | f = 1.0Hz | E = 0.00J</span></div>
+        <div class="demo-metric-pill"><span style="color:var(--col-wave-b);">Wave B:</span> <span id="demoPillB">A = 0.06m | f = 1.0Hz | E = 0.00J</span></div>
+        <div class="demo-metric-pill"><span style="color:var(--col-wave-c);">Wave C:</span> <span id="demoPillC">A = 0.09m | f = 1.0Hz | E = 0.00J</span></div>
+      </div>
+    </div>
+
+    <!-- 3 Independent Wave Panels Grid -->
+    <section class="wave-panels-grid">
+      <!-- Wave A (Control) -->
+      <div class="wave-panel-card card-wave-a">
+        <div class="wave-panel-header">
+          <div class="wave-title">
+            <span class="wave-badge badge-a">Wave A (Control)</span>
+          </div>
+          <div id="badgeStatsA" style="color:var(--dim); font-size:0.72rem; font-family:'JetBrains Mono',monospace;">
+            f = 1.0 Hz | λ = 70.7m
+          </div>
+        </div>
+        <div class="canvas-container" id="containerA">
+          <canvas id="canvasA"></canvas>
+        </div>
+        <div class="wave-panel-footer">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--dim);">Energy E_A:</span>
+            <strong id="lblEnergyA" style="color:var(--col-wave-a);">0.000 J</strong>
+          </div>
+          <div class="energy-bar-wrap">
+            <div class="energy-bar-fill fill-a" id="barEnergyA"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wave B (Change Frequency) -->
+      <div class="wave-panel-card card-wave-b">
+        <div class="wave-panel-header">
+          <div class="wave-title">
+            <span class="wave-badge badge-b">Wave B (Frequency Var)</span>
+          </div>
+          <div id="badgeStatsB" style="color:var(--dim); font-size:0.72rem; font-family:'JetBrains Mono',monospace;">
+            f = 2.0 Hz | λ = 35.4m
+          </div>
+        </div>
+        <div class="canvas-container" id="containerB">
+          <canvas id="canvasB"></canvas>
+        </div>
+        <div class="wave-panel-footer">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--dim);">Energy E_B:</span>
+            <strong id="lblEnergyB" style="color:var(--col-wave-b);">0.000 J</strong>
+          </div>
+          <div class="energy-bar-wrap">
+            <div class="energy-bar-fill fill-b" id="barEnergyB"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wave C (Change Amplitude / Parameter) -->
+      <div class="wave-panel-card card-wave-c">
+        <div class="wave-panel-header">
+          <div class="wave-title">
+            <span class="wave-badge badge-c">Wave C (Harmonic Comp)</span>
+          </div>
+          <div id="badgeStatsC" style="color:var(--dim); font-size:0.72rem; font-family:'JetBrains Mono',monospace;">
+            f = 2.0 Hz | λ = 35.4m
+          </div>
+        </div>
+        <div class="canvas-container" id="containerC">
+          <canvas id="canvasC"></canvas>
+        </div>
+        <div class="wave-panel-footer">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--dim);">Energy E_C:</span>
+            <strong id="lblEnergyC" style="color:var(--col-wave-c);">0.000 J</strong>
+          </div>
+          <div class="energy-bar-wrap">
+            <div class="energy-bar-fill fill-c" id="barEnergyC"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Superimposed Wave Profile Strip Card -->
+    <section class="strip-card">
+      <div class="strip-header">
+        <span>Transverse Profile Comparison (Superimposed Snapshots)</span>
+        <div class="strip-legend">
+          <div class="legend-tag" style="color:var(--col-wave-a);">
+            <div class="legend-indicator" style="background:var(--col-wave-a);"></div> Wave A
+          </div>
+          <div class="legend-tag" style="color:var(--col-wave-b);">
+            <div class="legend-indicator" style="background:var(--col-wave-b);"></div> Wave B
+          </div>
+          <div class="legend-tag" style="color:var(--col-wave-c);">
+            <div class="legend-indicator" style="background:var(--col-wave-c);"></div> Wave C
+          </div>
+        </div>
+      </div>
+      <div class="canvas-container" id="containerStrip">
+        <canvas id="canvasStrip"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <!-- Right Sidebar: Controls & Live Charts -->
+  <aside class="sidebar">
+    <!-- Sliders Card (Exactly 6 Sliders as Specified) -->
+    <div class="sidebar-card">
+      <div class="card-title">
+        <span>Physics Controls</span>
+        <span style="font-size:0.68rem; color:var(--dim);">6 Parameters</span>
+      </div>
+
+      <!-- 1. Amplitude (A) -->
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-name">Global Amplitude (A)</span>
+          <span class="sl-val" id="valAmp" style="color:var(--col-wave-a);">0.05 m</span>
+        </div>
+        <input type="range" id="slAmp" min="0.01" max="0.10" step="0.01" value="0.05" title="Amplitude affects all 3 waves (A² energy scaling)">
+      </div>
+
+      <!-- 2. Frequency Wave A (f_A) -->
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-name">Wave A Frequency (f_A)</span>
+          <span class="sl-val" id="valFreqA" style="color:var(--col-wave-a);">1.0 Hz</span>
+        </div>
+        <input type="range" id="slFreqA" min="0.5" max="5.0" step="0.1" value="1.0">
+      </div>
+
+      <!-- 3. Frequency Wave B (f_B) -->
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-name">Wave B Frequency (f_B)</span>
+          <span class="sl-val" id="valFreqB" style="color:var(--col-wave-b);">2.0 Hz</span>
+        </div>
+        <input type="range" id="slFreqB" min="0.5" max="5.0" step="0.1" value="2.0">
+      </div>
+
+      <!-- 4. Frequency Wave C (f_C) -->
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-name">Wave C Frequency (f_C)</span>
+          <span class="sl-val" id="valFreqC" style="color:var(--col-wave-c);">2.0 Hz</span>
+        </div>
+        <input type="range" id="slFreqC" min="0.5" max="5.0" step="0.1" value="2.0">
+      </div>
+
+      <!-- 5. Medium linear density (μ) -->
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-name">Linear Density (μ)</span>
+          <span class="sl-val" id="valMu">0.010 kg/m</span>
+        </div>
+        <input type="range" id="slMu" min="0.005" max="0.020" step="0.001" value="0.010">
+      </div>
+
+      <!-- 6. String Tension (T) -->
+      <div class="sl-row">
+        <div class="sl-hdr">
+          <span class="sl-name">String Tension (T)</span>
+          <span class="sl-val" id="valT">50 N</span>
+        </div>
+        <input type="range" id="slT" min="20" max="100" step="5" value="50">
+      </div>
+    </div>
+
+    <!-- Toggles (3 Toggles as Specified) -->
+    <div class="sidebar-card">
+      <div class="card-title">
+        <span>Visual Overlays</span>
+        <span style="font-size:0.68rem; color:var(--dim);">3 Toggles</span>
+      </div>
+      <div class="toggles-group">
+        <button class="toggle-chip active" id="togGlow" data-toggle="glow">✨ Wave Glow</button>
+        <button class="toggle-chip active" id="togVectors" data-toggle="vectors">🏹 Vectors</button>
+        <button class="toggle-chip active" id="togEnergyBar" data-toggle="energyBar">📊 Energy Stack</button>
+      </div>
+    </div>
+
+    <!-- Chart 1: Energy vs Amplitude (Scatter + Parabola) -->
+    <div class="sidebar-card">
+      <div class="card-title">
+        <span>E_total vs Amplitude (A)</span>
+        <span style="color:var(--col-energy); font-size:0.7rem;">E ∝ A²</span>
+      </div>
+      <div class="chart-box">
+        <canvas id="chartAmp"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 2: Energy vs Frequency² (Scatter + Linear Line) -->
+    <div class="sidebar-card">
+      <div class="card-title">
+        <span>E_total vs Frequency² (f²)</span>
+        <span style="color:var(--col-energy); font-size:0.7rem;">Linear Slope</span>
+      </div>
+      <div class="chart-box">
+        <canvas id="chartFreq"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 3: Energy vs Wavelength λ (Scatter + Inverse Curve ∝ 1/λ) -->
+    <div class="sidebar-card">
+      <div class="card-title">
+        <span>E_total vs Wavelength (λ)</span>
+        <span style="color:var(--col-energy); font-size:0.7rem;">Inverse E ∝ 1/λ</span>
+      </div>
+      <div class="chart-box">
+        <canvas id="chartLambda"></canvas>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ─── 5E Assessment View Overlay ─────────────────────────────── -->
+  <div class="assessment-view" id="assessmentView">
+    <div class="assess-header">
+      <div>
+        <h2 class="assess-title">Wave Energy & Propagation Assessment</h2>
+        <div style="color:var(--dim); font-size:0.8rem; margin-top:3px;">
+          Aligned with AP Physics 1 CED: SP 4.1, SP 5.2, SP 6.4 | NGSS Energy & Matter
+        </div>
+      </div>
+      <div class="assess-chip" id="assessScoreChip">Score: 0 / 10</div>
+    </div>
+
+    <!-- 5E Category Selector Tabs -->
+    <div class="five-e-tabs">
+      <button class="five-e-btn active" data-category="all">All (10)</button>
+      <button class="five-e-btn" data-category="engage">Engage (2)</button>
+      <button class="five-e-btn" data-category="explore">Explore (2)</button>
+      <button class="five-e-btn" data-category="explain">Explain (2)</button>
+      <button class="five-e-btn" data-category="elaborate">Elaborate (2)</button>
+      <button class="five-e-btn" data-category="evaluate">Evaluate FRQ (2)</button>
+    </div>
+
+    <!-- Questions Container -->
+    <div class="questions-grid" id="questionsContainer">
+      <!-- 1. Engage -->
+      <div class="assess-question" data-category="engage" data-correct="4">
+        <div class="q-meta">
+          <span class="q-type-badge">1. Engage</span>
+          <span style="color:var(--dim);">Proportional Reasoning</span>
+        </div>
+        <div class="q-text">If amplitude doubles, what is the factor change in wave energy?</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" placeholder="Enter numerical factor...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+
+      <!-- 2. Engage -->
+      <div class="assess-question" data-category="engage" data-correct="4">
+        <div class="q-meta">
+          <span class="q-type-badge">2. Engage</span>
+          <span style="color:var(--dim);">Frequency Relationship</span>
+        </div>
+        <div class="q-text">If frequency doubles, what is the factor change in wave energy?</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" placeholder="Enter numerical factor...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+
+      <!-- 3. Explore -->
+      <div class="assess-question" data-category="explore" data-correct="300% increase">
+        <div class="q-meta">
+          <span class="q-type-badge">3. Explore</span>
+          <span style="color:var(--dim);">Experimental Measurement</span>
+        </div>
+        <div class="q-text">On slider A, double amplitude → what percent ΔE do you measure? (measurable)</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" placeholder="Enter percentage change...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+
+      <!-- 4. Explore -->
+      <div class="assess-question" data-category="explore" data-correct="increases quadratically">
+        <div class="q-meta">
+          <span class="q-type-badge">4. Explore</span>
+          <span style="color:var(--dim);">Parametric Trends</span>
+        </div>
+        <div class="q-text">With freq B ↑ while A constant, E_B changes how?</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" placeholder="Describe the trend / mathematical relationship...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+
+      <!-- 5. Explain -->
+      <div class="assess-question" data-category="explain" data-correct="use of A²">
+        <div class="q-meta">
+          <span class="q-type-badge">5. Explain</span>
+          <span style="color:var(--dim);">Theoretical Derivation</span>
+        </div>
+        <div class="q-text">Explain why E ∝ A² (derive from E = ½ μ ω² A²):</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" style="width:380px;" placeholder="Explain the relationship between transverse speed and kinetic energy...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+
+      <!-- 6. Explain -->
+      <div class="assess-question" data-category="explain" data-correct="inversely">
+        <div class="q-meta">
+          <span class="q-type-badge">6. Explain</span>
+          <span style="color:var(--dim);">Wavelength Coupling</span>
+        </div>
+        <div class="q-text">In a fixed medium, why does doubling wavelength λ halve the wave energy transmission rate?</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" placeholder="Describe how λ relates to wave cycle energy...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+
+      <!-- 7. Elaborate -->
+      <div class="assess-question" data-category="elaborate" data-correct="160">
+        <div class="q-meta">
+          <span class="q-type-badge">7. Elaborate</span>
+          <span style="color:var(--dim);">Compound Scaling</span>
+        </div>
+        <div class="q-text">A wave carries 10 J. If freq doubles and A doubles, new energy = ?</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" placeholder="Enter calculated energy (in J)...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+
+      <!-- 8. Elaborate -->
+      <div class="assess-question" data-category="elaborate" data-correct="B by 9x">
+        <div class="q-meta">
+          <span class="q-type-badge">8. Elaborate</span>
+          <span style="color:var(--dim);">Comparative Waves</span>
+        </div>
+        <div class="q-text">Two waves A=0.02, f=1Hz vs A=0.03, f=2Hz — which is larger & by how?</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" placeholder="State which wave and factor (e.g., Wave X by Yx)...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+
+      <!-- 9. Evaluate FRQ -->
+      <div class="assess-question" data-category="evaluate" data-correct="0.5muw^2A^2lambda">
+        <div class="q-meta">
+          <span class="q-type-badge">9. Evaluate FRQ (6 pts)</span>
+          <span style="color:var(--dim);">Calculus Integration</span>
+        </div>
+        <div class="q-text">(Free Response 6 pts) Derive E_max using dE/dx, integrate over one wavelength λ, interpret:</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" style="width:380px;" placeholder="Write algebraic expression for integrated energy...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+
+      <!-- 10. Evaluate FRQ -->
+      <div class="assess-question" data-category="evaluate" data-correct="solar vs sound, any justified">
+        <div class="q-meta">
+          <span class="q-type-badge">10. Evaluate FRQ (4 pts)</span>
+          <span style="color:var(--dim);">Real-World Justification</span>
+        </div>
+        <div class="q-text">(Free response 4 pts) State real-world example where high-f low-A wave transfers more energy than low-f high-A; justify:</div>
+        <div class="q-interactive">
+          <input type="text" class="q-input" style="width:380px;" placeholder="Enter your real-world comparison and physical justification...">
+          <button class="q-check-btn">Check</button>
+          <span class="q-status"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Physical Demonstration Viewport: Top-View Ruler/Marble & Tuning Fork Water Splash ─── -->
+  <div class="physical-demo-view" id="physicalDemoView">
+    <div class="demo-view-header">
+      <div>
+        <h2 class="demo-view-title">
+          <span>🧪 Real-World Wave Energy Demonstrators</span>
+        </h2>
+        <div style="color:var(--dim); font-size:0.8rem; margin-top:3px;">
+          Empirical mechanical proofs of amplitude ($E \propto A^2$) and frequency ($E \propto f^2$ / water splash violence).
+        </div>
+      </div>
+      <div class="demo-subtabs">
+        <button class="btn-subtab active" id="btnSubtabRuler" data-mode="ruler">📏 Top-View Bent Ruler & Marble</button>
+        <button class="btn-subtab" id="btnSubtabFork" data-mode="fork">🌊 Tuning Fork Water Splash ($f$ Energy)</button>
+      </div>
+      <div class="pill" id="demoEnergyBadge" style="background:rgba(255,215,64,0.18); color:#ffd740; font-family:'JetBrains Mono',monospace; font-size:0.82rem; padding:5px 12px;">
+        Energy: 0.000 J (1.00×)
+      </div>
+    </div>
+
+    <!-- Dynamic Pedagogical Callout Card -->
+    <div class="demo-banner-card" id="demoBannerCard">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <strong id="demoBannerHeading" style="color:var(--col-energy); font-size:0.94rem;">
+          Top-Down View: Vertical Cantilever Ruler Bends Right ⟹ Hits Ball ⟹ Ball Rolls Left ($d \propto A^2$)
+        </strong>
+        <span class="pill" id="demoBannerRatio" style="background:rgba(0,229,255,0.15); color:var(--col-wave-a);">
+          Bend: 3.0 cm ⟹ Ratio: 1.00×
+        </span>
+      </div>
+      <div id="demoBannerText">
+        Viewing the laboratory table from directly above. The ruler is mounted vertically across the table. When stretched, the ruler bends to the <strong>RIGHT</strong>, storing elastic strain energy $PE = \frac{1}{2}kA^2$. Upon release, the ruler snaps back toward the left, strikes the ball at the neutral point, propelling it horizontally to the <strong>LEFT</strong> along the graduated centimeter track. The stopping distance $d = \frac{v^2}{2\mu_k g} \propto A^2$ proves that doubling the bend launches the marble <strong>4 times farther</strong>!
+      </div>
+    </div>
+
+    <!-- Demonstration Canvas Card -->
+    <div class="demo-canvas-card">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span id="demoCanvasSubtitle" style="font-weight:600; font-size:0.85rem; color:#fff;">
+          Top-Down View: Vertical Ruler (Bends Right) ⟹ Strikes Ball ⟹ Marble Rolls Left (0 to 400 cm)
+        </span>
+        <div style="display:flex; gap:12px; font-size:0.75rem; font-family:'JetBrains Mono',monospace;">
+          <span style="color:var(--col-wave-a);" id="statPill1">Bend A: 3.0 cm</span>
+          <span style="color:var(--col-wave-b);" id="statPill2">Length L: 30.0 cm</span>
+          <span style="color:var(--col-energy);" id="statPill3">Distance: 0.0 cm</span>
+        </div>
+      </div>
+      <div class="demo-canvas-container">
+        <canvas id="canvasPhysicalDemo"></canvas>
+      </div>
+    </div>
+
+    <!-- Controls Panel: Dynamically Toggled between Ruler & Tuning Fork -->
+    <div class="demo-controls-panel" id="rulerControlsPanel">
+      <!-- Ruler Bend Amplitude -->
+      <div class="demo-ctrl-group">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+          <span style="color:var(--dim);">1. Bend Amplitude to Right ($A$):</span>
+          <strong id="valRulerBend" style="color:var(--col-wave-a);">3.0 cm</strong>
+        </div>
+        <input type="range" id="slRulerBend" min="1.0" max="8.0" step="0.5" value="3.0">
+        <div class="demo-btn-group">
+          <button class="btn-rig-action" id="btnPresetAmp1">1× Amp (3 cm)</button>
+          <button class="btn-rig-action" id="btnPresetAmp2">2× Amp (6 cm = 4× Distance!)</button>
+        </div>
+      </div>
+
+      <!-- Cantilever Length (Frequency) -->
+      <div class="demo-ctrl-group">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+          <span style="color:var(--dim);">2. Ruler Overhang Height $L$ (Frequency $f$):</span>
+          <strong id="valRulerLen" style="color:var(--col-wave-b);">30.0 cm (Low f)</strong>
+        </div>
+        <input type="range" id="slRulerLen" min="15.0" max="35.0" step="1.0" value="30.0">
+        <div class="demo-btn-group">
+          <button class="btn-rig-action" id="btnPresetLenLong">Long Ruler (Low f)</button>
+          <button class="btn-rig-action" id="btnPresetLenShort">Short Ruler (High f)</button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="demo-ctrl-group">
+        <span style="color:var(--dim); font-size:0.8rem;">3. Physical Release Actions:</span>
+        <div class="demo-btn-group" style="margin-top:auto;">
+          <button class="btn-rig-action active" id="btnLaunchMarble" style="flex:1; padding:8px 12px; font-size:0.88rem;">🚀 Release & Strike Marble</button>
+          <button class="btn-rig-action" id="btnResetMarble" style="padding:8px 12px;">↺ Reset</button>
+          <button class="btn-rig-action" id="btnAutoFire" style="padding:8px 12px;">⏱ Continuous Wave</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tuning Fork & Water Splash Controls Panel (Hidden by default) -->
+    <div class="demo-controls-panel" id="forkControlsPanel" style="display:none;">
+      <!-- Fork Frequency Selector -->
+      <div class="demo-ctrl-group">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+          <span style="color:var(--dim);">1. Fork Frequency ($f$):</span>
+          <strong id="valForkFreq" style="color:var(--col-energy);">256 Hz (Middle C)</strong>
+        </div>
+        <input type="range" id="slForkFreq" min="128" max="1024" step="64" value="256">
+        <div class="demo-btn-group">
+          <button class="btn-rig-action" id="btnFork128">128 Hz (Low f / Mild)</button>
+          <button class="btn-rig-action active" id="btnFork256">256 Hz (Mid C)</button>
+          <button class="btn-rig-action" id="btnFork512">512 Hz (High C = 4× E!)</button>
+          <button class="btn-rig-action" id="btnFork1024">1024 Hz (Extreme Splash!)</button>
+        </div>
+      </div>
+
+      <!-- Fork Strike Amplitude -->
+      <div class="demo-ctrl-group">
+        <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+          <span style="color:var(--dim);">2. Strike Force / Amplitude:</span>
+          <strong id="valForkAmp" style="color:var(--col-wave-a);">Moderate (1.0 mm)</strong>
+        </div>
+        <input type="range" id="slForkAmp" min="0.5" max="3.0" step="0.5" value="1.0">
+        <div class="demo-btn-group">
+          <button class="btn-rig-action" id="btnForkSoft">Soft Tap (0.5 mm)</button>
+          <button class="btn-rig-action" id="btnForkHard">Hard Strike (2.0 mm)</button>
+        </div>
+      </div>
+
+      <!-- Water Dip Actions -->
+      <div class="demo-ctrl-group">
+        <span style="color:var(--dim); font-size:0.8rem;">3. Experiment Action:</span>
+        <div class="demo-btn-group" style="margin-top:auto;">
+          <button class="btn-rig-action active" id="btnStrikeFork" style="flex:1; padding:8px 12px; font-size:0.88rem;">🔔 Strike & Dip into Water</button>
+          <button class="btn-rig-action" id="btnResetWater" style="padding:8px 12px;">🌊 Calm Water</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── Footer ─────────────────────────────────────────────────── -->
+<footer>
+  <div class="shortcuts-hint">
+    <span>Shortcuts:</span>
+    <span><span class="kbd">P</span> Pause/Resume</span>
+    <span><span class="kbd">R</span> Reset</span>
+    <span><span class="kbd">Tab</span> Assessment Toggle</span>
+  </div>
+  <div>Physics Simulation Build Engine</div>
+</footer>
+
+<!-- ─── Single Bottom Script Block ─────────────────────────────── -->
+<script>
+// SIM-SG-77::VALID
+
+// ─── Mathematical Typography: KaTeX Auto-Render Helper ──────────
+function renderMathSafely(el = document.body) {
+  if (typeof renderMathInElement === 'function' && el) {
+    try {
+      renderMathInElement(el, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '$', right: '$', display: false }
+        ],
+        throwOnError: false
+      });
+    } catch (e) {
+      console.warn("KaTeX render error:", e);
+    }
+  }
+}
+
+// ─── Global State & Variables (Strict: No let inside deep loops) ───
+let gTime = 0.0;
+let gFrame = 0;
+let gRunning = true;
+let gActiveView = 'lab';
+let gDragTarget = null;
+let gLastEnergyAudit = 0.0;
+let gInitialEnergyA = 0.0;
+let gEnergyDriftPct = 0.0;
+
+// Reusable drawing variables to avoid garbage collection inside render loop
+let gI = 0;
+let gX = 0.0;
+let gY = 0.0;
+let gVy = 0.0;
+let gAy = 0.0;
+let gSX = 0.0;
+let gSY = 0.0;
+let gK = 0.0;
+let gOmega = 0.0;
+
+// ─── CLASS 1: PhysicsEngine ──────────────────────────────────────
+class PhysicsEngine {
+  constructor() {
+    this.A = 0.05;           // Global Amplitude reference (m)
+    this.AA = 0.05;          // Amplitude Wave A (m)
+    this.AB = 0.05;          // Amplitude Wave B (m)
+    this.AC = 0.05;          // Amplitude Wave C (m)
+    this.fA = 1.0;           // Frequency Wave A (Hz)
+    this.fB = 2.0;           // Frequency Wave B (Hz)
+    this.fC = 2.0;           // Frequency Wave C (Hz)
+    this.mu = 0.01;          // Linear mass density (kg/m)
+    this.T = 50.0;           // Tension (N)
+    this.demoMode = 'amplitude'; // 'amplitude', 'frequency', 'wavelength', 'compound'
+
+    // Evolved phases for RK4 integration
+    this.phiA = 0.0;
+    this.phiB = 0.0;
+    this.phiC = 0.0;
+  }
+
+  // Wave speed v = √(T/μ)
+  getSpeed() {
+    if (this.mu <= 0 || this.T <= 0) return 70.71;
+    const v = Math.sqrt(this.T / this.mu);
+    return isFinite(v) ? v : 70.71;
+  }
+
+  // Wavelength λ = v / f
+  getWavelength(f) {
+    const v = this.getSpeed();
+    if (!isFinite(f) || f <= 0) return 70.71;
+    return v / f;
+  }
+
+  // Wave number k = 2π / λ
+  getK(f) {
+    const lambda = this.getWavelength(f);
+    return (2.0 * Math.PI) / lambda;
+  }
+
+  // Angular frequency ω = 2πf
+  getOmega(f) {
+    return 2.0 * Math.PI * f;
+  }
+
+  // Analytic wave evaluation: y(x, t, A, f, T, mu)
+  evaluate(x, phi, A, f) {
+    const k = this.getK(f);
+    const phase = k * x - phi;
+    return A * Math.sin(phase);
+  }
+
+  // Transverse Velocity: ∂y/∂t = -A ω cos(kx - phi)
+  evaluateVelocity(x, phi, A, f) {
+    const k = this.getK(f);
+    const omega = this.getOmega(f);
+    const phase = k * x - phi;
+    return -A * omega * Math.cos(phase);
+  }
+
+  // Transverse Acceleration: ∂²y/∂t² = -A ω² sin(kx - phi)
+  evaluateAcceleration(x, phi, A, f) {
+    const k = this.getK(f);
+    const omega = this.getOmega(f);
+    const phase = k * x - phi;
+    return -A * omega * omega * Math.sin(phase);
+  }
+
+  // Energy over one wavelength: E_total = (1/4) * μ * ω² * A² * λ
+  computeTotalEnergy(A, f) {
+    const omega = this.getOmega(f);
+    const lambda = this.getWavelength(f);
+    const energy = 0.25 * this.mu * omega * omega * A * A * lambda;
+    return isFinite(energy) ? energy : 0.0;
+  }
+
+  // Instantaneous energy densities at position x
+  computeEnergyDensities(x, phi, A, f) {
+    const vy = this.evaluateVelocity(x, phi, A, f);
+    const k = this.getK(f);
+    const dydx = A * k * Math.cos(k * x - phi);
+    const dEk = 0.5 * this.mu * vy * vy;
+    const dEu = 0.5 * this.T * dydx * dydx;
+    return { dEk, dEu, dEtotal: dEk + dEu };
+  }
+
+  // Step physics with Runge-Kutta 4 (RK4) evolution for phases
+  step(dt) {
+    if (!isFinite(dt) || dt <= 0) dt = 0.016;
+    const v = this.getSpeed();
+    const clampedDt = Math.min(0.016, Math.max(0.001, dt));
+
+    // RK4 integration for phase evolution dphi/dt = omega
+    const evolvePhaseRK4 = (omega) => {
+      const k1 = omega;
+      const k2 = omega;
+      const k3 = omega;
+      const k4 = omega;
+      return (clampedDt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4);
+    };
+
+    const dPhiA = evolvePhaseRK4(this.getOmega(this.fA));
+    const dPhiB = evolvePhaseRK4(this.getOmega(this.fB));
+    const dPhiC = evolvePhaseRK4(this.getOmega(this.fC));
+
+    // NaN integration check
+    if (isFinite(dPhiA)) this.phiA = (this.phiA + dPhiA) % (2.0 * Math.PI * 1000);
+    if (isFinite(dPhiB)) this.phiB = (this.phiB + dPhiB) % (2.0 * Math.PI * 1000);
+    if (isFinite(dPhiC)) this.phiC = (this.phiC + dPhiC) % (2.0 * Math.PI * 1000);
+  }
+}
+
+// ─── CLASS 2: Camera ─────────────────────────────────────────────
+class Camera {
+  constructor() {
+    this.xSpan = 150.0;      // Physical horizontal meters viewed
+    this.ySpan = 0.18;       // Physical vertical meters viewed
+    this.autoScaleY = true;
+  }
+
+  update(physics) {
+    if (this.autoScaleY) {
+      const targetYSpan = Math.max(0.08, physics.A * 2.8);
+      this.ySpan += (targetYSpan - this.ySpan) * 0.1;
+    }
+  }
+
+  toScreenX(x, width) {
+    return (x / this.xSpan) * width;
+  }
+
+  toScreenY(y, height) {
+    return height * 0.5 - (y / this.ySpan) * (height * 0.5);
+  }
+
+  fromScreenY(sy, height) {
+    return (height * 0.5 - sy) / (height * 0.5) * this.ySpan;
+  }
+}
+
+// ─── CLASS 3: Renderer ───────────────────────────────────────────
+class Renderer {
+  constructor(physics, camera) {
+    this.physics = physics;
+    this.camera = camera;
+    this.visGlow = true;
+    this.visVectors = true;
+    this.visEnergyBar = true;
+
+    this.cTopA = document.getElementById('canvasA');
+    this.ctxA = this.cTopA.getContext('2d');
+    this.cTopB = document.getElementById('canvasB');
+    this.ctxB = this.cTopB.getContext('2d');
+    this.cTopC = document.getElementById('canvasC');
+    this.ctxC = this.cTopC.getContext('2d');
+
+    this.cStrip = document.getElementById('canvasStrip');
+    this.ctxStrip = this.cStrip.getContext('2d');
+
+    this.dpr = window.devicePixelRatio || 1;
+    this.handleResize();
+  }
+
+  handleResize() {
+    this.dpr = window.devicePixelRatio || 1;
+    const resizeCanvas = (canvas, ctx) => {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * this.dpr;
+      canvas.height = rect.height * this.dpr;
+      ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    };
+
+    resizeCanvas(this.cTopA, this.ctxA);
+    resizeCanvas(this.cTopB, this.ctxB);
+    resizeCanvas(this.cTopC, this.ctxC);
+    resizeCanvas(this.cStrip, this.ctxStrip);
+  }
+
+  drawBackground(ctx, w, h) {
+    ctx.save();
+    ctx.clearRect(0, 0, w, h);
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+    ctx.lineWidth = 1;
+    const gridSpacing = w / 8;
+    for (let px = gridSpacing; px < w; px += gridSpacing) {
+      ctx.beginPath();
+      ctx.moveTo(px, 0);
+      ctx.lineTo(px, h);
+      ctx.stroke();
+    }
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(0, h * 0.5);
+    ctx.lineTo(w, h * 0.5);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  renderWave(ctx, canvas, phi, A, f, colorHex, panelId) {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+    if (w <= 0 || h <= 0) return;
+
+    this.drawBackground(ctx, w, h);
+
+    const stepPx = 2.0;
+    ctx.save();
+
+    if (this.visGlow) {
+      ctx.shadowColor = colorHex;
+      ctx.shadowBlur = 12;
+    }
+    ctx.strokeStyle = colorHex;
+    ctx.lineWidth = 2.8;
+    ctx.beginPath();
+
+    let penDown = false;
+    for (gSX = 0.0; gSX <= w; gSX += stepPx) {
+      gX = (gSX / w) * this.camera.xSpan;
+      gY = this.physics.evaluate(gX, phi, A, f);
+      gSY = this.camera.toScreenY(gY, h);
+
+      if (!penDown) {
+        ctx.moveTo(gSX, gSY);
+        penDown = true;
+      } else {
+        ctx.lineTo(gSX, gSY);
+      }
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    if (this.visVectors) {
+      const sampleGapPx = 36.0;
+      ctx.save();
+      for (gSX = 20.0; gSX < w; gSX += sampleGapPx) {
+        gX = (gSX / w) * this.camera.xSpan;
+        gY = this.physics.evaluate(gX, phi, A, f);
+        gSY = this.camera.toScreenY(gY, h);
+
+        gVy = this.physics.evaluateVelocity(gX, phi, A, f);
+        gAy = this.physics.evaluateAcceleration(gX, phi, A, f);
+
+        const velScale = 18.0;
+        const vHeadY = gSY - gVy * velScale;
+        ctx.strokeStyle = 'var(--col-vel)';
+        ctx.fillStyle = 'var(--col-vel)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(gSX, gSY);
+        ctx.lineTo(gSX, vHeadY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(gSX, vHeadY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        const accScale = 0.08;
+        const aHeadY = gSY - gAy * accScale;
+        ctx.strokeStyle = 'var(--col-acc)';
+        ctx.fillStyle = 'var(--col-acc)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(gSX + 3, gSY);
+        ctx.lineTo(gSX + 3, aHeadY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(gSX + 3, aHeadY, 2.0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    // 3. Amplitude drag handle at first crest & caliper indicator
+    const lambda = this.physics.getWavelength(f);
+    const crestX = (phi / this.physics.getK(f) + lambda * 0.25) % lambda;
+    const crestSX = this.camera.toScreenX(crestX, w);
+    const crestSY = this.camera.toScreenY(A, h);
+
+    ctx.save();
+    // Amplitude caliper line from equilibrium to peak
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
+    ctx.beginPath();
+    ctx.moveTo(crestSX, h * 0.5);
+    ctx.lineTo(crestSX, crestSY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Amplitude label
+    ctx.fillStyle = '#fff';
+    ctx.font = '700 9px "JetBrains Mono", monospace';
+    ctx.fillText(`A=${A.toFixed(2)}m`, crestSX + 8, (h * 0.5 + crestSY) * 0.5);
+
+    // Draggable crest bead
+    ctx.fillStyle = colorHex;
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(crestSX, crestSY, 5.0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // 4. Wavelength dimension bracket across one full cycle [crest to next crest]
+    const nextCrestSX = this.camera.toScreenX(crestX + lambda, w);
+    if (nextCrestSX < w + 20) {
+      const dimY = Math.max(14, crestSY - 12);
+      ctx.strokeStyle = 'rgba(255, 215, 64, 0.7)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      // Left tick
+      ctx.moveTo(crestSX, dimY - 4); ctx.lineTo(crestSX, dimY + 4);
+      // Span
+      ctx.moveTo(crestSX, dimY); ctx.lineTo(nextCrestSX, dimY);
+      // Right tick
+      ctx.moveTo(nextCrestSX, dimY - 4); ctx.lineTo(nextCrestSX, dimY + 4);
+      ctx.stroke();
+
+      // Wavelength label
+      ctx.fillStyle = '#ffd740';
+      ctx.font = '700 9px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`λ=${lambda.toFixed(1)}m`, (crestSX + nextCrestSX) * 0.5, dimY - 4);
+      ctx.textAlign = 'left';
+    }
+    ctx.restore();
+  }
+
+  renderStrip() {
+    const rect = this.cStrip.parentElement.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+    if (w <= 0 || h <= 0) return;
+
+    this.drawBackground(this.ctxStrip, w, h);
+
+    const waves = [
+      { phi: this.physics.phiA, A: this.physics.AA, f: this.physics.fA, col: 'rgba(0, 229, 255, 0.85)' },
+      { phi: this.physics.phiB, A: this.physics.AB, f: this.physics.fB, col: 'rgba(255, 51, 102, 0.85)' },
+      { phi: this.physics.phiC, A: this.physics.AC, f: this.physics.fC, col: 'rgba(179, 136, 255, 0.85)' }
+    ];
+
+    const stepPx = 2.0;
+    waves.forEach(wv => {
+      this.ctxStrip.save();
+      this.ctxStrip.strokeStyle = wv.col;
+      this.ctxStrip.lineWidth = 2.0;
+      this.ctxStrip.beginPath();
+      let penDown = false;
+      for (gSX = 0.0; gSX <= w; gSX += stepPx) {
+        gX = (gSX / w) * this.camera.xSpan;
+        gY = this.physics.evaluate(gX, wv.phi, wv.A, wv.f);
+        gSY = this.camera.toScreenY(gY, h);
+        if (!penDown) {
+          this.ctxStrip.moveTo(gSX, gSY);
+          penDown = true;
+        } else {
+          this.ctxStrip.lineTo(gSX, gSY);
+        }
+      }
+      this.ctxStrip.stroke();
+      this.ctxStrip.restore();
+    });
+  }
+
+  render() {
+    this.renderWave(this.ctxA, this.cTopA, this.physics.phiA, this.physics.AA, this.physics.fA, '#00e5ff', 'A');
+    this.renderWave(this.ctxB, this.cTopB, this.physics.phiB, this.physics.AB, this.physics.fB, '#ff3366', 'B');
+    this.renderWave(this.ctxC, this.cTopC, this.physics.phiC, this.physics.AC, this.physics.fC, '#b388ff', 'C');
+    this.renderStrip();
+  }
+}
+
+// ─── CLASS 4: UIControls ─────────────────────────────────────────
+class UIControls {
+  constructor(physics, renderer, camera, dataLogger, exportManager) {
+    this.physics = physics;
+    this.renderer = renderer;
+    this.camera = camera;
+    this.dataLogger = dataLogger;
+    this.exportManager = exportManager;
+
+    this.bindDemoButtons();
+    this.bindSliders();
+    this.bindToggles();
+    this.bindNavAndShortcuts();
+    this.bindMouseDragAmplitude();
+  }
+
+  setDemoScenario(demo) {
+    this.physics.demoMode = demo;
+    document.querySelectorAll('.btn-demo').forEach(b => {
+      b.classList.toggle('active', b.dataset.demo === demo);
+    });
+
+    const bannerTitle = document.getElementById('demoBannerTitle');
+    const bannerBody = document.getElementById('demoBannerBody');
+    const formulaText = document.getElementById('demoFormulaText');
+    const slAmp = document.getElementById('slAmp');
+    const slFreqA = document.getElementById('slFreqA');
+    const slFreqB = document.getElementById('slFreqB');
+    const slFreqC = document.getElementById('slFreqC');
+
+    if (demo === 'amplitude') {
+      // Wave A: baseline (A=0.03m), Wave B: 2x (A=0.06m -> 4x E), Wave C: 3x (A=0.09m -> 9x E)
+      this.physics.AA = 0.03;
+      this.physics.AB = 0.06;
+      this.physics.AC = 0.09;
+      this.physics.A = 0.03;
+      this.physics.fA = 1.0;
+      this.physics.fB = 1.0;
+      this.physics.fC = 1.0;
+
+      slAmp.value = 0.03;
+      slFreqA.value = 1.0;
+      slFreqB.value = 1.0;
+      slFreqC.value = 1.0;
+
+      bannerTitle.innerHTML = "Demonstration 1: Amplitude Scaling ($E \\propto A^2$)";
+      bannerBody.innerText = "Comparing identical frequency waves (f = 1.0 Hz) at different amplitudes: Wave A (A = 0.03m), Wave B (A = 0.06m, 2×), and Wave C (A = 0.09m, 3×). Because transverse kinetic speed (∂y/∂t ∝ A) and potential gradient (∂y/∂x ∝ A) both scale linearly with A, total energy scales quadratically with A²: 1× : 4× : 9×!";
+      formulaText.innerHTML = "$E = \\frac{1}{4} \\mu \\omega^2 A^2 \\lambda \\propto A^2$";
+    } else if (demo === 'frequency') {
+      // Wave A: f=1Hz, Wave B: f=2Hz (4x E), Wave C: f=3Hz (9x E) with identical amplitude
+      this.physics.AA = 0.04;
+      this.physics.AB = 0.04;
+      this.physics.AC = 0.04;
+      this.physics.A = 0.04;
+      this.physics.fA = 1.0;
+      this.physics.fB = 2.0;
+      this.physics.fC = 3.0;
+
+      slAmp.value = 0.04;
+      slFreqA.value = 1.0;
+      slFreqB.value = 2.0;
+      slFreqC.value = 3.0;
+
+      bannerTitle.innerHTML = "Demonstration 2: Frequency Scaling ($E \\propto f^2$)";
+      bannerBody.innerText = "Comparing identical amplitude waves (A = 0.04m) across frequencies: Wave A (1.0 Hz), Wave B (2.0 Hz, 2×), and Wave C (3.0 Hz, 3×). As frequency doubles, string segments oscillate twice as fast, quadrupling transverse kinetic energy (½μ(∂y/∂t)² ∝ ω² = 4π²f²), resulting in 4× energy in Wave B and 9× energy in Wave C!";
+      formulaText.innerHTML = "$E = \\frac{1}{4} \\mu (2\\pi f)^2 A^2 \\lambda \\propto f^2$";
+    } else if (demo === 'wavelength') {
+      // In same medium, v = const. Double frequency cuts wavelength in half (lambda = v/f)
+      this.physics.AA = 0.04;
+      this.physics.AB = 0.04;
+      this.physics.AC = 0.04;
+      this.physics.A = 0.04;
+      this.physics.fA = 1.0;
+      this.physics.fB = 2.0;
+      this.physics.fC = 0.5;
+
+      slAmp.value = 0.04;
+      slFreqA.value = 1.0;
+      slFreqB.value = 2.0;
+      slFreqC.value = 0.5;
+
+      bannerTitle.innerHTML = "Demonstration 3: Wavelength &amp; Energy Rate ($\\lambda = v/f,\\; P_{\\text{avg}} \\propto 1/\\lambda^2$)";
+      bannerBody.innerText = "For fixed tension and mass density (v = 70.7 m/s), wavelength is inversely related to frequency (λ = v/f). Wave B (2 Hz, λ ≈ 35.4m) packs twice as many cycles into the same space as Wave A (1 Hz, λ ≈ 70.7m), transmitting 4× the energy flux. Shorter wavelength corresponds to tighter spatial curvature and greater mechanical power!";
+      formulaText.innerHTML = "$\\lambda = \\frac{v}{f} \\implies P_{\\text{avg}} = \\frac{1}{2} \\mu v \\omega^2 A^2 \\propto \\frac{1}{\\lambda^2}$";
+    } else if (demo === 'compound') {
+      // Wave A: A=0.03, f=1.0 | Wave B: A=0.06, f=2.0 (16x E!) | Wave C: A=0.08, f=2.5
+      this.physics.AA = 0.03;
+      this.physics.AB = 0.06;
+      this.physics.AC = 0.08;
+      this.physics.A = 0.03;
+      this.physics.fA = 1.0;
+      this.physics.fB = 2.0;
+      this.physics.fC = 2.5;
+
+      slAmp.value = 0.03;
+      slFreqA.value = 1.0;
+      slFreqB.value = 2.0;
+      slFreqC.value = 2.5;
+
+      bannerTitle.innerHTML = "Demonstration 4: Compound Scaling ($2A$ &amp; $2f = 16\\times$ Energy!)";
+      bannerBody.innerText = "Doubling both amplitude (0.03m → 0.06m, 2×) AND frequency (1.0Hz → 2.0Hz, 2×) simultaneously yields an astonishing 16-fold energy explosion: E_B / E_A = (2)² × (2)² = 4 × 4 = 16×! Watch the kinetic oscillation speed and energy bar fill to witness the compounding quadratic laws.";
+      formulaText.innerHTML = "$E_{\\text{ratio}} = \\left(\\frac{A_B}{A_A}\\right)^2 \\cdot \\left(\\frac{f_B}{f_A}\\right)^2 = 2^2 \\cdot 2^2 = 16\\times$";
+    }
+
+    renderMathSafely(formulaText);
+    renderMathSafely(bannerTitle);
+
+    document.getElementById('valAmp').innerText = `${this.physics.A.toFixed(2)} m`;
+    document.getElementById('valFreqA').innerText = `${this.physics.fA.toFixed(1)} Hz`;
+    document.getElementById('valFreqB').innerText = `${this.physics.fB.toFixed(1)} Hz`;
+    document.getElementById('valFreqC').innerText = `${this.physics.fC.toFixed(1)} Hz`;
+  }
+
+  bindDemoButtons() {
+    document.querySelectorAll('.btn-demo').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const demo = btn.dataset.demo;
+        this.setDemoScenario(demo);
+      });
+    });
+  }
+
+  bindSliders() {
+    const slAmp = document.getElementById('slAmp');
+    slAmp.addEventListener('input', (e) => {
+      this.physics.A = parseFloat(e.target.value);
+      this.physics.AA = this.physics.A;
+      this.physics.AB = this.physics.A;
+      this.physics.AC = this.physics.A;
+      document.getElementById('valAmp').innerText = `${this.physics.A.toFixed(2)} m`;
+    });
+
+    const slFreqA = document.getElementById('slFreqA');
+    slFreqA.addEventListener('input', (e) => {
+      this.physics.fA = parseFloat(e.target.value);
+      document.getElementById('valFreqA').innerText = `${this.physics.fA.toFixed(1)} Hz`;
+    });
+
+    const slFreqB = document.getElementById('slFreqB');
+    slFreqB.addEventListener('input', (e) => {
+      this.physics.fB = parseFloat(e.target.value);
+      document.getElementById('valFreqB').innerText = `${this.physics.fB.toFixed(1)} Hz`;
+    });
+
+    const slFreqC = document.getElementById('slFreqC');
+    slFreqC.addEventListener('input', (e) => {
+      this.physics.fC = parseFloat(e.target.value);
+      document.getElementById('valFreqC').innerText = `${this.physics.fC.toFixed(1)} Hz`;
+    });
+
+    const slMu = document.getElementById('slMu');
+    slMu.addEventListener('input', (e) => {
+      this.physics.mu = parseFloat(e.target.value);
+      document.getElementById('valMu').innerText = `${this.physics.mu.toFixed(3)} kg/m`;
+      document.getElementById('topValMu').innerText = `${this.physics.mu.toFixed(3)} kg/m`;
+    });
+
+    const slT = document.getElementById('slT');
+    slT.addEventListener('input', (e) => {
+      this.physics.T = parseFloat(e.target.value);
+      document.getElementById('valT').innerText = `${this.physics.T.toFixed(0)} N`;
+      document.getElementById('topValT').innerText = `${this.physics.T.toFixed(1)} N`;
+    });
+  }
+
+  bindToggles() {
+    const togGlow = document.getElementById('togGlow');
+    togGlow.addEventListener('click', () => {
+      this.renderer.visGlow = !this.renderer.visGlow;
+      togGlow.classList.toggle('active', this.renderer.visGlow);
+    });
+
+    const togVectors = document.getElementById('togVectors');
+    togVectors.addEventListener('click', () => {
+      this.renderer.visVectors = !this.renderer.visVectors;
+      togVectors.classList.toggle('active', this.renderer.visVectors);
+    });
+
+    const togEnergyBar = document.getElementById('togEnergyBar');
+    togEnergyBar.addEventListener('click', () => {
+      this.renderer.visEnergyBar = !this.renderer.visEnergyBar;
+      togEnergyBar.classList.toggle('active', this.renderer.visEnergyBar);
+      document.querySelectorAll('.energy-bar-wrap').forEach(el => {
+        el.style.display = this.renderer.visEnergyBar ? 'block' : 'none';
+      });
+    });
+  }
+
+  bindNavAndShortcuts() {
+    const btnPlayPause = document.getElementById('btnPlayPause');
+    const togglePlay = () => {
+      gRunning = !gRunning;
+      btnPlayPause.innerText = gRunning ? '⏸ Pause' : '▶ Play';
+      btnPlayPause.classList.toggle('active-state', !gRunning);
+    };
+    btnPlayPause.addEventListener('click', togglePlay);
+
+    const btnReset = document.getElementById('btnReset');
+    const resetSim = () => {
+      this.physics.A = 0.05;
+      this.physics.fA = 1.0;
+      this.physics.fB = 2.0;
+      this.physics.fC = 2.0;
+      this.physics.mu = 0.01;
+      this.physics.T = 50.0;
+      this.physics.phiA = 0.0;
+      this.physics.phiB = 0.0;
+      this.physics.phiC = 0.0;
+
+      document.getElementById('slAmp').value = 0.05;
+      document.getElementById('slFreqA').value = 1.0;
+      document.getElementById('slFreqB').value = 2.0;
+      document.getElementById('slFreqC').value = 2.0;
+      document.getElementById('slMu').value = 0.01;
+      document.getElementById('slT').value = 50;
+
+      document.getElementById('valAmp').innerText = '0.05 m';
+      document.getElementById('valFreqA').innerText = '1.0 Hz';
+      document.getElementById('valFreqB').innerText = '2.0 Hz';
+      document.getElementById('valFreqC').innerText = '2.0 Hz';
+      document.getElementById('valMu').innerText = '0.010 kg/m';
+      document.getElementById('valT').innerText = '50 N';
+      document.getElementById('topValMu').innerText = '0.010 kg/m';
+      document.getElementById('topValT').innerText = '50.0 N';
+    };
+    btnReset.addEventListener('click', resetSim);
+
+    document.getElementById('btnExportCSV').addEventListener('click', () => {
+      this.exportManager.exportCSV(this.dataLogger.records);
+    });
+
+    const tabBtnLab = document.getElementById('tabBtnLab');
+    const tabBtnPhysicalDemo = document.getElementById('tabBtnPhysicalDemo');
+    const tabBtnAssess = document.getElementById('tabBtnAssess');
+    const assessView = document.getElementById('assessmentView');
+    const demoView = document.getElementById('physicalDemoView');
+
+    const switchView = (view) => {
+      gActiveView = view;
+      tabBtnLab.classList.toggle('active', view === 'lab');
+      if (tabBtnPhysicalDemo) tabBtnPhysicalDemo.classList.toggle('active', view === 'demo');
+      tabBtnAssess.classList.toggle('active', view === 'assess');
+      assessView.classList.toggle('active', view === 'assess');
+      if (demoView) demoView.classList.toggle('active', view === 'demo');
+      if (view === 'demo') {
+        if (window.physicalDemoRig) window.physicalDemoRig.handleResize();
+        if (demoView) renderMathSafely(demoView);
+      } else if (view === 'assess') {
+        if (assessView) renderMathSafely(assessView);
+      }
+    };
+
+    tabBtnLab.addEventListener('click', () => switchView('lab'));
+    if (tabBtnPhysicalDemo) tabBtnPhysicalDemo.addEventListener('click', () => switchView('demo'));
+    tabBtnAssess.addEventListener('click', () => switchView('assess'));
+
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT') return;
+      if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.key === 'r' || e.key === 'R') {
+        e.preventDefault();
+        resetSim();
+      } else if (e.key === 'Tab') {
+        e.preventDefault();
+        const views = ['lab', 'demo', 'assess'];
+        const nextIdx = (views.indexOf(gActiveView) + 1) % views.length;
+        switchView(views[nextIdx]);
+      }
+    });
+
+    document.querySelectorAll('.five-e-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.five-e-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const cat = btn.dataset.category;
+        document.querySelectorAll('.assess-question').forEach(q => {
+          q.style.display = (cat === 'all' || q.dataset.category === cat) ? 'flex' : 'none';
+        });
+      });
+    });
+
+    document.querySelectorAll('.assess-question').forEach(q => {
+      const input = q.querySelector('.q-input');
+      const btn = q.querySelector('.q-check-btn');
+      const status = q.querySelector('.q-status');
+      const targetAns = q.dataset.correct.toLowerCase().trim();
+
+      const verifyAnswer = () => {
+        const val = input.value.toLowerCase().trim();
+        if (!val) return;
+
+        let isCorrect = false;
+        if (targetAns === '4') {
+          isCorrect = val.includes('4') || val.includes('quad');
+        } else if (targetAns === '300% increase') {
+          isCorrect = val.includes('300') || val.includes('4x') || val.includes('quad');
+        } else if (targetAns === 'increases quadratically') {
+          isCorrect = val.includes('quad') || val.includes('f^2') || val.includes('square');
+        } else if (targetAns === 'use of a²') {
+          isCorrect = val.includes('a^2') || val.includes('a²') || val.includes('square') || val.includes('amplitude');
+        } else if (targetAns === 'inversely') {
+          isCorrect = val.includes('inverse') || val.includes('1/lambda') || val.includes('1/λ') || val.includes('decreas');
+        } else if (targetAns === '160') {
+          isCorrect = val.includes('160');
+        } else if (targetAns === 'b by 9x') {
+          isCorrect = val.includes('b') && (val.includes('9') || val.includes('nine'));
+        } else if (targetAns === '0.5muw^2a^2lambda') {
+          isCorrect = val.includes('0.5') || val.includes('1/2') || val.includes('mu') || val.includes('μ') || val.includes('w^2') || val.includes('omega');
+        } else if (targetAns === 'solar vs sound, any justified') {
+          isCorrect = val.length > 5;
+        }
+
+        if (isCorrect) {
+          status.className = 'q-status correct';
+          status.innerText = '✓ Correct';
+          q.dataset.scored = "1";
+        } else {
+          status.className = 'q-status incorrect';
+          status.innerText = '✗ Check conceptual relationship';
+          q.dataset.scored = "0";
+        }
+        this.updateAssessmentScore();
+      };
+
+      btn.addEventListener('click', verifyAnswer);
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') verifyAnswer();
+      });
+    });
+  }
+
+  updateAssessmentScore() {
+    let score = 0;
+    const questions = document.querySelectorAll('.assess-question');
+    questions.forEach(q => {
+      if (q.dataset.scored === "1") score++;
+    });
+    document.getElementById('assessScoreChip').innerText = `Score: ${score} / ${questions.length}`;
+    try {
+      localStorage.setItem('wave_sim_assess_score', score);
+    } catch (err) {}
+  }
+
+  bindMouseDragAmplitude() {
+    const canvasB = document.getElementById('canvasB');
+    let isDragging = false;
+
+    const onPointerDown = (e) => {
+      isDragging = true;
+      onPointerMove(e);
+    };
+
+    const onPointerMove = (e) => {
+      if (!isDragging) return;
+      const rect = canvasB.getBoundingClientRect();
+      const clientY = e.clientY || (e.touches && e.touches[0] ? e.touches[0].clientY : rect.top + rect.height * 0.5);
+      const sy = clientY - rect.top;
+      const physicalY = Math.abs(this.camera.fromScreenY(sy, rect.height));
+      const clampedA = Math.max(0.01, Math.min(0.10, Math.round(physicalY * 100) / 100));
+
+      this.physics.A = clampedA;
+      document.getElementById('slAmp').value = clampedA;
+      document.getElementById('valAmp').innerText = `${clampedA.toFixed(2)} m`;
+    };
+
+    const onPointerUp = () => { isDragging = false; };
+
+    canvasB.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+
+    canvasB.addEventListener('touchstart', onPointerDown, { passive: true });
+    window.addEventListener('touchmove', onPointerMove, { passive: true });
+    window.addEventListener('touchend', onPointerUp);
+  }
+}
+
+// ─── CLASS 5: DataLogger ─────────────────────────────────────────
+class DataLogger {
+  constructor() {
+    this.records = [];
+  }
+
+  pushSample(t, physics, eA, eB, eC) {
+    const row = {
+      time: t.toFixed(2),
+      t: t.toFixed(3),
+      A_wave_amplitude: physics.A.toFixed(3),
+      f_B: physics.fB.toFixed(2),
+      f_C: physics.fC.toFixed(2),
+      mu: physics.mu.toFixed(4),
+      T: physics.T.toFixed(1),
+      E_A: eA.toFixed(4),
+      E_B: eB.toFixed(4),
+      E_C: eC.toFixed(4),
+      E_total: (eA + eB + eC).toFixed(4)
+    };
+    this.records.push(row);
+  }
+}
+
+// ─── CLASS 6: ExportManager ──────────────────────────────────────
+class ExportManager {
+  exportCSV(records) {
+    if (!records || records.length === 0) {
+      alert('No logged simulation frames to export yet.');
+      return;
+    }
+
+    const headers = ['time', 't', 'A_wave_amplitude', 'f_B', 'f_C', 'mu', 'T', 'E_A', 'E_B', 'E_C', 'E_total'];
+    const lines = [headers.join(',')];
+
+    for (let idx = 0; idx < records.length; idx++) {
+      const r = records[idx];
+      lines.push(`${r.time},${r.t},${r.A_wave_amplitude},${r.f_B},${r.f_C},${r.mu},${r.T},${r.E_A},${r.E_B},${r.E_C},${r.E_total}`);
+    }
+
+    const csvContent = lines.join('\\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'wave_energy_log.csv');
+  }
+}
+
+// ─── CLASS 7: PhysicalEnergyDemonstrators (Ruler/Marble & Tuning Fork/Water Splash) ──
+class PhysicalEnergyDemonstrators {
+  constructor() {
+    this.canvas = document.getElementById('canvasPhysicalDemo');
+    this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+    this.dpr = window.devicePixelRatio || 1;
+
+    // Active mode: 'ruler' (top-view bent ruler & marble) or 'fork' (tuning fork water splash)
+    this.mode = 'ruler';
+
+    // ── RIG 1: Top-View Vertical Ruler (Stretched Right, Strikes Ball Left) ──
+    this.rulerAmp = 0.03;         // Lateral bend (m) [0.01 - 0.08 m]
+    this.rulerLen = 0.30;         // Cantilever overhang (m) [0.15 - 0.35 m]
+    this.rulerStiffness = 320.0;  // Spring constant k (N/m)
+    this.marbleMass = 0.025;      // 25g glass marble
+    this.marbleMu = 0.035;        // Rolling friction coefficient
+    this.g = 9.81;
+
+    this.rulerState = 'idle';     // 'idle', 'releasing', 'rolling', 'stopped'
+    this.rulerPhase = 0.0;
+    this.rulerTipLateral = 0.0;   // Lateral displacement to the right (m)
+    this.marbleDist = 0.0;        // Distance traveled along track to the left (m)
+    this.marbleVel = 0.0;         // Forward speed along track (m/s)
+    this.marbleAngle = 0.0;       // Visual roll rotation angle (radians)
+    this.maxRollDist = 0.0;       // Max stopping distance current run (cm)
+    this.prevRollDist = 0.0;      // Previous run stopping distance (for 4x comparison)
+    this.autoFire = false;
+    this.lastFireTime = 0.0;
+
+    // Visual FX for Ruler & Marble
+    this.impactFlash = 0.0;       // Flash brightness upon marble impact [0..1]
+    this.skidParticles = [];      // Rolling friction dust/sparks
+    this.rulerHistory = [];       // Ghosting motion blur for ruler release
+
+    // ── RIG 2: Tuning Fork & Stable Acoustic Splash Water Tank ──
+    this.forkFreq = 256;          // Frequency (Hz): 128, 256, 512, 1024
+    this.forkAmp = 1.0;           // Vibration amplitude (mm): 0.5 - 3.0 mm
+    this.forkDipped = false;      // Whether vibrating tines are touching water
+    this.forkVibrating = false;
+    this.forkTime = 0.0;
+    this.malletTimer = 0.0;       // Mallet strike animation timer
+
+    // Stable fluid dynamics & particle systems
+    this.acousticWaves = [];      // Acoustic pressure rings radiating in air
+    this.cavitationBubbles = [];  // Micro-bubbles underwater
+    this.splashDroplets = [];     // Water droplets launched by rapid tine impulse
+
+    this.initControls();
+    this.handleResize();
+  }
+
+  handleResize() {
+    if (!this.canvas || !this.ctx) return;
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width * this.dpr;
+    this.canvas.height = rect.height * this.dpr;
+    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+  }
+
+  getRulerFrequency() {
+    const refL = 0.30;
+    const refF = 3.5;
+    return refF * Math.pow(refL / this.rulerLen, 2);
+  }
+
+  getRulerEnergy() {
+    return 0.5 * this.rulerStiffness * this.rulerAmp * this.rulerAmp;
+  }
+
+  getForkPowerRate() {
+    // Mechanical acoustic intensity / power transfer: P ~ f^2 * A^2
+    const fRatio = this.forkFreq / 256.0;
+    const aRatio = this.forkAmp / 1.0;
+    return Math.pow(fRatio, 2) * Math.pow(aRatio, 2);
+  }
+
+  initControls() {
+    // Mode subtabs switching
+    const btnSubRuler = document.getElementById('btnSubtabRuler');
+    const btnSubFork = document.getElementById('btnSubtabFork');
+    const panelRuler = document.getElementById('rulerControlsPanel');
+    const panelFork = document.getElementById('forkControlsPanel');
+
+    const setMode = (m) => {
+      this.mode = m;
+      if (btnSubRuler) btnSubRuler.classList.toggle('active', m === 'ruler');
+      if (btnSubFork) btnSubFork.classList.toggle('active', m === 'fork');
+      if (panelRuler) panelRuler.style.display = (m === 'ruler') ? 'grid' : 'none';
+      if (panelFork) panelFork.style.display = (m === 'fork') ? 'grid' : 'none';
+
+      const heading = document.getElementById('demoBannerHeading');
+      const text = document.getElementById('demoBannerText');
+      const sub = document.getElementById('demoCanvasSubtitle');
+
+      if (m === 'ruler') {
+        if (heading) heading.innerHTML = "Top-Down View: Vertical Cantilever Ruler Bends Right ⟹ Hits Ball ⟹ Ball Rolls Left ($d \\propto A^2$)";
+        if (text) text.innerHTML = "Viewing the laboratory table from directly above. The ruler is mounted vertically across the table. When stretched, the ruler bends to the <strong>RIGHT</strong>, storing elastic strain energy $PE = \\frac{1}{2}kA^2$. Upon release, the ruler snaps back toward the left, strikes the ball at the neutral point, propelling it horizontally to the <strong>LEFT</strong> along the graduated centimeter track. The stopping distance $d = \\frac{v^2}{2\\mu_k g} \\propto A^2$ proves that doubling the bend launches the marble <strong>4 times farther</strong>!";
+        if (sub) sub.innerText = "Top-Down View: Vertical Ruler (Bends Right) ⟹ Strikes Ball ⟹ Marble Rolls Left (0 to 400 cm)";
+      } else {
+        if (heading) heading.innerHTML = "Tuning Fork &amp; Water Splash: High Frequency Means Quadratic Energy Transfer ($P \\propto f^2 \\cdot A^2$)";
+        if (text) text.innerHTML = "When a vibrating tuning fork touches liquid water, each oscillation transfers momentum to surface water molecules. Because kinetic energy density scales as $\\omega^2 = 4\\pi^2 f^2$, a <strong>512 Hz fork delivers 4× more violent energy transfer</strong> than a 256 Hz fork at the same amplitude, causing droplets to atomize and spray violently into the air!";
+        if (sub) sub.innerText = "Physical Lab Tank: Acoustic Cavitation & Water Splash Dynamics";
+      }
+      this.updateScoreboards();
+      const bannerCard = document.getElementById('demoBannerCard');
+      if (bannerCard) renderMathSafely(bannerCard);
+    };
+
+    if (btnSubRuler) btnSubRuler.addEventListener('click', () => setMode('ruler'));
+    if (btnSubFork) btnSubFork.addEventListener('click', () => setMode('fork'));
+
+    // ── RIG 1: Ruler Controls ──
+    const slAmp = document.getElementById('slRulerBend');
+    if (slAmp) {
+      slAmp.addEventListener('input', (e) => {
+        this.rulerAmp = parseFloat(e.target.value) * 0.01;
+        document.getElementById('valRulerBend').innerText = `${parseFloat(e.target.value).toFixed(1)} cm`;
+        document.getElementById('statPill1').innerText = `Bend A: ${parseFloat(e.target.value).toFixed(1)} cm`;
+        this.updateScoreboards();
+      });
+    }
+
+    const slLen = document.getElementById('slRulerLen');
+    if (slLen) {
+      slLen.addEventListener('input', (e) => {
+        this.rulerLen = parseFloat(e.target.value) * 0.01;
+        const f = this.getRulerFrequency();
+        document.getElementById('valRulerLen').innerText = `${parseFloat(e.target.value).toFixed(1)} cm (f = ${f.toFixed(1)} Hz)`;
+        document.getElementById('statPill2').innerText = `Length L: ${parseFloat(e.target.value).toFixed(1)} cm`;
+      });
+    }
+
+    const btnAmp1 = document.getElementById('btnPresetAmp1');
+    if (btnAmp1) {
+      btnAmp1.addEventListener('click', () => {
+        this.rulerAmp = 0.03;
+        slAmp.value = 3.0;
+        document.getElementById('valRulerBend').innerText = '3.0 cm';
+        document.getElementById('statPill1').innerText = 'Bend A: 3.0 cm';
+        this.updateScoreboards();
+      });
+    }
+
+    const btnAmp2 = document.getElementById('btnPresetAmp2');
+    if (btnAmp2) {
+      btnAmp2.addEventListener('click', () => {
+        this.rulerAmp = 0.06;
+        slAmp.value = 6.0;
+        document.getElementById('valRulerBend').innerText = '6.0 cm';
+        document.getElementById('statPill1').innerText = 'Bend A: 6.0 cm';
+        this.updateScoreboards();
+      });
+    }
+
+    const btnLenLong = document.getElementById('btnPresetLenLong');
+    if (btnLenLong) {
+      btnLenLong.addEventListener('click', () => {
+        this.rulerLen = 0.32;
+        slLen.value = 32.0;
+        const f = this.getRulerFrequency();
+        document.getElementById('valRulerLen').innerText = `32.0 cm (f = ${f.toFixed(1)} Hz)`;
+        document.getElementById('statPill2').innerText = 'Length L: 32.0 cm';
+      });
+    }
+
+    const btnLenShort = document.getElementById('btnPresetLenShort');
+    if (btnLenShort) {
+      btnLenShort.addEventListener('click', () => {
+        this.rulerLen = 0.16;
+        slLen.value = 16.0;
+        const f = this.getRulerFrequency();
+        document.getElementById('valRulerLen').innerText = `16.0 cm (f = ${f.toFixed(1)} Hz)`;
+        document.getElementById('statPill2').innerText = 'Length L: 16.0 cm';
+      });
+    }
+
+    const btnLaunch = document.getElementById('btnLaunchMarble');
+    if (btnLaunch) {
+      btnLaunch.addEventListener('click', () => this.launchMarble());
+    }
+
+    const btnResetM = document.getElementById('btnResetMarble');
+    if (btnResetM) {
+      btnResetM.addEventListener('click', () => this.resetMarbleRig());
+    }
+
+    const btnAuto = document.getElementById('btnAutoFire');
+    if (btnAuto) {
+      btnAuto.addEventListener('click', () => {
+        this.autoFire = !this.autoFire;
+        btnAuto.classList.toggle('active', this.autoFire);
+        btnAuto.innerText = this.autoFire ? '⏸ Continuous: ON' : '⏱ Continuous Wave';
+      });
+    }
+
+    // ── RIG 2: Tuning Fork Controls ──
+    const slFreq = document.getElementById('slForkFreq');
+    const setForkFrequency = (f) => {
+      this.forkFreq = f;
+      if (slFreq) slFreq.value = f;
+      let label = `${f} Hz`;
+      if (f === 128) label += " (C3 - Low f)";
+      else if (f === 256) label += " (Middle C - Baseline)";
+      else if (f === 512) label += " (High C - 4× Energy!)";
+      else if (f === 1024) label += " (Super High - 16× Energy!)";
+      document.getElementById('valForkFreq').innerText = label;
+      document.querySelectorAll('#forkControlsPanel .btn-rig-action').forEach(b => {
+        if (b.id && b.id.startsWith('btnFork') && !isNaN(b.id.replace('btnFork', ''))) {
+          b.classList.toggle('active', parseInt(b.id.replace('btnFork', '')) === f);
+        }
+      });
+      this.updateScoreboards();
+    };
+
+    if (slFreq) {
+      slFreq.addEventListener('input', (e) => setForkFrequency(parseInt(e.target.value)));
+    }
+    const b128 = document.getElementById('btnFork128');
+    const b256 = document.getElementById('btnFork256');
+    const b512 = document.getElementById('btnFork512');
+    const b1024 = document.getElementById('btnFork1024');
+    if (b128) b128.addEventListener('click', () => setForkFrequency(128));
+    if (b256) b256.addEventListener('click', () => setForkFrequency(256));
+    if (b512) b512.addEventListener('click', () => setForkFrequency(512));
+    if (b1024) b1024.addEventListener('click', () => setForkFrequency(1024));
+
+    const slAmpF = document.getElementById('slForkAmp');
+    if (slAmpF) {
+      slAmpF.addEventListener('input', (e) => {
+        this.forkAmp = parseFloat(e.target.value);
+        document.getElementById('valForkAmp').innerText = `${this.forkAmp.toFixed(1)} mm`;
+        this.updateScoreboards();
+      });
+    }
+    const bSoft = document.getElementById('btnForkSoft');
+    const bHard = document.getElementById('btnForkHard');
+    if (bSoft) bSoft.addEventListener('click', () => {
+      this.forkAmp = 0.5;
+      if (slAmpF) slAmpF.value = 0.5;
+      document.getElementById('valForkAmp').innerText = '0.5 mm';
+      this.updateScoreboards();
+    });
+    if (bHard) bHard.addEventListener('click', () => {
+      this.forkAmp = 2.0;
+      if (slAmpF) slAmpF.value = 2.0;
+      document.getElementById('valForkAmp').innerText = '2.0 mm';
+      this.updateScoreboards();
+    });
+
+    const btnStrike = document.getElementById('btnStrikeFork');
+    if (btnStrike) {
+      btnStrike.addEventListener('click', () => this.strikeFork());
+    }
+    const btnResetW = document.getElementById('btnResetWater');
+    if (btnResetW) {
+      btnResetW.addEventListener('click', () => this.resetWater());
+    }
+
+    this.updateScoreboards();
+    const demoCard = document.getElementById('demoBannerCard');
+    if (demoCard) renderMathSafely(demoCard);
+  }
+
+  updateScoreboards() {
+    const badge = document.getElementById('demoEnergyBadge');
+    const ratioPill = document.getElementById('demoBannerRatio');
+
+    if (this.mode === 'ruler') {
+      const e = this.getRulerEnergy();
+      const baseE = 0.5 * this.rulerStiffness * (0.03 * 0.03);
+      const ratio = e / (baseE || 1.0);
+      if (badge) badge.innerText = `Elastic Energy: ${e.toFixed(3)} J (${ratio.toFixed(2)}× Baseline)`;
+      if (ratioPill) ratioPill.innerText = `Bend A: ${(this.rulerAmp * 100).toFixed(1)} cm ⟹ Distance: ${ratio.toFixed(2)}× (∝ A²)`;
+    } else {
+      const powerRate = this.getForkPowerRate();
+      const fRatio = this.forkFreq / 256.0;
+      if (badge) badge.innerText = `Splash Power Index: ${powerRate.toFixed(2)}× Baseline`;
+      if (ratioPill) ratioPill.innerText = `f = ${this.forkFreq} Hz (${fRatio.toFixed(1)}×) ⟹ Energy Flux: ${powerRate.toFixed(2)}× (∝ f²)`;
+    }
+  }
+
+  // ─── Actions: Ruler & Marble ───
+  launchMarble() {
+    if (this.rulerState === 'releasing' || this.rulerState === 'rolling') return;
+    if (this.maxRollDist > 1.0) {
+      this.prevRollDist = this.maxRollDist;
+    }
+    this.rulerState = 'releasing';
+    this.rulerPhase = 0.0;
+    this.rulerTipLateral = this.rulerAmp;
+    this.rulerHistory = [];
+    this.maxRollDist = 0.0;
+    this.marbleDist = 0.0;
+    this.marbleVel = 0.0;
+    this.marbleAngle = 0.0;
+  }
+
+  resetMarbleRig() {
+    if (this.maxRollDist > 1.0) {
+      this.prevRollDist = this.maxRollDist;
+    }
+    this.rulerState = 'idle';
+    this.rulerPhase = 0.0;
+    this.rulerTipLateral = 0.0;
+    this.marbleDist = 0.0;
+    this.marbleVel = 0.0;
+    this.marbleAngle = 0.0;
+    this.maxRollDist = 0.0;
+    this.impactFlash = 0.0;
+    this.skidParticles = [];
+    this.rulerHistory = [];
+    const stat = document.getElementById('statPill3');
+    if (stat) stat.innerText = 'Distance: 0.0 cm';
+  }
+
+  // ─── Actions: Tuning Fork ───
+  strikeFork() {
+    this.forkVibrating = true;
+    this.forkDipped = true;
+    this.forkTime = 0.0;
+    this.malletTimer = 1.0;
+
+    // Spawn expanding acoustic pressure rings in air
+    const ringCount = 5;
+    for (let i = 0; i < ringCount; i++) {
+      this.acousticWaves.push({
+        r: 10 + i * 20,
+        maxR: 190,
+        alpha: 0.85,
+        freq: this.forkFreq
+      });
+    }
+
+    // Launch initial splash droplets proportional to P ~ f^2 * A^2
+    const pIndex = this.getForkPowerRate();
+    const dropletCount = Math.min(140, Math.floor(16 * Math.sqrt(pIndex)));
+    for (let i = 0; i < dropletCount; i++) {
+      const angle = (Math.PI * 1.08) + Math.random() * (Math.PI * 0.84);
+      const speed = (2.5 + Math.random() * 6.0) * Math.min(3.2, Math.sqrt(pIndex));
+      this.splashDroplets.push({
+        x: (Math.random() - 0.5) * 16,
+        y: -2, // slightly above water surface
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed, // upward negative velocity
+        r: 1.2 + Math.random() * 2.5,
+        life: 1.0
+      });
+    }
+  }
+
+  resetWater() {
+    this.forkVibrating = false;
+    this.forkDipped = false;
+    this.forkTime = 0.0;
+    this.malletTimer = 0.0;
+    this.acousticWaves = [];
+    this.cavitationBubbles = [];
+    this.splashDroplets = [];
+  }
+
+  // ─── Step Simulation Loop ───
+  step(dt) {
+    if (!isFinite(dt) || dt <= 0) dt = 0.016;
+
+    if (this.mode === 'ruler') {
+      const f = this.getRulerFrequency();
+      const omega = 2.0 * Math.PI * f;
+
+      if (this.autoFire && (gTime - this.lastFireTime > 2.6)) {
+        this.lastFireTime = gTime;
+        if (this.maxRollDist > 1.0) this.prevRollDist = this.maxRollDist;
+        this.resetMarbleRig();
+        this.launchMarble();
+      }
+
+      // Decrement impact flash
+      if (this.impactFlash > 0.0) {
+        this.impactFlash = Math.max(0.0, this.impactFlash - dt * 3.5);
+      }
+
+      if (this.rulerState === 'releasing') {
+        this.rulerPhase += omega * dt;
+        // Damped harmonic oscillation swinging back left through equilibrium
+        this.rulerTipLateral = this.rulerAmp * Math.cos(this.rulerPhase) * Math.exp(-3.5 * this.rulerPhase / (2.0 * Math.PI));
+
+        // Save motion blur history
+        this.rulerHistory.push(this.rulerTipLateral);
+        if (this.rulerHistory.length > 5) this.rulerHistory.shift();
+
+        // When vertical cantilever strikes neutral line (phase = pi/2), transfer momentum!
+        if (this.rulerPhase >= Math.PI * 0.5) {
+          this.rulerState = 'rolling';
+          this.impactFlash = 1.0;
+          const energy = this.getRulerEnergy();
+          // Calibrated elastic impulse transfer so:
+          // A = 2.0 cm -> d ≈ 22.2 cm
+          // A = 3.0 cm -> d ≈ 50.0 cm
+          // A = 6.0 cm -> d ≈ 200.0 cm (4x farther!)
+          // A = 8.0 cm -> d ≈ 355.6 cm (< 400 cm track)
+          const eff = 0.02980;
+          this.marbleVel = Math.sqrt((2.0 * energy * eff) / this.marbleMass);
+          this.marbleDist = 0.0;
+          this.marbleAngle = 0.0;
+        }
+      } else if (this.rulerState === 'rolling') {
+        // Marble rolls horizontally across level surface to the LEFT against rolling friction
+        this.marbleDist += this.marbleVel * dt;
+        const decel = this.marbleMu * this.g;
+        this.marbleVel = Math.max(0.0, this.marbleVel - decel * dt);
+
+        // Visual rolling rotation (angle in radians)
+        this.marbleAngle -= (this.marbleVel * dt) / 0.012;
+
+        const currentCm = this.marbleDist * 100.0;
+        if (currentCm > this.maxRollDist) {
+          this.maxRollDist = currentCm;
+          const stat = document.getElementById('statPill3');
+          if (stat) stat.innerText = `Distance: ${this.maxRollDist.toFixed(1)} cm`;
+        }
+
+        // Skid dust particles behind rolling marble
+        if (this.marbleVel > 0.2 && Math.random() < 0.45) {
+          this.skidParticles.push({
+            d: this.marbleDist,
+            yOff: (Math.random() - 0.5) * 6,
+            life: 1.0,
+            r: 1.5 + Math.random() * 2.0
+          });
+        }
+
+        // Ruler rapidly damps out
+        this.rulerPhase += omega * dt;
+        this.rulerTipLateral = this.rulerAmp * Math.cos(this.rulerPhase) * Math.exp(-5.0 * this.rulerPhase / (2.0 * Math.PI));
+
+        if (this.marbleVel <= 0.01) {
+          this.rulerState = 'stopped';
+        }
+      } else if (this.rulerState === 'stopped') {
+        this.rulerTipLateral *= 0.85;
+      }
+
+      // Step skid particles
+      for (let i = this.skidParticles.length - 1; i >= 0; i--) {
+        const p = this.skidParticles[i];
+        p.life -= dt * 1.5;
+        if (p.life <= 0) this.skidParticles.splice(i, 1);
+      }
+    } else {
+      // ── Tuning Fork & Water Tank Step ──
+      if (this.malletTimer > 0.0) {
+        this.malletTimer = Math.max(0.0, this.malletTimer - dt * 2.5);
+      }
+
+      const pIndex = this.getForkPowerRate();
+
+      if (this.forkVibrating) {
+        this.forkTime += dt;
+
+        // Acoustic cavitation micro-bubbles underwater at the tines
+        if (Math.random() < Math.min(0.85, 0.25 * Math.sqrt(pIndex))) {
+          this.cavitationBubbles.push({
+            x: (Math.random() - 0.5) * 20,
+            y: 8 + Math.random() * 24,
+            vy: -12 - Math.random() * 20,
+            vx: (Math.random() - 0.5) * 6,
+            r: 1.0 + Math.random() * 2.0,
+            life: 1.0
+          });
+        }
+
+        // Continuous aerosol mist and droplet fountain while vibrating
+        if (Math.random() < Math.min(0.85, 0.16 * pIndex)) {
+          const angle = (Math.PI * 1.10) + Math.random() * (Math.PI * 0.80);
+          const speed = (2.2 + Math.random() * 5.5) * Math.min(3.0, Math.sqrt(pIndex));
+          this.splashDroplets.push({
+            x: (Math.random() - 0.5) * 16,
+            y: -2,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            r: 1.0 + Math.random() * 2.2,
+            life: 1.0
+          });
+        }
+
+        // Damping vibration over 4.5 seconds
+        if (this.forkTime > 4.5) {
+          this.forkVibrating = false;
+        }
+      }
+
+      // Step underwater cavitation bubbles
+      for (let i = this.cavitationBubbles.length - 1; i >= 0; i--) {
+        const b = this.cavitationBubbles[i];
+        b.y += b.vy * dt;
+        b.x += b.vx * dt;
+        b.life -= dt * 1.8;
+        if (b.y <= 0 || b.life <= 0) {
+          this.cavitationBubbles.splice(i, 1);
+        }
+      }
+
+      // Step acoustic pressure rings
+      for (let i = this.acousticWaves.length - 1; i >= 0; i--) {
+        const w = this.acousticWaves[i];
+        w.r += dt * 65.0;
+        w.alpha -= dt * 0.65;
+        if (w.alpha <= 0 || w.r >= w.maxR) {
+          this.acousticWaves.splice(i, 1);
+        }
+      }
+
+      // Step splash droplets in parabolic flight (gravity pulls down)
+      for (let i = this.splashDroplets.length - 1; i >= 0; i--) {
+        const drop = this.splashDroplets[i];
+        drop.x += drop.vx * dt * 45;
+        drop.y += drop.vy * dt * 45;
+        drop.vy += this.g * dt * 2.4; // gravity accelerates downwards
+        drop.life -= dt * 0.75;
+
+        // When droplet descends back to water surface (y >= 0), it splashes out cleanly
+        if (drop.y >= 0 && drop.vy > 0) {
+          drop.life = 0;
+        }
+
+        if (drop.life <= 0) {
+          this.splashDroplets.splice(i, 1);
+        }
+      }
+    }
+  }
+
+  // ─── Render ───
+  render() {
+    if (!this.canvas || !this.ctx) return;
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
+    if (w <= 0 || h <= 0) return;
+
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.clearRect(0, 0, w, h);
+
+    if (this.mode === 'ruler') {
+      this.renderTopViewRuler(ctx, w, h);
+    } else {
+      this.renderTuningForkWater(ctx, w, h);
+    }
+
+    ctx.restore();
+  }
+
+  // ─── Render Rig 1: Top-View Vertical Ruler (Bends Right, Hits Ball Left) ───
+  renderTopViewRuler(ctx, w, h) {
+    // 1. Lab Table Surface Grid Background
+    ctx.fillStyle = '#0b0f19';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
+    ctx.lineWidth = 1;
+    for (let x = 30; x < w; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+    }
+    for (let y = 30; y < h; y += 40) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+
+    // Geometry layout:
+    // Track runs horizontally at trackY
+    // Track starts at xZero (where 0 cm is located) and extends to the LEFT
+    // Vertical ruler is centered along xZero, clamped at the bottom, extending UP
+    const trackY = h * 0.48;
+    const xZero = Math.min(w - 120, Math.max(w * 0.56, 480));
+    const trackEndX = 35;
+    const trackLenPx = xZero - trackEndX;
+    const totalTrackCm = 400.0;
+
+    // 2. Fixed Clamp at Table Bottom Edge (Holds the vertical ruler firmly)
+    const clampBaseY = h - 22;
+    const clampH = 26;
+    const clampW = 68;
+    ctx.save();
+    ctx.fillStyle = '#1c2438';
+    ctx.fillRect(xZero - clampW * 0.5, clampBaseY - clampH, clampW, clampH);
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(xZero - clampW * 0.5, clampBaseY - clampH, clampW, clampH);
+
+    // Clamping metal screws
+    ctx.fillStyle = '#ff9800';
+    ctx.fillRect(xZero - 20, clampBaseY - clampH - 6, 10, 8);
+    ctx.fillRect(xZero + 10, clampBaseY - clampH - 6, 10, 8);
+
+    ctx.fillStyle = '#8b9bb4';
+    ctx.font = '700 8px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText("FIXED CLAMP", xZero, clampBaseY - 8);
+    ctx.restore();
+
+    // 3. Vertical Ruler Parameters
+    const rulerBaseY = clampBaseY - clampH;
+    const rulerLenPx = (this.rulerLen / 0.35) * (h * 0.72);
+    const rulerTipY = Math.max(25, rulerBaseY - rulerLenPx);
+    const rulerThick = 12.0;
+
+    // Lateral bend to the RIGHT in pixels
+    const currentShift = (this.rulerState === 'idle') ? (this.rulerAmp * 680) : (this.rulerTipLateral * 680);
+
+    // Helper: Euler-Bernoulli Deflection Curve (Fixed at bottom clamp, curves to the RIGHT as y goes UP)
+    const getRulerXAtY = (y, shift) => {
+      const xi = Math.max(0, Math.min(1, (rulerBaseY - y) / (rulerBaseY - rulerTipY)));
+      return xZero + shift * (1.5 * xi * xi - 0.5 * xi * xi * xi);
+    };
+
+    // Motion Blur Ghosting during snap release
+    if (this.rulerState === 'releasing' && this.rulerHistory.length > 1) {
+      ctx.save();
+      for (let g = 0; g < this.rulerHistory.length; g++) {
+        const pastShift = this.rulerHistory[g] * 680;
+        ctx.strokeStyle = `rgba(255, 215, 64, ${0.12 + g * 0.08})`;
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        for (let y = rulerBaseY; y >= rulerTipY; y -= 5) {
+          const rx = getRulerXAtY(y, pastShift);
+          if (y === rulerBaseY) ctx.moveTo(rx, y);
+          else ctx.lineTo(rx, y);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Draw Vertical Cantilever Ruler Body (Golden / Brushed Steel)
+    ctx.save();
+    const rulerGrad = ctx.createLinearGradient(xZero, 0, xZero + 50, 0);
+    rulerGrad.addColorStop(0, '#ffd740');
+    rulerGrad.addColorStop(0.5, '#ffb300');
+    rulerGrad.addColorStop(1, '#ff8f00');
+
+    // Ruler Polygon Path (Left edge and Right edge)
+    ctx.beginPath();
+    // Left edge going UP
+    for (let y = rulerBaseY; y >= rulerTipY; y -= 4) {
+      const rx = getRulerXAtY(y, currentShift);
+      if (y === rulerBaseY) ctx.moveTo(rx - rulerThick * 0.5, y);
+      else ctx.lineTo(rx - rulerThick * 0.5, y);
+    }
+    // Right edge going DOWN
+    for (let y = rulerTipY; y <= rulerBaseY; y += 4) {
+      const rx = getRulerXAtY(y, currentShift);
+      ctx.lineTo(rx + rulerThick * 0.5, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = rulerGrad;
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Centimeter graduation ticks engraved on the vertical ruler body
+    ctx.strokeStyle = '#111';
+    ctx.lineWidth = 1.4;
+    for (let s = 0.08; s <= 0.95; s += 0.07) {
+      const ry = rulerBaseY - (rulerBaseY - rulerTipY) * s;
+      const rx = getRulerXAtY(ry, currentShift);
+      ctx.beginPath();
+      ctx.moveTo(rx - rulerThick * 0.5, ry);
+      ctx.lineTo(rx + rulerThick * 0.1, ry);
+      ctx.stroke();
+    }
+
+    // Classic lab hanging hole at top free tip of the ruler
+    const tipX = getRulerXAtY(rulerTipY, currentShift);
+    ctx.fillStyle = '#0b0f19';
+    ctx.beginPath();
+    ctx.arc(tipX, rulerTipY + 8, 3.2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    // 4. Lateral Bend Caliper Line & Arrow (Stretching to the RIGHT!)
+    ctx.save();
+    const rulerXAtTrack = getRulerXAtY(trackY, currentShift);
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3, 3]);
+    ctx.beginPath();
+    ctx.moveTo(xZero, trackY);
+    ctx.lineTo(rulerXAtTrack, trackY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Arrowhead pointing to the right
+    ctx.fillStyle = '#00e5ff';
+    ctx.beginPath();
+    ctx.moveTo(rulerXAtTrack - 6, trackY - 4);
+    ctx.lineTo(rulerXAtTrack - 6, trackY + 4);
+    ctx.lineTo(rulerXAtTrack, trackY);
+    ctx.fill();
+
+    // Caliper text: "Bend A = X.X cm (Bends Right ⟶)"
+    ctx.font = '700 10px "JetBrains Mono", monospace';
+    ctx.fillText(`Bend A = ${(this.rulerAmp * 100).toFixed(1)} cm`, Math.max(xZero + 10, rulerXAtTrack + 8), trackY - 10);
+    ctx.restore();
+
+    // 5. Strike Point & Impact FX at (xZero - 10, trackY)
+    const strikeX = xZero - 10;
+
+    if (this.impactFlash > 0.01) {
+      ctx.save();
+      const flashR = (1.0 - this.impactFlash) * 36;
+      ctx.strokeStyle = `rgba(255, 215, 64, ${this.impactFlash})`;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(strikeX, trackY, flashR, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Spark lines bursting outwards
+      ctx.strokeStyle = `rgba(0, 229, 255, ${this.impactFlash})`;
+      ctx.lineWidth = 1.8;
+      for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+        ctx.beginPath();
+        ctx.moveTo(strikeX + Math.cos(a) * 4, trackY + Math.sin(a) * 4);
+        ctx.lineTo(strikeX + Math.cos(a) * (10 + flashR * 0.7), trackY + Math.sin(a) * (10 + flashR * 0.7));
+        ctx.stroke();
+      }
+
+      // "CLACK!" impact feedback badge
+      ctx.fillStyle = `rgba(255, 51, 102, ${this.impactFlash})`;
+      ctx.font = '800 11px "JetBrains Mono", monospace';
+      ctx.fillText("💥 CLACK!", strikeX - 25, trackY - 24);
+      ctx.restore();
+    }
+
+    // 6. Level Roll Track (Extends to the LEFT: 0cm at xZero, increasing to the left!)
+    // Track surface bed
+    ctx.fillStyle = '#101524';
+    ctx.fillRect(trackEndX, trackY - 18, trackLenPx, 36);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(trackEndX, trackY - 18, trackLenPx, 36);
+
+    // Track guide grooves (Top & Bottom Rails)
+    ctx.strokeStyle = '#2d3748';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(xZero, trackY - 14); ctx.lineTo(trackEndX, trackY - 14);
+    ctx.moveTo(xZero, trackY + 14); ctx.lineTo(trackEndX, trackY + 14);
+    ctx.stroke();
+
+    // Centimeter graduation ticks along track (0 cm at strike point, increasing to the LEFT!)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+    ctx.font = '600 8px "JetBrains Mono", monospace';
+    for (let cm = 0; cm <= totalTrackCm; cm += 10) {
+      const px = xZero - (cm / totalTrackCm) * trackLenPx;
+      const isMajor = (cm % 50 === 0);
+      ctx.strokeStyle = isMajor ? '#00e5ff' : 'rgba(255, 255, 255, 0.22)';
+      ctx.lineWidth = isMajor ? 1.8 : 0.9;
+      ctx.beginPath();
+      ctx.moveTo(px, trackY - 10);
+      ctx.lineTo(px, trackY - (isMajor ? 19 : 14));
+      ctx.stroke();
+      if (isMajor || cm === 0) {
+        ctx.fillText(`${cm}cm`, px - (cm >= 100 ? 12 : 8), trackY - 22);
+      }
+    }
+
+    // Track Direction Arrow & Label
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.font = '700 8px "JetBrains Mono", monospace';
+    ctx.fillText("⟵ MARBLE ROLLS LEFT ACROSS LEVEL TABLE TRACK (0 to 400 cm)", trackEndX + 15, trackY + 28);
+
+    // Skid friction particles on the track
+    ctx.save();
+    this.skidParticles.forEach(p => {
+      const px = strikeX - (p.d / (totalTrackCm * 0.01)) * trackLenPx;
+      ctx.fillStyle = `rgba(0, 229, 255, ${p.life * 0.6})`;
+      ctx.beginPath();
+      ctx.arc(px, trackY + p.yOff, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.restore();
+
+    // 7. Marble (Glass Sphere rolling horizontally to the LEFT)
+    let marbleX = strikeX;
+    let marbleY = trackY;
+
+    if (this.rulerState === 'idle') {
+      // Marble rests waiting in front of the neutral strike point
+      marbleX = strikeX;
+      marbleY = trackY;
+    } else if (this.rulerState === 'releasing') {
+      marbleX = strikeX;
+      marbleY = trackY;
+    } else {
+      // Marble rolling to the LEFT along the track
+      const rollPx = (this.marbleDist / (totalTrackCm * 0.01)) * trackLenPx;
+      marbleX = strikeX - Math.min(trackLenPx - 10, rollPx);
+      marbleY = trackY;
+    }
+
+    // Marble render with 3D Sphere gradient and Rotational swirl
+    ctx.save();
+    const rad = 8.0;
+
+    // Drop shadow on table
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.beginPath();
+    ctx.ellipse(marbleX, marbleY + 7, rad * 1.1, rad * 0.4, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Sphere Body
+    const grad = ctx.createRadialGradient(marbleX - 2.5, marbleY - 2.5, 1, marbleX, marbleY, rad);
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(0.3, '#00e5ff');
+    grad.addColorStop(0.8, '#00558f');
+    grad.addColorStop(1, '#001a33');
+
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(marbleX, marbleY, rad, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Internal Rolling Swirl (Rotates with angle as marble moves!)
+    ctx.save();
+    ctx.translate(marbleX, marbleY);
+    ctx.rotate(this.marbleAngle);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(0, 0, 4.5, 0, Math.PI * 1.3);
+    ctx.stroke();
+    ctx.restore();
+    ctx.restore();
+
+    // 8. Previous Run Ghost Marker (For Immediate 4x Visual Comparison)
+    if (this.prevRollDist > 1.0) {
+      const prevPx = strikeX - (this.prevRollDist / totalTrackCm) * trackLenPx;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 215, 64, 0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(prevPx, trackY - 24);
+      ctx.lineTo(prevPx, trackY + 24);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#ffd740';
+      ctx.font = '600 9px "JetBrains Mono", monospace';
+      ctx.fillText(`Prev: ${this.prevRollDist.toFixed(1)} cm`, prevPx - 30, trackY - 28);
+      ctx.restore();
+    }
+
+    // 9. Current Stopping Distance Caliper Line
+    if (this.maxRollDist > 1.0) {
+      const markPx = strikeX - (this.maxRollDist / totalTrackCm) * trackLenPx;
+      ctx.save();
+      ctx.strokeStyle = '#ff3366';
+      ctx.lineWidth = 2.0;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(markPx, trackY - 26);
+      ctx.lineTo(markPx, trackY + 26);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.fillStyle = '#ff3366';
+      ctx.font = '700 10px "JetBrains Mono", monospace';
+      const label = `d = ${this.maxRollDist.toFixed(1)} cm (∝ A²)`;
+      ctx.fillText(label, markPx - 45, trackY + 36);
+
+      // 4x Farther Badge if this run is 4x the baseline
+      if (this.prevRollDist > 1.0 && this.maxRollDist >= this.prevRollDist * 3.5) {
+        ctx.fillStyle = '#ffd740';
+        ctx.font = '800 10px "JetBrains Mono", monospace';
+        ctx.fillText("🌟 4× FARTHER! (d ∝ A²)", markPx - 60, trackY + 49);
+      }
+      ctx.restore();
+    }
+  }
+
+  // ─── Render Rig 2: Tuning Fork Dipped in Water Splash Tank (Stable Fluid Physics) ───
+  renderTuningForkWater(ctx, w, h) {
+    // 1. Grid Background
+    ctx.fillStyle = '#0b0f19';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.lineWidth = 1;
+    for (let x = 30; x < w; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+    }
+    for (let y = 30; y < h; y += 40) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+
+    // 2. Optical Glass Water Tank
+    const tankX = w * 0.28;
+    const tankY = h * 0.36;
+    const tankW = w * 0.66;
+    const tankH = h * 0.56;
+
+    // Stable Equilibrium Water Line (IMMUTABLE baseline: cannot sink or rise!)
+    const waterLevelY = tankY + 38;
+    const dipCenterX = tankX + tankW * 0.30;
+
+    // Deep Fluid Gradient
+    const waterGrad = ctx.createLinearGradient(0, waterLevelY, 0, tankY + tankH);
+    waterGrad.addColorStop(0, 'rgba(0, 195, 255, 0.55)');
+    waterGrad.addColorStop(0.5, 'rgba(0, 100, 200, 0.75)');
+    waterGrad.addColorStop(1, 'rgba(0, 25, 70, 0.92)');
+
+    // 3. Stable Surface Waveform Calculation (Analytic Zero-Mean Capillary Waves)
+    // Surface waves radiate outward from vibrating tines, strictly oscillating about waterLevelY
+    const pIndex = this.getForkPowerRate();
+    const waveAmpBase = this.forkVibrating ? Math.min(6.5, 1.2 * Math.sqrt(pIndex)) : 0.0;
+    const waveFreqEff = Math.min(30, this.forkFreq * 0.08);
+    const waveLenPx = Math.max(10, 50 * (256 / this.forkFreq));
+    const waveK = (Math.PI * 2.0) / waveLenPx;
+    const waveOmega = Math.PI * 2.0 * waveFreqEff;
+
+    const sampleCount = 90;
+    const stepX = (tankW - 8) / sampleCount;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(tankX + 4, tankY + tankH - 4);
+    ctx.lineTo(tankX + 4, waterLevelY);
+
+    for (let i = 0; i <= sampleCount; i++) {
+      const nx = tankX + 4 + i * stepX;
+      const r = Math.abs(nx - dipCenterX);
+      // Wave decays with distance from tines, perfectly bounded, zero vertical drift!
+      const localAmp = waveAmpBase * Math.exp(-r / 75.0);
+      const waveShiftY = localAmp * Math.sin(waveK * r - waveOmega * gTime);
+      const ny = waterLevelY + waveShiftY;
+      ctx.lineTo(nx, ny);
+    }
+    ctx.lineTo(tankX + tankW - 4, tankY + tankH - 4);
+    ctx.closePath();
+    ctx.fillStyle = waterGrad;
+    ctx.fill();
+
+    // Glowing Neon Surface Meniscus Line
+    ctx.strokeStyle = '#00e5ff';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    for (let i = 0; i <= sampleCount; i++) {
+      const nx = tankX + 4 + i * stepX;
+      const r = Math.abs(nx - dipCenterX);
+      const localAmp = waveAmpBase * Math.exp(-r / 75.0);
+      const waveShiftY = localAmp * Math.sin(waveK * r - waveOmega * gTime);
+      const ny = waterLevelY + waveShiftY;
+      if (i === 0) ctx.moveTo(nx, ny);
+      else ctx.lineTo(nx, ny);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    // Glass Tank Rim & Frame
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(tankX, tankY, tankW, tankH);
+
+    // Tank Graduations (ml marks)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.font = '600 8px "JetBrains Mono", monospace';
+    for (let gy = tankY + 60; gy < tankY + tankH - 20; gy += 30) {
+      ctx.fillRect(tankX + 4, gy, 8, 1.5);
+      ctx.fillText(`${Math.round(tankY + tankH - gy)}ml`, tankX + 16, gy + 3);
+    }
+
+    // 4. Underwater Cavitation Bubbles (Swirling beneath submerged tines)
+    ctx.save();
+    this.cavitationBubbles.forEach(b => {
+      const bx = dipCenterX + b.x;
+      const by = waterLevelY + b.y;
+      ctx.fillStyle = `rgba(255, 255, 255, ${b.life * 0.85})`;
+      ctx.beginPath();
+      ctx.arc(bx, by, b.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.restore();
+
+    // 5. Parabolic Splash Droplets (Violent Splash Fountain above Water Surface)
+    ctx.save();
+    this.splashDroplets.forEach(drop => {
+      const dx = dipCenterX + drop.x;
+      const dy = waterLevelY + drop.y;
+      ctx.fillStyle = `rgba(0, 229, 255, ${drop.life})`;
+      ctx.beginPath();
+      ctx.arc(dx, dy, drop.r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Specular highlight on droplet
+      ctx.fillStyle = `rgba(255, 255, 255, ${drop.life * 0.9})`;
+      ctx.beginPath();
+      ctx.arc(dx - drop.r * 0.3, dy - drop.r * 0.3, drop.r * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+    });
+    ctx.restore();
+
+    // 6. Acoustic Pressure Wavefront Rings in Air
+    ctx.save();
+    this.acousticWaves.forEach(w => {
+      ctx.strokeStyle = `rgba(0, 229, 255, ${w.alpha * 0.4})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(dipCenterX, waterLevelY - 40, w.r, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+    ctx.restore();
+
+    // 7. Tuning Fork Model (High-Detail Aluminum/Chrome)
+    const forkBaseX = dipCenterX;
+    const forkStemH = 80;
+    const forkTineH = 115;
+    const tineSeparation = 26;
+    const tineW = 7;
+    // Tines dip into surface by 8px
+    const forkStartY = waterLevelY - forkTineH + 8;
+
+    // Fast Antiphase Tine Vibration
+    const vibFreq = Math.min(60, this.forkFreq * 0.12);
+    const vibAmpPx = this.forkVibrating ? (this.forkAmp * 3.2 * Math.sin(gTime * vibFreq * 2.0 * Math.PI)) : 0.0;
+
+    ctx.save();
+    // High-speed motion blur fan envelope at 512 & 1024 Hz
+    if (this.forkVibrating && this.forkFreq >= 512) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
+      ctx.fillRect(forkBaseX - tineSeparation * 0.5 - tineW - this.forkAmp * 3.2, forkStartY, tineW + this.forkAmp * 6.4, forkTineH);
+      ctx.fillRect(forkBaseX + tineSeparation * 0.5 - this.forkAmp * 3.2, forkStartY, tineW + this.forkAmp * 6.4, forkTineH);
+    }
+
+    ctx.fillStyle = '#b0bec5'; // metallic chrome
+    ctx.strokeStyle = '#eceff1';
+    ctx.lineWidth = 1.2;
+
+    // Stem Handle with knurling
+    ctx.fillRect(forkBaseX - 5, forkStartY - forkStemH, 10, forkStemH);
+    ctx.strokeRect(forkBaseX - 5, forkStartY - forkStemH, 10, forkStemH);
+    ctx.strokeStyle = '#78909c';
+    for (let y = forkStartY - forkStemH + 8; y < forkStartY - 10; y += 5) {
+      ctx.beginPath();
+      ctx.moveTo(forkBaseX - 4, y);
+      ctx.lineTo(forkBaseX + 4, y);
+      ctx.stroke();
+    }
+
+    // U-shaped connector base
+    ctx.fillStyle = '#b0bec5';
+    ctx.beginPath();
+    ctx.arc(forkBaseX, forkStartY, tineSeparation * 0.5 + tineW, 0, Math.PI);
+    ctx.fill();
+    ctx.stroke();
+
+    // Left Tine (Vibrates in Antiphase)
+    const leftTineX = forkBaseX - tineSeparation * 0.5 - tineW + vibAmpPx;
+    ctx.fillRect(leftTineX, forkStartY, tineW, forkTineH);
+    ctx.strokeRect(leftTineX, forkStartY, tineW, forkTineH);
+
+    // Right Tine (Vibrates in Antiphase)
+    const rightTineX = forkBaseX + tineSeparation * 0.5 - vibAmpPx;
+    ctx.fillRect(rightTineX, forkStartY, tineW, forkTineH);
+    ctx.strokeRect(rightTineX, forkStartY, tineW, forkTineH);
+
+    // Frequency Engraving on Fork Body
+    ctx.fillStyle = '#263238';
+    ctx.font = '700 9px "JetBrains Mono", monospace';
+    ctx.fillText(`${this.forkFreq}Hz`, forkBaseX - 16, forkStartY - 16);
+    ctx.restore();
+
+    // 8. Mallet Strike Animation
+    if (this.malletTimer > 0.05) {
+      ctx.save();
+      const malletX = forkBaseX - 40 + (1.0 - this.malletTimer) * 12;
+      const malletY = forkStartY + 30;
+      ctx.strokeStyle = '#8d6e63';
+      ctx.lineWidth = 3.5;
+      ctx.beginPath();
+      ctx.moveTo(malletX - 35, malletY - 15);
+      ctx.lineTo(malletX, malletY);
+      ctx.stroke();
+      ctx.fillStyle = '#212121';
+      ctx.fillRect(malletX - 6, malletY - 10, 12, 20);
+      ctx.strokeRect(malletX - 6, malletY - 10, 12, 20);
+      ctx.fillStyle = '#ffd740';
+      ctx.beginPath();
+      ctx.arc(malletX + 6, malletY, 8 * this.malletTimer, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // 9. Mechanical Splash Power Callout Box
+    ctx.save();
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+    ctx.fillRect(tankX + tankW * 0.55, tankY + 20, 220, 85);
+    ctx.strokeStyle = (pIndex >= 4.0) ? '#ff3366' : '#ffd740';
+    ctx.lineWidth = 1.8;
+    ctx.strokeRect(tankX + tankW * 0.55, tankY + 20, 220, 85);
+
+    ctx.fillStyle = '#ffd740';
+    ctx.font = '700 12px "JetBrains Mono", monospace';
+    ctx.fillText(`⚡ Mechanical Power: ${pIndex.toFixed(1)}×`, tankX + tankW * 0.55 + 14, tankY + 45);
+
+    ctx.fillStyle = '#00e5ff';
+    ctx.font = '600 11px "JetBrains Mono", monospace';
+    ctx.fillText(`P ∝ f² · A² (${this.forkFreq} Hz)`, tankX + tankW * 0.55 + 14, tankY + 68);
+
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.font = '500 9px "JetBrains Mono", monospace';
+    if (this.forkFreq === 512) {
+      ctx.fillText("🌟 4× Energy Flux of 256 Hz!", tankX + tankW * 0.55 + 14, tankY + 88);
+    } else if (this.forkFreq === 1024) {
+      ctx.fillText("🔥 16× Violent Splash Geyser!", tankX + tankW * 0.55 + 14, tankY + 88);
+    } else {
+      ctx.fillText("Baseline Acoustic Vibration", tankX + tankW * 0.55 + 14, tankY + 88);
+    }
+    ctx.restore();
+  }
+}
+
+// ─── Chart.js Graph Controller ───────────────────────────────────
+class GraphController {
+  constructor(physics) {
+    this.physics = physics;
+
+    const ctxAmp = document.getElementById('chartAmp').getContext('2d');
+    this.chartAmp = new Chart(ctxAmp, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Measured E',
+            data: [],
+            backgroundColor: '#00e5ff',
+            borderColor: '#00e5ff',
+            pointRadius: 5,
+            pointHoverRadius: 7
+          },
+          {
+            label: 'Theory Parabola (∝ A²)',
+            data: [],
+            showLine: true,
+            borderColor: 'rgba(255, 215, 64, 0.7)',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [4, 4],
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `A: ${ctx.parsed.x.toFixed(2)}m | E: ${ctx.parsed.y.toFixed(3)}J`
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: 0,
+            max: 0.11,
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#8b9bb4', font: { size: 9 } },
+            title: { display: true, text: 'Amplitude A (m)', color: '#8b9bb4', font: { size: 9 } }
+          },
+          y: {
+            min: 0,
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#8b9bb4', font: { size: 9 } },
+            title: { display: true, text: 'Energy (J)', color: '#8b9bb4', font: { size: 9 } }
+          }
+        }
+      }
+    });
+
+    const ctxFreq = document.getElementById('chartFreq').getContext('2d');
+    this.chartFreq = new Chart(ctxFreq, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Current Waves',
+            data: [],
+            backgroundColor: '#ff3366',
+            borderColor: '#ff3366',
+            pointRadius: 5
+          },
+          {
+            label: 'Linear Theory (∝ f²)',
+            data: [],
+            showLine: true,
+            borderColor: 'rgba(0, 229, 255, 0.6)',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `f²: ${ctx.parsed.x.toFixed(1)} Hz² | E: ${ctx.parsed.y.toFixed(3)}J`
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: 0,
+            max: 26,
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#8b9bb4', font: { size: 9 } },
+            title: { display: true, text: 'f² (Hz²)', color: '#8b9bb4', font: { size: 9 } }
+          },
+          y: {
+            min: 0,
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#8b9bb4', font: { size: 9 } },
+            title: { display: true, text: 'Energy (J)', color: '#8b9bb4', font: { size: 9 } }
+          }
+        }
+      }
+    });
+
+    const ctxLambda = document.getElementById('chartLambda').getContext('2d');
+    this.chartLambda = new Chart(ctxLambda, {
+      type: 'scatter',
+      data: {
+        datasets: [
+          {
+            label: 'Current Waves',
+            data: [],
+            backgroundColor: '#b388ff',
+            borderColor: '#b388ff',
+            pointRadius: 5
+          },
+          {
+            label: 'Inverse Curve (∝ 1/λ)',
+            data: [],
+            showLine: true,
+            borderColor: 'rgba(255, 215, 64, 0.7)',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [3, 3],
+            pointRadius: 0
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => `λ: ${ctx.parsed.x.toFixed(1)}m | E: ${ctx.parsed.y.toFixed(3)}J`
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear',
+            min: 0,
+            max: 150,
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#8b9bb4', font: { size: 9 } },
+            title: { display: true, text: 'Wavelength λ (m)', color: '#8b9bb4', font: { size: 9 } }
+          },
+          y: {
+            min: 0,
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: '#8b9bb4', font: { size: 9 } },
+            title: { display: true, text: 'Energy (J)', color: '#8b9bb4', font: { size: 9 } }
+          }
+        }
+      }
+    });
+
+    this.populateTheoryCurves();
+  }
+
+  populateTheoryCurves() {
+    const ampTheory = [];
+    const fixedF = 1.0;
+    const fixedMu = 0.01;
+    const fixedT = 50.0;
+    const v = Math.sqrt(fixedT / fixedMu);
+    const lambda = v / fixedF;
+    const omega = 2.0 * Math.PI * fixedF;
+
+    for (let aVal = 0; aVal <= 0.105; aVal += 0.01) {
+      const eTheory = 0.25 * fixedMu * omega * omega * aVal * aVal * lambda;
+      ampTheory.push({ x: aVal, y: eTheory });
+    }
+    this.chartAmp.data.datasets[1].data = ampTheory;
+
+    const freqTheory = [];
+    const fixedA = 0.05;
+    for (let fVal = 0.5; fVal <= 5.0; fVal += 0.5) {
+      const fSq = fVal * fVal;
+      const lam = v / fVal;
+      const w = 2.0 * Math.PI * fVal;
+      const eTheory = 0.25 * fixedMu * w * w * fixedA * fixedA * lam;
+      freqTheory.push({ x: fSq, y: eTheory });
+    }
+    this.chartFreq.data.datasets[1].data = freqTheory;
+
+    const lambdaTheory = [];
+    for (let lamVal = 14; lamVal <= 145; lamVal += 5) {
+      const fVal = v / lamVal;
+      const w = 2.0 * Math.PI * fVal;
+      const eTheory = 0.25 * fixedMu * w * w * fixedA * fixedA * lamVal;
+      lambdaTheory.push({ x: lamVal, y: eTheory });
+    }
+    this.chartLambda.data.datasets[1].data = lambdaTheory;
+  }
+
+  update(currentEA, currentEB, currentEC) {
+    this.chartAmp.data.datasets[0].data = [
+      { x: this.physics.AA, y: currentEA },
+      { x: this.physics.AB, y: currentEB },
+      { x: this.physics.AC, y: currentEC }
+    ];
+    this.chartAmp.update();
+
+    const fSqA = this.physics.fA * this.physics.fA;
+    const fSqB = this.physics.fB * this.physics.fB;
+    const fSqC = this.physics.fC * this.physics.fC;
+
+    this.chartFreq.data.datasets[0].data = [
+      { x: fSqA, y: currentEA },
+      { x: fSqB, y: currentEB },
+      { x: fSqC, y: currentEC }
+    ];
+    this.chartFreq.update();
+
+    const lamA = this.physics.getWavelength(this.physics.fA);
+    const lamB = this.physics.getWavelength(this.physics.fB);
+    const lamC = this.physics.getWavelength(this.physics.fC);
+
+    this.chartLambda.data.datasets[0].data = [
+      { x: lamA, y: currentEA },
+      { x: lamB, y: currentEB },
+      { x: lamC, y: currentEC }
+    ];
+    this.chartLambda.update();
+  }
+}
+
+// ─── Bootstrap & Main Simulation Execution ───────────────────────
+const physics = new PhysicsEngine();
+const camera = new Camera();
+const renderer = new Renderer(physics, camera);
+const dataLogger = new DataLogger();
+const exportManager = new ExportManager();
+const uiControls = new UIControls(physics, renderer, camera, dataLogger, exportManager);
+const graphController = new GraphController(physics);
+const physicalDemoRig = new PhysicalEnergyDemonstrators();
+window.physicalDemoRig = physicalDemoRig;
+
+// Default to initial scenario
+uiControls.setDemoScenario('amplitude');
+
+gInitialEnergyA = physics.computeTotalEnergy(physics.AA, physics.fA);
+
+window.addEventListener('resize', () => {
+  renderer.handleResize();
+  if (physicalDemoRig) physicalDemoRig.handleResize();
+});
+
+let gLastTimestamp = performance.now();
+
+function animationLoop(timestamp) {
+  let dt = (timestamp - gLastTimestamp) / 1000.0;
+  gLastTimestamp = timestamp;
+  if (!isFinite(dt) || dt <= 0 || dt > 0.05) dt = 0.016;
+
+  if (gRunning) {
+    physics.step(dt);
+    gTime += dt;
+  }
+
+  // Step and render physical energy demonstrators
+  if (physicalDemoRig) {
+    physicalDemoRig.step(dt);
+    if (gActiveView === 'demo') {
+      physicalDemoRig.render();
+    }
+  }
+
+  camera.update(physics);
+  renderer.render();
+
+  const eA = physics.computeTotalEnergy(physics.AA, physics.fA);
+  const eB = physics.computeTotalEnergy(physics.AB, physics.fB);
+  const eC = physics.computeTotalEnergy(physics.AC, physics.fC);
+  const eTotal = eA + eB + eC;
+
+  document.getElementById('lblEnergyA').innerText = `${eA.toFixed(3)} J`;
+  document.getElementById('lblEnergyB').innerText = `${eB.toFixed(3)} J`;
+  document.getElementById('lblEnergyC').innerText = `${eC.toFixed(3)} J`;
+
+  document.getElementById('topValEA').innerText = `${eA.toFixed(2)} J`;
+  document.getElementById('topValEB').innerText = `${eB.toFixed(2)} J`;
+  document.getElementById('topValEC').innerText = `${eC.toFixed(2)} J`;
+
+  const vSpeed = physics.getSpeed();
+  document.getElementById('topValV').innerText = `${vSpeed.toFixed(2)} m/s`;
+
+  const lamA = physics.getWavelength(physics.fA);
+  const lamB = physics.getWavelength(physics.fB);
+  const lamC = physics.getWavelength(physics.fC);
+  document.getElementById('badgeStatsA').innerText = `A = ${physics.AA.toFixed(2)}m | f = ${physics.fA.toFixed(1)}Hz | λ = ${lamA.toFixed(1)}m`;
+  document.getElementById('badgeStatsB').innerText = `A = ${physics.AB.toFixed(2)}m | f = ${physics.fB.toFixed(1)}Hz | λ = ${lamB.toFixed(1)}m`;
+  document.getElementById('badgeStatsC').innerText = `A = ${physics.AC.toFixed(2)}m | f = ${physics.fC.toFixed(1)}Hz | λ = ${lamC.toFixed(1)}m`;
+
+  // Demonstration ratio computation
+  const ratioBA = eA > 1e-6 ? (eB / eA) : 1.0;
+  const ratioCA = eA > 1e-6 ? (eC / eA) : 1.0;
+  const ratioBadge = document.getElementById('demoRatioBadge');
+  if (ratioBadge) {
+    ratioBadge.innerText = `Live Ratio: EB/EA = ${ratioBA.toFixed(2)}× | EC/EA = ${ratioCA.toFixed(2)}×`;
+  }
+  const pillA = document.getElementById('demoPillA');
+  const pillB = document.getElementById('demoPillB');
+  const pillC = document.getElementById('demoPillC');
+  if (pillA) pillA.innerText = `A=${physics.AA.toFixed(2)}m | f=${physics.fA.toFixed(1)}Hz | λ=${lamA.toFixed(1)}m | E=${eA.toFixed(3)}J`;
+  if (pillB) pillB.innerText = `A=${physics.AB.toFixed(2)}m | f=${physics.fB.toFixed(1)}Hz | λ=${lamB.toFixed(1)}m | E=${eB.toFixed(3)}J (${ratioBA.toFixed(1)}×)`;
+  if (pillC) pillC.innerText = `A=${physics.AC.toFixed(2)}m | f=${physics.fC.toFixed(1)}Hz | λ=${lamC.toFixed(1)}m | E=${eC.toFixed(3)}J (${ratioCA.toFixed(1)}×)`;
+
+  const maxBarE = Math.max(0.01, eA, eB, eC);
+  document.getElementById('barEnergyA').style.width = `${Math.min(100, (eA / maxBarE) * 100)}%`;
+  document.getElementById('barEnergyB').style.width = `${Math.min(100, (eB / maxBarE) * 100)}%`;
+  document.getElementById('barEnergyC').style.width = `${Math.min(100, (eC / maxBarE) * 100)}%`;
+
+  if (gTime - gLastEnergyAudit > 60.0) {
+    gLastEnergyAudit = gTime;
+    const currentBaselineA = physics.computeTotalEnergy(0.05, 1.0);
+    gEnergyDriftPct = Math.abs(currentBaselineA - gInitialEnergyA) / (gInitialEnergyA || 1.0) * 100.0;
+    const elDrift = document.getElementById('topValDrift');
+    if (elDrift) elDrift.innerText = `${gEnergyDriftPct.toFixed(2)}%`;
+  }
+
+  if (gFrame % 10 === 0 && gRunning) {
+    dataLogger.pushSample(gTime, physics, eA, eB, eC);
+  }
+
+  if (gFrame % 5 === 0) {
+    graphController.update(eA, eB, eC);
+  }
+
+  gFrame++;
+  requestAnimationFrame(animationLoop);
+}
+
+// Render all math equations across the entire DOM with KaTeX
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  renderMathSafely(document.body);
+} else {
+  window.addEventListener('DOMContentLoaded', () => renderMathSafely(document.body));
+  window.addEventListener('load', () => renderMathSafely(document.body));
+}
+
+requestAnimationFrame(animationLoop);
+</script>
+
+</body>
+</html>

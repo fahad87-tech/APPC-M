@@ -1,0 +1,1917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculus & AP Physics Integration Explorer</title>
+  <script>
+    const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
+    }
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
+      });
+    }
+    async function verifyWebsiteAccess() {
+      const userInput = await requestPassword("Simulation Access", "Password required:");
+      if (userInput === null) { window.location.replace("about:blank"); return; }
+      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.replace("about:blank");
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
+    } else {
+      verifyWebsiteAccess();
+    }
+  </script>
+  <style id="password-gate-styles">
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
+    #password-gate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5, 9, 18, 0.88); padding: 24px; z-index: 9999; }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card { width: min(100%, 420px); background: #101625; border: 1px solid rgba(100,181,246,0.28); border-radius: 18px; padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); color: #e7edf7; font-family: 'Segoe UI', Arial, sans-serif; }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px; box-sizing: border-box; }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #060813;
+      --surface: #0e1222;
+      --surface-card: #13192f;
+      --surface-hover: #1b2342;
+      --border: rgba(255, 255, 255, 0.09);
+      --border-bright: rgba(255, 255, 255, 0.2);
+      --text: #f1f5f9;
+      --text-dim: #8292a8;
+      --text-muted: #4e5b72;
+      
+      /* Distinct Math Colors */
+      --col-f: #00e5ff;        /* Cyan f(x) */
+      --col-g: #10b981;        /* Emerald g(x) */
+      --col-diff: #f59e0b;     /* Amber Difference / Area between */
+      --col-accum: #a78bfa;    /* Purple Accumulation F(x) */
+      --col-tangent: #ec4899;  /* Pink Tangent slope */
+      --col-bound-a: #38bdf8;  /* Sky blue limit a */
+      --col-bound-b: #f43f5e;  /* Rose limit b */
+      --col-sweep: #ffd740;    /* Gold cursor */
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: radial-gradient(circle at 50% -10%, #151b36 0%, #060813 75%);
+      color: var(--text);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    /* ─── Top Control Bar ────────────────────────────────────────── */
+    header {
+      background: rgba(14, 18, 34, 0.9);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 6px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+      z-index: 20;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 1rem;
+      color: #fff;
+    }
+    .brand .symbol {
+      color: var(--col-f);
+      font-size: 1.4rem;
+      font-family: 'JetBrains Mono', serif;
+      font-weight: 900;
+    }
+
+    /* Focus Mode Tabs */
+    .mode-tabs {
+      display: flex;
+      gap: 4px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-left: 12px;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 6px 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
+    .tab-btn.active {
+      background: rgba(0, 229, 255, 0.15);
+      color: var(--col-f);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 13px;
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-shrink {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(236, 72, 153, 0.22));
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #ffd740;
+    }
+    .btn-shrink:hover {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.38), rgba(236, 72, 153, 0.38));
+      box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+    }
+
+    /* ─── Ergonomic Quick Function Preset Strip ──────────────────── */
+    .preset-strip {
+      background: rgba(10, 13, 26, 0.95);
+      border-bottom: 1px solid var(--border);
+      padding: 5px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      flex-shrink: 0;
+    }
+    .preset-strip::-webkit-scrollbar { height: 3px; }
+    .preset-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      margin-right: 4px;
+    }
+    .preset-chip {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.74rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .preset-chip:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .preset-chip.active {
+      background: rgba(0, 229, 255, 0.18);
+      border-color: var(--col-f);
+      color: var(--col-f);
+      box-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
+    }
+
+    /* ─── Main Workspace Layout ──────────────────────────────────── */
+    .workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .canvas-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 14px;
+      gap: 8px;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .sidebar-drawer {
+      width: 320px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      overflow-y: auto;
+      transition: width 0.25s ease;
+    }
+
+    /* ─── Ergonomic Formula & Live Info Header ───────────────────── */
+    .info-header {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+    .formula-line {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .formula-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pill {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 0.8em;
+    }
+
+    /* ─── Graph Panels ───────────────────────────────────────────── */
+    .graph-stack {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-height: 0;
+      position: relative;
+    }
+    .graph-card {
+      flex: 1;
+      background: #04050c;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      cursor: crosshair;
+      min-height: 120px;
+      transition: flex 0.4s cubic-bezier(0.4, 0, 0.2, 1), min-height 0.4s ease, max-height 0.4s ease, opacity 0.3s ease, transform 0.4s ease;
+    }
+    .graph-card.collapsed {
+      flex: 0 0 0px !important;
+      min-height: 0px !important;
+      max-height: 0px !important;
+      opacity: 0 !important;
+      border-color: transparent !important;
+      pointer-events: none !important;
+      transform: translateY(30px);
+    }
+    .graph-card canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    
+    /* Interactive Clickable Legend Overlay */
+    .graph-toolbar {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      right: 10px;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    .legend-chips {
+      display: flex;
+      gap: 6px;
+      pointer-events: auto;
+    }
+    .chip-toggle {
+      background: rgba(14, 18, 34, 0.85);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s;
+    }
+    .chip-toggle:hover { border-color: rgba(255, 255, 255, 0.3); }
+    .chip-toggle.active {
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.15);
+    }
+    .chip-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .graph-hud-stat {
+      background: rgba(14, 18, 34, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 9px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      pointer-events: auto;
+    }
+
+    /* ─── Mode-Specific Bottom Utility Panels ────────────────────── */
+    .mode-panel {
+      display: none;
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .mode-panel.active { display: flex; }
+
+    /* Riemann Controls Strip */
+    .riemann-strip {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    .method-selector {
+      display: flex;
+      gap: 3px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+    .method-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      padding: 4px 9px;
+      border-radius: 5px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .method-btn.active {
+      background: rgba(0, 229, 255, 0.2);
+      color: var(--col-f);
+    }
+
+    .slider-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+    }
+    .slider-inline input[type="range"] {
+      width: 110px;
+      accent-color: var(--col-f);
+      cursor: pointer;
+    }
+
+    /* Quiz Bar */
+    .quiz-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+    }
+    .quiz-q { font-weight: 600; flex: 1; }
+    .quiz-input {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 4px 10px;
+      border-radius: 5px;
+      width: 90px;
+      font-family: 'JetBrains Mono', monospace;
+      text-align: center;
+      outline: none;
+    }
+
+    /* ─── Sidebar Ergonomic Sections ─────────────────────────────── */
+    .sidebar-inner {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .card-sec {
+      background: var(--surface-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sec-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .sl-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .sl-hdr {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+    }
+    .sl-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--col-f);
+      cursor: pointer;
+      height: 16px;
+    }
+    select {
+      background: #080a14;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 5px 8px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      outline: none;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    /* AP Physics Context Card & Math Typography */
+    .physics-card {
+      background: rgba(167, 139, 250, 0.08);
+      border: 1px solid rgba(167, 139, 250, 0.25);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 0.77rem;
+      line-height: 1.5;
+      color: #ddd6fe;
+    }
+    .physics-card i, .mode-panel i, .math-var {
+      font-family: 'Cambria Math', 'Times New Roman', Georgia, serif;
+      font-style: italic;
+      color: #fff;
+    }
+    .physics-card sub, .physics-card sup {
+      font-size: 0.74em;
+    }
+
+    .btn-n-quick {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      padding: 4px 0;
+      border-radius: 5px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+    .btn-n-quick:hover {
+      background: rgba(245, 158, 11, 0.18);
+      border-color: var(--col-diff);
+      color: var(--col-diff);
+    }
+    .btn-n-quick.active {
+      background: rgba(245, 158, 11, 0.28);
+      border-color: var(--col-diff);
+      color: #ffd740;
+    }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ─── Top Control Bar ────────────────────────────────────────── -->
+<header>
+  <div class="brand">
+    <span class="symbol">∫</span>
+    <span>AP Physics Calculus Explorer</span>
+  </div>
+
+  <!-- Focus Mode Segmented Tabs -->
+  <div class="mode-tabs">
+    <button class="tab-btn active" data-tab="riemann">📐 Riemann Limits</button>
+    <button class="tab-btn" data-tab="ftc">📈 FTC Accumulation</button>
+    <button class="tab-btn" data-tab="between">🔄 Area Between Curves</button>
+    <button class="tab-btn" data-tab="quiz">🎯 AP Quiz Lab</button>
+  </div>
+
+  <div class="top-actions">
+    <button class="btn active-mode" id="btnToggleSweep">📍 Sweep Point: ON</button>
+    <button class="btn active-mode" id="btnToggleFGraph">📉 F(x) Graph: SHOW</button>
+    <button class="btn btn-shrink" id="btnShrink">⚡ Shrink Δx → 0</button>
+    <button class="btn" id="btnPlay">⏸ Pause</button>
+  </div>
+</header>
+
+<!-- ─── Ergonomic Quick Function Preset Strip ──────────────────── -->
+<div class="preset-strip">
+  <span class="preset-label">AP Presets:</span>
+  <button class="preset-chip active" data-preset="kinematics_accel">🚀 Accel a(t) → v(t)</button>
+  <button class="preset-chip" data-preset="kinematics_velocity">🚗 Velocity v(t) → x(t)</button>
+  <button class="preset-chip" data-preset="spring_hooke">🏹 Spring F = kx</button>
+  <button class="preset-chip" data-preset="spring_nonlinear">🌀 Non-linear Spring</button>
+  <button class="preset-chip" data-preset="gravity_work">🪐 Gravity -GMm/r²</button>
+  <button class="preset-chip" data-preset="shm_velocity">〰 SHM Oscillation</button>
+  <button class="preset-chip" data-preset="impulse_sine">🔨 Collision Impulse</button>
+  <button class="preset-chip" data-preset="rc_decay">⚡ RC Capacitor I(t)</button>
+  <button class="preset-chip" data-preset="drag_terminal">🪂 Drag Force / Terminal</button>
+  <button class="preset-chip" data-preset="rod_mass_cm">📏 Variable Mass Density</button>
+  <button class="preset-chip" data-preset="ring_potential">⚛ Ring E-Field U-Sub</button>
+  <button class="preset-chip" data-preset="custom_poly">⚙ Custom Polynomial</button>
+</div>
+
+<!-- ─── Main Workspace ─────────────────────────────────────────── -->
+<div class="workspace">
+  <div class="canvas-column">
+    <!-- Live Formula & Definite Area Scoreboard -->
+    <div class="info-header">
+      <div class="formula-line">
+        <div class="formula-tag">
+          <span style="color:var(--col-f); font-weight:700;">Rate f(t):</span>
+          <strong id="dispF" style="color:#fff;">a(t) = 2.0 − 0.8t</strong>
+        </div>
+        <div class="formula-tag" id="tagG" style="display:none;">
+          <span style="color:var(--col-g); font-weight:700;">g(t):</span>
+          <strong id="dispG" style="color:#fff;">g(t) = 0.5t</strong>
+        </div>
+        <div class="formula-tag" id="tagAccum">
+          <span style="color:var(--col-accum); font-weight:700;">Antideriv F(t):</span>
+          <strong id="dispF_accum" style="color:#e2d9fc;">v(t) = 2.0t − 0.4t² + C</strong>
+        </div>
+      </div>
+
+      <!-- Prominent Area & Integral Answer Scoreboard -->
+      <div style="display:flex; align-items:center; gap:8px; margin-left:auto;">
+        <div style="background:rgba(245, 158, 11, 0.12); border:1px solid rgba(245, 158, 11, 0.35); border-radius:6px; padding:3px 9px; font-size:0.75rem;">
+          <span style="color:var(--text-dim);">Riemann Approx:</span>
+          <strong id="dispRiemannScore" style="color:#ffd740; font-size:0.88rem; margin-left:4px;">2.390</strong>
+        </div>
+        <div style="background:rgba(16, 185, 129, 0.14); border:1px solid rgba(16, 185, 129, 0.4); border-radius:6px; padding:3px 10px; font-size:0.75rem; box-shadow:0 0 10px rgba(16, 185, 129, 0.15);">
+          <span style="color:#a7f3d0; font-weight:700;">Exact Area (∫):</span>
+          <strong id="dispDefiniteScore" style="color:#10b981; font-size:0.92rem; margin-left:4px;">2.40 m/s</strong>
+        </div>
+        <span class="pill" style="color:var(--col-diff);" id="dispDeltaX">Δx = 0.300</span>
+      </div>
+    </div>
+
+    <!-- Dual Graph Stack (Aligned X-Axes) -->
+    <div class="graph-stack">
+      <!-- Graph 1: Rate Function Integrand f(t) & g(t) -->
+      <div class="graph-card" id="cardIntegrand">
+        <div class="graph-toolbar">
+          <div class="legend-chips">
+            <span class="chip-toggle active" id="chipToggleF" style="color:var(--col-f);">
+              <span class="chip-dot" style="background:var(--col-f);"></span> f(t) Rate
+            </span>
+            <span class="chip-toggle" id="chipToggleG" style="color:var(--col-g); display:none;">
+              <span class="chip-dot" style="background:var(--col-g);"></span> g(t) Compare
+            </span>
+            <span class="chip-toggle active" id="chipToggleRiemann" style="color:var(--col-diff);">
+              <span class="chip-dot" style="background:var(--col-diff);"></span> Partitions
+            </span>
+            <span class="chip-toggle active" id="chipToggleArea" style="color:rgba(0, 229, 255, 0.7);">
+              <span class="chip-dot" style="background:var(--col-f);"></span> Area Fill
+            </span>
+          </div>
+        </div>
+        <canvas id="canvasTop"></canvas>
+      </div>
+
+      <!-- Graph 2: Integrated Accumulation F(x) = ∫ f(t) dt + C -->
+      <div class="graph-card" id="cardAccumulation">
+        <div class="graph-toolbar">
+          <div class="legend-chips">
+            <span class="chip-toggle active" id="chipToggleAccum" style="color:var(--col-accum);">
+              <span class="chip-dot" style="background:var(--col-accum);"></span> F(x) Integrated
+            </span>
+            <span class="chip-toggle active" id="chipToggleTangent" style="color:var(--col-tangent);">
+              <span class="chip-dot" style="background:var(--col-tangent);"></span> FTC Tangent Slope = f(x)
+            </span>
+            <span class="chip-toggle active" id="chipToggleLaser" style="color:var(--col-sweep);">
+              <span class="chip-dot" style="background:var(--col-sweep);"></span> FTC Beam
+            </span>
+          </div>
+        </div>
+        <canvas id="canvasBottom"></canvas>
+      </div>
+    </div>
+
+    <!-- Mode-Specific Utility Strips -->
+    <!-- 1. Riemann Mode Panel -->
+    <div class="mode-panel active" id="panelRiemann">
+      <div class="riemann-strip">
+        <span style="font-size:0.75rem; font-weight:700; color:var(--text-dim);">Method:</span>
+        <div class="method-selector">
+          <button class="method-btn active" data-method="midpoint">Midpoint (M_n)</button>
+          <button class="method-btn" data-method="left">Left (L_n)</button>
+          <button class="method-btn" data-method="right">Right (R_n)</button>
+          <button class="method-btn" data-method="trapezoid">Trapezoid (T_n)</button>
+          <button class="method-btn" data-method="simpson">Simpson's (S_n)</button>
+          <button class="method-btn" data-method="exact">Exact (∫)</button>
+        </div>
+
+        <div class="slider-inline">
+          <span>Partitions N: <strong id="lblN" style="color:var(--col-diff);">10</strong></span>
+          <input type="range" id="slN" min="1" max="250" step="1" value="10">
+        </div>
+
+        <div style="font-size:0.78rem; font-family:'JetBrains Mono', monospace; margin-left:auto; display:flex; gap:12px;">
+          <span>Sum: <strong id="lblSum" style="color:#ffd740;">2.390</strong></span>
+          <span>Exact: <strong id="lblExact" style="color:#10b981;">2.400</strong></span>
+          <span>Error: <strong id="lblError" style="color:#cbd5e1;">0.010 (0.4%)</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. FTC Mode Panel -->
+    <div class="mode-panel" id="panelFTC">
+      <div style="display:flex; align-items:center; justify-content:space-between; width:100%; font-size:0.78rem;">
+        <span><strong>Fundamental Theorem of Calculus:</strong> <sup>d</sup>&frasl;<sub>dx</sub> [&int;<sub>a</sub><sup>x</sup> <i>f</i>(<i>t</i>)<i>dt</i>] = <i>f</i>(<i>x</i>). Tangent slope of <i>F</i>(<i>x</i>) equals the instantaneous height <i>f</i>(<i>x</i>).</span>
+        <span class="pill" style="color:var(--col-tangent); font-family:'JetBrains Mono', monospace;" id="lblFtcSlope">Slope m = 1.20</span>
+      </div>
+    </div>
+
+    <!-- 3. Area Between Curves Panel -->
+    <div class="mode-panel" id="panelBetween">
+      <div style="display:flex; align-items:center; gap:16px; width:100%; font-size:0.78rem;">
+        <span><strong>Area Between Curves:</strong> &int;<sub>a</sub><sup>b</sup> [<i>f</i>(<i>x</i>) − <i>g</i>(<i>x</i>)] <i>dx</i>. Shaded area represents Net Work <i>W</i><sub>net</sub> = &int; (<i>F</i><sub>1</sub> − <i>F</i><sub>2</sub>)<i>dx</i> or Relative Displacement.</span>
+        <span class="pill" style="color:var(--col-diff); font-family:'JetBrains Mono', monospace; margin-left:auto;" id="lblNetArea">Net Area = 1.65 J</span>
+      </div>
+    </div>
+
+    <!-- 4. Quiz Mode Panel -->
+    <div class="mode-panel" id="panelQuiz">
+      <div class="quiz-strip">
+        <span class="quiz-q" id="lblQuizQ">Compute the definite integral:</span>
+        <input class="quiz-input" id="quizIn" type="number" step="0.1" placeholder="?">
+        <button class="btn" id="btnQuizCheck">Submit</button>
+        <button class="btn" id="btnQuizNext">Next</button>
+        <span id="lblQuizFeedback" style="font-weight:700; font-size:0.78rem;"></span>
+        <span style="font-family:'JetBrains Mono', monospace; color:var(--text-dim); margin-left:auto;" id="lblQuizScore">Score: 0 / 0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Ergonomic Right Sidebar Drawer ────────────────────────── -->
+  <aside class="sidebar-drawer">
+    <div class="sidebar-inner">
+      <!-- Scenario Card -->
+      <div class="physics-card" id="cardPhysicsDesc">
+        <strong>AP Kinematics:</strong> Integrating acceleration <i>a</i>(<i>t</i>) = <i>a</i><sub>0</sub> − <i>kt</i> yields velocity <i>v</i>(<i>t</i>) = <i>v</i><sub>0</sub> + <i>a</i><sub>0</sub><i>t</i> − &frac12;<i>kt</i><sup>2</sup>. Area under <i>a</i>(<i>t</i>) gives change in velocity &Delta;<i>v</i>.
+      </div>
+
+      <!-- Multiple Function Controls (f and g) -->
+      <div class="card-sec">
+        <div class="sec-title">Function Tuning & Dual Curves</div>
+
+        <div id="secFuncG" style="display:none; flex-direction:column; gap:4px; margin-bottom:6px;">
+          <label style="font-size:0.75rem; color:var(--col-g);">Second Function g(x) [For Area Between]:</label>
+          <select id="selFuncG">
+            <option value="linear_g">Linear: 0.5x</option>
+            <option value="const_g">Constant: 1.0</option>
+            <option value="drag_g">Friction/Drag: 0.2x²</option>
+          </select>
+        </div>
+
+        <div class="sl-row">
+          <div class="sl-hdr"><span style="color:var(--col-f);">Scale A / a₀</span><span class="sl-val" id="valA">2.0</span></div>
+          <input type="range" id="slA" min="-4.0" max="4.0" step="0.1" value="2.0">
+        </div>
+        <div class="sl-row">
+          <div class="sl-hdr"><span style="color:var(--col-f);">Scale B / k</span><span class="sl-val" id="valB">0.8</span></div>
+          <input type="range" id="slB" min="-4.0" max="4.0" step="0.1" value="0.8">
+        </div>
+      </div>
+
+      <!-- Bounds [a, b] & Initial Condition C -->
+      <div class="card-sec">
+        <div class="sec-title">Integration Interval [a, b]</div>
+        <div class="sl-row">
+          <div class="sl-hdr"><span style="color:var(--col-bound-a);">Lower Limit a</span><span class="sl-val" id="valBoundA">0.0</span></div>
+          <input type="range" id="slBoundA" min="-8.0" max="8.0" step="0.2" value="0.0">
+        </div>
+        <div class="sl-row">
+          <div class="sl-hdr"><span style="color:var(--col-bound-b);">Upper Limit b</span><span class="sl-val" id="valBoundB">3.0</span></div>
+          <input type="range" id="slBoundB" min="-8.0" max="8.0" step="0.2" value="3.0">
+        </div>
+        <div style="font-size:0.7rem; color:var(--text-muted);">
+          Tip: You can also drag the <strong>[a]</strong> and <strong>[b]</strong> handles directly on the graph!
+        </div>
+
+        <div class="sl-row" style="margin-top:6px;">
+          <div class="sl-hdr"><span style="color:var(--col-accum);">Constant C (Initial Condition F₀)</span><span class="sl-val" id="valConstC">0.0</span></div>
+          <input type="range" id="slConstC" min="-8.0" max="8.0" step="0.5" value="0.0">
+        </div>
+      </div>
+
+      <!-- Partitions (N) & Subinterval Size (Δx) Card -->
+      <div class="card-sec">
+        <div class="sec-title">
+          <span>Partitions (N) & Interval Width (Δx)</span>
+          <span class="pill" style="color:var(--col-diff);" id="cardDeltaX">Δx = 0.300</span>
+        </div>
+        <div class="sl-row">
+          <div class="sl-hdr">
+            <span style="color:var(--col-diff); font-weight:600;">Subintervals N</span>
+            <span class="sl-val" id="valSidebarN" style="color:var(--col-diff);">10</span>
+          </div>
+          <input type="range" id="slSidebarN" min="1" max="250" step="1" value="10">
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(5, 1fr); gap:4px; margin-top:2px;">
+          <button class="btn-n-quick" data-n="2">N=2</button>
+          <button class="btn-n-quick" data-n="5">N=5</button>
+          <button class="btn-n-quick active" data-n="10">N=10</button>
+          <button class="btn-n-quick" data-n="50">N=50</button>
+          <button class="btn-n-quick" data-n="200">N=200</button>
+        </div>
+
+        <div style="background:rgba(0,0,0,0.45); border:1px solid var(--border); border-radius:8px; padding:8px 10px; margin-top:5px; display:flex; flex-direction:column; gap:5px;">
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+            <span style="color:var(--text-dim);">Interval Span [a, b]:</span>
+            <strong id="lblSpanLength">3.00</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+            <span style="color:var(--text-dim);">Rectangle Width (Δx):</span>
+            <strong style="color:var(--col-diff);"><span id="lblSubWidth">0.300</span></strong>
+          </div>
+          <div style="margin-top:2px; padding-top:5px; border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.74rem; color:#fde68a;">Riemann Area (S_N):</span>
+            <strong style="color:#ffd740; font-size:0.95rem; font-family:'JetBrains Mono', monospace;" id="lblSidebarSum">2.390</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.74rem; color:#a7f3d0;">Exact Area (Limit ∫):</span>
+            <strong style="color:#10b981; font-size:0.95rem; font-family:'JetBrains Mono', monospace;" id="lblSidebarExact">2.400</strong>
+          </div>
+          <div style="font-size:0.7rem; color:var(--text-muted); text-align:center; margin-top:2px; border-top:1px dashed var(--border); padding-top:4px;">
+            ⚡ <em>As Δx → 0 (N → ∞), Riemann Area → Exact Area</em>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playback & Zoom -->
+      <div class="card-sec">
+        <div class="sec-title">Playback & View</div>
+        <div class="sl-row">
+          <div class="sl-hdr"><span>Sweep Speed</span><span class="sl-val" id="valSpeed">1.0×</span></div>
+          <input type="range" id="slSpeed" min="0.2" max="3.0" step="0.1" value="1.0">
+        </div>
+        <div class="sl-row">
+          <div class="sl-hdr"><span>Domain Width (W)</span><span class="sl-val" id="valW">10</span></div>
+          <input type="range" id="slW" min="4" max="20" step="2" value="10">
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- ─── Interactive JavaScript Engine ─────────────────────────── -->
+<script>
+// ─── State ───────────────────────────────────────────────────────
+const S = {
+  tab: 'riemann', // 'riemann', 'ftc', 'between', 'quiz'
+  preset: 'kinematics_accel',
+  funcF: 'poly2',
+  funcG: 'linear_g',
+  method: 'midpoint',
+  A: 2.0, B: 0.8,
+  a: 0.0, b: 3.0,
+  N: 10,
+  C: 0.0,
+  speed: 1.0,
+  W: 10.0,
+  xCenter: 0.0,
+  sweepX: 0.0,
+  playing: true,
+  dragging: null, // 'a', 'b', 'sweep'
+  shrinkAnimating: false,
+  vis: {
+    f: true,
+    g: false,
+    riemann: true,
+    area: true,
+    accum: true,
+    tangent: true,
+    laser: true,
+    sweepPoint: true,
+    accumGraph: true
+  },
+  quiz: {
+    active: false,
+    q: null,
+    score: 0,
+    total: 0
+  }
+};
+
+// ─── Mathematical Models & Multiple Functions ────────────────────
+function getFunctions() {
+  let f, F, fStr, FStr, g, gStr = '', physUnit = 'm/s';
+
+  // Second function g(x)
+  if (S.funcG === 'const_g') {
+    g = x => 1.0;
+    gStr = 'g(x) = 1.0';
+  } else if (S.funcG === 'drag_g') {
+    g = x => 0.2 * x * x;
+    gStr = 'g(x) = 0.2x²';
+  } else {
+    g = x => 0.5 * x;
+    gStr = 'g(x) = 0.5x';
+  }
+
+  // Primary function f(x)
+  switch (S.preset) {
+    case 'kinematics_accel':
+      f = t => S.A - S.B * t;
+      F = t => S.A * t - 0.5 * S.B * t * t + S.C;
+      fStr = `a(t) = ${S.A.toFixed(1)} − ${S.B.toFixed(1)}t`;
+      FStr = `v(t) = ${S.A.toFixed(1)}t − ${(0.5*S.B).toFixed(2)}t² + ${S.C.toFixed(1)}`;
+      physUnit = 'm/s';
+      break;
+
+    case 'kinematics_velocity':
+      f = t => S.A * t * t - S.B * t + 0.5;
+      F = t => (S.A / 3) * Math.pow(t, 3) - (S.B / 2) * Math.pow(t, 2) + 0.5 * t + S.C;
+      fStr = `v(t) = ${S.A.toFixed(1)}t² − ${S.B.toFixed(1)}t + 0.5`;
+      FStr = `x(t) = ${(S.A/3).toFixed(2)}t³ − ${(S.B/2).toFixed(2)}t² + 0.5t + ${S.C.toFixed(1)}`;
+      physUnit = 'm';
+      break;
+
+    case 'spring_hooke':
+      f = x => S.A * x;
+      F = x => 0.5 * S.A * x * x + S.C;
+      fStr = `F(x) = ${S.A.toFixed(1)}x`;
+      FStr = `W(x) = ${(0.5*S.A).toFixed(2)}x² + ${S.C.toFixed(1)}`;
+      physUnit = 'J (Joules)';
+      break;
+
+    case 'spring_nonlinear':
+      f = x => S.A * x + S.B * Math.pow(x, 3);
+      F = x => 0.5 * S.A * x * x + 0.25 * S.B * Math.pow(x, 4) + S.C;
+      fStr = `F(x) = ${S.A.toFixed(1)}x + ${S.B.toFixed(1)}x³`;
+      FStr = `W(x) = ${(0.5*S.A).toFixed(2)}x² + ${(0.25*S.B).toFixed(2)}x⁴ + ${S.C.toFixed(1)}`;
+      physUnit = 'J (Joules)';
+      break;
+
+    case 'gravity_work':
+      f = r => Math.abs(r) < 0.2 ? NaN : -S.A / (r * r);
+      F = r => Math.abs(r) < 0.2 ? NaN : S.A / r + S.C;
+      fStr = `F(r) = −${S.A.toFixed(1)} / r²`;
+      FStr = `U(r) = ${S.A.toFixed(1)} / r + ${S.C.toFixed(1)}`;
+      physUnit = 'J (Joules)';
+      break;
+
+    case 'shm_velocity':
+      f = t => -S.A * S.B * S.B * Math.cos(S.B * t);
+      F = t => -S.A * S.B * Math.sin(S.B * t) + S.C;
+      fStr = `a(t) = −${(S.A*S.B*S.B).toFixed(2)}cos(${S.B.toFixed(1)}t)`;
+      FStr = `v(t) = −${(S.A*S.B).toFixed(2)}sin(${S.B.toFixed(1)}t) + ${S.C.toFixed(1)}`;
+      physUnit = 'm/s';
+      break;
+
+    case 'impulse_sine':
+      f = t => S.A * Math.sin(Math.max(0.1, S.B) * t);
+      F = t => -(S.A / Math.max(0.1, Math.abs(S.B))) * Math.cos(Math.max(0.1, S.B) * t) + S.C;
+      fStr = `F(t) = ${S.A.toFixed(1)}sin(${S.B.toFixed(1)}t)`;
+      FStr = `J(t) = −${(S.A/Math.max(0.1, S.B)).toFixed(2)}cos(${S.B.toFixed(1)}t) + ${S.C.toFixed(1)}`;
+      physUnit = 'N·s';
+      break;
+
+    case 'rc_decay':
+      const tau = Math.max(0.3, Math.abs(S.B));
+      f = t => S.A * Math.exp(-t / tau);
+      F = t => -S.A * tau * Math.exp(-t / tau) + S.C;
+      fStr = `I(t) = ${S.A.toFixed(1)}e^(−t/${tau.toFixed(1)})`;
+      FStr = `Q(t) = −${(S.A*tau).toFixed(2)}e^(−t/${tau.toFixed(1)}) + ${S.C.toFixed(1)}`;
+      physUnit = 'C (Coulombs)';
+      break;
+
+    case 'drag_terminal':
+      f = v => {
+        const d = S.A - S.B * v;
+        return Math.abs(d) < 0.05 ? NaN : 1.0 / d;
+      };
+      F = v => {
+        const arg = Math.abs(S.A - S.B * v);
+        return arg < 0.01 ? NaN : (-1.0 / S.B) * Math.log(arg) + S.C;
+      };
+      fStr = `f(v) = 1 / (${S.A.toFixed(1)} − ${S.B.toFixed(1)}v)`;
+      FStr = `F(v) = −${(1/S.B).toFixed(2)}ln|${S.A.toFixed(1)} − ${S.B.toFixed(1)}v| + ${S.C.toFixed(1)}`;
+      physUnit = 's';
+      break;
+
+    case 'rod_mass_cm':
+      f = x => S.A * (1 + S.B * x);
+      F = x => S.A * (x + 0.5 * S.B * x * x) + S.C;
+      fStr = `λ(x) = ${S.A.toFixed(1)}(1 + ${S.B.toFixed(1)}x)`;
+      FStr = `M(x) = ${S.A.toFixed(1)}(x + ${(0.5*S.B).toFixed(2)}x²) + ${S.C.toFixed(1)}`;
+      physUnit = 'kg';
+      break;
+
+    case 'ring_potential':
+      const d2 = S.B * S.B + 0.4;
+      f = x => S.A * x / Math.pow(x * x + d2, 1.5);
+      F = x => -S.A / Math.sqrt(x * x + d2) + S.C;
+      fStr = `E(x) = ${S.A.toFixed(1)}x / (x² + ${d2.toFixed(1)})^(3/2)`;
+      FStr = `V(x) = −${S.A.toFixed(1)} / √(x² + ${d2.toFixed(1)}) + ${S.C.toFixed(1)}`;
+      physUnit = 'V (Volts)';
+      break;
+
+    default: // custom_poly
+      f = x => S.A * x * x - S.B * x;
+      F = x => (S.A / 3) * Math.pow(x, 3) - 0.5 * S.B * x * x + S.C;
+      fStr = `f(x) = ${S.A.toFixed(1)}x² − ${S.B.toFixed(1)}x`;
+      FStr = `F(x) = ${(S.A/3).toFixed(2)}x³ − ${(0.5*S.B).toFixed(2)}x² + ${S.C.toFixed(1)}`;
+      physUnit = 'Units';
+      break;
+  }
+
+  return { f, F, g, fStr, FStr, gStr, physUnit };
+}
+
+// ─── Numerical Approximations ────────────────────────────────────
+function computeRiemann(method, n, a, b, fFn) {
+  if (b === a || n <= 0) return { sum: 0, dx: 0, items: [] };
+  const dx = (b - a) / n;
+  let sum = 0;
+  const items = [];
+
+  if (method === 'trapezoid') {
+    for (let i = 0; i < n; i++) {
+      const x0 = a + i * dx;
+      const x1 = a + (i + 1) * dx;
+      const y0 = fFn(x0);
+      const y1 = fFn(x1);
+      const area = 0.5 * (y0 + y1) * dx;
+      sum += area;
+      items.push({ x0, x1, y0, y1, evalX: (x0 + x1)/2, evalY: (y0 + y1)/2, area });
+    }
+  } else if (method === 'simpson') {
+    const nEven = (n % 2 === 0) ? n : n + 1;
+    const sDx = (b - a) / nEven;
+    let sSum = fFn(a) + fFn(b);
+    for (let i = 1; i < nEven; i++) {
+      const xi = a + i * sDx;
+      sSum += ((i % 2 === 1) ? 4 : 2) * fFn(xi);
+    }
+    sum = (sDx / 3) * sSum;
+    for (let i = 0; i < nEven; i += 2) {
+      items.push({ x0: a + i*sDx, x2: a + (i+2)*sDx });
+    }
+  } else {
+    for (let i = 0; i < n; i++) {
+      const x0 = a + i * dx;
+      const x1 = a + (i + 1) * dx;
+      let evalX = x0;
+      if (method === 'right') evalX = x1;
+      else if (method === 'midpoint') evalX = (x0 + x1) / 2;
+      const evalY = fFn(evalX);
+      const area = evalY * dx;
+      sum += area;
+      items.push({ x0, x1, evalX, evalY, area });
+    }
+  }
+  return { sum, dx, items };
+}
+
+function computeExact(a, b, FFn) {
+  const Fa = FFn(a);
+  const Fb = FFn(b);
+  if (!isFinite(Fa) || !isFinite(Fb)) return NaN;
+  return Fb - Fa;
+}
+
+// ─── Canvases & Coordinates ──────────────────────────────────────
+const canvasTop = document.getElementById('canvasTop');
+const ctxTop = canvasTop.getContext('2d');
+const canvasBottom = document.getElementById('canvasBottom');
+const ctxBottom = canvasBottom.getContext('2d');
+
+let dpr = window.devicePixelRatio || 1;
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  const rTop = canvasTop.parentElement.getBoundingClientRect();
+  const rBot = canvasBottom.parentElement.getBoundingClientRect();
+
+  canvasTop.width = rTop.width * dpr;
+  canvasTop.height = rTop.height * dpr;
+  ctxTop.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  canvasBottom.width = rBot.width * dpr;
+  canvasBottom.height = rBot.height * dpr;
+  ctxBottom.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resize);
+resize();
+
+function getDomain() {
+  const xMin = S.xCenter - S.W / 2;
+  const xMax = S.xCenter + S.W / 2;
+  return { xMin, xMax };
+}
+function toSX(x, w) {
+  const { xMin, xMax } = getDomain();
+  return ((x - xMin) / (xMax - xMin)) * w;
+}
+function fromSX(sx, w) {
+  const { xMin, xMax } = getDomain();
+  return xMin + (sx / w) * (xMax - xMin);
+}
+function toSY(y, h, yRange, yOffset = 0) {
+  return h / 2 - ((y - yOffset) / yRange) * (h / 2);
+}
+
+// ─── Drawing Engine ──────────────────────────────────────────────
+function drawGrid(ctx, w, h, yRange, yOffset) {
+  const { xMin, xMax } = getDomain();
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.lineWidth = 1;
+
+  const xStep = S.W > 16 ? 2 : 1;
+  const firstX = Math.ceil(xMin / xStep) * xStep;
+  for (let gx = firstX; gx <= xMax; gx += xStep) {
+    const px = toSX(gx, w);
+    ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, h); ctx.stroke();
+  }
+
+  const yStep = yRange > 18 ? 5 : 2;
+  const firstY = Math.ceil((yOffset - yRange) / yStep) * yStep;
+  for (let gy = firstY; gy <= yOffset + yRange; gy += yStep) {
+    const py = toSY(gy, h, yRange, yOffset);
+    ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(w, py); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.lineWidth = 1.2;
+  const ax0 = toSY(0, h, yRange, yOffset);
+  const ay0 = toSX(0, w);
+  if (ax0 >= 0 && ax0 <= h) {
+    ctx.beginPath(); ctx.moveTo(0, ax0); ctx.lineTo(w, ax0); ctx.stroke();
+  }
+  if (ay0 >= 0 && ay0 <= w) {
+    ctx.beginPath(); ctx.moveTo(ay0, 0); ctx.lineTo(ay0, h); ctx.stroke();
+  }
+
+  // Numbers
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+  ctx.font = '10px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  const labelY = Math.min(Math.max(ax0 + 12, 13), h - 3);
+  for (let gx = firstX; gx <= xMax; gx += xStep) {
+    if (Math.abs(gx) < 0.001) continue;
+    ctx.fillText(gx, toSX(gx, w), labelY);
+  }
+
+  ctx.textAlign = 'right';
+  const labelX = Math.min(Math.max(ay0 - 5, 24), w - 5);
+  for (let gy = firstY; gy <= yOffset + yRange; gy += yStep) {
+    if (Math.abs(gy) < 0.001) continue;
+    ctx.fillText(gy, labelX, toSY(gy, h, yRange, yOffset) + 3);
+  }
+  ctx.restore();
+}
+
+function renderTopGraph(model, riemann) {
+  const rect = canvasTop.parentElement.getBoundingClientRect();
+  const w = rect.width, h = rect.height;
+  ctxTop.clearRect(0, 0, w, h);
+
+  const yRange = 8;
+  const ax0 = toSY(0, h, yRange, 0);
+  drawGrid(ctxTop, w, h, yRange, 0);
+
+  const { f, g } = model;
+  const a = S.a, b = S.b;
+  const leftX = Math.min(a, b);
+  const rightX = Math.max(a, b);
+
+  // 1. Shaded Area Fill
+  if (S.vis.area) {
+    if (S.tab === 'between') {
+      // Shaded area between f(x) and g(x)
+      ctxTop.save();
+      ctxTop.fillStyle = 'rgba(245, 158, 11, 0.18)';
+      ctxTop.beginPath();
+      ctxTop.moveTo(toSX(leftX, w), toSY(f(leftX), h, yRange, 0));
+      for (let px = toSX(leftX, w); px <= toSX(rightX, w); px += 2) {
+        const x = fromSX(px, w);
+        ctxTop.lineTo(px, toSY(f(x), h, yRange, 0));
+      }
+      for (let px = toSX(rightX, w); px >= toSX(leftX, w); px -= 2) {
+        const x = fromSX(px, w);
+        ctxTop.lineTo(px, toSY(g(x), h, yRange, 0));
+      }
+      ctxTop.closePath();
+      ctxTop.fill();
+      ctxTop.restore();
+    } else {
+      // Standard definite area under f(x)
+      const fillEnd = S.vis.sweepPoint ? Math.max(leftX, Math.min(rightX, S.sweepX)) : rightX;
+      ctxTop.save();
+      ctxTop.fillStyle = 'rgba(0, 229, 255, 0.12)';
+      ctxTop.beginPath();
+      ctxTop.moveTo(toSX(leftX, w), ax0);
+      for (let px = toSX(leftX, w); px <= toSX(fillEnd, w); px += 2) {
+        const x = fromSX(px, w);
+        const y = f(x);
+        if (isFinite(y)) ctxTop.lineTo(px, toSY(y, h, yRange, 0));
+      }
+      ctxTop.lineTo(toSX(fillEnd, w), ax0);
+      ctxTop.closePath();
+      ctxTop.fill();
+      ctxTop.restore();
+    }
+  }
+
+  // 2. Riemann Partitions (Rectangles or Trapezoids)
+  if (S.vis.riemann && S.method !== 'exact' && S.tab !== 'between') {
+    ctxTop.save();
+    if (S.method === 'trapezoid') {
+      riemann.items.forEach(trap => {
+        const sx0 = toSX(trap.x0, w), sx1 = toSX(trap.x1, w);
+        const sy0 = toSY(trap.y0, h, yRange, 0), sy1 = toSY(trap.y1, h, yRange, 0);
+
+        ctxTop.fillStyle = 'rgba(245, 158, 11, 0.16)';
+        ctxTop.beginPath();
+        ctxTop.moveTo(sx0, ax0); ctxTop.lineTo(sx0, sy0);
+        ctxTop.lineTo(sx1, sy1); ctxTop.lineTo(sx1, ax0);
+        ctxTop.closePath(); ctxTop.fill();
+
+        ctxTop.strokeStyle = '#f59e0b';
+        ctxTop.lineWidth = 1.5;
+        ctxTop.beginPath(); ctxTop.moveTo(sx0, sy0); ctxTop.lineTo(sx1, sy1); ctxTop.stroke();
+      });
+    } else if (S.method === 'simpson') {
+      riemann.items.forEach(simp => {
+        const sx0 = toSX(simp.x0, w), sx2 = toSX(simp.x2, w);
+        ctxTop.fillStyle = 'rgba(236, 72, 153, 0.16)';
+        ctxTop.beginPath();
+        ctxTop.moveTo(sx0, ax0);
+        for (let px = sx0; px <= sx2; px += 2) {
+          const x = fromSX(px, w);
+          ctxTop.lineTo(px, toSY(f(x), h, yRange, 0));
+        }
+        ctxTop.lineTo(sx2, ax0);
+        ctxTop.closePath(); ctxTop.fill();
+      });
+    } else {
+      riemann.items.forEach(rItem => {
+        const sx0 = toSX(rItem.x0, w), sx1 = toSX(rItem.x1, w);
+        const sy = toSY(rItem.evalY, h, yRange, 0);
+        const rw = sx1 - sx0, rh = ax0 - sy;
+
+        ctxTop.fillStyle = 'rgba(245, 158, 11, 0.18)';
+        ctxTop.fillRect(sx0, Math.min(ax0, sy), rw, Math.abs(rh));
+
+        ctxTop.strokeStyle = '#f59e0b';
+        ctxTop.lineWidth = 1.2;
+        ctxTop.strokeRect(sx0, Math.min(ax0, sy), rw, Math.abs(rh));
+
+        ctxTop.fillStyle = '#ffd740';
+        ctxTop.beginPath();
+        ctxTop.arc(toSX(rItem.evalX, w), sy, 2.5, 0, Math.PI * 2);
+        ctxTop.fill();
+      });
+    }
+    ctxTop.restore();
+  }
+
+  // 3. Smooth Curve f(x)
+  if (S.vis.f) {
+    ctxTop.save();
+    ctxTop.strokeStyle = '#00e5ff';
+    ctxTop.lineWidth = 2.8;
+    ctxTop.shadowColor = 'rgba(0, 229, 255, 0.4)';
+    ctxTop.shadowBlur = 6;
+    ctxTop.beginPath();
+    let pen = false;
+    for (let px = 0; px <= w; px += 1.5) {
+      const x = fromSX(px, w);
+      const y = f(x);
+      if (!isFinite(y) || Math.abs(y) > yRange * 3) { pen = false; continue; }
+      const py = toSY(y, h, yRange, 0);
+      if (!pen) { ctxTop.moveTo(px, py); pen = true; } else ctxTop.lineTo(px, py);
+    }
+    ctxTop.stroke();
+    ctxTop.restore();
+  }
+
+  // 4. Smooth Curve g(x) (in Between Mode)
+  if (S.tab === 'between' || S.vis.g) {
+    ctxTop.save();
+    ctxTop.strokeStyle = '#10b981';
+    ctxTop.lineWidth = 2.2;
+    ctxTop.beginPath();
+    let pen = false;
+    for (let px = 0; px <= w; px += 1.5) {
+      const x = fromSX(px, w);
+      const y = g(x);
+      if (!isFinite(y) || Math.abs(y) > yRange * 3) { pen = false; continue; }
+      const py = toSY(y, h, yRange, 0);
+      if (!pen) { ctxTop.moveTo(px, py); pen = true; } else ctxTop.lineTo(px, py);
+    }
+    ctxTop.stroke();
+    ctxTop.restore();
+  }
+
+  // 5. Bounds [a] & [b] Draggable Handles
+  function drawPin(val, label, col) {
+    const px = toSX(val, w);
+    ctxTop.save();
+    ctxTop.strokeStyle = col;
+    ctxTop.lineWidth = 2;
+    ctxTop.setLineDash([3, 3]);
+    ctxTop.beginPath(); ctxTop.moveTo(px, 0); ctxTop.lineTo(px, h); ctxTop.stroke();
+    ctxTop.setLineDash([]);
+
+    ctxTop.fillStyle = col;
+    ctxTop.beginPath(); ctxTop.roundRect(px - 13, h - 22, 26, 18, 4); ctxTop.fill();
+
+    ctxTop.fillStyle = '#060813';
+    ctxTop.font = '700 10px "JetBrains Mono", monospace';
+    ctxTop.textAlign = 'center';
+    ctxTop.fillText(label, px, h - 9);
+    ctxTop.restore();
+  }
+  drawPin(S.a, 'a', '#38bdf8');
+  drawPin(S.b, 'b', '#f43f5e');
+
+  // 6. Laser Sweep Beam & Moving Point
+  if (S.vis.sweepPoint) {
+    const sweepSX = toSX(S.sweepX, w);
+    const sweepY = f(S.sweepX);
+    const sweepSY = toSY(sweepY, h, yRange, 0);
+
+    if (S.vis.laser) {
+      ctxTop.save();
+      ctxTop.strokeStyle = 'rgba(255, 215, 64, 0.4)';
+      ctxTop.lineWidth = 1.5;
+      ctxTop.setLineDash([3, 3]);
+      ctxTop.beginPath(); ctxTop.moveTo(sweepSX, 0); ctxTop.lineTo(sweepSX, h); ctxTop.stroke();
+      ctxTop.restore();
+    }
+
+    if (isFinite(sweepY) && Math.abs(sweepY) < yRange * 2) {
+      ctxTop.save();
+      ctxTop.fillStyle = '#ffd740';
+      ctxTop.shadowColor = '#ffd740';
+      ctxTop.shadowBlur = 8;
+      ctxTop.beginPath(); ctxTop.arc(sweepSX, sweepSY, 4.5, 0, Math.PI * 2); ctxTop.fill();
+      ctxTop.restore();
+    }
+  }
+}
+
+function renderBottomGraph(model) {
+  const rect = canvasBottom.parentElement.getBoundingClientRect();
+  const w = rect.width, h = rect.height;
+  ctxBottom.clearRect(0, 0, w, h);
+
+  const yRange = 16;
+  const yOffset = S.C;
+  drawGrid(ctxBottom, w, h, yRange, yOffset);
+
+  const { f, F } = model;
+  const a = S.a, b = S.b;
+
+  // 1. Antiderivative Curve F(x)
+  if (S.vis.accum) {
+    ctxBottom.save();
+    ctxBottom.strokeStyle = '#a78bfa';
+    ctxBottom.lineWidth = 3;
+    ctxBottom.shadowColor = 'rgba(167, 139, 250, 0.4)';
+    ctxBottom.shadowBlur = 6;
+    ctxBottom.beginPath();
+    let pen = false;
+    for (let px = 0; px <= w; px += 1.5) {
+      const x = fromSX(px, w);
+      const y = F(x);
+      if (!isFinite(y) || Math.abs(y - yOffset) > yRange * 3) { pen = false; continue; }
+      const py = toSY(y, h, yRange, yOffset);
+      if (!pen) { ctxBottom.moveTo(px, py); pen = true; } else ctxBottom.lineTo(px, py);
+    }
+    ctxBottom.stroke();
+    ctxBottom.restore();
+  }
+
+  // 2. Net Accumulation Bracket
+  const Fa = F(a), Fb = F(b);
+  if (isFinite(Fa) && isFinite(Fb)) {
+    const sxb = toSX(b, w);
+    const sya = toSY(Fa, h, yRange, yOffset);
+    const syb = toSY(Fb, h, yRange, yOffset);
+
+    ctxBottom.save();
+    ctxBottom.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+    ctxBottom.lineWidth = 1.5;
+    ctxBottom.beginPath();
+    ctxBottom.moveTo(sxb + 6, sya); ctxBottom.lineTo(sxb + 12, sya);
+    ctxBottom.lineTo(sxb + 12, syb); ctxBottom.lineTo(sxb + 6, syb);
+    ctxBottom.stroke();
+
+    ctxBottom.fillStyle = '#ffd740';
+    ctxBottom.font = '600 10px "JetBrains Mono", monospace';
+    ctxBottom.textAlign = 'left';
+    ctxBottom.fillText(`ΔF = ${(Fb - Fa).toFixed(2)}`, sxb + 16, (sya + syb)/2 + 4);
+    ctxBottom.restore();
+  }
+
+  // 3. Laser Sweep Line, FTC Tangent & Moving Point
+  if (S.vis.sweepPoint) {
+    const sweepSX = toSX(S.sweepX, w);
+    const curF = F(S.sweepX);
+    const curSlope = f(S.sweepX); // FTC: dF/dx = f(x)
+    const sweepSY = toSY(curF, h, yRange, yOffset);
+
+    if (S.vis.laser) {
+      ctxBottom.save();
+      ctxBottom.strokeStyle = 'rgba(255, 215, 64, 0.4)';
+      ctxBottom.lineWidth = 1.5;
+      ctxBottom.setLineDash([3, 3]);
+      ctxBottom.beginPath(); ctxBottom.moveTo(sweepSX, 0); ctxBottom.lineTo(sweepSX, h); ctxBottom.stroke();
+      ctxBottom.restore();
+    }
+
+    // 4. FTC Tangent Line & Slope Triangle
+    if (isFinite(curF) && Math.abs(curF - yOffset) < yRange * 2) {
+      if (S.vis.tangent && isFinite(curSlope)) {
+        const span = 1.6;
+        ctxBottom.save();
+        ctxBottom.strokeStyle = '#ec4899';
+        ctxBottom.lineWidth = 2.4;
+        ctxBottom.shadowColor = 'rgba(236, 72, 153, 0.4)';
+        ctxBottom.shadowBlur = 6;
+        ctxBottom.beginPath();
+        ctxBottom.moveTo(toSX(S.sweepX - span, w), toSY(curF - curSlope * span, h, yRange, yOffset));
+        ctxBottom.lineTo(toSX(S.sweepX + span, w), toSY(curF + curSlope * span, h, yRange, yOffset));
+        ctxBottom.stroke();
+
+        // Slope Triangle
+        const tSpan = 1.0;
+        const pX0 = toSX(S.sweepX, w), pX1 = toSX(S.sweepX + tSpan, w);
+        const pY0 = toSY(curF, h, yRange, yOffset), pY1 = toSY(curF + curSlope * tSpan, h, yRange, yOffset);
+
+        ctxBottom.fillStyle = 'rgba(236, 72, 153, 0.12)';
+        ctxBottom.beginPath();
+        ctxBottom.moveTo(pX0, pY0); ctxBottom.lineTo(pX1, pY0); ctxBottom.lineTo(pX1, pY1);
+        ctxBottom.closePath(); ctxBottom.fill();
+
+        ctxBottom.strokeStyle = 'rgba(236, 72, 153, 0.8)';
+        ctxBottom.lineWidth = 1.2; ctxBottom.setLineDash([2, 2]);
+        ctxBottom.stroke();
+
+        ctxBottom.fillStyle = '#ffd740';
+        ctxBottom.font = '600 9px "JetBrains Mono", monospace';
+        ctxBottom.textAlign = 'left';
+        ctxBottom.fillText(`Slope = f(x) = ${curSlope.toFixed(2)}`, pX1 + 4, (pY0 + pY1)/2);
+        ctxBottom.restore();
+      }
+
+      ctxBottom.save();
+      ctxBottom.fillStyle = '#a78bfa';
+      ctxBottom.shadowColor = '#a78bfa'; ctxBottom.shadowBlur = 10;
+      ctxBottom.beginPath(); ctxBottom.arc(sweepSX, sweepSY, 4.5, 0, Math.PI * 2); ctxBottom.fill();
+      ctxBottom.restore();
+    }
+  }
+}
+
+// ─── Main Refresh Routine ────────────────────────────────────────
+function refresh() {
+  const model = getFunctions();
+  const riemann = computeRiemann(S.method, S.N, S.a, S.b, model.f);
+  const exactVal = computeExact(S.a, S.b, model.F);
+
+  renderTopGraph(model, riemann);
+  renderBottomGraph(model);
+
+  // Top info bar
+  document.getElementById('dispF').innerText = model.fStr;
+  document.getElementById('dispG').innerText = model.gStr;
+  document.getElementById('dispF_accum').innerText = model.FStr;
+  const elDefScore = document.getElementById('dispDefiniteScore');
+  if (elDefScore) elDefScore.innerText = isFinite(exactVal) ? `${exactVal.toFixed(2)} ${model.physUnit}` : 'Undefined';
+  const elRiemScore = document.getElementById('dispRiemannScore');
+  if (elRiemScore) elRiemScore.innerText = isFinite(riemann.sum) ? riemann.sum.toFixed(3) : '—';
+  document.getElementById('dispDeltaX').innerText = `Δx = ${riemann.dx.toFixed(3)}`;
+
+  // Mode panel stats
+  const curF = model.f(S.sweepX);
+  const curF_accum = model.F(S.sweepX);
+
+  // Mode panel stats
+  document.getElementById('lblN').innerText = S.N;
+  document.getElementById('lblSum').innerText = isFinite(riemann.sum) ? riemann.sum.toFixed(3) : '—';
+  document.getElementById('lblExact').innerText = isFinite(exactVal) ? exactVal.toFixed(3) : '—';
+
+  const err = Math.abs(exactVal - riemann.sum);
+  const pct = Math.abs(exactVal) > 0.001 ? (err / Math.abs(exactVal) * 100) : 0;
+  document.getElementById('lblError').innerText = isFinite(err) ? `${err.toFixed(3)} (${pct.toFixed(1)}%)` : '—';
+  document.getElementById('lblFtcSlope').innerText = `Slope m = f(${S.sweepX.toFixed(1)}) = ${isFinite(curF) ? curF.toFixed(2) : '—'}`;
+
+  // Area between curves value
+  if (S.tab === 'between') {
+    const rG = computeRiemann('midpoint', 100, S.a, S.b, model.g);
+    const netArea = exactVal - rG.sum;
+    document.getElementById('lblNetArea').innerText = `Net Area = ${netArea.toFixed(2)} J`;
+  }
+
+  // Sidebar N & Delta X Card updates
+  const elSidebarN = document.getElementById('valSidebarN');
+  if (elSidebarN) elSidebarN.innerText = S.N;
+  const elCardDx = document.getElementById('cardDeltaX');
+  if (elCardDx) elCardDx.innerText = `Δx = ${riemann.dx.toFixed(3)}`;
+  const elSubW = document.getElementById('lblSubWidth');
+  if (elSubW) elSubW.innerText = riemann.dx.toFixed(3);
+  const elSpan = document.getElementById('lblSpanLength');
+  if (elSpan) elSpan.innerText = Math.abs(S.b - S.a).toFixed(2);
+  const elSideSum = document.getElementById('lblSidebarSum');
+  if (elSideSum) elSideSum.innerText = isFinite(riemann.sum) ? riemann.sum.toFixed(3) : '—';
+  const elSideExact = document.getElementById('lblSidebarExact');
+  if (elSideExact) elSideExact.innerText = isFinite(exactVal) ? exactVal.toFixed(3) : '—';
+}
+
+// ─── Animation Loop ──────────────────────────────────────────────
+let lastT = performance.now();
+function loop(t) {
+  let dt = (t - lastT) / 1000;
+  lastT = t;
+  if (dt > 0.05) dt = 0.05;
+
+  if (S.playing && !S.dragging && S.tab !== 'quiz' && S.vis.sweepPoint) {
+    const minX = Math.min(S.a, S.b);
+    const maxX = Math.max(S.a, S.b);
+    S.sweepX += S.speed * dt * 1.5;
+    if (S.sweepX > maxX) S.sweepX = minX;
+  }
+
+  refresh();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ─── Focus Mode Tabs ─────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    S.tab = btn.dataset.tab;
+
+    // Show corresponding bottom utility strip
+    document.querySelectorAll('.mode-panel').forEach(p => p.classList.remove('active'));
+    if (S.tab === 'riemann') document.getElementById('panelRiemann').classList.add('active');
+    else if (S.tab === 'ftc') document.getElementById('panelFTC').classList.add('active');
+    else if (S.tab === 'between') document.getElementById('panelBetween').classList.add('active');
+    else if (S.tab === 'quiz') document.getElementById('panelQuiz').classList.add('active');
+
+    // Toggle secondary curve g(x) visibility
+    const isBetween = S.tab === 'between';
+    document.getElementById('secFuncG').style.display = isBetween ? 'flex' : 'none';
+    document.getElementById('tagG').style.display = isBetween ? 'inline-flex' : 'none';
+    document.getElementById('chipToggleG').style.display = isBetween ? 'inline-flex' : 'none';
+    S.vis.g = isBetween;
+
+    if (S.tab === 'quiz' && !S.quiz.q) nextQuizQuestion();
+    refresh();
+  });
+});
+
+// ─── Quick Preset Chips ──────────────────────────────────────────
+const PRESET_INFOS = {
+  kinematics_accel: {
+    a: 0.0, b: 3.0, A: 2.0, B: 0.8,
+    desc: "<strong>AP Kinematics:</strong> Integrating acceleration <i>a</i>(<i>t</i>) = <i>a</i><sub>0</sub> − <i>kt</i> yields velocity <i>v</i>(<i>t</i>) = <i>v</i><sub>0</sub> + <i>a</i><sub>0</sub><i>t</i> − &frac12;<i>kt</i><sup>2</sup>. Area under <i>a</i>(<i>t</i>) gives change in velocity &Delta;<i>v</i>."
+  },
+  kinematics_velocity: {
+    a: -1.0, b: 3.0, A: 1.2, B: 0.6,
+    desc: "<strong>AP Kinematics:</strong> Integrating quadratic velocity <i>v</i>(<i>t</i>) gives position <i>x</i>(<i>t</i>) = &int; <i>v</i>(<i>t</i>)<i>dt</i>. Area gives total displacement &Delta;<i>x</i>."
+  },
+  spring_hooke: {
+    a: -2.0, b: 2.0, A: 2.5, B: 1.0,
+    desc: "<strong>Hooke's Law Spring Work:</strong> <i>F</i>(<i>x</i>) = <i>kx</i>. Compressing (−<i>x</i>) and stretching (+<i>x</i>) demonstrate signed force and symmetric positive work &int; <i>kx</i> <i>dx</i> = &frac12;<i>kx</i><sup>2</sup>."
+  },
+  spring_nonlinear: {
+    a: -2.0, b: 2.0, A: 1.5, B: 0.4,
+    desc: "<strong>Non-Linear Spring:</strong> Force <i>F</i>(<i>x</i>) = <i>k</i><sub>1</sub><i>x</i> + <i>k</i><sub>2</sub><i>x</i><sup>3</sup>. Area represents stored potential energy <i>U</i> = &frac12;<i>k</i><sub>1</sub><i>x</i><sup>2</sup> + &frac14;<i>k</i><sub>2</sub><i>x</i><sup>4</sup> across compression and stretch."
+  },
+  gravity_work: {
+    a: 1.0, b: 4.0, A: 4.0, B: 1.0,
+    desc: "<strong>Newtonian Gravitation:</strong> <i>F</i>(<i>r</i>) = −<i>GMm</i> / <i>r</i><sup>2</sup>. Integrating gravitational force yields gravitational potential energy <i>U</i>(<i>r</i>) = −<i>GMm</i> / <i>r</i>."
+  },
+  shm_velocity: {
+    a: -3.14, b: 3.14, A: 1.5, B: 1.0,
+    desc: "<strong>Simple Harmonic Motion:</strong> Acceleration <i>a</i>(<i>t</i>) = −&omega;<sup>2</sup><i>x</i>. Spans both negative and positive cycles across the <i>y</i>-axis; net signed area cancels out over a full symmetric period!"
+  },
+  impulse_sine: {
+    a: 0.0, b: 3.14, A: 3.0, B: 1.0,
+    desc: "<strong>Impulse & Collision:</strong> Impact force modeled as a sine half-wave <i>F</i>(<i>t</i>) = <i>F</i><sub>0</sub> sin(&pi;<i>t</i> / <i>T</i>). Area represents impulse <i>J</i> = &Delta;<i>p</i>."
+  },
+  rc_decay: {
+    a: 0.0, b: 4.0, A: 3.0, B: 1.5,
+    desc: "<strong>RC Capacitor Discharge:</strong> Current <i>I</i>(<i>t</i>) = <i>I</i><sub>0</sub> <i>e</i><sup>−<i>t</i>/&tau;</sup>. Total delivered charge is the area <i>Q</i> = &int; <i>I</i> <i>dt</i>."
+  },
+  drag_terminal: {
+    a: 0.0, b: 2.0, A: 3.0, B: 1.0,
+    desc: "<strong>Fluid Drag / Terminal Speed:</strong> Separation of variables yields logarithmic integral &int; <sup>1</sup>&frasl;<sub>(<i>v</i><sub>t</sub> − <i>v</i>)</sub> <i>dv</i> = −<sup><i>b</i></sup>&frasl;<sub><i>m</i></sub> <i>t</i>."
+  },
+  rod_mass_cm: {
+    a: 0.0, b: 3.0, A: 1.5, B: 0.8,
+    desc: "<strong>Variable Mass Rod:</strong> Density &lambda;(<i>x</i>) = &lambda;<sub>0</sub>(1 + &alpha;<i>x</i>). Total rod mass is the integral <i>M</i> = &int;<sub>0</sub><sup><i>L</i></sup> &lambda;(<i>x</i>) <i>dx</i>."
+  },
+  ring_potential: {
+    a: -3.0, b: 3.0, A: 4.0, B: 1.0,
+    desc: "<strong>Charged Ring Potential (U-Sub):</strong> Electric field along the symmetry axis spans both left (−<i>x</i>) and right (+<i>x</i>). Integrating via <i>u</i>-substitution across <i>x</i> = 0."
+  },
+  custom_poly: {
+    a: -2.0, b: 2.0, A: 1.0, B: 1.0,
+    desc: "<strong>Custom Polynomial Calculus:</strong> Spanning both sides of the <i>y</i>-axis [−2, 2]. Observe how negative area below the axis cancels positive area above in net accumulation."
+  }
+};
+
+document.querySelectorAll('.preset-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    S.preset = chip.dataset.preset;
+
+    const conf = PRESET_INFOS[S.preset];
+    if (conf) {
+      S.a = conf.a; S.b = conf.b;
+      S.A = conf.A; S.B = conf.B;
+      S.sweepX = S.a;
+      document.getElementById('cardPhysicsDesc').innerHTML = conf.desc;
+      document.getElementById('slA').value = S.A;
+      document.getElementById('slB').value = S.B;
+      document.getElementById('slBoundA').value = S.a;
+      document.getElementById('slBoundB').value = S.b;
+      document.getElementById('valA').innerText = S.A.toFixed(1);
+      document.getElementById('valB').innerText = S.B.toFixed(1);
+      document.getElementById('valBoundA').innerText = S.a.toFixed(1);
+      document.getElementById('valBoundB').innerText = S.b.toFixed(1);
+    }
+    refresh();
+  });
+});
+
+// ─── Automated "Shrink Δx → 0" Animation ─────────────────────────
+document.getElementById('btnShrink').addEventListener('click', () => {
+  if (S.shrinkAnimating) return;
+  S.shrinkAnimating = true;
+  const btn = document.getElementById('btnShrink');
+  btn.innerText = '⏳ Subdividing Δx → 0...';
+
+  const steps = [2, 4, 8, 16, 32, 64, 128, 200];
+  let idx = 0;
+  function next() {
+    if (idx >= steps.length) {
+      S.shrinkAnimating = false;
+      btn.innerText = '⚡ Shrink Δx → 0';
+      return;
+    }
+    S.N = steps[idx];
+    document.getElementById('slN').value = S.N;
+    const sideN = document.getElementById('slSidebarN');
+    if (sideN) sideN.value = S.N;
+    document.getElementById('lblN').innerText = S.N;
+    document.querySelectorAll('.btn-n-quick').forEach(b => b.classList.toggle('active', parseInt(b.dataset.n, 10) === S.N));
+    idx++;
+    setTimeout(next, 240);
+  }
+  next();
+});
+
+// ─── Play / Pause ────────────────────────────────────────────────
+const btnPlay = document.getElementById('btnPlay');
+btnPlay.addEventListener('click', () => {
+  S.playing = !S.playing;
+  btnPlay.innerText = S.playing ? '⏸ Pause' : '▶ Play';
+});
+
+// ─── Moving Sweep Point Toggle ───────────────────────────────────
+const btnToggleSweep = document.getElementById('btnToggleSweep');
+btnToggleSweep.addEventListener('click', () => {
+  S.vis.sweepPoint = !S.vis.sweepPoint;
+  btnToggleSweep.innerText = S.vis.sweepPoint ? '📍 Sweep Point: ON' : '📍 Sweep Point: OFF';
+  btnToggleSweep.classList.toggle('active-mode', S.vis.sweepPoint);
+  refresh();
+});
+
+// ─── Integrated Function Graph F(x) Slide / Collapse Toggle ──────
+const btnToggleFGraph = document.getElementById('btnToggleFGraph');
+const cardAccumulation = document.getElementById('cardAccumulation');
+btnToggleFGraph.addEventListener('click', () => {
+  S.vis.accumGraph = !S.vis.accumGraph;
+  cardAccumulation.classList.toggle('collapsed', !S.vis.accumGraph);
+  btnToggleFGraph.innerText = S.vis.accumGraph ? '📉 F(x) Graph: SHOW' : '📉 F(x) Graph: HIDE';
+  btnToggleFGraph.classList.toggle('active-mode', S.vis.accumGraph);
+
+  // Smoothly trigger resize over the 400ms CSS slide transition
+  let start = performance.now();
+  function step(now) {
+    resize();
+    refresh();
+    if (now - start < 450) {
+      requestAnimationFrame(step);
+    }
+  }
+  requestAnimationFrame(step);
+});
+
+// ─── Interactive Legend Chips (Clickable Toggles) ────────────────
+const chipMap = [
+  ['chipToggleF', 'f'],
+  ['chipToggleG', 'g'],
+  ['chipToggleRiemann', 'riemann'],
+  ['chipToggleArea', 'area'],
+  ['chipToggleAccum', 'accum'],
+  ['chipToggleTangent', 'tangent'],
+  ['chipToggleLaser', 'laser']
+];
+chipMap.forEach(([id, key]) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('click', () => {
+      S.vis[key] = !S.vis[key];
+      el.classList.toggle('active', S.vis[key]);
+      refresh();
+    });
+  }
+});
+
+// ─── Riemann Method Buttons ──────────────────────────────────────
+document.querySelectorAll('.method-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    S.method = btn.dataset.method;
+    refresh();
+  });
+});
+
+// ─── Sidebar Controls Wiring ─────────────────────────────────────
+document.getElementById('selFuncG').addEventListener('change', e => {
+  S.funcG = e.target.value;
+  refresh();
+});
+document.getElementById('slA').addEventListener('input', e => {
+  S.A = parseFloat(e.target.value);
+  document.getElementById('valA').innerText = S.A.toFixed(1);
+  refresh();
+});
+document.getElementById('slB').addEventListener('input', e => {
+  S.B = parseFloat(e.target.value);
+  document.getElementById('valB').innerText = S.B.toFixed(1);
+  refresh();
+});
+document.getElementById('slBoundA').addEventListener('input', e => {
+  S.a = parseFloat(e.target.value);
+  document.getElementById('valBoundA').innerText = S.a.toFixed(1);
+  refresh();
+});
+document.getElementById('slBoundB').addEventListener('input', e => {
+  S.b = parseFloat(e.target.value);
+  document.getElementById('valBoundB').innerText = S.b.toFixed(1);
+  refresh();
+});
+document.getElementById('slN').addEventListener('input', e => {
+  S.N = parseInt(e.target.value, 10);
+  const sideN = document.getElementById('slSidebarN');
+  if (sideN) sideN.value = S.N;
+  document.getElementById('lblN').innerText = S.N;
+  document.querySelectorAll('.btn-n-quick').forEach(b => b.classList.toggle('active', parseInt(b.dataset.n, 10) === S.N));
+  refresh();
+});
+const elSlSidebarN = document.getElementById('slSidebarN');
+if (elSlSidebarN) {
+  elSlSidebarN.addEventListener('input', e => {
+    S.N = parseInt(e.target.value, 10);
+    document.getElementById('slN').value = S.N;
+    document.getElementById('lblN').innerText = S.N;
+    document.querySelectorAll('.btn-n-quick').forEach(b => b.classList.toggle('active', parseInt(b.dataset.n, 10) === S.N));
+    refresh();
+  });
+}
+document.querySelectorAll('.btn-n-quick').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-n-quick').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    S.N = parseInt(btn.dataset.n, 10);
+    document.getElementById('slN').value = S.N;
+    const sideN = document.getElementById('slSidebarN');
+    if (sideN) sideN.value = S.N;
+    document.getElementById('lblN').innerText = S.N;
+    refresh();
+  });
+});
+document.getElementById('slConstC').addEventListener('input', e => {
+  S.C = parseFloat(e.target.value);
+  document.getElementById('valConstC').innerText = S.C.toFixed(1);
+  refresh();
+});
+document.getElementById('slSpeed').addEventListener('input', e => {
+  S.speed = parseFloat(e.target.value);
+  document.getElementById('valSpeed').innerText = `${S.speed.toFixed(1)}×`;
+});
+document.getElementById('slW').addEventListener('input', e => {
+  S.W = parseFloat(e.target.value);
+  document.getElementById('valW').innerText = S.W;
+  refresh();
+});
+
+// ─── Direct Canvas Manipulation (Pins & Sweep) ───────────────────
+function pointerDown(e, canvas) {
+  const r = canvas.getBoundingClientRect();
+  const mouseX = fromSX(e.clientX - r.left, r.width);
+  const tol = S.W * 0.035;
+
+  if (Math.abs(mouseX - S.a) < tol) S.dragging = 'a';
+  else if (Math.abs(mouseX - S.b) < tol) S.dragging = 'b';
+  else {
+    S.dragging = 'sweep';
+    S.sweepX = mouseX;
+  }
+  refresh();
+}
+
+function pointerMove(e, canvas) {
+  if (!S.dragging) return;
+  const r = canvas.getBoundingClientRect();
+  const mouseX = fromSX(e.clientX - r.left, r.width);
+
+  if (S.dragging === 'a') {
+    S.a = Math.round(mouseX * 10) / 10;
+    document.getElementById('slBoundA').value = S.a;
+    document.getElementById('valBoundA').innerText = S.a.toFixed(1);
+  } else if (S.dragging === 'b') {
+    S.b = Math.round(mouseX * 10) / 10;
+    document.getElementById('slBoundB').value = S.b;
+    document.getElementById('valBoundB').innerText = S.b.toFixed(1);
+  } else if (S.dragging === 'sweep') {
+    S.sweepX = mouseX;
+  }
+  refresh();
+}
+
+[canvasTop, canvasBottom].forEach(c => {
+  c.addEventListener('mousedown', e => pointerDown(e, c));
+  c.addEventListener('mousemove', e => pointerMove(e, c));
+  window.addEventListener('mouseup', () => { S.dragging = null; });
+
+  c.addEventListener('touchstart', e => {
+    if (e.touches.length === 1) pointerDown(e.touches[0], c);
+  });
+  c.addEventListener('touchmove', e => {
+    if (e.touches.length === 1 && S.dragging) {
+      e.preventDefault();
+      pointerMove(e.touches[0], c);
+    }
+  }, { passive: false });
+  window.addEventListener('touchend', () => { S.dragging = null; });
+});
+
+// ─── AP Quiz Engine ──────────────────────────────────────────────
+const QUIZ_QUESTIONS = [
+  {
+    q: "A cart accelerates at a(t) = 4t m/s². With v(0) = 1 m/s, what is v(2) in m/s?",
+    ans: 9, // \int_0^2 4t dt + 1 = 2(4) + 1 = 9
+    fb: "v(2) = 1 + [2t²]₀² = 1 + 8 = 9 m/s."
+  },
+  {
+    q: "Find work done (in Joules) by force F(x) = 6x² N from x = 0 to x = 2 m:",
+    ans: 16, // \int_0^2 6x^2 dx = [2x^3]_0^2 = 16
+    fb: "W = [2x³]₀² = 2(8) = 16 J."
+  },
+  {
+    q: "A velocity v(t) = 6t - 2 m/s. What is displacement Δx (in m) between t = 0 and t = 3?",
+    ans: 21, // [3t^2 - 2t]_0^3 = 27 - 6 = 21
+    fb: "Δx = [3t² - 2t]₀³ = 27 - 6 = 21 m."
+  },
+  {
+    q: "Current is I(t) = 3e^(-t) A. Total charge Q (in C) from t = 0 to t → ∞ is:",
+    ans: 3, // \int_0^\infty 3 e^{-t} dt = 3
+    fb: "Q = [-3e⁻ᵗ]₀^∞ = 0 - (-3) = 3 C."
+  }
+];
+
+function nextQuizQuestion() {
+  const qObj = QUIZ_QUESTIONS[Math.floor(Math.random() * QUIZ_QUESTIONS.length)];
+  S.quiz.q = qObj;
+  document.getElementById('lblQuizQ').innerText = qObj.q;
+  document.getElementById('quizIn').value = '';
+  document.getElementById('lblQuizFeedback').innerText = '';
+}
+
+document.getElementById('btnQuizCheck').addEventListener('click', () => {
+  if (!S.quiz.q) return;
+  const val = parseFloat(document.getElementById('quizIn').value);
+  const fb = document.getElementById('lblQuizFeedback');
+  S.quiz.total++;
+
+  if (!isNaN(val) && Math.abs(val - S.quiz.q.ans) < 0.2) {
+    S.quiz.score++;
+    fb.innerText = `✓ Correct! ${S.quiz.q.fb}`;
+    fb.style.color = '#10b981';
+  } else {
+    fb.innerText = `✗ Answer: ${S.quiz.q.ans}. ${S.quiz.q.fb}`;
+    fb.style.color = '#ef4444';
+  }
+  document.getElementById('lblQuizScore').innerText = `Score: ${S.quiz.score} / ${S.quiz.total}`;
+});
+
+document.getElementById('btnQuizNext').addEventListener('click', nextQuizQuestion);
+
+// Initial call
+refresh();
+</script>
+</body>
+</html>
