@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AP Physics: Speed of Sound & Longitudinal Wave Simulator</title>
+    <script>
+    const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
+    }
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
+      });
+    }
+    async function verifyWebsiteAccess() {
+      const userInput = await requestPassword("Simulation Access", "Password required:");
+      if (userInput === null) { window.location.replace("about:blank"); return; }
+      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.replace("about:blank");
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
+    } else {
+      verifyWebsiteAccess();
+    }
+  </script>
+  <style id="password-gate-styles">
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
+    #password-gate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5, 9, 18, 0.88); padding: 24px; z-index: 9999; }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card { width: min(100%, 420px); background: #101625; border: 1px solid rgba(100,181,246,0.28); border-radius: 18px; padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); color: #e7edf7; font-family: 'Segoe UI', Arial, sans-serif; }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px; box-sizing: border-box; }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  </style>
+    <style>
+        :root {
+            --bg: #0a0a1a;
+            --card: #12122a;
+            --card-sub: #181838;
+            --input-bg: rgba(255, 255, 255, 0.06);
+            --accent-cyan: #00e5ff;
+            --accent-purple: #7c4dff;
+            --accent-pink: #ff4081;
+            --accent-amber: #ffd740;
+            --accent-green: #69f0ae;
+            --accent-red: #ff5252;
+            --text: #e0e0e0;
+            --text-muted: #8888aa;
+            --border: rgba(255, 255, 255, 0.10);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .tab-bar {
+            display: flex;
+            gap: 0;
+            padding: 0 20px;
+            max-width: 1560px;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(10,10,26,0.94);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+        }
+        .tab-btn {
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+        .tab-btn:hover { color: var(--text); }
+        .tab-btn.active { color: var(--accent-cyan); border-bottom-color: var(--accent-cyan); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .header {
+            text-align: center;
+            padding: 20px 20px 12px;
+            background: linear-gradient(180deg, rgba(124,77,255,0.12) 0%, transparent 100%);
+        }
+        .header h1 {
+            font-size: 27px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff, #a0a0cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .domain-badge {
+            display: inline-block;
+            margin-top: 6px;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            background: rgba(0,229,255,0.15);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0,229,255,0.3);
+        }
+        .header .description {
+            margin-top: 6px;
+            color: var(--text-muted);
+            font-size: 13.5px;
+            max-width: 860px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.5;
+        }
+
+
+        .main-layout {
+            display: flex;
+            gap: 16px;
+            padding: 0 20px 16px;
+            max-width: 1560px;
+            margin: 0 auto;
+        }
+        .controls-panel {
+            width: 340px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 15px;
+        }
+        .card h3 {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .slider-group { margin-bottom: 13px; }
+        .slider-group:last-child { margin-bottom: 0; }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        .slider-label .value {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            color: var(--accent-cyan);
+            font-size: 12px;
+            font-weight: 600;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.15);
+            outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(0,229,255,0.5);
+        }
+
+        .preset-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin-top: 6px;
+            margin-bottom: 12px;
+        }
+        .preset-btn {
+            padding: 6px 3px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 10px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .preset-btn:hover {
+            background: rgba(0,229,255,0.15);
+            color: #fff;
+            border-color: var(--accent-cyan);
+        }
+
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(255,255,255,0.08);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn:hover { background: rgba(255,255,255,0.15); }
+        .btn.active {
+            background: var(--accent-cyan);
+            color: #000;
+            box-shadow: 0 0 10px rgba(0,229,255,0.35);
+        }
+        .btn.race {
+            background: linear-gradient(135deg, #ff4081, #ffd740);
+            color: #000;
+            font-weight: 700;
+            width: 100%;
+            padding: 10px;
+            box-shadow: 0 0 12px rgba(255,64,129,0.4);
+        }
+        .btn.race:hover {
+            opacity: 0.92;
+            box-shadow: 0 0 16px rgba(255,64,129,0.6);
+        }
+        .btn.pulse {
+            background: linear-gradient(135deg, rgba(255,64,129,0.3), rgba(124,77,255,0.4));
+            color: #fff;
+            border: 1px solid rgba(255,64,129,0.4);
+        }
+        .btn.reset { background: rgba(255,64,129,0.15); color: var(--accent-pink); }
+        .btn.reset:hover { background: rgba(255,64,129,0.28); }
+
+        .mode-select-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+        .mode-btn {
+            padding: 8px 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-btn:hover { color: var(--text); background: rgba(255,255,255,0.09); }
+        .mode-btn.active {
+            background: rgba(0,229,255,0.12);
+            color: var(--accent-cyan);
+            border-color: var(--accent-cyan);
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-top: 6px;
+        }
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 11.5px;
+            color: var(--text-muted);
+            cursor: pointer;
+            user-select: none;
+        }
+        .toggle-item input[type="checkbox"] {
+            accent-color: var(--accent-cyan);
+            cursor: pointer;
+            width: 14px;
+            height: 14px;
+        }
+
+        .canvas-area {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .canvas-wrapper {
+            position: relative;
+            background: var(--card);
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .canvas-wrapper canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: var(--bg);
+        }
+
+        /* Speedometer HUD */
+        .speedometer-hud {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            padding: 12px;
+            background: rgba(255,255,255,0.02);
+            border-top: 1px solid var(--border);
+        }
+        .hud-stat {
+            background: rgba(255,255,255,0.04);
+            border-radius: 8px;
+            padding: 8px 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.04);
+            position: relative;
+        }
+        .hud-stat.highlight-energy {
+            border-color: rgba(0,229,255,0.35);
+            background: rgba(0,229,255,0.05);
+        }
+        .hud-stat.highlight-particle {
+            border-color: rgba(255,215,64,0.35);
+            background: rgba(255,215,64,0.05);
+        }
+        .hud-stat .hud-label {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 3px;
+        }
+        .hud-stat .hud-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+        .hud-stat .hud-sub {
+            font-size: 9.5px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .full-width {
+            max-width: 1560px;
+            margin: 0 auto;
+            padding: 0 20px 20px;
+        }
+        .graphs-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        @media (max-width: 1100px) {
+            .graphs-row { grid-template-columns: 1fr; }
+            .main-layout { flex-direction: column; }
+            .controls-panel { width: 100%; }
+        }
+        .graph-card {
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 12px;
+        }
+        .graph-card h4 {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .graph-card canvas {
+            width: 100%;
+            height: 180px;
+            background: rgba(0,0,0,0.25);
+            border-radius: 8px;
+            display: block;
+        }
+
+        .datalogger-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .data-table-container {
+            max-height: 220px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .data-table th {
+            position: sticky;
+            top: 0;
+            background: var(--card-sub);
+            padding: 8px;
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table td {
+            padding: 6px 8px;
+            text-align: right;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .data-table tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+        /* Assessment styles */
+        .assessment-section { max-width: 900px; margin: 0 auto; padding: 20px 20px 40px; }
+        .assessment-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+        .assessment-header h2 { font-size: 20px; font-weight: 600; }
+        .student-name-group { display: flex; align-items: center; gap: 10px; }
+        .student-name-group label { font-size: 13px; color: var(--text-muted); font-weight: 500; }
+        .student-name-group input[type="text"] { padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 14px; width: 220px; outline: none; }
+        .student-name-group input[type="text"]:focus { border-color: var(--accent-cyan); }
+        .assessment-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+        .assessment-nav .nav-btn { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.06); color: var(--text); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .assessment-nav .nav-btn:hover { background: rgba(255,255,255,0.12); border-color: var(--accent-cyan); }
+        .assessment-nav .nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .assessment-nav .nav-slider { flex: 1; }
+        .assessment-nav .nav-counter { font-size: 13px; font-family: 'JetBrains Mono', monospace; color: var(--text-muted); white-space: nowrap; min-width: 80px; text-align: center; }
+        .assessment-nav .progress-dots { display: flex; gap: 6px; flex-shrink: 0; }
+        .progress-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--border); background: transparent; transition: all 0.2s; }
+        .progress-dot.answered { background: var(--accent-green); border-color: var(--accent-green); }
+        .progress-dot.current { border-color: var(--accent-cyan); box-shadow: 0 0 6px rgba(0,229,255,0.5); }
+        .assess-question { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; display: none; }
+        .assess-question.active { display: block; }
+        .assess-question .q-phase { margin-bottom: 12px; }
+        .assess-question .q-number { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+        .assess-question .q-text { font-size: 15.5px; font-weight: 500; line-height: 1.6; color: var(--text); margin-bottom: 16px; }
+        .assess-question .q-answer-area textarea { width: 100%; min-height: 110px; padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: 14px; font-family: inherit; line-height: 1.6; resize: vertical; outline: none; }
+        .assess-question .q-answer-area textarea:focus { border-color: var(--accent-cyan); }
+        .export-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-top: 20px; }
+        .btn-docx { padding: 10px 24px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; background: linear-gradient(135deg, rgba(124,77,255,0.3), rgba(0,229,255,0.2)); color: #fff; border: 1px solid rgba(124,77,255,0.4); }
+        .phase-badge { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .phase-engage { background: rgba(0,229,255,0.15); color: var(--accent-cyan); }
+        .phase-explore { background: rgba(124,77,255,0.15); color: var(--accent-purple); }
+        .phase-explain { background: rgba(255,215,64,0.15); color: var(--accent-amber); }
+        .phase-elaborate { background: rgba(105,240,174,0.15); color: var(--accent-green); }
+        .phase-evaluate { background: rgba(255,64,129,0.15); color: var(--accent-pink); }
+    </style>
+    <!-- MathJax for LaTeX math rendering ($...$, $$...$$, \(...\), \[...\]) -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+</head>
+<body>
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="sim">Interactive Simulation</button>
+        <button class="tab-btn" data-tab="assessment">5E Formative Assessment</button>
+    </div>
+
+    <!-- TAB 1: SIMULATION -->
+    <div id="tab-sim" class="tab-content active">
+        <div class="header">
+            <h1>Speed of Sound & Temperature</h1>
+            <div class="domain-badge">Sound Waves & Temperature</div>
+            <p class="description">
+                Explore how sound speed changes with temperature using \(v \approx 331.5 + 0.6T\) (where \(T\) is in °C): <strong>for every 1°C increase in temperature, sound travels 0.6 m/s faster!</strong>
+            </p>
+        </div>
+
+        <div class="main-layout">
+            <!-- CONTROLS PANEL -->
+            <div class="controls-panel">
+                <!-- Temperature & Medium -->
+                <div class="card">
+                    <h3>Temperature & Medium</h3>
+                    
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Air Temperature</span>
+                            <span class="value" id="val-T">20.0 °C (293 K)</span>
+                        </div>
+                        <input type="range" id="slider-T" min="233" max="373" step="1" value="293">
+                    </div>
+
+                    <div class="preset-row">
+                        <button class="preset-btn" data-temp="253.15">-20°C (Cold)</button>
+                        <button class="preset-btn" data-temp="273.15">0°C (Ice)</button>
+                        <button class="preset-btn" data-temp="293.15">20°C (Room)</button>
+                        <button class="preset-btn" data-temp="313.15">40°C (Hot)</button>
+                        <button class="preset-btn" data-temp="373.15">100°C (Boil)</button>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label"><span>Gas Medium</span><span class="value" id="val-gas">Dry Air</span></div>
+                        <select id="select-gas" style="width:100%; padding:8px; border-radius:8px; background:var(--input-bg); color:var(--text); border:1px solid var(--border); font-size:12px; outline:none;">
+                            <option value="air">Dry Air (Standard)</option>
+                            <option value="he">Helium (Fast! ~1000 m/s)</option>
+                            <option value="co2">Carbon Dioxide (Slow! ~268 m/s)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Simulation Mode -->
+                <div class="card">
+                    <h3>Wave Mode</h3>
+                    <div class="mode-select-grid">
+                        <button class="mode-btn active" data-mode="traveling">Continuous Wave</button>
+                        <button class="mode-btn" data-mode="pulse">Acoustic Pulse</button>
+                        <button class="mode-btn" data-mode="dual">Cold vs Hot Race</button>
+                        <button class="mode-btn" data-mode="standing">Resonance Tube</button>
+                    </div>
+
+                    <div id="race-controls" style="display:none; margin-bottom:10px;">
+                        <button class="btn race" id="btn-start-race">🏁 Start Acoustic Drag Race!</button>
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label"><span>Speaker Frequency (f)</span><span class="value" id="val-freq">300 Hz</span></div>
+                        <input type="range" id="slider-freq" min="100" max="800" step="10" value="300">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label"><span>Wave Amplitude</span><span class="value" id="val-amp">1.0x</span></div>
+                        <input type="range" id="slider-amp" min="0.3" max="2.0" step="0.1" value="1.0">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-label"><span>Simulation Visual Speed</span><span class="value" id="val-speed">1.0x</span></div>
+                        <input type="range" id="slider-speed" min="0.2" max="2.5" step="0.1" value="1.0">
+                    </div>
+                </div>
+
+                <!-- Visual Overlays -->
+                <div class="card">
+                    <h3>Visualization Toggles</h3>
+                    <div class="toggle-group">
+                        <label class="toggle-item">
+                            <span>Moving Crest Tracker & Velocity Vector (v_wave)</span>
+                            <input type="checkbox" id="toggle-crest-tracker" checked>
+                        </label>
+                        <label class="toggle-item">
+                            <span>Tracer Particles & In-Place Oscillation Range</span>
+                            <input type="checkbox" id="toggle-tracers" checked>
+                        </label>
+                        <label class="toggle-item">
+                            <span>Compression & Rarefaction Glow</span>
+                            <input type="checkbox" id="toggle-glow" checked>
+                        </label>
+                        <label class="toggle-item">
+                            <span>Displacement & Pressure Waveforms</span>
+                            <input type="checkbox" id="toggle-waveforms" checked>
+                        </label>
+                        <label class="toggle-item">
+                            <span>Thermal Molecular Motion (Random Jitter)</span>
+                            <input type="checkbox" id="toggle-thermal" checked>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Playback controls -->
+                <div class="card">
+                    <h3>Controls</h3>
+                    <div class="btn-group">
+                        <button class="btn active" id="btn-play">⏸ Pause</button>
+                        <button class="btn" id="btn-step">⏭ Step</button>
+                        <button class="btn pulse" id="btn-pulse" style="display:none;">⚡ Fire Pulse</button>
+                        <button class="btn reset" id="btn-reset">↺ Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANVAS AREA -->
+            <div class="canvas-area">
+                <div class="canvas-wrapper">
+                    <canvas id="simCanvas" width="1050" height="620"></canvas>
+
+                    <!-- Clean Real-time HUD stats -->
+                    <div class="speedometer-hud">
+                        <div class="hud-stat highlight-energy">
+                            <div class="hud-label">Sound Velocity</div>
+                            <div class="hud-value" id="hud-v">343.5 m/s</div>
+                            <div class="hud-sub" id="hud-v-sub">1,237 km/h</div>
+                        </div>
+                        <div class="hud-stat">
+                            <div class="hud-label">Air Temperature</div>
+                            <div class="hud-value" id="hud-temp">20.0 °C</div>
+                            <div class="hud-sub" id="hud-temp-k">293.15 K</div>
+                        </div>
+                        <div class="hud-stat" style="border-color:rgba(105,240,174,0.3); background:rgba(105,240,174,0.06);">
+                            <div class="hud-label" style="color:var(--accent-green);">Sound Formula</div>
+                            <div class="hud-value" style="font-size:13.5px; color:var(--accent-green); padding-top:2px;">v ≈ 331.5 + 0.6T</div>
+                            <div class="hud-sub">+0.6 m/s per °C (T in °C)</div>
+                        </div>
+                        <div class="hud-stat">
+                            <div class="hud-label">Wavelength (λ)</div>
+                            <div class="hud-value" id="hud-lambda">1.15 m</div>
+                            <div class="hud-sub">Crest to crest distance</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FULL-WIDTH GRAPHS & DATA LOGGER -->
+        <div class="full-width">
+            <div class="graphs-row">
+                <div class="graph-card">
+                    <h4><span>Sound Velocity vs. Temperature</span><span id="graph1-legend" style="color:var(--accent-cyan); font-family:monospace;"></span></h4>
+                    <canvas id="graph-vt" width="450" height="180"></canvas>
+                </div>
+                <div class="graph-card">
+                    <h4><span>Microphone Waveforms (Oscilloscope)</span><span id="scope-legend" style="color:var(--accent-amber); font-family:monospace;">Time of Flight</span></h4>
+                    <canvas id="graph-scope" width="450" height="180"></canvas>
+                </div>
+                <div class="graph-card">
+                    <h4><span>Sound Wave Energy</span><span style="color:var(--accent-green); font-family:monospace;">Energy Distribution</span></h4>
+                    <canvas id="graph-energy" width="450" height="180"></canvas>
+                </div>
+            </div>
+
+            <!-- Data logger table -->
+            <div class="card" style="margin-top:14px;">
+                <div class="datalogger-header">
+                    <h3>Acoustic & Thermodynamic Data Logger</h3>
+                    <button class="btn btn-export" id="btn-export-csv">⬇ Export Data (CSV)</button>
+                </div>
+                <div class="data-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Time (s)</th>
+                                <th>Temp (K)</th>
+                                <th>Temp (°C)</th>
+                                <th>Gas</th>
+                                <th>Wave Speed v (m/s)</th>
+                                <th>Particle Peak u (m/s)</th>
+                                <th>Freq (Hz)</th>
+                                <th>λ (m)</th>
+                                <th>Thermal Speed (m/s)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: 5E ASSESSMENT -->
+    <div id="tab-assessment" class="tab-content">
+        <div class="assessment-section">
+            <div class="assessment-header">
+                <h2>5E Formative Assessment — <span id="assess-sim-title" style="color:var(--accent-cyan);">Speed of Sound & Temperature</span></h2>
+                <div class="student-name-group">
+                    <label for="student-name">Student Name:</label>
+                    <input type="text" id="student-name" placeholder="Enter your name...">
+                </div>
+            </div>
+
+            <div class="assessment-nav">
+                <button class="nav-btn" id="nav-prev" title="Previous">&#8592;</button>
+                <div class="nav-slider"><input type="range" id="nav-slider" min="0" max="9" step="1" value="0"></div>
+                <div class="nav-counter"><span id="nav-current">1</span> / <span id="nav-total">10</span></div>
+                <button class="nav-btn" id="nav-next" title="Next">&#8594;</button>
+                <div class="progress-dots" id="progress-dots"></div>
+            </div>
+
+            <!-- 10 Questions -->
+            <div class="assess-question active" data-q="0">
+                <div class="q-phase"><span class="phase-badge phase-engage">Engage</span><span class="q-number">Question 1 of 10</span></div>
+                <div class="q-text">Using the linear formula \(v \approx 331.5 + 0.6T\) (where \(T\) is in °C), what is the speed of sound at 0°C and at 20°C? By how much does sound velocity increase for each 1°C increase in temperature?</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="0"></textarea></div>
+            </div>
+            <div class="assess-question" data-q="1">
+                <div class="q-phase"><span class="phase-badge phase-engage">Engage</span><span class="q-number">Question 2 of 10</span></div>
+                <div class="q-text">Can sound waves travel through an empty vacuum? Why does sound require a physical medium like air to travel?</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="1"></textarea></div>
+            </div>
+            <div class="assess-question" data-q="2">
+                <div class="q-phase"><span class="phase-badge phase-explore">Explore</span><span class="q-number">Question 3 of 10</span></div>
+                <div class="q-text">Switch to "Cold vs Hot Race" mode and start the race. Which sound wave reaches the finish line first: the cold air (0°C) or the warm air? By how many milliseconds did the warm wave win?</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="2"></textarea></div>
+            </div>
+            <div class="assess-question" data-q="3">
+                <div class="q-phase"><span class="phase-badge phase-explore">Explore</span><span class="q-number">Question 4 of 10</span></div>
+                <div class="q-text">Look closely at the highlighted yellow tracer particles inside the tube. Do the air particles travel all the way across the tube, or do they vibrate back and forth in place? Explain what this tells us about sound waves.</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="3"></textarea></div>
+            </div>
+            <div class="assess-question" data-q="4">
+                <div class="q-phase"><span class="phase-badge phase-explain">Explain</span><span class="q-number">Question 5 of 10</span></div>
+                <div class="q-text">Why does sound travel faster in warm air than in cold air? Think about how fast air molecules move and collide with one another when heated.</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="4"></textarea></div>
+            </div>
+            <div class="assess-question" data-q="5">
+                <div class="q-phase"><span class="phase-badge phase-explain">Explain</span><span class="q-number">Question 6 of 10</span></div>
+                <div class="q-text">Select Helium from the gas dropdown. How does the speed of sound in Helium compare to dry air at the same temperature? Why do lighter gas molecules transmit sound faster?</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="5"></textarea></div>
+            </div>
+            <div class="assess-question" data-q="6">
+                <div class="q-phase"><span class="phase-badge phase-elaborate">Elaborate</span><span class="q-number">Question 7 of 10</span></div>
+                <div class="q-text">When sound travels faster in hot air at a constant speaker frequency, what happens to the distance between sound compressions (the wavelength)?</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="6"></textarea></div>
+            </div>
+            <div class="assess-question" data-q="7">
+                <div class="q-phase"><span class="phase-badge phase-elaborate">Elaborate</span><span class="q-number">Question 8 of 10</span></div>
+                <div class="q-text">In a sound wave, what is a compression (high pressure area) and what is a rarefaction (low pressure area)? How are they created by the vibrating speaker?</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="7"></textarea></div>
+            </div>
+            <div class="assess-question" data-q="8">
+                <div class="q-phase"><span class="phase-badge phase-evaluate">Evaluate</span><span class="q-number">Question 9 of 10</span></div>
+                <div class="q-text">If you measure the time it takes for a sound pulse to travel 0.50 meters between two microphones, how can you calculate sound velocity? (Hint: Speed = Distance ÷ Time)</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="8"></textarea></div>
+            </div>
+            <div class="assess-question" data-q="9">
+                <div class="q-phase"><span class="phase-badge phase-evaluate">Evaluate</span><span class="q-number">Question 10 of 10</span></div>
+                <div class="q-text">When air inside a resonance tube or wind instrument is heated up, why does the pitch / resonant frequency go up?</div>
+                <div class="q-answer-area"><textarea placeholder="Type your answer here..." data-q="9"></textarea></div>
+            </div>
+
+            <div class="export-bar">
+                <div class="progress-text"><strong id="answered-count">0</strong> of 10 questions answered</div>
+                <div class="export-actions">
+                    <button class="btn-docx" onclick="exportToDocx()">⬇ Export Worksheet (.DOCX)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- External libraries for export -->
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════
+        // PHYSICAL GAS CONSTANTS & MODELS
+        // ═══════════════════════════════════════════════════════════════
+        const R_UNIV = 8.314462; // J/(mol·K)
+        const P_ATM = 101325;    // Pa
+
+        const GAS_DATABASE = {
+            air: { name: 'Dry Air', gamma: 1.400, molarMass: 0.02897, color: '#00e5ff' },
+            he:  { name: 'Helium', gamma: 1.667, molarMass: 0.004003, color: '#ffd740' },
+            co2: { name: 'Carbon Dioxide', gamma: 1.300, molarMass: 0.04401, color: '#ff4081' }
+        };
+
+        // Application State
+        const state = {
+            running: true,
+            simTime: 0,
+            simSpeed: 1.0,
+            mode: 'traveling', // 'traveling', 'pulse', 'dual', 'standing'
+            tempK: 293.15,
+            gasKey: 'air',
+            freq: 300,
+            amplitude: 1.0,
+            harmonic: 1,
+            // Visual toggles
+            showCrestTracker: true,
+            showTracers: true,
+            showGlow: true,
+            showWaveforms: true,
+            showThermal: true,
+            // Pulse TOF state
+            pulseActive: false,
+            pulseX: 0,
+            sensor1X: 0.25, // meters
+            sensor2X: 0.75, // meters
+            tofT1: null,
+            tofT2: null,
+            tofMeasuredV: null,
+            // Race state for "dual" mode
+            raceActive: false,
+            raceStartTime: 0,
+            raceColdX: 0,
+            raceWarmX: 0,
+            raceFinishX: 0.88, // finish line gate in meters
+            raceColdFinishTime: null,
+            raceWarmFinishTime: null,
+            // Scope buffer
+            scopeHistory: []
+        };
+
+        // Compute instantaneous physical properties using v ≈ 331.5 + 0.6T
+        function getGasProps(gasKey, tempK) {
+            const gas = GAS_DATABASE[gasKey] || GAS_DATABASE.air;
+            const R_spec = R_UNIV / gas.molarMass; // J/(kg·K)
+            const tempC = tempK - 273.15;
+            
+            // Standard introductory linear equation: v ≈ 331.5 + 0.6 * T (where T is in °C)
+            let v_sound;
+            if (gasKey === 'air') {
+                v_sound = 331.5 + 0.6 * tempC;
+            } else if (gasKey === 'he') {
+                const ratio = Math.sqrt((gas.gamma / 1.4) * (0.02897 / gas.molarMass));
+                v_sound = (331.5 + 0.6 * tempC) * ratio;
+            } else if (gasKey === 'co2') {
+                const ratio = Math.sqrt((gas.gamma / 1.4) * (0.02897 / gas.molarMass));
+                v_sound = (331.5 + 0.6 * tempC) * ratio;
+            } else {
+                v_sound = 331.5 + 0.6 * tempC;
+            }
+            const v_rms = Math.sqrt(3 * R_spec * tempK);           // m/s
+            const rho = P_ATM / (R_spec * tempK);                  // kg/m³
+            return { gas, R_spec, v_sound, v_rms, rho };
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // PARTICLE MESH ENGINE (1350 air particles)
+        // ═══════════════════════════════════════════════════════════════
+        const particles = [];
+        const particlesCold = []; // For dual chamber mode
+
+        function initParticleSet(arr) {
+            arr.length = 0;
+            const cols = 90;
+            const rows = 15;
+            for (let c = 0; c < cols; c++) {
+                for (let r = 0; r < rows; r++) {
+                    const u0 = (c + (Math.random() - 0.5) * 0.75) / cols;
+                    const v0 = (r + 0.5 + (Math.random() - 0.5) * 0.6) / rows;
+                    arr.push({
+                        u0: Math.max(0.01, Math.min(0.99, u0)),
+                        v0: Math.max(0.08, Math.min(0.92, v0)),
+                        phaseRandom: Math.random() * Math.PI * 2,
+                        thermalSpeed: 0.6 + Math.random() * 0.8
+                    });
+                }
+            }
+        }
+        initParticleSet(particles);
+        initParticleSet(particlesCold);
+
+        // ═══════════════════════════════════════════════════════════════
+        // WAVE DISPLACEMENT & PRESSURE MATHEMATICS
+        // ═══════════════════════════════════════════════════════════════
+        function calculateAcousticField(xMeters, tSeconds, vSound, mode, freq, ampScale) {
+            const tubeLength = 1.0;
+            const s0 = 0.018 * ampScale; // base displacement amplitude
+            const k = (2 * Math.PI * freq) / vSound;
+            const omega = 2 * Math.PI * freq;
+
+            if (mode === 'traveling' || mode === 'dual') {
+                // Notice: phase = k * (x - v*t). Wave crest translates at speed v!
+                const phase = k * (xMeters - vSound * tSeconds);
+                const s = s0 * Math.sin(phase);
+                const dp = -Math.cos(phase);
+                return { s, dp };
+            } 
+            else if (mode === 'pulse') {
+                const pulseCenter = (vSound * tSeconds) % (tubeLength * 1.5) - 0.1;
+                const sigma = 0.08;
+                const dx = xMeters - pulseCenter;
+                const gaussian = Math.exp(-(dx * dx) / (2 * sigma * sigma));
+                const waveCarrier = Math.sin(k * dx * 0.5);
+                const s = s0 * gaussian * waveCarrier;
+                const dp = gaussian * (Math.cos(k * dx * 0.5) - (dx / (sigma * sigma * k)) * waveCarrier);
+                return { s, dp: Math.max(-1, Math.min(1, dp)) };
+            } 
+            else if (mode === 'standing') {
+                const harmonic = state.harmonic;
+                const kn = (harmonic * Math.PI) / tubeLength;
+                const omegaN = kn * vSound;
+                const s = s0 * Math.sin(kn * xMeters) * Math.cos(omegaN * tSeconds);
+                const dp = -Math.cos(kn * xMeters) * Math.cos(omegaN * tSeconds);
+                return { s, dp };
+            }
+            return { s: 0, dp: 0 };
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // RENDERER
+        // ═══════════════════════════════════════════════════════════════
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const props = getGasProps(state.gasKey, state.tempK);
+
+            if (state.mode === 'dual') {
+                // Dual comparison / Drag Race: Cold (0°C, 273.15K) vs Warm (state.tempK)
+                const coldProps = getGasProps(state.gasKey, 273.15);
+                drawChamber(
+                    45, 45, canvas.width - 90, 145, 
+                    coldProps, particlesCold, 
+                    'CHAMBER A — Freezing Cold: 0°C (273.15 K)', 
+                    '#33aaff', false, state.raceColdX, state.raceColdFinishTime
+                );
+                drawChamber(
+                    45, 230, canvas.width - 90, 145, 
+                    props, particles, 
+                    `CHAMBER B — Variable Temp: ${(state.tempK - 273.15).toFixed(1)}°C (${state.tempK.toFixed(1)} K)`, 
+                    '#ff9933', true, state.raceWarmX, state.raceWarmFinishTime
+                );
+                // Race HUD / Result Banner
+                drawRaceBanner(45, 415, canvas.width - 90, 45, coldProps, props);
+
+                if (state.showWaveforms) {
+                    drawWaveformGraph(45, 475, canvas.width - 90, 125, props, coldProps);
+                }
+            } else {
+                // Single detailed chamber with waveforms and trackers
+                const tubeH = state.showWaveforms ? 240 : 380;
+                drawChamber(
+                    50, 50, canvas.width - 100, tubeH, 
+                    props, particles, 
+                    `Acoustic Resonance Chamber — ${props.gas.name} at ${(state.tempK - 273.15).toFixed(1)}°C (${state.tempK.toFixed(1)} K)`, 
+                    '#00e5ff', true, null, null
+                );
+
+                if (state.showWaveforms) {
+                    drawWaveformGraph(50, 345, canvas.width - 100, 240, props, null);
+                }
+            }
+        }
+
+        // Draw a single acoustic chamber / tube
+        function drawChamber(x, y, w, h, props, particleSet, title, themeColor, isInteractive, pulseXOverride, finishTime) {
+            const vSound = props.v_sound;
+            const t = state.simTime;
+            const tubeL = 1.0;
+
+            // Background header & title
+            ctx.fillStyle = 'rgba(255,255,255,0.03)';
+            ctx.fillRect(x, y - 28, w, 24);
+            ctx.fillStyle = themeColor;
+            ctx.font = 'bold 12px "JetBrains Mono", monospace';
+            ctx.fillText(title, x + 10, y - 12);
+
+            ctx.fillStyle = '#8888aa';
+            ctx.font = '11px "JetBrains Mono", monospace';
+            ctx.textAlign = 'right';
+            ctx.fillText(`v_wave = ${vSound.toFixed(1)} m/s | λ = ${(vSound / state.freq).toFixed(2)} m`, x + w - 10, y - 12);
+            ctx.textAlign = 'left';
+
+            // Tube enclosure
+            const tubeX = x + 35;
+            const tubeW = w - 45;
+            const tubeY = y;
+            const tubeH = h;
+
+            // Glass tube background
+            const glassGrad = ctx.createLinearGradient(0, tubeY, 0, tubeY + tubeH);
+            glassGrad.addColorStop(0, 'rgba(20, 20, 48, 0.9)');
+            glassGrad.addColorStop(0.5, 'rgba(10, 10, 26, 0.95)');
+            glassGrad.addColorStop(1, 'rgba(20, 20, 48, 0.9)');
+            ctx.fillStyle = glassGrad;
+            ctx.fillRect(tubeX, tubeY, tubeW, tubeH);
+
+            // Compression / Rarefaction Glow Overlay
+            if (state.showGlow) {
+                const slices = 60;
+                const sliceW = tubeW / slices;
+                for (let i = 0; i < slices; i++) {
+                    const xFrac = i / slices;
+                    const xMeter = xFrac * tubeL;
+                    const field = calculateAcousticField(xMeter, t, vSound, state.mode, state.freq, state.amplitude);
+                    if (field.dp > 0) {
+                        ctx.fillStyle = `rgba(0, 229, 255, ${field.dp * 0.18})`;
+                    } else {
+                        ctx.fillStyle = `rgba(124, 77, 255, ${Math.abs(field.dp) * 0.12})`;
+                    }
+                    ctx.fillRect(tubeX + i * sliceW, tubeY, sliceW + 1, tubeH);
+                }
+            }
+
+            // Tube borders (glass rim)
+            ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+            ctx.lineWidth = 2.5;
+            ctx.strokeRect(tubeX, tubeY, tubeW, tubeH);
+
+            // Left Speaker / Driver Mechanism
+            const speakerX = x;
+            const speakerDisplace = calculateAcousticField(0, t, vSound, state.mode, state.freq, state.amplitude).s;
+            const membraneDx = (speakerDisplace / 0.02) * 12;
+
+            ctx.fillStyle = '#1e1e38';
+            ctx.strokeStyle = '#444466';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(speakerX, tubeY + tubeH * 0.2);
+            ctx.lineTo(tubeX - 8 + membraneDx, tubeY + 4);
+            ctx.lineTo(tubeX - 8 + membraneDx, tubeY + tubeH - 4);
+            ctx.lineTo(speakerX, tubeY + tubeH * 0.8);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = themeColor;
+            ctx.fillRect(tubeX - 8 + membraneDx, tubeY + 6, 6, tubeH - 12);
+
+            // Longitudinal Particle Rendering
+            const thermalScale = state.showThermal ? Math.sqrt(props.tempK / 273.15) * 3.5 : 0;
+
+            for (let i = 0; i < particleSet.length; i++) {
+                const p = particleSet[i];
+                const xMeter = p.u0 * tubeL;
+                const field = calculateAcousticField(xMeter, t, vSound, state.mode, state.freq, state.amplitude);
+
+                // Longitudinal displacement: parallel to propagation axis (X axis)
+                const dxPixels = (field.s / tubeL) * tubeW * 2.2;
+
+                let thX = 0, thY = 0;
+                if (thermalScale > 0) {
+                    const thAngle = p.phaseRandom + t * 25 * p.thermalSpeed;
+                    thX = Math.cos(thAngle) * thermalScale;
+                    thY = Math.sin(thAngle) * thermalScale * 0.6;
+                }
+
+                const px = tubeX + p.u0 * tubeW + dxPixels + thX;
+                const py = tubeY + p.v0 * tubeH + thY;
+
+                if (px >= tubeX + 2 && px <= tubeX + tubeW - 2 && py >= tubeY + 2 && py <= tubeY + tubeH - 2) {
+                    ctx.fillStyle = 'rgba(180, 220, 255, 0.75)';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 2.0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Moving Wavefront / Crest Tracker (Shows energy traveling at speed v)
+            if (state.showCrestTracker && (state.mode === 'traveling' || state.mode === 'dual')) {
+                // Track a compression crest moving at speed vSound
+                const crestXMeter = ((vSound * t * 0.8) % tubeL);
+                const crestPx = tubeX + (crestXMeter / tubeL) * tubeW;
+
+                // Glowing vertical tracker line
+                ctx.strokeStyle = '#00e5ff';
+                ctx.lineWidth = 2.5;
+                ctx.shadowColor = '#00e5ff';
+                ctx.shadowBlur = 8;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(crestPx, tubeY);
+                ctx.lineTo(crestPx, tubeY + tubeH);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.shadowBlur = 0;
+
+                // Wave speed vector arrow on top of tracker line
+                const arrowLen = Math.min(80, 25 + (vSound / 500) * 45);
+                ctx.strokeStyle = '#00e5ff';
+                ctx.fillStyle = '#00e5ff';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(crestPx, tubeY + 18);
+                ctx.lineTo(crestPx + arrowLen, tubeY + 18);
+                ctx.stroke();
+                // Arrow head
+                ctx.beginPath();
+                ctx.moveTo(crestPx + arrowLen, tubeY + 18);
+                ctx.lineTo(crestPx + arrowLen - 8, tubeY + 14);
+                ctx.lineTo(crestPx + arrowLen - 8, tubeY + 22);
+                ctx.closePath();
+                ctx.fill();
+
+                ctx.font = 'bold 9.5px "JetBrains Mono", monospace';
+                ctx.fillText(`v_wave = ${vSound.toFixed(0)} m/s`, crestPx + 6, tubeY + 13);
+            }
+
+            // In Drag Race mode: draw the racing pulse packet
+            if (state.mode === 'dual' && pulseXOverride !== undefined && pulseXOverride !== null) {
+                const pPx = tubeX + (pulseXOverride / tubeL) * tubeW;
+                // Draw high-visibility racing pulse beacon
+                ctx.fillStyle = themeColor;
+                ctx.shadowColor = themeColor;
+                ctx.shadowBlur = 14;
+                ctx.beginPath();
+                ctx.arc(pPx, tubeY + tubeH * 0.5, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                // Pulse label
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 10px monospace';
+                ctx.fillText('⚡ PULSE', pPx - 22, tubeY + tubeH * 0.5 - 16);
+            }
+
+            // Highlighted Tracer Particles (In-place vibration)
+            if (state.showTracers) {
+                const tracerFractions = [0.20, 0.50, 0.75];
+                tracerFractions.forEach((uTrac, idx) => {
+                    const xMeter = uTrac * tubeL;
+                    const field = calculateAcousticField(xMeter, t, vSound, state.mode, state.freq, state.amplitude);
+                    const dxPixels = (field.s / tubeL) * tubeW * 2.2;
+                    const eqX = tubeX + uTrac * tubeW;
+                    const curX = eqX + dxPixels;
+                    const curY = tubeY + tubeH * 0.5 + (idx - 1) * 26;
+
+                    // Equilibrium anchor dashed line
+                    ctx.strokeStyle = 'rgba(255, 215, 64, 0.4)';
+                    ctx.setLineDash([3, 3]);
+                    ctx.beginPath();
+                    ctx.moveTo(eqX, tubeY + 4);
+                    ctx.lineTo(eqX, tubeY + tubeH - 4);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // Displacement connector
+                    ctx.strokeStyle = '#ffd740';
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(eqX, curY);
+                    ctx.lineTo(curX, curY);
+                    ctx.stroke();
+
+                    // Tracer particle circle
+                    ctx.fillStyle = '#ffd740';
+                    ctx.shadowColor = '#ffd740';
+                    ctx.shadowBlur = 10;
+                    ctx.beginPath();
+                    ctx.arc(curX, curY, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+
+                    // Equilibrium tick
+                    ctx.fillStyle = 'rgba(255, 215, 64, 0.7)';
+                    ctx.fillRect(eqX - 1.5, curY - 5, 3, 10);
+
+                    // If center tracer, show particle vibration vector (u_p)
+                    if (idx === 1 && state.mode !== 'dual') {
+                        const omega = 2 * Math.PI * state.freq;
+                        const s0 = 0.018 * state.amplitude;
+                        // Particle velocity u = ds/dt = -omega*s0*cos(phase)
+                        const phase = (2 * Math.PI * state.freq / vSound) * (xMeter - vSound * t);
+                        const u_particle = -omega * s0 * Math.cos(phase);
+                        const vLen = (u_particle / (omega * s0)) * 26;
+
+                        ctx.strokeStyle = '#ffd740';
+                        ctx.fillStyle = '#ffd740';
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(curX, curY - 14);
+                        ctx.lineTo(curX + vLen, curY - 14);
+                        ctx.stroke();
+
+                        ctx.font = '9px "JetBrains Mono", monospace';
+                        ctx.fillText(`u_particle = ${Math.abs(u_particle).toFixed(3)} m/s (vibrating locally)`, curX - 60, curY - 22);
+                    }
+                });
+            }
+
+            // Finish Line Gate in Dual / Race Mode
+            if (state.mode === 'dual') {
+                const finPx = tubeX + (state.raceFinishX / tubeL) * tubeW;
+                ctx.strokeStyle = '#ff4081';
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([4, 2]);
+                ctx.beginPath();
+                ctx.moveTo(finPx, tubeY);
+                ctx.lineTo(finPx, tubeY + tubeH);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = '#ff4081';
+                ctx.font = 'bold 9.5px monospace';
+                ctx.fillText('🏁 FINISH (0.88m)', finPx - 26, tubeY - 6);
+
+                if (finishTime !== null && finishTime !== undefined) {
+                    ctx.fillStyle = '#69f0ae';
+                    ctx.font = 'bold 11px monospace';
+                    ctx.fillText(`⏱ FINISH: ${(finishTime * 1000).toFixed(2)} ms`, finPx + 8, tubeY + tubeH * 0.5);
+                }
+            }
+
+            // Tube length scale & ruler at bottom
+            drawRuler(tubeX, tubeY + tubeH, tubeW, tubeL);
+        }
+
+        // Draw meter ruler along tube
+        function drawRuler(rx, ry, rw, rMeters) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(rx, ry + 6);
+            ctx.lineTo(rx + rw, ry + 6);
+            ctx.stroke();
+
+            const ticks = 10;
+            for (let i = 0; i <= ticks; i++) {
+                const tx = rx + (i / ticks) * rw;
+                const len = (i % 5 === 0) ? 8 : 4;
+                ctx.beginPath();
+                ctx.moveTo(tx, ry + 6);
+                ctx.lineTo(tx, ry + 6 + len);
+                ctx.stroke();
+
+                if (i % 2 === 0) {
+                    ctx.fillStyle = '#8888aa';
+                    ctx.font = '9px "JetBrains Mono", monospace';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(((i / ticks) * rMeters).toFixed(1) + 'm', tx, ry + 20);
+                }
+            }
+            ctx.textAlign = 'left';
+        }
+
+        // Draw Drag Race result banner
+        function drawRaceBanner(bx, by, bw, bh, coldProps, warmProps) {
+            ctx.fillStyle = 'rgba(18, 18, 42, 0.95)';
+            ctx.strokeStyle = 'rgba(255, 64, 129, 0.4)';
+            ctx.lineWidth = 1.5;
+            ctx.fillRect(bx, by, bw, bh);
+            ctx.strokeRect(bx, by, bw, bh);
+
+            ctx.font = 'bold 12px "JetBrains Mono", monospace';
+            if (state.raceWarmFinishTime && state.raceColdFinishTime) {
+                const dtMs = (state.raceColdFinishTime - state.raceWarmFinishTime) * 1000;
+                ctx.fillStyle = '#69f0ae';
+                ctx.fillText(`🏆 RACE RESULT: Warm Chamber B arrived FIRST! Faster by ${dtMs.toFixed(2)} ms (${((warmProps.v_sound - coldProps.v_sound)/coldProps.v_sound*100).toFixed(1)}% speed advantage).`, bx + 16, by + 28);
+            } else if (state.raceActive) {
+                ctx.fillStyle = '#ffd740';
+                ctx.fillText('🏁 RACE IN PROGRESS: Watch the warm pulse surge ahead of the cold pulse...', bx + 16, by + 28);
+            } else {
+                ctx.fillStyle = '#00e5ff';
+                ctx.fillText('Click "Start Acoustic Drag Race" to fire identical pulses and witness the speed difference!', bx + 16, by + 28);
+            }
+        }
+
+        // Draw synchronized waveforms: Displacement s(x) and Pressure ΔP(x)
+        function drawWaveformGraph(gx, gy, gw, gh, props, coldProps) {
+            ctx.fillStyle = 'rgba(18, 18, 42, 0.92)';
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 1;
+            ctx.fillRect(gx, gy, gw, gh);
+            ctx.strokeRect(gx, gy, gw, gh);
+
+            ctx.font = 'bold 11px "JetBrains Mono", monospace';
+            ctx.fillStyle = '#00e5ff';
+            ctx.fillText('— Particle Displacement s(x)', gx + 15, gy + 18);
+            ctx.fillStyle = '#ffd740';
+            ctx.fillText('— Gauge Pressure ΔP(x) [Compressions / Rarefactions]', gx + 230, gy + 18);
+
+            const midY = gy + gh * 0.55;
+            const ampY = gh * 0.32;
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(gx + 35, midY);
+            ctx.lineTo(gx + gw - 10, midY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const tubeX = gx + 35;
+            const tubeW = gw - 45;
+            const steps = 140;
+
+            // Pressure Curve (Gold)
+            ctx.strokeStyle = '#ffd740';
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            for (let i = 0; i <= steps; i++) {
+                const xMeter = (i / steps) * 1.0;
+                const field = calculateAcousticField(xMeter, state.simTime, props.v_sound, state.mode, state.freq, state.amplitude);
+                const plotX = tubeX + (i / steps) * tubeW;
+                const plotY = midY - field.dp * ampY;
+                if (i === 0) ctx.moveTo(plotX, plotY);
+                else ctx.lineTo(plotX, plotY);
+            }
+            ctx.stroke();
+
+            // Displacement Curve (Cyan)
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 2.0;
+            ctx.beginPath();
+            for (let i = 0; i <= steps; i++) {
+                const xMeter = (i / steps) * 1.0;
+                const field = calculateAcousticField(xMeter, state.simTime, props.v_sound, state.mode, state.freq, state.amplitude);
+                const normS = field.s / (0.018 * state.amplitude);
+                const plotX = tubeX + (i / steps) * tubeW;
+                const plotY = midY - normS * ampY;
+                if (i === 0) ctx.moveTo(plotX, plotY);
+                else ctx.lineTo(plotX, plotY);
+            }
+            ctx.stroke();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // LOWER 2D CANVAS GRAPHS
+        // ═══════════════════════════════════════════════════════════════
+        const cvVT = document.getElementById('graph-vt');
+        const ctxVT = cvVT.getContext('2d');
+
+        const cvScope = document.getElementById('graph-scope');
+        const ctxScope = cvScope.getContext('2d');
+
+        const cvEnergy = document.getElementById('graph-energy');
+        const ctxEnergy = cvEnergy.getContext('2d');
+
+        // Graph 1: v vs Temperature Curve
+        function drawGraphVT() {
+            const w = cvVT.width;
+            const h = cvVT.height;
+            ctxVT.clearRect(0, 0, w, h);
+
+            ctxVT.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctxVT.lineWidth = 1;
+            for (let t = 100; t <= 600; t += 100) {
+                const x = 45 + ((t - 100) / 500) * (w - 65);
+                ctxVT.beginPath(); ctxVT.moveTo(x, 20); ctxVT.lineTo(x, h - 25); ctxVT.stroke();
+                ctxVT.fillStyle = '#666688';
+                ctxVT.font = '9px monospace';
+                ctxVT.fillText(t + 'K', x - 10, h - 10);
+            }
+            for (let v = 100; v <= 1200; v += 200) {
+                const y = h - 25 - ((v - 100) / 1100) * (h - 45);
+                if (y > 15) {
+                    ctxVT.beginPath(); ctxVT.moveTo(45, y); ctxVT.lineTo(w - 20, y); ctxVT.stroke();
+                    ctxVT.fillStyle = '#666688';
+                    ctxVT.fillText(v, 12, y + 3);
+                }
+            }
+
+            const currentGas = GAS_DATABASE[state.gasKey];
+            ctxVT.strokeStyle = currentGas.color;
+            ctxVT.lineWidth = 2.5;
+            ctxVT.beginPath();
+            for (let t = 100; t <= 600; t += 5) {
+                const v = getGasProps(state.gasKey, t).v_sound;
+                const px = 45 + ((t - 100) / 500) * (w - 65);
+                const py = h - 25 - ((v - 100) / 1100) * (h - 45);
+                if (t === 100) ctxVT.moveTo(px, py);
+                else ctxVT.lineTo(px, py);
+            }
+            ctxVT.stroke();
+
+            const curV = getGasProps(state.gasKey, state.tempK).v_sound;
+            const curX = 45 + ((state.tempK - 100) / 500) * (w - 65);
+            const curY = h - 25 - ((curV - 100) / 1100) * (h - 45);
+
+            ctxVT.fillStyle = '#ffffff';
+            ctxVT.shadowColor = currentGas.color;
+            ctxVT.shadowBlur = 10;
+            ctxVT.beginPath();
+            ctxVT.arc(curX, curY, 5, 0, Math.PI * 2);
+            ctxVT.fill();
+            ctxVT.shadowBlur = 0;
+
+            document.getElementById('graph1-legend').textContent = `v(${state.tempK.toFixed(0)}K) = ${curV.toFixed(1)} m/s`;
+        }
+
+        // Graph 2: Dual Sensor Oscilloscope Trace
+        function drawGraphScope() {
+            const w = cvScope.width;
+            const h = cvScope.height;
+            ctxScope.clearRect(0, 0, w, h);
+
+            const midY1 = h * 0.35;
+            const midY2 = h * 0.75;
+
+            ctxScope.fillStyle = '#00e5ff';
+            ctxScope.font = '10px monospace';
+            ctxScope.fillText('CH 1: Mic at x₁ = 0.25 m', 15, 20);
+
+            ctxScope.fillStyle = '#ffd740';
+            ctxScope.fillText('CH 2: Mic at x₂ = 0.75 m', 15, h * 0.55 + 5);
+
+            ctxScope.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctxScope.setLineDash([2, 4]);
+            ctxScope.beginPath();
+            ctxScope.moveTo(15, midY1); ctxScope.lineTo(w - 15, midY1);
+            ctxScope.moveTo(15, midY2); ctxScope.lineTo(w - 15, midY2);
+            ctxScope.stroke();
+            ctxScope.setLineDash([]);
+
+            const pts = state.scopeHistory;
+            if (pts.length > 2) {
+                ctxScope.strokeStyle = '#00e5ff';
+                ctxScope.lineWidth = 1.8;
+                ctxScope.beginPath();
+                for (let i = 0; i < pts.length; i++) {
+                    const px = 15 + (i / pts.length) * (w - 30);
+                    const py = midY1 - pts[i].s1 * 35;
+                    if (i === 0) ctxScope.moveTo(px, py); else ctxScope.lineTo(px, py);
+                }
+                ctxScope.stroke();
+
+                ctxScope.strokeStyle = '#ffd740';
+                ctxScope.lineWidth = 1.8;
+                ctxScope.beginPath();
+                for (let i = 0; i < pts.length; i++) {
+                    const px = 15 + (i / pts.length) * (w - 30);
+                    const py = midY2 - pts[i].s2 * 35;
+                    if (i === 0) ctxScope.moveTo(px, py); else ctxScope.lineTo(px, py);
+                }
+                ctxScope.stroke();
+            }
+        }
+
+        // Graph 3: Wave Energy Speed vs Particle Vibration Speed
+        function drawGraphEnergy() {
+            const w = cvEnergy.width;
+            const h = cvEnergy.height;
+            ctxEnergy.clearRect(0, 0, w, h);
+
+            const props = getGasProps(state.gasKey, state.tempK);
+            const omega = 2 * Math.PI * state.freq;
+            const s0 = 0.018 * state.amplitude;
+            const u_peak = omega * s0; // particle peak vibration velocity (m/s)
+
+            ctxEnergy.fillStyle = '#8888aa';
+            ctxEnergy.font = '10px monospace';
+            ctxEnergy.fillText('Wave Speed vs Particle Oscillation Speed (Log Scale Comparison)', 15, 20);
+
+            // Bar 1: Wave Speed (Energy)
+            const barW = (w - 70) / 2;
+            const vHeight = Math.min(h - 70, (props.v_sound / 1200) * (h - 70));
+
+            ctxEnergy.fillStyle = 'rgba(0, 229, 255, 0.2)';
+            ctxEnergy.fillRect(30, 40, barW, h - 70);
+            ctxEnergy.fillStyle = '#00e5ff';
+            ctxEnergy.fillRect(30, 40 + (h - 70 - vHeight), barW, vHeight);
+
+            ctxEnergy.font = 'bold 11px monospace';
+            ctxEnergy.fillStyle = '#00e5ff';
+            ctxEnergy.fillText(`v_wave = ${props.v_sound.toFixed(1)} m/s`, 32, h - 16);
+            ctxEnergy.font = '9px monospace';
+            ctxEnergy.fillStyle = '#8888aa';
+            ctxEnergy.fillText('ENERGY TRANSPORT', 32, h - 4);
+
+            // Bar 2: Particle Vibration Speed
+            // Even though u_peak is ~0.03 m/s, we render it proportionally
+            const uHeight = Math.max(12, (u_peak / 0.1) * 35);
+            ctxEnergy.fillStyle = 'rgba(255, 215, 64, 0.2)';
+            ctxEnergy.fillRect(45 + barW, 40, barW, h - 70);
+            ctxEnergy.fillStyle = '#ffd740';
+            ctxEnergy.fillRect(45 + barW, 40 + (h - 70 - uHeight), barW, uHeight);
+
+            ctxEnergy.font = 'bold 11px monospace';
+            ctxEnergy.fillStyle = '#ffd740';
+            ctxEnergy.fillText(`u_peak = ${u_peak.toFixed(3)} m/s`, 47 + barW, h - 16);
+            ctxEnergy.font = '9px monospace';
+            ctxEnergy.fillStyle = '#8888aa';
+            ctxEnergy.fillText('LOCAL VIBRATION ONLY', 47 + barW, h - 4);
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // DATA LOGGER & HUD UPDATE
+        // ═══════════════════════════════════════════════════════════════
+        const dataRows = [];
+        let logCounter = 0;
+
+        function updateHUDAndLogger(dt) {
+            const props = getGasProps(state.gasKey, state.tempK);
+            const lambda = props.v_sound / state.freq;
+            const omega = 2 * Math.PI * state.freq;
+            const s0 = 0.018 * state.amplitude;
+            const u_peak = omega * s0;
+
+            // HUD
+            const elV = document.getElementById('hud-v');
+            if (elV) elV.textContent = `${props.v_sound.toFixed(1)} m/s`;
+            const elVSub = document.getElementById('hud-v-sub');
+            if (elVSub) elVSub.textContent = `${(props.v_sound * 3.6).toFixed(0)} km/h`;
+            const elTemp = document.getElementById('hud-temp');
+            if (elTemp) elTemp.textContent = `${(state.tempK - 273.15).toFixed(1)} °C`;
+            const elTempK = document.getElementById('hud-temp-k');
+            if (elTempK) elTempK.textContent = `${state.tempK.toFixed(1)} K`;
+            const elLambda = document.getElementById('hud-lambda');
+            if (elLambda) elLambda.textContent = `${lambda.toFixed(2)} m`;
+
+            // Drag Race Logic
+            if (state.mode === 'dual' && state.raceActive) {
+                const coldProps = getGasProps(state.gasKey, 273.15);
+                const raceElapsed = state.simTime - state.raceStartTime;
+
+                // Move pulses forward
+                state.raceColdX = Math.min(state.raceFinishX + 0.1, coldProps.v_sound * raceElapsed);
+                state.raceWarmX = Math.min(state.raceFinishX + 0.1, props.v_sound * raceElapsed);
+
+                // Detect finish crossings
+                if (state.raceWarmFinishTime === null && state.raceWarmX >= state.raceFinishX) {
+                    state.raceWarmFinishTime = raceElapsed;
+                }
+                if (state.raceColdFinishTime === null && state.raceColdX >= state.raceFinishX) {
+                    state.raceColdFinishTime = raceElapsed;
+                }
+
+                if (state.raceWarmFinishTime !== null && state.raceColdFinishTime !== null) {
+                    state.raceActive = false; // race concluded!
+                }
+            }
+
+            // Scope buffer
+            const s1Field = calculateAcousticField(state.sensor1X, state.simTime, props.v_sound, state.mode, state.freq, state.amplitude);
+            const s2Field = calculateAcousticField(state.sensor2X, state.simTime, props.v_sound, state.mode, state.freq, state.amplitude);
+            state.scopeHistory.push({ s1: s1Field.dp, s2: s2Field.dp });
+            if (state.scopeHistory.length > 200) state.scopeHistory.shift();
+
+            // Table logging
+            logCounter++;
+            if (logCounter % 40 === 0 && state.running) {
+                const row = {
+                    time: state.simTime.toFixed(2),
+                    tempK: state.tempK.toFixed(1),
+                    tempC: (state.tempK - 273.15).toFixed(1),
+                    gas: props.gas.name,
+                    v: props.v_sound.toFixed(1),
+                    up: u_peak.toFixed(3),
+                    freq: state.freq,
+                    lambda: lambda.toFixed(2),
+                    vrms: props.v_rms.toFixed(0)
+                };
+                dataRows.push(row);
+                if (dataRows.length > 300) dataRows.shift();
+
+                const tbody = document.getElementById('data-tbody');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${row.time}</td>
+                    <td>${row.tempK}</td>
+                    <td>${row.tempC}</td>
+                    <td>${row.gas}</td>
+                    <td>${row.v}</td>
+                    <td>${row.up}</td>
+                    <td>${row.freq}</td>
+                    <td>${row.lambda}</td>
+                    <td>${row.vrms}</td>
+                `;
+                tbody.prepend(tr);
+                if (tbody.children.length > 100) tbody.removeChild(tbody.lastChild);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // UI BINDINGS & CONTROLS
+        // ═══════════════════════════════════════════════════════════════
+        const sliderT = document.getElementById('slider-T');
+        const valT = document.getElementById('val-T');
+        sliderT.addEventListener('input', () => {
+            state.tempK = parseFloat(sliderT.value);
+            valT.textContent = `${state.tempK.toFixed(1)} K (${(state.tempK - 273.15).toFixed(1)} °C)`;
+            drawGraphVT();
+        });
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const tVal = parseFloat(btn.dataset.temp);
+                state.tempK = tVal;
+                sliderT.value = tVal;
+                valT.textContent = `${state.tempK.toFixed(1)} K (${(state.tempK - 273.15).toFixed(1)} °C)`;
+                drawGraphVT();
+            });
+        });
+
+        const selectGas = document.getElementById('select-gas');
+        selectGas.addEventListener('change', () => {
+            state.gasKey = selectGas.value;
+            document.getElementById('val-gas').textContent = GAS_DATABASE[state.gasKey].name;
+            drawGraphVT();
+        });
+
+        const sliderFreq = document.getElementById('slider-freq');
+        sliderFreq.addEventListener('input', () => {
+            state.freq = parseInt(sliderFreq.value);
+            document.getElementById('val-freq').textContent = `${state.freq} Hz`;
+        });
+        const sliderAmp = document.getElementById('slider-amp');
+        sliderAmp.addEventListener('input', () => {
+            state.amplitude = parseFloat(sliderAmp.value);
+            document.getElementById('val-amp').textContent = `${state.amplitude.toFixed(1)}x`;
+        });
+        const sliderSpeed = document.getElementById('slider-speed');
+        sliderSpeed.addEventListener('input', () => {
+            state.simSpeed = parseFloat(sliderSpeed.value);
+            document.getElementById('val-speed').textContent = `${state.simSpeed.toFixed(1)}x`;
+        });
+
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const btnPulse = document.getElementById('btn-pulse');
+        const raceControls = document.getElementById('race-controls');
+
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                state.mode = btn.dataset.mode;
+
+                btnPulse.style.display = (state.mode === 'pulse') ? 'inline-flex' : 'none';
+                raceControls.style.display = (state.mode === 'dual') ? 'block' : 'none';
+
+                if (state.mode === 'dual') {
+                    startRace();
+                }
+            });
+        });
+
+        function startRace() {
+            state.raceActive = true;
+            state.raceStartTime = state.simTime;
+            state.raceColdX = 0;
+            state.raceWarmX = 0;
+            state.raceColdFinishTime = null;
+            state.raceWarmFinishTime = null;
+        }
+        document.getElementById('btn-start-race').addEventListener('click', startRace);
+
+        // Visual Toggles
+        document.getElementById('toggle-crest-tracker').addEventListener('change', e => state.showCrestTracker = e.target.checked);
+        document.getElementById('toggle-tracers').addEventListener('change', e => state.showTracers = e.target.checked);
+        document.getElementById('toggle-glow').addEventListener('change', e => state.showGlow = e.target.checked);
+        document.getElementById('toggle-waveforms').addEventListener('change', e => state.showWaveforms = e.target.checked);
+        document.getElementById('toggle-thermal').addEventListener('change', e => state.showThermal = e.target.checked);
+
+        // Playback
+        const btnPlay = document.getElementById('btn-play');
+        btnPlay.addEventListener('click', () => {
+            state.running = !state.running;
+            btnPlay.textContent = state.running ? '⏸ Pause' : '▶ Play';
+            btnPlay.classList.toggle('active', state.running);
+        });
+        document.getElementById('btn-step').addEventListener('click', () => {
+            state.running = false;
+            btnPlay.textContent = '▶ Play';
+            btnPlay.classList.remove('active');
+            state.simTime += 0.002;
+            render();
+            updateHUDAndLogger(0.002);
+        });
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            state.simTime = 0;
+            state.scopeHistory = [];
+            state.raceActive = false;
+            state.raceColdFinishTime = null;
+            state.raceWarmFinishTime = null;
+            render();
+            updateHUDAndLogger(0);
+        });
+
+        // CSV Export
+        document.getElementById('btn-export-csv').addEventListener('click', () => {
+            if (dataRows.length === 0) {
+                alert('No data logged yet. Run the simulation to collect data points.');
+                return;
+            }
+            const headers = 'Time(s),Temperature(K),Temperature(C),Gas,WaveSpeed_v(m/s),ParticlePeak_u(m/s),Frequency(Hz),Wavelength(m),v_rms(m/s)\n';
+            const csvContent = headers + dataRows.map(r => 
+                `${r.time},${r.tempK},${r.tempC},"${r.gas}",${r.v},${r.up},${r.freq},${r.lambda},${r.vrms}`
+            ).join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            saveAs(blob, 'sound_speed_temperature_data.csv');
+        });
+
+        // ═══════════════════════════════════════════════════════════════
+        // TAB SWITCHING & 5E ASSESSMENT SYSTEM
+        // ═══════════════════════════════════════════════════════════════
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    window.MathJax.typesetPromise().catch(e => {});
+                }
+            });
+        });
+
+        const questions = document.querySelectorAll('.assess-question');
+        const navSlider = document.getElementById('nav-slider');
+        const dotsContainer = document.getElementById('progress-dots');
+        for (let i = 0; i < questions.length; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'progress-dot' + (i === 0 ? ' current' : '');
+            dotsContainer.appendChild(dot);
+        }
+
+        function showQuestion(idx) {
+            questions.forEach((q, i) => q.classList.toggle('active', i === idx));
+            navSlider.value = idx;
+            document.getElementById('nav-current').textContent = idx + 1;
+            document.getElementById('nav-prev').disabled = idx === 0;
+            document.getElementById('nav-next').disabled = idx === questions.length - 1;
+            dotsContainer.querySelectorAll('.progress-dot').forEach((d, i) => d.classList.toggle('current', i === idx));
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch(e => {});
+            }
+        }
+
+        navSlider.addEventListener('input', () => showQuestion(parseInt(navSlider.value)));
+        document.getElementById('nav-prev').addEventListener('click', () => showQuestion(Math.max(0, parseInt(navSlider.value) - 1)));
+        document.getElementById('nav-next').addEventListener('click', () => showQuestion(Math.min(questions.length - 1, parseInt(navSlider.value) + 1)));
+
+        const textareas = document.querySelectorAll('.assess-question textarea');
+        const studentAnswers = new Array(10).fill('');
+        function updateAnsweredCount() {
+            let count = 0;
+            textareas.forEach((ta, i) => { 
+                studentAnswers[i] = ta.value.trim(); 
+                if (studentAnswers[i]) count++; 
+            });
+            document.getElementById('answered-count').textContent = count;
+            dotsContainer.querySelectorAll('.progress-dot').forEach((d, i) => d.classList.toggle('answered', textareas[i].value.trim().length > 0));
+        }
+        textareas.forEach(ta => ta.addEventListener('input', updateAnsweredCount));
+
+        // DOCX Worksheet Export
+        function exportToDocx() {
+            const studentName = document.getElementById('student-name').value.trim() || 'Student';
+            const simTitle = 'AP Physics: Speed of Sound & Temperature Wave Dynamics';
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            const { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle } = docx;
+
+            const phaseColors = { 'Engage': '00B8D4', 'Explore': '7C4DFF', 'Explain': 'FFD740', 'Elaborate': '69F0AE', 'Evaluate': 'FF4081' };
+            const phaseLabels = ['Engage','Engage','Explore','Explore','Explain','Explain','Elaborate','Elaborate','Evaluate','Evaluate'];
+
+            const paragraphs = [];
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: 'AP Physics 5E Formative Assessment', bold: true, size: 32, font: 'Calibri' })],
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 200 }
+            }));
+            paragraphs.push(new Paragraph({
+                children: [new TextRun({ text: simTitle, bold: true, size: 26, font: 'Calibri', color: '7C4DFF' })],
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 300 }
+            }));
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({ text: 'Student: ', bold: true, size: 22, font: 'Calibri' }),
+                    new TextRun({ text: studentName, size: 22, font: 'Calibri', color: '00B8D4' })
+                ],
+                spacing: { after: 100 }
+            }));
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({ text: 'Date: ', bold: true, size: 22, font: 'Calibri' }),
+                    new TextRun({ text: dateStr, size: 22, font: 'Calibri' })
+                ],
+                spacing: { after: 100 }
+            }));
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({ text: 'Questions Completed: ', bold: true, size: 22, font: 'Calibri' }),
+                    new TextRun({ text: document.getElementById('answered-count').textContent + ' of 10', size: 22, font: 'Calibri' })
+                ],
+                spacing: { after: 300 }
+            }));
+            paragraphs.push(new Paragraph({ border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } }, spacing: { after: 300 } }));
+
+            questions.forEach((qEl, i) => {
+                const phase = phaseLabels[i];
+                const qText = qEl.querySelector('.q-text')?.textContent?.trim() || `Question ${i + 1}`;
+                const answer = studentAnswers[i] || '(No answer provided)';
+
+                paragraphs.push(new Paragraph({
+                    children: [
+                        new TextRun({ text: `${phase.toUpperCase()} `, bold: true, size: 18, font: 'Calibri', color: phaseColors[phase] || '333333' }),
+                        new TextRun({ text: `— Question ${i + 1} of 10`, size: 18, font: 'Calibri', color: '888888' })
+                    ],
+                    spacing: { before: 300, after: 100 }
+                }));
+                paragraphs.push(new Paragraph({
+                    children: [new TextRun({ text: qText, bold: true, size: 22, font: 'Calibri' })],
+                    spacing: { after: 200 }
+                }));
+                paragraphs.push(new Paragraph({
+                    children: [new TextRun({ text: 'Your Answer: ', bold: true, size: 20, font: 'Calibri', color: '00B8D4' })],
+                    spacing: { after: 80 }
+                }));
+                paragraphs.push(new Paragraph({
+                    children: [new TextRun({ text: answer, size: 20, font: 'Calibri', italics: answer === '(No answer provided)' })],
+                    spacing: { after: 200 }
+                }));
+
+                if (i < questions.length - 1) {
+                    paragraphs.push(new Paragraph({ border: { bottom: { style: BorderStyle.DASHED, size: 2, color: 'DDDDDD' } }, spacing: { after: 200 } }));
+                }
+            });
+
+            Packer.toBlob(new Document({ sections: [{ properties: {}, children: paragraphs }] })).then(blob => {
+                saveAs(blob, `Speed_of_Sound_${studentName.replace(/\s+/g, '_')}_Assessment.docx`);
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // MAIN SIMULATION LOOP
+        // ═══════════════════════════════════════════════════════════════
+        let lastTimestamp = performance.now();
+
+        function mainLoop(now) {
+            const dtSec = Math.min((now - lastTimestamp) / 1000, 0.05);
+            lastTimestamp = now;
+
+            if (state.running) {
+                // Scale visual propagation time
+                const effectiveDt = dtSec * 0.004 * state.simSpeed;
+                state.simTime += effectiveDt;
+                updateHUDAndLogger(effectiveDt);
+            }
+
+            render();
+            drawGraphVT();
+            drawGraphScope();
+            drawGraphEnergy();
+
+            requestAnimationFrame(mainLoop);
+        }
+
+        // Ensure MathJax renders smoothly on initial async load
+        function ensureMathTypeset() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch(e => {});
+            } else {
+                setTimeout(ensureMathTypeset, 250);
+            }
+        }
+        ensureMathTypeset();
+
+        drawGraphVT();
+        requestAnimationFrame(mainLoop);
+    </script>
+</body>
+</html>
