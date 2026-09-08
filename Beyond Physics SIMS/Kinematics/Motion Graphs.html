@@ -4,6 +4,64 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Kinematics Motion Studio — Enhanced</title>
+  <script>
+    const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
+    }
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
+      });
+    }
+    async function verifyWebsiteAccess() {
+      const userInput = await requestPassword("Simulation Access", "Password required:");
+      if (userInput === null) { window.location.replace("about:blank"); return; }
+      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.replace("about:blank");
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
+    } else {
+      verifyWebsiteAccess();
+    }
+  </script>
+  <style id="password-gate-styles">
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
+    #password-gate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5, 9, 18, 0.88); padding: 24px; z-index: 9999; }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card { width: min(100%, 420px); background: #101625; border: 1px solid rgba(100,181,246,0.28); border-radius: 18px; padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); color: #e7edf7; font-family: 'Segoe UI', Arial, sans-serif; }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px; box-sizing: border-box; }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -372,6 +430,106 @@
       color:var(--dim);
       line-height:1.5;
     }
+    .tierBar{
+      display:flex;
+      gap:8px;
+      margin-top:10px;
+      flex-wrap:wrap;
+    }
+    .tierBtn{
+      flex:1;
+      min-width:180px;
+      border:1px solid rgba(255,255,255,.1);
+      border-radius:12px;
+      padding:9px 12px;
+      font:700 12px var(--font);
+      color:var(--dim);
+      background:rgba(255,255,255,.04);
+      cursor:pointer;
+      transition:all .18s ease;
+      text-align:center;
+    }
+    .tierBtn:hover{
+      color:var(--text);
+      background:rgba(255,255,255,.08);
+      border-color:rgba(56,189,248,.3);
+    }
+    .tierBtn.active{
+      color:#041018;
+      background:linear-gradient(135deg,var(--accent),#67e8f9);
+      border-color:rgba(56,189,248,.8);
+      box-shadow:0 0 16px rgba(56,189,248,.25);
+    }
+    .formulaCard{
+      background:var(--card2);
+      border:1px solid rgba(56,189,248,.2);
+      border-radius:14px;
+      padding:12px 16px;
+      box-shadow:var(--shadow);
+    }
+    .formulaHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      cursor:pointer;
+      user-select:none;
+    }
+    .formulaHeader h4{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      color:var(--accent);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-weight:800;
+    }
+    .formulaContent{
+      margin-top:10px;
+      font-size:12px;
+      color:rgba(232,238,251,.9);
+      line-height:1.7;
+      display:none;
+    }
+    .formulaContent.open{
+      display:block;
+    }
+    .formulaGrid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));
+      gap:8px;
+      margin-top:8px;
+    }
+    .formulaItem{
+      background:rgba(5,10,20,.65);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px;
+      padding:8px 10px;
+      font-family:var(--mono);
+      font-size:11.5px;
+    }
+    .formulaItem b{
+      color:var(--accent);
+      font-family:var(--font);
+      display:block;
+      margin-bottom:3px;
+      font-size:11px;
+    }
+    .qMetaRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .qCountBadge{
+      font-size:11px;
+      font-family:var(--mono);
+      color:var(--dim);
+      background:rgba(255,255,255,.06);
+      padding:3px 9px;
+      border-radius:6px;
+      border:1px solid rgba(255,255,255,.08);
+    }
     @media (max-width:1200px){
       #mainContent{grid-template-columns:1fr}
       .sceneWrap{grid-template-columns:1fr}
@@ -497,24 +655,42 @@
 
         <div id="fiveETab" class="fiveETab">
           <div class="panel">
-            <h3>Student Info</h3>
+            <h3>Student Info & Inquiry Tier</h3>
             <input type="text" id="studentName" placeholder="Student Name">
+            <div class="tierBar" id="tierBar">
+              <button class="tierBtn active" data-tier="tier1">Tier 1: Foundations & Graphs</button>
+              <button class="tierBtn" data-tier="tier2">Tier 2: AP Physics 1 (UAM Equations)</button>
+              <button class="tierBtn" data-tier="tier3">Tier 3: AP Physics C (Calculus & Modeling)</button>
+            </div>
+          </div>
+
+          <div class="formulaCard" id="formulaRefCard">
+            <div class="formulaHeader" id="formulaToggle">
+              <h4><span>📖 Formula & Theory Reference</span> <span id="formulaTierBadge" style="color:var(--accent2);font-weight:700;font-size:11px;background:rgba(139,92,246,.15);padding:2px 8px;border-radius:6px;border:1px solid rgba(139,92,246,.3);"></span></h4>
+              <span id="formulaToggleIcon" style="font-size:12px;color:var(--dim);font-weight:600;">▼ Show Reference</span>
+            </div>
+            <div class="formulaContent" id="formulaContent">
+              <!-- Dynamically populated based on active tier -->
+            </div>
           </div>
 
           <div class="fiveEWrap">
             <div class="qCard">
-              <div class="phase" id="qPhase">ENGAGE</div>
+              <div class="qMetaRow">
+                <div class="phase" id="qPhase">ENGAGE</div>
+                <div class="qCountBadge" id="qCountBadge">Question 1 of 11</div>
+              </div>
               <div class="question" id="qText">Loading question...</div>
-              <textarea id="qAnswer" placeholder="Type your response here..."></textarea>
+              <textarea id="qAnswer" placeholder="Type your response, derivation, and simulation readout comparison here..."></textarea>
             </div>
 
             <div class="qNav">
-              <button id="prevQ">◀</button>
+              <button id="prevQ" title="Previous Question">◀</button>
               <div class="dots" id="qDots"></div>
-              <button id="nextQ">▶</button>
+              <button id="nextQ" title="Next Question">▶</button>
             </div>
 
-            <button class="exportBtn" id="exportDocx">📄 Export Answers to .docx</button>
+            <button class="exportBtn" id="exportDocx">📄 Export Tier 1 Answers to .docx</button>
           </div>
         </div>
       </section>
@@ -523,22 +699,103 @@
 </div>
 
 <script>
-const QS = [
-  {p:'ENGAGE',q:'Two students watch the same moving car. One says, “It traveled 60 meters,” while the other says, “Its displacement is only 10 meters.” How can both be correct at the same time?'},
-  {p:'ENGAGE',q:'A runner circles a track and ends up where they started. Did they travel a distance? Did they have a displacement? Explain using your own words.'},
-  {p:'EXPLORE',q:'Set x₀ = -30 m, v₀ = +8 m/s, a = 0 m/s². Press Play. Describe how the position, distance, and displacement graphs compare. Why do some overlap?'},
-  {p:'EXPLORE',q:'Set x₀ = +20 m, v₀ = +12 m/s, a = -4 m/s². Watch the object slow down, stop, and reverse. What happens to velocity, speed, distance, and displacement during the reversal?'},
-  {p:'EXPLAIN',q:'Using the graphs, explain the difference between speed and velocity. Why can one graph go below zero while the other cannot?'},
-  {p:'EXPLAIN',q:'Explain why distance is always non-decreasing, even when the object changes direction. How does the graph prove this?'},
-  {p:'ELABORATE',q:'Imagine a car driving forward, braking hard to avoid an obstacle, stopping, then reversing into a parking spot. How would you configure x₀, v₀, and a to model part of this event?'},
-  {p:'ELABORATE',q:'Choose a different scenario (runner, train, or drone). Describe a realistic motion event that matches one of the graph shapes you observe.'},
-  {p:'EVALUATE',q:'If the velocity graph crosses zero at t = 3 s, what does that mean physically? What must the object be doing at that moment?'},
-  {p:'EVALUATE',q:'During a reversal, why does the displacement graph sometimes decrease while the distance graph still increases?'},
-  {p:'EVALUATE',q:'How can you tell from the acceleration graph whether velocity should be increasing, decreasing, or changing sign over time?'}
-];
+const TIERS = {
+  tier1: {
+    id: 'tier1',
+    name: 'Tier 1: Foundations & Graphs',
+    tag: 'Tier 1: Conceptual Foundations',
+    fileTag: 'Tier1_Conceptual',
+    heading: 'Kinematics Lab — Tier 1: Conceptual Foundations & Graph Interpretation',
+    formulaBadge: 'Definitions: Scalars, Vectors, Slopes & Areas',
+    btnLabel: '📄 Export Tier 1 (Conceptual) Answers to .docx',
+    formulas: [
+      { title: 'Position vs Displacement', math: 'x(t) vs Δx = x(t) - x₀', desc: 'Displacement is the vector change in position; position is absolute location.' },
+      { title: 'Distance vs Displacement', math: 'd = ∫ |v(t)| dt ≥ |Δx|', desc: 'Distance is total path length; strictly non-decreasing (odometer reading).' },
+      { title: 'Average Velocity', math: 'v_avg = Δx / Δt', desc: 'Vector rate of position change; secant slope of position-time graph.' },
+      { title: 'Average Speed', math: 'speed_avg = distance / Δt', desc: 'Scalar rate of distance accumulated per unit time.' },
+      { title: 'Instantaneous Acceleration', math: 'a = Δv / Δt (slope of v-t)', desc: 'Rate of change of velocity; sign indicates direction of acceleration vector.' },
+      { title: 'Speeding Up vs Slowing Down', math: 'Speeding up: v & a same sign; Slowing: opposite signs', desc: 'Sign of v indicates direction of motion; sign of a indicates direction of acceleration.' }
+    ],
+    questions: [
+      { p:'ENGAGE', q:'Two students watch the same moving car. One says, “It traveled 60 meters,” while the other says, “Its displacement is only 10 meters.” How can both be correct at the same time? Explain the physical difference between distance (scalar path length) and displacement (vector change in position).' },
+      { p:'ENGAGE', q:'A runner completes one full lap around a circular 400 m track and ends up at the exact starting mark. Did they travel a distance? Did they undergo a displacement? State the numerical value of both and explain your reasoning.' },
+      { p:'EXPLORE', q:'In the simulation, manually set x₀ = -30 m, v₀ = +8 m/s, and a = 0 m/s². Press Play. Compare Graph 1 (Distance & Displacement) and Graph 2 (Speed & Velocity). Why do distance and displacement have identical straight-line slopes in this run?' },
+      { p:'EXPLORE', q:'Manually configure x₀ = +20 m, v₀ = +12 m/s, and a = -4.0 m/s². Run the simulation. Watch the object slow down, stop, and reverse direction. What happens to the sign of velocity, and why does the distance curve continue rising while displacement turns downward?' },
+      { p:'EXPLAIN', q:'Using the graphs as evidence, explain why speed can never be negative, whereas velocity can be negative. What physical information does the negative sign on velocity communicate?' },
+      { p:'EXPLAIN', q:'Explain why the distance graph is strictly non-decreasing (its slope is always ≥ 0), even when the vehicle reverses. How does this connect to the definition of distance as accumulated path length?' },
+      { p:'ELABORATE', q:'Imagine a delivery truck cruising forward, braking sharply before an intersection, stopping momentarily, and then reversing into an alley. What sign combinations of initial velocity (v₀) and constant acceleration (a) produce this slowing down, stopping, and reversing sequence?' },
+      { p:'ELABORATE', q:'Switch to a different scenario (Runner, Train, or Drone). Describe a realistic physical motion event for that object that matches a parabolic position-time curve and a straight sloping velocity-time curve.' },
+      { p:'EVALUATE', q:'If the velocity-time graph crosses zero at t = 3.0 s, what is the instantaneous state of motion of the object at that exact moment? Is the object necessarily stationary for a finite time, or just at that instant?' },
+      { p:'EVALUATE', q:'During a direction reversal, why can an object have zero instantaneous velocity while simultaneously having a non-zero acceleration? Give a real-world example (e.g. tossing a ball upward at its peak).' },
+      { p:'EVALUATE', q:'How can you determine whether an object is speeding up or slowing down by comparing the algebraic signs of velocity and acceleration? Summarize the rule for all four sign combinations (+/+, +/-, -/+, -/-).' }
+    ]
+  },
+  tier2: {
+    id: 'tier2',
+    name: 'Tier 2: AP Physics 1 (UAM Equations)',
+    tag: 'Tier 2: AP Physics 1 (UAM Equations)',
+    fileTag: 'Tier2_AP1_UAM',
+    heading: 'Kinematics Lab — Tier 2: AP Physics 1 (UAM Kinematic Equations)',
+    formulaBadge: 'The Big 4 UAM Kinematic Equations',
+    btnLabel: '📄 Export Tier 2 (AP Physics 1) Answers to .docx',
+    formulas: [
+      { title: 'Equation 1 (Omits Δx)', math: 'v = v₀ + a·t', desc: 'Linear velocity relation; slope of v-t line is a; vertical intercept is v₀.' },
+      { title: 'Equation 2 (Omits v)', math: 'Δx = v₀·t + ½a·t²', desc: 'Quadratic displacement relation; area of rectangle (v₀·t) + triangle (½at²) under v-t graph.' },
+      { title: 'Equation 3 (Omits t)', math: 'v² = v₀² + 2a·Δx', desc: 'The "timeless" kinematic relation; links velocity change directly to displacement.' },
+      { title: 'Equation 4 (Omits a)', math: 'Δx = ½(v₀ + v)·t = v_avg·t', desc: 'Average velocity for constant acceleration; area of trapezoid under v-t graph.' },
+      { title: 'Stopping Time (v = 0)', math: 't_stop = -v₀ / a', desc: 'Elapsed time until instantaneous rest when braking/reversing.' },
+      { title: 'Stopping Distance (v = 0)', math: 'Δx_stop = -v₀² / (2a)', desc: 'Distance traveled before coming to rest (derived directly from Equation 3).' }
+    ],
+    questions: [
+      { p:'ENGAGE', q:'Equation Comparison (Δx = v₀t vs Δx = v₀t + ½at²): An object starts with v₀ = +10 m/s at x₀ = 0. If acceleration is zero (a = 0), in 5.0 s its displacement is Δx = v₀·t = 50 m. Now calculate the displacement if it undergoes constant acceleration a = +2.0 m/s² using the UAM equation Δx = v₀·t + ½a·t². Manually set x₀ = 0, v₀ = 10, a = 2 in the simulation, run to t = 5.0 s, and compare the HUD displacement to your calculated prediction.' },
+      { p:'ENGAGE', q:'The Velocity Equation & Slope (v = v₀ + at): Acceleration is defined as the slope of the v-t graph: a = Δv/Δt = (v - v₀)/t. Rearrange this into the first UAM equation v = v₀ + at. For an object with v₀ = -16 m/s and constant a = +4.0 m/s², calculate: (a) velocity at t = 2.5 s, and (b) the exact timestamp t_stop when velocity reaches zero. Manually set the sliders and verify on Graph 2.' },
+      { p:'EXPLORE', q:'Stopping Time & Turnaround Point: Manually set x₀ = -25 m, v₀ = +15 m/s, and a = -3.0 m/s². (a) Using v = v₀ + at = 0, calculate the turnaround timestamp t_turn = -v₀/a. (b) Run the simulation and pause as close as possible to your calculated time. Record the readouts for time, velocity, and displacement.' },
+      { p:'EXPLORE', q:'Maximum Displacement & Parabolic Vertex (Δx = v₀t + ½at²): Using the parameters from the previous question (v₀ = +15 m/s, a = -3.0 m/s²), calculate the maximum forward displacement Δx_max at t_turn = 5.0 s. Then calculate the maximum position coordinate x_max = x₀ + Δx_max. Confirm that Graph 1 (Distance & Displacement) reaches its crest at this exact coordinate.' },
+      { p:'EXPLORE', q:'Average Velocity & Geometric Area (Δx = ½(v₀ + v)·t): Set x₀ = 0 m, v₀ = +6.0 m/s, and a = +3.0 m/s². (a) Calculate the final velocity v at t = 5.0 s using v = v₀ + at. (b) Calculate displacement using the average velocity equation Δx = ½(v₀ + v)·t. (c) Calculate the area of the trapezoid under Graph 2 from t = 0 to 5.0 s (Area = base · average height). Compare both results with HUD dispReadout.' },
+      { p:'EXPLAIN', q:'The "Timeless" Kinematic Equation (v² = v₀² + 2aΔx): A sports car traveling at v₀ = +24 m/s applies emergency braking with deceleration a = -6.0 m/s² until it comes to a full stop (v = 0). (a) Use v² = v₀² + 2aΔx to solve directly for the braking distance Δx without calculating time. (b) Now calculate the stopping time t = -v₀/a, and check that Δx = v₀·t + ½a·t² yields the exact same distance.' },
+      { p:'EXPLAIN', q:'Distance vs. Displacement in Reversal Motion: A drone moves with v₀ = +14 m/s and constant a = -3.5 m/s². It comes to a stop at t = 4.0 s and accelerates in reverse back to its starting position at t = 8.0 s. (a) Calculate Δx(8.0 s) using Δx = v₀·t + ½a·t². (b) Calculate the total path distance d(8.0 s) traveled by summing forward and backward segments. Why does the UAM equation give Δx = 0 m while the odometer records 56 m?' },
+      { p:'ELABORATE', q:'Obstacle Avoidance & Impact Speed: A train operator traveling at v₀ = +28 m/s slams on the brakes producing a deceleration of a = -7.0 m/s². An obstacle is stalled on the rail 60 m ahead. (a) Calculate the train’s stopping distance. Does it stop in time to avoid collision? (b) If the obstacle had been only 40 m ahead, use v² = v₀² + 2aΔx to calculate the exact impact speed.' },
+      { p:'ELABORATE', q:'Missing-Variable Challenge: A vehicle speeds up uniformly from v₀ = +5.0 m/s across a measured stretch of road Δx = +75 m in elapsed time t = 6.0 s. (a) Which UAM equation allows you to determine the final velocity v directly without knowing acceleration a? Calculate v. (b) Next, determine acceleration a using v = v₀ + at. (c) Manually set these values in the simulation and verify that at t = 6.0 s the displacement matches 75 m.' },
+      { p:'EVALUATE', q:'AP Physics 1 Kinematics Equation Selection Matrix: For each of the 4 primary UAM equations, identify which single kinematic variable (from Δx, v₀, v, a, t) is absent: (1) v = v₀ + at; (2) Δx = v₀·t + ½a·t²; (3) v² = v₀² + 2aΔx; (4) Δx = ½(v₀ + v)·t. Explain your step-by-step strategy for selecting the quickest equation when solving AP Physics 1 free-response problems.' }
+    ]
+  },
+  tier3: {
+    id: 'tier3',
+    name: 'Tier 3: AP Physics C (Calculus & Modeling)',
+    tag: 'Tier 3: AP Physics C: Mechanics (Calculus)',
+    fileTag: 'Tier3_APC_Calculus',
+    heading: 'Kinematics Lab — Tier 3: AP Physics C: Mechanics (Calculus & Modeling)',
+    formulaBadge: 'Differential & Integral Kinematics',
+    btnLabel: '📄 Export Tier 3 (AP Physics C) Answers to .docx',
+    formulas: [
+      { title: 'Derivative Kinematics', math: 'v(t) = dx/dt,  a(t) = dv/dt = d²x/dt²', desc: 'Velocity is time derivative of position; acceleration is time derivative of velocity.' },
+      { title: 'Displacement Integral', math: 'Δx = ∫₀ᵗ v(t\') dt\'', desc: 'Displacement is the definite integral of velocity (accumulated signed area under v-t curve).' },
+      { title: 'Distance Path Integral', math: 'd = ∫₀ᵗ |v(t\')| dt\'', desc: 'Total path length is the integral of speed (absolute geometric area under v-t curve).' },
+      { title: 'Stationary Points / Extrema', math: 'dx/dt = 0  ⇒  t* = -v₀ / a', desc: 'Position vertex occurs when velocity vanishes; concavity given by d²x/dt² = a.' },
+      { title: 'Work-Energy Derivation', math: '∫ a dx = ∫ v dv  ⇒  a·Δx = ½(v² - v₀²)', desc: 'Integration of Newton\'s 2nd Law via chain rule a = v(dv/dx) yields the timeless relation.' },
+      { title: 'Taylor Series Exactness', math: 'x(t+dt) = x + v·dt + ½a·dt²', desc: 'Higher derivatives vanish for constant a; Verlet scheme yields zero local truncation error.' }
+    ],
+    questions: [
+      { p:'ENGAGE', q:'Differential Kinematics Formulations: In 1D classical mechanics, instantaneous velocity is v(t) = dx/dt and instantaneous acceleration is a(t) = dv/dt = d²x/dt². Given the position polynomial x(t) = x₀ + v₀·t + ½a·t² (with a = constant), evaluate the first and second time derivatives symbolically. Explain how the tangent slopes of Graph 1 and Graph 2 visually confirm these derivatives at any arbitrary instant t.' },
+      { p:'ENGAGE', q:'Definite Integration & Riemann Area Accumulation: Show by definite integration from t\' = 0 to t\' = t that Δx = ∫₀ᵗ v(t\') dt\' = ∫₀ᵗ (v₀ + a·t\') dt\' = v₀·t + ½a·t². In your own words, explain how Chart.js plotting the area under the v(t) curve physically represents the accumulation of infinitesimal displacement slices dt · v(t).' },
+      { p:'EXPLORE', q:'Stationary Points & Extrema of 1D Trajectory: Configure x₀ = -30 m, v₀ = +18 m/s, and a = -4.5 m/s². (a) Find the critical time t* by setting dx/dt = 0. (b) Use the Second Derivative Test (d²x/dt² = a) to formally classify this point as a local maximum or minimum. (c) Evaluate the maximum coordinate x(t*) analytically. Manually set the sliders in the simulator and verify that Graph 1 exhibits a zero tangent slope at this exact point.' },
+      { p:'EXPLORE', q:'Direction Reversal & The Absolute Value Integral: Consider motion defined by v(t) = 12 - 4t m/s from t = 0 to t = 5.0 s. (a) Calculate the net displacement as the definite integral ∫₀⁵ (12 - 4t) dt. (b) Calculate the total distance traveled as the piecewise integral of speed: ∫₀³ (12 - 4t) dt + ∫₃⁵ -(12 - 4t) dt. (c) Manually set x₀ = 0, v₀ = 12, a = -4, run to t = 5.0 s, and verify that dispReadout and distReadout match your two integrals.' },
+      { p:'EXPLAIN', q:'Work-Kinetic Energy Theorem Derivation via Chain Rule: From Newton\'s Second Law, F_net = m·a = m·(dv/dt). Using the chain rule, rewrite acceleration as a = (dv/dx)·(dx/dt) = v·(dv/dx). Separate variables and integrate both sides over displacement: ∫_{x₀}^{x} a dx = ∫_{v₀}^{v} v dv. (a) Evaluate the integrals to derive a·Δx = ½(v² - v₀²). (b) Multiply through by mass m to demonstrate how this kinematic equation is identical to the Work-Kinetic Energy Theorem W_net = ΔK.' },
+      { p:'EXPLAIN', q:'Curvature, Concavity, and Inflection Points: For constant acceleration, the position function x(t) has constant concavity dictated by d²x/dt² = a. (a) If a > 0, describe the concavity of x(t) and explain why the particle speeds up when v > 0 but slows down when v < 0. (b) Under what physical conditions would an x-t graph exhibit an inflection point (d²x/dt² = 0), and can an inflection point exist in uniformly accelerated motion (UAM)?' },
+      { p:'ELABORATE', q:'Quadratic Root Analysis for Boundary Crossings: A vehicle is located at x₀ = -40 m with initial velocity v₀ = -10 m/s and constant acceleration a = +3.0 m/s². (a) Write the quadratic equation for the origin crossing condition x(t) = 0. (b) Solve for both mathematical roots t₁ and t₂ using the quadratic formula. Explain why one root is rejected on physical grounds (t < 0). (c) Differentiate x(t) at the positive root to determine the passing velocity v(t_cross). Verify in the simulation.' },
+      { p:'ELABORATE', q:'Phase-Space Trajectory (v vs. x): In advanced mechanics, dynamics are analyzed in phase space (x vs. v). Rearrange v² = v₀² + 2a(x - x₀) to express position as a function of velocity: x(v) = x₀ + (v² - v₀²)/(2a). (a) What geometric curve is formed in the (x, v) phase plane? (b) What physical state corresponds to the vertex of this phase-space trajectory where v = 0?' },
+      { p:'EVALUATE', q:'Numerical Integration in Physics Engines (Verlet vs. Euler): The simulation engine steps state via: x += v*dt + 0.5*a*dt*dt; v += a*dt;. (a) Perform a Taylor series expansion of x(t + dt) and v(t + dt) about time t. (b) Prove that because acceleration a is strictly constant (da/dt = 0, higher derivatives vanish), this numerical algorithm incurs zero local truncation error and produces exact analytical values regardless of step size dt.' },
+      { p:'EVALUATE', q:'Piecewise Kinematic Analysis (Multi-Interval Motion): An AP Physics C student models a two-stage motion: Stage 1 has v₀ = +20 m/s with uniform braking a₁ = -5.0 m/s² until coming to rest; Stage 2 immediately follows with positive acceleration a₂ = +2.5 m/s² for an elapsed duration Δt₂ = 4.0 s. (a) Express v(t) as a piecewise function. (b) Analytically evaluate the total displacement Δx_total and total distance d_total across both stages.' }
+    ]
+  }
+};
 
-let answers = [];
-let curQ = 0;
+let currentTier = localStorage.getItem('kin_active_tier') || 'tier1';
+if(!TIERS[currentTier]) currentTier = 'tier1';
+
+const curQ = { tier1: 0, tier2: 0, tier3: 0 };
+const answers = { tier1: [], tier2: [], tier3: [] };
+let formulaOpen = false;
 
 const $ = id => document.getElementById(id);
 
@@ -1146,21 +1403,69 @@ function setPreset(name){
 }
 
 function init5E(){
-  try{
-    answers = JSON.parse(localStorage.getItem('kin_answers')) || [];
-  }catch(e){ answers = []; }
-  while(answers.length < QS.length) answers.push('');
+  ['tier1', 'tier2', 'tier3'].forEach(k=>{
+    try{
+      answers[k] = JSON.parse(localStorage.getItem('kin_answers_' + k)) || [];
+    }catch(e){ answers[k] = []; }
+
+    // Fallback migration from legacy kin_answers to tier1 if applicable
+    if(k === 'tier1' && answers[k].length === 0){
+      try{
+        const legacy = JSON.parse(localStorage.getItem('kin_answers'));
+        if(Array.isArray(legacy) && legacy.length > 0) answers.tier1 = legacy;
+      }catch(e){}
+    }
+
+    while(answers[k].length < TIERS[k].questions.length) answers[k].push('');
+  });
 
   $('studentName').value = localStorage.getItem('kin_student') || '';
 
+  $('formulaToggle').addEventListener('click', toggleFormulaReference);
+
+  document.querySelectorAll('.tierBtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      switchTier(btn.dataset.tier);
+    });
+  });
+
+  renderTier();
+}
+
+function toggleFormulaReference(){
+  formulaOpen = !formulaOpen;
+  $('formulaContent').classList.toggle('open', formulaOpen);
+  $('formulaToggleIcon').textContent = formulaOpen ? '▲ Hide Reference' : '▼ Show Reference';
+}
+
+function renderFormulaReference(){
+  const t = TIERS[currentTier];
+  $('formulaTierBadge').textContent = t.formulaBadge;
+  let html = '<div class="formulaGrid">';
+  t.formulas.forEach(f=>{
+    html += `<div class="formulaItem"><b>${f.title}</b><div style="color:#7dd3fc;margin:2px 0;">${f.math}</div><span style="color:var(--dim);font-size:11px;">${f.desc}</span></div>`;
+  });
+  html += '</div>';
+  $('formulaContent').innerHTML = html;
+}
+
+function renderTier(){
+  document.querySelectorAll('.tierBtn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tier === currentTier);
+  });
+
+  renderFormulaReference();
+  $('exportDocx').textContent = TIERS[currentTier].btnLabel;
+
   const dots = $('qDots');
   dots.innerHTML = '';
-  QS.forEach((_,i)=>{
+  const qList = TIERS[currentTier].questions;
+  qList.forEach((_,i)=>{
     const d = document.createElement('div');
-    d.className = 'dot' + (i===curQ ? ' active':'');
+    d.className = 'dot' + (i === curQ[currentTier] ? ' active':'');
     d.addEventListener('click', ()=>{
       saveAnswer();
-      curQ = i;
+      curQ[currentTier] = i;
       showQuestion();
     });
     dots.appendChild(d);
@@ -1169,22 +1474,36 @@ function init5E(){
   showQuestion();
 }
 
+function switchTier(newTier){
+  if(!TIERS[newTier] || newTier === currentTier) return;
+  saveAnswer();
+  currentTier = newTier;
+  localStorage.setItem('kin_active_tier', newTier);
+  renderTier();
+}
+
 function saveAnswer(){
-  answers[curQ] = $('qAnswer').value;
-  localStorage.setItem('kin_answers', JSON.stringify(answers));
+  answers[currentTier][curQ[currentTier]] = $('qAnswer').value;
+  localStorage.setItem('kin_answers_' + currentTier, JSON.stringify(answers[currentTier]));
 }
 
 function showQuestion(){
-  const q = QS[curQ];
+  const t = TIERS[currentTier];
+  const idx = curQ[currentTier];
+  const q = t.questions[idx];
   $('qPhase').textContent = q.p;
+  $('qCountBadge').textContent = `Question ${idx + 1} of ${t.questions.length}`;
   $('qText').textContent = q.q;
-  $('qAnswer').value = answers[curQ] || '';
-  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active', i===curQ));
+  $('qAnswer').value = answers[currentTier][idx] || '';
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active', i === idx));
 }
 
 function exportDocx(){
   saveAnswer();
-  const name = $('studentName').value || 'Student';
+  const name = $('studentName').value.trim() || 'Student';
+  const cleanName = name.replace(/[^a-zA-Z0-9_-]/g,'_');
+  const activeT = TIERS[currentTier];
+
   if(typeof docx === 'undefined'){
     alert('DOCX library not available.');
     return;
@@ -1194,28 +1513,28 @@ function exportDocx(){
     new Paragraph({
       heading:HeadingLevel.HEADING_1,
       alignment:AlignmentType.CENTER,
-      children:[new TextRun({text:'Kinematics Lab — 5E Inquiry Responses', bold:true, size:34, color:'2563EB'})]
+      children:[new TextRun({text:activeT.heading, bold:true, size:30, color:'2563EB'})]
     }),
     new Paragraph({
       alignment:AlignmentType.CENTER,
-      children:[new TextRun({text:`Student: ${name} | Date: ${new Date().toLocaleDateString()}`, size:22, color:'666666'})]
+      children:[new TextRun({text:`Student: ${name} | Track: ${activeT.tag} | Date: ${new Date().toLocaleDateString()}`, size:20, color:'666666'})]
     }),
     new Paragraph({text:''})
   ];
 
-  QS.forEach((q,i)=>{
+  activeT.questions.forEach((q,i)=>{
     children.push(new Paragraph({
       heading:HeadingLevel.HEADING_2,
       children:[
-        new TextRun({text:`[${q.p}] `, bold:true, color:'7C3AED', size:24}),
-        new TextRun({text:`Q${i+1}`, bold:true, size:24})
+        new TextRun({text:`[${q.p}] `, bold:true, color:'7C3AED', size:23}),
+        new TextRun({text:`Question ${i+1}`, bold:true, size:23})
       ]
     }));
-    children.push(new Paragraph({children:[new TextRun({text:q.q, italics:true, size:22})]}));
+    children.push(new Paragraph({children:[new TextRun({text:q.q, italics:true, size:21})]}));
     children.push(new Paragraph({
       children:[
-        new TextRun({text:'Answer: ', bold:true, size:22}),
-        new TextRun({text:answers[i] || '(no answer)', size:22})
+        new TextRun({text:'Student Response: ', bold:true, size:21}),
+        new TextRun({text:answers[currentTier][i] || '(no response entered)', size:21})
       ]
     }));
     children.push(new Paragraph({
@@ -1228,7 +1547,7 @@ function exportDocx(){
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Kinematics_${name.replace(/\s+/g,'_')}.docx`;
+    a.download = `Kinematics_${activeT.fileTag}_${cleanName}.docx`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -1271,17 +1590,19 @@ $('studentName').addEventListener('input', e=>{
   localStorage.setItem('kin_student', e.target.value);
 });
 $('qAnswer').addEventListener('input', e=>{
-  answers[curQ] = e.target.value;
-  localStorage.setItem('kin_answers', JSON.stringify(answers));
+  answers[currentTier][curQ[currentTier]] = e.target.value;
+  localStorage.setItem('kin_answers_' + currentTier, JSON.stringify(answers[currentTier]));
 });
 $('prevQ').addEventListener('click', ()=>{
   saveAnswer();
-  curQ = (curQ - 1 + QS.length) % QS.length;
+  const qCount = TIERS[currentTier].questions.length;
+  curQ[currentTier] = (curQ[currentTier] - 1 + qCount) % qCount;
   showQuestion();
 });
 $('nextQ').addEventListener('click', ()=>{
   saveAnswer();
-  curQ = (curQ + 1) % QS.length;
+  const qCount = TIERS[currentTier].questions.length;
+  curQ[currentTier] = (curQ[currentTier] + 1) % qCount;
   showQuestion();
 });
 $('exportDocx').addEventListener('click', exportDocx);
