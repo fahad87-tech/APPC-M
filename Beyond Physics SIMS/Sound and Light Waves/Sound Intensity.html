@@ -1,0 +1,3337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inverse-Square Sound Propagation Simulator</title>
+
+  <!-- External CDNs strictly as specified in prompt -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.4/dist/FileSaver.min.js"></script>
+  <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0a1a;
+      --bg-canvas: #0a0f1a;
+      --surface: #121428;
+      --card: #151833;
+      --card-hover: #1b2044;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(0, 229, 255, 0.4);
+      --text: #f0f3f8;
+      --text-muted: #8b9bb4;
+      --cyan: #00e5ff;
+      --pink: #ff4081;
+      --amber: #ffd740;
+      --green: #10b981;
+      --purple: #b388ff;
+      --blue: #2979ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.45;
+    }
+
+    /* ─── Header ─────────────────────────────────────────────────── */
+    header {
+      background: linear-gradient(180deg, #12152e 0%, var(--bg) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px 14px;
+      text-align: center;
+      position: relative;
+    }
+    .header-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .badge-topic {
+      background: rgba(0, 229, 255, 0.12);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      color: var(--cyan);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .header-desc {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      max-width: 860px;
+      margin: 6px auto 0;
+    }
+    .math-pill {
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      color: var(--amber);
+      background: rgba(255, 215, 64, 0.1);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 0.82rem;
+    }
+
+    /* ─── Main Container ─────────────────────────────────────────── */
+    .container {
+      max-width: 1480px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 16px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* ─── 2-Row Controls Above Canvas ────────────────────────────── */
+    .controls-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+    }
+    .controls-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px 18px;
+      align-items: center;
+    }
+    .ctrl-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .ctrl-label-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .ctrl-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.84rem;
+      color: var(--cyan);
+      font-weight: 700;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 3px;
+      outline: none;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    input[type="range"]:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.8);
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+      background: #ffffff;
+    }
+    .btn-toolbar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .btn-primary {
+      background: rgba(0, 229, 255, 0.18);
+      border-color: rgba(0, 229, 255, 0.45);
+      color: var(--cyan);
+    }
+    .btn-primary:hover {
+      background: rgba(0, 229, 255, 0.3);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.35);
+    }
+    .btn-danger {
+      background: rgba(255, 64, 129, 0.15);
+      border-color: rgba(255, 64, 129, 0.35);
+      color: var(--pink);
+    }
+    .btn-danger:hover {
+      background: rgba(255, 64, 129, 0.25);
+    }
+
+    /* ─── Canvas & Interactive Viewport ──────────────────────────── */
+    .canvas-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .canvas-card-header {
+      padding: 10px 16px;
+      background: rgba(14, 16, 32, 0.85);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .view-mode-group {
+      display: inline-flex;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px;
+      gap: 4px;
+    }
+    .view-btn {
+      padding: 5px 14px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .view-btn:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .view-btn.active {
+      background: rgba(0, 229, 255, 0.22);
+      color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+    }
+    .view-hint-badge {
+      font-size: 0.76rem;
+      color: var(--cyan);
+      background: rgba(0, 229, 255, 0.08);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 600px;
+      background: var(--bg-canvas);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: crosshair;
+    }
+    canvas#waveCanvas {
+      width: 900px;
+      height: 600px;
+      display: block;
+    }
+    /* Modernized Student-Friendly Controls */
+    .controls-row-main {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr 1.15fr 1fr;
+      gap: 14px;
+      align-items: stretch;
+    }
+    @media (max-width: 1240px) {
+      .controls-row-main { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .controls-row-main { grid-template-columns: 1fr; }
+    }
+    .ctrl-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      justify-content: space-between;
+    }
+    .ctrl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .ctrl-title {
+      font-size: 0.84rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ctrl-val.cyan-glow {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--cyan);
+      font-weight: 800;
+      font-size: 1.1rem;
+      text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
+    }
+    .ctrl-val.blue-glow {
+      font-family: 'JetBrains Mono', monospace;
+      color: #64b5f6;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .ctrl-val.purple-glow {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--purple);
+      font-weight: 800;
+      font-size: 1.1rem;
+      text-shadow: 0 0 10px rgba(179, 136, 255, 0.4);
+    }
+    .ctrl-val.amber-glow {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--amber);
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .ctrl-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+    .preset-buttons-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 2px;
+    }
+    .preset-btn {
+      padding: 4px 10px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      border-radius: 6px;
+      border: 1px solid rgba(0, 229, 255, 0.3);
+      background: rgba(0, 229, 255, 0.08);
+      color: var(--cyan);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .preset-btn:hover {
+      background: rgba(0, 229, 255, 0.25);
+      border-color: var(--cyan);
+      transform: translateY(-1px);
+    }
+    .preset-btn.active {
+      background: var(--cyan);
+      color: #000;
+      box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+    }
+    .freq-preset-btn {
+      border-color: rgba(179, 136, 255, 0.35);
+      background: rgba(179, 136, 255, 0.08);
+      color: var(--purple);
+    }
+    .freq-preset-btn:hover {
+      background: rgba(179, 136, 255, 0.25);
+      border-color: var(--purple);
+    }
+    .freq-preset-btn.active {
+      background: var(--purple);
+      color: #000;
+      box-shadow: 0 0 10px rgba(179, 136, 255, 0.5);
+    }
+
+    /* ─── Student-Friendly 4-Card HUD + Teaching Rule Banner ──────── */
+    .hud-dashboard {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      max-width: 440px;
+      width: calc(100% - 28px);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 10;
+    }
+    @media (max-width: 768px) {
+      .hud-dashboard { max-width: 100%; top: 8px; right: 8px; width: calc(100% - 16px); }
+    }
+    .hud-stat-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .hud-card {
+      background: rgba(14, 16, 36, 0.90);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    }
+    .card-icon {
+      font-size: 1.35rem;
+      flex-shrink: 0;
+    }
+    .card-content {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      min-width: 0;
+    }
+    .card-label {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .card-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.15rem;
+      font-weight: 800;
+      line-height: 1.15;
+    }
+    .card-sub {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-power { border-color: rgba(41, 121, 255, 0.45); }
+    .card-power .card-value { color: #64b5f6; }
+    .card-radius { border-color: rgba(0, 229, 255, 0.45); }
+    .card-radius .card-value { color: var(--cyan); }
+    .card-area { border-color: rgba(255, 215, 64, 0.45); }
+    .card-area .card-value { color: var(--amber); }
+    .card-intensity { border-color: rgba(16, 185, 129, 0.55); background: rgba(16, 185, 129, 0.12); }
+    .card-intensity .card-value { color: #6ee7b7; font-size: 1.22rem; }
+
+    .hud-teaching-rule {
+      background: rgba(10, 14, 30, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      border-radius: 10px;
+      padding: 9px 13px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    }
+    .rule-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .rule-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .rule-headline {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .rule-multiplier {
+      font-size: 0.74rem;
+      color: var(--amber);
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    /* Canvas legend / instruction hint */
+    .canvas-hint {
+      position: absolute;
+      bottom: 12px;
+      left: 16px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(10, 15, 26, 0.82);
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      pointer-events: none;
+    }
+
+    /* ─── 3 Chart.js Graphs Row Below Canvas ─────────────────────── */
+    .graphs-section {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 1100px) {
+      .graphs-section { grid-template-columns: 1fr; }
+    }
+    .graph-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      height: 310px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+    .graph-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .graph-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .graph-controls {
+      display: flex;
+      gap: 4px;
+    }
+    .btn-mini {
+      padding: 3px 8px;
+      font-size: 0.7rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-mini.active {
+      background: rgba(0, 229, 255, 0.2);
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    .chart-container {
+      flex: 1;
+      width: 100%;
+      height: 240px;
+      position: relative;
+    }
+
+    /* ─── 5E Formative Assessment Collapsible Section ────────────── */
+    .assessment-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+    .assessment-header {
+      padding: 16px 20px;
+      background: linear-gradient(90deg, #171a38 0%, var(--surface) 100%);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .assessment-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .assessment-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .assessment-score-chip {
+      background: rgba(255, 215, 64, 0.15);
+      border: 1px solid rgba(255, 215, 64, 0.4);
+      color: var(--amber);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+    .assessment-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .questions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .questions-grid { grid-template-columns: 1fr; }
+    }
+    .assess-question {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+    .assess-question.answered-correct {
+      border-color: rgba(16, 185, 129, 0.5);
+      background: rgba(16, 185, 129, 0.05);
+    }
+    .assess-question.answered-incorrect {
+      border-color: rgba(255, 64, 129, 0.5);
+      background: rgba(255, 64, 129, 0.05);
+    }
+    .q-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .q-badge {
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+    .q-badge.engage { background: rgba(0, 229, 255, 0.18); color: var(--cyan); }
+    .q-badge.explore { background: rgba(124, 77, 255, 0.18); color: var(--purple); }
+    .q-badge.explain { background: rgba(255, 215, 64, 0.18); color: var(--amber); }
+    .q-badge.elaborate { background: rgba(16, 185, 129, 0.18); color: var(--green); }
+    .q-badge.evaluate { background: rgba(255, 64, 129, 0.18); color: var(--pink); }
+
+    .q-text {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .q-options {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .q-opt-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .q-opt-label:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    .q-opt-label input[type="radio"] {
+      accent-color: var(--cyan);
+      cursor: pointer;
+    }
+    .q-frq-area {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .q-frq-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #fff;
+      outline: none;
+    }
+    .q-frq-input:focus {
+      border-color: var(--cyan);
+    }
+    .q-feedback {
+      font-size: 0.78rem;
+      margin-top: 4px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: none;
+    }
+    .q-feedback.show { display: block; }
+    .q-feedback.correct {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .q-feedback.incorrect {
+      background: rgba(255, 64, 129, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(255, 64, 129, 0.3);
+    }
+
+    
+    /* ─── Tab Bar Navigation ─────────────────────────────────────── */
+    .tab-bar {
+      display: flex;
+      gap: 12px;
+      padding: 12px 24px 0;
+      max-width: 1400px;
+      margin: 0 auto;
+      width: 100%;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 10, 26, 0.95);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .tab-btn {
+      padding: 12px 28px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.3px;
+    }
+    .tab-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .tab-btn.active {
+      color: var(--cyan);
+      border-bottom-color: var(--cyan);
+      background: rgba(0, 229, 255, 0.08);
+    }
+    .tab-content {
+      display: none;
+      width: 100%;
+    }
+    .tab-content.active {
+      display: block;
+    }
+
+    /* ─── Point Power Mechanism Visual Highlights ────────────────── */
+    .controls-row.point-power-row {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      background: rgba(0, 229, 255, 0.03);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .hud-row.point-power-highlight {
+      background: rgba(0, 229, 255, 0.12);
+      border-radius: 6px;
+      padding: 6px 8px;
+      margin: 4px -4px;
+      border: 1px solid rgba(0, 229, 255, 0.35);
+    }
+    .point-power-note {
+      font-size: 0.73rem;
+      color: var(--cyan);
+      line-height: 1.35;
+      margin-top: 4px;
+      opacity: 0.92;
+    }
+
+    /* ─── 5E Assessment Dedicated Tab Styling ────────────────────── */
+    .assessment-tab-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 16px 0 40px;
+    }
+    .assessment-section-header {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 26px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+    .assess-info h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, #90caf9);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .assess-sub {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
+    .student-name-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .student-name-group label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--cyan);
+      white-space: nowrap;
+    }
+    .student-name-group input {
+      background: #080816;
+      border: 1px solid rgba(0, 229, 255, 0.45);
+      border-radius: 8px;
+      padding: 9px 16px;
+      color: #fff;
+      font-size: 0.92rem;
+      width: 280px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .student-name-group input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+    }
+    .assessment-controls-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 22px;
+    }
+    .assess-stat-chips {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .stat-chip {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 8px;
+    }
+    .stat-chip strong {
+      color: var(--text);
+    }
+    .stat-chip.highlight strong {
+      color: var(--amber);
+      font-size: 0.94rem;
+    }
+    .btn-docx {
+      background: linear-gradient(135deg, #0288d1 0%, #00acc1 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      padding: 10px 22px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 4px 14px rgba(2, 136, 209, 0.35);
+    }
+    .btn-docx:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(2, 136, 209, 0.55);
+    }
+
+    /* ─── Footer ─────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 16px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      background: #080814;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── Top Header ────────────────────────────────────────────── -->
+  <header>
+    <div class="header-title-row">
+      <h1>Inverse-Square Sound Propagation Simulator</h1>
+      <span class="badge-topic">AP Physics / Acoustics</span>
+    </div>
+    <p class="header-desc">
+      Explore how sound waves propagate as 3D expanding spheres: <strong>total sound power (P) stays constant</strong>, but spreads over an expanding sphere of <strong>area A = 4πr²</strong>, causing <strong>intensity I = P / A</strong> to diminish as 1/r²!
+    </p>
+  </header>
+
+  
+  <!-- ─── Primary Navigation Tab Bar ────────────────────────────── -->
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tabBtnSim" data-tab="tab-sim">🔬 Interactive Simulation</button>
+    <button class="tab-btn" id="tabBtnAssessment" data-tab="tab-assessment">📝 5E Assessment &amp; Worksheet</button>
+  </div>
+
+  <!-- ─── TAB 1: Interactive Simulation ─────────────────────────── -->
+  <div id="tab-sim" class="tab-content active">
+    <div class="container">
+
+    <!-- ─── Student-Friendly Controls Panel ───────────────────────── -->
+    <div class="controls-panel">
+      <div class="controls-row-main">
+        <!-- 1. Distance & Multipliers -->
+        <div class="ctrl-card radius-ctrl-card">
+          <div class="ctrl-header">
+            <span class="ctrl-title">📏 Distance / Radius (r)</span>
+            <span class="ctrl-val cyan-glow" id="valRadius">5.0 m</span>
+          </div>
+          <input type="range" id="slRadius" min="1.0" max="15.0" step="0.1" value="5.0">
+          <div class="preset-buttons-row">
+            <button class="preset-btn" data-r="1.0">1m (1×)</button>
+            <button class="preset-btn" data-r="2.0">2m (2×)</button>
+            <button class="preset-btn" data-r="3.0">3m (3×)</button>
+            <button class="preset-btn" data-r="4.0">4m (4×)</button>
+            <button class="preset-btn" data-r="5.0">5m</button>
+            <button class="preset-btn" data-r="10.0">10m</button>
+          </div>
+        </div>
+
+        <!-- 2. Source Power -->
+        <div class="ctrl-card power-ctrl-card">
+          <div class="ctrl-header">
+            <span class="ctrl-title">🔊 Source Power (P)</span>
+            <span class="ctrl-val blue-glow" id="valPower">100.0 W</span>
+          </div>
+          <input type="range" id="slPower" min="10" max="200" step="5" value="100">
+          <div class="ctrl-hint">Total energy emitted per second (constant everywhere)</div>
+        </div>
+
+        <!-- 3. Frequency & Wavelength -->
+        <div class="ctrl-card freq-ctrl-card">
+          <div class="ctrl-header">
+            <span class="ctrl-title">🎵 Frequency (f)</span>
+            <span class="ctrl-val purple-glow" id="valFreq">100 Hz</span>
+          </div>
+          <input type="range" id="slFreq" min="50" max="400" step="10" value="100">
+          <div class="ctrl-hint" id="valWavelengthHint">Wavelength λ = 3.43 m (Wavefront spacing)</div>
+          <div class="preset-buttons-row">
+            <button class="preset-btn freq-preset-btn" data-f="50">50Hz</button>
+            <button class="preset-btn freq-preset-btn active" data-f="100">100Hz</button>
+            <button class="preset-btn freq-preset-btn" data-f="200">200Hz</button>
+            <button class="preset-btn freq-preset-btn" data-f="343">343Hz (1m)</button>
+          </div>
+        </div>
+
+        <!-- 4. Speed & Playback -->
+        <div class="ctrl-card playback-ctrl-card">
+          <div class="ctrl-header">
+            <span class="ctrl-title">⏱️ Sim Speed & Controls</span>
+            <span class="ctrl-val amber-glow" id="valSimSpeed">0.25×</span>
+          </div>
+          <input type="range" id="slSimSpeed" min="0.05" max="1.5" step="0.05" value="0.25">
+          <div class="btn-toolbar">
+            <button class="btn btn-primary" id="btnPlayPause">⏸ Pause</button>
+            <button class="btn" id="btnStep">⏭ Step</button>
+            <button class="btn btn-danger" id="btnReset">↺ Reset</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Interactive Simulation Canvas Card ────────────────────── -->
+    <div class="canvas-card">
+      <div class="canvas-card-header">
+        <div class="view-mode-group">
+          <button class="view-btn active" id="btnMode3D">🌐 3D Spherical Space</button>
+          <button class="view-btn" id="btnMode2D">🔘 2D Equatorial Slice</button>
+        </div>
+        <div class="view-hint-badge" id="viewHintBadge">
+          🖱️ Click &amp; Drag to Orbit 3D Sphere | Scroll to Zoom
+        </div>
+      </div>
+      <div class="canvas-wrapper">
+        <canvas id="waveCanvas" width="900" height="600"></canvas>
+
+        <!-- Student-Friendly 4-Card HUD + Teaching Rule Banner -->
+        <div class="hud-dashboard" id="hudDashboard">
+          <div class="hud-stat-cards">
+            <!-- Card 1: Source Power -->
+            <div class="hud-card card-power">
+              <div class="card-icon">🔊</div>
+              <div class="card-content">
+                <div class="card-label">Source Power (P)</div>
+                <div class="card-value" id="hudPower">100 W</div>
+                <div class="card-sub">Constant emitted energy</div>
+              </div>
+            </div>
+
+            <!-- Card 2: Distance -->
+            <div class="hud-card card-radius">
+              <div class="card-icon">📏</div>
+              <div class="card-content">
+                <div class="card-label">Distance (r)</div>
+                <div class="card-value" id="hudRadius">5.0 m</div>
+                <div class="card-sub">Sphere radius</div>
+              </div>
+            </div>
+
+            <!-- Card 3: Sphere Area -->
+            <div class="hud-card card-area">
+              <div class="card-icon">🌐</div>
+              <div class="card-content">
+                <div class="card-label">Sphere Area (4πr²)</div>
+                <div class="card-value" id="hudArea">314.2 m²</div>
+                <div class="card-sub" id="hudAreaSub">Area sound spreads over</div>
+              </div>
+            </div>
+
+            <!-- Card 4: Intensity -->
+            <div class="hud-card card-intensity">
+              <div class="card-icon">💡</div>
+              <div class="card-content">
+                <div class="card-label">Intensity (I = P / A)</div>
+                <div class="card-value" id="hudIntensity">0.32 W/m²</div>
+                <div class="card-sub">Power on each 1 m² tile</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Banner: Live Multiplier Teaching Rule -->
+          <div class="hud-teaching-rule">
+            <div class="rule-icon">💡</div>
+            <div class="rule-text">
+              <span class="rule-headline" id="hudRuleHeadline">Power stays 100 W, but spreads over 314.2 m²!</span>
+              <span class="rule-multiplier" id="hudRuleMultiplier">Double distance (r → 2r) ➔ 4× bigger sphere (4πr²) ➔ 1/4 the intensity!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="canvas-hint">
+          💡 Click or drag on the canvas to reposition the observation probe radius r.
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── 3 Chart.js Graphs Row Below Canvas ───────────────────── -->
+    <div class="graphs-section">
+      <!-- Graph 1: Intensity vs Distance -->
+      <div class="graph-card">
+        <div class="graph-header">
+          <span class="graph-title">1. Sound Intensity I vs Distance r</span>
+          <span style="font-size:0.7rem; color:var(--cyan); font-family:monospace;">I = P / (4πr²)</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartLogLog"></canvas>
+        </div>
+      </div>
+
+      <!-- Graph 2: Sphere Surface Area vs Distance -->
+      <div class="graph-card">
+        <div class="graph-header">
+          <span class="graph-title">2. Sphere Area A vs Distance r</span>
+          <span style="font-size:0.7rem; color:var(--amber); font-family:monospace;">A = 4πr² (Quadruples at 2r)</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartWaveform"></canvas>
+        </div>
+      </div>
+
+      <!-- Graph 3: Total Power vs Distance -->
+      <div class="graph-card">
+        <div class="graph-header">
+          <span class="graph-title">3. Total Power P vs Distance r</span>
+          <span style="font-size:0.7rem; color:var(--green); font-family:monospace;">Constant 100 W Everywhere</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartConservation"></canvas>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- ─── TAB 2: Dedicated 5E Assessment & Worksheet ────────────── -->
+  <div id="tab-assessment" class="tab-content">
+    <div class="container">
+      <div class="assessment-tab-wrapper">
+        <div class="assessment-section-header">
+          <div class="assess-info">
+            <h2>5E Formative Assessment &amp; Worksheet</h2>
+            <p class="assess-sub">Acoustic Geometric Spreading, Inverse-Square Law, and Point Power Measurements</p>
+          </div>
+          <div class="student-name-group">
+            <label for="student-name">Student Full Name:</label>
+            <input type="text" id="student-name" placeholder="Enter student full name for export...">
+          </div>
+        </div>
+
+        <div class="assessment-controls-bar">
+          <div class="assess-stat-chips">
+            <span class="stat-chip">Questions: <strong>10</strong></span>
+            <span class="stat-chip">Completed: <strong id="answered-count">0</strong> / 10</span>
+            <span class="stat-chip highlight">Score: <strong id="assessmentScoreBadge">0 / 10</strong></span>
+          </div>
+          <button class="btn-docx" id="btnExportDocx">
+            📄 Export Worksheet (.DOCX)
+          </button>
+        </div>
+
+        <div class="questions-grid" id="questionsGrid">
+          <!-- All 10 Questions injected by AssessmentManager -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <footer>
+    Inverse-Square Sound Propagation Simulator • Self-Contained AP Physics / Acoustics Simulation Engine
+  </footer>
+
+  <!-- ─── ES6 Class Implementations in Exact Ordered Hierarchy ───── -->
+  <script>
+  // =================================================================
+  // CLASS 1: PhysicsEngine
+  // Computes wave equation, sector area, solid angle, and values
+  // =================================================================
+  class PhysicsEngine {
+    constructor(cfg = {}) {
+      this.P_src = cfg.P_src ?? 100.0;    // Acoustic source power (Watts)
+      this.f = cfg.f ?? 100.0;            // Frequency (Hz)
+      this.c = cfg.c ?? 343.0;            // Wave phase speed in air (m/s)
+      this.thetaDeg = cfg.thetaDeg ?? 90; // Wedge full apex angle (degrees)
+      this.A0 = cfg.A0 ?? 10.0;           // Reference pressure amplitude at r0 (Pa)
+      this.r0 = 1.0;                      // Reference distance (1 meter)
+      this.r = cfg.r ?? 5.0;              // Current observation radius (meters)
+      this.probeArea_cm2 = cfg.probeArea_cm2 ?? 1.0; // Point Sensor Aperture Area (cm²)
+
+      this.time = 0.0;
+      this.running = true;
+      this.simSpeed = 0.25;
+    }
+
+    // Kinematic & wave parameters
+    get lambda() { return this.c / Math.max(0.1, this.f); }
+    get omega() { return 2.0 * Math.PI * this.f; }
+    get k() { return 2.0 * Math.PI / Math.max(0.001, this.lambda); }
+    get thetaRad() { return (this.thetaDeg * Math.PI) / 180.0; }
+
+    // 3D Solid angle of a cone of half-angle theta/2: Ω = 2π(1 - cos(θ/2))
+    get solidAngle() {
+      const halfAngle = this.thetaRad * 0.5;
+      return 2.0 * Math.PI * (1.0 - Math.cos(halfAngle));
+    }
+
+    // Total 3D spherical surface area: A_tot = 4πr²
+    getTotalArea(r = this.r) {
+      const safeR = Math.max(0.1, r);
+      return 4.0 * Math.PI * safeR * safeR;
+    }
+
+    // 3D Spherical cap area of the sector: A_sector = Ω·r²
+    getSectorArea(r = this.r) {
+      const safeR = Math.max(0.1, r);
+      return this.solidAngle * safeR * safeR;
+    }
+
+    // Intensity at distance r: I(r) = P_src / (4πr²) in W/m²
+    getIntensityFor(r = this.r) {
+      const safeR = Math.max(0.1, r);
+      return this.P_src / this.getTotalArea(safeR);
+    }
+
+    // Acoustic Pressure Amplitude at r: P_amp(r) = (A0 · r0) / r
+    getPressureAmplitude(r = this.r) {
+      const safeR = Math.max(0.1, r);
+      return (this.A0 * this.r0) / safeR;
+    }
+
+    // Sound Pressure Level in dB SPL (ref 10^-12 W/m²)
+    getSPL(r = this.r) {
+      const I = this.getIntensityFor(r);
+      return Math.max(0, 10.0 * Math.log10(Math.max(1e-12, I) / 1e-12));
+    }
+
+    // Power intercepted by a localized point-receiver with aperture area ΔA:
+    // ΔP = I(r) · ΔA (in Watts)
+    // Note: At a mathematical point (ΔA = 0), power is 0 W. A physical sensor of area ΔA intercepts ΔP.
+    getPointPower(r = this.r, area_cm2 = this.probeArea_cm2) {
+      const safeR = Math.max(0.1, r);
+      const I = this.getIntensityFor(safeR);
+      const area_m2 = Math.max(1e-6, area_cm2) * 1e-4; // 1 cm² = 1e-4 m²
+      return I * area_m2;
+    }
+
+    // Formatted point power string helper
+    formatPointPower(watts) {
+      if (watts >= 1.0) return watts.toFixed(2) + ' W';
+      if (watts >= 1e-3) return (watts * 1e3).toFixed(2) + ' mW';
+      if (watts >= 1e-6) return (watts * 1e6).toFixed(2) + ' µW';
+      return (watts * 1e9).toFixed(2) + ' nW';
+    }
+
+    // Instantaneous longitudinal acoustic wave pressure: ψ(r,t) = (A0·r0/r) · sin(k·r − ω·t)
+    getPressureAt(r, t = this.time) {
+      const safeR = Math.max(0.1, r);
+      const amp = (this.A0 * this.r0) / safeR;
+      return amp * Math.sin(this.k * safeR - this.omega * t);
+    }
+
+    // Pressure gradient along propagation: ∂ψ/∂r
+    getPressureGradient(r, t = this.time) {
+      const safeR = Math.max(0.1, r);
+      const phase = this.k * safeR - this.omega * t;
+      const term1 = -((this.A0 * this.r0) / (safeR * safeR)) * Math.sin(phase);
+      const term2 = ((this.A0 * this.r0 * this.k) / safeR) * Math.cos(phase);
+      return term1 + term2;
+    }
+
+    // Power flowing through the sector: P_sector = I(r) · A_sector(r) = P_src · (Ω / 4π)
+    getComputedSectorPower(r = this.r) {
+      const I = this.getIntensityFor(r);
+      const A_sec = this.getSectorArea(r);
+      return I * A_sec;
+    }
+
+    // Extrapolated total power from sector: P_total = P_sector / (Ω / 4π)
+    getNormalizedComputedPower(r = this.r) {
+      const frac = this.solidAngle / (4.0 * Math.PI);
+      if (frac <= 0) return this.P_src;
+      return this.getComputedSectorPower(r) / frac;
+    }
+
+    // Power conservation ratio: strictly 1.000 in ideal medium
+    getPowerRatio(r = this.r) {
+      const expected = this.P_src;
+      if (expected <= 0) return 1.0;
+      return this.getNormalizedComputedPower(r) / expected;
+    }
+
+    // Physics step
+    updatePhysics(dt) {
+      if (!isFinite(dt) || dt <= 0) dt = 0.016;
+      if (!this.running) return;
+
+      this.time += dt * this.simSpeed;
+
+      // Ensure finite numbers
+      if (!isFinite(this.time)) this.time = 0.0;
+    }
+  }
+
+  // =================================================================
+  // CLASS 2: Camera
+  // Dual-mode (2D & 3D) view transformation and perspective projector
+  // =================================================================
+  class Camera {
+    constructor(canvas) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext('2d');
+      this.mode = '3d'; // '3d' or '2d'
+      
+      // 2D Origin & scale
+      this.originX = canvas.width * 0.42;
+      this.originY = canvas.height * 0.50;
+      this.metersToPixels = 20.0;
+      this.dpr = window.devicePixelRatio || 1;
+
+      // 3D Perspective Orbit Parameters
+      this.yaw = 0.55;          // Azimuth angle (radians)
+      this.pitch = 0.38;        // Elevation angle (radians)
+      this.dist = 22.0;         // Distance from world origin in meters
+      this.fov = 520.0;         // Focal length factor
+      this.centerScreenX = 450;
+      this.centerScreenY = 300;
+    }
+
+    resize() {
+      const rect = this.canvas.parentElement.getBoundingClientRect();
+      const w = Math.max(600, rect.width);
+      const h = 600;
+      this.canvas.width = w * this.dpr;
+      this.canvas.height = h * this.dpr;
+      this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+
+      this.centerScreenX = w * 0.46;
+      this.centerScreenY = h * 0.52;
+      this.originX = w * 0.40;
+      this.originY = h * 0.50;
+      this.metersToPixels = Math.min(w, h) / 28.0;
+    }
+
+    worldToScreen(x, y) {
+      return {
+        x: this.originX + x * this.metersToPixels,
+        y: this.originY + y * this.metersToPixels
+      };
+    }
+
+    screenToWorld(sx, sy) {
+      return {
+        x: (sx - this.originX) / this.metersToPixels,
+        y: (sy - this.originY) / this.metersToPixels
+      };
+    }
+
+    worldRadiusToPixels(r) {
+      return r * this.metersToPixels;
+    }
+
+    pixelsToWorldRadius(px) {
+      return px / this.metersToPixels;
+    }
+
+    // 3D Perspective Projection: (x, y, z) in meters -> (sx, sy, depth, visible)
+    project3D(x, y, z) {
+      const cosY = Math.cos(this.yaw);
+      const sinY = Math.sin(this.yaw);
+      const cosP = Math.cos(this.pitch);
+      const sinP = Math.sin(this.pitch);
+
+      // Rotate around Y-axis (yaw)
+      const x1 = x * cosY - z * sinY;
+      const z1 = x * sinY + z * cosY;
+
+      // Rotate around X-axis (pitch)
+      const y1 = y * cosP - z1 * sinP;
+      const z2 = y * sinP + z1 * cosP;
+
+      // Translate along camera viewing axis
+      const zEff = z2 + this.dist;
+
+      if (zEff <= 0.2) {
+        return { sx: 0, sy: 0, depth: -1, visible: false, scale: 0 };
+      }
+
+      const scale = this.fov / zEff;
+      const sx = this.centerScreenX + x1 * scale;
+      const sy = this.centerScreenY - y1 * scale;
+
+      return {
+        sx,
+        sy,
+        depth: zEff,
+        visible: true,
+        scale
+      };
+    }
+  }
+
+  // =================================================================
+  // =================================================================
+  // CLASS 3: Renderer
+  // High-Aesthetic Wavefront Visualization (Continuous Circular Rings in 2D & 3D, NO Particles)
+  // =================================================================
+  class Renderer {
+    constructor(canvas, camera, engine) {
+      this.canvas = canvas;
+      this.ctx = canvas.getContext('2d');
+      this.camera = camera;
+      this.engine = engine;
+
+      // Trailing historical ripples for 2D mode
+      this.trailingWavefronts = [];
+      this.lastTrailTime = 0.0;
+    }
+
+    // ─── 2D Mode Rendering Routines: Continuous Expanding Circular Wavefront Rings ───
+    draw2DGrid(w, h) {
+      const ctx = this.ctx;
+      // High-contrast deep space gradient
+      const bgGrad = ctx.createRadialGradient(
+        this.camera.originX, this.camera.originY, 20,
+        this.camera.originX, this.camera.originY, Math.max(w, h)
+      );
+      bgGrad.addColorStop(0, '#0d1124');
+      bgGrad.addColorStop(1, '#060812');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+      ctx.lineWidth = 1;
+      const stepPx = this.camera.worldRadiusToPixels(2.0);
+
+      for (let x = this.camera.originX % stepPx; x < w; x += stepPx) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = this.camera.originY % stepPx; y < h; y += stepPx) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+
+      // Origin center axes
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.15)';
+      ctx.beginPath();
+      ctx.moveTo(0, this.camera.originY); ctx.lineTo(w, this.camera.originY);
+      ctx.moveTo(this.camera.originX, 0); ctx.lineTo(this.camera.originX, h);
+      ctx.stroke();
+    }
+
+    draw2DSectorOverlay() {
+      const ctx = this.ctx;
+      const ox = this.camera.originX;
+      const oy = this.camera.originY;
+      const halfTheta = this.engine.thetaRad * 0.5;
+      const maxR = Math.max(this.canvas.width, this.canvas.height) * 1.2;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.arc(ox, oy, maxR, -halfTheta, halfTheta);
+      ctx.closePath();
+
+      const grad = ctx.createRadialGradient(ox, oy, 10, ox, oy, maxR * 0.65);
+      grad.addColorStop(0, 'rgba(0, 229, 255, 0.10)');
+      grad.addColorStop(0.5, 'rgba(16, 185, 129, 0.04)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0.0)');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Glowing boundary rays
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.65)';
+      ctx.lineWidth = 1.8;
+      ctx.setLineDash([7, 4]);
+      ctx.beginPath();
+      ctx.moveTo(ox, oy);
+      ctx.lineTo(ox + maxR * Math.cos(-halfTheta), oy + maxR * Math.sin(-halfTheta));
+      ctx.moveTo(ox, oy);
+      ctx.lineTo(ox + maxR * Math.cos(halfTheta), oy + maxR * Math.sin(halfTheta));
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Angular caliper
+      const caliperR = 48;
+      ctx.strokeStyle = 'rgba(255, 215, 64, 0.85)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(ox, oy, caliperR, -halfTheta, halfTheta);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffd740';
+      ctx.font = '700 11px "JetBrains Mono", monospace';
+      ctx.fillText("θ = " + Math.round(this.engine.thetaDeg) + "°", ox + caliperR + 8, oy + 4);
+      ctx.restore();
+    }
+
+    draw2DWavefronts() {
+      const ctx = this.ctx;
+      const ox = this.camera.originX;
+      const oy = this.camera.originY;
+      const lambda = this.engine.lambda;
+      const t = this.engine.time;
+      const k = this.engine.k;
+      const omega = this.engine.omega;
+      const halfTheta = this.engine.thetaRad * 0.5;
+
+      const maxDistMeters = 24.0;
+      const numRings = Math.min(24, Math.max(8, Math.floor(maxDistMeters / lambda)));
+
+      // Render smooth continuous concentric circular rings propagating outwards
+      for (let i = 1; i <= numRings; i++) {
+        const phaseOffset = (omega * t) / k;
+        const waveBaseR = ((i * lambda + (phaseOffset % lambda)) % maxDistMeters);
+        if (waveBaseR < 0.25) continue;
+
+        const rPx = this.camera.worldRadiusToPixels(waveBaseR);
+        const ampAtR = this.engine.getPressureAmplitude(waveBaseR);
+        const normAmp = Math.min(1.0, ampAtR / (this.engine.A0 * 0.35));
+
+        const press = this.engine.getPressureAt(waveBaseR, t);
+        const isCompression = (press >= 0);
+
+        ctx.save();
+
+        // 1. Outside Sector: Smooth Circular Ring
+        const ringAlphaOut = (isCompression ? 0.38 : 0.16) * normAmp + 0.05;
+        ctx.strokeStyle = isCompression
+          ? "rgba(0, 229, 255, " + ringAlphaOut + ")"
+          : "rgba(255, 64, 129, " + ringAlphaOut + ")";
+        ctx.lineWidth = isCompression ? Math.max(1.5, 3.5 * normAmp) : 1.2;
+
+        ctx.beginPath();
+        ctx.arc(ox, oy, rPx, halfTheta, Math.PI * 2 - halfTheta);
+        ctx.stroke();
+
+        // 2. Inside Sector: Enhanced Glowing Circular Arc
+        const ringAlphaIn = (isCompression ? 0.90 : 0.35) * normAmp + 0.15;
+        ctx.strokeStyle = isCompression
+          ? "rgba(0, 229, 255, " + ringAlphaIn + ")"
+          : "rgba(255, 64, 129, " + ringAlphaIn + ")";
+        ctx.lineWidth = isCompression ? Math.max(2.2, 5.0 * normAmp) : 1.8;
+
+        if (isCompression) {
+          ctx.shadowColor = '#00e5ff';
+          ctx.shadowBlur = 10 * normAmp;
+        }
+
+        ctx.beginPath();
+        ctx.arc(ox, oy, rPx, -halfTheta, halfTheta);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        ctx.restore();
+      }
+    }
+
+    draw2DTrails() {
+      const ctx = this.ctx;
+      const ox = this.camera.originX;
+      const oy = this.camera.originY;
+
+      if (this.engine.time - this.lastTrailTime > 0.14) {
+        this.lastTrailTime = this.engine.time;
+        this.trailingWavefronts.push({ r: 0.6, alpha: 0.28 });
+      }
+
+      for (let i = this.trailingWavefronts.length - 1; i >= 0; i--) {
+        const w = this.trailingWavefronts[i];
+        w.r += (this.engine.c * 0.016 * this.engine.simSpeed * 0.04);
+        w.alpha -= 0.003;
+
+        if (w.alpha <= 0 || w.r > 25.0) {
+          this.trailingWavefronts.splice(i, 1);
+          continue;
+        }
+
+        const rPx = this.camera.worldRadiusToPixels(w.r);
+        ctx.strokeStyle = "rgba(179, 136, 255, " + w.alpha + ")";
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.arc(ox, oy, rPx, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+
+    draw2DCentralSource() {
+      const ctx = this.ctx;
+      const ox = this.camera.originX;
+      const oy = this.camera.originY;
+      const pulse = 9.0 + Math.sin(this.engine.omega * this.engine.time) * 2.5;
+
+      const grad = ctx.createRadialGradient(ox, oy, 2, ox, oy, pulse * 2.8);
+      grad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      grad.addColorStop(0.35, 'rgba(0, 229, 255, 0.7)');
+      grad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(ox, oy, pulse * 2.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(ox, oy, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#00e5ff';
+      ctx.font = '700 10px "JetBrains Mono", monospace';
+      ctx.fillText("SOUND SOURCE (x₀, y₀)", ox - 60, oy - 22);
+    }
+
+    draw2DObservationProbeAndVectors() {
+      const ctx = this.ctx;
+      const ox = this.camera.originX;
+      const oy = this.camera.originY;
+      const rMeters = this.engine.r;
+      const rPx = this.camera.worldRadiusToPixels(rMeters);
+      const halfTheta = this.engine.thetaRad * 0.5;
+
+      ctx.save();
+      ctx.strokeStyle = '#ffd740';
+      ctx.lineWidth = 2.5;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.arc(ox, oy, rPx, -halfTheta, halfTheta);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.strokeStyle = 'rgba(255, 215, 64, 0.2)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(ox, oy, rPx, 0, Math.PI * 2);
+      ctx.stroke();
+
+      const probeX = ox + rPx;
+      const probeY = oy;
+
+      // Localized Point Sensor Aperture Ring (Aperture area ΔA)
+      const sensorRadiusPx = Math.max(8, 6 + Math.sqrt(this.engine.probeArea_cm2) * 4);
+      ctx.fillStyle = 'rgba(0, 229, 255, 0.2)';
+      ctx.beginPath();
+      ctx.arc(probeX, probeY, sensorRadiusPx, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
+
+      // Sensor Reticle Crosshairs
+      ctx.strokeStyle = 'rgba(0, 229, 255, 0.7)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(probeX - sensorRadiusPx - 4, probeY);
+      ctx.lineTo(probeX + sensorRadiusPx + 4, probeY);
+      ctx.moveTo(probeX, probeY - sensorRadiusPx - 4);
+      ctx.lineTo(probeX, probeY + sensorRadiusPx + 4);
+      ctx.stroke();
+
+      // Center Pinpoint
+      ctx.fillStyle = '#ffd740';
+      ctx.beginPath();
+      ctx.arc(probeX, probeY, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Point Power Callout Badge
+      const pointPowerVal = this.engine.getPointPower(rMeters);
+      const pointPowerStr = this.engine.formatPointPower(pointPowerVal);
+      ctx.fillStyle = '#00e5ff';
+      ctx.font = '800 11px "JetBrains Mono", monospace';
+      ctx.fillText("Point Sensor (ΔA = " + this.engine.probeArea_cm2.toFixed(1) + " cm²): ΔP = " + pointPowerStr, probeX + 14, probeY - 14);
+
+      // Velocity v
+      const vLenPx = 45;
+      ctx.strokeStyle = '#00e5ff';
+      ctx.lineWidth = 2.8;
+      ctx.beginPath();
+      ctx.moveTo(probeX, probeY);
+      ctx.lineTo(probeX + vLenPx, probeY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#00e5ff';
+      ctx.beginPath();
+      ctx.moveTo(probeX + vLenPx + 6, probeY);
+      ctx.lineTo(probeX + vLenPx - 4, probeY - 5);
+      ctx.lineTo(probeX + vLenPx - 4, probeY + 5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.font = '800 11px "JetBrains Mono", monospace';
+      ctx.fillText("v = " + this.engine.c + " m/s", probeX + vLenPx + 10, probeY - 6);
+
+      // Pressure Gradient
+      const gradVal = this.engine.getPressureGradient(rMeters);
+      const gradLenPx = Math.max(-35, Math.min(35, gradVal * 6.0));
+
+      ctx.strokeStyle = '#ff4081';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(probeX, probeY + 14);
+      ctx.lineTo(probeX + gradLenPx, probeY + 14);
+      ctx.stroke();
+
+      ctx.fillStyle = '#ff4081';
+      const arrowDir = gradLenPx >= 0 ? 1 : -1;
+      ctx.beginPath();
+      ctx.moveTo(probeX + gradLenPx + (arrowDir * 5), probeY + 14);
+      ctx.lineTo(probeX + gradLenPx - (arrowDir * 4), probeY + 10);
+      ctx.lineTo(probeX + gradLenPx - (arrowDir * 4), probeY + 18);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillText("∇P (" + gradVal.toFixed(1) + " Pa/m)", probeX + Math.max(gradLenPx, 0) + 12, probeY + 18);
+
+      const edgeTopY = oy - rPx * Math.sin(halfTheta);
+      const edgeTopX = ox + rPx * Math.cos(halfTheta);
+      ctx.fillStyle = '#10b981';
+      ctx.font = '700 10px "JetBrains Mono", monospace';
+      ctx.fillText("A_sector = " + this.engine.getSectorArea().toFixed(1) + " m²", edgeTopX + 8, edgeTopY - 4);
+
+      ctx.restore();
+    }
+
+    // ─── 3D Mode Rendering: Spheres expanding away from source in all directions ───
+    draw3DScene(w, h) {
+      const ctx = this.ctx;
+      const cam = this.camera;
+      const eng = this.engine;
+
+      // 1. Deep space radial background with cosmic nebula glow
+      const bgGrad = ctx.createRadialGradient(
+        cam.centerScreenX, cam.centerScreenY, 30,
+        cam.centerScreenX, cam.centerScreenY, Math.max(w, h) * 0.95
+      );
+      bgGrad.addColorStop(0, '#0f1738');
+      bgGrad.addColorStop(0.55, '#080a1c');
+      bgGrad.addColorStop(1, '#04050e');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // 2. Subtle 3D floor reference grid at y = -8.0m for spatial depth
+      ctx.save();
+      ctx.lineWidth = 1;
+      const gridY = -8.0;
+      const gridHalf = 18.0;
+      const gridStep = 3.0;
+      for (let x = -gridHalf; x <= gridHalf; x += gridStep) {
+        const p1 = cam.project3D(x, gridY, -gridHalf);
+        const p2 = cam.project3D(x, gridY, gridHalf);
+        if (p1.visible && p2.visible) {
+          ctx.strokeStyle = (x === 0) ? 'rgba(0, 229, 255, 0.25)' : 'rgba(255, 255, 255, 0.03)';
+          ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke();
+        }
+      }
+      for (let z = -gridHalf; z <= gridHalf; z += gridStep) {
+        const p1 = cam.project3D(-gridHalf, gridY, z);
+        const p2 = cam.project3D(gridHalf, gridY, z);
+        if (p1.visible && p2.visible) {
+          ctx.strokeStyle = (z === 0) ? 'rgba(0, 229, 255, 0.25)' : 'rgba(255, 255, 255, 0.03)';
+          ctx.beginPath(); ctx.moveTo(p1.sx, p1.sy); ctx.lineTo(p2.sx, p2.sy); ctx.stroke();
+        }
+      }
+
+      // 3. 3D Coordinate Axis Triad at Origin
+      const originP = cam.project3D(0, 0, 0);
+      const axisLen = 3.0;
+      const axX = cam.project3D(axisLen, 0, 0);
+      const axY = cam.project3D(0, axisLen, 0);
+      const axZ = cam.project3D(0, 0, axisLen);
+
+      if (originP.visible && axX.visible) {
+        ctx.strokeStyle = 'rgba(255, 64, 129, 0.65)'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(originP.sx, originP.sy); ctx.lineTo(axX.sx, axX.sy); ctx.stroke();
+        ctx.fillStyle = '#ff4081'; ctx.font = '700 9px monospace'; ctx.fillText('+X', axX.sx + 4, axX.sy);
+      }
+      if (originP.visible && axY.visible) {
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.65)'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(originP.sx, originP.sy); ctx.lineTo(axY.sx, axY.sy); ctx.stroke();
+        ctx.fillStyle = '#10b981'; ctx.font = '700 9px monospace'; ctx.fillText('+Y', axY.sx + 4, axY.sy);
+      }
+      if (originP.visible && axZ.visible) {
+        ctx.strokeStyle = 'rgba(41, 121, 255, 0.65)'; ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.moveTo(originP.sx, originP.sy); ctx.lineTo(axZ.sx, axZ.sy); ctx.stroke();
+        ctx.fillStyle = '#2979ff'; ctx.font = '700 9px monospace'; ctx.fillText('+Z', axZ.sx + 4, axZ.sy);
+      }
+      ctx.restore();
+
+      if (!originP.visible) return;
+
+      // 4. Helper to draw 3D Great Circles & Latitudes on a sphere of radius R
+      const draw3DSphereRings = (R, strokeColor, lineWidth, isDashed = false) => {
+        const steps = 44;
+
+        // Plane 1: Equatorial (Y = 0, X-Z plane)
+        ctx.save();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = lineWidth;
+        if (isDashed) ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        let first = true;
+        for (let s = 0; s <= steps; s++) {
+          const a = (s / steps) * Math.PI * 2;
+          const p = cam.project3D(R * Math.cos(a), 0, R * Math.sin(a));
+          if (!p.visible) continue;
+          if (first) { ctx.moveTo(p.sx, p.sy); first = false; } else { ctx.lineTo(p.sx, p.sy); }
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Plane 2: Prime Meridian (Z = 0, X-Y plane)
+        ctx.beginPath();
+        first = true;
+        for (let s = 0; s <= steps; s++) {
+          const a = (s / steps) * Math.PI * 2;
+          const p = cam.project3D(R * Math.cos(a), R * Math.sin(a), 0);
+          if (!p.visible) continue;
+          if (first) { ctx.moveTo(p.sx, p.sy); first = false; } else { ctx.lineTo(p.sx, p.sy); }
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Plane 3: Cross Meridian (X = 0, Y-Z plane)
+        ctx.beginPath();
+        first = true;
+        for (let s = 0; s <= steps; s++) {
+          const a = (s / steps) * Math.PI * 2;
+          const p = cam.project3D(0, R * Math.sin(a), R * Math.cos(a));
+          if (!p.visible) continue;
+          if (first) { ctx.moveTo(p.sx, p.sy); first = false; } else { ctx.lineTo(p.sx, p.sy); }
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Plane 4 & 5: Upper and Lower 45° Latitude Parallels
+        const latAngles = [Math.PI / 4, -Math.PI / 4];
+        for (const lat of latAngles) {
+          const latY = R * Math.sin(lat);
+          const latR = R * Math.cos(lat);
+          ctx.beginPath();
+          first = true;
+          for (let s = 0; s <= steps; s++) {
+            const a = (s / steps) * Math.PI * 2;
+            const p = cam.project3D(latR * Math.cos(a), latY, latR * Math.sin(a));
+            if (!p.visible) continue;
+            if (first) { ctx.moveTo(p.sx, p.sy); first = false; } else { ctx.lineTo(p.sx, p.sy); }
+          }
+          ctx.closePath();
+          ctx.stroke();
+        }
+        ctx.restore();
+      };
+
+      // 5. RENDER EXPANDING 3D SPHERICAL WAVEFRONTS (Moving away from source in all directions)
+      // Wavelength determines spatial spacing between expanding concentric spheres: lambda = c / f
+      const lambda = Math.max(0.85, Math.min(6.86, eng.lambda));
+      const maxRange = 16.0;
+      const waveSpeed = 2.4 * eng.simSpeed;
+      const phaseOffset = (eng.time * waveSpeed) % lambda;
+      const numWaves = Math.min(12, Math.max(3, Math.ceil(maxRange / lambda)));
+      const waveDistances = [];
+
+      for (let wIdx = 0; wIdx < numWaves; wIdx++) {
+        const baseR = ((wIdx * lambda + phaseOffset) % maxRange) + 0.35;
+        waveDistances.push(baseR);
+      }
+      // Sort from largest to smallest for natural painter's layering
+      waveDistances.sort((a, b) => b - a);
+
+      for (const R of waveDistances) {
+        const sRad = R * (cam.fov / cam.dist);
+        if (sRad < 3) continue;
+
+        // Physical Intensity Dimming (1/R² energy dilution)
+        const intensityFactor = Math.min(1.0, 2.2 / Math.max(0.8, R));
+        const alpha = 0.12 + 0.65 * intensityFactor;
+
+        // 3D Luminous Translucent Spherical Bubble
+        ctx.save();
+        const bubbleGrad = ctx.createRadialGradient(
+          originP.sx, originP.sy, Math.max(0, sRad * 0.15),
+          originP.sx, originP.sy, sRad
+        );
+        bubbleGrad.addColorStop(0, `rgba(0, 229, 255, ${0.03 * intensityFactor})`);
+        bubbleGrad.addColorStop(0.70, `rgba(0, 229, 255, ${0.10 * intensityFactor})`);
+        bubbleGrad.addColorStop(0.92, `rgba(0, 240, 255, ${0.35 * intensityFactor})`);
+        bubbleGrad.addColorStop(1.0, `rgba(0, 255, 255, ${0.75 * intensityFactor})`);
+
+        ctx.fillStyle = bubbleGrad;
+        ctx.beginPath();
+        ctx.arc(originP.sx, originP.sy, sRad, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = `rgba(0, 255, 255, ${0.85 * intensityFactor})`;
+        ctx.lineWidth = Math.max(1.0, 2.2 * intensityFactor);
+        ctx.stroke();
+        ctx.restore();
+
+        // 3D Wireframe Rings on the sphere (giving true rotating 3D spherical volume)
+        const ringStroke = `rgba(0, 229, 255, ${0.28 * intensityFactor})`;
+        draw3DSphereRings(R, ringStroke, Math.max(0.8, 1.4 * intensityFactor), false);
+
+        // 3D Radial Direction Arrows (Proving sound moves outward in every direction!)
+        const dirDirs = [
+          [1, 0, 0], [-1, 0, 0], [0, 1, 0], [0, -1, 0], [0, 0, 1], [0, 0, -1],
+          [0.707, 0.707, 0], [-0.707, 0.707, 0], [0, 0.707, 0.707], [0, -0.707, 0.707]
+        ];
+        ctx.save();
+        ctx.fillStyle = `rgba(0, 255, 255, ${0.80 * intensityFactor})`;
+        for (const dir of dirDirs) {
+          const pt = cam.project3D(dir[0] * R, dir[1] * R, dir[2] * R);
+          if (pt.visible) {
+            ctx.beginPath();
+            ctx.arc(pt.sx, pt.sy, Math.max(2, 3.5 * intensityFactor), 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        ctx.restore();
+      }
+
+      // 6. HIGHLIGHTED OBSERVATION SPHERE (at radius r)
+      const obsR = eng.r;
+      const obsSRad = obsR * (cam.fov / cam.dist);
+
+      if (obsSRad > 5) {
+        ctx.save();
+        // Glowing Amber Observation Bubble
+        const obsGrad = ctx.createRadialGradient(
+          originP.sx, originP.sy, Math.max(0, obsSRad * 0.2),
+          originP.sx, originP.sy, obsSRad
+        );
+        obsGrad.addColorStop(0, 'rgba(255, 215, 64, 0.04)');
+        obsGrad.addColorStop(0.75, 'rgba(255, 215, 64, 0.12)');
+        obsGrad.addColorStop(0.94, 'rgba(255, 215, 64, 0.35)');
+        obsGrad.addColorStop(1.0, 'rgba(255, 215, 64, 0.85)');
+
+        ctx.fillStyle = obsGrad;
+        ctx.beginPath();
+        ctx.arc(originP.sx, originP.sy, obsSRad, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#ffd740';
+        ctx.lineWidth = 2.4;
+        ctx.setLineDash([6, 4]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        // 3D Golden Great Circles on Observation Sphere
+        draw3DSphereRings(obsR, 'rgba(255, 215, 64, 0.45)', 1.5, true);
+
+        // 7. HIGHLIGHT 1 m² UNIT AREA SURFACE TILE (The core visual teaching tool!)
+        // Compute 1m x 1m surface tile centered on front surface (+X axis)
+        const halfTile = 0.5;
+        const tileCorners = [
+          [obsR, -halfTile, -halfTile],
+          [obsR,  halfTile, -halfTile],
+          [obsR,  halfTile,  halfTile],
+          [obsR, -halfTile,  halfTile]
+        ];
+        const projTile = tileCorners.map(c => {
+          // Normalize to lie exactly on the sphere surface of radius obsR
+          const len = Math.sqrt(c[0]*c[0] + c[1]*c[1] + c[2]*c[2]);
+          return cam.project3D(c[0]*obsR/len, c[1]*obsR/len, c[2]*obsR/len);
+        });
+
+        if (projTile.every(p => p.visible)) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(16, 185, 129, 0.55)';
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          ctx.moveTo(projTile[0].sx, projTile[0].sy);
+          for (let i = 1; i < projTile.length; i++) {
+            ctx.lineTo(projTile[i].sx, projTile[i].sy);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Leader line and Callout badge for the 1 m² tile
+          const tileCenter = {
+            sx: (projTile[0].sx + projTile[1].sx + projTile[2].sx + projTile[3].sx) * 0.25,
+            sy: (projTile[0].sy + projTile[1].sy + projTile[2].sy + projTile[3].sy) * 0.25
+          };
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(tileCenter.sx, tileCenter.sy);
+          ctx.lineTo(tileCenter.sx + 45, tileCenter.sy - 35);
+          ctx.lineTo(tileCenter.sx + 150, tileCenter.sy - 35);
+          ctx.stroke();
+
+          ctx.fillStyle = '#10b981';
+          ctx.font = '800 11px "JetBrains Mono", monospace';
+          ctx.fillText(`🟩 1 m² Surface Tile`, tileCenter.sx + 50, tileCenter.sy - 42);
+          ctx.fillStyle = '#e0f2fe';
+          ctx.font = '700 10px "JetBrains Mono", monospace';
+          const curIntensity = eng.getIntensityFor(obsR);
+          ctx.fillText(`Receives I = P / (4πr²) = ${curIntensity >= 1 ? curIntensity.toFixed(2) : curIntensity.toFixed(3)} W`, tileCenter.sx + 50, tileCenter.sy - 22);
+          ctx.restore();
+        }
+
+        // Observation Sphere Floating Title Tag
+        ctx.save();
+        const tagY = originP.sy - obsSRad - 14;
+        ctx.fillStyle = 'rgba(14, 18, 36, 0.88)';
+        ctx.strokeStyle = 'rgba(255, 215, 64, 0.6)';
+        ctx.lineWidth = 1.2;
+        const tagText = `🌐 Observation Sphere: r = ${obsR.toFixed(1)}m | Area A = 4πr² = ${eng.getTotalArea(obsR).toFixed(1)} m²`;
+        ctx.font = '700 11px "JetBrains Mono", monospace';
+        const tagW = ctx.measureText(tagText).width + 18;
+        ctx.fillRect(originP.sx - tagW * 0.5, tagY - 14, tagW, 20);
+        ctx.strokeRect(originP.sx - tagW * 0.5, tagY - 14, tagW, 20);
+        ctx.fillStyle = '#ffd740';
+        ctx.textAlign = 'center';
+        ctx.fillText(tagText, originP.sx, tagY);
+        ctx.textAlign = 'left';
+        ctx.restore();
+      }
+
+      // 8. 3D LISTENER / PROBE AT RADIUS r
+      const listenerP = cam.project3D(obsR, 0, 0);
+      if (listenerP.visible) {
+        ctx.save();
+        // Listener icon halo
+        ctx.fillStyle = '#10b981';
+        ctx.beginPath();
+        ctx.arc(listenerP.sx, listenerP.sy, 6.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2.0;
+        ctx.stroke();
+
+        ctx.fillStyle = '#10b981';
+        ctx.font = '800 11px "JetBrains Mono", monospace';
+        ctx.fillText(`👂 Listener at ${obsR.toFixed(1)} m`, listenerP.sx + 12, listenerP.sy - 8);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 10px monospace';
+        ctx.fillText(`Intensity = ${eng.getIntensityFor(obsR).toFixed(3)} W/m²`, listenerP.sx + 12, listenerP.sy + 8);
+        ctx.restore();
+      }
+
+      // 9. CENTRAL SOUND SOURCE (Speaker Orb at Origin)
+      const pulse = (10.0 + Math.sin(eng.omega * eng.time) * 3.0) * (originP.scale / 24);
+      const srcGrad = ctx.createRadialGradient(originP.sx, originP.sy, 2, originP.sx, originP.sy, Math.max(8, pulse * 2.8));
+      srcGrad.addColorStop(0, '#ffffff');
+      srcGrad.addColorStop(0.3, 'rgba(0, 229, 255, 0.95)');
+      srcGrad.addColorStop(0.7, 'rgba(0, 180, 255, 0.4)');
+      srcGrad.addColorStop(1, 'rgba(0, 180, 255, 0)');
+
+      ctx.fillStyle = srcGrad;
+      ctx.beginPath();
+      ctx.arc(originP.sx, originP.sy, Math.max(8, pulse * 2.8), 0, Math.PI * 2);
+      ctx.fill();
+
+      // Speaker icon core
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(originP.sx, originP.sy, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#00e5ff';
+      ctx.font = '800 11px "JetBrains Mono", monospace';
+      ctx.fillText(`🔊 SOURCE (P = ${eng.P_src.toFixed(0)} W)`, originP.sx - 60, originP.sy - pulse * 2.8 - 6);
+
+      // 10. Compass & Orbit Hint (Bottom-Left)
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      ctx.font = '10px "JetBrains Mono", monospace';
+      ctx.fillText(`3D Camera: Yaw ${(cam.yaw * 180 / Math.PI).toFixed(0)}° | Pitch ${(cam.pitch * 180 / Math.PI).toFixed(0)}° | Dist ${cam.dist.toFixed(1)}m (Drag to rotate)`, 16, h - 16);
+    }
+
+    render() {
+      const w = this.canvas.width / this.camera.dpr;
+      const h = this.canvas.height / this.camera.dpr;
+
+      if (this.camera.mode === '3d') {
+        this.draw3DScene(w, h);
+      } else {
+        this.draw2DGrid(w, h);
+        this.draw2DSectorOverlay();
+        this.draw2DTrails();
+        this.draw2DWavefronts();
+        this.draw2DCentralSource();
+        this.draw2DObservationProbeAndVectors();
+      }
+    }
+  }
+
+  // CLASS 4: UIControls
+  // Binds sliders, reads values, updates simulation in real time
+  // =================================================================
+  class UIControls {
+    constructor(engine, camera, renderer, onStateChange = null) {
+      this.engine = engine;
+      this.camera = camera;
+      this.renderer = renderer;
+      this.onStateChange = onStateChange;
+
+      this.isDraggingProbe = false;
+      this.isOrbiting3D = false;
+      this.lastPointerX = 0;
+      this.lastPointerY = 0;
+
+      this.initSliderBindings();
+      this.initButtonBindings();
+      this.initViewSwitcher();
+      this.initTabSwitcher();
+      this.initCanvasPointer();
+      this.updateAllDisplayValues();
+    }
+
+    initTabSwitcher() {
+      const btnSim = document.getElementById('tabBtnSim');
+      const btnAssess = document.getElementById('tabBtnAssessment');
+      const tabSim = document.getElementById('tab-sim');
+      const tabAssess = document.getElementById('tab-assessment');
+
+      if (!btnSim || !btnAssess || !tabSim || !tabAssess) return;
+
+      btnSim.addEventListener('click', () => {
+        btnSim.classList.add('active');
+        btnAssess.classList.remove('active');
+        tabSim.classList.add('active');
+        tabAssess.classList.remove('active');
+        // Trigger resize and render when switching back to sim
+        this.camera.resize();
+        this.renderer.render();
+      });
+
+      btnAssess.addEventListener('click', () => {
+        btnAssess.classList.add('active');
+        btnSim.classList.remove('active');
+        tabAssess.classList.add('active');
+        tabSim.classList.remove('active');
+      });
+    }
+
+    initViewSwitcher() {
+      const btn3D = document.getElementById('btnMode3D');
+      const btn2D = document.getElementById('btnMode2D');
+      const hintBadge = document.getElementById('viewHintBadge');
+      if (!btn3D || !btn2D) return;
+
+      btn3D.addEventListener('click', () => {
+        this.camera.mode = '3d';
+        btn3D.classList.add('active');
+        btn2D.classList.remove('active');
+        if (hintBadge) hintBadge.textContent = '🖱️ Click & Drag to Orbit 3D Sphere | Scroll to Zoom';
+      });
+
+      btn2D.addEventListener('click', () => {
+        this.camera.mode = '2d';
+        btn2D.classList.add('active');
+        btn3D.classList.remove('active');
+        if (hintBadge) hintBadge.textContent = '💡 Click & Drag to inspect radius r across 2D equatorial slice';
+      });
+    }
+
+    initSliderBindings() {
+      const bind = (id, valId, prop, unit = '', format = (v) => v.toString()) => {
+        const slider = document.getElementById(id);
+        const display = document.getElementById(valId);
+        if (!slider) return;
+
+        slider.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          this.engine[prop] = val;
+          if (display) display.textContent = `${format(val)}${unit}`;
+          if (prop === 'r') {
+            this.syncPresetButtons(val);
+          }
+          if (this.onStateChange) this.onStateChange(prop, val);
+        });
+      };
+
+      bind('slPower', 'valPower', 'P_src', ' W', v => v.toFixed(1));
+      bind('slRadius', 'valRadius', 'r', ' m', v => v.toFixed(1));
+
+      // Frequency Slider & Live Wavelength Hint
+      const slFreq = document.getElementById('slFreq');
+      const valFreq = document.getElementById('valFreq');
+      const valWlHint = document.getElementById('valWavelengthHint');
+      if (slFreq) {
+        slFreq.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value);
+          this.engine.f = val;
+          if (valFreq) valFreq.textContent = `${Math.round(val)} Hz`;
+          if (valWlHint) valWlHint.textContent = `Wavelength λ = ${(this.engine.c / val).toFixed(2)} m (Wavefront spacing)`;
+          this.syncFreqPresetButtons(val);
+          if (this.onStateChange) this.onStateChange('f', val);
+        });
+      }
+
+      // Frequency Quick Preset Buttons
+      document.querySelectorAll('.freq-preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const fVal = parseFloat(btn.dataset.f);
+          if (isNaN(fVal)) return;
+          this.engine.f = fVal;
+          if (slFreq) slFreq.value = fVal;
+          if (valFreq) valFreq.textContent = `${Math.round(fVal)} Hz`;
+          if (valWlHint) valWlHint.textContent = `Wavelength λ = ${(this.engine.c / fVal).toFixed(2)} m (Wavefront spacing)`;
+          this.syncFreqPresetButtons(fVal);
+          if (this.onStateChange) this.onStateChange('f', fVal);
+        });
+      });
+
+      // Optional legacy controls if present
+      bind('slSpeed', 'valSpeed', 'c', ' m/s', v => Math.round(v));
+      bind('slTheta', 'valTheta', 'thetaDeg', '°', v => Math.round(v));
+      bind('slAmp', 'valAmp', 'A0', ' Pa', v => Math.round(v));
+      bind('slProbeArea', 'valProbeArea', 'probeArea_cm2', ' cm²', v => v.toFixed(2));
+
+      const slSpeed = document.getElementById('slSimSpeed');
+      if (slSpeed) {
+        slSpeed.addEventListener('input', (e) => {
+          const v = parseFloat(e.target.value);
+          this.engine.simSpeed = v;
+          const valSimSpeed = document.getElementById('valSimSpeed');
+          if (valSimSpeed) valSimSpeed.textContent = `${v.toFixed(2)}×`;
+        });
+      }
+
+      // Radius Quick Preset Buttons (1m, 2m, 3m, 4m, 5m, 10m)
+      document.querySelectorAll('.preset-btn[data-r]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const rVal = parseFloat(btn.dataset.r);
+          if (isNaN(rVal)) return;
+          this.engine.r = rVal;
+          const slR = document.getElementById('slRadius');
+          const valR = document.getElementById('valRadius');
+          if (slR) slR.value = rVal;
+          if (valR) valR.textContent = `${rVal.toFixed(1)} m`;
+          this.syncPresetButtons(rVal);
+          if (this.onStateChange) this.onStateChange('r', rVal);
+        });
+      });
+    }
+
+    syncPresetButtons(currentR) {
+      document.querySelectorAll('.preset-btn[data-r]').forEach(btn => {
+        const btnR = parseFloat(btn.dataset.r);
+        btn.classList.toggle('active', Math.abs(btnR - currentR) < 0.08);
+      });
+    }
+
+    syncFreqPresetButtons(currentF) {
+      document.querySelectorAll('.freq-preset-btn').forEach(btn => {
+        const btnF = parseFloat(btn.dataset.f);
+        btn.classList.toggle('active', Math.abs(btnF - currentF) < 5);
+      });
+    }
+
+    initButtonBindings() {
+      const btnPlay = document.getElementById('btnPlayPause');
+      if (btnPlay) {
+        btnPlay.addEventListener('click', () => {
+          this.engine.running = !this.engine.running;
+          btnPlay.textContent = this.engine.running ? '⏸ Pause' : '▶ Play';
+          btnPlay.classList.toggle('btn-primary', this.engine.running);
+        });
+      }
+
+      const btnStep = document.getElementById('btnStep');
+      if (btnStep) {
+        btnStep.addEventListener('click', () => {
+          this.engine.running = false;
+          if (btnPlay) {
+            btnPlay.textContent = '▶ Play';
+            btnPlay.classList.remove('btn-primary');
+          }
+          this.engine.time += 0.016;
+        });
+      }
+
+      const btnReset = document.getElementById('btnReset');
+      if (btnReset) {
+        btnReset.addEventListener('click', () => {
+          this.engine.time = 0.0;
+          this.engine.P_src = 100.0;
+          this.engine.f = 100.0;
+          this.engine.c = 343.0;
+          this.engine.thetaDeg = 90;
+          this.engine.A0 = 10.0;
+          this.engine.r = 5.0;
+          this.engine.simSpeed = 0.25;
+
+          const safeVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val;
+          };
+          safeVal('slPower', 100);
+          safeVal('slRadius', 5.0);
+          safeVal('slSimSpeed', 0.25);
+          safeVal('slFreq', 100);
+          safeVal('slSpeed', 343);
+          safeVal('slTheta', 90);
+          safeVal('slAmp', 10);
+
+          this.updateAllDisplayValues();
+          this.syncPresetButtons(5.0);
+          this.syncFreqPresetButtons(100);
+          if (this.onStateChange) this.onStateChange('reset', true);
+        });
+      }
+    }
+
+    initCanvasPointer() {
+      const canvas = this.camera.canvas;
+
+      const handle2DPointer = (clientX, clientY) => {
+        const world = this.camera.screenToWorld(clientX, clientY);
+        const radius = Math.sqrt(world.x * world.x + world.y * world.y);
+        const clampedR = Math.max(1.0, Math.min(15.0, radius));
+
+        this.engine.r = clampedR;
+        const slR = document.getElementById('slRadius');
+        const valR = document.getElementById('valRadius');
+        if (slR) slR.value = clampedR;
+        if (valR) valR.textContent = `${clampedR.toFixed(1)} m`;
+        this.syncPresetButtons(clampedR);
+
+        if (this.onStateChange) this.onStateChange('r', clampedR);
+      };
+
+      canvas.addEventListener('mousedown', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        this.lastPointerX = e.clientX - rect.left;
+        this.lastPointerY = e.clientY - rect.top;
+
+        if (this.camera.mode === '3d') {
+          this.isOrbiting3D = true;
+        } else {
+          this.isDraggingProbe = true;
+          handle2DPointer(this.lastPointerX, this.lastPointerY);
+        }
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+
+        if (this.isOrbiting3D && this.camera.mode === '3d') {
+          const dx = currentX - this.lastPointerX;
+          const dy = currentY - this.lastPointerY;
+
+          this.camera.yaw += dx * 0.008;
+          this.camera.pitch = Math.max(-1.4, Math.min(1.4, this.camera.pitch - dy * 0.008));
+
+          this.lastPointerX = currentX;
+          this.lastPointerY = currentY;
+        } else if (this.isDraggingProbe && this.camera.mode === '2d') {
+          handle2DPointer(currentX, currentY);
+        }
+      });
+
+      window.addEventListener('mouseup', () => {
+        this.isDraggingProbe = false;
+        this.isOrbiting3D = false;
+      });
+
+      // Mouse wheel zoom in 3D mode
+      canvas.addEventListener('wheel', (e) => {
+        if (this.camera.mode === '3d') {
+          e.preventDefault();
+          this.camera.dist = Math.max(8.0, Math.min(50.0, this.camera.dist + e.deltaY * 0.02));
+        }
+      }, { passive: false });
+
+      // Touch events support for mobile / tablets
+      canvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+          const rect = canvas.getBoundingClientRect();
+          this.lastPointerX = e.touches[0].clientX - rect.left;
+          this.lastPointerY = e.touches[0].clientY - rect.top;
+
+          if (this.camera.mode === '3d') {
+            this.isOrbiting3D = true;
+          } else {
+            this.isDraggingProbe = true;
+            handle2DPointer(this.lastPointerX, this.lastPointerY);
+          }
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+          const rect = canvas.getBoundingClientRect();
+          const currentX = e.touches[0].clientX - rect.left;
+          const currentY = e.touches[0].clientY - rect.top;
+
+          if (this.isOrbiting3D && this.camera.mode === '3d') {
+            const dx = currentX - this.lastPointerX;
+            const dy = currentY - this.lastPointerY;
+
+            this.camera.yaw += dx * 0.01;
+            this.camera.pitch = Math.max(-1.4, Math.min(1.4, this.camera.pitch - dy * 0.01));
+
+            this.lastPointerX = currentX;
+            this.lastPointerY = currentY;
+          } else if (this.isDraggingProbe && this.camera.mode === '2d') {
+            handle2DPointer(currentX, currentY);
+          }
+        }
+      }, { passive: false });
+
+      window.addEventListener('touchend', () => {
+        this.isDraggingProbe = false;
+        this.isOrbiting3D = false;
+      });
+    }
+
+    updateAllDisplayValues() {
+      const safeText = (id, txt) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = txt;
+      };
+      safeText('valPower', `${this.engine.P_src.toFixed(1)} W`);
+      safeText('valRadius', `${this.engine.r.toFixed(1)} m`);
+      safeText('valSimSpeed', `${this.engine.simSpeed.toFixed(2)}×`);
+      safeText('valFreq', `${Math.round(this.engine.f)} Hz`);
+      const valWlHint = document.getElementById('valWavelengthHint');
+      if (valWlHint) valWlHint.textContent = `Wavelength λ = ${(this.engine.c / this.engine.f).toFixed(2)} m (Wavefront spacing)`;
+      safeText('valSpeed', `${Math.round(this.engine.c)} m/s`);
+      safeText('valTheta', `${Math.round(this.engine.thetaDeg)}°`);
+      safeText('valAmp', `${Math.round(this.engine.A0)} Pa`);
+      safeText('valProbeArea', `${this.engine.probeArea_cm2.toFixed(2)} cm²`);
+      this.syncPresetButtons(this.engine.r);
+      this.syncFreqPresetButtons(this.engine.f);
+    }
+
+    updateTelemetryOverlay() {
+      const e = this.engine;
+      const r = e.r;
+      const P = e.P_src;
+      const A = 4.0 * Math.PI * r * r;
+      const I = P / Math.max(0.01, A);
+
+      const safeText = (id, txt) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = txt;
+      };
+
+      // 4-Card HUD
+      safeText('hudPower', `${P.toFixed(0)} W`);
+      safeText('hudRadius', `${r.toFixed(1)} m`);
+      safeText('hudArea', `${A.toFixed(1)} m²`);
+      safeText('hudAreaSub', `A = 4π·(${r.toFixed(1)})² = ${(r * r).toFixed(1)} × 4π`);
+
+      if (I >= 1.0) safeText('hudIntensity', `${I.toFixed(2)} W/m²`);
+      else if (I >= 0.01) safeText('hudIntensity', `${I.toFixed(3)} W/m²`);
+      else safeText('hudIntensity', `${I.toExponential(2)} W/m²`);
+
+      // Teaching Rule Banner
+      safeText('hudRuleHeadline', `Power stays ${P.toFixed(0)} W, but is spread over a ${A.toFixed(1)} m² sphere!`);
+
+      const rRatio = r / 1.0;
+      const areaFactor = rRatio * rRatio;
+      const intensityFactor = 1.0 / areaFactor;
+      if (Math.abs(r - 1.0) < 0.08) {
+        safeText('hudRuleMultiplier', `Reference at 1 m: Intensity is ${(P / (4 * Math.PI)).toFixed(2)} W/m². Increase distance to see how it spreads!`);
+      } else {
+        safeText('hudRuleMultiplier', `At ${r.toFixed(1)} m (${rRatio.toFixed(1)}× dist): Sphere Area is ${areaFactor.toFixed(1)}× bigger ➔ Intensity drops to 1/${areaFactor.toFixed(1)} (${(intensityFactor * 100).toFixed(1)}% of 1m)!`);
+      }
+
+      // Safe checks for legacy telemetry elements if present in DOM
+      safeText('hudSPL', `${e.getSPL(r).toFixed(1)} dB SPL`);
+      safeText('hudAmp', `${e.getPressureAmplitude(r).toFixed(2)} Pa`);
+      safeText('hudSolidAngle', `${e.solidAngle.toFixed(3)} sr`);
+      safeText('hudSectorArea', `${e.getSectorArea(r).toFixed(1)} m²`);
+      safeText('hudTotalArea', `${A.toFixed(1)} m²`);
+      safeText('hudSourcePower', `${P.toFixed(0)} W`);
+      safeText('hudComputedPower', `${P.toFixed(0)} W`);
+    }
+  }
+
+  // =================================================================
+  // CLASS 5: DataLogger
+  // Growable arrays, decimation tick (every 10 frames), table rendering
+  // =================================================================
+  class DataLogger {
+    constructor(engine) {
+      this.engine = engine;
+      this.records = []; // Strictly growable array using .push() only
+      this.frameCount = 0;
+      this.decimation = 10; // Record once every 10 frames (~0.5s simulated)
+      // Internal data recorder (CSV table removed per specification)
+    }
+
+    step() {
+      this.frameCount++;
+      if (this.frameCount % this.decimation === 0) {
+        this.sample();
+      }
+    }
+
+    sample() {
+      const e = this.engine;
+      const r = e.r;
+      const row = {
+        time: e.time,
+        theta_degegree: e.thetaDeg,
+        r: r,
+        amplitude_at_r: e.getPressureAmplitude(r),
+        intensity: e.getIntensityFor(r),
+        sector_area: e.getSectorArea(r),
+        total_surface_area: e.getTotalArea(r),
+        source_power: e.P_src,
+        computed_power: e.getComputedSectorPower(r),
+        power_ratio: e.getPowerRatio(r)
+      };
+
+      this.records.push(row);
+    }
+
+    }
+
+  // =================================================================
+  // CLASS 6: ExportManager
+  // Handles CSV formatting and FileSaver.js file downloads
+  // =================================================================
+  class ExportManager {
+    constructor(engine, assessmentManager) {
+      this.engine = engine;
+      this.assessmentManager = assessmentManager;
+      this.initDocxButton();
+    }
+
+    setAssessmentManager(am) {
+      this.assessmentManager = am;
+    }
+
+    initDocxButton() {
+      const btn = document.getElementById('btnExportDocx');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          this.exportToDocx();
+        });
+      }
+    }
+
+    exportToDocx() {
+      if (typeof docx === 'undefined') {
+        alert('The docx library is still loading or unavailable. Please check your internet connection.');
+        return;
+      }
+
+      const { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle, HeadingLevel } = docx;
+
+      const studentNameInput = document.getElementById('student-name');
+      const studentName = (studentNameInput && studentNameInput.value.trim()) ? studentNameInput.value.trim() : 'Anonymous Student';
+      const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const simTitle = 'Inverse-Square Sound Propagation & Point Power Lab';
+
+      const paragraphs = [];
+
+      // ─── Document Title & Subtitle ──────────────────────────────
+      paragraphs.push(new Paragraph({
+        children: [
+          new TextRun({ text: simTitle, bold: true, size: 36, font: 'Calibri', color: '006699' })
+        ],
+        heading: HeadingLevel.TITLE,
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 100, after: 120 }
+      }));
+
+      paragraphs.push(new Paragraph({
+        children: [
+          new TextRun({ text: '5E Formative Assessment & Acoustic Mechanics Report', italics: true, color: '555555', size: 22, font: 'Calibri' })
+        ],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 280 }
+      }));
+
+      // ─── Student Metadata ───────────────────────────────────────
+      paragraphs.push(new Paragraph({
+        children: [
+          new TextRun({ text: 'Student Full Name: ', bold: true, size: 22, font: 'Calibri' }),
+          new TextRun({ text: studentName, size: 22, font: 'Calibri', color: '0055AA', bold: true })
+        ],
+        spacing: { after: 80 }
+      }));
+
+      paragraphs.push(new Paragraph({
+        children: [
+          new TextRun({ text: 'Date & Time: ', bold: true, size: 22, font: 'Calibri' }),
+          new TextRun({ text: dateStr, size: 22, font: 'Calibri' })
+        ],
+        spacing: { after: 80 }
+      }));
+
+      const answeredCount = this.assessmentManager ? this.assessmentManager.getAnsweredCount() : 0;
+      const scoreCount = this.assessmentManager ? this.assessmentManager.score : 0;
+
+      paragraphs.push(new Paragraph({
+        children: [
+          new TextRun({ text: 'Assessment Score: ', bold: true, size: 22, font: 'Calibri' }),
+          new TextRun({ text: scoreCount + ' / 10 (' + answeredCount + ' answered)', size: 22, font: 'Calibri', bold: true, color: scoreCount >= 7 ? '2E7D32' : 'E65100' })
+        ],
+        spacing: { after: 200 }
+      }));
+
+      // ─── Current Active Simulation Telemetry Snapshot ────────────
+      paragraphs.push(new Paragraph({
+        border: { top: { style: BorderStyle.SINGLE, size: 4, color: 'CCCCCC' } },
+        children: [
+          new TextRun({ text: 'Active Simulation Experimental State Snapshot:', bold: true, size: 22, font: 'Calibri', color: '333333' })
+        ],
+        spacing: { before: 200, after: 100 }
+      }));
+
+      const e = this.engine;
+      const curR = e.r;
+      const curI = e.getIntensityFor(curR);
+      const curSPL = e.getSPL(curR);
+      const curPamp = e.getPressureAmplitude(curR);
+      const curPointPower = e.getPointPower(curR);
+
+      paragraphs.push(new Paragraph({
+        children: [
+          new TextRun({ text: '• Acoustic Source Power (P_src): ', bold: true, size: 20, font: 'Calibri' }),
+          new TextRun({ text: e.P_src.toFixed(1) + ' Watts\n', size: 20, font: 'Calibri' }),
+          new TextRun({ text: '• Oscillation Frequency (f): ', bold: true, size: 20, font: 'Calibri' }),
+          new TextRun({ text: e.f.toFixed(0) + ' Hz (Wavelength λ = ' + e.lambda.toFixed(2) + ' m)\n', size: 20, font: 'Calibri' }),
+          new TextRun({ text: '• Observation Probe Radius (r): ', bold: true, size: 20, font: 'Calibri' }),
+          new TextRun({ text: curR.toFixed(2) + ' meters\n', size: 20, font: 'Calibri' }),
+          new TextRun({ text: '• Acoustic Intensity at r: ', bold: true, size: 20, font: 'Calibri' }),
+          new TextRun({ text: curI.toFixed(4) + ' W/m² (SPL = ' + curSPL.toFixed(1) + ' dB)\n', size: 20, font: 'Calibri' }),
+          new TextRun({ text: '• Pressure Amplitude P_amp(r): ', bold: true, size: 20, font: 'Calibri' }),
+          new TextRun({ text: curPamp.toFixed(3) + ' Pa\n', size: 20, font: 'Calibri' }),
+          new TextRun({ text: '• Sector Solid Angle (Ω): ', bold: true, size: 20, font: 'Calibri' }),
+          new TextRun({ text: e.solidAngle.toFixed(3) + ' sr (Sector Area = ' + e.getSectorArea(curR).toFixed(2) + ' m²)\n', size: 20, font: 'Calibri' }),
+          new TextRun({ text: '• Point Sensor Aperture (ΔA): ', bold: true, size: 20, font: 'Calibri', color: '006699' }),
+          new TextRun({ text: e.probeArea_cm2.toFixed(2) + ' cm² (' + (e.probeArea_cm2 * 1e-4).toExponential(2) + ' m²)\n', size: 20, font: 'Calibri' }),
+          new TextRun({ text: '• Measured Point Power (ΔP = I·ΔA): ', bold: true, size: 20, font: 'Calibri', color: '006699' }),
+          new TextRun({ text: e.formatPointPower(curPointPower) + ' (' + (curPointPower * 1e3).toFixed(4) + ' mW)', size: 20, font: 'Calibri', bold: true, color: '006699' })
+        ],
+        spacing: { after: 250 }
+      }));
+
+      paragraphs.push(new Paragraph({
+        border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: 'BBBBBB' } },
+        spacing: { after: 250 }
+      }));
+
+      // ─── 10 5E Assessment Questions ─────────────────────────────
+      const phaseColors = {
+        Engage: '00838F',
+        Explore: '5E35B1',
+        Explain: 'D84315',
+        Elaborate: '2E7D32',
+        Evaluate: 'C2185B'
+      };
+
+      if (this.assessmentManager && this.assessmentManager.questions) {
+        this.assessmentManager.questions.forEach((q, i) => {
+          const ansData = this.assessmentManager.getQuestionAnswer(q.id);
+
+          paragraphs.push(new Paragraph({
+            children: [
+              new TextRun({ text: (q.phase || '5E').toUpperCase() + ' ', bold: true, size: 18, font: 'Calibri', color: phaseColors[q.phase] || '333333' }),
+              new TextRun({ text: '— Question ' + q.id + ' of 10', size: 18, font: 'Calibri', color: '777777' })
+            ],
+            spacing: { before: 240, after: 60 }
+          }));
+
+          paragraphs.push(new Paragraph({
+            children: [
+              new TextRun({ text: q.text, bold: true, size: 22, font: 'Calibri' })
+            ],
+            spacing: { after: 120 }
+          }));
+
+          paragraphs.push(new Paragraph({
+            children: [
+              new TextRun({ text: 'Student Answer: ', bold: true, size: 20, font: 'Calibri', color: '0055AA' }),
+              new TextRun({ text: ansData.userAnswer || '(No response entered)', size: 20, font: 'Calibri', italics: !ansData.userAnswer })
+            ],
+            spacing: { after: 60 }
+          }));
+
+          paragraphs.push(new Paragraph({
+            children: [
+              new TextRun({
+                text: ansData.isAnswered ? (ansData.isCorrect ? 'Status: Correct ✓' : 'Status: Review Concept ✗') : 'Status: Unanswered',
+                bold: true,
+                size: 18,
+                font: 'Calibri',
+                color: ansData.isCorrect ? '2E7D32' : 'C62828'
+              }),
+              new TextRun({ text: ' — ' + q.explanation, size: 18, font: 'Calibri', color: '555555' })
+            ],
+            spacing: { after: 180 }
+          }));
+
+          if (i < this.assessmentManager.questions.length - 1) {
+            paragraphs.push(new Paragraph({
+              border: { bottom: { style: BorderStyle.DASHED, size: 2, color: 'E0E0E0' } },
+              spacing: { after: 180 }
+            }));
+          }
+        });
+      }
+
+      // ─── Document Footer ────────────────────────────────────────
+      paragraphs.push(new Paragraph({
+        border: { top: { style: BorderStyle.SINGLE, size: 6, color: 'CCCCCC' } },
+        spacing: { before: 350, after: 80 }
+      }));
+
+      paragraphs.push(new Paragraph({
+        children: [
+          new TextRun({ text: 'Generated by AP Physics Simulation Engine — Classroom Hub', size: 16, font: 'Calibri', color: '888888', italics: true })
+        ],
+        alignment: AlignmentType.CENTER
+      }));
+
+      // Generate and Save Document Blob
+      Packer.toBlob(new Document({ sections: [{ properties: {}, children: paragraphs }] }))
+        .then(blob => {
+          const cleanName = studentName.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '_');
+          const fileName = 'Inverse_Square_Sound_' + cleanName + '_Assessment.docx';
+          saveAs(blob, fileName);
+        })
+        .catch(err => {
+          console.error('DOCX generation error:', err);
+          alert('Error generating DOCX: ' + err.message);
+        });
+    }
+  }
+
+  // =================================================================
+  // Chart.js Graph Controllers
+  // =================================================================
+  class SimulationGraphs {
+    constructor(engine) {
+      this.engine = engine;
+      this.initChart1();
+      this.initChart2();
+      this.initChart3();
+    }
+
+    initChart1() {
+      const canvas = document.getElementById('chartLogLog');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      this.chart1 = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: 'Intensity I = P / (4πr²)',
+              data: [],
+              borderColor: '#00e5ff',
+              backgroundColor: 'rgba(0, 229, 255, 0.12)',
+              borderWidth: 2.5,
+              tension: 0.3,
+              pointRadius: 0,
+              fill: true
+            },
+            {
+              label: 'Current Probe r',
+              data: [],
+              borderColor: '#ffffff',
+              backgroundColor: '#ff4081',
+              pointRadius: 7,
+              pointHoverRadius: 9,
+              showLine: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          scales: {
+            x: {
+              type: 'linear',
+              min: 1,
+              max: 15,
+              title: { display: true, text: 'Distance r (meters)', color: '#8b9bb4', font: { size: 10, weight: 'bold' } },
+              ticks: { color: '#8b9bb4', font: { size: 9 }, stepSize: 2 },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            },
+            y: {
+              type: 'linear',
+              min: 0,
+              title: { display: true, text: 'Intensity I (W/m²)', color: '#8b9bb4', font: { size: 10, weight: 'bold' } },
+              ticks: { color: '#8b9bb4', font: { size: 9 } },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#f0f3f8', boxWidth: 12, font: { size: 10 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(3)} W/m² at r = ${ctx.parsed.x.toFixed(1)}m`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    initChart2() {
+      const canvas = document.getElementById('chartWaveform');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      this.chart2 = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: 'Sphere Area A = 4πr²',
+              data: [],
+              borderColor: '#ffd740',
+              backgroundColor: 'rgba(255, 215, 64, 0.12)',
+              borderWidth: 2.5,
+              tension: 0.3,
+              pointRadius: 0,
+              fill: true
+            },
+            {
+              label: 'Current Sphere Area',
+              data: [],
+              borderColor: '#ffffff',
+              backgroundColor: '#00e5ff',
+              pointRadius: 7,
+              pointHoverRadius: 9,
+              showLine: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          scales: {
+            x: {
+              type: 'linear',
+              min: 1,
+              max: 15,
+              title: { display: true, text: 'Distance r (meters)', color: '#8b9bb4', font: { size: 10, weight: 'bold' } },
+              ticks: { color: '#8b9bb4', font: { size: 9 }, stepSize: 2 },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            },
+            y: {
+              type: 'linear',
+              min: 0,
+              title: { display: true, text: 'Sphere Area A (m²)', color: '#8b9bb4', font: { size: 10, weight: 'bold' } },
+              ticks: { color: '#8b9bb4', font: { size: 9 } },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#f0f3f8', boxWidth: 12, font: { size: 10 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} m² at r = ${ctx.parsed.x.toFixed(1)}m`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    initChart3() {
+      const canvas = document.getElementById('chartConservation');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      this.chart3 = new Chart(ctx, {
+        type: 'line',
+        data: {
+          datasets: [
+            {
+              label: 'Total Power P (Constant Everywhere)',
+              data: [],
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.08)',
+              borderWidth: 2.5,
+              pointRadius: 0,
+              fill: true
+            },
+            {
+              label: 'Power at Distance r',
+              data: [],
+              borderColor: '#ffffff',
+              backgroundColor: '#ffd740',
+              pointRadius: 7,
+              pointHoverRadius: 9,
+              showLine: false
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: false,
+          scales: {
+            x: {
+              type: 'linear',
+              min: 1,
+              max: 15,
+              title: { display: true, text: 'Distance r (meters)', color: '#8b9bb4', font: { size: 10, weight: 'bold' } },
+              ticks: { color: '#8b9bb4', font: { size: 9 }, stepSize: 2 },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            },
+            y: {
+              type: 'linear',
+              min: 0,
+              suggestedMax: 150,
+              title: { display: true, text: 'Total Power P (Watts)', color: '#8b9bb4', font: { size: 10, weight: 'bold' } },
+              ticks: { color: '#8b9bb4', font: { size: 9 } },
+              grid: { color: 'rgba(255, 255, 255, 0.06)' }
+            }
+          },
+          plugins: {
+            legend: {
+              labels: { color: '#f0f3f8', boxWidth: 12, font: { size: 10 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(1)} W (Constant)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    updateChart1() {
+      if (!this.chart1) return;
+      const e = this.engine;
+      const curve = [];
+      for (let r = 1.0; r <= 15.05; r += 0.25) {
+        curve.push({ x: r, y: e.P_src / (4.0 * Math.PI * r * r) });
+      }
+      this.chart1.data.datasets[0].data = curve;
+      this.chart1.data.datasets[1].data = [{ x: e.r, y: e.getIntensityFor(e.r) }];
+      this.chart1.update('none');
+    }
+
+    updateChart2() {
+      if (!this.chart2) return;
+      const e = this.engine;
+      const curve = [];
+      for (let r = 1.0; r <= 15.05; r += 0.25) {
+        curve.push({ x: r, y: 4.0 * Math.PI * r * r });
+      }
+      this.chart2.data.datasets[0].data = curve;
+      this.chart2.data.datasets[1].data = [{ x: e.r, y: 4.0 * Math.PI * e.r * e.r }];
+      this.chart2.update('none');
+    }
+
+    updateChart3() {
+      if (!this.chart3) return;
+      const e = this.engine;
+      const curve = [
+        { x: 1.0, y: e.P_src },
+        { x: 15.0, y: e.P_src }
+      ];
+      this.chart3.data.datasets[0].data = curve;
+      this.chart3.data.datasets[1].data = [{ x: e.r, y: e.P_src }];
+      this.chart3.options.scales.y.suggestedMax = Math.max(120, e.P_src * 1.3);
+      this.chart3.update('none');
+    }
+
+    update() {
+      this.updateChart1();
+      this.updateChart2();
+      this.updateChart3();
+    }
+  }
+
+  // =================================================================
+  // 5E Formative Assessment Engine
+  // =================================================================
+  class AssessmentManager {
+    constructor() {
+      this.questions = [
+        {
+          id: 1,
+          phase: 'Engage',
+          phaseClass: 'engage',
+          type: 'mc',
+          text: 'Which quantity stays constant for an ideal point sound source as the spherical wavefront expands?',
+          options: [
+            { key: 'A', text: 'Acoustic Intensity I(r)' },
+            { key: 'B', text: 'Total Emitted Power P_source' },
+            { key: 'C', text: 'Pressure Amplitude P_amp(r)' },
+            { key: 'D', text: 'Wavefront Surface Area A(r)' }
+          ],
+          correct: 'B',
+          explanation: 'In an unattenuated isotropic medium, energy is conserved. Thus, total acoustic power P_source emitted by the source remains constant over any closed enclosing surface.'
+        },
+        {
+          id: 2,
+          phase: 'Engage',
+          phaseClass: 'engage',
+          type: 'mc',
+          text: 'What property of a sound wave changes as it travels outward from the point source?',
+          options: [
+            { key: 'A', text: 'Total emitted source power' },
+            { key: 'B', text: 'Oscillation frequency f' },
+            { key: 'C', text: 'Intensity and pressure amplitude' },
+            { key: 'D', text: 'Wave phase speed c in uniform air' }
+          ],
+          correct: 'C',
+          explanation: 'As the wave expands, energy spreads over an area ∝ r², causing local intensity to fall as 1/r² and pressure amplitude to decrease as 1/r.'
+        },
+        {
+          id: 3,
+          phase: 'Explore',
+          phaseClass: 'explore',
+          type: 'mc',
+          text: 'If the distance r from the sound source doubles (r → 2r), the intensity I ______.',
+          options: [
+            { key: 'A', text: 'Halves (decreases by factor 2)' },
+            { key: 'B', text: 'Decreases by factor 4 (1/4 of original)' },
+            { key: 'C', text: 'Decreases by factor 8 (1/8 of original)' },
+            { key: 'D', text: 'Remains unchanged' }
+          ],
+          correct: 'B',
+          explanation: 'Because I(r) = P / (4πr²), doubling r results in I(2r) = P / [4π(2r)²] = I(r) / 4.'
+        },
+        {
+          id: 4,
+          phase: 'Explore',
+          phaseClass: 'explore',
+          type: 'mc',
+          text: 'What does the sound wavefront surface area do with radius r?',
+          options: [
+            { key: 'A', text: 'Increases linearly with r' },
+            { key: 'B', text: 'Increases quadratically with r² (A = 4πr²)' },
+            { key: 'C', text: 'Remains constant regardless of r' },
+            { key: 'D', text: 'Decreases inversely with 1/r²' }
+          ],
+          correct: 'B',
+          explanation: 'The surface area of a sphere of radius r is A = 4πr², which grows quadratically with radius.'
+        },
+        {
+          id: 5,
+          phase: 'Explain',
+          phaseClass: 'explain',
+          type: 'mc',
+          text: 'Why does sound intensity diminish as 1/r² while acoustic amplitude only decreases as 1/r?',
+          options: [
+            { key: 'A', text: 'Intensity is power per area (∝ 1/r²), and intensity scales as amplitude squared (I ∝ P²), so P ∝ √I ∝ 1/r' },
+            { key: 'B', text: 'Pressure amplitude is protected from geometric dilution by air elasticity' },
+            { key: 'C', text: 'Sound amplitude is only dampened by air viscosity, not geometry' },
+            { key: 'D', text: 'Transverse waves decay as 1/r² but longitudinal waves decay as 1/r' }
+          ],
+          correct: 'A',
+          explanation: 'Wave energy density is proportional to the square of pressure amplitude (I ∝ P_amp²). Since geometric spreading forces I ∝ 1/r², taking the square root gives P_amp ∝ 1/r.'
+        },
+        {
+          id: 6,
+          phase: 'Explain',
+          phaseClass: 'explain',
+          type: 'mc',
+          text: 'What happens to the total power flowing through a fixed sector of solid angle Ω as r grows very large?',
+          options: [
+            { key: 'A', text: 'It decays to 0 W' },
+            { key: 'B', text: 'It grows infinitely large' },
+            { key: 'C', text: 'It remains strictly constant because A_sector ∝ r² exactly cancels I ∝ 1/r²' },
+            { key: 'D', text: 'It oscillates sinusoidally with frequency f' }
+          ],
+          correct: 'C',
+          explanation: 'P_sector = I(r) · A_sector(r) = [P / (4πr²)] · [Ω r²] = P · (Ω / 4π), which is completely independent of r!'
+        },
+        {
+          id: 7,
+          phase: 'Elaborate',
+          phaseClass: 'elaborate',
+          type: 'mc',
+          text: 'If you triple the source power (P_src → 3 P_src), what is the new intensity at the same distance r?',
+          options: [
+            { key: 'A', text: '9× the original intensity' },
+            { key: 'B', text: '3× the original intensity' },
+            { key: 'C', text: '√3× the original intensity' },
+            { key: 'D', text: 'The intensity remains unchanged' }
+          ],
+          correct: 'B',
+          explanation: 'Intensity I is directly proportional to source power: I ∝ P_src. Tripling power triples intensity.'
+        },
+        {
+          id: 8,
+          phase: 'Elaborate',
+          phaseClass: 'elaborate',
+          type: 'mc',
+          text: 'If the radius quadruples (r → 4r), how do amplitude and intensity change?',
+          options: [
+            { key: 'A', text: 'Amplitude: 1/2×, Intensity: 1/4×' },
+            { key: 'B', text: 'Amplitude: 1/4×, Intensity: 1/16×' },
+            { key: 'C', text: 'Amplitude: 1/16×, Intensity: 1/4×' },
+            { key: 'D', text: 'Both decrease by 1/4×' }
+          ],
+          correct: 'B',
+          explanation: 'Since P_amp ∝ 1/r, amplitude becomes 1/4×. Since I ∝ 1/r², intensity becomes (1/4)² = 1/16×.'
+        },
+        {
+          id: 9,
+          phase: 'Evaluate',
+          phaseClass: 'evaluate',
+          type: 'frq',
+          text: 'Write the algebraic equation for acoustic intensity I at radius r for an isotropic point source emitting power P:',
+          correct: 'I = P / (4*pi*r^2)',
+          keywords: ['P', '4', 'pi', 'r'],
+          explanation: 'Standard formula: I(r) = P / (4πr²). Intensity equals power divided by 3D spherical area.'
+        },
+        {
+          id: 10,
+          phase: 'Evaluate',
+          phaseClass: 'evaluate',
+          type: 'frq',
+          text: 'A loudspeaker emits 10 W. At r = 5 m, calculate intensity I (W/m²) and dB SPL (assuming I₀ = 10⁻¹² W/m²):',
+          correct: '0.0318 W/m², 105 dB',
+          keywords: ['0.03', '105'],
+          explanation: 'I = 10 / (4π·5²) = 10 / 314.16 ≈ 0.0318 W/m². dB SPL = 10 log10(0.0318 / 10⁻¹²) = 10 log10(3.18 × 10¹⁰) ≈ 105 dB SPL.'
+        }
+      ];
+
+      this.score = 0;
+      this.answeredState = {};
+      this.studentAnswers = {};
+      this.render();
+    }
+
+    initAccordion() {
+      const toggle = document.getElementById('assessmentToggle');
+      const content = document.getElementById('assessmentContent');
+      if (toggle && content) {
+        toggle.addEventListener('click', () => {
+          content.style.display = content.style.display === 'none' ? 'block' : 'none';
+        });
+      }
+    }
+
+    render() {
+      const container = document.getElementById('questionsGrid');
+      if (!container) return;
+      container.innerHTML = '';
+
+      this.questions.forEach((q, idx) => {
+        const card = document.createElement('div');
+        card.className = 'assess-question';
+        card.id = `question-${q.id}`;
+        card.setAttribute('data-correct', q.correct);
+
+        const badgeHtml = `<span class="q-badge ${q.phaseClass}">${q.phase}</span>`;
+
+        let interactiveHtml = '';
+        if (q.type === 'mc') {
+          const optsHtml = q.options.map(opt => `
+            <label class="q-opt-label">
+              <input type="radio" name="q_${q.id}" value="${opt.key}">
+              <span><strong>${opt.key})</strong> ${opt.text}</span>
+            </label>
+          `).join('');
+
+          interactiveHtml = `
+            <div class="q-options" data-qid="${q.id}">
+              ${optsHtml}
+            </div>
+          `;
+        } else {
+          interactiveHtml = `
+            <div class="q-frq-area">
+              <input type="text" class="q-frq-input" id="frqInput_${q.id}" placeholder="Type your answer...">
+              <button class="btn btn-primary btn-check-frq" data-qid="${q.id}">Check</button>
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="q-meta">
+            <span>Question ${q.id} of 10</span>
+            ${badgeHtml}
+          </div>
+          <div class="q-text">${q.text}</div>
+          ${interactiveHtml}
+          <div class="q-feedback" id="feedback_${q.id}">${q.explanation}</div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      this.bindInputs();
+    }
+
+    bindInputs() {
+      // Multiple choice radio inputs
+      document.querySelectorAll('.q-options input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const qid = parseInt(e.target.name.replace('q_', ''));
+          const selected = e.target.value;
+          this.checkMC(qid, selected);
+        });
+      });
+
+      // FRQ submit buttons
+      document.querySelectorAll('.btn-check-frq').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const qid = parseInt(btn.dataset.qid);
+          const input = document.getElementById(`frqInput_${qid}`);
+          if (input) this.checkFRQ(qid, input.value.trim());
+        });
+      });
+    }
+
+    checkMC(qid, selected) {
+      const q = this.questions.find(item => item.id === qid);
+      const card = document.getElementById(`question-${qid}`);
+      const fb = document.getElementById(`feedback_${qid}`);
+      if (!q || !card || !fb) return;
+
+      const isCorrect = (selected === q.correct);
+      card.classList.toggle('answered-correct', isCorrect);
+      card.classList.toggle('answered-incorrect', !isCorrect);
+
+      fb.className = `q-feedback show ${isCorrect ? 'correct' : 'incorrect'}`;
+      fb.innerHTML = `<strong>${isCorrect ? '✓ Correct!' : '✗ Review Concept:'}</strong> ${q.explanation}`;
+
+      this.answeredState[qid] = isCorrect;
+      const opt = q.options.find(o => o.key === selected);
+      this.studentAnswers[qid] = selected + ') ' + (opt ? opt.text : '');
+      this.updateScoreBadge();
+    }
+
+    checkFRQ(qid, userText) {
+      const q = this.questions.find(item => item.id === qid);
+      const card = document.getElementById(`question-${qid}`);
+      const fb = document.getElementById(`feedback_${qid}`);
+      if (!q || !card || !fb) return;
+
+      const normalized = userText.toLowerCase().replace(/\s+/g, '');
+      let isCorrect = false;
+
+      if (q.keywords) {
+        const matches = q.keywords.filter(kw => normalized.includes(kw.toLowerCase()));
+        isCorrect = (matches.length >= Math.ceil(q.keywords.length * 0.6));
+      }
+
+      card.classList.toggle('answered-correct', isCorrect);
+      card.classList.toggle('answered-incorrect', !isCorrect);
+
+      fb.className = `q-feedback show ${isCorrect ? 'correct' : 'incorrect'}`;
+      fb.innerHTML = `<strong>${isCorrect ? '✓ Well Done!' : '✗ Model Solution:'}</strong> ${q.explanation}`;
+
+      this.answeredState[qid] = isCorrect;
+      this.studentAnswers[qid] = userText;
+      this.updateScoreBadge();
+    }
+
+    updateScoreBadge() {
+      const correctCount = Object.values(this.answeredState).filter(Boolean).length;
+      this.score = correctCount;
+      const badge = document.getElementById('assessmentScoreBadge');
+      if (badge) {
+        badge.textContent = `${this.score} / 10`;
+      }
+      const ansCount = this.getAnsweredCount();
+      const ansEl = document.getElementById('answered-count');
+      if (ansEl) {
+        ansEl.textContent = ansCount;
+      }
+    }
+
+    getAnsweredCount() {
+      return Object.keys(this.studentAnswers).length;
+    }
+
+    getQuestionAnswer(qid) {
+      return {
+        isAnswered: this.studentAnswers.hasOwnProperty(qid),
+        userAnswer: this.studentAnswers[qid] || '',
+        isCorrect: !!this.answeredState[qid]
+      };
+    }
+  }
+
+  // =================================================================
+  // Main Simulation Orchestrator & Animation Loop
+  // =================================================================
+  window.addEventListener('DOMContentLoaded', () => {
+    const canvas = document.getElementById('waveCanvas');
+    const camera = new Camera(canvas);
+    const engine = new PhysicsEngine();
+    const renderer = new Renderer(canvas, camera, engine);
+
+    let graphs = null;
+
+    const ui = new UIControls(engine, camera, renderer, (prop, val) => {
+      if (graphs) graphs.update();
+    });
+
+    const dataLogger = new DataLogger(engine);
+    const assessment = new AssessmentManager();
+    const exportManager = new ExportManager(engine, assessment);
+    graphs = new SimulationGraphs(engine);
+
+    // Initial camera layout
+    camera.resize();
+    window.addEventListener('resize', () => {
+      camera.resize();
+      renderer.render();
+    });
+
+    // ─── Animation Loop (Strictly requestAnimationFrame only) ───
+    let lastTs = performance.now();
+
+    function animationLoop(ts) {
+      const dt = Math.min(0.064, (ts - lastTs) / 1000.0);
+      lastTs = ts;
+
+      // Update engine physics
+      engine.updatePhysics(dt);
+
+      // Render 2D wave canvas
+      renderer.render();
+
+      // Update HUD overlay
+      ui.updateTelemetryOverlay();
+
+      // Sample DataLogger periodically
+      if (engine.running) {
+        dataLogger.step();
+      }
+
+      // Update Chart.js graphs periodically to balance 60 FPS performance
+      if (engine.running && Math.random() < 0.25) {
+        graphs.update();
+      }
+
+      requestAnimationFrame(animationLoop);
+    }
+
+    // Trigger initial charts and loop
+    graphs.update();
+    requestAnimationFrame(animationLoop);
+  });
+  </script>
+</body>
+</html>
