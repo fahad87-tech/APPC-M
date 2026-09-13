@@ -28,7 +28,7 @@ import {
   ViewMode,
 } from './types/physics';
 import { computeCenterOfMass, computeKinematics } from './utils/kinematics';
-import { REAL_EXPERIMENT_VIDEOS } from './utils/videoLibrary';
+import { REAL_EXPERIMENT_VIDEOS, resolveMediaUrl } from './utils/videoLibrary';
 import { extractTemplate, matchTemplate, seekVideoFrame } from './utils/autotracker';
 import { exportToCsv, exportToExcel, exportToJson } from './utils/exportUtils';
 import { getLabTemplateForSample } from './data/labTemplates';
@@ -1136,7 +1136,7 @@ export const App: React.FC = () => {
             >
               <video
                 ref={pipVideoRef}
-                src={videoUrl}
+                src={resolveMediaUrl(videoUrl)}
                 muted
                 playsInline
                 className="w-full h-full object-contain pointer-events-none"

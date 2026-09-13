@@ -7,32 +7,31 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
-const isInsideStudentEdition = path.basename(rootDir) === 'student-edition';
-const mainDir = isInsideStudentEdition ? path.resolve(rootDir, '..') : rootDir;
-const studentDir = isInsideStudentEdition ? rootDir : path.join(rootDir, 'student-edition');
 
 test('Marker Visibility & Acc/Dec Lines: UI Toggles in TrackerControls and AutotrackModal', async () => {
-  // Check main app TrackerControls
-  const trackerControls = fs.readFileSync(path.join(mainDir, 'src', 'components', 'Tracker', 'TrackerControls.tsx'), 'utf8');
+  // Check current app TrackerControls
+  const trackerControls = fs.readFileSync(path.join(rootDir, 'src', 'components', 'Tracker', 'TrackerControls.tsx'), 'utf8');
   assert.ok(trackerControls.includes("onToggleVector('showDataMarkers')"), 'TrackerControls must have showDataMarkers toggle');
   assert.ok(trackerControls.includes("onToggleVector('showAccelerationLines')"), 'TrackerControls must have showAccelerationLines toggle');
   assert.ok(trackerControls.includes('Markers'), 'TrackerControls must feature Markers button');
   assert.ok(trackerControls.includes('Acc/Dec Lines'), 'TrackerControls must feature Acc/Dec Lines button');
 
-  // Check main app AutotrackModal
-  const autotrackModal = fs.readFileSync(path.join(mainDir, 'src', 'components', 'Tracker', 'AutotrackModal.tsx'), 'utf8');
+  // Check current app AutotrackModal
+  const autotrackModal = fs.readFileSync(path.join(rootDir, 'src', 'components', 'Tracker', 'AutotrackModal.tsx'), 'utf8');
   assert.ok(autotrackModal.includes("onToggleVector?.('showDataMarkers')"), 'AutotrackModal must have showDataMarkers toggle');
   assert.ok(autotrackModal.includes("onToggleVector?.('showAccelerationLines')"), 'AutotrackModal must have showAccelerationLines toggle');
 
-  // Check student edition TrackerControls
-  const studentControls = fs.readFileSync(path.join(studentDir, 'src', 'components', 'Tracker', 'TrackerControls.tsx'), 'utf8');
-  assert.ok(studentControls.includes("onToggleVector('showDataMarkers')"), 'Student TrackerControls must have showDataMarkers toggle');
-  assert.ok(studentControls.includes("onToggleVector('showAccelerationLines')"), 'Student TrackerControls must have showAccelerationLines toggle');
+  // Check student edition subfolder if present (e.g. in monorepo)
+  const studentDir = path.join(rootDir, 'student-edition');
+  if (fs.existsSync(studentDir)) {
+    const studentControls = fs.readFileSync(path.join(studentDir, 'src', 'components', 'Tracker', 'TrackerControls.tsx'), 'utf8');
+    assert.ok(studentControls.includes("onToggleVector('showDataMarkers')"), 'Student TrackerControls must have showDataMarkers toggle');
+    assert.ok(studentControls.includes("onToggleVector('showAccelerationLines')"), 'Student TrackerControls must have showAccelerationLines toggle');
 
-  // Check student edition AutotrackModal
-  const studentAutotrack = fs.readFileSync(path.join(studentDir, 'src', 'components', 'Tracker', 'AutotrackModal.tsx'), 'utf8');
-  assert.ok(studentAutotrack.includes("onToggleVector?.('showDataMarkers')"), 'Student AutotrackModal must have showDataMarkers toggle');
-  assert.ok(studentAutotrack.includes("onToggleVector?.('showAccelerationLines')"), 'Student AutotrackModal must have showAccelerationLines toggle');
+    const studentAutotrack = fs.readFileSync(path.join(studentDir, 'src', 'components', 'Tracker', 'AutotrackModal.tsx'), 'utf8');
+    assert.ok(studentAutotrack.includes("onToggleVector?.('showDataMarkers')"), 'Student AutotrackModal must have showDataMarkers toggle');
+    assert.ok(studentAutotrack.includes("onToggleVector?.('showAccelerationLines')"), 'Student AutotrackModal must have showAccelerationLines toggle');
+  }
 });
 
 test('Physics Acc/Dec Logic: Tangential, Horizontal, and Vertical Motion States', () => {

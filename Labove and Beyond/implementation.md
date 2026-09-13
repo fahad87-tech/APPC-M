@@ -1079,3 +1079,35 @@ npm run dev
     - `npm test`: **All 6 test suites passing (100% pass rate)**.
     - `npm run build`: Production bundle compiled cleanly in 4.50s.
     - Git commit created on branch `main` (`feat: add data marker visibility toggle and acc/dec reference lines through mass`).
+
+---
+
+### Step 31: Standalone Relocation, Portability Hardening, and Multi-Hub Integration in APPC-M [SUCCESSFUL]
+
+- **1. Objective & Context**:
+  - The application was relocated to `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond` as part of the broader **APPC-M** Physics Classroom & Simulation collection repository.
+  - The user requested verification and hardening to guarantee that this relocated application operates reliably as a completely self-contained, standalone physics laboratory application.
+
+- **2. Issues Identified & Fixed**:
+  - **Standalone Automated Test Path Assumption**:
+    - In `tests/acc-dec-lines-and-marker-toggle.test.mjs`, directory detection previously assumed the directory was either named `student-edition` or contained a child folder named `student-edition`. When renamed to `Labove and Beyond` as a standalone root, it failed attempting to open `Labove and Beyond/student-edition/...`.
+    - **Fix**: Updated `tests/acc-dec-lines-and-marker-toggle.test.mjs` to target the local repository (`rootDir`) unconditionally, and only scan for `student-edition/` if that subfolder actually exists.
+  - **Asset Portability Across Subpaths & GitHub Pages**:
+    - Hardcoded leading slashes (e.g. `/videos/fizziq_parabole.mp4` and `/images/...`) caused requests to resolve to the domain root instead of the nested folder when deployed to static hosts (such as `https://<username>.github.io/APPC-M/Labove and Beyond/dist/`).
+    - **Fix**: Configured `base: './'` in `vite.config.ts` and created `resolveMediaUrl(url?: string | null): string` in `src/utils/videoLibrary.ts`.
+    - Handled URL normalization dynamically across:
+      - `src/components/Tracker/VideoTracker.tsx` (`<video src={resolveMediaUrl(videoUrl) || undefined} ... />`)
+      - `src/App.tsx` (Picture-in-Picture `<video src={resolveMediaUrl(videoUrl)} ... />`)
+      - `src/components/Tracker/StroboscopeModal.tsx` (`<video src={resolveMediaUrl(videoUrl)} ... />`)
+      - `src/components/Modals/VideoLibraryModal.tsx` (`<img src={resolveMediaUrl(sample.posterUrl)} ... />`)
+  - **APPC-M Main Hub Portal Connection**:
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\index.html` hosts a multi-card portal for physics simulations. The "Lab-ove and Beyond 🧪" card previously linked to `Labove and Beyond/`, which serves development TypeScript source `src/main.tsx` if served via static HTTP / GitHub Pages without a Vite dev server.
+    - **Fix**: Updated the card link in `APPC-M/index.html` to `Labove and Beyond/dist/`, allowing static browser execution out of the box.
+
+- **3. Verification**:
+  - `npm test`: **All 6 test suites passing (100% pass rate)**.
+  - `npm run build`: Production bundle compiled cleanly in 3.73s with zero TypeScript compilation errors.
+  - `npx vite preview`: Tested local HTTP server serving the compiled `dist/` bundle on port 4174. HTTP 200 OK.
+  - `npx vite`: Verified dev server running with instant HMR on port 5174. HTTP 200 OK.
+  - Asset Audit: All 65 video assets verified present and intact in both `public/videos/` and `dist/videos/`.
+

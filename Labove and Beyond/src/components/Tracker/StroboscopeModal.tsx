@@ -13,6 +13,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { CalibrationScale, NotebookCard, TrackSeries } from '../../types/physics';
+import { resolveMediaUrl } from '../../utils/videoLibrary';
 
 interface StroboscopeModalProps {
   isOpen: boolean;
@@ -228,7 +229,7 @@ export const StroboscopeModal: React.FC<StroboscopeModalProps> = ({
         {/* Hidden video element for seeking */}
         <video
           ref={hiddenVideoRef}
-          src={videoUrl}
+          src={resolveMediaUrl(videoUrl)}
           preload="auto"
           muted
           playsInline

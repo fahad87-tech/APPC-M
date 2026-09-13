@@ -1032,3 +1032,23 @@ const BASE_EXPERIMENT_VIDEOS: PhysicsExperimentSample[] = [
 // Student Edition: Zero pre-analyzed videos. All 57 experiments start with clean slate for student tracking.
 export const REAL_EXPERIMENT_VIDEOS: PhysicsExperimentSample[] = BASE_EXPERIMENT_VIDEOS;
 
+/**
+ * Resolves local public assets (videos, images) relative to the Vite base URL
+ * to support standalone deployment in root, subpaths, or GitHub Pages.
+ */
+export function resolveMediaUrl(url?: string | null): string {
+  if (!url) return '';
+  if (
+    url.startsWith('blob:') ||
+    url.startsWith('data:') ||
+    url.startsWith('http://') ||
+    url.startsWith('https://')
+  ) {
+    return url;
+  }
+  const clean = url.replace(/^\/+/, '');
+  const base: string = ((import.meta as any).env?.BASE_URL as string) || './';
+  const separator = base.endsWith('/') ? '' : '/';
+  return `${base}${separator}${clean}`;
+}
+

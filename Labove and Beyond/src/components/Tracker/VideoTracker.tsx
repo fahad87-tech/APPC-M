@@ -14,6 +14,7 @@ import {
 import { LoupeMagnifier } from './LoupeMagnifier';
 import { ArrowUpDown, ArrowLeftRight, RotateCcw, Check, Sparkles, X, Target, Ruler } from 'lucide-react';
 import { convertScaleUnit } from '../../utils/kinematics';
+import { resolveMediaUrl } from '../../utils/videoLibrary';
 
 // Distance from point p to line segment (v, w)
 function distToSegment(p: Point2D, v: Point2D, w: Point2D): number {
@@ -1075,7 +1076,7 @@ export const VideoTracker: React.FC<VideoTrackerProps> = ({
       >
         <video
           ref={videoRef}
-          src={videoUrl || undefined}
+          src={resolveMediaUrl(videoUrl) || undefined}
           playsInline
           muted
           crossOrigin="anonymous"

@@ -8,7 +8,7 @@ import {
   X,
   Sparkles,
 } from 'lucide-react';
-import { REAL_EXPERIMENT_VIDEOS } from '../../utils/videoLibrary';
+import { REAL_EXPERIMENT_VIDEOS, resolveMediaUrl } from '../../utils/videoLibrary';
 import { PhysicsExperimentSample } from '../../types/physics';
 
 interface VideoLibraryModalProps {
@@ -173,7 +173,7 @@ export const VideoLibraryModal: React.FC<VideoLibraryModalProps> = ({
                 {sample.posterUrl ? (
                   <div className="relative w-full h-32 rounded-lg overflow-hidden bg-slate-900 mb-2.5 shrink-0 border border-slate-100 group">
                     <img
-                      src={sample.posterUrl}
+                      src={resolveMediaUrl(sample.posterUrl)}
                       alt={sample.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
