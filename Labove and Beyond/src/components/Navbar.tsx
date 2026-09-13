@@ -73,128 +73,130 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="h-14 border-b border-slate-200 bg-white px-4 flex items-center justify-between z-30 shrink-0 select-none shadow-xs">
+    <header className="h-14 min-h-[3.5rem] max-h-14 border-b border-slate-200 bg-white px-3 sm:px-4 flex items-center justify-between z-30 shrink-0 select-none shadow-xs overflow-hidden">
       {/* Brand & Title (FizziQ Blue & Tracker Edition) */}
-      <div className="flex items-center gap-3">
-        <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm">
+      <div className="flex items-center gap-2.5 shrink-0">
+        <div className="h-9 w-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm shrink-0">
           <Film className="w-5 h-5 text-white" />
         </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-slate-900 text-base tracking-tight">Lab-ove and Beyond</span>
-            <span className="text-[10px] font-black tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs">
+        <div className="shrink-0 flex flex-col justify-center">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="font-extrabold text-slate-900 text-sm xl:text-base tracking-tight whitespace-nowrap">
+              Lab-ove and Beyond
+            </span>
+            <span className="text-[10px] font-black tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xs whitespace-nowrap shrink-0">
               by MR. F.
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 font-medium hidden sm:block">
+          <p className="text-[11px] text-slate-500 font-medium hidden 2xl:block whitespace-nowrap">
             Scientific Kinematics, Acoustics & Experiment Studio • by MR. F.
           </p>
         </div>
 
         {/* Student Edition Badge */}
-        <div className="ml-2 hidden md:flex items-center">
-          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs">
+        <div className="ml-1 sm:ml-2 hidden md:flex items-center shrink-0">
+          <span className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 shadow-2xs whitespace-nowrap">
             🧑‍🎓 Student Edition
           </span>
         </div>
       </div>
 
       {/* Seamless View Mode Switcher */}
-      <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 shadow-inner">
+      <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 shadow-inner shrink-0 mx-1">
         <button
           onClick={() => onViewModeChange('split')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1 px-2 xl:px-2.5 py-1 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
             viewMode === 'split'
               ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
           title="Split screen: Video Tracker and Graphs side-by-side"
         >
-          <Columns className="w-3.5 h-3.5" />
-          <span className="hidden lg:inline">Split</span>
+          <Columns className="w-3.5 h-3.5 shrink-0" />
+          <span className="hidden 2xl:inline">Split</span>
         </button>
 
         <button
           onClick={() => onViewModeChange('tracker')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1 px-2 xl:px-2.5 py-1 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
             viewMode === 'tracker'
               ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
           title="Focus Video Tracker"
         >
-          <Video className="w-3.5 h-3.5" />
-          <span className="hidden lg:inline">Tracker</span>
+          <Video className="w-3.5 h-3.5 shrink-0" />
+          <span className="hidden 2xl:inline">Tracker</span>
         </button>
 
         <button
           onClick={() => onViewModeChange('graph')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1 px-2 xl:px-2.5 py-1 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
             viewMode === 'graph'
               ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
           title="Focus Scientific Graphs with Mini Video Overlay"
         >
-          <LineChart className="w-3.5 h-3.5" />
-          <span className="hidden lg:inline">Graph</span>
+          <LineChart className="w-3.5 h-3.5 shrink-0" />
+          <span className="hidden 2xl:inline">Graph</span>
         </button>
 
         <button
           onClick={() => onViewModeChange('table')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1 px-2 xl:px-2.5 py-1 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
             viewMode === 'table'
               ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
           title="Data Table Spreadsheet"
         >
-          <Table className="w-3.5 h-3.5" />
-          <span className="hidden lg:inline">Table</span>
+          <Table className="w-3.5 h-3.5 shrink-0" />
+          <span className="hidden 2xl:inline">Table</span>
         </button>
 
         <button
           onClick={() => onViewModeChange('sound')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1 px-2 xl:px-2.5 py-1 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
             viewMode === 'sound'
               ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
           title="FizziQ Sound & Acoustics Studio: Oscilloscope, FFT, dB meter, Tone Generator"
         >
-          <Activity className="w-3.5 h-3.5 text-amber-500" />
-          <span className="hidden lg:inline">Sound</span>
+          <Activity className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+          <span className="hidden 2xl:inline">Sound</span>
         </button>
 
         <button
           onClick={() => onViewModeChange('physics-suites')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1 px-2 xl:px-2.5 py-1 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
             viewMode === 'physics-suites'
               ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
           title="Multi-Topic Physics Suites: Rotational Dynamics, Optics, Circuits & E&M, Thermodynamics"
         >
-          <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-          <span className="hidden lg:inline">Suites</span>
+          <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+          <span className="hidden 2xl:inline">Suites</span>
         </button>
 
         <button
           onClick={() => onViewModeChange('notebook')}
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1 px-2 xl:px-2.5 py-1 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
             viewMode === 'notebook'
               ? 'bg-indigo-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
           title="FizziQ Digital Lab Notebook: Cahier d'expériences report builder"
         >
-          <BookOpen className="w-3.5 h-3.5 text-indigo-500" />
-          <span className="hidden lg:inline">Notebook</span>
+          <BookOpen className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+          <span className="hidden 2xl:inline">Notebook</span>
         </button>
       </div>
 
       {/* Real Videos, Tools & Export */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         {/* Real Physics Video Selector & Library Browser */}
         <div className="flex items-center gap-1.5">
           <select

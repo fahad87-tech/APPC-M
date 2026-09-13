@@ -925,7 +925,7 @@ export const App: React.FC = () => {
   const totalPointsCount = seriesList.reduce((sum, s) => sum + s.points.length, 0);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-slate-100 text-slate-800 overflow-hidden font-sans">
+    <div className="h-full h-screen w-full flex flex-col bg-slate-100 text-slate-800 overflow-hidden font-sans">
       {/* Top Navbar */}
       <Navbar
         viewMode={viewMode}

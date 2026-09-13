@@ -68,6 +68,10 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
   // Frequency Graph Scale & Preset
   const [freqScale, setFreqScale] = useState<'voice' | 'music' | 'full' | 'auto'>('auto');
 
+  // Modern Curve Smoothing & High FPS Animation
+  const [curveSmoothing, setCurveSmoothing] = useState<boolean>(true);
+  const [fpsLive, setFpsLive] = useState<number>(60);
+
   // Simulation generator (Doppler, Chirp, Vibrato)
   const [simType, setSimType] = useState<'none' | 'doppler' | 'chirp' | 'vibrato'>('none');
   const [simBaseFreq, setSimBaseFreq] = useState<number>(440);
@@ -79,10 +83,24 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // High-performance refs for 60/120 FPS requestAnimationFrame rendering
+  const recordsRef = useRef<FrequencyHistoryRecord[]>(records);
+  recordsRef.current = records;
+  const elapsedTimeRef = useRef<number>(elapsedTime);
+  elapsedTimeRef.current = elapsedTime;
+  const currentFreqRef = useRef<number>(currentFreq);
+  currentFreqRef.current = currentFreq;
+  const freqScaleRef = useRef<'voice' | 'music' | 'full' | 'auto'>(freqScale);
+  freqScaleRef.current = freqScale;
+  const curveSmoothingRef = useRef<boolean>(curveSmoothing);
+  curveSmoothingRef.current = curveSmoothing;
+  const hoveredPointRef = useRef<{ time: number; freq: number; note: string; x: number; y: number } | null>(hoveredPoint);
+  hoveredPointRef.current = hoveredPoint;
+
   // Active note representation
   const activeNote = useMemo(() => frequencyToNote(currentFreq), [currentFreq]);
 
-  // Handle Recording Timer & Sampling
+  // Handle Recording Timer & High-Density Sampling (40 Hz / 25ms)
   useEffect(() => {
     if (!isRecording || isPaused) {
       if (timerRef.current) {
@@ -92,7 +110,7 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
       return;
     }
 
-    const intervalMs = 50; // 20 Hz recording rate
+    const intervalMs = 25; // High-density 40 Hz recording rate for ultra-smooth capture
     timerRef.current = setInterval(() => {
       setElapsedTime((prev) => {
         const nextTime = Math.round((prev + intervalMs / 1000) * 1000) / 1000;
@@ -220,7 +238,7 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
     };
   }, [records, elapsedTime]);
 
-  // Render Frequency vs Time Canvas Graph
+  // Render Frequency vs Time Canvas Graph at 60/120 FPS via requestAnimationFrame
   useEffect(() => {
     if (displayMode !== 'timeSeries') return;
     const canvas = canvasRef.current;
@@ -228,236 +246,321 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const w = canvas.width;
-    const h = canvas.height;
+    let animId: number;
+    let lastTime = performance.now();
+    const frameTimes: number[] = [];
+    let lastFpsUpdate = performance.now();
 
-    ctx.clearRect(0, 0, w, h);
-
-    // Background
-    ctx.fillStyle = '#0f172a'; // Slate 900
-    ctx.fillRect(0, 0, w, h);
-
-    const padLeft = 65;
-    const padRight = 30;
-    const padTop = 30;
-    const padBottom = 40;
-    const plotW = w - padLeft - padRight;
-    const plotH = h - padTop - padBottom;
-
-    // Determine Y range (Frequency Hz)
-    let yMin = 0;
-    let yMax = 1000;
-
-    if (freqScale === 'voice') {
-      yMin = 50;
-      yMax = 1200;
-    } else if (freqScale === 'music') {
-      yMin = 50;
-      yMax = 3500;
-    } else if (freqScale === 'full') {
-      yMin = 20;
-      yMax = 8000;
-    } else {
-      // Auto-scale
-      if (stats.max > 0) {
-        yMax = Math.max(500, Math.ceil((stats.max * 1.2) / 100) * 100);
-        yMin = Math.max(0, Math.floor((stats.min * 0.8) / 50) * 50);
-      } else {
-        yMax = 1000;
-        yMin = 0;
+    const render = (now: number) => {
+      // Calculate real-time FPS
+      const dt = now - lastTime;
+      lastTime = now;
+      if (dt > 0) {
+        frameTimes.push(1000 / dt);
+        if (frameTimes.length > 30) frameTimes.shift();
       }
-    }
+      if (now - lastFpsUpdate > 400 && frameTimes.length > 0) {
+        const measured = Math.round(frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length);
+        setFpsLive(Math.min(144, Math.max(15, measured)));
+        lastFpsUpdate = now;
+      }
 
-    // Determine X range (Time seconds)
-    const maxTime = Math.max(10, elapsedTime + 1);
-    const minTime = Math.max(0, maxTime - 20); // 20-second scrolling window if long
+      const recs = recordsRef.current;
+      const elTime = elapsedTimeRef.current;
+      const cFreq = currentFreqRef.current;
+      const fScale = freqScaleRef.current;
+      const isSmooth = curveSmoothingRef.current;
+      const hPoint = hoveredPointRef.current;
 
-    // Draw Grid Lines & Musical Reference Tiers
-    ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
-    ctx.lineWidth = 1;
+      const w = canvas.width;
+      const h = canvas.height;
 
-    // Horizontal Frequency Grids
-    const ySteps = 5;
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '10px JetBrains Mono, monospace';
-    ctx.textAlign = 'right';
+      ctx.clearRect(0, 0, w, h);
 
-    for (let i = 0; i <= ySteps; i++) {
-      const fVal = yMin + (i * (yMax - yMin)) / ySteps;
-      const py = padTop + plotH - ((fVal - yMin) / (yMax - yMin)) * plotH;
+      // Deep dark blueprint background (#090d16)
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(0, 0, w, h);
 
-      ctx.beginPath();
-      ctx.moveTo(padLeft, py);
-      ctx.lineTo(padLeft + plotW, py);
-      ctx.stroke();
+      const padLeft = 65;
+      const padRight = 35;
+      const padTop = 30;
+      const padBottom = 40;
+      const plotW = w - padLeft - padRight;
+      const plotH = h - padTop - padBottom;
 
-      ctx.fillText(`${Math.round(fVal)} Hz`, padLeft - 8, py + 3);
-    }
+      // Determine Y range (Frequency Hz)
+      let yMin = 0;
+      let yMax = 1000;
 
-    // Musical Landmark Guides (e.g. A4 = 440 Hz, C4 = 261.6 Hz, C5 = 523.3 Hz)
-    const landmarks = [
-      { f: 261.6, note: 'C4' },
-      { f: 440.0, note: 'A4' },
-      { f: 523.3, note: 'C5' },
-      { f: 880.0, note: 'A5' },
-    ];
+      if (fScale === 'voice') {
+        yMin = 50;
+        yMax = 1200;
+      } else if (fScale === 'music') {
+        yMin = 50;
+        yMax = 3500;
+      } else if (fScale === 'full') {
+        yMin = 20;
+        yMax = 8000;
+      } else {
+        // Auto-scale with smooth bounds
+        const validRecs = recs.filter((r) => r.frequency > 15);
+        if (validRecs.length > 0) {
+          const maxCaptured = Math.max(...validRecs.map((r) => r.frequency));
+          const minCaptured = Math.min(...validRecs.map((r) => r.frequency));
+          yMax = Math.max(500, Math.ceil((maxCaptured * 1.25) / 100) * 100);
+          yMin = Math.max(0, Math.floor((minCaptured * 0.75) / 50) * 50);
+        } else {
+          yMax = 1000;
+          yMin = 0;
+        }
+      }
 
-    landmarks.forEach((lm) => {
-      if (lm.f >= yMin && lm.f <= yMax) {
-        const py = padTop + plotH - ((lm.f - yMin) / (yMax - yMin)) * plotH;
-        ctx.strokeStyle = 'rgba(99, 102, 241, 0.25)';
-        ctx.setLineDash([4, 4]);
+      // Determine X range (Time seconds)
+      const maxTime = Math.max(10, elTime + 0.5);
+      const minTime = Math.max(0, maxTime - 20); // 20s scrolling window
+      const tSpan = maxTime - minTime;
+
+      // Horizontal Frequency Grids
+      const ySteps = 5;
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px JetBrains Mono, monospace';
+      ctx.textAlign = 'right';
+
+      for (let i = 0; i <= ySteps; i++) {
+        const fVal = yMin + (i * (yMax - yMin)) / ySteps;
+        const py = padTop + plotH - ((fVal - yMin) / (yMax - yMin)) * plotH;
+
+        ctx.strokeStyle = 'rgba(51, 65, 85, 0.25)';
+        ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.moveTo(padLeft, py);
         ctx.lineTo(padLeft + plotW, py);
         ctx.stroke();
+
+        ctx.fillText(`${Math.round(fVal)} Hz`, padLeft - 8, py + 3);
+      }
+
+      // Musical Landmark Guides (e.g. C4 = 261.6 Hz, A4 = 440 Hz, C5 = 523.3 Hz, A5 = 880 Hz)
+      const landmarks = [
+        { f: 261.6, note: 'C4' },
+        { f: 440.0, note: 'A4' },
+        { f: 523.3, note: 'C5' },
+        { f: 880.0, note: 'A5' },
+      ];
+
+      landmarks.forEach((lm) => {
+        if (lm.f >= yMin && lm.f <= yMax) {
+          const py = padTop + plotH - ((lm.f - yMin) / (yMax - yMin)) * plotH;
+          ctx.strokeStyle = 'rgba(99, 102, 241, 0.35)';
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(padLeft, py);
+          ctx.lineTo(padLeft + plotW, py);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Pitch Tag Badge
+          ctx.fillStyle = '#818cf8';
+          ctx.textAlign = 'left';
+          ctx.font = 'bold 10px JetBrains Mono, monospace';
+          ctx.fillText(lm.note, padLeft + plotW + 6, py + 3);
+        }
+      });
+
+      // Vertical Time Grids
+      const xSteps = 5;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#64748b';
+      ctx.font = '10px JetBrains Mono, monospace';
+
+      for (let i = 0; i <= xSteps; i++) {
+        const tVal = minTime + (i * tSpan) / xSteps;
+        const px = padLeft + ((tVal - minTime) / tSpan) * plotW;
+
+        ctx.strokeStyle = 'rgba(51, 65, 85, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(px, padTop);
+        ctx.lineTo(px, padTop + plotH);
+        ctx.stroke();
+
+        ctx.fillText(`${tVal.toFixed(1)}s`, px, padTop + plotH + 18);
+      }
+
+      // Axis Labels with modern typography
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = 'bold 11px Plus Jakarta Sans, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Time t (seconds)', padLeft + plotW / 2, h - 8);
+
+      ctx.save();
+      ctx.translate(16, padTop + plotH / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText('Frequency f(t) [Hz]', 0, 0);
+      ctx.restore();
+
+      // Plot Recorded Data Points & Curve
+      if (recs.length > 1) {
+        // Collect visible active coordinates
+        const activePoints: { x: number; y: number; f: number; t: number }[] = [];
+
+        recs.forEach((pt) => {
+          if (pt.time < minTime || pt.time > maxTime) return;
+          if (pt.frequency <= 15) return;
+
+          const px = padLeft + ((pt.time - minTime) / tSpan) * plotW;
+          const py = padTop + plotH - ((pt.frequency - yMin) / (yMax - yMin)) * plotH;
+          activePoints.push({ x: px, y: py, f: pt.frequency, t: pt.time });
+        });
+
+        if (activePoints.length >= 2) {
+          // Helper: Catmull-Rom cubic spline interpolation path
+          const buildSplinePath = () => {
+            ctx.beginPath();
+            ctx.moveTo(activePoints[0].x, activePoints[0].y);
+
+            if (!isSmooth || activePoints.length < 3) {
+              for (let i = 1; i < activePoints.length; i++) {
+                ctx.lineTo(activePoints[i].x, activePoints[i].y);
+              }
+            } else {
+              const tension = 0.35;
+              for (let i = 0; i < activePoints.length - 1; i++) {
+                const p0 = i > 0 ? activePoints[i - 1] : activePoints[i];
+                const p1 = activePoints[i];
+                const p2 = activePoints[i + 1];
+                const p3 = i < activePoints.length - 2 ? activePoints[i + 2] : p2;
+
+                const cp1x = p1.x + ((p2.x - p0.x) / 6) * tension;
+                const cp1y = p1.y + ((p2.y - p0.y) / 6) * tension;
+                const cp2x = p2.x - ((p3.x - p1.x) / 6) * tension;
+                const cp2y = p2.y - ((p3.y - p1.y) / 6) * tension;
+
+                ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, p2.x, p2.y);
+              }
+            }
+          };
+
+          // 1. Sleek Gradient Fill Under Curve
+          ctx.save();
+          buildSplinePath();
+          ctx.lineTo(activePoints[activePoints.length - 1].x, padTop + plotH);
+          ctx.lineTo(activePoints[0].x, padTop + plotH);
+          ctx.closePath();
+          const fillGrad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
+          fillGrad.addColorStop(0, 'rgba(56, 189, 248, 0.32)');
+          fillGrad.addColorStop(0.6, 'rgba(14, 165, 233, 0.08)');
+          fillGrad.addColorStop(1, 'rgba(9, 13, 22, 0.0)');
+          ctx.fillStyle = fillGrad;
+          ctx.fill();
+          ctx.restore();
+
+          // 2. Glowing Neon Path
+          ctx.save();
+          ctx.shadowColor = 'rgba(56, 189, 248, 0.85)';
+          ctx.shadowBlur = 9;
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 2.5;
+          buildSplinePath();
+          ctx.stroke();
+          ctx.restore();
+
+          // 3. Crisp Data Point Halos (sample every N points if dense)
+          const stride = activePoints.length > 80 ? 4 : activePoints.length > 40 ? 2 : 1;
+          for (let i = 0; i < activePoints.length; i += stride) {
+            const pt = activePoints[i];
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 2.5, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = '#e0f2fe';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw Live Reticle for Current Instantaneous Value with 60 FPS Animated Pulse
+      if (cFreq > 15) {
+        const liveX = padLeft + ((elTime - minTime) / tSpan) * plotW;
+        const liveY = padTop + plotH - ((cFreq - yMin) / (yMax - yMin)) * plotH;
+
+        if (liveX >= padLeft && liveX <= padLeft + plotW && liveY >= padTop && liveY <= padTop + plotH) {
+          // Central glowing reticle dot
+          ctx.save();
+          ctx.shadowColor = 'rgba(34, 197, 94, 0.9)';
+          ctx.shadowBlur = 10;
+          ctx.fillStyle = '#22c55e';
+          ctx.beginPath();
+          ctx.arc(liveX, liveY, 5.5, 0, 2 * Math.PI);
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.restore();
+
+          // 60 FPS Smooth Expanding Pulse Wave
+          const pulsePhase = (now % 1000) / 1000;
+          const pulseRadius = 6 + pulsePhase * 16;
+          const pulseAlpha = (1 - pulsePhase) * 0.75;
+          ctx.strokeStyle = `rgba(34, 197, 94, ${pulseAlpha})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(liveX, liveY, pulseRadius, 0, 2 * Math.PI);
+          ctx.stroke();
+        }
+      }
+
+      // Draw Hover Crosshair & Glassmorphic Tooltip Card
+      if (hPoint) {
+        ctx.save();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+
+        // Vertical line
+        ctx.beginPath();
+        ctx.moveTo(hPoint.x, padTop);
+        ctx.lineTo(hPoint.x, padTop + plotH);
+        ctx.stroke();
+
+        // Horizontal line
+        ctx.beginPath();
+        ctx.moveTo(padLeft, hPoint.y);
+        ctx.lineTo(padLeft + plotW, hPoint.y);
+        ctx.stroke();
         ctx.setLineDash([]);
 
-        ctx.fillStyle = '#818cf8';
-        ctx.textAlign = 'left';
-        ctx.fillText(lm.note, padLeft + plotW + 4, py + 3);
-      }
-    });
+        // Tooltip Card
+        const tipText = `t = ${hPoint.time.toFixed(2)}s | f = ${hPoint.freq.toFixed(1)} Hz (${hPoint.note})`;
+        ctx.font = '11px JetBrains Mono, monospace';
+        const textW = ctx.measureText(tipText).width + 16;
+        let tipX = hPoint.x + 10;
+        if (tipX + textW > padLeft + plotW) tipX = hPoint.x - textW - 10;
+        let tipY = hPoint.y - 28;
+        if (tipY < padTop) tipY = hPoint.y + 16;
 
-    // Vertical Time Grids
-    const tSpan = maxTime - minTime;
-    const xSteps = 5;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#94a3b8';
-
-    for (let i = 0; i <= xSteps; i++) {
-      const tVal = minTime + (i * tSpan) / xSteps;
-      const px = padLeft + ((tVal - minTime) / tSpan) * plotW;
-
-      ctx.strokeStyle = 'rgba(51, 65, 85, 0.3)';
-      ctx.beginPath();
-      ctx.moveTo(px, padTop);
-      ctx.lineTo(px, padTop + plotH);
-      ctx.stroke();
-
-      ctx.fillText(`${tVal.toFixed(1)}s`, px, padTop + plotH + 18);
-    }
-
-    // Axis Labels
-    ctx.fillStyle = '#e2e8f0';
-    ctx.font = 'bold 11px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Time t (seconds)', padLeft + plotW / 2, h - 8);
-
-    ctx.save();
-    ctx.translate(16, padTop + plotH / 2);
-    ctx.rotate(-Math.PI / 2);
-    ctx.fillText('Frequency f(t) [Hz]', 0, 0);
-    ctx.restore();
-
-    // Plot Recorded Data Points & Curve
-    if (records.length > 1) {
-      // Draw smooth line
-      ctx.strokeStyle = '#38bdf8'; // Sky blue
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-
-      let isDrawing = false;
-
-      records.forEach((pt) => {
-        if (pt.time < minTime || pt.time > maxTime) return;
-        if (pt.frequency <= 15) {
-          isDrawing = false;
-          return;
-        }
-
-        const px = padLeft + ((pt.time - minTime) / tSpan) * plotW;
-        const py = padTop + plotH - ((pt.frequency - yMin) / (yMax - yMin)) * plotH;
-
-        if (!isDrawing) {
-          ctx.moveTo(px, py);
-          isDrawing = true;
-        } else {
-          ctx.lineTo(px, py);
-        }
-      });
-      ctx.stroke();
-
-      // Draw point markers with glow
-      records.forEach((pt) => {
-        if (pt.time < minTime || pt.time > maxTime || pt.frequency <= 15) return;
-        const px = padLeft + ((pt.time - minTime) / tSpan) * plotW;
-        const py = padTop + plotH - ((pt.frequency - yMin) / (yMax - yMin)) * plotH;
-
-        ctx.fillStyle = '#0284c7';
-        ctx.beginPath();
-        ctx.arc(px, py, 3, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      });
-    }
-
-    // Draw Live Reticle for Current Instantaneous Value
-    if (currentFreq > 15) {
-      const liveX = padLeft + ((elapsedTime - minTime) / tSpan) * plotW;
-      const liveY = padTop + plotH - ((currentFreq - yMin) / (yMax - yMin)) * plotH;
-
-      if (liveX >= padLeft && liveX <= padLeft + plotW && liveY >= padTop && liveY <= padTop + plotH) {
-        ctx.fillStyle = '#22c55e'; // Emerald
-        ctx.beginPath();
-        ctx.arc(liveX, liveY, 6, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Pulsing radar ring
-        ctx.strokeStyle = 'rgba(34, 197, 94, 0.5)';
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+        ctx.strokeStyle = '#f59e0b';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.arc(liveX, liveY, 11, 0, 2 * Math.PI);
+        ctx.roundRect(tipX, tipY, textW, 24, 6);
+        ctx.fill();
         ctx.stroke();
+
+        ctx.fillStyle = '#f8fafc';
+        ctx.textAlign = 'left';
+        ctx.fillText(tipText, tipX + 8, tipY + 16);
+        ctx.restore();
       }
-    }
 
-    // Draw Hover Crosshair (if active)
-    if (hoveredPoint) {
-      ctx.strokeStyle = '#f59e0b';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([3, 3]);
+      animId = requestAnimationFrame(render);
+    };
 
-      // Vertical line
-      ctx.beginPath();
-      ctx.moveTo(hoveredPoint.x, padTop);
-      ctx.lineTo(hoveredPoint.x, padTop + plotH);
-      ctx.stroke();
-
-      // Horizontal line
-      ctx.beginPath();
-      ctx.moveTo(padLeft, hoveredPoint.y);
-      ctx.lineTo(padLeft + plotW, hoveredPoint.y);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // Tooltip Card
-      const tipText = `t = ${hoveredPoint.time.toFixed(2)}s | f = ${hoveredPoint.freq.toFixed(1)} Hz (${hoveredPoint.note})`;
-      ctx.font = '11px JetBrains Mono, monospace';
-      const textW = ctx.measureText(tipText).width + 16;
-      let tipX = hoveredPoint.x + 10;
-      if (tipX + textW > padLeft + plotW) tipX = hoveredPoint.x - textW - 10;
-      let tipY = hoveredPoint.y - 25;
-      if (tipY < padTop) tipY = hoveredPoint.y + 15;
-
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.95)';
-      ctx.strokeStyle = '#f59e0b';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(tipX, tipY, textW, 24, 6);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#f8fafc';
-      ctx.textAlign = 'left';
-      ctx.fillText(tipText, tipX + 8, tipY + 16);
-    }
-  }, [displayMode, records, elapsedTime, currentFreq, freqScale, stats, hoveredPoint]);
+    animId = requestAnimationFrame(render);
+    return () => cancelAnimationFrame(animId);
+  }, [displayMode]);
 
   // Handle Canvas Mouse Move for Tooltip
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -768,8 +871,35 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
               )}
             </div>
 
-            {/* Timer & Scale Presets */}
-            <div className="flex items-center gap-3">
+            {/* Timer, Smoothing Toggle, Scale Presets & Live FPS Monitor */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              {/* Curve Smoothing Spline vs Linear Toggle */}
+              <button
+                type="button"
+                onClick={() => setCurveSmoothing(!curveSmoothing)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold transition border ${
+                  curveSmoothing
+                    ? 'bg-sky-50 text-sky-700 border-sky-300 shadow-2xs'
+                    : 'bg-slate-100 text-slate-600 border-slate-300'
+                }`}
+                title="Toggle smooth cubic spline curve interpolation vs. linear points"
+              >
+                <Sparkles className="w-3 h-3 text-sky-500" />
+                <span>{curveSmoothing ? 'Spline Smooth' : 'Linear Points'}</span>
+              </button>
+
+              {/* Hardware Accelerated Live FPS Monitor Badge */}
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-emerald-400 font-mono text-xs font-bold shadow-inner"
+                title="Hardware-accelerated live rendering frame rate"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span>{fpsLive} FPS</span>
+              </div>
+
               <div className="text-xs font-mono font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded border border-slate-200">
                 ⏱ {elapsedTime.toFixed(1)}s ({records.length} pts)
               </div>

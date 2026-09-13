@@ -1167,4 +1167,46 @@ npm run dev
     - Automated Test Suite: `node --test tests/*.test.mjs` -> **All 12 test suites passing (100% pass rate)**.
     - Production Build: `npm run build` -> Passed with 0 errors (Vite production bundle generated cleanly in 3.62s).
 
+---
+
+### Step 33: Top Header Alignment & Viewport Hardening, 60/120 FPS High-Refresh Smooth Spline Graphs [SUCCESSFUL]
+
+- **1. Objective & Context**:
+  - The user observed that in Google Chrome at 100% zoom, the top of the header in both Teacher and Student apps was vertically clipped, with letters sliced off and overlapping the workspace below.
+  - Furthermore, the user requested that the graphs look modern and smooth with higher FPS.
+
+- **2. Root Cause Analysis**:
+  - In `Navbar.tsx`, when horizontal space was constrained (e.g. laptop viewports or 1080p with standard 125% Windows DPI scaling = 1536px or 1280px), the unconstrained brand title "Lab-ove and Beyond" and subtitle "Scientific Kinematics, Acoustics & Experiment Studio • by MR. F." wrapped into multiple lines without `whitespace-nowrap` or `shrink-0`.
+  - As a result, the header contents expanded vertically from 36px to ~75px. With `h-14` (56px) and `flex items-center`, CSS flexbox vertically centered the 75px child at $y = (56 - 75) / 2 \approx -10\text{px}$, pushing the top 10-15 pixels of the brand icon, title, mode toggle, and view buttons completely off the top of the screen!
+  - In `FrequencyRecorder.tsx`, canvas redraws were tied to 20Hz React state updates, causing noticeable stepping and jagged line-to-line corners.
+
+- **3. Technical Solutions Implemented**:
+  - **Header Alignment & Responsive Viewport Hardening (`Navbar.tsx` & `App.tsx`)**:
+    - Enforced `h-14 min-h-[3.5rem] max-h-14 overflow-hidden shrink-0` on `<header>`.
+    - Added `whitespace-nowrap shrink-0` to the brand block, title, and "by MR. F." pill badge.
+    - Added `hidden 2xl:block whitespace-nowrap` on the subtitle so it never wraps into multiple lines on smaller viewports.
+    - Added responsive breakpoints (`hidden 2xl:inline`) on the View Mode Switcher buttons (`Split`, `Tracker`, `Graph`, etc.), so that on tighter viewports the buttons show clean, centered icons with tooltips, and on wide monitors they show icon + text.
+    - Updated `App.tsx` root container to `h-full h-screen w-full` (eliminating `w-screen` / 100vw horizontal overflow scrollbars).
+  - **60/120 FPS Hardware-Accelerated High-Refresh Render Engine (`FrequencyRecorder.tsx`)**:
+    - Converted the canvas rendering from 20 Hz React state triggers to a continuous `requestAnimationFrame` loop running at the display's native refresh rate (60 Hz / 120 Hz / 144 Hz).
+    - Added high-performance ref bindings (`recordsRef`, `currentFreqRef`, `elapsedTimeRef`, `curveSmoothingRef`, `hoveredPointRef`) for zero-allocation, stutter-free animation.
+    - Increased internal sampling density to 40 Hz (25ms interval) for high-fidelity audio capture.
+    - Added a live FPS monitor badge: `⚡ 60 FPS` measuring rolling inter-frame delta times.
+  - **Catmull-Rom Cubic Spline Smoothing & Modern Neon Aesthetic (`FrequencyRecorder.tsx` & `KinematicsGraph.tsx`)**:
+    - Replaced jagged `lineTo` line segments in `FrequencyRecorder` with Catmull-Rom to cubic Bezier curve interpolation path (`buildSplinePath`).
+    - Added glowing neon path stroke (`shadowColor: rgba(56, 189, 248, 0.85)`, `shadowBlur: 9`).
+    - Added vertical multi-stop gradient fill under the curve (`rgba(56, 189, 248, 0.32)` to dark transparent).
+    - Added animated 60 FPS expanding radar pulse wave around the live instantaneous frequency reticle.
+    - Added user toggle: `Spline Smooth` vs. `Linear Points`.
+    - In `KinematicsGraph.tsx`, updated Chart.js `tension: 0.35` (smooth natural cubic spline curves) and refined point hover radii.
+
+- **4. Verification**:
+  - Teacher Edition (`c:\Users\fahad\Desktop\fizziq`):
+    - `npm test`: **All 36 test suites passing (100% pass rate)**.
+    - `npm run build`: Production bundle compiled cleanly in 3.46s with 0 errors.
+  - Student Edition (`C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`):
+    - `npm test`: **All 12 test suites passing (100% pass rate)**.
+    - `npm run build`: Production bundle compiled cleanly in 3.59s with 0 errors.
+
+
 

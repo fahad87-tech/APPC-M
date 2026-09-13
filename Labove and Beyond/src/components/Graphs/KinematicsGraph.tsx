@@ -507,13 +507,13 @@ const SinglePlot: React.FC<SinglePlotProps> = ({
         data,
         borderColor: series.color,
         backgroundColor: series.color,
-        borderWidth: 2,
-        pointRadius: 4,
-        pointHoverRadius: 7,
+        borderWidth: 2.5,
+        pointRadius: 3.5,
+        pointHoverRadius: 6.5,
         pointBackgroundColor: series.color,
         pointBorderColor: '#ffffff',
         pointBorderWidth: 1.5,
-        tension: 0.1,
+        tension: 0.35, // Smooth natural cubic spline curve
       });
     });
 
@@ -538,7 +538,7 @@ const SinglePlot: React.FC<SinglePlotProps> = ({
           borderDash: [6, 4],
           pointRadius: 0,
           fill: false,
-          tension: 0.1,
+          tension: 0.25,
         });
       }
     }
