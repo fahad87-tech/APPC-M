@@ -83,13 +83,13 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // High-performance refs for 60/120 FPS requestAnimationFrame rendering
-  const recordsRef = useRef<FrequencyHistoryRecord[]>(records);
-  recordsRef.current = records;
+  // High-performance refs for 60/120/144 FPS requestAnimationFrame rendering
+  const recordsBufferRef = useRef<FrequencyHistoryRecord[]>(records);
   const elapsedTimeRef = useRef<number>(elapsedTime);
-  elapsedTimeRef.current = elapsedTime;
   const currentFreqRef = useRef<number>(currentFreq);
   currentFreqRef.current = currentFreq;
+  const currentDbRef = useRef<number>(currentDb);
+  currentDbRef.current = currentDb;
   const freqScaleRef = useRef<'voice' | 'music' | 'full' | 'auto'>(freqScale);
   freqScaleRef.current = freqScale;
   const curveSmoothingRef = useRef<boolean>(curveSmoothing);
@@ -100,7 +100,7 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
   // Active note representation
   const activeNote = useMemo(() => frequencyToNote(currentFreq), [currentFreq]);
 
-  // Handle Recording Timer & High-Density Sampling (40 Hz / 25ms)
+  // Handle Recording Timer & High-Density Sampling (60 Hz / ~16ms) decoupled from React component renders
   useEffect(() => {
     if (!isRecording || isPaused) {
       if (timerRef.current) {
@@ -110,28 +110,33 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
       return;
     }
 
-    const intervalMs = 25; // High-density 40 Hz recording rate for ultra-smooth capture
+    const intervalMs = 16; // 60 Hz recording rate for ultra-smooth capture
+    let lastSyncTime = performance.now();
+
     timerRef.current = setInterval(() => {
-      setElapsedTime((prev) => {
-        const nextTime = Math.round((prev + intervalMs / 1000) * 1000) / 1000;
+      const now = performance.now();
+      elapsedTimeRef.current = Math.round((elapsedTimeRef.current + intervalMs / 1000) * 1000) / 1000;
+      const nextTime = elapsedTimeRef.current;
 
-        // Sample current frequency if valid
-        const freqToRecord = currentFreq > 15 ? currentFreq : 0;
-        const noteInfo = frequencyToNote(freqToRecord);
+      // Sample current frequency if valid
+      const fNow = currentFreqRef.current;
+      const freqToRecord = fNow > 15 ? fNow : 0;
+      const noteInfo = frequencyToNote(freqToRecord);
 
-        setRecords((prevRecs) => [
-          ...prevRecs,
-          {
-            time: nextTime,
-            frequency: freqToRecord,
-            note: noteInfo.note !== '--' ? `${noteInfo.note}${noteInfo.octave}` : '--',
-            cents: noteInfo.cents,
-            decibels: currentDb,
-          },
-        ]);
-
-        return nextTime;
+      recordsBufferRef.current.push({
+        time: nextTime,
+        frequency: freqToRecord,
+        note: noteInfo.note !== '--' ? `${noteInfo.note}${noteInfo.octave}` : '--',
+        cents: noteInfo.cents,
+        decibels: currentDbRef.current,
       });
+
+      // Throttle React state updates to 10 Hz (every 100ms) to eliminate React re-render lag
+      if (now - lastSyncTime >= 100) {
+        setElapsedTime(nextTime);
+        setRecords([...recordsBufferRef.current]);
+        lastSyncTime = now;
+      }
     }, intervalMs);
 
     return () => {
@@ -139,8 +144,10 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
         clearInterval(timerRef.current);
         timerRef.current = null;
       }
+      setElapsedTime(elapsedTimeRef.current);
+      setRecords([...recordsBufferRef.current]);
     };
-  }, [isRecording, isPaused, currentFreq, currentDb]);
+  }, [isRecording, isPaused]);
 
   // Simulation physics loop (if active)
   useEffect(() => {
@@ -181,6 +188,8 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
 
   // Erase and Restart
   const handleEraseAndRestart = () => {
+    recordsBufferRef.current = [];
+    elapsedTimeRef.current = 0;
     setRecords([]);
     setElapsedTime(0);
     setIsRecording(true);
@@ -191,6 +200,8 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
   const handleStopRecording = () => {
     setIsRecording(false);
     setIsPaused(false);
+    setRecords([...recordsBufferRef.current]);
+    setElapsedTime(elapsedTimeRef.current);
   };
 
   // Toggle Pause/Resume
@@ -199,29 +210,37 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
       setIsRecording(true);
       setIsPaused(false);
     } else {
-      setIsPaused((prev) => !prev);
+      setIsPaused((prev) => {
+        if (!prev) {
+          setRecords([...recordsBufferRef.current]);
+          setElapsedTime(elapsedTimeRef.current);
+        }
+        return !prev;
+      });
     }
   };
 
   // Export CSV
   const handleExportCsv = () => {
-    if (records.length === 0) {
+    const dataToExport = recordsBufferRef.current.length > 0 ? recordsBufferRef.current : records;
+    if (dataToExport.length === 0) {
       alert('No recorded frequency data to export. Click Record to capture data first.');
       return;
     }
     const filename = `frequency_vs_time_${Date.now()}.csv`;
-    exportFrequencyToCsv(records, filename);
+    exportFrequencyToCsv(dataToExport, filename);
   };
 
   // Summary Statistics
   const stats = useMemo(() => {
-    const validRecs = records.filter((r) => r.frequency > 15);
+    const recsToUse = recordsBufferRef.current.length > 0 ? recordsBufferRef.current : records;
+    const validRecs = recsToUse.filter((r) => r.frequency > 15);
     if (validRecs.length === 0) {
       return {
         min: 0,
         max: 0,
         avg: 0,
-        count: records.length,
+        count: recsToUse.length,
         duration: elapsedTime,
       };
     }
@@ -233,12 +252,12 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
       min: Math.round(min * 10) / 10,
       max: Math.round(max * 10) / 10,
       avg: Math.round(avg * 10) / 10,
-      count: records.length,
+      count: recsToUse.length,
       duration: elapsedTime,
     };
   }, [records, elapsedTime]);
 
-  // Render Frequency vs Time Canvas Graph at 60/120 FPS via requestAnimationFrame
+  // Render Frequency vs Time Canvas Graph at 60/120/144 FPS via requestAnimationFrame
   useEffect(() => {
     if (displayMode !== 'timeSeries') return;
     const canvas = canvasRef.current;
@@ -259,34 +278,48 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
         frameTimes.push(1000 / dt);
         if (frameTimes.length > 30) frameTimes.shift();
       }
-      if (now - lastFpsUpdate > 400 && frameTimes.length > 0) {
+      if (now - lastFpsUpdate > 350 && frameTimes.length > 0) {
         const measured = Math.round(frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length);
         setFpsLive(Math.min(144, Math.max(15, measured)));
         lastFpsUpdate = now;
       }
 
-      const recs = recordsRef.current;
+      // Handle Retina / High-DPI display scaling for razor-sharp rendering
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const displayW = Math.max(300, Math.round(rect.width));
+      const displayH = Math.max(200, Math.round(rect.height));
+
+      if (canvas.width !== Math.round(displayW * dpr) || canvas.height !== Math.round(displayH * dpr)) {
+        canvas.width = Math.round(displayW * dpr);
+        canvas.height = Math.round(displayH * dpr);
+      }
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+
+      const w = displayW;
+      const h = displayH;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Modern publication-grade pure white background
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+
+      const padLeft = 68;
+      const padRight = 36;
+      const padTop = 28;
+      const padBottom = 38;
+      const plotW = Math.max(10, w - padLeft - padRight);
+      const plotH = Math.max(10, h - padTop - padBottom);
+
+      const recs = recordsBufferRef.current;
       const elTime = elapsedTimeRef.current;
       const cFreq = currentFreqRef.current;
       const fScale = freqScaleRef.current;
       const isSmooth = curveSmoothingRef.current;
       const hPoint = hoveredPointRef.current;
-
-      const w = canvas.width;
-      const h = canvas.height;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // Deep dark blueprint background (#090d16)
-      ctx.fillStyle = '#090d16';
-      ctx.fillRect(0, 0, w, h);
-
-      const padLeft = 65;
-      const padRight = 35;
-      const padTop = 30;
-      const padBottom = 40;
-      const plotW = w - padLeft - padRight;
-      const plotH = h - padTop - padBottom;
 
       // Determine Y range (Frequency Hz)
       let yMin = 0;
@@ -318,29 +351,29 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
       // Determine X range (Time seconds)
       const maxTime = Math.max(10, elTime + 0.5);
       const minTime = Math.max(0, maxTime - 20); // 20s scrolling window
-      const tSpan = maxTime - minTime;
+      const tSpan = Math.max(0.1, maxTime - minTime);
 
       // Horizontal Frequency Grids
       const ySteps = 5;
       ctx.fillStyle = '#64748b';
-      ctx.font = '10px JetBrains Mono, monospace';
+      ctx.font = '500 10px JetBrains Mono, monospace';
       ctx.textAlign = 'right';
 
       for (let i = 0; i <= ySteps; i++) {
         const fVal = yMin + (i * (yMax - yMin)) / ySteps;
         const py = padTop + plotH - ((fVal - yMin) / (yMax - yMin)) * plotH;
 
-        ctx.strokeStyle = 'rgba(51, 65, 85, 0.25)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = i === 0 ? '#cbd5e1' : '#f1f5f9';
+        ctx.lineWidth = i === 0 ? 1.5 : 1;
         ctx.beginPath();
         ctx.moveTo(padLeft, py);
         ctx.lineTo(padLeft + plotW, py);
         ctx.stroke();
 
-        ctx.fillText(`${Math.round(fVal)} Hz`, padLeft - 8, py + 3);
+        ctx.fillText(`${Math.round(fVal)} Hz`, padLeft - 8, py + 3.5);
       }
 
-      // Musical Landmark Guides (e.g. C4 = 261.6 Hz, A4 = 440 Hz, C5 = 523.3 Hz, A5 = 880 Hz)
+      // Musical Landmark Guides (C4 = 261.6 Hz, A4 = 440 Hz, C5 = 523.3 Hz, A5 = 880 Hz)
       const landmarks = [
         { f: 261.6, note: 'C4' },
         { f: 440.0, note: 'A4' },
@@ -351,7 +384,7 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
       landmarks.forEach((lm) => {
         if (lm.f >= yMin && lm.f <= yMax) {
           const py = padTop + plotH - ((lm.f - yMin) / (yMax - yMin)) * plotH;
-          ctx.strokeStyle = 'rgba(99, 102, 241, 0.35)';
+          ctx.strokeStyle = 'rgba(99, 102, 241, 0.28)';
           ctx.lineWidth = 1;
           ctx.setLineDash([4, 4]);
           ctx.beginPath();
@@ -360,11 +393,23 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
           ctx.stroke();
           ctx.setLineDash([]);
 
-          // Pitch Tag Badge
-          ctx.fillStyle = '#818cf8';
-          ctx.textAlign = 'left';
-          ctx.font = 'bold 10px JetBrains Mono, monospace';
-          ctx.fillText(lm.note, padLeft + plotW + 6, py + 3);
+          // Modern Pitch Tag Badge on right
+          const badgeW = 24;
+          const badgeH = 15;
+          const badgeX = padLeft + plotW + 5;
+          const badgeY = py - 7.5;
+          ctx.fillStyle = '#eef2ff';
+          ctx.strokeStyle = '#c7d2fe';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 4);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = '#4338ca';
+          ctx.textAlign = 'center';
+          ctx.font = 'bold 9px JetBrains Mono, monospace';
+          ctx.fillText(lm.note, badgeX + badgeW / 2, badgeY + 11);
         }
       });
 
@@ -372,24 +417,24 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
       const xSteps = 5;
       ctx.textAlign = 'center';
       ctx.fillStyle = '#64748b';
-      ctx.font = '10px JetBrains Mono, monospace';
+      ctx.font = '500 10px JetBrains Mono, monospace';
 
       for (let i = 0; i <= xSteps; i++) {
         const tVal = minTime + (i * tSpan) / xSteps;
         const px = padLeft + ((tVal - minTime) / tSpan) * plotW;
 
-        ctx.strokeStyle = 'rgba(51, 65, 85, 0.25)';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = i === 0 ? '#cbd5e1' : '#f1f5f9';
+        ctx.lineWidth = i === 0 ? 1.5 : 1;
         ctx.beginPath();
         ctx.moveTo(px, padTop);
         ctx.lineTo(px, padTop + plotH);
         ctx.stroke();
 
-        ctx.fillText(`${tVal.toFixed(1)}s`, px, padTop + plotH + 18);
+        ctx.fillText(`${tVal.toFixed(1)}s`, px, padTop + plotH + 16);
       }
 
-      // Axis Labels with modern typography
-      ctx.fillStyle = '#cbd5e1';
+      // Axis Titles with modern typography
+      ctx.fillStyle = '#334155';
       ctx.font = 'bold 11px Plus Jakarta Sans, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText('Time t (seconds)', padLeft + plotW / 2, h - 8);
@@ -449,39 +494,39 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
           ctx.lineTo(activePoints[0].x, padTop + plotH);
           ctx.closePath();
           const fillGrad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
-          fillGrad.addColorStop(0, 'rgba(56, 189, 248, 0.32)');
-          fillGrad.addColorStop(0.6, 'rgba(14, 165, 233, 0.08)');
-          fillGrad.addColorStop(1, 'rgba(9, 13, 22, 0.0)');
+          fillGrad.addColorStop(0, 'rgba(37, 99, 235, 0.16)');
+          fillGrad.addColorStop(0.7, 'rgba(37, 99, 235, 0.04)');
+          fillGrad.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
           ctx.fillStyle = fillGrad;
           ctx.fill();
           ctx.restore();
 
-          // 2. Glowing Neon Path
+          // 2. High-definition Sapphire Spline Stroke with soft glow
           ctx.save();
-          ctx.shadowColor = 'rgba(56, 189, 248, 0.85)';
-          ctx.shadowBlur = 9;
-          ctx.strokeStyle = '#38bdf8';
+          ctx.shadowColor = 'rgba(37, 99, 235, 0.22)';
+          ctx.shadowBlur = 6;
+          ctx.strokeStyle = '#2563eb';
           ctx.lineWidth = 2.5;
           buildSplinePath();
           ctx.stroke();
           ctx.restore();
 
-          // 3. Crisp Data Point Halos (sample every N points if dense)
-          const stride = activePoints.length > 80 ? 4 : activePoints.length > 40 ? 2 : 1;
+          // 3. Crisp Data Point Halos (subsampled cleanly if dense)
+          const stride = activePoints.length > 120 ? 4 : activePoints.length > 60 ? 2 : 1;
           for (let i = 0; i < activePoints.length; i += stride) {
             const pt = activePoints[i];
-            ctx.fillStyle = '#0284c7';
+            ctx.fillStyle = '#2563eb';
             ctx.beginPath();
             ctx.arc(pt.x, pt.y, 2.5, 0, 2 * Math.PI);
             ctx.fill();
-            ctx.strokeStyle = '#e0f2fe';
+            ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 1;
             ctx.stroke();
           }
         }
       }
 
-      // Draw Live Reticle for Current Instantaneous Value with 60 FPS Animated Pulse
+      // Draw Live Reticle for Current Instantaneous Value with 60/120/144 FPS Animated Pulse
       if (cFreq > 15) {
         const liveX = padLeft + ((elTime - minTime) / tSpan) * plotW;
         const liveY = padTop + plotH - ((cFreq - yMin) / (yMax - yMin)) * plotH;
@@ -489,22 +534,22 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
         if (liveX >= padLeft && liveX <= padLeft + plotW && liveY >= padTop && liveY <= padTop + plotH) {
           // Central glowing reticle dot
           ctx.save();
-          ctx.shadowColor = 'rgba(34, 197, 94, 0.9)';
-          ctx.shadowBlur = 10;
-          ctx.fillStyle = '#22c55e';
+          ctx.shadowColor = 'rgba(37, 99, 235, 0.35)';
+          ctx.shadowBlur = 8;
+          ctx.fillStyle = '#2563eb';
           ctx.beginPath();
-          ctx.arc(liveX, liveY, 5.5, 0, 2 * Math.PI);
+          ctx.arc(liveX, liveY, 5, 0, 2 * Math.PI);
           ctx.fill();
           ctx.strokeStyle = '#ffffff';
           ctx.lineWidth = 2;
           ctx.stroke();
           ctx.restore();
 
-          // 60 FPS Smooth Expanding Pulse Wave
+          // Smooth Expanding Pulse Wave
           const pulsePhase = (now % 1000) / 1000;
-          const pulseRadius = 6 + pulsePhase * 16;
-          const pulseAlpha = (1 - pulsePhase) * 0.75;
-          ctx.strokeStyle = `rgba(34, 197, 94, ${pulseAlpha})`;
+          const pulseRadius = 5 + pulsePhase * 16;
+          const pulseAlpha = (1 - pulsePhase) * 0.65;
+          ctx.strokeStyle = `rgba(37, 99, 235, ${pulseAlpha})`;
           ctx.lineWidth = 1.5;
           ctx.beginPath();
           ctx.arc(liveX, liveY, pulseRadius, 0, 2 * Math.PI);
@@ -512,10 +557,10 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
         }
       }
 
-      // Draw Hover Crosshair & Glassmorphic Tooltip Card
+      // Draw Hover Crosshair & Modern Tooltip Card
       if (hPoint) {
         ctx.save();
-        ctx.strokeStyle = '#f59e0b';
+        ctx.strokeStyle = '#94a3b8';
         ctx.lineWidth = 1;
         ctx.setLineDash([3, 3]);
 
@@ -534,27 +579,32 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
 
         // Tooltip Card
         const tipText = `t = ${hPoint.time.toFixed(2)}s | f = ${hPoint.freq.toFixed(1)} Hz (${hPoint.note})`;
-        ctx.font = '11px JetBrains Mono, monospace';
-        const textW = ctx.measureText(tipText).width + 16;
+        ctx.font = '500 11px JetBrains Mono, monospace';
+        const textW = ctx.measureText(tipText).width + 20;
         let tipX = hPoint.x + 10;
         if (tipX + textW > padLeft + plotW) tipX = hPoint.x - textW - 10;
-        let tipY = hPoint.y - 28;
-        if (tipY < padTop) tipY = hPoint.y + 16;
+        let tipY = hPoint.y - 30;
+        if (tipY < padTop) tipY = hPoint.y + 14;
 
-        ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-        ctx.strokeStyle = '#f59e0b';
+        ctx.shadowColor = 'rgba(15, 23, 42, 0.12)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 2;
+        ctx.fillStyle = '#ffffff';
+        ctx.strokeStyle = '#e2e8f0';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.roundRect(tipX, tipY, textW, 24, 6);
+        ctx.roundRect(tipX, tipY, textW, 26, 6);
         ctx.fill();
         ctx.stroke();
 
-        ctx.fillStyle = '#f8fafc';
+        ctx.shadowColor = 'transparent';
+        ctx.fillStyle = '#0f172a';
         ctx.textAlign = 'left';
-        ctx.fillText(tipText, tipX + 8, tipY + 16);
+        ctx.fillText(tipText, tipX + 10, tipY + 17);
         ctx.restore();
       }
 
+      ctx.restore();
       animId = requestAnimationFrame(render);
     };
 
@@ -565,33 +615,36 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
   // Handle Canvas Mouse Move for Tooltip
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
-    if (!canvas || records.length === 0) return;
+    const allRecs = recordsBufferRef.current;
+    if (!canvas || allRecs.length === 0) return;
     const rect = canvas.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * canvas.width;
-    const y = ((e.clientY - rect.top) / rect.height) * canvas.height;
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-    const padLeft = 65;
-    const padRight = 30;
-    const padTop = 30;
-    const padBottom = 40;
-    const plotW = canvas.width - padLeft - padRight;
-    const plotH = canvas.height - padTop - padBottom;
+    const padLeft = 68;
+    const padRight = 36;
+    const padTop = 28;
+    const padBottom = 38;
+    const plotW = Math.max(10, rect.width - padLeft - padRight);
+    const plotH = Math.max(10, rect.height - padTop - padBottom);
 
     if (x < padLeft || x > padLeft + plotW || y < padTop || y > padTop + plotH) {
       setHoveredPoint(null);
       return;
     }
 
-    const maxTime = Math.max(10, elapsedTime + 1);
+    const maxTime = Math.max(10, elapsedTimeRef.current + 0.5);
     const minTime = Math.max(0, maxTime - 20);
-    const tSpan = maxTime - minTime;
+    const tSpan = Math.max(0.1, maxTime - minTime);
     const hoverT = minTime + ((x - padLeft) / plotW) * tSpan;
 
-    // Find closest recorded point
+    // Find closest recorded point (reverse search for speed)
     let closest: FrequencyHistoryRecord | null = null;
     let minDist = Infinity;
 
-    for (const r of records) {
+    for (let i = allRecs.length - 1; i >= 0; i--) {
+      const r = allRecs[i];
+      if (r.time < minTime - 1) break;
       const d = Math.abs(r.time - hoverT);
       if (d < minDist) {
         minDist = d;
@@ -601,15 +654,20 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
 
     if (closest) {
       const targetRecord: FrequencyHistoryRecord = closest;
-      if (minDist < 1.0 && targetRecord.frequency > 15) {
+      if (minDist < 1.5 && targetRecord.frequency > 15) {
         let yMin = 0;
         let yMax = 1000;
         if (freqScale === 'voice') { yMin = 50; yMax = 1200; }
         else if (freqScale === 'music') { yMin = 50; yMax = 3500; }
         else if (freqScale === 'full') { yMin = 20; yMax = 8000; }
         else {
-          yMax = Math.max(500, Math.ceil((stats.max * 1.2) / 100) * 100);
-          yMin = Math.max(0, Math.floor((stats.min * 0.8) / 50) * 50);
+          const validRecs = allRecs.filter((r) => r.frequency > 15);
+          if (validRecs.length > 0) {
+            const maxCaptured = Math.max(...validRecs.map((r) => r.frequency));
+            const minCaptured = Math.min(...validRecs.map((r) => r.frequency));
+            yMax = Math.max(500, Math.ceil((maxCaptured * 1.25) / 100) * 100);
+            yMin = Math.max(0, Math.floor((minCaptured * 0.75) / 50) * 50);
+          }
         }
 
         const px = padLeft + ((targetRecord.time - minTime) / tSpan) * plotW;
@@ -632,19 +690,21 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
     if (!onAddToNotebook) return;
     const canvas = canvasRef.current;
     const imgUrl = canvas ? canvas.toDataURL('image/png') : undefined;
+    const recsToUse = recordsBufferRef.current.length > 0 ? recordsBufferRef.current : records;
+    const curTime = elapsedTimeRef.current;
 
     onAddToNotebook({
       type: 'sound',
       title: `Acoustic Frequency as a Function of Time f(t)`,
-      content: `Recorded ${records.length} frequency samples over ${elapsedTime.toFixed(1)} seconds. Average fundamental frequency f_avg = ${stats.avg} Hz (Range: ${stats.min} - ${stats.max} Hz). Pitch range spans ${activeNote.note}${activeNote.octave}.`,
+      content: `Recorded ${recsToUse.length} frequency samples over ${curTime.toFixed(1)} seconds. Average fundamental frequency f_avg = ${stats.avg} Hz (Range: ${stats.min} - ${stats.max} Hz). Pitch range spans ${activeNote.note}${activeNote.octave}.`,
       imageUrl: imgUrl,
       dataSnippet: {
         'Average Frequency': `${stats.avg} Hz`,
         'Min Frequency': `${stats.min} Hz`,
         'Max Frequency': `${stats.max} Hz`,
         'Pitch Range': `${activeNote.note}${activeNote.octave}`,
-        'Sample Count': `${records.length} samples`,
-        'Elapsed Time': `${elapsedTime.toFixed(1)} s`,
+        'Sample Count': `${recsToUse.length} samples`,
+        'Elapsed Time': `${curTime.toFixed(1)} s`,
       },
     });
   };
@@ -890,7 +950,7 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
 
               {/* Hardware Accelerated Live FPS Monitor Badge */}
               <div
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-emerald-400 font-mono text-xs font-bold shadow-inner"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono text-xs font-bold shadow-2xs"
                 title="Hardware-accelerated live rendering frame rate"
               >
                 <span className="relative flex h-2 w-2">
@@ -991,14 +1051,12 @@ export const FrequencyRecorder: React.FC<FrequencyRecorderProps> = ({
           )}
 
           {/* Interactive Canvas Graph */}
-          <div className="relative flex-1 bg-slate-900 rounded-xl overflow-hidden border border-slate-800 shadow-inner min-h-[300px]">
+          <div className="relative flex-1 bg-white rounded-xl overflow-hidden border border-slate-200 shadow-xs min-h-[300px]">
             <canvas
               ref={canvasRef}
-              width={900}
-              height={380}
               onMouseMove={handleCanvasMouseMove}
               onMouseLeave={() => setHoveredPoint(null)}
-              className="w-full h-full object-fill cursor-crosshair"
+              className="w-full h-full block cursor-crosshair"
             />
           </div>
 

@@ -402,13 +402,26 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
       if (oscCanvas) {
         const ctx = oscCanvas.getContext('2d');
         if (ctx) {
-          const w = oscCanvas.width;
-          const h = oscCanvas.height;
-          ctx.fillStyle = '#0f172a'; // dark navy slate
+          const rect = oscCanvas.getBoundingClientRect();
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          const dw = Math.max(200, Math.round(rect.width));
+          const dh = Math.max(120, Math.round(rect.height));
+
+          if (oscCanvas.width !== Math.round(dw * dpr) || oscCanvas.height !== Math.round(dh * dpr)) {
+            oscCanvas.width = Math.round(dw * dpr);
+            oscCanvas.height = Math.round(dh * dpr);
+          }
+
+          ctx.save();
+          ctx.scale(dpr, dpr);
+
+          const w = dw;
+          const h = dh;
+          ctx.fillStyle = '#ffffff'; // Clean publication-grade white background
           ctx.fillRect(0, 0, w, h);
 
-          // Grid lines
-          ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+          // Subtle Grid lines
+          ctx.strokeStyle = '#f1f5f9';
           ctx.lineWidth = 1;
           for (let x = 0; x < w; x += 40) {
             ctx.beginPath();
@@ -424,15 +437,18 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
           }
 
           // Center zero line
-          ctx.strokeStyle = 'rgba(100, 116, 139, 0.6)';
+          ctx.strokeStyle = '#cbd5e1';
+          ctx.lineWidth = 1.5;
           ctx.beginPath();
           ctx.moveTo(0, h / 2);
           ctx.lineTo(w, h / 2);
           ctx.stroke();
 
-          // Waveform
+          // Modern Sapphire Waveform
           ctx.lineWidth = 2;
-          ctx.strokeStyle = '#38bdf8'; // bright cyan
+          ctx.strokeStyle = '#2563eb';
+          ctx.shadowColor = 'rgba(37, 99, 235, 0.2)';
+          ctx.shadowBlur = 4;
           ctx.beginPath();
 
           const sliceWidth = w / bufferLength;
@@ -448,6 +464,7 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
             x += sliceWidth;
           }
           ctx.stroke();
+          ctx.restore();
         }
       }
 
@@ -456,13 +473,26 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
       if (fftCanvas) {
         const ctx = fftCanvas.getContext('2d');
         if (ctx) {
-          const w = fftCanvas.width;
-          const h = fftCanvas.height;
-          ctx.fillStyle = '#0f172a';
+          const rect = fftCanvas.getBoundingClientRect();
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          const dw = Math.max(200, Math.round(rect.width));
+          const dh = Math.max(120, Math.round(rect.height));
+
+          if (fftCanvas.width !== Math.round(dw * dpr) || fftCanvas.height !== Math.round(dh * dpr)) {
+            fftCanvas.width = Math.round(dw * dpr);
+            fftCanvas.height = Math.round(dh * dpr);
+          }
+
+          ctx.save();
+          ctx.scale(dpr, dpr);
+
+          const w = dw;
+          const h = dh;
+          ctx.fillStyle = '#ffffff'; // Clean publication-grade white background
           ctx.fillRect(0, 0, w, h);
 
-          // Grid lines
-          ctx.strokeStyle = 'rgba(51, 65, 85, 0.4)';
+          // Subtle Grid lines
+          ctx.strokeStyle = '#f1f5f9';
           ctx.lineWidth = 1;
           for (let x = 0; x < w; x += 60) {
             ctx.beginPath();
@@ -478,8 +508,14 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
           );
           const barWidth = w / visibleBins;
 
-          ctx.strokeStyle = '#3b82f6'; // FizziQ blue
-          ctx.fillStyle = 'rgba(59, 130, 246, 0.25)';
+          ctx.strokeStyle = '#2563eb';
+          ctx.lineWidth = 2;
+
+          const grad = ctx.createLinearGradient(0, 0, 0, h);
+          grad.addColorStop(0, 'rgba(37, 99, 235, 0.28)');
+          grad.addColorStop(1, 'rgba(37, 99, 235, 0.02)');
+          ctx.fillStyle = grad;
+
           ctx.beginPath();
           ctx.moveTo(0, h);
 
@@ -495,23 +531,49 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
           ctx.fill();
           ctx.stroke();
 
-          // Peak Marker
+          // Baseline
+          ctx.strokeStyle = '#e2e8f0';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(0, h);
+          ctx.lineTo(w, h);
+          ctx.stroke();
+
+          // Peak Marker & Badge
           if (maxVal > -70 && maxIndex < visibleBins) {
             const peakX = maxIndex * barWidth;
             const peakY = h - Math.max(0, Math.min(1, (maxVal + 100) / 75)) * (h - 20);
-            ctx.fillStyle = '#ef4444';
+
+            // Red dot
+            ctx.fillStyle = '#e11d48';
             ctx.beginPath();
-            ctx.arc(peakX, peakY, 5, 0, Math.PI * 2);
+            ctx.arc(peakX, peakY, 4.5, 0, Math.PI * 2);
             ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Peak text pill badge
+            const peakText = `${rawPeak.toFixed(0)} Hz`;
+            ctx.font = 'bold 10px JetBrains Mono, monospace';
+            const textW = ctx.measureText(peakText).width + 12;
+            const badgeX = Math.min(w - textW - 6, Math.max(6, peakX - textW / 2));
+            const badgeY = Math.max(8, peakY - 24);
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 11px Inter, sans-serif';
-            ctx.fillText(
-              `${rawPeak.toFixed(0)} Hz`,
-              Math.min(w - 60, Math.max(10, peakX - 20)),
-              Math.max(20, peakY - 10)
-            );
+            ctx.strokeStyle = '#e2e8f0';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.roundRect(badgeX, badgeY, textW, 18, 4);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#0f172a';
+            ctx.textAlign = 'center';
+            ctx.fillText(peakText, badgeX + textW / 2, badgeY + 12.5);
           }
+
+          ctx.restore();
         }
       }
 
@@ -917,38 +979,36 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
           {/* Visualizers Grid: Oscilloscope + FFT */}
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 min-h-0">
             {/* Oscilloscope Waveform */}
-            <div className="bg-slate-900 rounded-xl p-3 flex flex-col border border-slate-700 shadow-md min-h-[220px]">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-xs font-bold text-slate-300">
+            <div className="bg-white rounded-xl p-3 flex flex-col border border-slate-200 shadow-xs min-h-[220px]">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-xs font-bold text-slate-800">
                 <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-sky-400" />
+                  <Activity className="w-4 h-4 text-blue-600" />
                   <span>Real-time Waveform V(t) [Oscilloscope]</span>
                 </div>
-                <div className="flex items-center gap-2 text-[11px] font-mono text-slate-400">
+                <div className="flex items-center gap-2 text-[11px] font-mono text-slate-500">
                   <span>Scale: 10 ms/div</span>
                 </div>
               </div>
               <div className="flex-1 relative mt-2">
                 <canvas
                   ref={oscCanvasRef}
-                  width={640}
-                  height={240}
-                  className="w-full h-full rounded bg-slate-950"
+                  className="w-full h-full rounded-lg bg-white border border-slate-100 block"
                 />
               </div>
             </div>
 
             {/* FFT Frequency Spectrum */}
-            <div className="bg-slate-900 rounded-xl p-3 flex flex-col border border-slate-700 shadow-md min-h-[220px]">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-800 text-xs font-bold text-slate-300">
+            <div className="bg-white rounded-xl p-3 flex flex-col border border-slate-200 shadow-xs min-h-[220px]">
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100 text-xs font-bold text-slate-800">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-blue-400" />
+                  <Sparkles className="w-4 h-4 text-indigo-600" />
                   <span>Fast Fourier Transform (FFT) Frequency Spectrum</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <select
                     value={maxFftFreq}
                     onChange={(e) => setMaxFftFreq(Number(e.target.value))}
-                    className="bg-slate-800 text-slate-200 text-[11px] rounded border border-slate-700 px-2 py-0.5"
+                    className="bg-slate-50 text-slate-700 text-[11px] font-bold rounded border border-slate-200 px-2 py-0.5 outline-none cursor-pointer"
                   >
                     <option value={1000}>0 - 1000 Hz</option>
                     <option value={2000}>0 - 2000 Hz</option>
@@ -960,9 +1020,7 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
               <div className="flex-1 relative mt-2">
                 <canvas
                   ref={fftCanvasRef}
-                  width={640}
-                  height={240}
-                  className="w-full h-full rounded bg-slate-950"
+                  className="w-full h-full rounded-lg bg-white border border-slate-100 block"
                 />
               </div>
             </div>

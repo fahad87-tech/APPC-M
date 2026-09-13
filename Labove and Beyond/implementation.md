@@ -1208,5 +1208,63 @@ npm run dev
     - `npm test`: **All 12 test suites passing (100% pass rate)**.
     - `npm run build`: Production bundle compiled cleanly in 3.59s with 0 errors.
 
+---
 
+### Step 34: Modern Publication-Grade Pure White Background, Decoupled High-FPS Architecture, and High-DPI Canvas Rendering [SUCCESSFUL]
 
+- **1. Objective & Context**:
+  - The user requested: *"can you up the fps.....also the graph looks like it is from the 70s .make it modern...make it white background."*
+  - Addressed the dark navy/slate blueprint styling (`#090d16` in `FrequencyRecorder.tsx` and `#0f172a` in `SoundStudio.tsx`) which gave the app a retro 1970s CRT oscillograph appearance.
+  - Eliminated the severe FPS micro-stutter caused by high-frequency React component re-renders (where `setRecords` and `setElapsedTime` were called 40 times per second with full array copying).
+  - Fixed blurry and stretched canvas drawing on high-DPI and Windows 125%/150% scaling displays.
+  - Synchronized and verified across both the Teacher Edition (`c:\Users\fahad\Desktop\fizziq`) and Student Edition (`C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`).
+
+- **2. Decoupled High-FPS Performance Architecture**:
+  - **Memory Buffer Decoupling**:
+    - Replaced direct React state array pushes with an in-memory mutable reference `recordsBufferRef.current`.
+    - High-density sampling timer pushes sample objects into `recordsBufferRef.current` at 60 Hz in $\mathcal{O}(1)$ time with zero React re-rendering or garbage collection overhead.
+  - **Throttled State Synchronization**:
+    - Throttled React state updates (`setElapsedTime` and `setRecords`) to 10 Hz (every 100ms) purely to update digital metric cards and summary text smoothly without UI thread contention.
+    - Full synchronization is guaranteed on Pause, Stop, CSV Export, Notebook Logging, and Erase/Restart.
+  - **Native Refresh Rate Canvas Loop**:
+    - Canvas `requestAnimationFrame` loop directly reads `recordsBufferRef.current` and renders continuously at the user's native monitor refresh rate (60 FPS, 120 FPS, 144 FPS).
+    - Added high-precision rolling average FPS calculation displayed in a live pill badge (`60 / 120 / 144 FPS`).
+
+- **3. High-DPI Retina Canvas Auto-Scaling**:
+  - Dynamic `devicePixelRatio` scaling applied to `FrequencyRecorder`, `Oscilloscope`, and `FFT Spectrum`:
+    ```typescript
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const displayW = Math.max(300, Math.round(rect.width));
+    const displayH = Math.max(200, Math.round(rect.height));
+
+    if (canvas.width !== Math.round(displayW * dpr) || canvas.height !== Math.round(displayH * dpr)) {
+      canvas.width = Math.round(displayW * dpr);
+      canvas.height = Math.round(displayH * dpr);
+    }
+    ctx.save();
+    ctx.scale(dpr, dpr);
+    ```
+  - Coordinates draw against logical CSS pixels, ensuring pin-sharp 1px lines and crisp typography with zero blurriness on all resolutions.
+
+- **4. Modern Publication-Grade Pure White Styling**:
+  - **`FrequencyRecorder.tsx`**:
+    - Canvas Background: Pure white `#ffffff`.
+    - Container Card: `bg-white rounded-xl overflow-hidden border border-slate-200 shadow-xs min-h-[300px]`.
+    - Grid & Axes: Clean horizontal and vertical gridlines in `#f1f5f9`, baseline/axis in `#cbd5e1`, ticks `#64748b` in `JetBrains Mono`, axis titles `#334155` in `Plus Jakarta Sans`.
+    - Musical Landmark Pitches ($C_4, A_4, C_5, A_5$): Subtle dashed indigo guidelines `rgba(99, 102, 241, 0.28)` with rounded chip badges (`#eef2ff` fill, `#c7d2fe` border, `#4338ca` text).
+    - Spline Curve: Royal sapphire `#2563eb` with Catmull-Rom cubic spline interpolation, soft ambient shadow (`rgba(37, 99, 235, 0.22)`), and smooth vertical gradient area wash (`rgba(37, 99, 235, 0.16)` to transparent).
+    - Live Pulse Reticle: Sapphire `#2563eb` beacon with white border and animated expanding ripple ring.
+    - Hover Inspection: Minimal `#94a3b8` dashed crosshairs and floating white card tooltip (`#ffffff`, border `#e2e8f0`, soft drop shadow, dark slate `#0f172a` text).
+    - FPS Badge: Modern pill badge `bg-emerald-50 text-emerald-700 border-emerald-200 font-mono text-xs font-bold px-2.5 py-1 rounded-lg` with pulsing emerald status dot.
+  - **`SoundStudio.tsx`**:
+    - Oscilloscope: Converted from dark 70s CRT (`bg-slate-900`, `#0f172a` canvas) to `bg-white border-slate-200 shadow-xs`, pure `#ffffff` canvas, subtle `#f1f5f9` gridlines, and sapphire blue `#2563eb` waveform.
+    - FFT Frequency Spectrum: Converted to pure `#ffffff` canvas, `#f1f5f9` grid, sapphire gradient wash (`rgba(37, 99, 235, 0.28)` down to `0.02`), sapphire stroke `#2563eb`, and vibrant rose `#e11d48` peak dot with clean white badge pill.
+
+- **5. Verification & Testing**:
+  - **Teacher Edition (`c:\Users\fahad\Desktop\fizziq`)**:
+    - `npm test`: **All 36 test suites passing (100% pass rate)**.
+    - `npm run build`: Production bundle compiled cleanly in 3.94s with 0 errors.
+  - **Student Edition (`C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`)**:
+    - `npm test`: **All 12 test suites passing (100% pass rate)**.
+    - `npm run build`: Production bundle compiled cleanly in 4.00s with 0 errors.
