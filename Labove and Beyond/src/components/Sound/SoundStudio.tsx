@@ -11,9 +11,11 @@ import {
   Pause,
   RotateCcw,
   Volume2,
+  Gauge,
 } from 'lucide-react';
 import { NotebookCard } from '../../types/physics';
 import { SoundIntensityMeter } from './SoundIntensityMeter';
+import { FrequencyRecorder } from './FrequencyRecorder';
 
 interface SoundStudioProps {
   onAddToNotebook?: (card: Omit<NotebookCard, 'id' | 'timestamp'>) => void;
@@ -43,6 +45,7 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
   const [micError, setMicError] = useState<string | null>(null);
 
   // Analyzer options
+  const [analyzerMode, setAnalyzerMode] = useState<'instantaneous' | 'timeSeries'>('instantaneous');
   const [isFrozen, setIsFrozen] = useState<boolean>(false);
   const [maxFftFreq, setMaxFftFreq] = useState<number>(4000); // max displayed Hz
   const [peakFreq, setPeakFreq] = useState<number>(0);
@@ -756,9 +759,56 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
       )}
 
       {activeTab === 'analyzer' && (
-        <div className="flex-1 flex flex-col gap-4 min-h-0">
-          {/* Top Metric Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+        <div className="flex-1 flex flex-col gap-3 min-h-0">
+          {/* Analyzer View Toggle: Instantaneous (Oscilloscope & FFT) vs. Frequency as a function of time f(t) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-extrabold text-slate-700">Display View:</span>
+              <div className="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200">
+                <button
+                  type="button"
+                  onClick={() => setAnalyzerMode('instantaneous')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition ${
+                    analyzerMode === 'instantaneous'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <Gauge className="w-3.5 h-3.5" />
+                  <span>Instantaneous f₀ (Oscilloscope & FFT)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAnalyzerMode('timeSeries')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition ${
+                    analyzerMode === 'timeSeries'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  }`}
+                >
+                  <Activity className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Frequency vs. Time Graph f(t)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {analyzerMode === 'timeSeries' ? (
+            <FrequencyRecorder
+              currentFreq={peakFreq}
+              currentDb={decibels}
+              isListening={isListening}
+              onStartAudio={startMicrophone}
+              onStopAudio={stopAudio}
+              onAddToNotebook={onAddToNotebook}
+              allowSimulations={false}
+              title="Acoustic Frequency as a Function of Time f(t)"
+              subtitle="Record continuous fundamental frequency streams over time, visualize live f(t) graph, and export to CSV"
+            />
+          ) : (
+            <>
+              {/* Top Metric Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             {/* Fundamental Peak Frequency */}
             <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between">
               <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
@@ -917,8 +967,10 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
+    </div>
+  )}
 
       {/* Tone Generator & Acoustic Beats Tab */}
       {activeTab === 'generator' && (

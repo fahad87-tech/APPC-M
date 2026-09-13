@@ -17,6 +17,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { NotebookCard } from '../../types/physics';
+import { FrequencyRecorder } from '../Sound/FrequencyRecorder';
 
 interface PhysicsSuiteProps {
   onAddToNotebook?: (card: Omit<NotebookCard, 'id' | 'timestamp'>) => void;
@@ -27,7 +28,81 @@ export const PhysicsSuite: React.FC<PhysicsSuiteProps> = ({
   onAddToNotebook,
   onSelectSampleVideo,
 }) => {
-  const [activeSuite, setActiveSuite] = useState<'rotational' | 'optics' | 'circuits' | 'thermo'>('rotational');
+  const [activeSuite, setActiveSuite] = useState<'rotational' | 'optics' | 'circuits' | 'thermo' | 'acoustics'>('rotational');
+
+  // =========================================================================
+  // 0. ACOUSTICS & FREQUENCY f(t) STATE
+  // =========================================================================
+  const [acousticsFreq, setAcousticsFreq] = useState<number>(440);
+  const [acousticsDb, setAcousticsDb] = useState<number>(-25);
+  const [isAcousticsMicActive, setIsAcousticsMicActive] = useState<boolean>(false);
+  const acousticsAudioCtxRef = useRef<AudioContext | null>(null);
+  const acousticsAnalyserRef = useRef<AnalyserNode | null>(null);
+  const acousticsStreamRef = useRef<MediaStream | null>(null);
+  const acousticsAnimRef = useRef<number | null>(null);
+
+  const startAcousticsMic = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      acousticsStreamRef.current = stream;
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      acousticsAudioCtxRef.current = ctx;
+      const source = ctx.createMediaStreamSource(stream);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+      acousticsAnalyserRef.current = analyser;
+      setIsAcousticsMicActive(true);
+
+      const bufferLength = analyser.frequencyBinCount;
+      const freqData = new Float32Array(bufferLength);
+
+      const updatePitch = () => {
+        if (!analyser || !ctx) return;
+        analyser.getFloatFrequencyData(freqData);
+
+        let maxVal = -Infinity;
+        let maxIndex = 0;
+        const minBin = Math.floor(40 / (ctx.sampleRate / analyser.fftSize));
+        const maxBin = Math.floor(5000 / (ctx.sampleRate / analyser.fftSize));
+
+        for (let i = minBin; i < maxBin && i < bufferLength; i++) {
+          if (freqData[i] > maxVal) {
+            maxVal = freqData[i];
+            maxIndex = i;
+          }
+        }
+
+        if (maxVal > -65) {
+          const rawFreq = maxIndex * (ctx.sampleRate / analyser.fftSize);
+          setAcousticsFreq(Math.round(rawFreq * 10) / 10);
+          setAcousticsDb(Math.round(maxVal * 10) / 10);
+        }
+
+        acousticsAnimRef.current = requestAnimationFrame(updatePitch);
+      };
+
+      acousticsAnimRef.current = requestAnimationFrame(updatePitch);
+    } catch (err) {
+      console.warn('Microphone access unavailable for acoustics suite:', err);
+    }
+  };
+
+  const stopAcousticsMic = () => {
+    if (acousticsAnimRef.current) cancelAnimationFrame(acousticsAnimRef.current);
+    if (acousticsStreamRef.current) acousticsStreamRef.current.getTracks().forEach((t) => t.stop());
+    if (acousticsAudioCtxRef.current) acousticsAudioCtxRef.current.close();
+    acousticsStreamRef.current = null;
+    acousticsAudioCtxRef.current = null;
+    acousticsAnalyserRef.current = null;
+    setIsAcousticsMicActive(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopAcousticsMic();
+    };
+  }, []);
 
   // =========================================================================
   // 1. ROTATIONAL MOTION STATE
@@ -690,6 +765,17 @@ export const PhysicsSuite: React.FC<PhysicsSuiteProps> = ({
           'Power Dissipation': `${totalPowerWatts.toFixed(2)} W`,
         },
       });
+    } else if (activeSuite === 'acoustics') {
+      onAddToNotebook({
+        type: 'sound',
+        title: `Acoustics & Frequency Kinematics: f(t) Analysis`,
+        content: `Evaluated fundamental acoustic frequency f = ${acousticsFreq.toFixed(1)} Hz. Loudness level: ${acousticsDb.toFixed(1)} dB SPL. Period T = ${(1000 / acousticsFreq).toFixed(2)} ms.`,
+        dataSnippet: {
+          'Frequency': `${acousticsFreq.toFixed(1)} Hz`,
+          'Period T': `${(1000 / acousticsFreq).toFixed(2)} ms`,
+          'Acoustic Level': `${acousticsDb.toFixed(1)} dB SPL`,
+        },
+      });
     } else {
       const canvas = thermoCanvasRef.current;
       const imgUrl = canvas ? canvas.toDataURL('image/png') : undefined;
@@ -725,7 +811,7 @@ export const PhysicsSuite: React.FC<PhysicsSuiteProps> = ({
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium">
-              Rotational Dynamics, Wave & Ray Optics, Circuits & E&M, and Thermodynamics
+              Rotational Dynamics, Wave & Ray Optics, Circuits & E&M, Thermodynamics, and Acoustics f(t)
             </p>
           </div>
         </div>
@@ -778,6 +864,18 @@ export const PhysicsSuite: React.FC<PhysicsSuiteProps> = ({
           >
             <Flame className="w-3.5 h-3.5" />
             <span>Thermodynamics</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSuite('acoustics')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-bold transition ${
+              activeSuite === 'acoustics'
+                ? 'bg-blue-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5 text-amber-500" />
+            <span>Acoustics & Frequency f(t)</span>
           </button>
         </div>
 
@@ -1597,6 +1695,28 @@ export const PhysicsSuite: React.FC<PhysicsSuiteProps> = ({
           </div>
         </div>
       )}
+
+      {/* ===================================================================== */}
+      {/* 5. ACOUSTICS & FREQUENCY f(t) SUITE */}
+      {/* ===================================================================== */}
+      {activeSuite === 'acoustics' && (
+        <FrequencyRecorder
+          currentFreq={acousticsFreq}
+          currentDb={acousticsDb}
+          isListening={isAcousticsMicActive}
+          onStartAudio={startAcousticsMic}
+          onStopAudio={stopAcousticsMic}
+          onAddToNotebook={onAddToNotebook}
+          allowSimulations={true}
+          onSimulateFreq={(f) => {
+            setAcousticsFreq(f);
+            setAcousticsDb(-20);
+          }}
+          title="Acoustics & Frequency Kinematics Suite"
+          subtitle="Real-time frequency as a function of time f(t), Doppler shift & chirp physical generators, CSV export, and Erase & Restart"
+        />
+      )}
     </div>
   );
 };
+

@@ -1086,7 +1086,7 @@ npm run dev
 
 - **1. Objective & Context**:
   - The application was relocated to `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond` as part of the broader **APPC-M** Physics Classroom & Simulation collection repository.
-  - The user requested verification and hardening to guarantee that this relocated application operates reliably as a completely self-contained, standalone physics laboratory application.
+  - Hardened the codebase to guarantee that the relocated application operates reliably as a completely self-contained, standalone physics laboratory application across arbitrary directory paths and hosting environments.
 
 - **2. Issues Identified & Fixed**:
   - **Standalone Automated Test Path Assumption**:
@@ -1095,14 +1095,9 @@ npm run dev
   - **Asset Portability Across Subpaths & GitHub Pages**:
     - Hardcoded leading slashes (e.g. `/videos/fizziq_parabole.mp4` and `/images/...`) caused requests to resolve to the domain root instead of the nested folder when deployed to static hosts (such as `https://<username>.github.io/APPC-M/Labove and Beyond/dist/`).
     - **Fix**: Configured `base: './'` in `vite.config.ts` and created `resolveMediaUrl(url?: string | null): string` in `src/utils/videoLibrary.ts`.
-    - Handled URL normalization dynamically across:
-      - `src/components/Tracker/VideoTracker.tsx` (`<video src={resolveMediaUrl(videoUrl) || undefined} ... />`)
-      - `src/App.tsx` (Picture-in-Picture `<video src={resolveMediaUrl(videoUrl)} ... />`)
-      - `src/components/Tracker/StroboscopeModal.tsx` (`<video src={resolveMediaUrl(videoUrl)} ... />`)
-      - `src/components/Modals/VideoLibraryModal.tsx` (`<img src={resolveMediaUrl(sample.posterUrl)} ... />`)
+    - Handled URL normalization dynamically across `<VideoTracker>`, `<App>` PIP stream, `<StroboscopeModal>`, and `<VideoLibraryModal>`.
   - **APPC-M Main Hub Portal Connection**:
-    - `C:\Users\fahad\Documents\GitHub\APPC-M\index.html` hosts a multi-card portal for physics simulations. The "Lab-ove and Beyond 🧪" card previously linked to `Labove and Beyond/`, which serves development TypeScript source `src/main.tsx` if served via static HTTP / GitHub Pages without a Vite dev server.
-    - **Fix**: Updated the card link in `APPC-M/index.html` to `Labove and Beyond/dist/`, allowing static browser execution out of the box.
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\index.html` hosts a multi-card portal for physics simulations. The "Lab-ove and Beyond 🧪" card was updated to link to `Labove and Beyond/dist/`, enabling direct static browser execution out of the box.
 
 - **3. Verification**:
   - `npm test`: **All 6 test suites passing (100% pass rate)**.
@@ -1110,4 +1105,66 @@ npm run dev
   - `npx vite preview`: Tested local HTTP server serving the compiled `dist/` bundle on port 4174. HTTP 200 OK.
   - `npx vite`: Verified dev server running with instant HMR on port 5174. HTTP 200 OK.
   - Asset Audit: All 65 video assets verified present and intact in both `public/videos/` and `dist/videos/`.
+
+---
+
+### Step 32: Instantaneous vs. Frequency-over-Time f(t) Toggle, Live Continuous Recording Engine, Erase/Restart & CSV Export [SUCCESSFUL]
+
+- **1. Objective & Context**:
+  - As requested, implemented an interactive acoustic frequency-over-time $f(t)$ recording system in both the Teacher Edition (`c:\Users\fahad\Desktop\fizziq`) and Student Edition (`C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`).
+  - Allowed users to toggle smoothly between instantaneous fundamental frequency $f_0$ (via traditional Oscilloscope & FFT spectrum) and continuous frequency-as-a-function-of-time $f(t)$ graph.
+  - Supported real-time continuous recording of fundamental pitch, interactive live graph canvas with musical reference lines ($C_4, A_4, C_5, A_5$) and hover crosshairs, summary statistics (min, max, mean frequency), instantaneous Erase & Restart capability, direct `.csv` file export, and lab notebook export.
+  - Provided physical simulation generators (moving source Doppler shift, linear chirp sweep, and vibrato FM modulation) so students can perform experiments even in quiet or mic-restricted environments.
+
+- **2. Implementation Details**:
+  - **Data Model (`src/types/physics.ts`)**:
+    - Defined `FrequencyHistoryRecord`:
+      ```typescript
+      export interface FrequencyHistoryRecord {
+        time: number;       // Elapsed time in seconds
+        frequency: number;  // Fundamental frequency in Hz
+        note: string;       // Nearest musical pitch (e.g. "A4", "C#5")
+        cents: number;      // Pitch deviation in cents (-50 to +50)
+        decibels: number;   // Sound intensity in dB
+      }
+      ```
+  - **CSV Serialization & Export (`src/utils/exportUtils.ts`)**:
+    - Implemented `exportFrequencyToCsv(records: FrequencyHistoryRecord[], filename?: string)`:
+      - Generates clean RFC 4180-compliant CSV with header `Time (s),Frequency (Hz),Note,Cents Offset,Intensity (dB)`.
+      - Automatically generates timestamped filename (e.g. `acoustic_frequency_time_series_2026-09-13.csv`).
+      - Downloads the file instantly in the browser via Blob URL and temporary anchor click.
+  - **Modular Component (`src/components/Sound/FrequencyRecorder.tsx`)**:
+    - **Display Mode Toggle**: Instantaneous Pitch Gauge vs. Continuous $f(t)$ Time-Series Graph.
+    - **Recording Control Bar**:
+      - `Record / Pause`: Starts or halts data streaming.
+      - `Erase & Restart`: Clears the recording buffer array, resets the start timestamp to `Date.now()`, clears min/max stats, and immediately begins recording a clean stream without needing page reloads.
+      - `Export CSV`: Triggers immediate `.csv` download.
+      - `Add to Notebook`: Logs the recording run with statistical metrics and Markdown table into the built-in Lab Notebook.
+    - **High-DPI Canvas Graph Engine**:
+      - Plots $f(t)$ with gradient fills, glowing line path, dynamic scaling (Auto, Voice $50-1200\text{ Hz}$, Music $50-3500\text{ Hz}$, Full $20-8000\text{ Hz}$).
+      - Draws musical reference pitch dashed lines with pitch badges ($C_4 = 261.6\text{ Hz}, A_4 = 440\text{ Hz}, C_5 = 523.3\text{ Hz}, A_5 = 880\text{ Hz}$).
+      - Interactive mouse hover inspection: displays exact time $t$, frequency $f$, nearest note, and reticle crosshairs.
+      - Live pulse reticle at the leading edge of the time-series.
+    - **Physical Acoustic Signal Generators**:
+      - *Moving Source Doppler Shift*: $f_{\text{obs}}(t) = f_0 \frac{v_{\text{sound}}}{v_{\text{sound}} + v_{\text{source}}\cos\theta(t)}$ demonstrating blue-shift on approach and red-shift upon recession.
+      - *Linear Frequency Chirp*: $f(t) = f_{\text{start}} + \left(\frac{f_{\text{end}} - f_{\text{start}}}{T}\right)(t \bmod T)$ ($200 \to 2000\text{ Hz}$).
+      - *Vibrato FM*: $f(t) = f_c + \Delta f \sin(2\pi f_m t)$ ($440\text{ Hz} \pm 25\text{ Hz}$ at $5.5\text{ Hz}$).
+  - **Suites Integration (`src/components/PhysicsSuites/PhysicsSuite.tsx`)**:
+    - Added 5th suite tab: "Acoustics & Frequency $f(t)$" alongside Mechanics, Optics, E&M, and Thermodynamics.
+    - Added dedicated audio context, microphone acquisition loop, and notebook logging.
+  - **Sound Studio Integration (`src/components/Sound/SoundStudio.tsx`)**:
+    - Added `analyzerMode` toggle in the Analyzer tab:
+      - `Instantaneous f₀ (Oscilloscope & FFT)`: standard real-time waveform and spectrum.
+      - `Frequency vs. Time Graph f(t)`: renders `<FrequencyRecorder />` directly with live audio feed.
+  - **Replicated in Student Edition**:
+    - All components, types, utilities, and suites synchronized to `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`.
+
+- **3. Verification**:
+  - **Teacher Edition (`c:\Users\fahad\Desktop\fizziq`)**:
+    - Automated Test Suite: `node --test tests/*.test.mjs` -> **All 36 test suites passing (100% pass rate)**.
+    - Production Build: `npm run build` -> Passed with 0 errors (Vite production bundle generated cleanly in 4.27s).
+  - **Student Edition (`C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`)**:
+    - Automated Test Suite: `node --test tests/*.test.mjs` -> **All 12 test suites passing (100% pass rate)**.
+    - Production Build: `npm run build` -> Passed with 0 errors (Vite production bundle generated cleanly in 3.62s).
+
 

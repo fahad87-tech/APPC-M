@@ -255,3 +255,12 @@ export interface PhysicsExperimentSample {
   }[];
   generator?: (canvas: HTMLCanvasElement, durationSec?: number, fps?: number) => Promise<string>;
 }
+
+export interface FrequencyHistoryRecord {
+  time: number; // Elapsed time in seconds (e.g. 0.00, 0.05, 0.10)
+  frequency: number; // Measured fundamental frequency in Hz
+  note: string; // Musical note (e.g. "A4", "C5")
+  cents: number; // Pitch offset from nominal note in cents (-50 to +50)
+  decibels?: number; // Acoustic loudness level in dB SPL
+}
+

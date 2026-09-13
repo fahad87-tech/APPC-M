@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { CalibrationScale, CoordinateOrigin, TrackSeries } from '../types/physics';
+import { CalibrationScale, CoordinateOrigin, FrequencyHistoryRecord, TrackSeries } from '../types/physics';
 
 /**
  * Generates and downloads a native multi-sheet Excel (.xlsx) workbook of the kinematics experiment
@@ -195,3 +195,41 @@ export function downloadBlob(blob: Blob, filename: string) {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+/**
+  * Generates and downloads a CSV spreadsheet of the recorded acoustic frequency vs. time series
+  */
+export function exportFrequencyToCsv(
+  records: FrequencyHistoryRecord[],
+  filename = 'frequency_vs_time_data.csv'
+) {
+  const headers = [
+    'Time (s)',
+    'Frequency (Hz)',
+    'Period (ms)',
+    'Musical Note',
+    'Pitch Error (cents)',
+    'Loudness (dB)',
+  ];
+
+  const rows: string[] = [headers.join(',')];
+
+  records.forEach((r) => {
+    const periodMs = r.frequency > 0 ? (1000 / r.frequency).toFixed(3) : '';
+    rows.push(
+      [
+        r.time.toFixed(3),
+        r.frequency.toFixed(2),
+        periodMs,
+        `"${r.note}"`,
+        r.cents >= 0 ? `+${r.cents}` : `${r.cents}`,
+        r.decibels !== undefined ? r.decibels.toFixed(1) : '',
+      ].join(',')
+    );
+  });
+
+  const csvContent = rows.join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  downloadBlob(blob, filename);
+}
+
