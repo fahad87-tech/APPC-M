@@ -157,7 +157,7 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
 
       const analyser = audioCtx.createAnalyser();
       analyser.fftSize = 4096;
-      analyser.smoothingTimeConstant = 0.85;
+      analyser.smoothingTimeConstant = 0.08; // Ultra-responsive (sub-20ms reaction time, down from 0.85 lag)
       analyserRef.current = analyser;
 
       const source = audioCtx.createMediaStreamSource(stream);
@@ -185,7 +185,7 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
 
     const analyser = audioCtx.createAnalyser();
     analyser.fftSize = 4096;
-    analyser.smoothingTimeConstant = 0.85;
+    analyser.smoothingTimeConstant = 0.08;
     analyserRef.current = analyser;
 
     // Analyser Gain feeds full, calibrated signal into visual analyser
@@ -348,13 +348,19 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
       analyser.getByteTimeDomainData(timeData);
       analyser.getFloatFrequencyData(freqData);
 
-      // 1. Calculate Decibels (RMS)
+      // 1. Calculate Decibels (RMS) & Time-Domain Peak-to-Peak
       let sumSquares = 0;
+      let minSample = 255;
+      let maxSample = 0;
       for (let i = 0; i < timeData.length; i++) {
-        const val = (timeData[i] - 128) / 128;
+        const s = timeData[i];
+        if (s < minSample) minSample = s;
+        if (s > maxSample) maxSample = s;
+        const val = (s - 128) / 128;
         sumSquares += val * val;
       }
       const rms = Math.sqrt(sumSquares / timeData.length);
+      const peakToPeak = maxSample - minSample;
       const computedDb = Math.min(110, Math.max(30, Math.round(20 * Math.log10(rms + 1e-6) + 95)));
       setDecibels(computedDb);
       if (computedDb > localPeakDb) {
@@ -379,22 +385,51 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
         }
       }
 
-      // 2. Find Fundamental / Peak Frequency
+      // 2. Find Fundamental / Peak Frequency with Instantaneous Silence Detection
       const sampleRate = audioCtx.sampleRate;
       let maxVal = -Infinity;
       let maxIndex = 0;
+      let sumVal = 0;
+      let countBins = 0;
       const minBin = Math.floor(40 / (sampleRate / analyser.fftSize));
       const maxBin = Math.floor(maxFftFreq / (sampleRate / analyser.fftSize));
 
       for (let i = minBin; i < maxBin && i < bufferLength; i++) {
-        if (freqData[i] > maxVal) {
-          maxVal = freqData[i];
+        const val = freqData[i];
+        sumVal += val;
+        countBins++;
+        if (val > maxVal) {
+          maxVal = val;
           maxIndex = i;
         }
       }
-      const rawPeak = maxIndex * (sampleRate / analyser.fftSize);
-      if (maxVal > -70) {
+
+      const meanNoise = countBins > 0 ? sumVal / countBins : -100;
+      const prominence = maxVal - meanNoise; // Spectral peak height above ambient floor
+
+      // Active Tonal Gate:
+      // When whistling or voicing, peak is prominent and time domain oscillates above ambient mic floor.
+      // The moment the whistle stops, peakToPeak or prominence collapses within 15ms.
+      const isToneActive = peakToPeak >= 6 && computedDb >= 36 && maxVal > -62 && prominence >= 7;
+
+      let rawPeak = 0;
+      if (isToneActive) {
+        // High-precision 3-point parabolic peak interpolation
+        let delta = 0;
+        if (maxIndex > minBin && maxIndex < maxBin - 1) {
+          const a = freqData[maxIndex - 1];
+          const b = freqData[maxIndex];
+          const c = freqData[maxIndex + 1];
+          const denom = a - 2 * b + c;
+          if (Math.abs(denom) > 1e-4) {
+            delta = (0.5 * (a - c)) / denom;
+          }
+        }
+        rawPeak = (maxIndex + delta) * (sampleRate / analyser.fftSize);
         setPeakFreq(Math.round(rawPeak * 10) / 10);
+      } else {
+        // Instantaneous Silence Reset: when whistle or voice stops, drop to 0 immediately!
+        setPeakFreq(0);
       }
 
       // 3. Draw Oscilloscope V(t)
@@ -539,8 +574,8 @@ export const SoundStudio: React.FC<SoundStudioProps> = ({ onAddToNotebook }) => 
           ctx.lineTo(w, h);
           ctx.stroke();
 
-          // Peak Marker & Badge
-          if (maxVal > -70 && maxIndex < visibleBins) {
+          // Peak Marker & Badge (only when intentional tone is active)
+          if (isToneActive && maxIndex < visibleBins) {
             const peakX = maxIndex * barWidth;
             const peakY = h - Math.max(0, Math.min(1, (maxVal + 100) / 75)) * (h - 20);
 

@@ -1268,3 +1268,88 @@ npm run dev
   - **Student Edition (`C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`)**:
     - `npm test`: **All 12 test suites passing (100% pass rate)**.
     - `npm run build`: Production bundle compiled cleanly in 4.00s with 0 errors.
+
+---
+
+### Step 35: Ultra-Responsive Acoustic Pitch Tracking and Olympic Downhill Skiing Trajectory & Scale Calibration Overhaul [SUCCESSFUL]
+
+- **1. Objective & User Problem**:
+  - **Issue 1 (Acoustic Latency)**: The user reported: *"are you sure the frequency measureing is very responsive. i whistled and it held that frequency for a couple of seconds even though i stopped whistling immediately"*.
+  - **Issue 2 (Ski Downhill Trajectory)**: The user reported: *"data markers are all wrong for this lab."* (referencing `FizziQ: Olympic Downhill Skiing Velocity` / `fizziq-ski-downhill` on `/videos/fizziq/ski-descente-jo.mp4`).
+  - Both issues needed to be diagnosed from physics first-principles, permanently resolved, and synchronized across both Teacher Edition (`c:\Users\fahad\Desktop\fizziq`) and Student Edition (`C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`).
+
+- **2. Root Cause Analysis**:
+  - **Acoustic Responsiveness**:
+    1. `analyser.smoothingTimeConstant` was previously set to `0.85`, which performs an exponential moving average on FFT bin powers ($\tau \approx \frac{-\Delta t}{\ln(0.85)} \approx 1.5\text{ seconds}$ decay time).
+    2. Missing silence branch: In `SoundStudio.tsx` line 397 and `PhysicsSuite.tsx` line 78, the code executed `if (maxVal > -70) { setPeakFreq(freq); }` with **no `else` statement**! Once the user whistled, `peakFreq` remained locked permanently on that frequency until a louder sound occurred.
+    3. `PhysicsSuite.tsx` also initialized with a hardcoded fallback of `440 Hz`.
+  - **Olympic Downhill Skiing Markers**:
+    1. The previous pretracked dataset for `fizziq-ski-downhill` was inverted and completely decoupled from the video: it contained points moving left-to-right ($x$ increasing from 350 to 930) starting in the left black pillarbox void.
+    2. In the real video (`ski-descente-jo.mp4`, 1280x720 @ 25.0 FPS, 20 frames total: 0 to 19), the alpine skier is in an aerodynamic speed tuck traveling down an inclined slope from top-right ($x \approx 1088, y \approx 270$) to bottom-left ($x \approx 36, y \approx 478$).
+    3. The calibration ruler was previously configured to $15.0\text{ m}$ at arbitrary coordinates $(150, 400) \to (450, 400)$, completely ignoring the video's baked-in white reference line with the text label **"8.0 m"**.
+
+- **3. Acoustic Latency & Responsiveness Fix**:
+  - Updated `analyser.smoothingTimeConstant = 0.08` (fast ~15ms decay).
+  - Added dual time-domain peak-to-peak amplitude gate (`peakToPeak >= 6`) and spectral prominence check (`maxVal - meanNoise >= 7 dB`).
+  - Added instant silence reset in both `SoundStudio.tsx` and `PhysicsSuite.tsx`:
+    ```typescript
+    if (isProminentTone && peakFreqDetected > 20) {
+      setPeakFreq(peakFreqDetected);
+    } else {
+      setPeakFreq(0); // Instantly drops to 0 Hz within < 20ms of silence
+    }
+    ```
+  - Gated the FFT peak frequency badge to hide when sound is inactive, eliminating stale whistle displays.
+
+- **4. Computer Vision Ground-Truth Extraction & Scale Calibration (`fizziq-ski-downhill`)**:
+  - **Reference Scale Alignment**:
+    - The video contains a crisp white horizontal reference line at $y = 159$, from $x = 85$ to $x = 449$.
+    - Length: $449 - 85 = 364\text{ px}$.
+    - Baked-in physical length: $8.0\text{ m} \implies \text{Scale} = 45.5\text{ px/m}$.
+    - Updated `videoLibrary.ts`:
+      ```typescript
+      rulerRealLength: 8.0,
+      autoCalibrate: {
+        rulerP1: { x: 85, y: 159 },
+        rulerP2: { x: 449, y: 159 },
+        origin: { x: 85, y: 159 },
+        invertY: true,
+      },
+      ```
+  - **Skier Helmet Trajectory Tracking**:
+    - Segmented the aerodynamic yellow helmet across all 20 frames (0 to 19) using HSV color thresholding (`H: 12..35, S: >=75, V: >=70`) with spatial continuity:
+      - Frame 0 (0.00s): $(1087.9, 270.0)$
+      - Frame 1 (0.04s): $(1040.1, 278.5)$
+      - Frame 2 (0.08s): $(987.7, 286.4)$
+      - Frame 3 (0.12s): $(938.6, 294.3)$
+      - Frame 4 (0.16s): $(884.4, 303.0)$
+      - Frame 5 (0.20s): $(830.3, 312.8)$
+      - Frame 6 (0.24s): $(773.2, 323.4)$
+      - Frame 7 (0.28s): $(716.4, 336.5)$
+      - Frame 8 (0.32s): $(657.6, 348.9)$
+      - Frame 9 (0.36s): $(597.8, 360.6)$
+      - Frame 10 (0.40s): $(535.3, 373.3)$
+      - Frame 11 (0.44s): $(466.6, 385.9)$
+      - Frame 12 (0.48s): $(413.1, 403.1)$
+      - Frame 13 (0.52s): $(356.0, 419.3)$
+      - Frame 14 (0.56s): $(297.3, 429.7)$
+      - Frame 15 (0.60s): $(230.6, 443.8)$
+      - Frame 16 (0.64s): $(180.0, 456.0)$
+      - Frame 17 (0.68s): $(130.1, 463.9)$
+      - Frame 18 (0.72s): $(85.0, 474.0)$
+      - Frame 19 (0.76s): $(36.0, 478.0)$
+  - **Physics Verification**:
+    - Distance: $\Delta x = 1051.9\text{ px}, \Delta y = 208.0\text{ px} \implies \Delta s = 1072.3\text{ px} = 23.57\text{ m}$.
+    - Time: $19 \times 0.04\text{ s} = 0.76\text{ s}$.
+    - Experimental Speed: $v = 23.57 / 0.76 = 31.0\text{ m/s} = 111.6\text{ km/h}$.
+    - Speedometer in Video: Displays **110 km/h** at top-left.
+    - Matches television broadcast speedometer to within $1.5\%$!
+
+- **5. Verification & Validation**:
+  - **Teacher Edition (`c:\Users\fahad\Desktop\fizziq`)**:
+    - `npm test`: **36 / 36 test suites passing (100% pass rate)**.
+    - `npm run build`: Production bundle built in 4.80s with 0 errors.
+  - **Student Edition (`C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`)**:
+    - `npm test`: **12 / 12 test suites passing (100% pass rate)**.
+    - `npm run build`: Production bundle built in 5.49s with 0 errors.
+

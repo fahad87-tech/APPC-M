@@ -33,8 +33,8 @@ export const PhysicsSuite: React.FC<PhysicsSuiteProps> = ({
   // =========================================================================
   // 0. ACOUSTICS & FREQUENCY f(t) STATE
   // =========================================================================
-  const [acousticsFreq, setAcousticsFreq] = useState<number>(440);
-  const [acousticsDb, setAcousticsDb] = useState<number>(-25);
+  const [acousticsFreq, setAcousticsFreq] = useState<number>(0);
+  const [acousticsDb, setAcousticsDb] = useState<number>(-80);
   const [isAcousticsMicActive, setIsAcousticsMicActive] = useState<boolean>(false);
   const acousticsAudioCtxRef = useRef<AudioContext | null>(null);
   const acousticsAnalyserRef = useRef<AnalyserNode | null>(null);
@@ -50,33 +50,68 @@ export const PhysicsSuite: React.FC<PhysicsSuiteProps> = ({
       const source = ctx.createMediaStreamSource(stream);
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.08;
       source.connect(analyser);
       acousticsAnalyserRef.current = analyser;
       setIsAcousticsMicActive(true);
 
       const bufferLength = analyser.frequencyBinCount;
       const freqData = new Float32Array(bufferLength);
+      const timeData = new Uint8Array(bufferLength);
 
       const updatePitch = () => {
         if (!analyser || !ctx) return;
+        analyser.getByteTimeDomainData(timeData);
         analyser.getFloatFrequencyData(freqData);
+
+        let minSample = 255;
+        let maxSample = 0;
+        for (let i = 0; i < timeData.length; i++) {
+          const s = timeData[i];
+          if (s < minSample) minSample = s;
+          if (s > maxSample) maxSample = s;
+        }
+        const peakToPeak = maxSample - minSample;
 
         let maxVal = -Infinity;
         let maxIndex = 0;
+        let sumVal = 0;
+        let countBins = 0;
         const minBin = Math.floor(40 / (ctx.sampleRate / analyser.fftSize));
         const maxBin = Math.floor(5000 / (ctx.sampleRate / analyser.fftSize));
 
         for (let i = minBin; i < maxBin && i < bufferLength; i++) {
-          if (freqData[i] > maxVal) {
-            maxVal = freqData[i];
+          const val = freqData[i];
+          sumVal += val;
+          countBins++;
+          if (val > maxVal) {
+            maxVal = val;
             maxIndex = i;
           }
         }
 
-        if (maxVal > -65) {
-          const rawFreq = maxIndex * (ctx.sampleRate / analyser.fftSize);
+        const meanNoise = countBins > 0 ? sumVal / countBins : -100;
+        const prominence = maxVal - meanNoise;
+        const isToneActive = peakToPeak >= 6 && maxVal > -62 && prominence >= 7;
+
+        if (isToneActive) {
+          let delta = 0;
+          if (maxIndex > minBin && maxIndex < maxBin - 1) {
+            const a = freqData[maxIndex - 1];
+            const b = freqData[maxIndex];
+            const c = freqData[maxIndex + 1];
+            const denom = a - 2 * b + c;
+            if (Math.abs(denom) > 1e-4) {
+              delta = (0.5 * (a - c)) / denom;
+            }
+          }
+          const rawFreq = (maxIndex + delta) * (ctx.sampleRate / analyser.fftSize);
           setAcousticsFreq(Math.round(rawFreq * 10) / 10);
           setAcousticsDb(Math.round(maxVal * 10) / 10);
+        } else {
+          // Reset to 0 the instant sound stops
+          setAcousticsFreq(0);
+          setAcousticsDb(-80);
         }
 
         acousticsAnimRef.current = requestAnimationFrame(updatePitch);
