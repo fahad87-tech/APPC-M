@@ -1,0 +1,2752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Projectile Motion Comparative Simulator — AP Physics</title>
+
+    <script>
+    const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
+    }
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
+      });
+    }
+    async function verifyWebsiteAccess() {
+      const userInput = await requestPassword("Simulation Access", "Password required:");
+      if (userInput === null) { window.location.replace("about:blank"); return; }
+      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.replace("about:blank");
+      }
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
+    } else {
+      verifyWebsiteAccess();
+    }
+  </script>
+  <style id="password-gate-styles">
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
+    #password-gate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5, 9, 18, 0.88); padding: 24px; z-index: 9999; }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card { width: min(100%, 420px); background: #101625; border: 1px solid rgba(100,181,246,0.28); border-radius: 18px; padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); color: #e7edf7; font-family: 'Segoe UI', Arial, sans-serif; }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px; box-sizing: border-box; }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  </style>
+
+    <!-- Required External CDNs strictly conforming to prompt rules -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+
+    <!-- MathJax 3 for rendering dynamic LaTeX mathematics -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            options: {
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        :root {
+            --bg: #0a0a1a;
+            --surface: #101226;
+            --card: #151834;
+            --card-hover: #1c2045;
+            --input-bg: rgba(255, 255, 255, 0.06);
+            --border: rgba(255, 255, 255, 0.10);
+            --border-glow: rgba(0, 229, 255, 0.35);
+            --cyan: #00e5ff;
+            --purple: #b388ff;
+            --pink: #ff4081;
+            --amber: #ffd740;
+            --green: #69f0ae;
+            --blue: #2979ff;
+            --text: #f0f3f8;
+            --text-muted: #8c9bb5;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.45;
+        }
+
+        /* ─── Header & Top Tab Bar ─────────────────────────────────── */
+        header {
+            background: linear-gradient(180deg, #131636 0%, var(--bg) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 24px 12px;
+            text-align: center;
+        }
+        .header-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        h1 {
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 40%, var(--cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .domain-badge {
+            background: rgba(0, 229, 255, 0.12);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            color: var(--cyan);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .header-desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            max-width: 880px;
+            margin: 6px auto 0;
+            line-height: 1.55;
+        }
+        .header-desc em, .math-sym {
+            font-family: 'Cambria Math', 'KaTeX_Math', 'Times New Roman', serif;
+            font-style: italic;
+            font-weight: 600;
+            color: var(--cyan);
+        }
+        .header-desc sub, .math-sym sub {
+            font-size: 0.72em;
+            color: var(--cyan);
+            font-style: normal;
+        }
+
+        .tab-bar {
+            display: flex;
+            gap: 4px;
+            padding: 0 20px;
+            max-width: 1560px;
+            width: 100%;
+            margin: 0 auto;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: rgba(10, 10, 26, 0.94);
+            backdrop-filter: blur(12px);
+            z-index: 100;
+        }
+        .tab-btn {
+            padding: 12px 24px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .tab-btn:hover {
+            color: #ffffff;
+        }
+        .tab-btn.active {
+            color: var(--cyan);
+            border-bottom-color: var(--cyan);
+            background: rgba(0, 229, 255, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ─── Simulation Viewport Layout ────────────────────────────── */
+        .container {
+            max-width: 1560px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px 20px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 16px;
+            align-items: start;
+        }
+        @media (max-width: 1100px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ─── Controls Panel ────────────────────────────────────────── */
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 18px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            transition: border-color 0.2s ease;
+        }
+        .card:hover {
+            border-color: rgba(255, 255, 255, 0.16);
+        }
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slider-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .slider-item:last-child {
+            margin-bottom: 0;
+        }
+        .slider-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .slider-val {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 3px;
+            outline: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.7);
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.18);
+            background: #ffffff;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .btn {
+            padding: 9px 14px;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+        .btn-fire {
+            background: linear-gradient(135deg, #ff4081 0%, #f50057 100%);
+            color: #ffffff;
+            border: none;
+            box-shadow: 0 4px 14px rgba(255, 64, 129, 0.4);
+            grid-column: span 2;
+            font-size: 0.95rem;
+            padding: 11px;
+        }
+        .btn-fire:hover {
+            background: linear-gradient(135deg, #ff5c93 0%, #ff1744 100%);
+            box-shadow: 0 6px 18px rgba(255, 64, 129, 0.6);
+        }
+        .btn-primary {
+            background: rgba(0, 229, 255, 0.16);
+            border-color: rgba(0, 229, 255, 0.4);
+            color: var(--cyan);
+        }
+        .btn-primary:hover {
+            background: rgba(0, 229, 255, 0.28);
+        }
+        .btn-danger {
+            background: rgba(255, 64, 129, 0.12);
+            border-color: rgba(255, 64, 129, 0.3);
+            color: var(--pink);
+        }
+
+        .presets-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .preset-chip {
+            padding: 4px 9px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border-radius: 6px;
+            border: 1px solid rgba(179, 136, 255, 0.35);
+            background: rgba(179, 136, 255, 0.08);
+            color: var(--purple);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .preset-chip:hover {
+            background: rgba(179, 136, 255, 0.22);
+            border-color: var(--purple);
+        }
+
+        .mode-toggle-pills {
+            display: flex;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.28);
+            padding: 4px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-top: 6px;
+            margin-bottom: 8px;
+        }
+        .mode-pill-btn {
+            flex: 1;
+            padding: 6px 8px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .mode-pill-btn.active {
+            background: var(--cyan);
+            color: #0a0a1a;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+        }
+        .indiv-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            transition: border-color 0.2s;
+        }
+        .indiv-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .indiv-slider {
+            width: 100%;
+            accent-color: var(--cyan);
+            height: 4px;
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .checkbox-label input[type="checkbox"] {
+            accent-color: var(--cyan);
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+
+        /* ─── Canvas & Interactive Viewport ──────────────────────────── */
+        .canvas-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+        }
+        .canvas-toolbar {
+            padding: 8px 16px;
+            background: rgba(16, 18, 38, 0.9);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .vector-legend {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+        }
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .canvas-wrapper {
+            position: relative;
+            width: 100%;
+            height: 540px;
+            background: #0a0a1a;
+        }
+        canvas#simCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Canvas Floating HUD Overlay */
+        .canvas-hud {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+            max-width: 320px;
+            width: calc(100% - 28px);
+            z-index: 10;
+        }
+        .hud-card {
+            background: rgba(16, 18, 38, 0.88);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+        }
+        .hud-header {
+            font-size: 0.74rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .hud-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+        }
+        .hud-row:last-child {
+            margin-bottom: 0;
+        }
+        .hud-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* Stacked Energy Bar HUD */
+        .energy-bar-wrap {
+            margin-top: 6px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 5px;
+            overflow: hidden;
+            display: flex;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .energy-bar-ke {
+            background: var(--green);
+            height: 100%;
+            transition: width 0.05s linear;
+        }
+        .energy-bar-pe {
+            background: var(--purple);
+            height: 100%;
+            transition: width 0.05s linear;
+        }
+
+        /* ─── Comparative Landing Statistics Table ─────────────────── */
+        .table-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            overflow: hidden;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+            margin-top: 8px;
+        }
+        .stats-table th {
+            text-align: left;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-muted);
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+        }
+        .stats-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .stats-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .proj-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 700;
+        }
+        .proj-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+        }
+
+        /* ─── 3 Chart.js Graphs Row ─────────────────────────────────── */
+        .graphs-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        @media (max-width: 1200px) {
+            .graphs-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        .graph-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+            display: flex;
+            flex-direction: column;
+            height: 290px;
+        }
+        .graph-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .graph-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .chart-box {
+            position: relative;
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ─── 5E Formative Assessment Tab ──────────────────────────── */
+        .assess-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .assess-top-bar {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+        .student-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .student-input-group label {
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: var(--cyan);
+        }
+        .student-input-group input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 14px;
+            color: #ffffff;
+            font-size: 0.88rem;
+            outline: none;
+            width: 240px;
+            transition: border-color 0.2s;
+        }
+        .student-input-group input:focus {
+            border-color: var(--cyan);
+        }
+
+        .assess-nav-bar {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+        .assess-progress-dots {
+            display: flex;
+            gap: 6px;
+        }
+        .assess-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.12);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .assess-dot.current {
+            background: var(--cyan);
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.8);
+            transform: scale(1.15);
+        }
+        .assess-dot.answered {
+            background: var(--green);
+        }
+
+        .assess-question {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 22px 26px;
+            display: none;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .assess-question.active {
+            display: flex;
+        }
+        .q-badge-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .phase-tag {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .phase-engage { background: rgba(0, 229, 255, 0.18); color: var(--cyan); }
+        .phase-explore { background: rgba(179, 136, 255, 0.18); color: var(--purple); }
+        .phase-explain { background: rgba(255, 215, 64, 0.18); color: var(--amber); }
+        .phase-elaborate { background: rgba(105, 240, 174, 0.18); color: var(--green); }
+        .phase-evaluate { background: rgba(255, 64, 129, 0.18); color: var(--pink); }
+
+        .q-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+            line-height: 1.55;
+        }
+        .q-textarea {
+            width: 100%;
+            min-height: 110px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .q-textarea:focus {
+            border-color: var(--cyan);
+        }
+
+        .q-rubric-drawer {
+            background: rgba(0, 229, 255, 0.04);
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 0.84rem;
+            color: #e0f7fa;
+            line-height: 1.5;
+            display: none;
+        }
+        .q-rubric-drawer.show {
+            display: block;
+        }
+        .q-toggle-rubric-btn {
+            align-self: flex-start;
+            background: transparent;
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            color: var(--cyan);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .q-toggle-rubric-btn:hover {
+            background: rgba(0, 229, 255, 0.15);
+        }
+
+        .assess-footer-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 22px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .btn-docx {
+            background: linear-gradient(135deg, #0288d1 0%, #00acc1 100%);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.88rem;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(2, 136, 209, 0.35);
+            transition: all 0.2s ease;
+        }
+        .btn-docx:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(2, 136, 209, 0.55);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 16px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            background: #080814;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ─── Top Header ────────────────────────────────────────────── -->
+    <header>
+        <div class="header-title-row">
+            <h1>2D Projectile Motion Comparative Simulator</h1>
+            <span class="domain-badge">AP Physics / Kinematics 2D</span>
+        </div>
+        <p class="header-desc">
+            Simultaneously launch multiple projectiles to compare trajectories, maximum heights (<span class="math-sym">y<sub>max</sub></span>), horizontal ranges (<span class="math-sym">R</span>), times of flight (<span class="math-sym">t<sub>flight</sub></span>), and mechanical energy conservation with real-time Velocity-Verlet physics!
+        </p>
+    </header>
+
+    <!-- ─── Top Navigation Tab Bar ────────────────────────────────── -->
+    <nav class="tab-bar">
+        <button class="tab-btn active" id="tabBtnSim" data-tab="sim">🔬 Interactive Simulation</button>
+        <button class="tab-btn" id="tabBtnAssessment" data-tab="assessment">📝 5E Formative Assessment &amp; Worksheet</button>
+    </nav>
+
+    <!-- ─── TAB 1: Interactive Simulation ─────────────────────────── -->
+    <main id="tab-sim" class="tab-content active">
+        <div class="container">
+            <div class="main-layout">
+
+                <!-- Controls Panel -->
+                <aside class="controls-panel">
+                    <div class="card">
+                        <div class="card-header-row">
+                            <span class="card-title">⚙️ Launch Parameters</span>
+                            <button class="btn btn-primary" id="btn-fire" style="padding: 6px 18px; font-size: 0.84rem; font-weight: 700; box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);">🔥 Fire</button>
+                        </div>
+
+                        <!-- 1. Initial Speed (v0) -->
+                        <div class="slider-item">
+                            <div class="slider-label-row">
+                                <span>Initial Speed (v₀)</span>
+                                <span class="slider-val" id="val-v0">10.0 m/s</span>
+                            </div>
+                            <input type="range" id="slider-v0" min="0" max="50" step="0.5" value="10">
+                        </div>
+
+                        <!-- 2. Launch Angle (theta) -->
+                        <div class="slider-item">
+                            <div class="slider-label-row">
+                                <span>Launch Angle (θ)</span>
+                                <span class="slider-val" id="val-theta">45°</span>
+                            </div>
+                            <input type="range" id="slider-theta" min="-90" max="90" step="1" value="45">
+                        </div>
+
+                        <!-- 3. Launch Height (h) -->
+                        <div class="slider-item">
+                            <div class="slider-label-row">
+                                <span>Launch Height (h)</span>
+                                <span class="slider-val" id="val-h">10.0 m</span>
+                            </div>
+                            <input type="range" id="slider-h" min="0" max="100" step="0.5" value="10">
+                        </div>
+
+                        <!-- 4. Gravity (g) -->
+                        <div class="slider-item">
+                            <div class="slider-label-row">
+                                <span>Gravitational Field (g)</span>
+                                <span class="slider-val" id="val-g">9.8 m/s²</span>
+                            </div>
+                            <input type="range" id="slider-g" min="0" max="20" step="0.1" value="9.8">
+                        </div>
+
+                        <!-- 5. Air Drag Coefficient -->
+                        <div class="slider-item">
+                            <div class="slider-label-row">
+                                <span>Air Drag Coefficient</span>
+                                <span class="slider-val" id="val-drag">0.00 kg/s</span>
+                            </div>
+                            <input type="range" id="slider-drag" min="0" max="1" step="0.01" value="0">
+                        </div>
+
+                        <!-- 6. Simultaneous Projectiles Count -->
+                        <div class="slider-item">
+                            <div class="slider-label-row">
+                                <span>Simultaneous Projectiles</span>
+                                <span class="slider-val" id="val-count">2</span>
+                            </div>
+                            <input type="range" id="slider-count" min="1" max="5" step="1" value="2">
+                        </div>
+
+                        <!-- Multi-Projectile Configuration Mode Selector -->
+                        <div style="margin-top: 10px;">
+                            <div class="slider-label-row" style="margin-bottom: 4px;">
+                                <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Angle &amp; Speed Mode:</span>
+                            </div>
+                            <div class="mode-toggle-pills">
+                                <button type="button" class="mode-pill-btn active" id="btn-mode-auto">Auto Angle Spread</button>
+                                <button type="button" class="mode-pill-btn" id="btn-mode-custom">🎯 Individual Tuning</button>
+                            </div>
+                        </div>
+
+                        <!-- Individual Projectile Controls Container -->
+                        <div id="individual-controls-box" style="display: none; margin-top: 8px; flex-direction: column; gap: 8px;">
+                            <!-- Projectile 1 -->
+                            <div class="indiv-card" id="indiv-card-1" style="border-left: 3px solid #00e5ff;">
+                                <div class="indiv-card-header">
+                                    <span style="font-weight: 700; font-size: 0.78rem; color: #00e5ff; display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #00e5ff; display: inline-block;"></span> Projectile 1
+                                    </span>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-1">15.0 m/s @ 30°</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>v₀ (m/s)</span>
+                                            <span id="indiv-val-v0-1">15.0</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-v0-1" min="0" max="50" step="0.5" value="15" style="accent-color: #00e5ff;">
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>θ (deg)</span>
+                                            <span id="indiv-val-theta-1">30°</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-theta-1" min="-90" max="90" step="1" value="30" style="accent-color: #00e5ff;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Projectile 2 -->
+                            <div class="indiv-card" id="indiv-card-2" style="border-left: 3px solid #ff4081;">
+                                <div class="indiv-card-header">
+                                    <span style="font-weight: 700; font-size: 0.78rem; color: #ff4081; display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff4081; display: inline-block;"></span> Projectile 2
+                                    </span>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-2">15.0 m/s @ 60°</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>v₀ (m/s)</span>
+                                            <span id="indiv-val-v0-2">15.0</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-v0-2" min="0" max="50" step="0.5" value="15" style="accent-color: #ff4081;">
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>θ (deg)</span>
+                                            <span id="indiv-val-theta-2">60°</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-theta-2" min="-90" max="90" step="1" value="60" style="accent-color: #ff4081;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Projectile 3 -->
+                            <div class="indiv-card" id="indiv-card-3" style="display: none; border-left: 3px solid #ffd740;">
+                                <div class="indiv-card-header">
+                                    <span style="font-weight: 700; font-size: 0.78rem; color: #ffd740; display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #ffd740; display: inline-block;"></span> Projectile 3
+                                    </span>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-3">20.0 m/s @ 45°</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>v₀ (m/s)</span>
+                                            <span id="indiv-val-v0-3">20.0</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-v0-3" min="0" max="50" step="0.5" value="20" style="accent-color: #ffd740;">
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>θ (deg)</span>
+                                            <span id="indiv-val-theta-3">45°</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-theta-3" min="-90" max="90" step="1" value="45" style="accent-color: #ffd740;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Projectile 4 -->
+                            <div class="indiv-card" id="indiv-card-4" style="display: none; border-left: 3px solid #69f0ae;">
+                                <div class="indiv-card-header">
+                                    <span style="font-weight: 700; font-size: 0.78rem; color: #69f0ae; display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #69f0ae; display: inline-block;"></span> Projectile 4
+                                    </span>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-4">25.0 m/s @ 45°</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>v₀ (m/s)</span>
+                                            <span id="indiv-val-v0-4">25.0</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-v0-4" min="0" max="50" step="0.5" value="25" style="accent-color: #69f0ae;">
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>θ (deg)</span>
+                                            <span id="indiv-val-theta-4">45°</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-theta-4" min="-90" max="90" step="1" value="45" style="accent-color: #69f0ae;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Projectile 5 -->
+                            <div class="indiv-card" id="indiv-card-5" style="display: none; border-left: 3px solid #b388ff;">
+                                <div class="indiv-card-header">
+                                    <span style="font-weight: 700; font-size: 0.78rem; color: #b388ff; display: flex; align-items: center; gap: 6px;">
+                                        <span style="width: 8px; height: 8px; border-radius: 50%; background: #b388ff; display: inline-block;"></span> Projectile 5
+                                    </span>
+                                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-5">30.0 m/s @ 45°</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>v₀ (m/s)</span>
+                                            <span id="indiv-val-v0-5">30.0</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-v0-5" min="0" max="50" step="0.5" value="30" style="accent-color: #b388ff;">
+                                    </div>
+                                    <div>
+                                        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-bottom: 2px;">
+                                            <span>θ (deg)</span>
+                                            <span id="indiv-val-theta-5">45°</span>
+                                        </div>
+                                        <input type="range" class="indiv-slider" id="indiv-theta-5" min="-90" max="90" step="1" value="45" style="accent-color: #b388ff;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Comparative Presets -->
+                        <div style="margin-top: 10px;">
+                            <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Comparative Presets:</span>
+                            <div class="presets-row">
+                                <button class="preset-chip" id="preset-ground45">Ground 45°</button>
+                                <button class="preset-chip" id="preset-cliff0">Cliff 0° (Horizontal)</button>
+                                <button class="preset-chip" id="preset-comp3060">30° vs 60° (Same v₀)</button>
+                                <button class="preset-chip" id="preset-varied-v0">Varied v₀ (10, 20, 30 m/s)</button>
+                                <button class="preset-chip" id="preset-drop-launch">Drop vs 15 m/s Launch</button>
+                                <button class="preset-chip" id="preset-drag">With Air Resistance</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Simulation Action Controls -->
+                    <div class="card">
+                        <div class="card-header-row">
+                            <span class="card-title">⏱️ Playback &amp; Export</span>
+                            <span class="slider-val" id="val-speed">1.00×</span>
+                        </div>
+
+                        <div class="slider-item">
+                            <div class="slider-label-row">
+                                <span>Sim Speed</span>
+                            </div>
+                            <input type="range" id="slider-speed" min="0.25" max="4" step="0.25" value="1">
+                        </div>
+
+                        <div class="btn-grid">
+                            <button class="btn btn-primary" id="btn-play">⏸ Pause</button>
+                            <button class="btn" id="btn-step">⏭ Step</button>
+                            <button class="btn btn-danger" id="btn-reset">↺ Reset</button>
+                            <button class="btn" id="btn-csv">⬇ Export CSV</button>
+                        </div>
+
+                        <div class="checkbox-group">
+                            <label class="checkbox-label"><input type="checkbox" id="chk-velocity" checked> <span style="color: var(--cyan)">Velocity Vector</span></label>
+                            <label class="checkbox-label"><input type="checkbox" id="chk-acceleration" checked> <span style="color: var(--pink)">Acceleration Vector</span></label>
+                            <label class="checkbox-label"><input type="checkbox" id="chk-force" checked> <span style="color: var(--amber)">Net Force</span></label>
+                            <label class="checkbox-label"><input type="checkbox" id="chk-trails" checked> <span>Purple Trails</span></label>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Interactive 2D Canvas Viewport -->
+                <section class="canvas-card">
+                    <div class="canvas-toolbar">
+                        <div class="vector-legend">
+                            <span>Dynamic Vectors:</span>
+                            <span class="legend-item"><span class="legend-dot" style="background: var(--cyan);"></span> Velocity (<span class="math-sym">v</span>)</span>
+                            <span class="legend-item"><span class="legend-dot" style="background: var(--pink);"></span> Acceleration (<span class="math-sym">a</span>)</span>
+                            <span class="legend-item"><span class="legend-dot" style="background: var(--amber);"></span> Net Force (<span class="math-sym">F<sub>net</sub></span>)</span>
+                        </div>
+                        <span id="canvasStatusText">Click "Fire" to launch comparative projectiles</span>
+                    </div>
+
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="940" height="540"></canvas>
+
+                        <!-- Canvas Floating Telemetry & Stacked Energy HUD -->
+                        <div class="canvas-hud">
+                            <div class="hud-card">
+                                <div class="hud-header">
+                                    <span>Primary Projectile HUD</span>
+                                    <span id="hudTime">t = 0.00 s</span>
+                                </div>
+                                <div class="hud-row">
+                                    <span style="color: var(--text-muted)">Coordinates:</span>
+                                    <span class="hud-val" id="hudCoords">x: 0.0m, y: 10.0m</span>
+                                </div>
+                                <div class="hud-row">
+                                    <span style="color: var(--text-muted)">Speed |v|:</span>
+                                    <span class="hud-val" id="hudSpeed">10.00 m/s</span>
+                                </div>
+                                <div class="hud-row">
+                                    <span style="color: var(--text-muted)">Max Height (<span class="math-sym">y<sub>max</sub></span>):</span>
+                                    <span class="hud-val" style="color: var(--amber)" id="hudMaxHeight">10.0 m</span>
+                                </div>
+                                <div class="hud-row">
+                                    <span style="color: var(--text-muted)">Current Range:</span>
+                                    <span class="hud-val" style="color: var(--cyan)" id="hudRange">0.0 m</span>
+                                </div>
+
+                                <!-- Stacked Energy Bar -->
+                                <div style="margin-top: 8px;">
+                                    <div class="hud-row" style="font-size: 0.72rem;">
+                                        <span style="color: var(--green)">KE: <strong id="hudKE">50.0 J</strong></span>
+                                        <span style="color: var(--purple)">PE: <strong id="hudPE">98.0 J</strong></span>
+                                        <span style="color: var(--cyan)">Total: <strong id="hudTotalE">148.0 J</strong></span>
+                                    </div>
+                                    <div class="energy-bar-wrap">
+                                        <div class="energy-bar-ke" id="energyBarKE" style="width: 33%;"></div>
+                                        <div class="energy-bar-pe" id="energyBarPE" style="width: 67%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Comparative Landing Telemetry & DataLogger Section -->
+            <section class="table-card">
+                <div class="card-header-row">
+                    <span class="card-title">📊 Comparative Landing Statistics &amp; DataLogger</span>
+                    <span style="font-size: 0.78rem; color: var(--text-muted);">Decimation: N = 10 frames | Filename: <code>projectile_motion_comparison.csv</code></span>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>Projectile</th>
+                                <th>Launch θ</th>
+                                <th>Initial v₀</th>
+                                <th>Peak Height (<span class="math-sym">y<sub>max</sub></span>)</th>
+                                <th>Total Range (<span class="math-sym">R</span>)</th>
+                                <th>Time of Flight (<span class="math-sym">t<sub>flight</sub></span>)</th>
+                                <th>Energy Conserved (Drift %)</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="landingStatsBody">
+                            <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 14px;">No projectiles fired yet. Click "Fire" to begin.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ─── 3 Chart.js Graphs Row ───────────────────────────────── -->
+            <section class="graphs-section">
+                <!-- Graph 1: Position vs Time -->
+                <div class="graph-card">
+                    <div class="graph-header">
+                        <span class="graph-title">1. Position vs Time: X(t) &amp; Y(t)</span>
+                        <span style="font-size: 0.72rem; color: var(--cyan); font-family: monospace;">Heights &amp; Ranges</span>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="chartPosition"></canvas>
+                    </div>
+                </div>
+
+                <!-- Graph 2: Kinematics vs Time -->
+                <div class="graph-card">
+                    <div class="graph-header">
+                        <span class="graph-title">2. Kinematics vs Time: Vx(t) &amp; Vy(t)</span>
+                        <span style="font-size: 0.72rem; color: var(--pink); font-family: monospace;">Velocity Profiles</span>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="chartKinematics"></canvas>
+                    </div>
+                </div>
+
+                <!-- Graph 3: Energy vs Time -->
+                <div class="graph-card">
+                    <div class="graph-header">
+                        <span class="graph-title">3. Energy vs Time: KE, PE &amp; Total</span>
+                        <span style="font-size: 0.72rem; color: var(--green); font-family: monospace;">Conservation &amp; Drag</span>
+                    </div>
+                    <div class="chart-box">
+                        <canvas id="chartEnergy"></canvas>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ─── TAB 2: 5E Formative Assessment & Worksheet ────────────── -->
+    <main id="tab-assessment" class="tab-content">
+        <div class="container">
+            <div class="assess-wrapper">
+                <div class="assess-top-bar">
+                    <div>
+                        <h2 style="font-size: 1.15rem; font-weight: 800; color: #ffffff;">5E Formative Assessment — 2D Projectile Motion</h2>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Comparative analysis of simultaneous launches, flight dynamics, and energy conservation.</p>
+                    </div>
+                    <div class="student-input-group">
+                        <label for="student-name">Student Full Name:</label>
+                        <input type="text" id="student-name" placeholder="Enter student name...">
+                    </div>
+                </div>
+
+                <div class="assess-nav-bar">
+                    <button class="btn" id="btnAssessPrev" style="padding: 6px 14px;">← Previous</button>
+                    <div class="assess-progress-dots" id="assessDotsContainer"></div>
+                    <span style="font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--cyan);" id="assessCounter">1 / 10</span>
+                    <button class="btn btn-primary" id="btnAssessNext" style="padding: 6px 14px;">Next →</button>
+                </div>
+
+                <!-- 10 Questions conforming strictly to prompt -->
+                <div id="questionsContainer">
+
+                    <!-- 1. Engage -->
+                    <div class="assess-question active" data-q="0" data-correct="Launching horizontally (θ = 0°) from a cliff gives zero initial vertical velocity (vy0 = 0), so its fall time is strictly determined by height (t = √(2h/g)). An angled launch (θ = 45°) provides an upward vertical velocity component (vy0 = v0 sin θ), elevating the projectile to a higher peak and increasing air time to extend horizontal range.">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-engage">Engage — Question 1 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Horizontal vs Angled Launch</span>
+                        </div>
+                        <p class="q-text">Set launch height h = 10 m and speed v₀ = 15 m/s. First launch horizontally at θ = 0°, then at θ = 45°. Compare the two trajectory paths: which launch angle results in a higher maximum height, and which one covers a larger horizontal range? Explain why.</p>
+                        <textarea class="q-textarea" placeholder="Type your observation and explanation here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                    <!-- 2. Engage -->
+                    <div class="assess-question" data-q="1" data-correct="On level ground (h = 0), a 60° launch achieves a significantly higher maximum height than a 30° launch because peak height scales with sin²θ (sin 60° = 0.866 vs sin 30° = 0.500). However, the horizontal ranges are identical without drag because sin(2·30°) = sin(60°) = sin(120°) = sin(2·60°).">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-engage">Engage — Question 2 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Complementary Launch Paths</span>
+                        </div>
+                        <p class="q-text">Set launch height h = 0 m and fire simultaneously with projectileCount = 2 using the complementary preset (θ = 30° and θ = 60°). Describe what happens to the landing positions and peak heights of both projectiles.</p>
+                        <textarea class="q-textarea" placeholder="Type your observation here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                    <!-- 3. Explore -->
+                    <div class="assess-question" data-q="2" data-correct="Maximum height formula is H_max = h0 + (v0² sin²θ)/(2g). As θ increases from 0° to 90°, the vertical velocity component vy0 = v0 sin θ increases monotonically from 0 to v0, maximizing peak height at θ = 90° where all kinetic energy converts into gravitational potential energy.">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-explore">Explore — Question 3 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Effect of Angle on Max Height</span>
+                        </div>
+                        <p class="q-text">Using the simulation, vary θ from 15° to 75° while keeping v₀ = 20 m/s and h = 0 m constant. Mathematically and physically explain why the maximum height increases continuously with launch angle.</p>
+                        <textarea class="q-textarea" placeholder="Type your mathematical reasoning here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                    <!-- 4. Explore -->
+                    <div class="assess-question" data-q="3" data-correct="For level ground launch (h = 0), maximum horizontal range occurs at θ = 45° because R = (v0² sin 2θ)/g, and the function sin(2θ) reaches its absolute maximum of 1.0 at 2θ = 90° (θ = 45°). If launching from an elevated cliff (h > 0), the optimal angle shifts to slightly less than 45° to exploit extra falling time.">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-explore">Explore — Question 4 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Optimal Launch Angle for Range</span>
+                        </div>
+                        <p class="q-text">At what launch angle θ is horizontal range maximized on level ground (h = 0)? Does this optimal angle remain exactly 45° when launching from a height of h = 20 m? Test this in the simulator and explain your findings.</p>
+                        <textarea class="q-textarea" placeholder="Type your analysis here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                    <!-- 5. Explain -->
+                    <div class="assess-question" data-q="4" data-correct="Time of flight is determined exclusively by vertical motion under gravity: y(t) = y0 + vy0·t - 0.5·g·t². Setting y = 0 for level ground yields t_flight = (2·v0·sin θ)/g. Because a steeper angle provides a larger initial upward velocity vy0 = v0 sin θ, it takes longer for gravity to decelerate vy to zero at the peak and pull it back to the ground.">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-explain">Explain — Question 5 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Why Flight Time Differs With Angle</span>
+                        </div>
+                        <p class="q-text">Derive and explain why the total time of flight of a projectile is proportional to sin θ on level ground. Why does the horizontal velocity component vx have no influence on flight duration?</p>
+                        <textarea class="q-textarea" placeholder="Type your derivation and explanation here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                    <!-- 6. Explain -->
+                    <div class="assess-question" data-q="5" data-correct="Horizontal range is the product of horizontal velocity and time of flight: R = vx · t_flight = (v0 cos θ) · (2 v0 sin θ / g). Maximizing range requires balancing horizontal speed (favored by low θ near 0°) and air time (favored by high θ near 90°). Their product is maximized at θ = 45° where cos θ · sin θ is maximum.">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-explain">Explain — Question 6 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Kinematic Velocity Trade-Off</span>
+                        </div>
+                        <p class="q-text">Explain the fundamental trade-off between horizontal velocity vx = v₀ cos θ and flight time t_flight in determining horizontal range. Use your Kinematics vs Time chart to support your answer.</p>
+                        <textarea class="q-textarea" placeholder="Explain the trade-off here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                    <!-- 7. Elaborate -->
+                    <div class="assess-question" data-q="6" data-correct="When simultaneous projectiles are launched with an angular spread, the Position vs Time graph clearly shows their diverging vertical peaks and crossing trajectories. Steeper projectiles peak higher and later in time, while lower-angle projectiles reach their landing points earlier with higher horizontal speeds.">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-elaborate">Elaborate — Question 7 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Multi-Projectile Trajectory Comparison</span>
+                        </div>
+                        <p class="q-text">Set simultaneous projectiles to 3 or 4 and fire. Observe the Position vs Time graph. How does the graph illustrate the difference in peak arrival time and landing sequence among the different colored projectiles?</p>
+                        <textarea class="q-textarea" placeholder="Type your comparative graph analysis here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                    <!-- 8. Elaborate -->
+                    <div class="assess-question" data-q="7" data-correct="Air drag applies an opposing force proportional to v² (F_drag = -drag·v²·v_hat). This non-conservative force continuously does negative work on the projectile, dissipating mechanical energy into thermal energy. The trajectory becomes asymmetric: the descent is steeper than the ascent, and both maximum height and range are reduced. The Energy vs Time graph shows total mechanical energy decaying over time.">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-elaborate">Elaborate — Question 8 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Aerodynamic Drag &amp; Energy Dissipation</span>
+                        </div>
+                        <p class="q-text">Compare a launch with drag = 0 to drag = 0.35. How does aerodynamic drag distort the shape of the parabolic trajectory, and what happens to the Total Mechanical Energy curve on the Energy vs Time chart?</p>
+                        <textarea class="q-textarea" placeholder="Type your energy and trajectory analysis here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                    <!-- 9. Evaluate FRQ -->
+                    <div class="assess-question" data-q="8" data-correct="Theoretical Range calculation: R = (v0² sin 2θ)/g. For v0 = 10 m/s, θ = 45°, g = 9.8 m/s²: R = (10² · sin 90°)/9.8 = 100/9.8 ≈ 10.204 m. In the simulation with drag = 0, the simulated range will closely match 10.20 m (drift < 0.1%).">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-evaluate">Evaluate (FRQ) — Question 9 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Theoretical vs Simulated Range (5 Points)</span>
+                        </div>
+                        <p class="q-text">Calculate the theoretical maximum horizontal range for a projectile launched from level ground (h = 0) with initial speed v₀ = 10.0 m/s, launch angle θ = 45°, and g = 9.8 m/s² (assuming zero drag). Show your complete algebraic work and compare your numerical result to the DataLogger's simulated range.</p>
+                        <textarea class="q-textarea" placeholder="Show your step-by-step formula, values, and simulated comparison here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                    <!-- 10. Evaluate FRQ -->
+                    <div class="assess-question" data-q="9" data-correct="Theoretical Peak Height calculation: H_max = h0 + (v0² sin²θ)/(2g). For v0 = 10 m/s, θ = 45°, h0 = 10 m, g = 9.8 m/s²: vy0 = 10 · sin 45° ≈ 7.071 m/s. Additional height = (7.071)² / (2 · 9.8) = 50 / 19.6 ≈ 2.551 m. Total peak height = 10 + 2.551 = 12.55 m. The simulation confirms this peak within < 0.1% accuracy.">
+                        <div class="q-badge-row">
+                            <span class="phase-tag phase-evaluate">Evaluate (FRQ) — Question 10 of 10</span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted);">Cliff Launch Peak &amp; Flight Time (5 Points)</span>
+                        </div>
+                        <p class="q-text">A projectile is launched from a cliff of height h = 10.0 m with speed v₀ = 10.0 m/s at angle θ = 45° under g = 9.8 m/s². Calculate: (a) the maximum height reached above ground level, and (b) the theoretical velocity magnitude just prior to landing using conservation of energy. Show your full work.</p>
+                        <textarea class="q-textarea" placeholder="Show your step-by-step calculations for (a) and (b) here..."></textarea>
+                        <button class="q-toggle-rubric-btn">💡 Self-Check / Show Pedagogical Rubric</button>
+                        <div class="q-rubric-drawer"></div>
+                    </div>
+
+                </div>
+
+                <div class="assess-footer-bar">
+                    <span style="font-size: 0.88rem; color: var(--text-muted);">
+                        Completed: <strong id="answeredCountBadge" style="color: var(--cyan)">0</strong> / 10 questions answered
+                    </span>
+                    <button class="btn-docx" id="btnExportDocx">📄 Export Assessment Worksheet (.DOCX)</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        2D Projectile Motion Comparative Simulation • Self-Contained Velocity-Verlet Kinematics Engine • AP Physics
+    </footer>
+
+    <!-- ════════════════════════════════════════════════════════════════
+         SINGLE SCRIPT BLOCK: 6 ES6 CLASSES IN EXACT ORDERED HIERARCHY
+         1. PhysicsEngine
+         2. Camera
+         3. Renderer
+         4. UIControls
+         5. DataLogger
+         6. ExportManager
+         ════════════════════════════════════════════════════════════════ -->
+    <script>
+    // =================================================================
+    // CLASS 1: PhysicsEngine
+    // Implements Velocity-Verlet integration, aerodynamic drag,
+    // energy conservation tracking, and strict NaN safety guards.
+    // =================================================================
+    class PhysicsEngine {
+        constructor() {
+            this.dtCap = 0.016; // Maximum integration time-step strictly <= 0.016s
+        }
+
+        // Computes aerodynamic drag acceleration: F_drag = -drag * v^2 * v_hat
+        computeAcceleration(vx, vy, g, drag, mass = 1.0) {
+            const vSq = vx * vx + vy * vy;
+            const v = Math.sqrt(vSq);
+            let dragAx = 0;
+            let dragAy = 0;
+            if (v > 1e-7 && drag > 0) {
+                const fDragMag = drag * vSq;
+                dragAx = (-fDragMag * (vx / v)) / mass;
+                dragAy = (-fDragMag * (vy / v)) / mass;
+            }
+            return {
+                ax: dragAx,
+                ay: -g + dragAy
+            };
+        }
+
+        // Strict Velocity-Verlet integration step for a projectile
+        stepProjectile(p, dt, g, drag) {
+            if (p.landed) return;
+
+            const safeDt = Math.min(dt, this.dtCap);
+            const m = p.mass || 1.0;
+
+            // 1. Evaluate current acceleration a(t)
+            const a0 = this.computeAcceleration(p.vx, p.vy, g, drag, m);
+            p.ax = a0.ax;
+            p.ay = a0.ay;
+
+            // 2. Position update: r(t + dt) = r(t) + v(t)*dt + 0.5*a(t)*dt^2
+            const nextX = p.x + p.vx * safeDt + 0.5 * a0.ax * safeDt * safeDt;
+            const nextY = p.y + p.vy * safeDt + 0.5 * a0.ay * safeDt * safeDt;
+
+            // 3. Predicted velocity for evaluating next acceleration a(t + dt)
+            const predVx = p.vx + a0.ax * safeDt;
+            const predVy = p.vy + a0.ay * safeDt;
+            const a1 = this.computeAcceleration(predVx, predVy, g, drag, m);
+
+            // 4. Velocity update: v(t + dt) = v(t) + 0.5*(a(t) + a(t + dt))*dt
+            const nextVx = p.vx + 0.5 * (a0.ax + a1.ax) * safeDt;
+            const nextVy = p.vy + 0.5 * (a0.ay + a1.ay) * safeDt;
+
+            // 5. Post-integration NaN/Infinity safety guard
+            if (!isFinite(nextX) || !isFinite(nextY) || !isFinite(nextVx) || !isFinite(nextVy)) {
+                p.landed = true;
+                return;
+            }
+
+            // 6. Ground impact detection (y <= 0) with linear landing interpolation
+            if (nextY <= 0) {
+                const dy = nextY - p.y;
+                const frac = Math.abs(dy) > 1e-7 ? Math.max(0, Math.min(1, (0 - p.y) / dy)) : 1.0;
+                p.x = p.x + (nextX - p.x) * frac;
+                p.y = 0;
+                p.time += safeDt * frac;
+                p.range = p.x;
+                p.time_of_flight = p.time;
+                p.vx = 0;
+                p.vy = 0;
+                p.ax = 0;
+                p.ay = 0;
+                p.landed = true;
+                p.ke = 0;
+                p.pe = 0;
+                p.total_energy = 0;
+            } else {
+                p.x = nextX;
+                p.y = nextY;
+                p.vx = nextVx;
+                p.vy = nextVy;
+                p.ax = a1.ax;
+                p.ay = a1.ay;
+                p.time += safeDt;
+                if (p.y > p.max_height) p.max_height = p.y;
+                p.range = p.x;
+                p.ke = 0.5 * m * (p.vx * p.vx + p.vy * p.vy);
+                p.pe = m * g * p.y;
+                p.total_energy = p.ke + p.pe;
+            }
+
+            // Record trail points (growable array)
+            if (!p.trail) p.trail = [];
+            if (p.trail.length === 0 || Math.hypot(p.x - p.trail[p.trail.length - 1].x, p.y - p.trail[p.trail.length - 1].y) >= 0.35) {
+                p.trail.push({ x: p.x, y: p.y, time: p.time });
+            }
+        }
+    }
+
+    // =================================================================
+    // CLASS 2: Camera
+    // Maps simulation physics coordinates (meters) to canvas pixels
+    // with automatic dynamic bounds fitting.
+    // =================================================================
+    class Camera {
+        constructor(canvas) {
+            this.canvas = canvas;
+            this.ctx = canvas.getContext('2d');
+            this.scale = 8.0; // pixels per meter default
+            this.originX = 70; // left margin in pixels
+            this.originY = canvas.height - 65; // bottom margin in pixels
+            this.maxVisibleX = 80;
+            this.maxVisibleY = 40;
+        }
+
+        resize() {
+            const rect = this.canvas.parentElement.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                this.canvas.width = rect.width;
+                this.canvas.height = rect.height;
+                this.originY = this.canvas.height - 65;
+            }
+        }
+
+        // Dynamically fits scale and viewport to enclose all active trajectories
+        updateBounds(projectiles, launchHeight) {
+            let maxX = 30.0;
+            let maxY = Math.max(15.0, launchHeight + 5.0);
+
+            if (projectiles && projectiles.length > 0) {
+                projectiles.forEach(p => {
+                    if (p.x > maxX) maxX = p.x;
+                    if (p.max_height > maxY) maxY = p.max_height;
+                });
+            }
+
+            // Add comfortable padding
+            this.maxVisibleX = maxX * 1.25;
+            this.maxVisibleY = maxY * 1.30;
+
+            const availW = Math.max(200, this.canvas.width - this.originX - 60);
+            const availH = Math.max(150, this.originY - 50);
+
+            const scaleX = availW / this.maxVisibleX;
+            const scaleY = availH / this.maxVisibleY;
+
+            // Smooth scale adjustment
+            const targetScale = Math.max(2.5, Math.min(18.0, Math.min(scaleX, scaleY)));
+            this.scale = this.scale * 0.90 + targetScale * 0.10;
+        }
+
+        worldToScreen(x, y) {
+            return {
+                sx: this.originX + x * this.scale,
+                sy: this.originY - y * this.scale
+            };
+        }
+
+        screenToWorld(sx, sy) {
+            return {
+                x: (sx - this.originX) / this.scale,
+                y: (this.originY - sy) / this.scale
+            };
+        }
+    }
+
+    // =================================================================
+    // CLASS 3: Renderer
+    // Renders canvas background, ground, launch platform, fading trails,
+    // glowing projectiles, and dynamic vector arrows.
+    // =================================================================
+    class Renderer {
+        constructor(camera) {
+            this.camera = camera;
+            this.ctx = camera.ctx;
+        }
+
+        renderScene(projectiles, launchHeight, launchAngle, options = {}) {
+            const ctx = this.ctx;
+            const cam = this.camera;
+            const w = cam.canvas.width;
+            const h = cam.canvas.height;
+
+            // 1. Clear background
+            ctx.fillStyle = '#0a0a1a';
+            ctx.fillRect(0, 0, w, h);
+
+            // 2. Metric coordinate grid
+            ctx.lineWidth = 1;
+            const stepMeters = cam.scale < 6 ? 20 : (cam.scale < 10 ? 10 : 5);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+            ctx.font = '10px "JetBrains Mono", monospace';
+
+            for (let mx = 0; mx <= cam.maxVisibleX + 20; mx += stepMeters) {
+                const scr = cam.worldToScreen(mx, 0);
+                if (scr.sx < 0 || scr.sx > w) continue;
+                ctx.beginPath();
+                ctx.moveTo(scr.sx, 0);
+                ctx.lineTo(scr.sx, cam.originY);
+                ctx.stroke();
+                ctx.fillText(mx + 'm', scr.sx - 8, cam.originY + 18);
+            }
+
+            for (let my = 0; my <= cam.maxVisibleY + 20; my += stepMeters) {
+                const scr = cam.worldToScreen(0, my);
+                if (scr.sy < 0 || scr.sy > h) continue;
+                ctx.beginPath();
+                ctx.moveTo(cam.originX, scr.sy);
+                ctx.lineTo(w, scr.sy);
+                ctx.stroke();
+                ctx.fillText(my + 'm', cam.originX - 34, scr.sy + 4);
+            }
+
+            // 3. Ground surface
+            const groundP1 = cam.worldToScreen(0, 0);
+            const groundGrad = ctx.createLinearGradient(0, cam.originY, 0, h);
+            groundGrad.addColorStop(0, '#10142a');
+            groundGrad.addColorStop(1, '#080814');
+            ctx.fillStyle = groundGrad;
+            ctx.fillRect(0, cam.originY, w, h - cam.originY);
+
+            ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, cam.originY);
+            ctx.lineTo(w, cam.originY);
+            ctx.stroke();
+
+            // 4. Launch tower / cliff platform at x = 0
+            if (launchHeight > 0) {
+                const topScreen = cam.worldToScreen(0, launchHeight);
+                const cliffW = 36;
+                const cliffGrad = ctx.createLinearGradient(topScreen.sx - cliffW, 0, topScreen.sx, 0);
+                cliffGrad.addColorStop(0, '#181b38');
+                cliffGrad.addColorStop(1, '#252a56');
+                ctx.fillStyle = cliffGrad;
+                ctx.fillRect(topScreen.sx - cliffW, topScreen.sy, cliffW, cam.originY - topScreen.sy);
+
+                ctx.strokeStyle = 'rgba(0, 229, 255, 0.6)';
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(topScreen.sx - cliffW, topScreen.sy, cliffW, cam.originY - topScreen.sy);
+
+                // Platform guard railing
+                ctx.strokeStyle = '#ffd740';
+                ctx.beginPath();
+                ctx.moveTo(topScreen.sx - cliffW, topScreen.sy - 8);
+                ctx.lineTo(topScreen.sx + 4, topScreen.sy - 8);
+                ctx.stroke();
+            }
+
+            // 5. Cannon / Launch Barrel at (0, h)
+            const muzzle = cam.worldToScreen(0, launchHeight);
+            ctx.save();
+            ctx.translate(muzzle.sx, muzzle.sy);
+            ctx.rotate(-launchAngle * Math.PI / 180);
+            ctx.fillStyle = '#2979ff';
+            ctx.strokeStyle = '#00e5ff';
+            ctx.lineWidth = 1.5;
+            ctx.fillRect(0, -5, 26, 10);
+            ctx.strokeRect(0, -5, 26, 10);
+            ctx.restore();
+
+            // 6. Draw Projectiles, Trails, and Vectors
+            if (projectiles && projectiles.length > 0) {
+                projectiles.forEach((p, idx) => {
+                    // Fading purple/colored trail
+                    if (options.showTrails !== false && p.trail && p.trail.length > 1) {
+                        for (let t = 1; t < p.trail.length; t++) {
+                            const p0 = cam.worldToScreen(p.trail[t - 1].x, p.trail[t - 1].y);
+                            const p1 = cam.worldToScreen(p.trail[t].x, p.trail[t].y);
+                            const alpha = Math.min(0.9, 0.15 + 0.75 * (t / p.trail.length));
+                            ctx.strokeStyle = `rgba(179, 136, 255, ${alpha})`;
+                            ctx.lineWidth = 2.2;
+                            ctx.beginPath();
+                            ctx.moveTo(p0.sx, p0.sy);
+                            ctx.lineTo(p1.sx, p1.sy);
+                            ctx.stroke();
+                        }
+                    }
+
+                    // Draw Landing Marker if landed
+                    if (p.landed) {
+                        const landScr = cam.worldToScreen(p.x, 0);
+                        ctx.save();
+                        ctx.strokeStyle = p.color;
+                        ctx.lineWidth = 1.5;
+                        ctx.beginPath();
+                        ctx.moveTo(landScr.sx, landScr.sy);
+                        ctx.lineTo(landScr.sx, landScr.sy - 22);
+                        ctx.lineTo(landScr.sx + 14, landScr.sy - 16);
+                        ctx.lineTo(landScr.sx, landScr.sy - 10);
+                        ctx.stroke();
+                        ctx.fillStyle = p.color;
+                        ctx.fill();
+
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = '700 9px monospace';
+                        ctx.fillText(`P${idx + 1}: ${p.x.toFixed(1)}m`, landScr.sx - 15, landScr.sy + 14);
+                        ctx.restore();
+                    }
+
+                    // Glowing Projectile Circle (strictly no ctx.ellipse())
+                    const pos = cam.worldToScreen(p.x, p.y);
+                    ctx.save();
+                    ctx.shadowBlur = p.landed ? 4 : 14;
+                    ctx.shadowColor = p.color;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(pos.sx, pos.sy, 7, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Inner White Core
+                    ctx.shadowBlur = 0;
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(pos.sx, pos.sy, 2.5, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+
+                    // Dynamic Vector Arrows (while in flight)
+                    if (!p.landed) {
+                        if (options.showVelocity !== false) {
+                            this.drawVectorArrow(pos.sx, pos.sy, p.vx, -p.vy, 1.4, '#00e5ff', 'v');
+                        }
+                        if (options.showAcceleration !== false) {
+                            this.drawVectorArrow(pos.sx, pos.sy, p.ax, -p.ay, 1.4, '#ff4081', 'a');
+                        }
+                        if (options.showForce !== false) {
+                            const m = p.mass || 1.0;
+                            this.drawVectorArrow(pos.sx, pos.sy, p.ax * m, -p.ay * m, 1.4, '#ffd740', 'F');
+                        }
+                    }
+                });
+            }
+        }
+
+        drawVectorArrow(sx, sy, vx, vy, scale, color, label) {
+            const ctx = this.ctx;
+            const len = Math.hypot(vx, vy);
+            if (len < 0.2) return;
+
+            const visualLen = Math.min(65, Math.max(12, len * scale));
+            const angle = Math.atan2(vy, vx);
+            const ex = sx + visualLen * Math.cos(angle);
+            const ey = sy + visualLen * Math.sin(angle);
+
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.2;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(ex, ey);
+            ctx.stroke();
+
+            // Arrowhead
+            const headLen = 8;
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(ex, ey);
+            ctx.lineTo(ex - headLen * Math.cos(angle - 0.35), ey - headLen * Math.sin(angle - 0.35));
+            ctx.lineTo(ex - headLen * Math.cos(angle + 0.35), ey - headLen * Math.sin(angle + 0.35));
+            ctx.closePath();
+            ctx.fill();
+
+            // Vector Label
+            ctx.font = '700 9px monospace';
+            ctx.fillText(label, ex + 4, ey - 2);
+            ctx.restore();
+        }
+    }
+
+    // =================================================================
+    // CLASS 4: UIControls
+    // Binds all 6 required parameter sliders, action buttons,
+    // speed settings, presets, and vector options.
+    // =================================================================
+    class UIControls {
+        constructor(state, onFire, onReset, onStateChange) {
+            this.state = state;
+            this.onFire = onFire;
+            this.onReset = onReset;
+            this.onStateChange = onStateChange;
+
+            this.initSliders();
+            this.initIndividualControls();
+            this.initButtons();
+            this.initPresets();
+            this.initTabs();
+            this.updateAllSliderDisplays();
+        }
+
+        initSliders() {
+            const bind = (id, valId, prop, unit, format) => {
+                const sl = document.getElementById(id);
+                const el = document.getElementById(valId);
+                if (!sl) return;
+                sl.addEventListener('input', e => {
+                    const val = parseFloat(e.target.value);
+                    this.state[prop] = val;
+                    if (el) el.textContent = `${format(val)}${unit}`;
+                    if (prop === 'projectileCount') {
+                        this.syncIndividualControlsUI();
+                    }
+                    if (this.onStateChange) this.onStateChange(prop, val);
+                    if (this.onFire) this.onFire();
+                });
+            };
+
+            bind('slider-v0', 'val-v0', 'v0', ' m/s', v => v.toFixed(1));
+            bind('slider-theta', 'val-theta', 'theta', '°', v => Math.round(v));
+            bind('slider-h', 'val-h', 'h', ' m', v => v.toFixed(1));
+            bind('slider-g', 'val-g', 'g', ' m/s²', v => v.toFixed(1));
+            bind('slider-drag', 'val-drag', 'drag', ' kg/s', v => v.toFixed(2));
+            bind('slider-count', 'val-count', 'projectileCount', '', v => Math.round(v));
+
+            const slSpeed = document.getElementById('slider-speed');
+            if (slSpeed) {
+                slSpeed.addEventListener('input', e => {
+                    const sp = parseFloat(e.target.value);
+                    this.state.simSpeed = sp;
+                    document.getElementById('val-speed').textContent = `${sp.toFixed(2)}×`;
+                });
+            }
+        }
+
+        initIndividualControls() {
+            const btnAuto = document.getElementById('btn-mode-auto');
+            const btnCustom = document.getElementById('btn-mode-custom');
+            const box = document.getElementById('individual-controls-box');
+
+            if (btnAuto && btnCustom) {
+                btnAuto.addEventListener('click', () => {
+                    this.state.customProjectilesMode = false;
+                    this.syncIndividualControlsUI();
+                    if (this.onFire) this.onFire();
+                });
+                btnCustom.addEventListener('click', () => {
+                    this.state.customProjectilesMode = true;
+                    this.syncIndividualControlsUI();
+                    if (this.onFire) this.onFire();
+                });
+            }
+
+            // Bind individual sliders for P1..P5
+            for (let i = 1; i <= 5; i++) {
+                const slV0 = document.getElementById(`indiv-v0-${i}`);
+                const slTh = document.getElementById(`indiv-theta-${i}`);
+                const valV0 = document.getElementById(`indiv-val-v0-${i}`);
+                const valTh = document.getElementById(`indiv-val-theta-${i}`);
+                const summary = document.getElementById(`indiv-summary-${i}`);
+
+                if (slV0) {
+                    slV0.addEventListener('input', e => {
+                        const val = parseFloat(e.target.value);
+                        if (this.state.individualConfigs[i - 1]) {
+                            this.state.individualConfigs[i - 1].v0 = val;
+                        }
+                        if (valV0) valV0.textContent = val.toFixed(1);
+                        if (summary) summary.textContent = `${val.toFixed(1)} m/s @ ${Math.round(this.state.individualConfigs[i - 1].theta)}°`;
+                        if (this.onFire) this.onFire();
+                    });
+                }
+
+                if (slTh) {
+                    slTh.addEventListener('input', e => {
+                        const val = parseFloat(e.target.value);
+                        if (this.state.individualConfigs[i - 1]) {
+                            this.state.individualConfigs[i - 1].theta = val;
+                        }
+                        if (valTh) valTh.textContent = `${Math.round(val)}°`;
+                        if (summary) summary.textContent = `${this.state.individualConfigs[i - 1].v0.toFixed(1)} m/s @ ${Math.round(val)}°`;
+                        if (this.onFire) this.onFire();
+                    });
+                }
+            }
+            this.syncIndividualControlsUI();
+        }
+
+        syncIndividualControlsUI() {
+            const btnAuto = document.getElementById('btn-mode-auto');
+            const btnCustom = document.getElementById('btn-mode-custom');
+            const box = document.getElementById('individual-controls-box');
+
+            const isCustom = !!this.state.customProjectilesMode;
+            if (btnAuto) btnAuto.classList.toggle('active', !isCustom);
+            if (btnCustom) btnCustom.classList.toggle('active', isCustom);
+            if (box) box.style.display = isCustom ? 'flex' : 'none';
+
+            const count = Math.max(1, Math.min(5, Math.floor(this.state.projectileCount)));
+            for (let i = 1; i <= 5; i++) {
+                const card = document.getElementById(`indiv-card-${i}`);
+                if (card) {
+                    card.style.display = (i <= count) ? 'block' : 'none';
+                }
+                const cfg = this.state.individualConfigs ? this.state.individualConfigs[i - 1] : null;
+                if (cfg) {
+                    const slV0 = document.getElementById(`indiv-v0-${i}`);
+                    const slTh = document.getElementById(`indiv-theta-${i}`);
+                    const valV0 = document.getElementById(`indiv-val-v0-${i}`);
+                    const valTh = document.getElementById(`indiv-val-theta-${i}`);
+                    const summary = document.getElementById(`indiv-summary-${i}`);
+
+                    if (slV0) slV0.value = cfg.v0;
+                    if (slTh) slTh.value = cfg.theta;
+                    if (valV0) valV0.textContent = cfg.v0.toFixed(1);
+                    if (valTh) valTh.textContent = `${Math.round(cfg.theta)}°`;
+                    if (summary) summary.textContent = `${cfg.v0.toFixed(1)} m/s @ ${Math.round(cfg.theta)}°`;
+                }
+            }
+        }
+
+        initButtons() {
+            const btnPlay = document.getElementById('btn-play');
+            if (btnPlay) {
+                btnPlay.addEventListener('click', () => {
+                    this.state.running = !this.state.running;
+                    btnPlay.textContent = this.state.running ? '⏸ Pause' : '▶ Play';
+                    btnPlay.classList.toggle('btn-primary', this.state.running);
+                });
+            }
+
+            const btnStep = document.getElementById('btn-step');
+            if (btnStep) {
+                btnStep.addEventListener('click', () => {
+                    this.state.running = false;
+                    if (btnPlay) {
+                        btnPlay.textContent = '▶ Play';
+                        btnPlay.classList.remove('btn-primary');
+                    }
+                    if (this.onStateChange) this.onStateChange('step', true);
+                });
+            }
+
+            const btnReset = document.getElementById('btn-reset');
+            if (btnReset) {
+                btnReset.addEventListener('click', () => {
+                    if (this.onReset) this.onReset();
+                });
+            }
+
+            const fireHandler = () => {
+                if (this.onFire) this.onFire();
+            };
+            const btnFire = document.getElementById('btn-fire');
+            if (btnFire) btnFire.addEventListener('click', fireHandler);
+
+            // Vector visibility toggles
+            const bindChk = (id, prop) => {
+                const chk = document.getElementById(id);
+                if (chk) {
+                    chk.addEventListener('change', e => {
+                        this.state[prop] = e.target.checked;
+                    });
+                }
+            };
+            bindChk('chk-velocity', 'showVelocity');
+            bindChk('chk-acceleration', 'showAcceleration');
+            bindChk('chk-force', 'showForce');
+            bindChk('chk-trails', 'showTrails');
+        }
+
+        initPresets() {
+            const applyPreset = (v0, theta, h, drag, count, customMode = false) => {
+                this.state.v0 = v0;
+                this.state.theta = theta;
+                this.state.h = h;
+                this.state.drag = drag;
+                this.state.projectileCount = count;
+                this.state.customProjectilesMode = customMode;
+
+                document.getElementById('slider-v0').value = v0;
+                document.getElementById('slider-theta').value = theta;
+                document.getElementById('slider-h').value = h;
+                document.getElementById('slider-drag').value = drag;
+                document.getElementById('slider-count').value = count;
+
+                this.updateAllSliderDisplays();
+                this.syncIndividualControlsUI();
+                if (this.onFire) this.onFire();
+            };
+
+            const pGround45 = document.getElementById('preset-ground45');
+            if (pGround45) pGround45.addEventListener('click', () => applyPreset(15.0, 45, 0.0, 0.0, 1, false));
+
+            const pCliff0 = document.getElementById('preset-cliff0');
+            if (pCliff0) pCliff0.addEventListener('click', () => applyPreset(12.0, 0, 15.0, 0.0, 1, false));
+
+            const pComp = document.getElementById('preset-comp3060');
+            if (pComp) {
+                pComp.addEventListener('click', () => {
+                    this.state.individualConfigs[0] = { v0: 15.0, theta: 30.0 };
+                    this.state.individualConfigs[1] = { v0: 15.0, theta: 60.0 };
+                    applyPreset(15.0, 45, 0.0, 0.0, 2, true);
+                });
+            }
+
+            const pVariedV0 = document.getElementById('preset-varied-v0');
+            if (pVariedV0) {
+                pVariedV0.addEventListener('click', () => {
+                    this.state.individualConfigs[0] = { v0: 10.0, theta: 45.0 };
+                    this.state.individualConfigs[1] = { v0: 20.0, theta: 45.0 };
+                    this.state.individualConfigs[2] = { v0: 30.0, theta: 45.0 };
+                    applyPreset(20.0, 45, 0.0, 0.0, 3, true);
+                });
+            }
+
+            const pDropLaunch = document.getElementById('preset-drop-launch');
+            if (pDropLaunch) {
+                pDropLaunch.addEventListener('click', () => {
+                    this.state.individualConfigs[0] = { v0: 0.0, theta: 0.0 };
+                    this.state.individualConfigs[1] = { v0: 15.0, theta: 0.0 };
+                    applyPreset(15.0, 0, 20.0, 0.0, 2, true);
+                });
+            }
+
+            const pDrag = document.getElementById('preset-drag');
+            if (pDrag) pDrag.addEventListener('click', () => applyPreset(18.0, 45, 5.0, 0.25, 2, false));
+        }
+
+        initTabs() {
+            const btnSim = document.getElementById('tabBtnSim');
+            const btnAssess = document.getElementById('tabBtnAssessment');
+            const tabSim = document.getElementById('tab-sim');
+            const tabAssess = document.getElementById('tab-assessment');
+
+            if (!btnSim || !btnAssess || !tabSim || !tabAssess) return;
+
+            btnSim.addEventListener('click', () => {
+                btnSim.classList.add('active');
+                btnAssess.classList.remove('active');
+                tabSim.classList.add('active');
+                tabAssess.classList.remove('active');
+            });
+
+            btnAssess.addEventListener('click', () => {
+                btnAssess.classList.add('active');
+                btnSim.classList.remove('active');
+                tabAssess.classList.add('active');
+                tabSim.classList.remove('active');
+            });
+        }
+
+        updateAllSliderDisplays() {
+            const safeSet = (id, text) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = text;
+            };
+            safeSet('val-v0', `${this.state.v0.toFixed(1)} m/s`);
+            safeSet('val-theta', `${Math.round(this.state.theta)}°`);
+            safeSet('val-h', `${this.state.h.toFixed(1)} m`);
+            safeSet('val-g', `${this.state.g.toFixed(1)} m/s²`);
+            safeSet('val-drag', `${this.state.drag.toFixed(2)} kg/s`);
+            safeSet('val-count', `${this.state.projectileCount}`);
+        }
+    }
+
+    // =================================================================
+    // CLASS 5: DataLogger
+    // Growable arrays ONLY (strictly NO data.shift() or circular buffers).
+    // Stores decimated telemetry (N = 10 frames) and exports to CSV.
+    // =================================================================
+    class DataLogger {
+        constructor() {
+            this.records = []; // Growable array ONLY
+            this.frameCount = 0;
+            this.decimationN = 10;
+        }
+
+        log(projectiles, time) {
+            this.frameCount++;
+            if (this.frameCount % this.decimationN === 0) {
+                const row = { time: Number(time.toFixed(3)) };
+                projectiles.forEach((p, idx) => {
+                    const pNum = idx + 1;
+                    row[`proj${pNum}_x`] = Number(p.x.toFixed(3));
+                    row[`proj${pNum}_y`] = Number(p.y.toFixed(3));
+                    row[`proj${pNum}_vx`] = Number(p.vx.toFixed(3));
+                    row[`proj${pNum}_vy`] = Number(p.vy.toFixed(3));
+                });
+                this.records.push(row); // Growable push ONLY
+            }
+        }
+
+        reset() {
+            this.records = [];
+            this.frameCount = 0;
+        }
+
+        toCSV() {
+            if (!this.records || this.records.length === 0) return '';
+            const headers = Object.keys(this.records[0]);
+            let csv = headers.join(',') + '\r\n';
+            for (let i = 0; i < this.records.length; i++) {
+                const row = this.records[i];
+                const line = headers.map(h => row[h] !== undefined ? row[h] : '').join(',');
+                csv += line + '\r\n';
+            }
+            return csv;
+        }
+    }
+
+    // =================================================================
+    // CLASS 6: ExportManager
+    // Orchestrates CSV export via FileSaver.js (projectile_motion_comparison.csv)
+    // and DOCX student worksheet generation using docx@8.5.0.
+    // =================================================================
+    class ExportManager {
+        static exportCSV(dataLogger) {
+            const csvText = dataLogger.toCSV();
+            if (!csvText) {
+                alert('No simulation telemetry recorded yet. Fire projectiles to generate data before exporting.');
+                return;
+            }
+            const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8' });
+            saveAs(blob, 'projectile_motion_comparison.csv');
+        }
+
+        static exportDocx(state, answers) {
+            if (typeof docx === 'undefined') {
+                alert('The docx library is loading. Please check your internet connection.');
+                return;
+            }
+
+            const { Document, Packer, Paragraph, TextRun, AlignmentType, BorderStyle } = docx;
+            const studentInput = document.getElementById('student-name');
+            const studentName = (studentInput && studentInput.value.trim()) ? studentInput.value.trim() : 'Anonymous Student';
+            const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+            const paragraphs = [];
+
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({ text: 'AP Physics: 2D Projectile Motion Comparative Lab', bold: true, size: 34, font: 'Calibri', color: '00838F' })
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 140 }
+            }));
+
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({ text: `Student: ${studentName}  |  Date: ${dateStr}`, bold: true, size: 22, font: 'Calibri', color: '455A64' })
+                ],
+                alignment: AlignmentType.CENTER,
+                spacing: { after: 260 }
+            }));
+
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({ text: 'Active Simulation Parameters Snapshot:', bold: true, size: 24, font: 'Calibri', color: '006064' })
+                ],
+                spacing: { after: 100 }
+            }));
+
+            paragraphs.push(new Paragraph({
+                children: [
+                    new TextRun({ text: `v₀ = ${state.v0.toFixed(1)} m/s, θ = ${state.theta}°, h₀ = ${state.h.toFixed(1)} m, g = ${state.g.toFixed(1)} m/s², Drag = ${state.drag.toFixed(2)} kg/s, Count = ${state.projectileCount}\n`, size: 20, font: 'Calibri' })
+                ],
+                spacing: { after: 240 }
+            }));
+
+            // Include all 10 5E questions
+            const qDivs = document.querySelectorAll('.assess-question');
+            qDivs.forEach((qDiv, idx) => {
+                const qNum = idx + 1;
+                const phaseTag = qDiv.querySelector('.phase-tag')?.textContent || `Question ${qNum}`;
+                const qText = qDiv.querySelector('.q-text')?.textContent || '';
+                const studentAns = (answers && answers[idx] && answers[idx].trim()) ? answers[idx].trim() : '(No response recorded)';
+                const correctRubric = qDiv.getAttribute('data-correct') || '';
+
+                paragraphs.push(new Paragraph({
+                    children: [
+                        new TextRun({ text: `Q${qNum} [${phaseTag}]`, bold: true, size: 22, font: 'Calibri', color: '00838F' })
+                    ],
+                    spacing: { before: 200, after: 60 }
+                }));
+
+                paragraphs.push(new Paragraph({
+                    children: [
+                        new TextRun({ text: qText, size: 20, font: 'Calibri' })
+                    ],
+                    spacing: { after: 80 }
+                }));
+
+                paragraphs.push(new Paragraph({
+                    children: [
+                        new TextRun({ text: 'Student Response: ', bold: true, size: 20, font: 'Calibri', color: '2E7D32' }),
+                        new TextRun({ text: studentAns, size: 20, font: 'Calibri' })
+                    ],
+                    spacing: { after: 60 }
+                }));
+
+                paragraphs.push(new Paragraph({
+                    children: [
+                        new TextRun({ text: 'Authoritative Scoring Rubric: ', bold: true, size: 19, font: 'Calibri', color: 'E65100' }),
+                        new TextRun({ text: correctRubric, size: 19, font: 'Calibri', italics: true })
+                    ],
+                    spacing: { after: 180 }
+                }));
+            });
+
+            Packer.toBlob(new Document({ sections: [{ properties: {}, children: paragraphs }] })).then(blob => {
+                const cleanName = studentName.replace(/[^a-zA-Z0-9]/g, '_');
+                saveAs(blob, `Projectile_Motion_${cleanName}_Assessment.docx`);
+            });
+        }
+    }
+
+    // =================================================================
+    // MAIN CONTROLLER & APPLICATION INITIALIZATION
+    // =================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+        const canvas = document.getElementById('simCanvas');
+        const camera = new Camera(canvas);
+        const renderer = new Renderer(camera);
+        const physicsEngine = new PhysicsEngine();
+        const dataLogger = new DataLogger();
+
+        // Distinct bright glowing projectile colors
+        const COLORS = ['#00e5ff', '#ff4081', '#ffd740', '#69f0ae', '#b388ff'];
+
+        // Main Simulation Reactive State
+        const state = {
+            running: true,
+            time: 0,
+            v0: 10.0,
+            theta: 45,
+            h: 10.0,
+            g: 9.8,
+            drag: 0.0,
+            projectileCount: 2,
+            simSpeed: 1.0,
+            customProjectilesMode: false,
+            individualConfigs: [
+                { v0: 15.0, theta: 30.0 },
+                { v0: 15.0, theta: 60.0 },
+                { v0: 20.0, theta: 45.0 },
+                { v0: 25.0, theta: 45.0 },
+                { v0: 30.0, theta: 45.0 }
+            ],
+            projectiles: [],
+            showVelocity: true,
+            showAcceleration: true,
+            showForce: true,
+            showTrails: true
+        };
+
+        // Resize camera to canvas container
+        camera.resize();
+        window.addEventListener('resize', () => {
+            camera.resize();
+        });
+
+        // ─── Chart.js 4.x Instances Setup ────────────────────────────
+        const createChart = (id, xLabel, yLabel) => {
+            const ctx = document.getElementById(id).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: { datasets: [] },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: xLabel, color: '#8c9bb5', font: { size: 10, weight: 'bold' } },
+                            ticks: { color: '#8c9bb5', font: { size: 9 } },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        },
+                        y: {
+                            type: 'linear',
+                            title: { display: true, text: yLabel, color: '#8c9bb5', font: { size: 10, weight: 'bold' } },
+                            ticks: { color: '#8c9bb5', font: { size: 9 } },
+                            grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#f0f3f8', boxWidth: 10, font: { size: 9 } }
+                        }
+                    }
+                }
+            });
+        };
+
+        const chartPos = createChart('chartPosition', 'Time (s)', 'Position (m)');
+        const chartKin = createChart('chartKinematics', 'Time (s)', 'Velocity (m/s)');
+        const chartEne = createChart('chartEnergy', 'Time (s)', 'Energy (J)');
+
+        // Prepares Chart.js datasets when new projectiles are launched
+        function setupChartDatasets() {
+            // 1. Position vs Time: Height Y(t) and Range X(t) per projectile
+            chartPos.data.datasets = [];
+            state.projectiles.forEach((p, idx) => {
+                chartPos.data.datasets.push({
+                    label: `P${idx + 1} Height Y`,
+                    borderColor: p.color,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    data: []
+                });
+                chartPos.data.datasets.push({
+                    label: `P${idx + 1} Range X`,
+                    borderColor: p.color,
+                    borderWidth: 1.6,
+                    borderDash: [4, 3],
+                    pointRadius: 0,
+                    data: []
+                });
+            });
+
+            // 2. Kinematics vs Time: Vy(t) and Vx(t) per projectile
+            chartKin.data.datasets = [];
+            state.projectiles.forEach((p, idx) => {
+                chartKin.data.datasets.push({
+                    label: `P${idx + 1} Vy`,
+                    borderColor: p.color,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    data: []
+                });
+                chartKin.data.datasets.push({
+                    label: `P${idx + 1} Vx`,
+                    borderColor: p.color,
+                    borderWidth: 1.6,
+                    borderDash: [4, 3],
+                    pointRadius: 0,
+                    data: []
+                });
+            });
+
+            // 3. Energy vs Time: KE, PE, Total
+            chartEne.data.datasets = [
+                {
+                    label: 'Kinetic Energy (KE)',
+                    borderColor: '#69f0ae',
+                    backgroundColor: 'rgba(105, 240, 174, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    data: []
+                },
+                {
+                    label: 'Potential Energy (PE)',
+                    borderColor: '#b388ff',
+                    backgroundColor: 'rgba(179, 136, 255, 0.1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    data: []
+                },
+                {
+                    label: 'Total Mechanical Energy',
+                    borderColor: '#00e5ff',
+                    borderWidth: 2.2,
+                    borderDash: [3, 2],
+                    pointRadius: 0,
+                    data: []
+                }
+            ];
+
+            chartPos.update('none');
+            chartKin.update('none');
+            chartEne.update('none');
+        }
+
+        // ─── Spawns simultaneous projectiles with angle spread or individual configs ────────
+        function fireProjectiles() {
+            state.time = 0;
+            state.running = true;
+            state.projectiles = [];
+            dataLogger.reset();
+
+            const btnPlay = document.getElementById('btn-play');
+            if (btnPlay) {
+                btnPlay.textContent = '⏸ Pause';
+                btnPlay.classList.add('btn-primary');
+            }
+
+            const count = Math.max(1, Math.min(5, Math.floor(state.projectileCount)));
+            const baseTheta = state.theta;
+
+            for (let i = 0; i < count; i++) {
+                let projV0 = state.v0;
+                let actualTheta = state.theta;
+                let projName = '';
+
+                if (state.customProjectilesMode && state.individualConfigs && state.individualConfigs[i]) {
+                    projV0 = state.individualConfigs[i].v0;
+                    actualTheta = Math.max(-89.9, Math.min(89.9, state.individualConfigs[i].theta));
+                    projName = `P${i + 1} (${projV0.toFixed(1)}m/s, ${Math.round(actualTheta)}°)`;
+                } else {
+                    // Compute angular variations centered around main theta
+                    let angleOffset = 0;
+                    if (count === 2) {
+                        angleOffset = (i === 0) ? -7.5 : 7.5;
+                    } else if (count > 2) {
+                        const step = 20 / (count - 1);
+                        angleOffset = -10 + i * step;
+                    }
+                    actualTheta = Math.max(-89.9, Math.min(89.9, baseTheta + angleOffset));
+                    projName = `P${i + 1} (${Math.round(actualTheta)}°)`;
+                }
+
+                const rad = actualTheta * Math.PI / 180;
+                const vx = projV0 * Math.cos(rad);
+                const vy = projV0 * Math.sin(rad);
+
+                const m = 1.0;
+                const ke = 0.5 * m * (vx * vx + vy * vy);
+                const pe = m * state.g * state.h;
+
+                state.projectiles.push({
+                    id: i + 1,
+                    name: projName,
+                    color: COLORS[i % COLORS.length],
+                    x: 0,
+                    y: state.h,
+                    vx: vx,
+                    vy: vy,
+                    ax: 0,
+                    ay: -state.g,
+                    theta: actualTheta,
+                    v0: projV0,
+                    mass: m,
+                    landed: false,
+                    time: 0,
+                    max_height: state.h,
+                    range: 0,
+                    time_of_flight: 0,
+                    trail: [{ x: 0, y: state.h, time: 0 }],
+                    ke: ke,
+                    pe: pe,
+                    total_energy: ke + pe,
+                    initial_energy: ke + pe
+                });
+            }
+
+            setupChartDatasets();
+            updateLandingStatsTable();
+            const statusEl = document.getElementById('canvasStatusText');
+            if (statusEl) {
+                if (state.customProjectilesMode) {
+                    statusEl.textContent = `Fired ${count} custom projectile(s) with individual speeds and angles`;
+                } else {
+                    statusEl.textContent = `Fired ${count} simultaneous projectile(s) at base angle θ = ${Math.round(baseTheta)}°`;
+                }
+            }
+        }
+
+        // ─── Updates Landing Telemetry Table ──────────────────────────
+        function updateLandingStatsTable() {
+            const tbody = document.getElementById('landingStatsBody');
+            if (!tbody) return;
+
+            if (!state.projectiles || state.projectiles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 14px;">No projectiles fired yet. Click "Fire" to begin.</td></tr>';
+                return;
+            }
+
+            let html = '';
+            state.projectiles.forEach((p, idx) => {
+                const initialE = p.initial_energy > 0 ? p.initial_energy : 1.0;
+                const currentE = p.ke + p.pe;
+                const drift = state.drag === 0 ? Math.abs((currentE - initialE) / initialE) * 100 : ((initialE - currentE) / initialE) * 100;
+                const statusStr = p.landed ? '<span style="color: var(--green); font-weight: 700;">Landed</span>' : '<span style="color: var(--cyan); font-weight: 700;">In Flight</span>';
+
+                html += `<tr>
+                    <td><span class="proj-badge"><span class="proj-dot" style="background:${p.color}"></span> ${p.name}</span></td>
+                    <td>${p.theta.toFixed(1)}°</td>
+                    <td>${p.v0.toFixed(1)} m/s</td>
+                    <td style="color: var(--amber)">${p.max_height.toFixed(2)} m</td>
+                    <td style="color: var(--cyan)">${p.range.toFixed(2)} m</td>
+                    <td>${p.landed ? p.time_of_flight.toFixed(2) + ' s' : p.time.toFixed(2) + ' s'}</td>
+                    <td>${state.drag === 0 ? drift.toFixed(3) + '% (Conserved)' : drift.toFixed(1) + '% (Dissipated)'}</td>
+                    <td>${statusStr}</td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // ─── Updates Real-Time Canvas HUD ─────────────────────────────
+        function updateHud() {
+            const elTime = document.getElementById('hudTime');
+            if (elTime) elTime.textContent = `t = ${state.time.toFixed(2)} s`;
+
+            if (state.projectiles && state.projectiles.length > 0) {
+                const p0 = state.projectiles[0];
+                const speed = Math.hypot(p0.vx, p0.vy);
+
+                document.getElementById('hudCoords').textContent = `x: ${p0.x.toFixed(1)}m, y: ${p0.y.toFixed(1)}m`;
+                document.getElementById('hudSpeed').textContent = `${speed.toFixed(2)} m/s`;
+                document.getElementById('hudMaxHeight').textContent = `${p0.max_height.toFixed(2)} m`;
+                document.getElementById('hudRange').textContent = `${p0.range.toFixed(2)} m`;
+
+                const totalE = p0.ke + p0.pe;
+                document.getElementById('hudKE').textContent = `${p0.ke.toFixed(1)} J`;
+                document.getElementById('hudPE').textContent = `${p0.pe.toFixed(1)} J`;
+                document.getElementById('hudTotalE').textContent = `${totalE.toFixed(1)} J`;
+
+                const barKE = document.getElementById('energyBarKE');
+                const barPE = document.getElementById('energyBarPE');
+                if (barKE && barPE) {
+                    if (totalE > 0) {
+                        const kePct = (p0.ke / totalE) * 100;
+                        const pePct = (p0.pe / totalE) * 100;
+                        barKE.style.width = `${kePct.toFixed(1)}%`;
+                        barPE.style.width = `${pePct.toFixed(1)}%`;
+                    } else {
+                        barKE.style.width = '0%';
+                        barPE.style.width = '0%';
+                    }
+                }
+            }
+        }
+
+        // ─── UIControls Initialization ────────────────────────────────
+        const ui = new UIControls(
+            state,
+            () => fireProjectiles(),
+            () => {
+                state.time = 0;
+                state.running = false;
+                state.projectiles = [];
+                dataLogger.reset();
+                setupChartDatasets();
+                updateLandingStatsTable();
+                document.getElementById('btn-play').textContent = '▶ Play';
+                document.getElementById('btn-play').classList.remove('btn-primary');
+                document.getElementById('canvasStatusText').textContent = 'Simulation reset. Ready to fire.';
+            },
+            (prop, val) => {
+                if (prop === 'step') {
+                    // Single Step Execution
+                    physicsStep(0.016);
+                }
+            }
+        );
+
+        // Bind CSV Export
+        const btnCsv = document.getElementById('btn-csv');
+        if (btnCsv) {
+            btnCsv.addEventListener('click', () => {
+                ExportManager.exportCSV(dataLogger);
+            });
+        }
+
+        // ─── Physics Simulation Step Function ─────────────────────────
+        function physicsStep(dt) {
+            if (!state.projectiles || state.projectiles.length === 0) return;
+
+            state.time += dt;
+
+            let anyActive = false;
+            state.projectiles.forEach((p, idx) => {
+                if (!p.landed) {
+                    physicsEngine.stepProjectile(p, dt, state.g, state.drag);
+                    anyActive = true;
+                }
+
+                // Append live chart telemetry points
+                const t = Number(p.time.toFixed(3));
+                const posDatasetY = chartPos.data.datasets[idx * 2];
+                const posDatasetX = chartPos.data.datasets[idx * 2 + 1];
+                if (posDatasetY && posDatasetX) {
+                    posDatasetY.data.push({ x: t, y: Number(p.y.toFixed(2)) });
+                    posDatasetX.data.push({ x: t, y: Number(p.x.toFixed(2)) });
+                }
+
+                const kinDatasetVy = chartKin.data.datasets[idx * 2];
+                const kinDatasetVx = chartKin.data.datasets[idx * 2 + 1];
+                if (kinDatasetVy && kinDatasetVx) {
+                    kinDatasetVy.data.push({ x: t, y: Number(p.vy.toFixed(2)) });
+                    kinDatasetVx.data.push({ x: t, y: Number(p.vx.toFixed(2)) });
+                }
+            });
+
+            // Primary projectile energy tracking
+            if (state.projectiles.length > 0) {
+                const p0 = state.projectiles[0];
+                const t = Number(p0.time.toFixed(3));
+                if (chartEne.data.datasets.length >= 3) {
+                    chartEne.data.datasets[0].data.push({ x: t, y: Number(p0.ke.toFixed(2)) });
+                    chartEne.data.datasets[1].data.push({ x: t, y: Number(p0.pe.toFixed(2)) });
+                    chartEne.data.datasets[2].data.push({ x: t, y: Number(p0.total_energy.toFixed(2)) });
+                }
+            }
+
+            // Log decimated records to DataLogger
+            dataLogger.log(state.projectiles, state.time);
+
+            // Periodically refresh landing table
+            if (Math.random() < 0.25 || !anyActive) {
+                updateLandingStatsTable();
+            }
+        }
+
+        // ─── 5E Formative Assessment Setup ────────────────────────────
+        const studentAnswers = new Array(10).fill('');
+        const qDivs = document.querySelectorAll('.assess-question');
+        const dotsContainer = document.getElementById('assessDotsContainer');
+        let currentQIdx = 0;
+
+        // Populate assessment progress dots
+        if (dotsContainer) {
+            qDivs.forEach((_, idx) => {
+                const dot = document.createElement('div');
+                dot.className = `assess-dot ${idx === 0 ? 'current' : ''}`;
+                dot.addEventListener('click', () => showQuestion(idx));
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function showQuestion(idx) {
+            currentQIdx = Math.max(0, Math.min(qDivs.length - 1, idx));
+            qDivs.forEach((q, i) => {
+                q.classList.toggle('active', i === currentQIdx);
+            });
+            const dots = dotsContainer.querySelectorAll('.assess-dot');
+            dots.forEach((d, i) => {
+                d.classList.toggle('current', i === currentQIdx);
+            });
+            document.getElementById('assessCounter').textContent = `${currentQIdx + 1} / ${qDivs.length}`;
+            document.getElementById('btnAssessPrev').disabled = currentQIdx === 0;
+            document.getElementById('btnAssessNext').disabled = currentQIdx === qDivs.length - 1;
+        }
+
+        const btnPrev = document.getElementById('btnAssessPrev');
+        if (btnPrev) btnPrev.addEventListener('click', () => showQuestion(currentQIdx - 1));
+        const btnNext = document.getElementById('btnAssessNext');
+        if (btnNext) btnNext.addEventListener('click', () => showQuestion(currentQIdx + 1));
+
+        // Textarea input tracking and self-check reveal logic
+        qDivs.forEach((qDiv, idx) => {
+            const ta = qDiv.querySelector('.q-textarea');
+            const rubricBtn = qDiv.querySelector('.q-toggle-rubric-btn');
+            const rubricDrawer = qDiv.querySelector('.q-rubric-drawer');
+            const correctText = qDiv.getAttribute('data-correct') || '';
+
+            if (rubricDrawer) {
+                rubricDrawer.innerHTML = `<strong>Authoritative Scoring Rubric:</strong><br>${correctText}`;
+            }
+
+            if (ta) {
+                ta.addEventListener('input', () => {
+                    studentAnswers[idx] = ta.value;
+                    const dots = dotsContainer.querySelectorAll('.assess-dot');
+                    if (dots[idx]) {
+                        dots[idx].classList.toggle('answered', ta.value.trim().length > 0);
+                    }
+                    const answeredCount = studentAnswers.filter(a => a.trim().length > 0).length;
+                    document.getElementById('answeredCountBadge').textContent = answeredCount;
+                });
+            }
+
+            if (rubricBtn && rubricDrawer) {
+                rubricBtn.addEventListener('click', () => {
+                    const isVisible = rubricDrawer.classList.contains('show');
+                    rubricDrawer.classList.toggle('show', !isVisible);
+                    rubricBtn.textContent = isVisible ? '💡 Self-Check / Show Pedagogical Rubric' : '▲ Hide Rubric';
+                });
+            }
+        });
+
+        // DOCX Worksheet Export
+        const btnDocx = document.getElementById('btnExportDocx');
+        if (btnDocx) {
+            btnDocx.addEventListener('click', () => {
+                ExportManager.exportDocx(state, studentAnswers);
+            });
+        }
+
+        // ─── Initial Setup & Fire ─────────────────────────────────────
+        fireProjectiles();
+
+        // ─── Animation Loop (Strictly requestAnimationFrame only) ──────
+        let lastTs = performance.now();
+
+        function animationLoop(ts) {
+            const elapsed = Math.min(0.064, (ts - lastTs) / 1000.0);
+            lastTs = ts;
+
+            // Physics step
+            if (state.running) {
+                const effectiveDt = (1 / 60) * state.simSpeed;
+                physicsStep(effectiveDt);
+
+                // Update charts periodically (every ~4 frames) for smooth 60fps rendering
+                if (Math.random() < 0.25) {
+                    chartPos.update('none');
+                    chartKin.update('none');
+                    chartEne.update('none');
+                }
+            }
+
+            // Camera bounds & rendering
+            camera.updateBounds(state.projectiles, state.h);
+            const currentCannonAngle = (state.customProjectilesMode && state.individualConfigs && state.individualConfigs.length > 0)
+                ? state.individualConfigs[0].theta
+                : state.theta;
+            renderer.renderScene(state.projectiles, state.h, currentCannonAngle, {
+                showVelocity: state.showVelocity,
+                showAcceleration: state.showAcceleration,
+                showForce: state.showForce,
+                showTrails: state.showTrails
+            });
+
+            // HUD
+            updateHud();
+
+            requestAnimationFrame(animationLoop);
+        }
+
+        requestAnimationFrame(animationLoop);
+    });
+    </script>
+</body>
+</html>
