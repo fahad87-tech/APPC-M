@@ -393,22 +393,20 @@
             border-color: var(--purple);
         }
 
-        .mode-toggle-pills {
+        .count-pills {
             display: flex;
-            gap: 6px;
+            gap: 4px;
             background: rgba(0, 0, 0, 0.28);
-            padding: 4px;
+            padding: 3px;
             border-radius: 8px;
             border: 1px solid var(--border);
-            margin-top: 6px;
-            margin-bottom: 8px;
         }
-        .mode-pill-btn {
+        .count-pill-btn {
             flex: 1;
-            padding: 6px 8px;
+            padding: 4px 0;
             font-size: 0.74rem;
             font-weight: 700;
-            border-radius: 6px;
+            border-radius: 5px;
             border: none;
             background: transparent;
             color: var(--text-muted);
@@ -416,10 +414,29 @@
             transition: all 0.2s ease;
             text-align: center;
         }
-        .mode-pill-btn.active {
+        .count-pill-btn:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .count-pill-btn.active {
             background: var(--cyan);
             color: #0a0a1a;
-            box-shadow: 0 0 10px rgba(0, 229, 255, 0.35);
+            box-shadow: 0 0 8px rgba(0, 229, 255, 0.35);
+        }
+        .btn-card-del {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.82rem;
+            padding: 1px 5px;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+            line-height: 1;
+        }
+        .btn-card-del:hover {
+            color: #ff5252;
+            background: rgba(255, 82, 82, 0.18);
         }
         .indiv-card {
             background: rgba(255, 255, 255, 0.03);
@@ -899,25 +916,7 @@
                             <button class="btn btn-primary" id="btn-fire" style="padding: 6px 18px; font-size: 0.84rem; font-weight: 700; box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);">🔥 Fire</button>
                         </div>
 
-                        <!-- 1. Initial Speed (v0) -->
-                        <div class="slider-item">
-                            <div class="slider-label-row">
-                                <span>Initial Speed (v₀)</span>
-                                <span class="slider-val" id="val-v0">10.0 m/s</span>
-                            </div>
-                            <input type="range" id="slider-v0" min="0" max="50" step="0.5" value="10">
-                        </div>
-
-                        <!-- 2. Launch Angle (theta) -->
-                        <div class="slider-item">
-                            <div class="slider-label-row">
-                                <span>Launch Angle (θ)</span>
-                                <span class="slider-val" id="val-theta">45°</span>
-                            </div>
-                            <input type="range" id="slider-theta" min="-90" max="90" step="1" value="45">
-                        </div>
-
-                        <!-- 3. Launch Height (h) -->
+                        <!-- 1. Launch Height (h) -->
                         <div class="slider-item">
                             <div class="slider-label-row">
                                 <span>Launch Height (h)</span>
@@ -926,7 +925,7 @@
                             <input type="range" id="slider-h" min="0" max="100" step="0.5" value="10">
                         </div>
 
-                        <!-- 4. Gravity (g) -->
+                        <!-- 2. Gravitational Field (g) -->
                         <div class="slider-item">
                             <div class="slider-label-row">
                                 <span>Gravitational Field (g)</span>
@@ -935,7 +934,7 @@
                             <input type="range" id="slider-g" min="0" max="20" step="0.1" value="9.8">
                         </div>
 
-                        <!-- 5. Air Drag Coefficient -->
+                        <!-- 3. Air Drag Coefficient -->
                         <div class="slider-item">
                             <div class="slider-label-row">
                                 <span>Air Drag Coefficient</span>
@@ -944,28 +943,32 @@
                             <input type="range" id="slider-drag" min="0" max="1" step="0.01" value="0">
                         </div>
 
-                        <!-- 6. Simultaneous Projectiles Count -->
-                        <div class="slider-item">
-                            <div class="slider-label-row">
-                                <span>Simultaneous Projectiles</span>
-                                <span class="slider-val" id="val-count">2</span>
+                        <!-- Active Projectiles Manager -->
+                        <div style="margin-top: 10px; margin-bottom: 8px; padding-top: 10px; border-top: 1px solid var(--border);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span style="font-size: 0.74rem; font-weight: 700; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.5px;">🚀 Active Projectiles</span>
+                                    <span id="proj-count-label" class="badge" style="background: rgba(0, 229, 255, 0.15); color: var(--cyan); border: 1px solid rgba(0, 229, 255, 0.3); font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">2 Active</span>
+                                </div>
+                                <div style="display: flex; gap: 4px;">
+                                    <button type="button" id="btn-del-proj" class="btn btn-secondary" style="padding: 3px 8px; font-size: 0.72rem; line-height: 1;" title="Remove Projectile">− Del</button>
+                                    <button type="button" id="btn-add-proj" class="btn btn-primary" style="padding: 3px 8px; font-size: 0.72rem; line-height: 1;" title="Add Another Projectile">+ Add</button>
+                                </div>
                             </div>
-                            <input type="range" id="slider-count" min="1" max="5" step="1" value="2">
-                        </div>
-
-                        <!-- Multi-Projectile Configuration Mode Selector -->
-                        <div style="margin-top: 10px;">
-                            <div class="slider-label-row" style="margin-bottom: 4px;">
-                                <span style="font-size: 0.74rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Angle &amp; Speed Mode:</span>
+                            <!-- Quick count pills 1..5 -->
+                            <div class="count-pills">
+                                <button type="button" class="count-pill-btn" data-count="1">1</button>
+                                <button type="button" class="count-pill-btn active" data-count="2">2</button>
+                                <button type="button" class="count-pill-btn" data-count="3">3</button>
+                                <button type="button" class="count-pill-btn" data-count="4">4</button>
+                                <button type="button" class="count-pill-btn" data-count="5">5</button>
                             </div>
-                            <div class="mode-toggle-pills">
-                                <button type="button" class="mode-pill-btn active" id="btn-mode-auto">Auto Angle Spread</button>
-                                <button type="button" class="mode-pill-btn" id="btn-mode-custom">🎯 Individual Tuning</button>
-                            </div>
+                            <input type="range" id="slider-count" min="1" max="5" step="1" value="2" style="display: none;">
+                            <span id="val-count" style="display: none;">2</span>
                         </div>
 
                         <!-- Individual Projectile Controls Container -->
-                        <div id="individual-controls-box" style="display: none; margin-top: 8px; flex-direction: column; gap: 8px;">
+                        <div id="individual-controls-box" style="display: flex; flex-direction: column; gap: 8px;">
                             <!-- Projectile 1 -->
                             <div class="indiv-card" id="indiv-card-1" style="border-left: 3px solid #00e5ff;">
                                 <div class="indiv-card-header">
@@ -998,7 +1001,10 @@
                                     <span style="font-weight: 700; font-size: 0.78rem; color: #ff4081; display: flex; align-items: center; gap: 6px;">
                                         <span style="width: 8px; height: 8px; border-radius: 50%; background: #ff4081; display: inline-block;"></span> Projectile 2
                                     </span>
-                                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-2">15.0 m/s @ 60°</span>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-2">15.0 m/s @ 60°</span>
+                                        <button type="button" class="btn-card-del" data-index="2" title="Remove Projectile 2">✕</button>
+                                    </div>
                                 </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                     <div>
@@ -1024,7 +1030,10 @@
                                     <span style="font-weight: 700; font-size: 0.78rem; color: #ffd740; display: flex; align-items: center; gap: 6px;">
                                         <span style="width: 8px; height: 8px; border-radius: 50%; background: #ffd740; display: inline-block;"></span> Projectile 3
                                     </span>
-                                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-3">20.0 m/s @ 45°</span>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-3">20.0 m/s @ 45°</span>
+                                        <button type="button" class="btn-card-del" data-index="3" title="Remove Projectile 3">✕</button>
+                                    </div>
                                 </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                     <div>
@@ -1050,7 +1059,10 @@
                                     <span style="font-weight: 700; font-size: 0.78rem; color: #69f0ae; display: flex; align-items: center; gap: 6px;">
                                         <span style="width: 8px; height: 8px; border-radius: 50%; background: #69f0ae; display: inline-block;"></span> Projectile 4
                                     </span>
-                                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-4">25.0 m/s @ 45°</span>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-4">25.0 m/s @ 45°</span>
+                                        <button type="button" class="btn-card-del" data-index="4" title="Remove Projectile 4">✕</button>
+                                    </div>
                                 </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                     <div>
@@ -1076,7 +1088,10 @@
                                     <span style="font-weight: 700; font-size: 0.78rem; color: #b388ff; display: flex; align-items: center; gap: 6px;">
                                         <span style="width: 8px; height: 8px; border-radius: 50%; background: #b388ff; display: inline-block;"></span> Projectile 5
                                     </span>
-                                    <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-5">30.0 m/s @ 45°</span>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-size: 0.72rem; color: var(--text-muted);" id="indiv-summary-5">30.0 m/s @ 45°</span>
+                                        <button type="button" class="btn-card-del" data-index="5" title="Remove Projectile 5">✕</button>
+                                    </div>
                                 </div>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                     <div>
@@ -1842,8 +1857,6 @@
                 });
             };
 
-            bind('slider-v0', 'val-v0', 'v0', ' m/s', v => v.toFixed(1));
-            bind('slider-theta', 'val-theta', 'theta', '°', v => Math.round(v));
             bind('slider-h', 'val-h', 'h', ' m', v => v.toFixed(1));
             bind('slider-g', 'val-g', 'g', ' m/s²', v => v.toFixed(1));
             bind('slider-drag', 'val-drag', 'drag', ' kg/s', v => v.toFixed(2));
@@ -1860,22 +1873,46 @@
         }
 
         initIndividualControls() {
-            const btnAuto = document.getElementById('btn-mode-auto');
-            const btnCustom = document.getElementById('btn-mode-custom');
-            const box = document.getElementById('individual-controls-box');
+            const btnAdd = document.getElementById('btn-add-proj');
+            const btnDel = document.getElementById('btn-del-proj');
 
-            if (btnAuto && btnCustom) {
-                btnAuto.addEventListener('click', () => {
-                    this.state.customProjectilesMode = false;
-                    this.syncIndividualControlsUI();
-                    if (this.onFire) this.onFire();
-                });
-                btnCustom.addEventListener('click', () => {
-                    this.state.customProjectilesMode = true;
-                    this.syncIndividualControlsUI();
-                    if (this.onFire) this.onFire();
+            const setProjectileCount = (newCount) => {
+                const count = Math.max(1, Math.min(5, Math.floor(newCount)));
+                this.state.projectileCount = count;
+                const slCount = document.getElementById('slider-count');
+                if (slCount) slCount.value = count;
+                this.syncIndividualControlsUI();
+                if (this.onFire) this.onFire();
+            };
+
+            if (btnAdd) {
+                btnAdd.addEventListener('click', () => {
+                    setProjectileCount(this.state.projectileCount + 1);
                 });
             }
+            if (btnDel) {
+                btnDel.addEventListener('click', () => {
+                    setProjectileCount(this.state.projectileCount - 1);
+                });
+            }
+
+            // Bind count pill buttons 1..5
+            document.querySelectorAll('.count-pill-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const c = parseInt(btn.getAttribute('data-count'), 10);
+                    if (!isNaN(c)) setProjectileCount(c);
+                });
+            });
+
+            // Bind card delete buttons
+            document.querySelectorAll('.btn-card-del').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.getAttribute('data-index'), 10);
+                    if (this.state.projectileCount >= idx) {
+                        setProjectileCount(this.state.projectileCount - 1);
+                    }
+                });
+            });
 
             // Bind individual sliders for P1..P5
             for (let i = 1; i <= 5; i++) {
@@ -1891,8 +1928,11 @@
                         if (this.state.individualConfigs[i - 1]) {
                             this.state.individualConfigs[i - 1].v0 = val;
                         }
+                        if (i === 1) this.state.v0 = val;
                         if (valV0) valV0.textContent = val.toFixed(1);
-                        if (summary) summary.textContent = `${val.toFixed(1)} m/s @ ${Math.round(this.state.individualConfigs[i - 1].theta)}°`;
+                        if (summary && this.state.individualConfigs[i - 1]) {
+                            summary.textContent = `${val.toFixed(1)} m/s @ ${Math.round(this.state.individualConfigs[i - 1].theta)}°`;
+                        }
                         if (this.onFire) this.onFire();
                     });
                 }
@@ -1903,8 +1943,11 @@
                         if (this.state.individualConfigs[i - 1]) {
                             this.state.individualConfigs[i - 1].theta = val;
                         }
+                        if (i === 1) this.state.theta = val;
                         if (valTh) valTh.textContent = `${Math.round(val)}°`;
-                        if (summary) summary.textContent = `${this.state.individualConfigs[i - 1].v0.toFixed(1)} m/s @ ${Math.round(val)}°`;
+                        if (summary && this.state.individualConfigs[i - 1]) {
+                            summary.textContent = `${this.state.individualConfigs[i - 1].v0.toFixed(1)} m/s @ ${Math.round(val)}°`;
+                        }
                         if (this.onFire) this.onFire();
                     });
                 }
@@ -1913,16 +1956,28 @@
         }
 
         syncIndividualControlsUI() {
-            const btnAuto = document.getElementById('btn-mode-auto');
-            const btnCustom = document.getElementById('btn-mode-custom');
-            const box = document.getElementById('individual-controls-box');
-
-            const isCustom = !!this.state.customProjectilesMode;
-            if (btnAuto) btnAuto.classList.toggle('active', !isCustom);
-            if (btnCustom) btnCustom.classList.toggle('active', isCustom);
-            if (box) box.style.display = isCustom ? 'flex' : 'none';
-
             const count = Math.max(1, Math.min(5, Math.floor(this.state.projectileCount)));
+
+            // Update badge label
+            const label = document.getElementById('proj-count-label');
+            if (label) label.textContent = `${count} Active`;
+
+            const valCount = document.getElementById('val-count');
+            if (valCount) valCount.textContent = `${count}`;
+
+            // Update count pill buttons
+            document.querySelectorAll('.count-pill-btn').forEach(btn => {
+                const c = parseInt(btn.getAttribute('data-count'), 10);
+                btn.classList.toggle('active', c === count);
+            });
+
+            // Update add/del button disabled states
+            const btnAdd = document.getElementById('btn-add-proj');
+            const btnDel = document.getElementById('btn-del-proj');
+            if (btnAdd) btnAdd.disabled = (count >= 5);
+            if (btnDel) btnDel.disabled = (count <= 1);
+
+            // Toggle card display and sync values
             for (let i = 1; i <= 5; i++) {
                 const card = document.getElementById(`indiv-card-${i}`);
                 if (card) {
@@ -1996,19 +2051,24 @@
         }
 
         initPresets() {
-            const applyPreset = (v0, theta, h, drag, count, customMode = false) => {
-                this.state.v0 = v0;
-                this.state.theta = theta;
+            const applyPreset = (h, drag, configs) => {
                 this.state.h = h;
                 this.state.drag = drag;
-                this.state.projectileCount = count;
-                this.state.customProjectilesMode = customMode;
+                this.state.projectileCount = configs.length;
+                for (let i = 0; i < configs.length; i++) {
+                    this.state.individualConfigs[i] = { ...configs[i] };
+                }
+                if (this.state.individualConfigs[0]) {
+                    this.state.v0 = this.state.individualConfigs[0].v0;
+                    this.state.theta = this.state.individualConfigs[0].theta;
+                }
 
-                document.getElementById('slider-v0').value = v0;
-                document.getElementById('slider-theta').value = theta;
-                document.getElementById('slider-h').value = h;
-                document.getElementById('slider-drag').value = drag;
-                document.getElementById('slider-count').value = count;
+                const slH = document.getElementById('slider-h');
+                if (slH) slH.value = h;
+                const slDrag = document.getElementById('slider-drag');
+                if (slDrag) slDrag.value = drag;
+                const slCount = document.getElementById('slider-count');
+                if (slCount) slCount.value = configs.length;
 
                 this.updateAllSliderDisplays();
                 this.syncIndividualControlsUI();
@@ -2016,41 +2076,51 @@
             };
 
             const pGround45 = document.getElementById('preset-ground45');
-            if (pGround45) pGround45.addEventListener('click', () => applyPreset(15.0, 45, 0.0, 0.0, 1, false));
+            if (pGround45) pGround45.addEventListener('click', () => applyPreset(0.0, 0.0, [{ v0: 15.0, theta: 45.0 }]));
 
             const pCliff0 = document.getElementById('preset-cliff0');
-            if (pCliff0) pCliff0.addEventListener('click', () => applyPreset(12.0, 0, 15.0, 0.0, 1, false));
+            if (pCliff0) pCliff0.addEventListener('click', () => applyPreset(15.0, 0.0, [{ v0: 12.0, theta: 0.0 }]));
 
             const pComp = document.getElementById('preset-comp3060');
             if (pComp) {
                 pComp.addEventListener('click', () => {
-                    this.state.individualConfigs[0] = { v0: 15.0, theta: 30.0 };
-                    this.state.individualConfigs[1] = { v0: 15.0, theta: 60.0 };
-                    applyPreset(15.0, 45, 0.0, 0.0, 2, true);
+                    applyPreset(0.0, 0.0, [
+                        { v0: 15.0, theta: 30.0 },
+                        { v0: 15.0, theta: 60.0 }
+                    ]);
                 });
             }
 
             const pVariedV0 = document.getElementById('preset-varied-v0');
             if (pVariedV0) {
                 pVariedV0.addEventListener('click', () => {
-                    this.state.individualConfigs[0] = { v0: 10.0, theta: 45.0 };
-                    this.state.individualConfigs[1] = { v0: 20.0, theta: 45.0 };
-                    this.state.individualConfigs[2] = { v0: 30.0, theta: 45.0 };
-                    applyPreset(20.0, 45, 0.0, 0.0, 3, true);
+                    applyPreset(0.0, 0.0, [
+                        { v0: 10.0, theta: 45.0 },
+                        { v0: 20.0, theta: 45.0 },
+                        { v0: 30.0, theta: 45.0 }
+                    ]);
                 });
             }
 
             const pDropLaunch = document.getElementById('preset-drop-launch');
             if (pDropLaunch) {
                 pDropLaunch.addEventListener('click', () => {
-                    this.state.individualConfigs[0] = { v0: 0.0, theta: 0.0 };
-                    this.state.individualConfigs[1] = { v0: 15.0, theta: 0.0 };
-                    applyPreset(15.0, 0, 20.0, 0.0, 2, true);
+                    applyPreset(20.0, 0.0, [
+                        { v0: 0.0, theta: 0.0 },
+                        { v0: 15.0, theta: 0.0 }
+                    ]);
                 });
             }
 
             const pDrag = document.getElementById('preset-drag');
-            if (pDrag) pDrag.addEventListener('click', () => applyPreset(18.0, 45, 5.0, 0.25, 2, false));
+            if (pDrag) {
+                pDrag.addEventListener('click', () => {
+                    applyPreset(5.0, 0.25, [
+                        { v0: 18.0, theta: 45.0 },
+                        { v0: 18.0, theta: 30.0 }
+                    ]);
+                });
+            }
         }
 
         initTabs() {
@@ -2081,8 +2151,6 @@
                 const el = document.getElementById(id);
                 if (el) el.textContent = text;
             };
-            safeSet('val-v0', `${this.state.v0.toFixed(1)} m/s`);
-            safeSet('val-theta', `${Math.round(this.state.theta)}°`);
             safeSet('val-h', `${this.state.h.toFixed(1)} m`);
             safeSet('val-g', `${this.state.g.toFixed(1)} m/s²`);
             safeSet('val-drag', `${this.state.drag.toFixed(2)} kg/s`);
@@ -2398,7 +2466,7 @@
             chartEne.update('none');
         }
 
-        // ─── Spawns simultaneous projectiles with angle spread or individual configs ────────
+        // ─── Spawns simultaneous projectiles with individual configs ────────
         function fireProjectiles() {
             state.time = 0;
             state.running = true;
@@ -2412,29 +2480,14 @@
             }
 
             const count = Math.max(1, Math.min(5, Math.floor(state.projectileCount)));
-            const baseTheta = state.theta;
 
             for (let i = 0; i < count; i++) {
-                let projV0 = state.v0;
-                let actualTheta = state.theta;
-                let projName = '';
-
-                if (state.customProjectilesMode && state.individualConfigs && state.individualConfigs[i]) {
-                    projV0 = state.individualConfigs[i].v0;
-                    actualTheta = Math.max(-89.9, Math.min(89.9, state.individualConfigs[i].theta));
-                    projName = `P${i + 1} (${projV0.toFixed(1)}m/s, ${Math.round(actualTheta)}°)`;
-                } else {
-                    // Compute angular variations centered around main theta
-                    let angleOffset = 0;
-                    if (count === 2) {
-                        angleOffset = (i === 0) ? -7.5 : 7.5;
-                    } else if (count > 2) {
-                        const step = 20 / (count - 1);
-                        angleOffset = -10 + i * step;
-                    }
-                    actualTheta = Math.max(-89.9, Math.min(89.9, baseTheta + angleOffset));
-                    projName = `P${i + 1} (${Math.round(actualTheta)}°)`;
-                }
+                const cfg = (state.individualConfigs && state.individualConfigs[i])
+                    ? state.individualConfigs[i]
+                    : { v0: 15.0, theta: 45.0 };
+                const projV0 = cfg.v0;
+                const actualTheta = Math.max(-89.9, Math.min(89.9, cfg.theta));
+                const projName = `P${i + 1} (${projV0.toFixed(1)} m/s, ${Math.round(actualTheta)}°)`;
 
                 const rad = actualTheta * Math.PI / 180;
                 const vx = projV0 * Math.cos(rad);
@@ -2474,11 +2527,7 @@
             updateLandingStatsTable();
             const statusEl = document.getElementById('canvasStatusText');
             if (statusEl) {
-                if (state.customProjectilesMode) {
-                    statusEl.textContent = `Fired ${count} custom projectile(s) with individual speeds and angles`;
-                } else {
-                    statusEl.textContent = `Fired ${count} simultaneous projectile(s) at base angle θ = ${Math.round(baseTheta)}°`;
-                }
+                statusEl.textContent = `Fired ${count} projectile(s) with individual speeds and angles`;
             }
         }
 
@@ -2729,9 +2778,9 @@
 
             // Camera bounds & rendering
             camera.updateBounds(state.projectiles, state.h);
-            const currentCannonAngle = (state.customProjectilesMode && state.individualConfigs && state.individualConfigs.length > 0)
+            const currentCannonAngle = (state.individualConfigs && state.individualConfigs.length > 0)
                 ? state.individualConfigs[0].theta
-                : state.theta;
+                : 45;
             renderer.renderScene(state.projectiles, state.h, currentCannonAngle, {
                 showVelocity: state.showVelocity,
                 showAcceleration: state.showAcceleration,
