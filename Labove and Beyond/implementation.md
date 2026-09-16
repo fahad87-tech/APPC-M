@@ -1353,3 +1353,78 @@ npm run dev
     - `npm test`: **12 / 12 test suites passing (100% pass rate)**.
     - `npm run build`: Production bundle built in 5.49s with 0 errors.
 
+---
+
+### Step 36: Precision Trajectory Alignment & Physical Calibration for Horizontal Launch Off Table (`tracker-ball-toss-out`)
+
+- **1. Problem Analysis & Physical Ground Truth**:
+  - **User Feedback**: "horizontal launch data markers start at the wrong place. the ball becomes a porjectile with horizontal velocoity after it passes the white spaced line..... fix it."
+  - **Root Cause**:
+    - The previous `sampleTrackPoints` in `src/utils/pretrackedData.ts` erroneously began at Frame 0 at coordinates $(120, 140)$ in thin air on the far left.
+    - As confirmed in user screenshots, at Frame 16 ($t = 0.548\text{ s}$), the old synthetic marker was already halfway down at $(322.7, 250.9)$, whereas the physical ball was at the top of the stick $(264.5, 99.0)$.
+    - The ball is actually tossed upward from the left by hand, reaching its trajectory apex and crossing the vertical white-spaced calibration stick at **Frame 17** ($x = 287.4, y = 97.8$).
+    - At Frame 17, the ball has zero vertical velocity ($v_{0y} \approx 0.0\text{ m/s}$) and constant horizontal velocity ($v_x = 1.64\text{ m/s}$), entering true 2D horizontal projectile motion under gravity.
+
+- **2. Metric Ruler Calibration & Origin Alignment (`videoLibrary.ts`)**:
+  - **Calibration Stick Analysis**:
+    - Video: `public/videos/tracker_balltossout.mp4` (Resolution: $634 \times 480$, 30.0 FPS, 32 frames).
+    - The vertical striped rod located at $x = 284$ extends from $y = 27$ to $y = 453$.
+    - Total pixel length: $453 - 27 = 426\text{ px}$.
+    - Alternating 10 cm black/white bands demonstrate a total rod length of $1.00\text{ m}$.
+    - Scale: $426\text{ px} / 1.0\text{ m} = 426\text{ px/m}$.
+  - **Updated Configuration in Both Teacher & Student Editions**:
+    ```typescript
+    {
+      id: 'tracker-ball-toss-out',
+      title: 'Tracker: Horizontal Launch Off Table (2D Projectile)',
+      source: 'Tracker',
+      category: '2D Kinematics & Projectiles',
+      description: 'Ball tossed into projectile flight, reaching apex and launching horizontally as it passes the vertical calibration stick. Demonstrates independence of constant horizontal velocity vx and vertical gravitational acceleration.',
+      videoUrl: '/videos/tracker_balltossout.mp4',
+      fps: 30,
+      defaultMass: 0.15,
+      rulerRealLength: 1.0,
+      autoCalibrate: {
+        rulerP1: { x: 284, y: 27 },
+        rulerP2: { x: 284, y: 453 },
+        origin: { x: 284, y: 98 },
+        invertY: true,
+      },
+    }
+    ```
+
+- **3. High-Precision Physical Trajectory Tracking (`pretrackedData.ts`)**:
+  - Extracted 13 consecutive frames from launch apex (Frame 17) to landing (Frame 29):
+    - Frame 17 ($t = 0.0000\text{ s}$): $(287.4, 97.8)$
+    - Frame 18 ($t = 0.0333\text{ s}$): $(310.1, 98.1)$
+    - Frame 19 ($t = 0.0667\text{ s}$): $(333.0, 104.1)$
+    - Frame 20 ($t = 0.1000\text{ s}$): $(355.9, 114.7)$
+    - Frame 21 ($t = 0.1333\text{ s}$): $(378.9, 129.7)$
+    - Frame 22 ($t = 0.1667\text{ s}$): $(401.9, 149.1)$
+    - Frame 23 ($t = 0.2000\text{ s}$): $(425.3, 173.1)$
+    - Frame 24 ($t = 0.2333\text{ s}$): $(448.5, 201.3)$
+    - Frame 25 ($t = 0.2667\text{ s}$): $(471.6, 234.3)$
+    - Frame 26 ($t = 0.3000\text{ s}$): $(495.3, 271.7)$
+    - Frame 27 ($t = 0.3333\text{ s}$): $(518.8, 314.0)$
+    - Frame 28 ($t = 0.3667\text{ s}$): $(542.5, 360.6)$
+    - Frame 29 ($t = 0.4000\text{ s}$): $(566.8, 412.3)$
+
+- **4. Kinematic Regression & Theoretical Physics Verification**:
+  - **Horizontal Position Regression**:
+    $$x(t) = 1.637\text{ m/s} \cdot t + 0.007\text{ m} \quad (R^2 > 0.999)$$
+    $\implies a_x \approx 0$, proving pure uniform horizontal motion.
+  - **Vertical Position Regression**:
+    $$y(t) = -4.805 t^2 + 0.076 t + 0.001\text{ m}$$
+    $\implies v_{0y} = 0.076\text{ m/s} \approx 0.0\text{ m/s}$ (textbook pure horizontal launch).
+    $\implies g = -2 \times (-4.805) = 9.61\text{ m/s}^2$ (within $2\%$ of standard $9.81\text{ m/s}^2$).
+
+- **5. Automated Tests & Build Verification**:
+  - Added comprehensive kinematic assertion in `tests/kinematics-and-regression.test.mjs`.
+  - **Teacher Edition (`c:\Users\fahad\Desktop\fizziq`)**:
+    - `npm test`: **36 / 36 tests passing (100%)**.
+    - `npm run build`: Production build verified with zero errors.
+  - **Student Edition (`C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`)**:
+    - `npm test`: **12 / 12 tests passing (100%)**.
+    - `npm run build`: Production build verified with zero errors.
+
+
