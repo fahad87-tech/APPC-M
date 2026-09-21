@@ -1749,3 +1749,21 @@ npm run dev
   - **Verification**:
     - `npm test`: 36/36 tests passing in Teacher edition, 12/12 passing in Student edition.
     - `npm run build`: Production builds verified successfully in both repos.
+
+---
+
+### Step 43: Student Tutorial Documentation: 1D Vertical Free Fall Laboratory Workflow [SUCCESSFUL]
+
+- **1. Objective**:
+  - Provide a clean, equation-free, click-by-click student tutorial specifically for the **Vertical Free Fall (Measure g)** laboratory experiment.
+  - Focus purely on app navigation, scale calibration, origin positioning, frame-by-frame tracking, and scientific graph interpretation.
+
+- **2. Step-by-Step Student Workflow**:
+  1. **Open the Video**: Open Video Library -> select `"Vertical Free Fall (Measure g)"`.
+  2. **Set the Scale**: Activate the Ruler Tool -> drag endpoints to the 1.0 m vertical calibration rod -> enter `1.0` meters.
+  3. **Set the Origin**: Activate Axes Tool -> position purple crosshair on the ball at Frame 0 (release position) with +Y pointing up.
+  4. **Track the Ball**: Activate Track Tool -> click the center of the ball -> automatic 1-frame advance -> repeat until landing.
+  5. **Analyze the Graphs**:
+     - Plot $y$ vs. Time with Quadratic Fit to observe gravitational parabolic curvature.
+     - Plot $v_y$ vs. Time with Linear Fit to observe linear velocity increase (slope = -9.8 m/s²).
+  6. **Handy Features**: Vector overlays (growing velocity vector), right-click / Ctrl+Z undo, and Data Table spreadsheet export.
