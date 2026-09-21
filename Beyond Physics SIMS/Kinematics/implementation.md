@@ -46,10 +46,19 @@ This document provides a comprehensive technical overview and replication refere
 2. **Car 1 Frame (`observer = 'car1'`)**: Camera tracks $Car_1$.
 3. **Car 2 Frame (`observer = 'car2'`)**: Camera tracks $Car_2$.
 
-### 2.2 Replication Checklist
+### 2.2 Vector Projections & Dynamic Arrow Toggling
+1. **Toggle Control**: Controlled by `#chk-components` ("Vector Projections").
+2. **Behavior**:
+   - When **Enabled** (`state.showComponents = true`): Absolute ground velocity arrows ($v_1$, $v_2$), relative velocity vector ($v_{\text{rel}}$), component projection dashed lines ($v_x, v_y$), and the vector legend HUD are rendered.
+   - When **Disabled** (`state.showComponents = false`): All velocity vector arrows and badges are removed from both Car 1 and Car 2, providing an uncluttered visual representation of the approaching vehicles.
+3. **Reset Synchronization**: Resetting the simulation restores the active vector projection state and synchronizes DOM checkbox inputs.
+4. **Direct Access**: Removed the client-side PBKDF2 password gate to avoid browser crypto restrictions, case-sensitivity lockouts, and redirect-to-blank failures.
+
+### 2.3 Replication Checklist
 1. **Dynamic Parameter Switcher (`setModeDefaults`)**: Auto-update physical parameters (e.g. $T=6.0\text{ N}$ for Longitudinal) and hide/show relevant UI controls when switching wave types.
 2. **Horizontal Acoustic Driver**: Drive longitudinal sound waves along the $x$-axis using a horizontal plunger.
 3. **High-DPI Canvas Scaling**: Scale canvas context by `window.devicePixelRatio`.
+4. **Vector Arrow Toggle**: Ensure `drawVectors()` guards all arrow and projection calls with `state.showComponents`.
 
 ---
 

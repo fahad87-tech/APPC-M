@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AP Physics: Relative Velocity in 2D</title>
+
     <script>
     const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
     document.documentElement.classList.add("password-locked");
@@ -62,6 +63,7 @@
     #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
     #password-gate-submit { background: #64b5f6; color: #08101c; }
   </style>
+
     <style>
         :root {
             --bg: #0a0a1a;
@@ -835,7 +837,7 @@
                     <div class="radio-group">
                         <label class="radio-label selected" id="label-chk-components">
                             <input type="checkbox" id="chk-components" checked style="accent-color:var(--accent-cyan);">
-                            <span>Component Projections</span>
+                            <span>Vector Projections</span>
                         </label>
                         <label class="radio-label" id="label-chk-triangle">
                             <input type="checkbox" id="chk-triangle" style="accent-color:var(--accent-cyan);">
@@ -1761,6 +1763,9 @@
     }
 
     function drawVectors() {
+        // When Vector Projections is toggled off, remove vector arrows from both cars
+        if (!state.showComponents) return;
+
         const v1 = getCar1Velocity();
         const v2 = getCar2Velocity();
         const vrel = getRelativeVelocity();
@@ -1768,19 +1773,19 @@
 
         if (state.observer === 'ground') {
             // Ground Frame: Draw both absolute ground vectors
-            drawVector(state.car1Pos.x, state.car1Pos.y, v1.x, v1.y, '#00e5ff', `v₁ = ${state.v1.toFixed(1)} m/s`, state.showComponents);
-            drawVector(state.car2Pos.x, state.car2Pos.y, v2.x, v2.y, '#ffd740', `v₂ = ${state.v2.toFixed(1)} m/s`, state.showComponents);
+            drawVector(state.car1Pos.x, state.car1Pos.y, v1.x, v1.y, '#00e5ff', `v₁ = ${state.v1.toFixed(1)} m/s`, true);
+            drawVector(state.car2Pos.x, state.car2Pos.y, v2.x, v2.y, '#ffd740', `v₂ = ${state.v2.toFixed(1)} m/s`, true);
 
             // Relative vector between Car 1 and Car 2
-            drawVector(state.car1Pos.x, state.car1Pos.y, vrel.x, vrel.y, '#7c4dff', `v₂/₁ = ${relMag.toFixed(1)} m/s`, false);
+            drawVector(state.car1Pos.x, state.car1Pos.y, vrel.x, vrel.y, '#7c4dff', `v₂/₁ = ${relMag.toFixed(1)} m/s`, true);
         } else if (state.observer === 'car1') {
             // Car 1 Frame: Car 1 sees Car 2
             drawVector(state.car1Pos.x, state.car1Pos.y, v1.x, v1.y, '#00e5ff', `v₁ (Ground) = ${state.v1.toFixed(1)} m/s`, false);
-            drawVector(state.car1Pos.x, state.car1Pos.y, vrel.x, vrel.y, '#7c4dff', `v_rel = ${relMag.toFixed(1)} m/s`, state.showComponents);
+            drawVector(state.car1Pos.x, state.car1Pos.y, vrel.x, vrel.y, '#7c4dff', `v_rel = ${relMag.toFixed(1)} m/s`, true);
         } else {
             // Car 2 Frame: Car 2 sees Car 1
             drawVector(state.car2Pos.x, state.car2Pos.y, v2.x, v2.y, '#ffd740', `v₂ (Ground) = ${state.v2.toFixed(1)} m/s`, false);
-            drawVector(state.car2Pos.x, state.car2Pos.y, vrel.x, vrel.y, '#7c4dff', `v_rel = ${relMag.toFixed(1)} m/s`, state.showComponents);
+            drawVector(state.car2Pos.x, state.car2Pos.y, vrel.x, vrel.y, '#7c4dff', `v_rel = ${relMag.toFixed(1)} m/s`, true);
         }
 
         // Vector Addition Triangle overlay: v1 + v_rel = v2
@@ -2167,6 +2172,18 @@
         btnPlay.textContent = '▶ Play';
         btnPlay.classList.remove('active');
         Object.assign(state, JSON.parse(JSON.stringify(initialState)));
+        const chkC = document.getElementById('chk-components');
+        if (chkC) {
+            chkC.checked = state.showComponents;
+            const lblC = document.getElementById('label-chk-components');
+            if (lblC) lblC.classList.toggle('selected', state.showComponents);
+        }
+        const chkT = document.getElementById('chk-triangle');
+        if (chkT) {
+            chkT.checked = state.showTriangle;
+            const lblT = document.getElementById('label-chk-triangle');
+            if (lblT) lblT.classList.toggle('selected', state.showTriangle);
+        }
         particles = [];
         dataLogger.reset();
         render();
