@@ -1726,3 +1726,26 @@ npm run dev
        - **$v_y(t)$ with Linear Fit**: Slope gives experimental gravitational acceleration $a_y \approx -9.8\text{ m/s}^2$.
        - **Trajectory $y(x)$**: Plots the spatial parabolic flight path.
      - Enable **Vector Overlays** ($\vec{v}$ velocity in emerald green, $\vec{a}$ acceleration in magenta) to watch kinematic vectors dynamically scale and rotate during playback.
+
+---
+
+### Step 42: Complete Removal of "FIZZIQ" Text Across Video Titles, Cards, Badges, and Navigation [SUCCESSFUL]
+
+- **1. Objective**:
+  - Remove all occurrences of "FizziQ" branding text from video titles, cards, badges, dropdowns, and UI navigation in both Teacher and Student editions, establishing a clean, unified, authentic physics laboratory experience under the "Lab-ove and Beyond" identity.
+
+- **2. Modifications Applied**:
+  - **Video Titles & Descriptions (`src/utils/videoLibrary.ts`)**:
+    - Stripped the `'FizziQ: '` prefix from all 34 video experiment titles (e.g. `'FizziQ: Parabolic Motion'` -> `'Parabolic Motion'`, `'FizziQ: Vertical Free Fall'` -> `'Vertical Free Fall'`, `"FizziQ: Newton's Cradle"` -> `"Newton's Cradle"`).
+    - Cleaned descriptions to refer to authentic laboratory experiments rather than proprietary FizziQ labels.
+  - **Video Library Modal (`src/components/Modals/VideoLibraryModal.tsx`)**:
+    - Replaced category button `'FizziQ Official'` with `'Physics Lab'`.
+    - Updated card badges from `'FIZZIQ'` to `'PHYSICS LAB'`.
+  - **Navbar Navigation (`src/components/Navbar.tsx`)**:
+    - Updated video selector `<optgroup label="Real FizziQ Experiments">` to `<optgroup label="Physics Laboratory Experiments">`.
+    - Cleaned tooltips for Sound Studio and Digital Notebook.
+  - **Overlays & Controls (`TrackerControls.tsx`, `StroboscopeModal.tsx`, `App.tsx`, `exportUtils.ts`)**:
+    - Replaced remaining legacy strings with generic laboratory and "Lab-ove and Beyond" text.
+  - **Verification**:
+    - `npm test`: 36/36 tests passing in Teacher edition, 12/12 passing in Student edition.
+    - `npm run build`: Production builds verified successfully in both repos.
