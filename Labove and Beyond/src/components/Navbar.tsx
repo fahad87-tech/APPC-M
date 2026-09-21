@@ -162,7 +162,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               ? 'bg-blue-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
-          title="FizziQ Sound & Acoustics Studio: Oscilloscope, FFT, dB meter, Tone Generator"
+          title="Sound & Acoustics Studio: Oscilloscope, FFT, dB meter, Tone Generator"
         >
           <Activity className="w-3.5 h-3.5 text-amber-500 shrink-0" />
           <span className="hidden 2xl:inline">Sound</span>
@@ -188,7 +188,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               ? 'bg-indigo-600 text-white shadow-xs'
               : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
           }`}
-          title="FizziQ Digital Lab Notebook: Cahier d'expériences report builder"
+          title="Digital Lab Notebook: Cahier d'expériences report builder"
         >
           <BookOpen className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
           <span className="hidden 2xl:inline">Notebook</span>
@@ -207,7 +207,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <option value="" disabled>
               🎬 Load Physics Video...
             </option>
-            <optgroup label="Real FizziQ Experiments">
+            <optgroup label="Physics Laboratory Experiments">
               {REAL_EXPERIMENT_VIDEOS.filter((v) => v.source === 'FizziQ').map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.title}

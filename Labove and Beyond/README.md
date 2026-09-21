@@ -174,7 +174,7 @@ lab-ove-and-beyond-student/
 │   │   ├── Table/           # Spreadsheet data table
 │   │   └── Tracker/         # Video tracker canvas, crosshair, autotracker, stroboscope
 │   ├── data/
-│   │   └── labTemplates.ts  # 10 curriculum experiment inquiry templates
+│   │   └── labTemplates.ts  # 6 curriculum experiment inquiry templates
 │   ├── types/
 │   │   └── physics.ts       # TypeScript type definitions
 │   ├── utils/
@@ -187,6 +187,9 @@ lab-ove-and-beyond-student/
 │   ├── App.tsx              # Root application component
 │   ├── index.css            # Tailwind styles and custom sliders
 │   └── main.tsx             # Application entry point
+├── worksheets/              # Printable AP Physics C lab handouts (.docx)
+│   ├── APC_2D_Projectile_Motion_TEACHER.docx
+│   └── APC_2D_Projectile_Motion_STUDENT.docx
 ├── tests/
 │   └── student-edition.test.mjs # Automated verification test suite
 ├── package.json

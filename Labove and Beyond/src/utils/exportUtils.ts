@@ -18,7 +18,7 @@ export function exportToExcel(
   const pxPerMeter = scale ? scalePxLen / (scale.distanceInMeters || 1) : 0;
 
   const metaData: (string | number)[][] = [
-    ['FizziQ + Tracker Scientific Experiment Report', ''],
+    ['Lab-ove and Beyond Scientific Experiment Report', ''],
     ['Experiment Title', videoTitle],
     ['Date Exported', new Date().toLocaleString()],
     ['Total Tracked Series', seriesList.length],

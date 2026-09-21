@@ -1427,4 +1427,302 @@ npm run dev
     - `npm test`: **12 / 12 tests passing (100%)**.
     - `npm run build`: Production build verified with zero errors.
 
+---
 
+### Step 37: 2D Projectile Motion Laboratory Word Handouts (Teacher & Student Editions) for AP Physics C: Mechanics (42-Minute Period)
+
+- **1. Pedagogical Rationale & College Board AP Physics C Alignment**:
+  - **Objective**: Create publication-grade Microsoft Word laboratory handouts (`.docx`) in two distinct editions:
+    - **Teacher Master Edition & Master Solution Manual** (`AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`): Contains full step-by-step calculus derivations, complete 25-frame empirical ground truth data, graphical regression fits, point-by-point AP scoring rubrics, pacing strategies, and common student pitfall remedies.
+    - **Student Guided Inquiry Handout** (`AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`): Contains clean, structured prompts, guided calculus integration boxes, apparatus calibration guides, data collection tables, regression analysis prompts, and AP C challenge problems.
+  - **Classroom Duration Constraint**: Specifically engineered to fit within a standard **42-minute high school class period**.
+  - **AP Physics C: Mechanics Topic Alignment**:
+    - **Topic 1.3: Projectile Motion** (Learning Objectives: 1.A.1, 1.A.2, 1.A.3, 1.C.1).
+    - Vector Cartesian representation: $\vec{r}(t) = x(t)\hat{i} + y(t)\hat{j}$, $\vec{v}(t) = \frac{d\vec{r}}{dt}$, $\vec{a}(t) = \frac{d\vec{v}}{dt} = -g\hat{j}$.
+    - Parametric trajectory equation: $y(x) = (\tan\theta_0)x - \frac{g}{2(v_0\cos\theta_0)^2}x^2$.
+    - Apex curvature: $\rho = \frac{v^2}{a_\perp} = \frac{v_{0x}^2}{g}$.
+    - Non-linear aerodynamic drag modeling: $m\frac{d\vec{v}}{dt} = m\vec{g} - c v \vec{v}$.
+
+- **2. Video Selection & Apparatus Setup in Lab-ove and Beyond**:
+  - **Selected Experiment**: `"FizziQ: Parabolic Motion (Classic Lab)"` (ID: `fizziq-parabola`, Video: `/videos/fizziq_parabole.mp4`).
+  - **Physical Scale Calibration**: 1.00 m vertical reference rod located at $x = 140\text{ px}$, extending from $y = 963\text{ px}$ to $y = 478\text{ px}$ ($\Delta y = 485\text{ px} \implies \text{Scale} = 485.0\text{ px/m}$).
+  - **Coordinate Origin**: Placed at the projectile release center in Frame 0 $(508, 724\text{ px})$, with $+Y$ directed upwards and $+X$ directed horizontally along the motion path.
+  - **Temporal Frame Calibration**: Filmed at $30.0\text{ FPS}$, yielding a discrete time increment of $\Delta t = \frac{1}{30}\text{ s} \approx 0.03333\text{ s}$ across 25 frames ($t = 0.0000\text{ s}$ to $t = 0.8000\text{ s}$).
+
+- **3. Empirical Kinematic Ground Truth & Regression Results**:
+  - **Horizontal Position**:
+    $$x(t) = (0.9182\text{ m/s})\cdot t + 0.0064\text{ m} \quad (R^2 = 0.9991)$$
+    $\implies v_{0x} = 0.9182\text{ m/s}$, proving horizontal acceleration $a_x = \frac{d^2x}{dt^2} \approx 0\text{ m/s}^2$.
+  - **Vertical Position**:
+    $$y(t) = -4.9394\cdot t^2 + 4.2650\cdot t + 0.0010\text{ m} \quad (R^2 = 0.9997)$$
+    $\implies g_{\text{exp}} = 2|A| = 9.8788\text{ m/s}^2$ (**0.74% discrepancy** from theoretical $9.8067\text{ m/s}^2$).
+    $\implies v_{0y} = 4.2650\text{ m/s}$.
+  - **Vertical Velocity**:
+    $$v_y(t) = -9.6269\cdot t + 4.1885\text{ m/s} \quad (R^2 = 0.9980) \implies a_y = -9.627\text{ m/s}^2.$$
+  - **Launch Parameters**:
+    - Launch speed: $v_0 = \sqrt{v_{0x}^2 + v_{0y}^2} = \sqrt{0.9182^2 + 4.2650^2} = 4.363\text{ m/s}$.
+    - Launch angle: $\theta_0 = \arctan\left(\frac{4.2650}{0.9182}\right) = 77.85^\circ$ above horizontal.
+  - **Apex & Flight Characteristics**:
+    - Time to apex: $t_{\text{apex}} = \frac{v_{0y}}{g} = 0.432\text{ s}$ (matches Frame 13 video empirical peak).
+    - Maximum apex height: $H = \frac{v_{0y}^2}{2g} = 0.922\text{ m}$ (empirical measurement: $0.926\text{ m}$).
+    - Total flight time: $T = 2 t_{\text{apex}} = 0.864\text{ s}$.
+    - Total range: $R = v_{0x} T = 0.799\text{ m} \approx 0.80\text{ m}$.
+  - **Instantaneous Kinematics at Mid-Ascent ($t = 0.200\text{ s}$, Frame 6)**:
+    - $\vec{r}(0.20) = 0.190\hat{i} + 0.656\hat{j}\text{ m}$.
+    - $\vec{v}(0.20) = 0.929\hat{i} + 2.322\hat{j}\text{ m/s}$, Speed: $v = 2.501\text{ m/s}$, Direction: $\phi = 68.20^\circ$.
+    - Tangential acceleration: $a_\parallel = -g\sin\phi = -9.11\text{ m/s}^2$ (slowing down).
+    - Normal acceleration: $a_\perp = g\cos\phi = 3.64\text{ m/s}^2$.
+    - Instantaneous radius of curvature: $\rho(0.20) = \frac{v^2}{a_\perp} = 1.72\text{ m}$.
+  - **AP Physics C Calculus Extensions**:
+    - **Apex Radius of Curvature**: $\rho_{\text{apex}} = \frac{v_{0x}^2}{g} = \frac{0.9182^2}{9.807} = 0.0860\text{ m} = 8.60\text{ cm}$. Verified via differential geometry curvature $\kappa = \frac{|y''(x)|}{[1 + (y'(x))^2]^{3/2}} \implies \rho = \frac{1}{\kappa} = \frac{v_{0x}^2}{g}$.
+    - **Conservation of Mechanical Energy**: $E(0) = 1.428\text{ J}$ vs. $E(t_{\text{apex}}) = 1.431\text{ J}$ ($\Delta E / E = 0.23\%$).
+    - **Aerodynamic Drag Differential Equations**:
+      $$m\frac{dv_x}{dt} = -c \sqrt{v_x^2 + v_y^2}\cdot v_x, \quad m\frac{dv_y}{dt} = -mg - c \sqrt{v_x^2 + v_y^2}\cdot v_y$$
+      Explaining the observed late-frame deceleration in $v_x$ (down to $0.43\text{ m/s}$ in Frame 24) and physical trajectory steepening/asymmetry.
+
+- **4. Document Generation & Asset Synchronization**:
+  - Python scripts implemented:
+    - `scratch/generate_figures.py`: Generates Figure 1 (`lab_setup_and_vectors.png`) and Figure 2 (`projectile_kinematics_panel.png`) at 300 DPI.
+    - `scratch/docx_builder_helpers.py`: XML-level cell shading, custom borders, callouts, and response boxes.
+    - `scratch/build_teacher_docx.py`: Produces `AP_Physics_C_2D_Projectile_Lab_TEACHER.docx` (750 KB).
+    - `scratch/build_student_docx.py`: Produces `AP_Physics_C_2D_Projectile_Lab_STUDENT.docx` (745 KB).
+  - Both `.docx` files generated in `c:\Users\fahad\Desktop\fizziq` and synchronized to `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`.
+
+
+---
+
+### Step 38: Streamlining AP Physics C 2D Projectile Lab Handouts: Removing Scaffolding & Wordiness, Adding Explicit App Instructions, Measurements, and Graphing Guides
+
+- **1. Objective & Design Rationale**:
+  - Addressed critical user feedback:
+    1. **Eliminate Wordiness**: Removed multi-page historical background, pedagogical preambles, and repetitive filler text.
+    2. **Remove Heavy Scaffolding**: Replaced spoon-fed algebraic substitutions and pre-filled formula templates with authentic AP Physics C inquiry prompts. Students independently perform calculus integrations, vector decompositions, and regression interpretations.
+    3. **Explicit App Instructions (Lab-ove and Beyond)**: Clear, tool-by-tool UI directions for video loading, calibration, tracking, and vector visualization.
+    4. **Physical Measurement Protocols**: Direct instructions for measuring $(t, x, y, v_x, v_y, v)$, launch parameters $(v_0, \theta_0)$, apex milestones $(x_{\text{apex}}, y_{\text{apex}}, H, t_{\text{apex}})$, total flight duration $T$, horizontal range $R$, and mid-ascent vector components ($a_\parallel, a_\perp$).
+    5. **Graphing & Fitting Procedures**: Explicit procedures for plotting $x(t)$, $y(t)$, $v_y(t)$, and trajectory $y(x)$ within the app, applying linear and quadratic regressions, and extracting physical constants ($g = 2|A|$, $a_x \approx 0$, $a_y \approx -g$).
+
+- **2. Streamlined 5-Section Lab Architecture (42-Minute Period)**:
+  - **Section 1: Theoretical Foundation (Calculus & Vectors)**:
+    - Independent derivation of $\vec{r}(t)$, $\vec{v}(t)$, and $\vec{a}(t)$ starting from initial value problem $\vec{a} = -g\hat{j}$.
+    - Parametric trajectory derivation $y(x)$ and differential curvature $\rho = \frac{v^2}{a_\perp}$.
+  - **Section 2: Lab-ove and Beyond App Workflow & Calibration**:
+    - Step 1: Open Video Library $\rightarrow$ load `'FizziQ: Parabolic Motion (Classic Lab)'` (30.0 FPS).
+    - Step 2: Calibrate scale with Ruler Tool on the 1.00 m vertical rod ($pprox 485\text{ px/m}$).
+    - Step 3: Set origin with Axes Tool at projectile release point in Frame 0.
+    - Step 4: Track motion with Track Tool (or Autotracker) across all 25 frames.
+    - Step 5: Enable Vector Overlays to observe velocity and acceleration vectors live.
+  - **Section 3: Experimental Data Collection & Physical Measurements**:
+    - Record essential kinematic milestone table (Frames 0, 3, 6, 9, 13 [apex], 18, 24).
+    - Measure initial launch vector $(v_0, \theta_0)$, maximum height $H$, time to apex $t_{\text{apex}}$, total flight time $T$, and range $R$.
+    - At mid-ascent ($t = 0.20\text{ s}$), decompose $\vec{a}$ into tangential $a_\parallel = -g\sin\phi$ and normal $a_\perp = g\cos\phi$.
+  - **Section 4: App Graphing & Regression Fitting**:
+    - App Graph 1: $x(t)$ with Linear Fit $\implies$ slope $= v_{0x}$, $a_x = 0$.
+    - App Graph 2: $y(t)$ with Quadratic Fit $\implies y(t) = A t^2 + B t + C$; calculate experimental $g = 2|A|$ and % error vs. $9.81\text{ m/s}^2$.
+    - App Graph 3: $v_y(t)$ with Linear Fit $\implies$ slope $= a_y \approx -g$.
+    - App Graph 4: Trajectory $y(x) \implies$ inspect real-world aerodynamic asymmetry.
+  - **Section 5: AP Physics C Rigor & Calculus Extensions**:
+    - Apex radius of curvature calculation $\rho_{\text{apex}} = \frac{v_{0x}^2}{g}$.
+    - Mechanical energy conservation test between release and apex.
+    - Real-world drag differential equations ($m\frac{d\vec{v}}{dt} = m\vec{g} - c v \vec{v}$) explaining observed deceleration.
+
+- **3. Script & Document Deliverables**:
+  - `scratch/build_student_docx.py`: Generates the streamlined, unscaffolded Student Inquiry Handout.
+  - `scratch/build_teacher_docx.py`: Generates the complete Teacher Master Edition with solutions, ground truth milestones, and AP rubrics.
+  - Documents generated and synchronized:
+    - `c:\Users\fahad\Desktop\fizziq\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `c:\Users\fahad\Desktop\fizziq\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\worksheets\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\worksheets\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+
+
+---
+
+### Step 39: Radical De-Wordification, Multi-Part Answer Tab Partitioning, and AP Physics C Mechanics Curriculum Re-Centering
+
+- **1. User Rationale & Feedback Implementation**:
+  - **Radical De-Wordification**: Stripped all remaining conversational filler, multi-sentence preambles, and unnecessary narrative text. Every step, question, and instruction is crisp, punchy, and straight to the point.
+  - **Dedicated Multi-Part Answer Tabs/Boxes**: Previously, multi-part prompts (e.g., Q2.1 asking for speed, angle, and vector) were forced into a single unstructured response box. Every sub-part ((a), (b), (c)) now possesses its own bold question prompt and dedicated, shaded response box with customized height and targeted guidance.
+  - **AP Physics C Mechanics Domain Alignment**:
+    - Removed non-syllabus / out-of-domain topics: Radius of curvature ($\rho = v^2/a_\perp$ from differential geometry), Mechanical Energy ($E = K + U$ with an arbitrary mass during an early-year kinematics lab), and 2D coupled quadratic drag ODEs.
+    - Replaced with core AP Physics C: Mechanics Topic 1.3 Free-Response Calculus Challenges:
+      - **Challenge 4.1 [Calculus Trajectory Derivation & Path Verification — 3 Pts]**:
+        - Part (a): Parametric elimination of time $t = x / v_{0x}$ to derive $y(x) = (v_{0y} / v_{0x})x - (g / (2 v_{0x}^2))x^2$.
+        - Part (b): Evaluating empirical coefficients to formulate the numerical trajectory equation $y(x) = 4.645 x - 5.816 x^2$.
+        - Part (c): Applying the calculus extremum condition $\frac{dy}{dx} = 0$ to solve for $x_{\text{apex}} = \frac{v_{0x} v_{0y}}{g} = 0.399\text{ m}$, verified against Frame 13 experimental data ($0.404\text{ m}$).
+      - **Challenge 4.2 [Calculus Derivation of Flight Extremes: Height & Range — 3 Pts]**:
+        - Part (a): Setting vertical velocity $v_y(t) = v_{0y} - gt = 0$ to derive $t_{\text{apex}} = \frac{v_{0y}}{g}$ and $H = \frac{v_{0y}^2}{2g} = 0.927\text{ m}$ (matches measured $0.926\text{ m}$).
+        - Part (b): Setting landing condition $y(T) = 0$ to derive $T = \frac{2v_{0y}}{g}$ and range $R = \frac{2v_{0x}v_{0y}}{g} = 0.799\text{ m} \approx 0.80\text{ m}$.
+        - Part (c): Percentage discrepancy analysis comparing $R_{\text{theory}}$ to measured video range and attributing specific physical error sources (drag, level offset, camera perspective).
+      - **Challenge 4.3 [Calculus Extremum: Minimum Speed During Flight — 2 Pts]**:
+        - Part (a): Expressing speed squared $f(t) = v^2(t) = v_{0x}^2 + (v_{0y} - gt)^2$, taking $\frac{d(v^2)}{dt} = -2g(v_{0y} - gt) = 0$, and proving $t^* = \frac{v_{0y}}{g}$.
+        - Part (b): Proving minimum speed occurs at apex where $v_{\text{min}} = v_{0x} = 0.918\text{ m/s}$, validated against empirical Frame 13 speed ($0.920\text{ m/s}$, $< 0.2\%$ discrepancy).
+
+- **2. Synchronized Deliverables**:
+  - `scratch/build_student_docx.py`: Clean, punchy Student Inquiry Handout with partitioned answer boxes for all parts.
+  - `scratch/build_teacher_docx.py`: Master Teacher Edition with complete worked derivations, empirical ground-truth milestones, and AP rubrics.
+  - Document locations:
+    - `c:\Users\fahad\Desktop\fizziq\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `c:\Users\fahad\Desktop\fizziq\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\worksheets\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\worksheets\AP_Physics_C_2D_Projectile_Lab_STUDENT_STREAMLINED.docx`
+
+
+---
+
+### Step 40: Native OMML Math Rendering (True Overhead Vector Arrows & Radical Equations) and Single-Directory Consolidation
+
+- **1. User Request & Root Cause of Math Glitch**:
+  - **Issue Identified**: In Microsoft Word (`.docx`), using raw Unicode combining characters (e.g. `v\u20d7` or `v⃗`) caused Word's rendering engine to display the vector arrow as a floating side superscript `v→` (as captured in the user's screenshot). Subscripts and fractions were also previously rendered as plain text strings.
+  - **Solution**: Implemented native Office Math Markup Language (OMML) under the namespace `http://schemas.openxmlformats.org/officeDocument/2006/math`.
+    - **Vector Accents**: Used `<m:acc><m:accPr><m:chr m:val="&#x20D7;"/></m:accPr><m:e><m:r><m:t>v</m:t></m:r></m:e></m:acc>` so Cambria Math positions the vector arrow directly centered on top of $\vec{v}$, $\vec{a}$, and $\vec{r}$.
+    - **Unit Vector Hats**: Used `<m:acc><m:accPr><m:chr m:val="&#x0302;"/></m:accPr><m:e><m:r><m:t>i</m:t></m:r></m:e></m:acc>` for $\hat{i}$ and $\hat{j}$.
+    - **Subscripts & Superscripts**: Native `<m:sSub>`, `<m:sSup>`, and `<m:sSubSup>` for $v_{0x}, v_{0y}, v_0, \theta_0, t_{\text{apex}}, a_\parallel, a_\perp, g_{\text{exp}}, R^2, v_{0x}^2$.
+    - **Radicals & Fractions**: Native `<m:rad>` for $v_0 = \sqrt{v_{0x}^2 + v_{0y}^2}$ and `<m:f>` vertical fractions for all derivations ($y(x), H, R, \frac{dy}{dx}$).
+
+- **2. Single-Folder Consolidation & Deletion of Stale Files**:
+  - Removed all duplicate `.docx` files from the project root folders (`c:\Users\fahad\Desktop\fizziq` and `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`).
+
+
+---
+
+### Step 38: Streamlining AP Physics C 2D Projectile Lab Handouts: Removing Scaffolding & Wordiness, Adding Explicit App Instructions, Measurements, and Graphing Guides
+
+- **1. Objective & Design Rationale**:
+  - Addressed critical user feedback:
+    1. **Eliminate Wordiness**: Removed multi-page historical background, pedagogical preambles, and repetitive filler text.
+    2. **Remove Heavy Scaffolding**: Replaced spoon-fed algebraic substitutions and pre-filled formula templates with authentic AP Physics C inquiry prompts. Students independently perform calculus integrations, vector decompositions, and regression interpretations.
+    3. **Explicit App Instructions (Lab-ove and Beyond)**: Clear, tool-by-tool UI directions for video loading, calibration, tracking, and vector visualization.
+    4. **Physical Measurement Protocols**: Direct instructions for measuring $(t, x, y, v_x, v_y, v)$, launch parameters $(v_0, \theta_0)$, apex milestones $(x_{\text{apex}}, y_{\text{apex}}, H, t_{\text{apex}})$, total flight duration $T$, horizontal range $R$, and mid-ascent vector components ($a_\parallel, a_\perp$).
+    5. **Graphing & Fitting Procedures**: Explicit procedures for plotting $x(t)$, $y(t)$, $v_y(t)$, and trajectory $y(x)$ within the app, applying linear and quadratic regressions, and extracting physical constants ($g = 2|A|$, $a_x \approx 0$, $a_y \approx -g$).
+
+- **2. Streamlined 5-Section Lab Architecture (42-Minute Period)**:
+  - **Section 1: Theoretical Foundation (Calculus & Vectors)**:
+    - Independent derivation of $\vec{r}(t)$, $\vec{v}(t)$, and $\vec{a}(t)$ starting from initial value problem $\vec{a} = -g\hat{j}$.
+    - Parametric trajectory derivation $y(x)$ and differential curvature $\rho = \frac{v^2}{a_\perp}$.
+  - **Section 2: Lab-ove and Beyond App Workflow & Calibration**:
+    - Step 1: Open Video Library $\rightarrow$ load `'FizziQ: Parabolic Motion (Classic Lab)'` (30.0 FPS).
+    - Step 2: Calibrate scale with Ruler Tool on the 1.00 m vertical rod ($ pprox 485\text{ px/m}$).
+    - Step 3: Set origin with Axes Tool at projectile release point in Frame 0.
+    - Step 4: Track motion with Track Tool (or Autotracker) across all 25 frames.
+    - Step 5: Enable Vector Overlays to observe velocity and acceleration vectors live.
+  - **Section 3: Experimental Data Collection & Physical Measurements**:
+    - Record essential kinematic milestone table (Frames 0, 3, 6, 9, 13 [apex], 18, 24).
+    - Measure initial launch vector $(v_0, \theta_0)$, maximum height $H$, time to apex $t_{\text{apex}}$, total flight time $T$, and range $R$.
+    - At mid-ascent ($t = 0.20\text{ s}$), decompose $\vec{a}$ into tangential $a_\parallel = -g\sin\phi$ and normal $a_\perp = g\cos\phi$.
+  - **Section 4: App Graphing & Regression Fitting**:
+    - App Graph 1: $x(t)$ with Linear Fit $\implies$ slope $= v_{0x}$, $a_x = 0$.
+    - App Graph 2: $y(t)$ with Quadratic Fit $\implies y(t) = A t^2 + B t + C$; calculate experimental $g = 2|A|$ and % error vs. $9.81\text{ m/s}^2$.
+    - App Graph 3: $v_y(t)$ with Linear Fit $\implies$ slope $= a_y \approx -g$.
+    - App Graph 4: Trajectory $y(x) \implies$ inspect real-world aerodynamic asymmetry.
+  - **Section 5: AP Physics C Rigor & Calculus Extensions**:
+    - Apex radius of curvature calculation $\rho_{\text{apex}} = \frac{v_{0x}^2}{g}$.
+    - Mechanical energy conservation test between release and apex.
+    - Real-world drag differential equations ($m\frac{d\vec{v}}{dt} = m\vec{g} - c v \vec{v}$) explaining observed deceleration.
+
+- **3. Script & Document Deliverables**:
+  - `scratch/build_student_docx.py`: Generates the streamlined, unscaffolded Student Inquiry Handout.
+  - `scratch/build_teacher_docx.py`: Generates the complete Teacher Master Edition with solutions, ground truth milestones, and AP rubrics.
+  - Documents generated and synchronized:
+    - `c:\Users\fahad\Desktop\fizziq\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `c:\Users\fahad\Desktop\fizziq\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\worksheets\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\worksheets\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+
+
+---
+
+### Step 39: Radical De-Wordification, Multi-Part Answer Tab Partitioning, and AP Physics C Mechanics Curriculum Re-Centering
+
+- **1. User Rationale & Feedback Implementation**:
+  - **Radical De-Wordification**: Stripped all remaining conversational filler, multi-sentence preambles, and unnecessary narrative text. Every step, question, and instruction is crisp, punchy, and straight to the point.
+  - **Dedicated Multi-Part Answer Tabs/Boxes**: Previously, multi-part prompts (e.g., Q2.1 asking for speed, angle, and vector) were forced into a single unstructured response box. Every sub-part ((a), (b), (c)) now possesses its own bold question prompt and dedicated, shaded response box with customized height and targeted guidance.
+  - **AP Physics C Mechanics Domain Alignment**:
+    - Removed non-syllabus / out-of-domain topics: Radius of curvature ($\rho = v^2/a_\perp$ from differential geometry), Mechanical Energy ($E = K + U$ with an arbitrary mass during an early-year kinematics lab), and 2D coupled quadratic drag ODEs.
+    - Replaced with core AP Physics C: Mechanics Topic 1.3 Free-Response Calculus Challenges:
+      - **Challenge 4.1 [Calculus Trajectory Derivation & Path Verification — 3 Pts]**:
+        - Part (a): Parametric elimination of time $t = x / v_{0x}$ to derive $y(x) = (v_{0y} / v_{0x})x - (g / (2 v_{0x}^2))x^2$.
+        - Part (b): Evaluating empirical coefficients to formulate the numerical trajectory equation $y(x) = 4.645 x - 5.816 x^2$.
+        - Part (c): Applying the calculus extremum condition $\frac{dy}{dx} = 0$ to solve for $x_{\text{apex}} = \frac{v_{0x} v_{0y}}{g} = 0.399\text{ m}$, verified against Frame 13 experimental data ($0.404\text{ m}$).
+      - **Challenge 4.2 [Calculus Derivation of Flight Extremes: Height & Range — 3 Pts]**:
+        - Part (a): Setting vertical velocity $v_y(t) = v_{0y} - gt = 0$ to derive $t_{\text{apex}} = \frac{v_{0y}}{g}$ and $H = \frac{v_{0y}^2}{2g} = 0.927\text{ m}$ (matches measured $0.926\text{ m}$).
+        - Part (b): Setting landing condition $y(T) = 0$ to derive $T = \frac{2v_{0y}}{g}$ and range $R = \frac{2v_{0x}v_{0y}}{g} = 0.799\text{ m} \approx 0.80\text{ m}$.
+        - Part (c): Percentage discrepancy analysis comparing $R_{\text{theory}}$ to measured video range and attributing specific physical error sources (drag, level offset, camera perspective).
+      - **Challenge 4.3 [Calculus Extremum: Minimum Speed During Flight — 2 Pts]**:
+        - Part (a): Expressing speed squared $f(t) = v^2(t) = v_{0x}^2 + (v_{0y} - gt)^2$, taking $\frac{d(v^2)}{dt} = -2g(v_{0y} - gt) = 0$, and proving $t^* = \frac{v_{0y}}{g}$.
+        - Part (b): Proving minimum speed occurs at apex where $v_{\text{min}} = v_{0x} = 0.918\text{ m/s}$, validated against empirical Frame 13 speed ($0.920\text{ m/s}$, $< 0.2\%$ discrepancy).
+
+- **2. Synchronized Deliverables**:
+  - `scratch/build_student_docx.py`: Clean, punchy Student Inquiry Handout with partitioned answer boxes for all parts.
+  - `scratch/build_teacher_docx.py`: Master Teacher Edition with complete worked derivations, empirical ground-truth milestones, and AP rubrics.
+  - Document locations:
+    - `c:\Users\fahad\Desktop\fizziq\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `c:\Users\fahad\Desktop\fizziq\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\AP_Physics_C_2D_Projectile_Lab_STUDENT.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\worksheets\AP_Physics_C_2D_Projectile_Lab_TEACHER.docx`
+    - `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\worksheets\AP_Physics_C_2D_Projectile_Lab_STUDENT_STREAMLINED.docx`
+
+
+---
+
+### Step 40: Native OMML Math Rendering (True Overhead Vector Arrows & Radical Equations) and Single-Directory Consolidation
+
+- **1. User Request & Root Cause of Math Glitch**:
+  - **Issue Identified**: In Microsoft Word (`.docx`), using raw Unicode combining characters (e.g. `v\u20d7` or `v⃗`) caused Word's rendering engine to display the vector arrow as a floating side superscript `v→` (as captured in the user's screenshot). Subscripts and fractions were also previously rendered as plain text strings.
+  - **Solution**: Implemented native Office Math Markup Language (OMML) under the namespace `http://schemas.openxmlformats.org/officeDocument/2006/math`.
+    - **Vector Accents**: Used `<m:acc><m:accPr><m:chr m:val="&#x20D7;"/></m:accPr><m:e><m:r><m:t>v</m:t></m:r></m:e></m:acc>` so Cambria Math positions the vector arrow directly centered on top of $\vec{v}$, $\vec{a}$, and $\vec{r}$.
+    - **Unit Vector Hats**: Used `<m:acc><m:accPr><m:chr m:val="&#x0302;"/></m:accPr><m:e><m:r><m:t>i</m:t></m:r></m:e></m:acc>` for $\hat{i}$ and $\hat{j}$.
+    - **Subscripts & Superscripts**: Native `<m:sSub>`, `<m:sSup>`, and `<m:sSubSup>` for $v_{0x}, v_{0y}, v_0, \theta_0, t_{\text{apex}}, a_\parallel, a_\perp, g_{\text{exp}}, R^2, v_{0x}^2$.
+    - **Radicals & Fractions**: Native `<m:rad>` for $v_0 = \sqrt{v_{0x}^2 + v_{0y}^2}$ and `<m:f>` vertical fractions for all derivations ($y(x), H, R, \frac{dy}{dx}$).
+
+- **2. Single-Folder Consolidation & Deletion of Stale Files**:
+  - Removed all duplicate `.docx` files from the project root folders (`c:\Users\fahad\Desktop\fizziq` and `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond`).
+  - Purged obsolete drafts (`APC_2D_Projectile_Motion_STUDENT.docx`, `APC_2D_Projectile_Motion_TEACHER.docx`, and `AP_Physics_C_2D_Projectile_Lab_STUDENT_STREAMLINED.docx`).
+  - Consolidated **all** final student and teacher worksheets into exactly **one single designated folder**:
+    `C:\Users\fahad\Documents\GitHub\APPC-M\Labove and Beyond\worksheets\`
+    - `AP_Physics_C_2D_Projectile_Lab_STUDENT.docx` (761 KB)
+    - `AP_Physics_C_2D_Projectile_Lab_STUDENT.pdf` (4.7 MB)
+    - `AP_Physics_C_2D_Projectile_Lab_TEACHER.docx` (762 KB)
+    - `AP_Physics_C_2D_Projectile_Lab_TEACHER.pdf` (4.7 MB)
+
+---
+
+### Step 41: End-User Quick-Start Guide: 2D Projectile Kinematics, Scale Calibration, Tracking & Scientific Graphing [SUCCESSFUL]
+
+- **1. Purpose & Target Audience**:
+  - Provide a simple, straightforward, student- and teacher-friendly operational workflow for utilizing **Lab-ove and Beyond** to perform high-precision 2D projectile motion analysis, reference scale calibration, manual/automated tracking, and scientific regression graphing.
+
+- **2. 5-Step Operational Pipeline**:
+  1. **Load Video**:
+     - Open the **Video Library** modal from the header bar.
+     - Choose a standard 2D projectile lab:
+       - `"FizziQ: Parabolic Motion (Classic Lab)"` (`/videos/fizziq_parabole.mp4`, 30 FPS).
+       - `"Tracker: Classic Ball Toss (2D Projectile)"` (`/videos/tracker_ball_toss.mp4`, 30 FPS).
+       - `"Tracker: Horizontal Launch Off Table"` (`/videos/tracker_balltossout.mp4`, 30 FPS).
+     - Or click **Upload Video** to import a custom MP4/MOV recorded from a smartphone or high-speed camera.
+  2. **Set Scale (Ruler Calibration)**:
+     - Click the **Ruler Tool** in the tracker controls bar.
+     - Position the two calibration endpoints ($P_1, P_2$) along the physical reference object visible in the frame (e.g., the 1.00 m striped rod or meter stick).
+     - Enter the known real-world distance (e.g. `1.0` meters). The app instantly calculates the scale factor (e.g., $427\text{ px/m}$).
+  3. **Set Coordinate Axes & Origin**:
+     - Click the **Axes Tool** to reveal the coordinate reticle.
+     - Drag the origin $(0, 0)$ to the release position of the projectile at Frame 0 (or launch apex).
+     - Ensure $+Y$ points upward (standard physics convention; `invertY: true`).
+  4. **Track the Projectile**:
+     - **Manual Tracking (Default / High Precision)**: Select the **Track Tool** (crosshair icon). Click on the center of the ball. The video automatically advances forward by 1 frame upon each click. Continue until landing.
+     - **Autotracker (Automated Feature Matching)**: Click **Autotrack**, adjust the template box over the projectile, set search radius ($25\text{px} - 50\text{px}$) and match score ($70\% - 85\%$), then press **Autotrack All**.
+     - **Corrections**: Right-click any plotted marker, press `Delete` / `Backspace`, or use `Ctrl + Z` to undo points.
+  5. **Graphing & Kinematic Regression Analysis**:
+     - Switch layout to **Split Screen** (Tracker + Graph side-by-side) or **Graph Only**.
+     - Select variable pairs from the graph controls:
+       - **$x(t)$ with Linear Fit**: Proves constant horizontal speed ($v_x = \text{slope}$, $a_x \approx 0$).
+       - **$y(t)$ with Quadratic Fit**: Evaluates $y(t) = At^2 + Bt + C \implies g_{\text{exp}} = 2|A|$ (recovering $g \approx 9.8\text{ m/s}^2$) and $v_{0y} = B$.
+       - **$v_y(t)$ with Linear Fit**: Slope gives experimental gravitational acceleration $a_y \approx -9.8\text{ m/s}^2$.
+       - **Trajectory $y(x)$**: Plots the spatial parabolic flight path.
+     - Enable **Vector Overlays** ($\vec{v}$ velocity in emerald green, $\vec{a}$ acceleration in magenta) to watch kinematic vectors dynamically scale and rotate during playback.

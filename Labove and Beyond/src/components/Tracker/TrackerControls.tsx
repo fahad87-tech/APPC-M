@@ -661,7 +661,7 @@ export const TrackerControls: React.FC<TrackerControlsProps> = ({
             <button
               onClick={onOpenStroboscope}
               className="flex items-center gap-1 px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition"
-              title="FizziQ Chronophotographie: Compose multiple motion frames into a high-res stroboscopic photograph"
+              title="Chronophotographie: Compose multiple motion frames into a high-res stroboscopic photograph"
             >
               <Layers className="w-3.5 h-3.5" />
               <span>Stroboscope</span>

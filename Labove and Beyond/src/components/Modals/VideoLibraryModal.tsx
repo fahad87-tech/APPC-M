@@ -20,7 +20,7 @@ interface VideoLibraryModalProps {
 
 const CATEGORIES = [
   'All Experiments',
-  'FizziQ Official',
+  'Physics Lab',
   'Tracker Lab',
   '1D & 2D Kinematics',
   'Harmonic Motion & Oscillations',
@@ -52,7 +52,7 @@ export const VideoLibraryModal: React.FC<VideoLibraryModalProps> = ({
       if (!matchesSearch) return false;
 
       if (selectedCategory === 'All Experiments') return true;
-      if (selectedCategory === 'FizziQ Official') return v.source === 'FizziQ';
+      if (selectedCategory === 'Physics Lab') return v.source === 'FizziQ';
       if (selectedCategory === 'Tracker Lab') return v.source === 'Tracker';
       if (selectedCategory === '1D & 2D Kinematics') {
         return v.category.includes('Kinematics') || v.category.includes('Gravity') || v.category.includes('Projectiles');
@@ -201,7 +201,7 @@ export const VideoLibraryModal: React.FC<VideoLibraryModalProps> = ({
                           : 'bg-emerald-100 text-emerald-700'
                       }`}
                     >
-                      {sample.source}
+                      {sample.source === 'FizziQ' ? 'Physics Lab' : sample.source}
                     </span>
                     <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
                       🔬 Lab

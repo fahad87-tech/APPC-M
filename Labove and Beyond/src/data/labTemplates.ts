@@ -31,7 +31,7 @@ export interface LabWorksheetTemplate {
 export const LAB_WORKSHEET_TEMPLATES: LabWorksheetTemplate[] = [
   {
     id: 'lab-uniform-motion',
-    matchingSampleIds: ['fizziq-uniform-ball', 'fizziq-train-uniform', 'fizziq-curling'],
+    matchingSampleIds: ['fizziq-uniform-ball', 'fizziq-train-uniform', 'fizziq-curling-stone'],
     category: '1D Kinematics & Constant Velocity',
     title: 'Lab 1: Uniform Linear Motion & Velocity Verification',
     course: 'AP Physics 1 / Mechanics & Kinematics',
@@ -157,21 +157,30 @@ export const LAB_WORKSHEET_TEMPLATES: LabWorksheetTemplate[] = [
   },
   {
     id: 'lab-parabola',
-    matchingSampleIds: ['fizziq-parabola', 'fizziq-parabola-cinematique', 'fizziq-basketball', 'fizziq-tennis'],
+    // NOTE: both ids point at the identical FizziQ "Parabole" clip and share the same
+    // auto-calibration (1.00 m ruler at x = 140 px, origin at the ruler base, +Y Up), so the
+    // numeric expected values below are valid for every sample listed here.
+    matchingSampleIds: ['fizziq-parabola', 'fizziq-parabola-cinematique'],
     category: '2D Kinematics & Projectile Motion',
     title: 'Lab 3: Two-Dimensional Projectile Motion & Independence of Motions',
-    course: 'AP Physics 1 / 2D Kinematics',
+    course: 'AP Physics C: Mechanics / 2D Kinematics (also AP Physics 1 & IB)',
     objectives: [
       'Demonstrate Galileo\'s principle of the independence of horizontal and vertical motions.',
-      'Show that horizontal velocity vx(t) is constant while vertical motion vy(t) accelerates downward at g.',
-      'Determine the launch speed v_0, launch angle \\theta, apex maximum height, and total range.'
+      'Show that horizontal velocity vx(t) is constant (ax = 0) while vertical motion accelerates downward at g.',
+      'Determine the launch speed v_0, launch angle \\theta_0, apex maximum height, time of flight and total range.',
+      'Verify the parabolic trajectory y(x) and show that d^2y/dx^2 = -g / v_x^2 is constant (calculus check).',
+      'Compute instantaneous position, velocity and speed at any time, and predict quantities beyond the recorded clip.'
     ],
-    theorySummary: 'A 2D projectile under gravity experiences no horizontal acceleration (ax = 0) and uniform vertical acceleration (ay = -g). Hence: x(t) = v_{0x}*t and y(t) = y_0 + v_{0y}*t - 0.5*g*t². Combining these equations eliminates time t, yielding the parabolic path y(x) = y_0 + \\tan(\\theta)*x - \\frac{g}{2(v_0 \\cos\\theta)^2}x². Launch angle is \\theta = \\arctan(v_{0y} / v_{0x}), and initial velocity magnitude is v_0 = \\sqrt{v_{0x}² + v_{0y}²}.',
+    theorySummary: 'A 2D projectile under gravity experiences no horizontal acceleration (ax = 0) and uniform vertical acceleration (ay = -g). Hence: x(t) = v_{0x}*t and y(t) = y_0 + v_{0y}*t - 0.5*g*t². Combining these equations eliminates time t, yielding the parabolic path y(x) = y_0 + \\tan(\\theta)*x - \\frac{g}{2(v_0 \\cos\\theta)^2}x². Launch angle is \\theta = \\arctan(v_{0y} / v_{0x}), and initial velocity magnitude is v_0 = \\sqrt{v_{0x}² + v_{0y}²}. Because the horizontal acceleration is exactly zero, the path is a true parabola in space: differentiating y(x) twice gives the constant d²y/dx² = -g / v_x². Note carefully that this is a statement about the SHAPE of the path, not about time: the temporal acceleration is a_y = -g at every instant, including at the apex, where only v_y (not a_y, and not v_x) passes through zero. With calculus, v(t) = dr/dt and a(t) = dv/dt = -g \\hat{j}; integrating the components recovers the kinematic equations, and eliminating t gives the trajectory equation used for the regression check. When the landing surface is not at the launch height, the equal-height shortcuts for time of flight and range no longer apply and the vertical equation must be solved for t first.',
     relevantFormulas: [
       'v_{0x} = v_0 \\cos\\theta, \\quad v_{0y} = v_0 \\sin\\theta',
       'x(t) = v_{0x}\\cdot t \\implies v_x(t) = \\text{constant}',
       'y(t) = y_0 + v_{0y}\\cdot t - \\frac{1}{2}g\\cdot t^2 \\implies a_y = -g',
-      'y_{\\text{max}} = \\frac{v_{0y}^2}{2g}, \\quad \\text{Range } R = \\frac{v_0^2 \\sin(2\\theta)}{g}'
+      'y_{\\text{max}} = \\frac{v_{0y}^2}{2g}, \\quad \\text{Range } R = \\frac{v_0^2 \\sin(2\\theta)}{g}',
+      'y(x) = y_0 + \\tan\\theta_0\\,(x - x_0) - \\frac{g\\,(x - x_0)^2}{2v_0^2\\cos^2\\theta_0}, \\quad \\frac{d^2y}{dx^2} = -\\frac{g}{v_x^2}',
+      't_{\\text{apex}} = \\frac{v_{0y}}{g}, \\quad T = \\frac{2v_{0y}}{g} \\text{ (equal heights only)}',
+      '\\text{Unequal heights: } t = \\frac{v_{0y} + \\sqrt{v_{0y}^2 + 2g\\,\\Delta y}}{g}',
+      'v_y^2 = v_{0y}^2 + 2g\\,\\Delta y \\quad \\text{(speed at impact, } \\Delta y < 0\\text{)}'
     ],
     recommendedGraph: {
       yVariable: 'trajectory',
@@ -181,40 +190,164 @@ export const LAB_WORKSHEET_TEMPLATES: LabWorksheetTemplate[] = [
       {
         id: 'q-hyp',
         category: 'hypothesis',
-        prompt: '1. Pre-Lab Hypothesis: State Galileo\'s principle of independence of vertical and horizontal motions. What should happen to vx as the projectile ascends to its apex and descends?',
-        hint: 'Does gravity act horizontally?'
+        prompt: '1. Pre-Lab Hypothesis: State Galileo\'s principle of independence of horizontal and vertical motions. Then predict what happens to $v_x$, $v_y$, $a_x$ and $a_y$ as the projectile rises, passes the apex, and falls.',
+        hint: 'Gravity acts only vertically, so can it change $v_x$? At the apex, which of $v_x$, $v_y$, $a_x$, $a_y$ is actually zero?'
       },
       {
         id: 'q-calib',
         category: 'calibration',
-        prompt: '2. Calibration & Origin Setup: Confirm your scale calibration (1.00m vertical ruler at x=140). Where did you set the coordinate origin, and is +Y directed upwards?',
-        hint: 'Standard kinematics requires +Y Up to obtain negative gravitational acceleration.'
+        prompt: '2. Calibration, Frames & Axes: Confirm the scale (1.00 m vertical ruler at x = 140 px). Record the pixel length of the ruler, the resulting px/m factor, the frame rate, and $\\Delta t$ between frames. Where did you place the origin, is $+Y$ up, and is $+X$ flipped to follow the motion? Where did you set $t = 0$?',
+        hint: 'The ball flies right-to-left, so press "+X Left" to keep $v_x > 0$. Set $t = 0$ at the launch frame.'
       },
       {
         id: 'q-graph',
         category: 'data-analysis',
-        prompt: '3. Trajectory & Velocity Analysis: Attach both your 2D trajectory path (y vs. x) and your velocity components graph (vx and vy vs. t). Confirm that vx is flat while vy decreases linearly.',
-        hint: 'Use \'Attach Graph Snapshot\' and \'Attach Trajectory Snapshot\'.'
+        prompt: '3. Trajectory & Velocity Analysis: Attach your $y$ vs $x$ trajectory and your $v_x$ and $v_y$ vs $t$ graphs. Confirm that $v_x$ is flat while $v_y$ decreases linearly, and quote both slopes with units and $R^2$.',
+        hint: 'Use "Attach Graph Snapshot" and "Attach Trajectory Snapshot". A flat $v_x$ is the graphical statement that $a_x = 0$.'
       },
       {
-        id: 'q-calc',
+        id: 'q-g',
         category: 'calculation',
-        prompt: '4. Launch Speed & Angle Determination: Compute the launch angle \\theta in degrees from your initial components v_{0x} and v_{0y}: \\theta = \\arctan(|v_{0y}| / |v_{0x}|).',
-        expectedValue: 55.0,
+        prompt: '4. Measuring g: Fit a quadratic $y = At^2 + Bt + C$ to your $y(t)$ data. Report $A$, then compute $g_{\\text{exp}} = 2|A|$ and enter it below.',
+        hint: 'Compare with the accepted $g = 9.81\\ \\text{m/s}^2$ and compute the percent error.',
+        expectedValue: 9.81,
+        unit: 'm/s²',
+        tolerancePercent: 10
+      },
+      {
+        id: 'q-angle',
+        category: 'calculation',
+        prompt: '5. Launch Speed & Angle: Take $v_{0x}$ from the slope of $x(t)$ and $v_{0y}$ from the intercept of $v_y(t)$. Compute $v_0 = \\sqrt{v_{0x}^2 + v_{0y}^2}$ and $\\theta_0 = \\arctan(v_{0y}/v_{0x})$. Enter the launch angle in degrees below.',
+        hint: 'Cross-check the angle independently: the linear coefficient of your $y(x)$ fit equals $\\tan\\theta_0$.',
+        expectedValue: 77.8,
         unit: 'degrees',
-        tolerancePercent: 25
+        tolerancePercent: 15
+      },
+      {
+        id: 'q-apex',
+        category: 'data-analysis',
+        prompt: '6. Apex, Time of Flight & Range: From $v_y(t) = 0$ find $t_{\\text{apex}}$ and the corresponding frame. Read the maximum height from your data and compare it with $h = v_{0y}^2/(2g)$. Then find the time of flight from $y(t) = 0$ and the range from $R = v_x T$, and compare with $R = v_0^2\\sin(2\\theta_0)/g$.',
+        hint: 'Is the acceleration zero at the apex? Which quantity is actually zero there, and what is the speed at the apex?'
+      },
+      {
+        id: 'q-instant',
+        category: 'data-analysis',
+        prompt: '7. Instantaneous & Beyond the Clip: Compute $x$, $y$, $v_x$, $v_y$ and the speed $v$ at one chosen instant (for example $t = 0.633\\ \\text{s}$). Then predict the impact time and the full range by extrapolating to the table surface, which lies $0.515\\ \\text{m}$ below the launch point.',
+        hint: 'Solve $y(t) = -0.515\\ \\text{m}$ for $t$ first, then substitute into $x(t) = v_x t$. The clip ends before impact, so this part is a prediction.'
       },
       {
         id: 'q-err',
         category: 'error-analysis',
-        prompt: '5. Comparison of ay with g: From your vy(t) linear regression slope or y(t) quadratic fit, what is your measured vertical acceleration ay? Compare with theoretical -9.81 m/s².',
-        hint: 'Calculate percent discrepancy between |ay| and 9.81 m/s².'
+        prompt: '8. Error Analysis: Compare your measured $a_y$ with $-9.81\\ \\text{m/s}^2$. Estimate the uncertainty in a single position ($\\pm 1$ px) and propagate it to a velocity using $\\Delta v = \\sqrt{2}\\,\\Delta x/\\Delta t$. Estimate the drag force and compare it with the weight $mg$ to justify neglecting air resistance.',
+        hint: 'One pixel is about 2.1 mm at this calibration. Drag grows as $v^2$, so it matters most at launch and landing.'
       },
       {
         id: 'q-conc',
         category: 'conclusion',
-        prompt: '6. Scientific Conclusion: Summarize how this experiment validates 2D projectile kinematics and the independence of orthogonal motion components.',
-        hint: 'Contrast the behavior of the horizontal and vertical velocity vectors.'
+        prompt: '9. Scientific Conclusion: Summarise how this experiment validates 2D projectile kinematics and the independence of orthogonal motion components. Cite at least two quantitative comparisons between your measured values and the theoretical predictions.',
+        hint: 'Contrast the behaviour of the horizontal and vertical velocity components, and report your values with uncertainties.'
+      }
+    ]
+  },
+  {
+    id: 'lab-projectiles-sports',
+    // Generic 2D-projectile lab for every other projectile clip in the library. Because these
+    // videos have different geometries, scales and launch angles, NO video-specific numeric
+    // expected value is attached here (only the universal g = 9.81 m/s² check), so a correct
+    // measurement can never be flagged as wrong.
+    matchingSampleIds: [
+      'fizziq-basketball-shot',
+      'fizziq-tennis-shot',
+      'fizziq-football-penalty',
+      'fizziq-javelin-throw',
+      'fizziq-golf-swing',
+      'fizziq-badminton-smash',
+      'fizziq-juggler',
+      'fizziq-toyota-robot',
+      'tracker-ball-toss',
+      'tracker-ball-toss-out',
+      'tracker-cups-clips'
+    ],
+    category: '2D Kinematics & Projectile Motion',
+    title: 'Lab 6: Projectile Motion in Sport — Instantaneous & Extrapolated Analysis',
+    course: 'AP Physics C: Mechanics / 2D Kinematics (also AP Physics 1 & IB)',
+    objectives: [
+      'Separate a real sporting projectile into independent horizontal (constant velocity) and vertical (constant acceleration) components.',
+      'Measure the launch speed, launch angle, apex height, time of flight and range from video analysis.',
+      'Compute instantaneous position, velocity and speed at any time, and predict impact conditions beyond the recorded clip.',
+      'Decide, with a quantitative drag estimate, whether the constant-acceleration model is valid for the chosen sport.'
+    ],
+    theorySummary: 'Every projectile clip in this library is analysed the same way. With air resistance neglected, the only acceleration is gravitational, so the motion separates into a uniform horizontal problem, $x(t) = x_0 + v_{0x}t$ with $v_x$ constant and $a_x = 0$, and a uniformly accelerated vertical problem, $y(t) = y_0 + v_{0y}t - \\frac{1}{2}gt^2$ with $a_y = -g$. The two problems are coupled by the single shared variable $t$. Eliminating time gives the trajectory equation $y(x) = y_0 + \\tan\\theta_0(x - x_0) - \\frac{g(x - x_0)^2}{2v_0^2\\cos^2\\theta_0}$, whose constant second derivative $d^2y/dx^2 = -g/v_x^2$ proves the path is a parabola. The apex is the instant where $v_y = 0$ (not where $a_y = 0$), the time of flight follows from solving $y(t) = y_{\\text{land}}$, and the range is $R = v_xT$. Sports with high speed-to-mass ratios or large frontal area (badminton, a spinning football) will violate the drag-free assumption, and the fit residuals will show it.',
+    relevantFormulas: [
+      'v_{0x} = v_0 \\cos\\theta_0, \\quad v_{0y} = v_0 \\sin\\theta_0, \\quad v_0 = \\sqrt{v_{0x}^2 + v_{0y}^2}',
+      'x(t) = x_0 + v_{0x}t \\implies v_x = \\text{constant}, \\quad a_x = 0',
+      'y(t) = y_0 + v_{0y}t - \\frac{1}{2}gt^2 \\implies a_y = -g',
+      'y(x) = y_0 + \\tan\\theta_0\\,(x - x_0) - \\frac{g\\,(x - x_0)^2}{2v_0^2\\cos^2\\theta_0}, \\quad \\frac{d^2y}{dx^2} = -\\frac{g}{v_x^2}',
+      't_{\\text{apex}} = \\frac{v_{0y}}{g}, \\quad h = \\frac{v_{0y}^2}{2g}',
+      '\\text{Unequal heights: } t = \\frac{v_{0y} + \\sqrt{v_{0y}^2 + 2g\\,\\Delta y}}{g}',
+      'v = \\sqrt{v_x^2 + v_y^2}, \\quad \\theta = \\arctan\\!\\left(\\frac{v_y}{v_x}\\right), \\quad F_{\\text{drag}} = \\tfrac{1}{2}\\rho C_d A v^2'
+    ],
+    recommendedGraph: {
+      yVariable: 'trajectory',
+      regressionType: 'quadratic'
+    },
+    questions: [
+      {
+        id: 'q-hyp',
+        category: 'hypothesis',
+        prompt: '1. Pre-Lab Hypothesis: State the independence principle. Predict the shapes of $x(t)$, $y(t)$, $v_x(t)$ and $v_y(t)$ for your chosen clip, and say whether you expect air resistance to matter for this sport.',
+        hint: 'A small, light, fast projectile (shuttlecock, spinning ball) will show drag effects; a heavy, dense one will not.'
+      },
+      {
+        id: 'q-calib',
+        category: 'calibration',
+        prompt: '2. Calibration, Frames & Axes: Record the frame rate, $\\Delta t$ between frames, the reference object used to set the scale, its real length, and the resulting px/m factor. State the origin you chose, the direction of $+X$ and $+Y$, and where you set $t = 0$.',
+        hint: 'Different clips use different references (basketball rim 3.05 m, football pitch 3.6 m, etc.). Check the library entry.'
+      },
+      {
+        id: 'q-graph',
+        category: 'data-analysis',
+        prompt: '3. Component Analysis: Attach your $y$ vs $x$ trajectory and your $v_x$ and $v_y$ vs $t$ graphs. Quote the slope of $x(t)$, the slope and intercept of $v_y(t)$, and both $R^2$ values. Does $v_x$ stay flat?',
+        hint: 'A systematic downward drift in $v_x$ rather than random scatter is the signature of air resistance.'
+      },
+      {
+        id: 'q-g',
+        category: 'calculation',
+        prompt: '4. Measuring g: Fit $y = At^2 + Bt + C$ to your $y(t)$ data and compute $g_{\\text{exp}} = 2|A|$. Enter it below.',
+        hint: 'A drag-free projectile should return $g$ close to $9.81\\ \\text{m/s}^2$. A low value usually means drag or a scale error.',
+        expectedValue: 9.81,
+        unit: 'm/s²',
+        tolerancePercent: 12
+      },
+      {
+        id: 'q-launch',
+        category: 'data-analysis',
+        prompt: '5. Launch Speed & Angle: Determine $v_{0x}$ and $v_{0y}$ from your regression coefficients, then compute $v_0$ and $\\theta_0$. Cross-check $\\theta_0$ using $\\tan\\theta_0$ from the linear coefficient of your $y(x)$ fit. Do the two routes agree?',
+        hint: 'Report both values with units. The two independent routes to $\\theta_0$ should agree within a few percent.'
+      },
+      {
+        id: 'q-apex',
+        category: 'data-analysis',
+        prompt: '6. Apex, Time of Flight & Range: Find $t_{\\text{apex}}$ from $v_y(t) = 0$ and compare the observed maximum height with $h = v_{0y}^2/(2g)$. Then solve $y(t) = y_{\\text{land}}$ for the time of flight and compute the range. If the launch and landing heights differ, explain why $R = v_0^2\\sin(2\\theta_0)/g$ does not apply.',
+        hint: 'In most sports clips the projectile is launched above the landing surface, so the equal-height shortcuts fail.'
+      },
+      {
+        id: 'q-instant',
+        category: 'data-analysis',
+        prompt: '7. Instantaneous & Beyond the Clip: Choose one instant and compute $x$, $y$, $v_x$, $v_y$ and the speed $v$ there. Then predict the impact time, the impact velocity components and the full range by extrapolating past the end of the clip.',
+        hint: 'Use $v_y^2 = v_{0y}^2 + 2g\\,\\Delta y$ for the impact speed, and check it against your energy calculation.'
+      },
+      {
+        id: 'q-drag',
+        category: 'error-analysis',
+        prompt: '8. Validity of the Model: Estimate the drag force $F_{\\text{drag}} = \\tfrac{1}{2}\\rho C_d A v^2$ at the highest speed in your clip and compare it with the weight $mg$. Do the residuals of your quadratic fit show a systematic curvature? Conclude whether the constant-acceleration model is acceptable for this sport.',
+        hint: 'Use $\\rho_{\\text{air}} = 1.2\\ \\text{kg/m}^3$ and $C_d \\approx 0.47$ for a sphere. Report the ratio $F_{\\text{drag}}/mg$ as a percentage.'
+      },
+      {
+        id: 'q-conc',
+        category: 'conclusion',
+        prompt: '9. Scientific Conclusion: Summarise your measured projectile quantities with uncertainties, state whether the constant-acceleration model describes your clip, and identify the dominant source of error.',
+        hint: 'Support your conclusion with at least two quantitative comparisons against theory.'
       }
     ]
   },
@@ -347,20 +480,39 @@ export const LAB_WORKSHEET_TEMPLATES: LabWorksheetTemplate[] = [
   }
 ];
 
+/** Resolve a template by id so the keyword fallback below survives re-ordering of the list. */
+function templateById(id: string): LabWorksheetTemplate {
+  return LAB_WORKSHEET_TEMPLATES.find((t) => t.id === id) || LAB_WORKSHEET_TEMPLATES[0];
+}
+
 export function getLabTemplateForSample(sampleId: string): LabWorksheetTemplate {
   const found = LAB_WORKSHEET_TEMPLATES.find((t) => t.matchingSampleIds.includes(sampleId));
   if (found) return found;
-  if (sampleId.includes('fall') || sampleId.includes('chute') || sampleId.includes('drop')) {
-    return LAB_WORKSHEET_TEMPLATES[1]; // free fall
+  if (sampleId.includes('fall') || sampleId.includes('chute') || sampleId.includes('drop') || sampleId.includes('tossup')) {
+    return templateById('lab-free-fall');
   }
-  if (sampleId.includes('parabole') || sampleId.includes('parabola') || sampleId.includes('toss')) {
-    return LAB_WORKSHEET_TEMPLATES[2]; // parabola
+  if (sampleId.includes('parabole') || sampleId.includes('parabola')) {
+    return templateById('lab-parabola');
+  }
+  if (
+    sampleId.includes('toss') ||
+    sampleId.includes('projectile') ||
+    sampleId.includes('basket') ||
+    sampleId.includes('tennis') ||
+    sampleId.includes('football') ||
+    sampleId.includes('javelin') ||
+    sampleId.includes('golf') ||
+    sampleId.includes('badminton') ||
+    sampleId.includes('jongleur') ||
+    sampleId.includes('robot')
+  ) {
+    return templateById('lab-projectiles-sports');
   }
   if (sampleId.includes('pendul')) {
-    return LAB_WORKSHEET_TEMPLATES[3]; // pendulum
+    return templateById('lab-pendulum');
   }
   if (sampleId.includes('collision') || sampleId.includes('puck') || sampleId.includes('cart') || sampleId.includes('choc')) {
-    return LAB_WORKSHEET_TEMPLATES[4]; // collisions
+    return templateById('lab-collisions');
   }
-  return LAB_WORKSHEET_TEMPLATES[0]; // default uniform motion
+  return templateById('lab-uniform-motion');
 }

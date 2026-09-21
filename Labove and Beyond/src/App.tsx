@@ -854,7 +854,7 @@ export const App: React.FC = () => {
     ctx.fillRect(0, h - 36, w, 36);
     ctx.fillStyle = '#38bdf8';
     ctx.font = 'bold 13px sans-serif';
-    ctx.fillText('FizziQ Trajectory Capture', 16, h - 13);
+    ctx.fillText('Motion Trajectory Capture', 16, h - 13);
     ctx.fillStyle = '#ffffff';
     ctx.font = '12px sans-serif';
     const totalPts = seriesList.reduce((acc, s) => acc + s.points.length, 0);
@@ -886,7 +886,7 @@ export const App: React.FC = () => {
 
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 15px Inter, sans-serif';
-    ctx.fillText('FizziQ + Tracker Lab', 20, snapCanvas.height - 18);
+    ctx.fillText('Lab-ove and Beyond', 20, snapCanvas.height - 18);
 
     ctx.fillStyle = '#94a3b8';
     ctx.font = '13px Inter, sans-serif';

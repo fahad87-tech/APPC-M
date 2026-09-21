@@ -246,7 +246,7 @@ export const StroboscopeModal: React.FC<StroboscopeModalProps> = ({
               <h2 className="text-base font-bold text-slate-800 tracking-tight flex items-center gap-2">
                 Stroboscopic Motion Generator (Chronophotographie)
                 <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-100 text-blue-700">
-                  FizziQ Stroboscope
+                  Motion Stroboscope
                 </span>
               </h2>
               <p className="text-xs text-slate-500 font-medium">
