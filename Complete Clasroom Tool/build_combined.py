@@ -192,7 +192,7 @@ html_template = f"""<!DOCTYPE html>
   }}
 </style>
 <script>
-  const WEBSITE_AUTH = {{ hash: "846db8a6b7b7eb12de353e118546858eb3682725f37ef1b08b75820e50cadfe6", salt: "7a02bab1f801f9d023e52d0be1168942", iterations: 100000 }};
+  const WEBSITE_AUTH = {{ hash: "764a886ee0dd8001d073673f4865ada09e8ffeffaefba8c97c4c1bd20ba8d0b9", salt: "7a02bab1f801f9d023e52d0be1168942", iterations: 100000 }};
   document.documentElement.classList.add("password-locked");
   async function pbkdf2Verify(password, storedHash, salt, iterations) {{
     const enc = new TextEncoder();
