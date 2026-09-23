@@ -3,94 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mr. Fahad Teacher Pro</title>
-  <script>
-    const SIM_AUTH = { hash: "SHA-256", salt: "7a02bab1f801f9d023e52d0be1168942", iterations: 100000 };
-    document.documentElement.classList.add("password-locked");
-
-    async function pbkdf2Verify(password, storedHash, salt, iterations) {
-      const enc = new TextEncoder();
-      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
-      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
-      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
-      return hex === storedHash;
-    }
-
-    function requestPassword(title, message) {
-      return new Promise(resolve => {
-        const existingGate = document.getElementById("password-gate");
-        if (existingGate) existingGate.remove();
-        const gate = document.createElement("div");
-        gate.id = "password-gate";
-        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
-        document.body.appendChild(gate);
-        const input = document.getElementById("password-gate-input");
-        const finish = value => { gate.remove(); resolve(value); };
-        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
-        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
-        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
-        window.requestAnimationFrame(() => input.focus());
-      });
-    }
-
-    async function verifyPageAccess() {
-      const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
-      if (userInput === null) { window.location.href = "../index.html"; return; }
-      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
-        document.documentElement.classList.remove("password-locked");
-      } else {
-        alert("Incorrect password. Access denied.");
-        window.location.href = "../index.html";
-      }
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
-    } else {
-      verifyPageAccess();
-    }
-  </script>
-  <style id="password-gate-styles">
-    html.password-locked body { overflow: hidden; }
-    html.password-locked body > * { visibility: hidden; }
-    html.password-locked body > #password-gate { visibility: visible; }
-    #password-gate {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(5, 9, 18, 0.88);
-      padding: 24px;
-      z-index: 9999;
-    }
-    html.password-locked #password-gate { display: flex; visibility: visible; }
-    #password-gate-card {
-      width: min(100%, 420px);
-      background: #101625;
-      border: 1px solid rgba(100,181,246,0.28);
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-      color: #e7edf7;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
-    #password-gate-input {
-      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35);
-      background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px;
-      box-sizing: border-box;
-    }
-    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
-    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
-    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
-    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
-    #password-gate-submit { background: #64b5f6; color: #08101c; }
-  </style>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Mr. Fahad Teacher Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  html.password-locked body { overflow: hidden; }
+  html.password-locked .app-header-container,
+  html.password-locked .iframe-container { visibility: hidden; }
+  #password-gate {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 9, 18, 0.92);
+    padding: 24px;
+    z-index: 9999;
+  }
+  html.password-locked #password-gate { display: flex; visibility: visible; }
+  #password-gate-card {
+    width: min(100%, 420px);
+    background: #101625;
+    border: 1px solid rgba(100,181,246,0.28);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    color: #e7edf7;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+  #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+  #password-gate-input {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35);
+    background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px;
+    box-sizing: border-box;
+  }
+  #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+  #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+  #password-gate-submit { background: #64b5f6; color: #08101c; }
+
   body {
     margin: 0;
     font-family: 'Inter', system-ui, sans-serif;
@@ -214,6 +166,52 @@
     z-index: 5;
   }
 </style>
+<script>
+  const WEBSITE_AUTH = { hash: "846db8a6b7b7eb12de353e118546858eb3682725f37ef1b08b75820e50cadfe6", salt: "7a02bab1f801f9d023e52d0be1168942", iterations: 100000 };
+  document.documentElement.classList.add("password-locked");
+  async function pbkdf2Verify(password, storedHash, salt, iterations) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+    const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+    return hex === storedHash;
+  }
+  function requestPassword(title, message) {
+    return new Promise(resolve => {
+      const gate = document.createElement("div");
+      gate.id = "password-gate";
+      gate.innerHTML = '<div id="password-gate-card"><div id="password-gate-title">' + title + '</div><div id="password-gate-message">' + message + '</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>';
+      document.body.appendChild(gate);
+      const input = document.getElementById("password-gate-input");
+      const finish = value => { gate.remove(); resolve(value); };
+      document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+      document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+      input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+      window.requestAnimationFrame(() => input.focus());
+    });
+  }
+  async function verifyWebsiteAccess() {
+    const userInput = await requestPassword("Classroom Hub Access", "Password required:");
+    if (userInput === null) { window.location.replace("about:blank"); return; }
+    try {
+      const isValid = await pbkdf2Verify(userInput, WEBSITE_AUTH.hash, WEBSITE_AUTH.salt, WEBSITE_AUTH.iterations);
+      if (isValid) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.replace("about:blank");
+      }
+    } catch (e) {
+      alert("Error verifying password.");
+      window.location.replace("about:blank");
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", verifyWebsiteAccess, { once: true });
+  } else {
+    verifyWebsiteAccess();
+  }
+</script>
 </head>
 <body>
 
@@ -1074,7 +1072,46 @@ function saveState(patch = {}) {
   localStorage.setItem(RANDOMIZER_STATE_KEY, JSON.stringify(next));
 }
 
+function initializeClassData() {
+  try {
+    const existing = localStorage.getItem(&#x27;classRotatorData&#x27;);
+    if (existing) {
+      const parsed = JSON.parse(existing);
+      if (parsed.classes &amp;&amp; Object.keys(parsed.classes).length &gt; 0) {
+        return;
+      }
+    }
+    
+    fetch(&#x27;students_data.json&#x27;)
+      .then(res =&gt; res.json())
+      .then(data =&gt; {
+        if (data.classes) {
+          const classRotatorData = {
+            classes: data.classes,
+            last_rotation: {},
+            layouts: {},
+            layout_selection: {}
+          };
+          
+          Object.keys(data.classes).forEach(className =&gt; {
+            classRotatorData.layouts[className] = [
+              { row: 1, pairs: [2, 2, 2] },
+              { row: 2, pairs: [2, 2, 2] },
+              { row: 3, pairs: [2, 2, 2] }
+            ];
+            classRotatorData.layout_selection[className] = 1;
+          });
+          
+          localStorage.setItem(&#x27;classRotatorData&#x27;, JSON.stringify(classRotatorData));
+        }
+      })
+      .catch(err =&gt; console.error(&#x27;Failed to load students_data.json:&#x27;, err));
+  } catch(e) {}
+}
+
 function init() {
+  initializeClassData();
+  
   try {
     const d = localStorage.getItem(&#x27;classRotatorData&#x27;);
     if (d) appData = JSON.parse(d);
@@ -1407,6 +1444,43 @@ function saveState(next) {
   localStorage.setItem(RANDOM_GROUP_STATE_KEY, JSON.stringify(next));
 }
 
+function initializeClassData() {
+  try {
+    const existing = localStorage.getItem(&#x27;classRotatorData&#x27;);
+    if (existing) {
+      const parsed = JSON.parse(existing);
+      if (parsed.classes &amp;&amp; Object.keys(parsed.classes).length &gt; 0) {
+        return;
+      }
+    }
+    
+    fetch(&#x27;students_data.json&#x27;)
+      .then(res =&gt; res.json())
+      .then(data =&gt; {
+        if (data.classes) {
+          const classRotatorData = {
+            classes: data.classes,
+            last_rotation: {},
+            layouts: {},
+            layout_selection: {}
+          };
+          
+          Object.keys(data.classes).forEach(className =&gt; {
+            classRotatorData.layouts[className] = [
+              { row: 1, pairs: [2, 2, 2] },
+              { row: 2, pairs: [2, 2, 2] },
+              { row: 3, pairs: [2, 2, 2] }
+            ];
+            classRotatorData.layout_selection[className] = 1;
+          });
+          
+          localStorage.setItem(&#x27;classRotatorData&#x27;, JSON.stringify(classRotatorData));
+        }
+      })
+      .catch(err =&gt; console.error(&#x27;Failed to load students_data.json:&#x27;, err));
+  } catch(e) {}
+}
+
 function persistCurrentClassLayout() {
   const next = readState();
   const size = parseInt(groupSizeInput.value, 10);
@@ -1462,6 +1536,8 @@ function restoreClassLayout(name) {
 }
 
 function init() {
+  initializeClassData();
+  
   const savedState = readState();
   const size = parseInt(savedState.groupSize, 10);
   const groupCount = parseInt(savedState.groupCount, 10);
@@ -1977,6 +2053,46 @@ const GRP_COLORS = [&#x27;#e74c3c&#x27;,&#x27;#3498db&#x27;,&#x27;#2ecc71&#x27;,
    ============================================================ */
 let dragSrcGroup = -1, dragSrcIndex = -1, dragName = &#x27;&#x27;;
 let dragSrcGroupHG = -1, dragSrcIndexHG = -1, dragObjHG = null;
+
+/* ============================================================
+   INITIALIZE CLASS DATA
+   ============================================================ */
+function initializeClassData() {
+  try {
+    const existing = localStorage.getItem(&#x27;classRotatorData&#x27;);
+    if (existing) {
+      const parsed = JSON.parse(existing);
+      if (parsed.classes &amp;&amp; Object.keys(parsed.classes).length &gt; 0) {
+        return;
+      }
+    }
+    
+    fetch(&#x27;students_data.json&#x27;)
+      .then(res =&gt; res.json())
+      .then(data =&gt; {
+        if (data.classes) {
+          const classRotatorData = {
+            classes: data.classes,
+            last_rotation: {},
+            layouts: {},
+            layout_selection: {}
+          };
+          
+          Object.keys(data.classes).forEach(className =&gt; {
+            classRotatorData.layouts[className] = [
+              { row: 1, pairs: [2, 2, 2] },
+              { row: 2, pairs: [2, 2, 2] },
+              { row: 3, pairs: [2, 2, 2] }
+            ];
+            classRotatorData.layout_selection[className] = 1;
+          });
+          
+          localStorage.setItem(&#x27;classRotatorData&#x27;, JSON.stringify(classRotatorData));
+        }
+      })
+      .catch(err =&gt; console.error(&#x27;Failed to load students_data.json:&#x27;, err));
+  } catch(e) {}
+}
 
 /* ============================================================
    CLASS MANAGER
@@ -2658,6 +2774,7 @@ function printGroups(which){
 /* ============================================================
    INIT
    ============================================================ */
+initializeClassData();
 renderClassTabs();
 &lt;/script&gt;
 &lt;/body&gt;
@@ -3283,7 +3400,46 @@ renderClassTabs();
             btnDeleteRow.disabled = layout.length &lt;= 1;
         }
 
+        function initializeClassData() {
+            try {
+                const existing = localStorage.getItem(&#x27;classRotatorData&#x27;);
+                if (existing) {
+                    const parsed = JSON.parse(existing);
+                    if (parsed.classes &amp;&amp; Object.keys(parsed.classes).length &gt; 0) {
+                        return;
+                    }
+                }
+                
+                fetch(&#x27;students_data.json&#x27;)
+                    .then(res =&gt; res.json())
+                    .then(data =&gt; {
+                        if (data.classes) {
+                            const classRotatorData = {
+                                classes: data.classes,
+                                last_rotation: {},
+                                layouts: {},
+                                layout_selection: {}
+                            };
+                            
+                            Object.keys(data.classes).forEach(className =&gt; {
+                                classRotatorData.layouts[className] = [
+                                    { row: 1, pairs: [2, 2, 2] },
+                                    { row: 2, pairs: [2, 2, 2] },
+                                    { row: 3, pairs: [2, 2, 2] }
+                                ];
+                                classRotatorData.layout_selection[className] = 1;
+                            });
+                            
+                            localStorage.setItem(&#x27;classRotatorData&#x27;, JSON.stringify(classRotatorData));
+                        }
+                    })
+                    .catch(err =&gt; console.error(&#x27;Failed to load students_data.json:&#x27;, err));
+            } catch(e) {}
+        }
+
         function initApp() {
+            initializeClassData();
+            
             const savedData = localStorage.getItem(&#x27;classRotatorData&#x27;);
             if (savedData) {
                 try {
@@ -3825,6 +3981,7 @@ renderClassTabs();
 &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
 &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
 &lt;link href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
 &lt;style&gt;
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: &#x27;Inter&#x27;, system-ui, sans-serif; }
 body { background: radial-gradient(circle at top, #1e293b, #0f172a 60%); color: #e5e7eb; min-height: 100vh; padding: 16px; }
@@ -3975,7 +4132,10 @@ tbody tr:hover { background: rgba(59, 130, 246, 0.08); }
 &lt;/div&gt;
 
 &lt;script&gt;
-document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
+const SUPABASE_URL = &#x27;https://cabjyjqbfnntcdqqmjhu.supabase.co&#x27;;
+const SUPABASE_ANON_KEY = &#x27;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhYmp5anFiZm5udGNkcXFtamh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMDY5NzgsImV4cCI6MjEwNTY4Mjk3OH0.2tpKcvCwVT7WM-30g6uCFC_5cUULkq3CghwgRHPjAAk&#x27;;
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+document.addEventListener(&#x27;DOMContentLoaded&#x27;, async () =&gt; {
   const classSelector = document.getElementById(&#x27;classSelector&#x27;);
   const studentListEl = document.getElementById(&#x27;studentList&#x27;);
   const addStudentBtn = document.getElementById(&#x27;addStudentBtn&#x27;);
@@ -4006,20 +4166,8 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
     { rawMin: 25, rawMax: 39.9, curveMin: 30, curveMax: 59, ap: 2 },
     { rawMin: 0, rawMax: 24.9, curveMin: 0, curveMax: 29, ap: 1 }
   ];
-  const DEFAULT_STUDENTS_CLASS1 = [
-    &#x27;Cao, Zhiyuan(Jessica)&#x27;, &#x27;Chen, Haiwei(Harvey)&#x27;, &#x27;Cui, Hankun(Daniel)&#x27;, &#x27;Jiang, Haosen(Jerry)&#x27;,
-    &#x27;Li, Yuyang (Micheal)&#x27;, &#x27;Pei, Jingzhou(Oscar)&#x27;, &#x27;Qu, Haibo (Lucas)&#x27;, &#x27;Wang, Han(Bright)&#x27;,
-    &#x27;Wang, Jinghan (Jason)&#x27;, &#x27;Wang, Yunbo(Steven)&#x27;, &#x27;Xu, Shien(Steven)&#x27;, &#x27;Xu, Yuwei(Lisa)&#x27;,
-    &#x27;Zhang, Jiazhen(Anthony)&#x27;, &#x27;Zhang, Ziye(Eason)&#x27;, &#x27;Zhao, Siqi(Steven Zhao)&#x27;, &#x27;Cerelia&#x27;
-  ];
-  const DEFAULT_STUDENTS_CLASS2 = [
-    &#x27;Cheng, Yitian(Timothy)&#x27;, &#x27;Li, Dong(Jasper)&#x27;, &#x27;Li, Qianran(Cindy)&#x27;, &#x27;Li, Zhe(Jackson)&#x27;,
-    &#x27;Liu, Yuyin (Sam)&#x27;, &#x27;Luo, Yuhong&#x27;, &#x27;Mao, Zhengkang(Kang)&#x27;, &#x27;Miao, Yan (Helen)&#x27;,
-    &#x27;Nie, Wenda(Nick)&#x27;, &#x27;Pu, Zihang(Andy)&#x27;, &#x27;Ruan, Zhenghao(Deo)&#x27;, &#x27;Shen, Duowei(Maxime)&#x27;,
-    &#x27;Wang, Yihao(will)&#x27;, &#x27;Wang, Zijian(James)&#x27;, &#x27;Wang, Ziyan (Zoe)&#x27;, &#x27;Yang, Shijie(Nick)&#x27;, &#x27;Zhang, Ziye(Eason)&#x27;, &#x27;Bella&#x27;
-  ];
-
   let currentClass = &#x27;class1&#x27;;
+  let supabaseSyncEnabled = false;
   let appData = {
     class1: {
       label: &#x27;APP1 (Class 1)&#x27;,
@@ -4041,13 +4189,62 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
 
   init();
 
-  function init() {
+  async function init() {
+    await loadStudentsFromJSON();
     loadData();
+    await loadSupabaseState();
     syncFromRotatorData();
     pruneLegacyEmptyClasses();
     pruneRedundantClasses();
     setupEventListeners();
     syncUIWithState();
+    supabaseSyncEnabled = true;
+  }
+
+  async function loadStudentsFromJSON() {
+    try {
+      const response = await fetch(&#x27;students_data.json?t=&#x27; + Date.now());
+      if (!response.ok) throw new Error(&#x27;Failed to load students_data.json&#x27;);
+      const data = await response.json();
+      if (!data || !data.classes) return;
+      Object.keys(data.classes).forEach(className =&gt; {
+        const classId = makeClassId(className);
+        if (appData[classId]) return;
+        appData[classId] = {
+          label: className,
+          sourceClassName: className,
+          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: &#x27;&#x27; },
+          curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
+          assignments: [],
+          students: []
+        };
+      });
+    } catch (error) {
+      console.error(&#x27;Error loading students_data.json:&#x27;, error);
+    }
+  }
+
+  async function loadSupabaseState() {
+    try {
+      const { data, error } = await supabaseClient.from(&#x27;curve_state&#x27;).select(&#x27;*&#x27;);
+      if (error) throw error;
+      if (!data || !data.length) return;
+      data.forEach(row =&gt; {
+        if (!row.class_id || !row.state) return;
+        const existing = appData[row.class_id];
+        if (!existing) {
+          appData[row.class_id] = row.state;
+          return;
+        }
+        Object.assign(existing, row.state);
+        if (!existing.sourceClassName) existing.sourceClassName = null;
+        if (!Array.isArray(existing.curveBands)) existing.curveBands = JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS));
+        if (!Array.isArray(existing.assignments)) existing.assignments = [];
+        if (!Array.isArray(existing.students)) existing.students = [];
+      });
+    } catch (error) {
+      console.error(&#x27;Error loading state from Supabase:&#x27;, error);
+    }
   }
 
   function pruneRedundantClasses() {
@@ -4213,12 +4410,12 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
       saveData();
       return;
     }
-    appData.class1.students = DEFAULT_STUDENTS_CLASS1.map(name =&gt; ({ id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; }));
-    appData.class2.students = DEFAULT_STUDENTS_CLASS2.map(name =&gt; ({ id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; }));
+    appData.class1.students = [];
+    appData.class2.students = [];
     saveData();
   }
 
-  function loadClassDefaults(cls) {
+  async function loadClassDefaults(cls) {
     const sourceClassName = appData[cls]?.sourceClassName;
     if (sourceClassName) {
       const rotatorClasses = getRotatorClasses();
@@ -4227,10 +4424,22 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
       saveData();
       return;
     }
-    const defaults = cls === &#x27;class1&#x27; ? DEFAULT_STUDENTS_CLASS1 : cls === &#x27;class2&#x27; ? DEFAULT_STUDENTS_CLASS2 : [];
-    appData[cls].students = defaults.map(name =&gt; ({ id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; }));
+    appData[cls].students = await loadStudentsForClass(sourceClassName || appData[cls].label);
     appData[cls].curveBands = JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS));
     saveData();
+  }
+
+  async function loadStudentsForClass(className) {
+    try {
+      const response = await fetch(&#x27;students_data.json?t=&#x27; + Date.now());
+      if (!response.ok) throw new Error(&#x27;Failed to load students_data.json&#x27;);
+      const data = await response.json();
+      const roster = (data &amp;&amp; data.classes &amp;&amp; data.classes[className]) || [];
+      return roster.map(toStudentRecord).filter(Boolean);
+    } catch (error) {
+      console.error(&#x27;Error loading students_data.json:&#x27;, error);
+      return [];
+    }
   }
 
   function syncUIWithState() {
@@ -4245,7 +4454,7 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
     renderTable();
   }
 
-  function saveData() {
+  async function saveData() {
     appData[currentClass].settings = {
       maxMcq: parseFloat(maxMcqInput.value) || 40,
       scaledMcq: parseFloat(scaledMcqInput.value) || 52,
@@ -4255,6 +4464,21 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
     syncOrderToOtherApp(&#x27;curving_formula_app_data_v1&#x27;);
+    if (supabaseSyncEnabled) await saveSupabaseState();
+  }
+
+  async function saveSupabaseState() {
+    try {
+      const updates = Object.entries(appData).map(([class_id, stateData]) =&gt; ({
+        class_id,
+        state: stateData,
+        updated_at: new Date().toISOString()
+      }));
+      const { error } = await supabaseClient.from(&#x27;curve_state&#x27;).upsert(updates, { onConflict: [&#x27;class_id&#x27;] });
+      if (error) console.error(&#x27;Error saving state to Supabase:&#x27;, error);
+    } catch (error) {
+      console.error(&#x27;Error saving state to Supabase:&#x27;, error);
+    }
   }
 
   function syncOrderToOtherApp(targetKey) {
@@ -4714,6 +4938,7 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
 &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
 &lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
 &lt;link href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
 &lt;style&gt;
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: &#x27;Inter&#x27;, system-ui, sans-serif; }
 body { background: radial-gradient(circle at top, #1e293b, #0f172a 60%); color: #e5e7eb; min-height: 100vh; padding: 16px; }
@@ -4852,7 +5077,10 @@ tbody tr:hover { background: rgba(59, 130, 246, 0.08); }
 &lt;/div&gt;
 
 &lt;script&gt;
-document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
+const SUPABASE_URL = &#x27;https://cabjyjqbfnntcdqqmjhu.supabase.co&#x27;;
+const SUPABASE_ANON_KEY = &#x27;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhYmp5anFiZm5udGNkcXFtamh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMDY5NzgsImV4cCI6MjEwNTY4Mjk3OH0.2tpKcvCwVT7WM-30g6uCFC_5cUULkq3CghwgRHPjAAk&#x27;;
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+document.addEventListener(&#x27;DOMContentLoaded&#x27;, async () =&gt; {
   const classSelector = document.getElementById(&#x27;classSelector&#x27;);
   const studentListEl = document.getElementById(&#x27;studentList&#x27;);
   const addStudentBtn = document.getElementById(&#x27;addStudentBtn&#x27;);
@@ -4877,26 +5105,8 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
   const newStudentNameInput = document.getElementById(&#x27;newStudentName&#x27;);
   const STORAGE_KEY = &#x27;curving_formula_app_data_v1&#x27;;
   const ROTATOR_STORAGE_KEY = &#x27;classRotatorData&#x27;;
-  const DEFAULT_STUDENTS_CLASS1 = [
-    &#x27;Cao, Zhiyuan(Jessica)&#x27;, &#x27;Chen, Haiwei(Harvey)&#x27;,
-    &#x27;Cui, Hankun(Daniel)&#x27;, &#x27;Jiang, Haosen(Jerry)&#x27;,
-    &#x27;Li, Yuyang (Micheal)&#x27;, &#x27;Pei, Jingzhou(Oscar)&#x27;,
-    &#x27;Qu, Haibo (Lucas)&#x27;, &#x27;Wang, Han(Bright)&#x27;,
-    &#x27;Wang, Jinghan (Jason)&#x27;, &#x27;Wang, Yunbo(Steven)&#x27;,
-    &#x27;Xu, Shien(Steven)&#x27;, &#x27;Xu, Yuwei(Lisa)&#x27;,
-    &#x27;Zhang, Jiazhen(Anthony)&#x27;, &#x27;Zhang, Ziye(Eason)&#x27;,
-    &#x27;Zhao, Siqi(Steven Zhao)&#x27;, &#x27;Cerelia&#x27;
-  ];
-  const DEFAULT_STUDENTS_CLASS2 = [
-    &#x27;Cheng, Yitian(Timothy)&#x27;, &#x27;Li, Dong(Jasper)&#x27;, &#x27;Li, Qianran(Cindy)&#x27;,
-    &#x27;Li, Zhe(Jackson)&#x27;, &#x27;Liu, Yuyin (Sam)&#x27;, &#x27;Luo, Yuhong&#x27;,
-    &#x27;Mao, Zhengkang(Kang)&#x27;, &#x27;Miao, Yan (Helen)&#x27;, &#x27;Nie, Wenda(Nick)&#x27;,
-    &#x27;Pu, Zihang(Andy)&#x27;, &#x27;Ruan, Zhenghao(Deo)&#x27;, &#x27;Shen, Duowei(Maxime)&#x27;,
-    &#x27;Wang, Yihao(will)&#x27;, &#x27;Wang, Zijian(James)&#x27;, &#x27;Wang, Ziyan (Zoe)&#x27;,
-    &#x27;Yang, Shijie(Nick)&#x27;, &#x27;Zhang, Ziye(Eason)&#x27;, &#x27;Bella&#x27;
-  ];
-
   let currentClass = &#x27;class1&#x27;;
+  let supabaseSyncEnabled = false;
   let appData = {
     class1: {
       label: &#x27;APP1 (Class 1)&#x27;,
@@ -4914,12 +5124,59 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
 
   init();
 
-  function init() {
+  async function init() {
+    await loadStudentsFromJSON();
     loadData();
+    await loadSupabaseState();
     syncFromRotatorData();
     pruneRedundantClasses();
     setupEventListeners();
     syncUIWithState();
+    supabaseSyncEnabled = true;
+  }
+
+  async function loadStudentsFromJSON() {
+    try {
+      const response = await fetch(&#x27;students_data.json?t=&#x27; + Date.now());
+      if (!response.ok) throw new Error(&#x27;Failed to load students_data.json&#x27;);
+      const data = await response.json();
+      if (!data || !data.classes) return;
+      Object.keys(data.classes).forEach(className =&gt; {
+        const classId = makeClassId(className);
+        if (appData[classId]) return;
+        appData[classId] = {
+          label: className,
+          sourceClassName: className,
+          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: &#x27;=RAW_PCT&#x27;, assignmentName: &#x27;&#x27; },
+          assignments: [],
+          students: []
+        };
+      });
+    } catch (error) {
+      console.error(&#x27;Error loading students_data.json:&#x27;, error);
+    }
+  }
+
+  async function loadSupabaseState() {
+    try {
+      const { data, error } = await supabaseClient.from(&#x27;curve_state&#x27;).select(&#x27;*&#x27;);
+      if (error) throw error;
+      if (!data || !data.length) return;
+      data.forEach(row =&gt; {
+        if (!row.class_id || !row.state) return;
+        const existing = appData[row.class_id];
+        if (!existing) {
+          appData[row.class_id] = row.state;
+          return;
+        }
+        Object.assign(existing, row.state);
+        if (!existing.sourceClassName) existing.sourceClassName = null;
+        if (!Array.isArray(existing.assignments)) existing.assignments = [];
+        if (!Array.isArray(existing.students)) existing.students = [];
+      });
+    } catch (error) {
+      console.error(&#x27;Error loading state from Supabase:&#x27;, error);
+    }
   }
 
   function pruneRedundantClasses() {
@@ -5065,12 +5322,12 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
     }
     appData.class1.sourceClassName = null;
     appData.class2.sourceClassName = null;
-    appData.class1.students = DEFAULT_STUDENTS_CLASS1.map(name =&gt; ({ id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; }));
-    appData.class2.students = DEFAULT_STUDENTS_CLASS2.map(name =&gt; ({ id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; }));
+    appData.class1.students = [];
+    appData.class2.students = [];
     saveData();
   }
 
-  function loadClassDefaults(cls) {
+  async function loadClassDefaults(cls) {
     const sourceClassName = appData[cls]?.sourceClassName;
     if (sourceClassName) {
       const rotatorClasses = getRotatorClasses();
@@ -5080,10 +5337,22 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
       saveData();
       return;
     }
-    const defaults = cls === &#x27;class1&#x27; ? DEFAULT_STUDENTS_CLASS1 : cls === &#x27;class2&#x27; ? DEFAULT_STUDENTS_CLASS2 : [];
-    appData[cls].students = defaults.map(name =&gt; ({ id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; }));
+    appData[cls].students = await loadStudentsForClass(sourceClassName || appData[cls].label);
     appData[cls].settings.formula = &#x27;=RAW_PCT&#x27;;
     saveData();
+  }
+
+  async function loadStudentsForClass(className) {
+    try {
+      const response = await fetch(&#x27;students_data.json?t=&#x27; + Date.now());
+      if (!response.ok) throw new Error(&#x27;Failed to load students_data.json&#x27;);
+      const data = await response.json();
+      const roster = (data &amp;&amp; data.classes &amp;&amp; data.classes[className]) || [];
+      return roster.map(toStudentRecord).filter(Boolean);
+    } catch (error) {
+      console.error(&#x27;Error loading students_data.json:&#x27;, error);
+      return [];
+    }
   }
 
   function syncUIWithState() {
@@ -5099,7 +5368,7 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
     renderTable();
   }
 
-  function saveData() {
+  async function saveData() {
     appData[currentClass].settings = {
       maxMcq: parseFloat(maxMcqInput.value) || 40,
       scaledMcq: parseFloat(scaledMcqInput.value) || 52,
@@ -5110,6 +5379,21 @@ document.addEventListener(&#x27;DOMContentLoaded&#x27;, () =&gt; {
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
     syncOrderToOtherApp(&#x27;ap_curving_local_data_v1&#x27;);
+    if (supabaseSyncEnabled) await saveSupabaseState();
+  }
+
+  async function saveSupabaseState() {
+    try {
+      const updates = Object.entries(appData).map(([class_id, stateData]) =&gt; ({
+        class_id,
+        state: stateData,
+        updated_at: new Date().toISOString()
+      }));
+      const { error } = await supabaseClient.from(&#x27;curve_state&#x27;).upsert(updates, { onConflict: [&#x27;class_id&#x27;] });
+      if (error) console.error(&#x27;Error saving state to Supabase:&#x27;, error);
+    } catch (error) {
+      console.error(&#x27;Error saving state to Supabase:&#x27;, error);
+    }
   }
 
   function syncOrderToOtherApp(targetKey) {

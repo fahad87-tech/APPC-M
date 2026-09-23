@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Curve Manager - Unified Grading Tool</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
 body { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); color: #e5e7eb; min-height: 100vh; }
@@ -269,9 +270,10 @@ tbody tr.drag-over { border-top: 2px solid #8b5cf6; }
         </div>
         <div class="data-info-card">
           <h4>Scores & Grades</h4>
-          <p>Stored in: <code>localStorage["curve_manager_data_v1"]</code><br>
+          <p>Primary storage: <code>Supabase curve_state table</code><br>
           Contains MCQ scores, FRQ scores, and all calculated values per class.<br>
-          Persists automatically on every change.</p>
+          Persists across devices and browser refreshes.<br>
+          Local fallback: <code>localStorage["curve_manager_data_v1"]</code> is used if Supabase is unreachable.</p>
         </div>
         <div class="data-info-card">
           <h4>Student Order</h4>
@@ -329,6 +331,11 @@ tbody tr.drag-over { border-top: 2px solid #8b5cf6; }
 (function() {
   'use strict';
 
+  // ===== SUPABASE CONFIG =====
+  const SUPABASE_URL = 'https://cabjyjqbfnntcdqqmjhu.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhYmp5anFiZm5udGNkcXFtamh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMDY5NzgsImV4cCI6MjEwNTY4Mjk3OH0.2tpKcvCwVT7WM-30g6uCFC_5cUULkq3CghwgRHPjAAk';
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   // ===== STORAGE KEYS =====
   const STORAGE_KEYS = {
     mainData: 'curve_manager_data_v1',
@@ -359,6 +366,7 @@ tbody tr.drag-over { border-top: 2px solid #8b5cf6; }
 
   // ===== STATE =====
   let currentClass = '';
+  let supabaseSyncEnabled = false;
   let appData = {};
   let studentOrders = {};
   let apBands = {};
@@ -514,6 +522,60 @@ tbody tr.drag-over { border-top: 2px solid #8b5cf6; }
     saveApBands();
     saveFormulas();
     saveAssignments();
+    if (supabaseSyncEnabled) saveSupabaseState();
+  }
+
+  async function loadSupabaseState() {
+    try {
+      const { data, error } = await supabaseClient.from('curve_state').select('*');
+      if (error) throw error;
+      if (!data || !data.length) return;
+      data.forEach(row => {
+        if (!row.class_id || !row.state) return;
+        const state = row.state;
+        if (!appData[row.class_id]) {
+          appData[row.class_id] = {
+            label: state.label || row.class_id,
+            settings: state.settings || { ...DEFAULT_SETTINGS },
+            students: Array.isArray(state.students) ? state.students : []
+          };
+        } else {
+          Object.assign(appData[row.class_id], state);
+          if (!appData[row.class_id].settings) appData[row.class_id].settings = { ...DEFAULT_SETTINGS };
+          if (!Array.isArray(appData[row.class_id].students)) appData[row.class_id].students = [];
+        }
+        if (state.settings) {
+          if (!apBands[row.class_id] && state.curveBands) apBands[row.class_id] = state.curveBands;
+          if (!formulas[row.class_id] && state.formula) formulas[row.class_id] = state.formula;
+          if (!assignments[row.class_id] && state.assignments) assignments[row.class_id] = state.assignments;
+          if (!studentOrders[row.class_id] && state.studentOrders) studentOrders[row.class_id] = state.studentOrders;
+        }
+      });
+    } catch (error) {
+      console.error('Error loading state from Supabase:', error);
+    }
+  }
+
+  async function saveSupabaseState() {
+    try {
+      const updates = Object.keys(appData).map(class_id => ({
+        class_id,
+        state: {
+          label: appData[class_id].label,
+          settings: appData[class_id].settings,
+          students: appData[class_id].students,
+          curveBands: apBands[class_id] || JSON.parse(JSON.stringify(DEFAULT_AP_BANDS)),
+          formula: formulas[class_id] || DEFAULT_FORMULA,
+          assignments: assignments[class_id] || [],
+          studentOrders: studentOrders[class_id] || appData[class_id].students.map(s => s.id)
+        },
+        updated_at: new Date().toISOString()
+      }));
+      const { error } = await supabaseClient.from('curve_state').upsert(updates, { onConflict: ['class_id'] });
+      if (error) console.error('Error saving state to Supabase:', error);
+    } catch (error) {
+      console.error('Error saving state to Supabase:', error);
+    }
   }
 
   // ===== EXTERNAL STUDENT FILE LOADING =====
@@ -581,38 +643,17 @@ tbody tr.drag-over { border-top: 2px solid #8b5cf6; }
   // ===== DEFAULT CLASS INITIALIZATION =====
   function initializeDefaultClasses() {
     if (Object.keys(appData).length === 0) {
-      const defaultStudents1 = [
-        'Cao, Zhiyuan (Jessica)', 'Chen, Haiwei (Harvey)', 'Cui, Hankun (Daniel)',
-        'Jiang, Haosen (Jerry)', 'Li, Yuyang (Michael)', 'Pei, Jingzhou (Oscar)',
-        'Qu, Haibo (Lucas)', 'Wang, Han (Bright)', 'Wang, Jinghan (Jason)',
-        'Wang, Yunbo (Steven)', 'Xu, Shien (Steven)', 'Xu, Yuwei (Lisa)',
-        'Zhang, Jiazhen (Anthony)', 'Zhang, Ziye (Eason)', 'Zhao, Siqi (Steven Zhao)', 'Cerelia'
-      ];
-      const defaultStudents2 = [
-        'Cheng, Yitian (Timothy)', 'Li, Dong (Jasper)', 'Li, Qianran (Cindy)',
-        'Li, Zhe (Jackson)', 'Liu, Yuyin (Sam)', 'Luo, Yuhong',
-        'Mao, Zhengkang (Kang)', 'Miao, Yan (Helen)', 'Nie, Wenda (Nick)',
-        'Pu, Zihang (Andy)', 'Ruan, Zhenghao (Deo)', 'Shen, Duowei (Maxime)',
-        'Wang, Yihao (Will)', 'Wang, Zijian (James)', 'Wang, Ziyan (Zoe)',
-        'Yang, Shijie (Nick)', 'Zhang, Ziye (Eason)', 'Bella'
-      ];
-
-      appData.class1 = {
-        label: 'APP1 (Class 1)',
-        settings: { ...DEFAULT_SETTINGS },
-        students: cleanStudentList(defaultStudents1)
-      };
-      appData.class2 = {
-        label: 'APPC-M (Class 2)',
-        settings: { ...DEFAULT_SETTINGS },
-        students: cleanStudentList(defaultStudents2)
-      };
-
-      ['class1', 'class2'].forEach(id => {
-        if (!apBands[id]) apBands[id] = JSON.parse(JSON.stringify(DEFAULT_AP_BANDS));
-        if (!formulas[id]) formulas[id] = DEFAULT_FORMULA;
-        if (!assignments[id]) assignments[id] = [];
-        if (!studentOrders[id]) studentOrders[id] = appData[id].students.map(s => s.id);
+      Object.keys(externalStudents).forEach(className => {
+        const classId = makeClassId(className);
+        appData[classId] = {
+          label: className,
+          settings: { ...DEFAULT_SETTINGS },
+          students: externalStudents[className].map(s => ({ ...s, mcq: '', frq: '' }))
+        };
+        if (!apBands[classId]) apBands[classId] = JSON.parse(JSON.stringify(DEFAULT_AP_BANDS));
+        if (!formulas[classId]) formulas[classId] = DEFAULT_FORMULA;
+        if (!assignments[classId]) assignments[classId] = [];
+        if (!studentOrders[classId]) studentOrders[classId] = appData[classId].students.map(s => s.id);
       });
       saveAllData();
     }
@@ -1279,6 +1320,7 @@ tbody tr.drag-over { border-top: 2px solid #8b5cf6; }
   // ===== INITIALIZATION =====
   async function init() {
     loadAllData();
+    await loadSupabaseState();
     await loadExternalStudents();
     
     if (Object.keys(appData).length === 0) {
@@ -1311,6 +1353,7 @@ tbody tr.drag-over { border-top: 2px solid #8b5cf6; }
     renderAPLegend();
     validateFormula();
     setupEventListeners();
+    supabaseSyncEnabled = true;
     
     console.log('Curve Manager initialized');
     console.log('Data storage locations:');
