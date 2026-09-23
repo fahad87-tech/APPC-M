@@ -44,12 +44,6 @@
         "pair_position": 1
       },
       {
-        "id": "s_imfb0v9k",
-        "name": "Kevin Ji",
-        "row": 1,
-        "pair_position": 1
-      },
-      {
         "id": "s_3assux0k",
         "name": "Tommy Pan",
         "row": 1,
@@ -100,12 +94,6 @@
     ],
     "AP Physics 1": [
       {
-        "id": "s_90p3mubm",
-        "name": "Ian Chen",
-        "row": 3,
-        "pair_position": 1
-      },
-      {
         "id": "s_wfys2vcc",
         "name": "Kun He",
         "row": 3,
@@ -136,26 +124,8 @@
         "pair_position": 3
       },
       {
-        "id": "s_j5850om3",
-        "name": "Charlotte Xia",
-        "row": 1,
-        "pair_position": 1
-      },
-      {
-        "id": "s_iizbrfeq",
-        "name": "Zoe Zhu",
-        "row": 1,
-        "pair_position": 1
-      },
-      {
         "id": "s_98st0apa",
         "name": "Alex Xiao",
-        "row": 1,
-        "pair_position": 2
-      },
-      {
-        "id": "s_2n9mknq8",
-        "name": "Joyce Yang",
         "row": 1,
         "pair_position": 2
       },
@@ -188,158 +158,170 @@
         "name": "Connie Yang",
         "row": 2,
         "pair_position": 2
+      },
+      {
+        "id": "s_uac4n896",
+        "name": "Michael Huang"
+      },
+      {
+        "id": "s_psdtjyfb",
+        "name": "Kevin Ji"
+      },
+      {
+        "id": "s_pog2qftf",
+        "name": "Chris Wang"
+      },
+      {
+        "id": "s_eff17suz",
+        "name": "Ray"
       }
     ],
     "Honors Physics 1": [
       {
-        "id": "s_vftlkqcm",
-        "name": "Reem Almazrouei",
-        "row": 1,
-        "pair_position": 1
-      },
-      {
         "id": "s_o564w7jr",
         "name": "Summer Chen",
-        "row": 1,
+        "row": 5,
         "pair_position": 1
       },
       {
         "id": "s_njksrho4",
         "name": "Nicole Chen",
-        "row": 1,
+        "row": 5,
         "pair_position": 2
       },
       {
         "id": "s_we55dr1f",
         "name": "Felix Gao",
-        "row": 1,
+        "row": 5,
         "pair_position": 2
-      },
-      {
-        "id": "s_mp5mtg0q",
-        "name": "Jason Huang",
-        "row": 1,
-        "pair_position": 3
       },
       {
         "id": "s_y55w2nkc",
         "name": "Leo Li",
-        "row": 1,
+        "row": 5,
         "pair_position": 3
       },
       {
         "id": "s_5ys9pd78",
         "name": "Kevin Lin",
-        "row": 2,
+        "row": 1,
         "pair_position": 1
       },
       {
         "id": "s_khh2nemx",
         "name": "Edwin Liu",
-        "row": 2,
+        "row": 1,
         "pair_position": 1
       },
       {
         "id": "s_o35k8h7v",
         "name": "Kevin Liu",
-        "row": 2,
+        "row": 1,
         "pair_position": 2
       },
       {
         "id": "s_nyqdtakb",
         "name": "Amina Liu",
-        "row": 2,
+        "row": 1,
         "pair_position": 2
       },
       {
         "id": "s_dqm9bqlw",
         "name": "Alan Luo",
-        "row": 2,
+        "row": 1,
         "pair_position": 3
       },
       {
         "id": "s_vo461e0j",
         "name": "Bob Miao",
-        "row": 2,
+        "row": 1,
         "pair_position": 3
       },
       {
         "id": "s_n2pwmpx1",
         "name": "Steven Shen",
-        "row": 3,
+        "row": 2,
         "pair_position": 1
       },
       {
         "id": "s_8gabywug",
         "name": "Cris Wang",
-        "row": 3,
+        "row": 2,
         "pair_position": 1
       },
       {
         "id": "s_dbusjh1t",
         "name": "Eric Wang",
-        "row": 3,
+        "row": 2,
         "pair_position": 2
       },
       {
         "id": "s_yy0pqzmy",
         "name": "Codis Wang",
-        "row": 3,
+        "row": 2,
         "pair_position": 2
       },
       {
         "id": "s_1rwdj6oj",
         "name": "Bruce Wang",
-        "row": 3,
+        "row": 2,
         "pair_position": 3
       },
       {
         "id": "s_nidktq83",
         "name": "Henry Zhang",
-        "row": 3,
+        "row": 2,
         "pair_position": 3
       },
       {
         "id": "s_pzroztsu",
         "name": "Harry Zhang",
-        "row": 4,
+        "row": 3,
         "pair_position": 1
       },
       {
         "id": "s_bd19es87",
         "name": "Johnny Zhang",
-        "row": 4,
+        "row": 3,
         "pair_position": 1
       },
       {
         "id": "s_y0sds710",
         "name": "Janie Zhang",
-        "row": 4,
+        "row": 3,
         "pair_position": 2
       },
       {
         "id": "s_xx6hemmt",
         "name": "Alex Zhong",
-        "row": 4,
+        "row": 3,
         "pair_position": 2
       },
       {
         "id": "s_mfx7fpt9",
         "name": "Jason Zhou",
-        "row": 4,
+        "row": 3,
         "pair_position": 3
       },
       {
         "id": "s_k4p22b88",
         "name": "Andrew Zhou",
-        "row": 4,
+        "row": 3,
         "pair_position": 3
       },
       {
         "id": "s_kgqw1p4n",
         "name": "Sandy Zhu",
-        "row": 5,
+        "row": 4,
         "pair_position": 1
+      },
+      {
+        "id": "s_yole4syl",
+        "name": "Wafer Cheng"
+      },
+      {
+        "id": "s_9m2cyo6y",
+        "name": "Richard Liu"
       }
     ],
     "Honors Physics 2": [
@@ -424,7 +406,7 @@
   "last_rotation": {
     "AP Physics C": "2026-09-11",
     "Honors Physics 2": "2026-09-02",
-    "Honors Physics 1": "2026-09-11",
+    "Honors Physics 1": "2026-09-23",
     "AP Physics 1": "2026-09-11"
   },
   "callLog": {
@@ -443,12 +425,12 @@
     }
   },
   "curve": {
-    "cls": "AP Physics C",
+    "cls": "AP Physics 1",
     "cs": {
       "mcq": {
         "en": true,
-        "mx": 0,
-        "sc": 0
+        "mx": 26,
+        "sc": 26
       },
       "fib": {
         "en": true,
@@ -462,7 +444,7 @@
       },
       "frq": {
         "en": true,
-        "mx": 24,
+        "mx": 13,
         "sc": 48
       }
     },
@@ -503,8 +485,8 @@
         "ap": 1
       }
     ],
-    "fm": "=SQRT(RAW_PCT)*10.1",
-    "mr": 40,
+    "fm": "=(RAW_PCT)",
+    "mr": 23,
     "scores": {
       "AP Physics C_s_nwma209g": {
         "formula": {
@@ -624,6 +606,250 @@
           "fib": "",
           "sa": "",
           "frq": "14"
+        }
+      },
+      "Honors Physics 2_s_bm1pn3u6": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "9"
+        }
+      },
+      "Honors Physics 2_s_a089hpf5": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "16"
+        }
+      },
+      "Honors Physics 2_s_ux32430i": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "7"
+        }
+      },
+      "Honors Physics 2_s_4mykegq3": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "13"
+        }
+      },
+      "Honors Physics 2_s_7z8geype": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "7.5"
+        }
+      },
+      "Honors Physics 2_s_jjad5h2p": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "11"
+        }
+      },
+      "Honors Physics 2_s_gpjbky4a": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "13"
+        }
+      },
+      "Honors Physics 2_s_ovcvs8m1": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "11"
+        }
+      },
+      "Honors Physics 2_s_06twdlg9": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "15.5"
+        }
+      },
+      "Honors Physics 2_s_9m8yw5ve": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "13"
+        }
+      },
+      "Honors Physics 2_s_1q2kc5a4": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "15"
+        }
+      },
+      "Honors Physics 2_s_x551k2km": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "14"
+        }
+      },
+      "Honors Physics 2_s_1tc2gvpf": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "15"
+        }
+      },
+      "Honors Physics 2_s_ciw526wo": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "7"
+        }
+      },
+      "Honors Physics 2_s_yopm0qw4": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "16"
+        }
+      },
+      "Honors Physics 2_s_8d635q62": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "6"
+        }
+      },
+      "Honors Physics 2_s_rpi201xv": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "14"
+        }
+      },
+      "Honors Physics 2_s_68nr3xoq": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "15"
+        }
+      },
+      "Honors Physics 2_s_8y5sismh": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "16"
+        }
+      },
+      "AP Physics 1_s_wfys2vcc": {
+        "ap": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "19"
+        },
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "19"
+        }
+      },
+      "AP Physics 1_s_67cy24xb": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "18.33"
+        }
+      },
+      "AP Physics 1_s_pog2qftf": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "17.33"
+        }
+      },
+      "AP Physics 1_s_eff17suz": {
+        "ap": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "18.67"
+        }
+      },
+      "AP Physics 1_s_n7la4v50": {
+        "ap": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "20"
+        }
+      },
+      "AP Physics 1_s_psdtjyfb": {
+        "ap": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "21"
+        }
+      },
+      "AP Physics 1_s_tr0kxnll": {
+        "ap": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "14.33"
+        },
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "14.33"
+        }
+      },
+      "AP Physics 1_s_uac4n896": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "11"
+        }
+      },
+      "AP Physics 1_s_djcwre2g": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "21.67"
+        }
+      },
+      "AP Physics 1_s_xi01osao": {
+        "formula": {
+          "mcq": "",
+          "fib": "",
+          "sa": "",
+          "frq": "17.33"
         }
       }
     },

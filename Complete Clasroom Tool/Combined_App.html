@@ -227,8 +227,7 @@
       <button class="tab-btn" data-tab-id="group" draggable="true">Random Groups</button>
       <button class="tab-btn" data-tab-id="jigsaw" draggable="true">Jigsaw Expert</button>
       <button class="tab-btn" data-tab-id="rotation" draggable="true">Class Rotation</button>
-      <button class="tab-btn" data-tab-id="apcurving" draggable="true">AP Curving Tool</button>
-      <button class="tab-btn" data-tab-id="curving" draggable="true">Curving Tool</button>
+      <button class="tab-btn" data-tab-id="curve" draggable="true">Curve Manager</button>
     </div>
   </div>
 </div>
@@ -3972,2030 +3971,447 @@ renderClassTabs();
 &lt;/body&gt;
 &lt;/html&gt;
 "></iframe>
-  <iframe id="frame-apcurving" srcdoc="&lt;!DOCTYPE html&gt;
+  <iframe id="frame-curve" srcdoc="&lt;!DOCTYPE html&gt;
 &lt;html lang=&quot;en&quot;&gt;
 &lt;head&gt;
 &lt;meta charset=&quot;UTF-8&quot;&gt;
 &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-&lt;title&gt;AP Curving Tool&lt;/title&gt;
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
-&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
+&lt;title&gt;Curve Manager&lt;/title&gt;
 &lt;style&gt;
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: &#x27;Inter&#x27;, system-ui, sans-serif; }
-body { background: radial-gradient(circle at top, #1e293b, #0f172a 60%); color: #e5e7eb; min-height: 100vh; padding: 16px; }
-.app-container { max-width: 1700px; margin: 0 auto; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 16px; backdrop-filter: blur(10px); box-shadow: 0 10px 35px rgba(0,0,0,0.35); }
-.header { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-h1 { font-size: 1.5rem; margin-bottom: 4px; }
-.subtitle { color: #94a3b8; font-size: 0.9rem; }
-.class-selector-container, .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.settings-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
-.input-group { display: flex; flex-direction: column; gap: 4px; }
-.input-group label { font-size: 0.72rem; color: #cbd5e1; }
-.input-group input, .class-selector { background: rgba(30, 41, 59, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 8px 10px; outline: none; }
-.input-group input { width: 115px; }
-.assignment-input { width: 230px !important; }
-.class-selector { min-width: 220px; }
-.save-status { font-size: 0.78rem; color: #cbd5e1; min-height: 18px; }
-.btn { border: none; border-radius: 8px; padding: 9px 12px; font-size: 0.87rem; font-weight: 600; cursor: pointer; color: #fff; background: #3b82f6; }
-.btn:hover { filter: brightness(1.08); }
-.btn-secondary { background: #475569; }
-.btn-danger { background: #dc2626; }
-.btn-icon { width: 38px; }
-.table-container { overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); margin-bottom: 14px; }
-table { width: 100%; border-collapse: collapse; min-width: 1160px; table-layout: fixed; }
-thead th { position: sticky; top: 0; z-index: 2; background: #1e293b; color: #f1f5f9; text-align: left; padding: 11px; font-size: 0.9rem; letter-spacing: 0.03em; text-transform: uppercase; }
-tbody td { padding: 10px 11px; border-bottom: 1px solid rgba(255,255,255,0.08); vertical-align: middle; font-size: 1rem; }
-tbody tr:hover { background: rgba(59, 130, 246, 0.08); }
-.col-number { color: #93c5fd; width: 52px; }
-.col-name { font-weight: 600; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.td-input input { width: 84px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(30,41,59,0.85); color: #fff; font-size: 0.95rem; }
-.calculated { color: #f8fafc; }
-.highlight-score { font-weight: 700; color: #86efac; }
-.delete-btn { border: none; background: #dc2626; color: white; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; }
-.ap-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 24px; border-radius: 999px; font-weight: 700; color: #fff; }
-.score-none { background: #64748b; }
-.score-1 { background: #dc2626; }
-.score-2 { background: #f97316; }
-.score-3 { background: #eab308; color: #111827; }
-.score-4 { background: #22c55e; }
-.score-5 { background: #3b82f6; }
-.legend-wrap { border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 12px; }
-.legend-wrap h3 { margin-bottom: 10px; font-size: 1rem; color: #cbd5e1; }
-.legend-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
-.legend-card { border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 10px; background: rgba(30,41,59,0.6); }
-.legend-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.legend-title .badge { padding: 2px 8px; border-radius: 999px; font-size: 0.82rem; font-weight: 700; color: #fff; }
-.legend-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-.legend-row label { width: 82px; font-size: 0.78rem; color: #cbd5e1; }
-.legend-row input { width: 85px; padding: 6px 7px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(15,23,42,0.8); color: #fff; }
-.modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,0.6); z-index: 20; }
-.modal.show { display: flex; }
-.modal-content { width: 92%; max-width: 440px; background: #0f172a; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; }
-.modal-header, .modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.modal-footer { border-bottom: none; border-top: 1px solid rgba(255,255,255,0.1); justify-content: flex-end; gap: 8px; }
-.modal-body { padding: 16px; }
-.modal-body input { width: 100%; }
-@media (max-width: 1000px) {
-  .header { flex-direction: column; align-items: stretch; }
-}
+*{box-sizing:border-box;margin:0;padding:0;font-family:&#x27;Segoe UI&#x27;,system-ui,sans-serif}
+body{background:linear-gradient(135deg,#0f172a,#1e293b);color:#e5e7eb;min-height:100vh;font-size:1.05rem}
+.app-container{max-width:1800px;margin:auto;padding:16px}
+.header{background:rgba(15,23,42,.8);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;margin-bottom:10px}
+.header-top{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+h1{font-size:1.9rem;background:linear-gradient(90deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:#94a3b8;font-size:1rem}
+.tab-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab-btn{padding:10px 20px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#94a3b8;cursor:pointer;font-size:1rem;font-weight:600}
+.tab-btn:hover{background:rgba(255,255,255,.1);color:#e2e8f0}
+.tab-btn.active{background:#8b5cf6;border-color:#a78bfa;color:#fff}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.controls-row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.control-group{display:flex;flex-direction:column;gap:2px}
+.control-group label{font-size:.85rem;color:#94a3b8}
+.control-group input,.control-group select{background:rgba(30,41,59,.8);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:8px 10px;font-size:.95rem}
+.class-select{min-width:180px}
+.cat-wrap{display:flex;align-items:center;gap:4px;margin-right:4px}
+.cat-toggle{display:flex;align-items:center;gap:5px;padding:6px 12px;background:rgba(30,41,59,.8);border:1px solid rgba(255,255,255,.15);border-radius:6px;cursor:pointer}
+.cat-toggle.enabled{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.4)}
+.cat-dot{width:12px;height:12px;border-radius:50%}
+.cat-label{font-size:.95rem;font-weight:700}
+.cat-input{width:55px;padding:5px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:rgba(30,41,59,.8);color:#fff;font-size:.95rem;text-align:center}
+.btn{border:none;border-radius:6px;padding:9px 14px;font-size:.95rem;font-weight:600;cursor:pointer;color:#fff}
+.btn:hover{filter:brightness(1.1)}
+.btn-primary{background:linear-gradient(135deg,#8b5cf6,#a78bfa)}
+.btn-secondary{background:#475569}
+.btn-success{background:linear-gradient(135deg,#10b981,#34d399)}
+.table-container{overflow:auto;border-radius:10px;border:1px solid rgba(255,255,255,.1);margin:12px 0;max-height:520px}
+table{width:100%;border-collapse:collapse}
+thead th{position:sticky;top:0;background:#1e293b;color:#f1f5f9;text-align:left;padding:12px 6px 12px 10px;font-size:1rem;font-weight:700;border-bottom:2px solid rgba(139,92,246,.3)}
+thead th:first-child{text-align:center;width:40px}
+tbody td{padding:10px 6px 10px 10px;border-bottom:1px solid rgba(255,255,255,.05);font-size:1.05rem;text-align:left}
+tbody td:first-child{text-align:center;width:40px;color:#94a3b8;cursor:grab;user-select:none}
+tbody tr.dragging{opacity:.4}
+tbody tr.drag-over-top{box-shadow:inset 0 3px 0 0 #a78bfa}
+tbody tr.drag-over-bottom{box-shadow:inset 0 -3px 0 0 #a78bfa}
+tbody td:first-child:active{cursor:grabbing}
+.col-name{font-weight:600;min-width:180px}
+.col-input{width:95px}
+.col-input input{width:85px;padding:8px 6px;border-radius:5px;border:1px solid rgba(255,255,255,.15);background:rgba(30,41,59,.8);color:#fff;font-size:1.05rem;text-align:center}
+.col-highlight{color:#86efac;font-weight:700}
+.col-error{color:#f87171;font-weight:700}
+.ap-badge{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:24px;border-radius:999px;font-weight:700;font-size:.9rem;color:#fff}
+.ap-1{background:#ef4444}.ap-2{background:#f97316}.ap-3{background:#eab308;color:#1a1a2e}.ap-4{background:#22c55e}.ap-5{background:#3b82f6}
+.delete-btn{border:none;background:rgba(239,68,68,.8);color:#fff;border-radius:5px;width:28px;height:28px;cursor:pointer;font-size:1rem}
+.legend-panel{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-top:12px}
+.legend-panel h3{font-size:1.1rem;color:#a78bfa;margin-bottom:8px}
+.legend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:8px}
+.legend-card{background:rgba(30,41,59,.6);border-radius:8px;padding:10px}
+.legend-card-header{display:flex;justify-content:space-between;margin-bottom:8px;font-size:1.05rem}
+.legend-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.legend-row label{width:80px;font-size:.9rem;color:#94a3b8}
+.legend-row input{width:70px;padding:5px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:rgba(15,23,42,.8);color:#fff;font-size:.95rem;text-align:center}
+.formula-panel{background:rgba(15,23,42,.6);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px;margin-top:12px}
+.formula-panel h3{font-size:1.1rem;color:#a78bfa;margin-bottom:8px}
+.formula-input{flex:1;min-width:280px;padding:10px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);background:rgba(30,41,59,.8);color:#fff;font-size:1.1rem;font-family:Consolas,monospace}
+.formula-status{font-size:.95rem;color:#94a3b8;margin-top:6px}
+.formula-help{font-size:.85rem;color:#64748b;margin-top:6px;line-height:1.5}
+.modal-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2, 6, 23, .8);z-index:100}
+.modal-overlay.show{display:flex}
+.modal{width:94%;max-width:420px;background:#1e293b;border-radius:12px}
+.modal-header{display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.1);font-size:1.1rem}
+.modal-body{padding:16px}
+.modal-body input{width:100%;padding:10px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(30,41,59,.8);color:#fff;font-size:1.05rem}
+.modal-footer{display:flex;justify-content:flex-end;gap:6px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.1)}
+.toast{position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;padding:14px 24px;border-radius:8px;font-size:1rem;z-index:200;display:none}
 &lt;/style&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;div class=&quot;app-container&quot;&gt;
-  &lt;header class=&quot;header&quot;&gt;
-    &lt;div&gt;
-      &lt;h1&gt;AP Curving Tool&lt;/h1&gt;
-      &lt;p class=&quot;subtitle&quot;&gt;AP Curve Legend + Assignment Snapshots&lt;/p&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;class-selector-container&quot;&gt;
-      &lt;select id=&quot;classSelector&quot; class=&quot;class-selector&quot;&gt;&lt;/select&gt;
-      &lt;button id=&quot;renameClassBtn&quot; class=&quot;btn btn-secondary btn-icon&quot; title=&quot;Rename Class&quot;&gt;✎&lt;/button&gt;
-      &lt;button id=&quot;addClassBtn&quot; class=&quot;btn btn-secondary btn-icon&quot; title=&quot;Add Class&quot;&gt;＋&lt;/button&gt;
-      &lt;button id=&quot;deleteClassBtn&quot; class=&quot;btn btn-danger&quot; title=&quot;Delete Class&quot;&gt;Delete Class&lt;/button&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;actions&quot;&gt;
-      &lt;button id=&quot;addStudentBtn&quot; class=&quot;btn&quot;&gt;Add Student&lt;/button&gt;
-      &lt;div class=&quot;settings-group&quot;&gt;
-        &lt;div class=&quot;input-group&quot;&gt;
-          &lt;label for=&quot;maxMcqInput&quot;&gt;Max MCQ&lt;/label&gt;
-          &lt;input type=&quot;number&quot; id=&quot;maxMcqInput&quot; value=&quot;40&quot; min=&quot;1&quot;&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;input-group&quot;&gt;
-          &lt;label for=&quot;scaledMcqInput&quot;&gt;Scaled MCQ&lt;/label&gt;
-          &lt;input type=&quot;number&quot; id=&quot;scaledMcqInput&quot; value=&quot;52&quot; min=&quot;1&quot;&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;input-group&quot;&gt;
-          &lt;label for=&quot;maxFrqInput&quot;&gt;Max FRQ&lt;/label&gt;
-          &lt;input type=&quot;number&quot; id=&quot;maxFrqInput&quot; value=&quot;48&quot; min=&quot;1&quot;&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;input-group&quot;&gt;
-          &lt;label for=&quot;maxRawScoreInput&quot;&gt;Max Raw Score&lt;/label&gt;
-          &lt;input type=&quot;number&quot; id=&quot;maxRawScoreInput&quot; value=&quot;100&quot; min=&quot;1&quot;&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;input-group&quot;&gt;
-        &lt;label for=&quot;assignmentNameInput&quot;&gt;Assignment Name&lt;/label&gt;
-        &lt;input type=&quot;text&quot; id=&quot;assignmentNameInput&quot; class=&quot;assignment-input&quot; placeholder=&quot;e.g. Unit 3 Test&quot;&gt;
-      &lt;/div&gt;
-      &lt;button id=&quot;saveAssignmentBtn&quot; class=&quot;btn&quot;&gt;Save Assignment&lt;/button&gt;
-      &lt;button id=&quot;resetDataBtn&quot; class=&quot;btn btn-secondary&quot; title=&quot;Reset Current Class&quot;&gt;Reset&lt;/button&gt;
-      &lt;button id=&quot;exportCsvBtn&quot; class=&quot;btn btn-secondary&quot; title=&quot;Export Class History CSV&quot;&gt;Export CSV&lt;/button&gt;
-      &lt;div id=&quot;saveStatus&quot; class=&quot;save-status&quot;&gt;&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/header&gt;
+&lt;header class=&quot;header&quot;&gt;
+&lt;div class=&quot;header-top&quot;&gt;&lt;div&gt;&lt;h1&gt;Curve Manager&lt;/h1&gt;&lt;p class=&quot;subtitle&quot;&gt;Multi-Category Grading - Auto-saves all entries&lt;/p&gt;&lt;/div&gt;
+&lt;div style=&quot;display:flex;gap:5px&quot;&gt;&lt;button id=&quot;clearBtn&quot; class=&quot;btn btn-secondary&quot;&gt;Clear All&lt;/button&gt;&lt;button id=&quot;reloadBtn&quot; class=&quot;btn btn-secondary&quot;&gt;Reload&lt;/button&gt;&lt;button id=&quot;exportBtn&quot; class=&quot;btn btn-secondary&quot;&gt;Export&lt;/button&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;tab-nav&quot;&gt;
+&lt;button class=&quot;tab-btn active&quot; id=&quot;tabAp&quot; data-tab=&quot;ap&quot;&gt;AP Curve&lt;/button&gt;
+&lt;button class=&quot;tab-btn&quot; id=&quot;tabFormula&quot; data-tab=&quot;formula&quot;&gt;Formula Curve&lt;/button&gt;
+&lt;/div&gt;
+&lt;div class=&quot;controls-row&quot;&gt;
+&lt;div class=&quot;control-group&quot;&gt;&lt;label&gt;Class&lt;/label&gt;&lt;select id=&quot;classSelector&quot; class=&quot;class-select&quot;&gt;&lt;/select&gt;&lt;/div&gt;
+&lt;div id=&quot;catToggles&quot; style=&quot;display:flex;gap:4px;flex-wrap:wrap;align-items:center&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;control-group&quot;&gt;&lt;label&gt;Max Raw&lt;/label&gt;&lt;input type=&quot;number&quot; id=&quot;maxRaw&quot; value=&quot;100&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;control-group&quot;&gt;&lt;label&gt;Assignment&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;assignName&quot; placeholder=&quot;Test name&quot;&gt;&lt;/div&gt;
+&lt;button id=&quot;addBtn&quot; class=&quot;btn btn-primary&quot;&gt;Add Student&lt;/button&gt;
+&lt;/div&gt;
+&lt;/header&gt;
 
-  &lt;div class=&quot;table-container&quot;&gt;
-    &lt;table id=&quot;gradesTable&quot;&gt;
-      &lt;thead&gt;
-        &lt;tr&gt;
-          &lt;th style=&quot;width: 50px;&quot;&gt;#&lt;/th&gt;
-          &lt;th style=&quot;width: 250px;&quot;&gt;Student Name&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;MCQ Score&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;FRQ Score&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;Scaled MCQ&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;Raw Score&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;Raw %&lt;/th&gt;
-          &lt;th style=&quot;width: 128px;&quot;&gt;Curved Score (%)&lt;/th&gt;
-          &lt;th style=&quot;width: 88px;&quot;&gt;AP Score&lt;/th&gt;
-          &lt;th style=&quot;width: 70px;&quot;&gt;Actions&lt;/th&gt;
-        &lt;/tr&gt;
-      &lt;/thead&gt;
-      &lt;tbody id=&quot;studentList&quot;&gt;&lt;/tbody&gt;
-    &lt;/table&gt;
-  &lt;/div&gt;
-
-  &lt;div class=&quot;legend-wrap&quot;&gt;
-    &lt;h3&gt;Editable AP Curve Legend&lt;/h3&gt;
-    &lt;div id=&quot;curveLegendContainer&quot; class=&quot;legend-grid&quot;&gt;&lt;/div&gt;
-  &lt;/div&gt;
+&lt;div id=&quot;tab-ap&quot; class=&quot;tab-content active&quot;&gt;
+&lt;div class=&quot;table-container&quot;&gt;
+&lt;table id=&quot;apTable&quot;&gt;&lt;thead&gt;&lt;tr&gt;
+&lt;th&gt;#&lt;/th&gt;&lt;th&gt;Student&lt;/th&gt;&lt;th&gt;MCQ&lt;/th&gt;&lt;th&gt;FIB&lt;/th&gt;&lt;th&gt;SA&lt;/th&gt;&lt;th&gt;FRQ&lt;/th&gt;&lt;th&gt;Raw&lt;/th&gt;&lt;th&gt;Raw%&lt;/th&gt;&lt;th&gt;Curved%&lt;/th&gt;&lt;th style=&quot;width:50px&quot;&gt;AP&lt;/th&gt;&lt;th style=&quot;width:30px&quot;&gt;&lt;/th&gt;
+&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;apBody&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;div class=&quot;legend-panel&quot;&gt;&lt;h3&gt;AP Curve Legend&lt;/h3&gt;&lt;div id=&quot;apLegend&quot; class=&quot;legend-grid&quot;&gt;&lt;/div&gt;&lt;/div&gt;
 &lt;/div&gt;
 
-&lt;div id=&quot;addStudentModal&quot; class=&quot;modal&quot;&gt;
-  &lt;div class=&quot;modal-content&quot;&gt;
-    &lt;div class=&quot;modal-header&quot;&gt;
-      &lt;h2&gt;Add Student&lt;/h2&gt;
-      &lt;button class=&quot;btn btn-secondary close-modal&quot;&gt;Close&lt;/button&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;modal-body&quot;&gt;
-      &lt;div class=&quot;input-group&quot;&gt;
-        &lt;label for=&quot;newStudentName&quot;&gt;Student Name&lt;/label&gt;
-        &lt;input type=&quot;text&quot; id=&quot;newStudentName&quot; placeholder=&quot;e.g. John Doe&quot; autocomplete=&quot;off&quot;&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;modal-footer&quot;&gt;
-      &lt;button class=&quot;btn btn-secondary cancel-modal&quot;&gt;Cancel&lt;/button&gt;
-      &lt;button id=&quot;confirmAddStudent&quot; class=&quot;btn&quot;&gt;Add&lt;/button&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
+&lt;div id=&quot;tab-formula&quot; class=&quot;tab-content&quot;&gt;
+&lt;div class=&quot;table-container&quot;&gt;
+&lt;table id=&quot;formulaTable&quot;&gt;&lt;thead&gt;&lt;tr&gt;
+&lt;th&gt;#&lt;/th&gt;&lt;th&gt;Student&lt;/th&gt;&lt;th&gt;MCQ&lt;/th&gt;&lt;th&gt;FIB&lt;/th&gt;&lt;th&gt;SA&lt;/th&gt;&lt;th&gt;FRQ&lt;/th&gt;&lt;th&gt;Raw&lt;/th&gt;&lt;th&gt;Raw%&lt;/th&gt;&lt;th&gt;Curved%&lt;/th&gt;&lt;th style=&quot;width:30px&quot;&gt;&lt;/th&gt;
+&lt;/tr&gt;&lt;/thead&gt;&lt;tbody id=&quot;formulaBody&quot;&gt;&lt;/tbody&gt;&lt;/table&gt;
 &lt;/div&gt;
+&lt;div class=&quot;formula-panel&quot;&gt;&lt;h3&gt;Curve Formula&lt;/h3&gt;
+&lt;input id=&quot;formulaInput&quot; class=&quot;formula-input&quot; value=&quot;=RAW_PCT&quot; placeholder=&quot;=ROUND(RAW_PCT*1.08,1)&quot;&gt;
+&lt;div id=&quot;formStatus&quot; class=&quot;formula-status&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;formula-help&quot;&gt;Variables: RAW, RAW_PCT, MCQ, FIB, SA, FRQ, MAX_RAW | Functions: ROUND, MIN, MAX, IF, ABS, SQRT, SUM, AVG&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;div id=&quot;addModal&quot; class=&quot;modal-overlay&quot;&gt;
+&lt;div class=&quot;modal&quot;&gt;
+&lt;div class=&quot;modal-header&quot;&gt;&lt;h2&gt;Add Student&lt;/h2&gt;&lt;button class=&quot;btn btn-secondary&quot; id=&quot;closeModal&quot;&gt;×&lt;/button&gt;&lt;/div&gt;
+&lt;div class=&quot;modal-body&quot;&gt;&lt;input type=&quot;text&quot; id=&quot;newStudent&quot; placeholder=&quot;Name&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;modal-footer&quot;&gt;&lt;button class=&quot;btn btn-secondary&quot; id=&quot;cancelModal&quot;&gt;Cancel&lt;/button&gt;&lt;button class=&quot;btn btn-primary&quot; id=&quot;okModal&quot;&gt;Add&lt;/button&gt;&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&quot;toast&quot; class=&quot;toast&quot;&gt;&lt;/div&gt;
 
 &lt;script&gt;
-const SUPABASE_URL = &#x27;https://cabjyjqbfnntcdqqmjhu.supabase.co&#x27;;
-const SUPABASE_ANON_KEY = &#x27;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhYmp5anFiZm5udGNkcXFtamh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMDY5NzgsImV4cCI6MjEwNTY4Mjk3OH0.2tpKcvCwVT7WM-30g6uCFC_5cUULkq3CghwgRHPjAAk&#x27;;
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-document.addEventListener(&#x27;DOMContentLoaded&#x27;, async () =&gt; {
-  const classSelector = document.getElementById(&#x27;classSelector&#x27;);
-  const studentListEl = document.getElementById(&#x27;studentList&#x27;);
-  const addStudentBtn = document.getElementById(&#x27;addStudentBtn&#x27;);
-  const resetDataBtn = document.getElementById(&#x27;resetDataBtn&#x27;);
-  const exportCsvBtn = document.getElementById(&#x27;exportCsvBtn&#x27;);
-  const renameClassBtn = document.getElementById(&#x27;renameClassBtn&#x27;);
-  const addClassBtn = document.getElementById(&#x27;addClassBtn&#x27;);
-  const deleteClassBtn = document.getElementById(&#x27;deleteClassBtn&#x27;);
-  const maxMcqInput = document.getElementById(&#x27;maxMcqInput&#x27;);
-  const scaledMcqInput = document.getElementById(&#x27;scaledMcqInput&#x27;);
-  const maxFrqInput = document.getElementById(&#x27;maxFrqInput&#x27;);
-  const maxRawScoreInput = document.getElementById(&#x27;maxRawScoreInput&#x27;);
-  const assignmentNameInput = document.getElementById(&#x27;assignmentNameInput&#x27;);
-  const saveAssignmentBtn = document.getElementById(&#x27;saveAssignmentBtn&#x27;);
-  const saveStatus = document.getElementById(&#x27;saveStatus&#x27;);
-  const curveLegendContainer = document.getElementById(&#x27;curveLegendContainer&#x27;);
-  const modal = document.getElementById(&#x27;addStudentModal&#x27;);
-  const closeModalBtn = document.querySelector(&#x27;.close-modal&#x27;);
-  const cancelModalBtn = document.querySelector(&#x27;.cancel-modal&#x27;);
-  const confirmAddBtn = document.getElementById(&#x27;confirmAddStudent&#x27;);
-  const newStudentNameInput = document.getElementById(&#x27;newStudentName&#x27;);
-  const STORAGE_KEY = &#x27;ap_curving_local_data_v1&#x27;;
-  const ROTATOR_STORAGE_KEY = &#x27;classRotatorData&#x27;;
-  const DEFAULT_CURVE_BANDS = [
-    { rawMin: 70, rawMax: 100, curveMin: 90, curveMax: 100, ap: 5 },
-    { rawMin: 54, rawMax: 69.9, curveMin: 75, curveMax: 89, ap: 4 },
-    { rawMin: 40, rawMax: 53.9, curveMin: 60, curveMax: 74, ap: 3 },
-    { rawMin: 25, rawMax: 39.9, curveMin: 30, curveMax: 59, ap: 2 },
-    { rawMin: 0, rawMax: 24.9, curveMin: 0, curveMax: 29, ap: 1 }
-  ];
-  let currentClass = &#x27;class1&#x27;;
-  let supabaseSyncEnabled = false;
-  let appData = {
-    class1: {
-      label: &#x27;APP1 (Class 1)&#x27;,
-      sourceClassName: null,
-      settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: &#x27;&#x27; },
-      curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
-      assignments: [],
-      students: []
-    },
-    class2: {
-      label: &#x27;APPC-M (Class 2)&#x27;,
-      sourceClassName: null,
-      settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: &#x27;&#x27; },
-      curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
-      assignments: [],
-      students: []
+(function(){
+const KEY=&#x27;curve_v3&#x27;,CLSKEY=&#x27;classRotatorData&#x27;;
+const CATS=[{id:&#x27;mcq&#x27;,color:&#x27;#3b82f6&#x27;,max:40,scale:52,sc:true},{id:&#x27;fib&#x27;,color:&#x27;#10b981&#x27;,max:10,scale:10},{id:&#x27;sa&#x27;,color:&#x27;#f59e0b&#x27;,max:15,scale:15},{id:&#x27;frq&#x27;,color:&#x27;#a855f7&#x27;,max:48,scale:48}];
+const BANDS=[{rMin:70,rMax:100,cMin:90,cMax:100,ap:5},{rMin:54,rMax:69.9,cMin:75,cMax:89,ap:4},{rMin:40,rMax:53.9,cMin:60,cMax:74,ap:3},{rMin:25,rMax:39.9,cMin:30,cMax:59,ap:2},{rMin:0,rMax:24.9,cMin:0,cMax:29,ap:1}];
+let cls=&#x27;&#x27;,mode=&#x27;ap&#x27;,cs={},ab=[],fm=&#x27;=RAW_PCT&#x27;,mr=100,st=[],savedScores={},orders={},dragRow=null;
+const $=id=&gt;document.getElementById(id);
+
+async function initClassData(){
+  if(localStorage.getItem(CLSKEY))return;
+  try{
+    const r=await fetch(&#x27;students_data.json?t=&#x27;+Date.now());
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d&amp;&amp;d.classes){
+      localStorage.setItem(CLSKEY,JSON.stringify({classes:d.classes,last_rotation:d.last_rotation||{},default_settings:d.default_settings||{}}));
     }
-  };
-
-  init();
-
-  async function init() {
-    await loadStudentsFromJSON();
-    loadData();
-    await loadSupabaseState();
-    syncFromRotatorData();
-    pruneLegacyEmptyClasses();
-    pruneRedundantClasses();
-    setupEventListeners();
-    syncUIWithState();
-    supabaseSyncEnabled = true;
-  }
-
-  async function loadStudentsFromJSON() {
-    try {
-      const response = await fetch(&#x27;students_data.json?t=&#x27; + Date.now());
-      if (!response.ok) throw new Error(&#x27;Failed to load students_data.json&#x27;);
-      const data = await response.json();
-      if (!data || !data.classes) return;
-      Object.keys(data.classes).forEach(className =&gt; {
-        const classId = makeClassId(className);
-        if (appData[classId]) return;
-        appData[classId] = {
-          label: className,
-          sourceClassName: className,
-          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: &#x27;&#x27; },
-          curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
-          assignments: [],
-          students: []
-        };
-      });
-    } catch (error) {
-      console.error(&#x27;Error loading students_data.json:&#x27;, error);
-    }
-  }
-
-  async function loadSupabaseState() {
-    try {
-      const { data, error } = await supabaseClient.from(&#x27;curve_state&#x27;).select(&#x27;*&#x27;);
-      if (error) throw error;
-      if (!data || !data.length) return;
-      data.forEach(row =&gt; {
-        if (!row.class_id || !row.state) return;
-        const existing = appData[row.class_id];
-        if (!existing) {
-          appData[row.class_id] = row.state;
-          return;
-        }
-        Object.assign(existing, row.state);
-        if (!existing.sourceClassName) existing.sourceClassName = null;
-        if (!Array.isArray(existing.curveBands)) existing.curveBands = JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS));
-        if (!Array.isArray(existing.assignments)) existing.assignments = [];
-        if (!Array.isArray(existing.students)) existing.students = [];
-      });
-    } catch (error) {
-      console.error(&#x27;Error loading state from Supabase:&#x27;, error);
-    }
-  }
-
-  function pruneRedundantClasses() {
-    const keys = Object.keys(appData);
-    const seenLabels = new Set();
-    const toDelete = [];
-    keys.forEach(k =&gt; {
-      const lbl = appData[k].label;
-      if (lbl === &#x27;APP1 (Class 1)&#x27; || lbl === &#x27;APPC-M (Class 2)&#x27;) {
-        toDelete.push(k);
-      } else if (seenLabels.has(lbl)) {
-        toDelete.push(k);
-      } else {
-        seenLabels.add(lbl);
-      }
-    });
-    if (toDelete.length &lt; keys.length) {
-      toDelete.forEach(k =&gt; delete appData[k]);
-    }
-    if (!appData[currentClass]) {
-      currentClass = Object.keys(appData)[0];
-    }
-    saveData();
-  }
-
-  function getRotatorClasses() {
-    try {
-      const raw = localStorage.getItem(ROTATOR_STORAGE_KEY);
-      if (!raw) return {};
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== &#x27;object&#x27; || !parsed.classes || typeof parsed.classes !== &#x27;object&#x27;) return {};
-      return parsed.classes;
-    } catch {
-      return {};
-    }
-  }
-
-  function toStudentRecord(item) {
-    if (typeof item === &#x27;string&#x27;) {
-      const name = item.trim();
-      if (!name) return null;
-      return { id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; };
-    }
-    if (item &amp;&amp; typeof item === &#x27;object&#x27; &amp;&amp; typeof item.name === &#x27;string&#x27;) {
-      const name = item.name.trim();
-      if (!name) return null;
-      return { id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; };
-    }
-    return null;
-  }
-
-  function makeClassId(name) {
-    const normalized = String(name).toLowerCase().replace(/[^a-z0-9]+/g, &#x27;_&#x27;).replace(/^_+|_+$/g, &#x27;&#x27;);
-    return `rot_${normalized || generateId().slice(0, 8)}`;
-  }
-
-  function syncFromRotatorData() {
-    const classes = getRotatorClasses();
-    const classNames = Object.keys(classes);
-    if (!classNames.length) return;
-    classNames.forEach(className =&gt; {
-      const students = Array.isArray(classes[className]) ? classes[className].map(toStudentRecord).filter(Boolean) : [];
-      let existingId = Object.keys(appData).find(id =&gt; appData[id].label === className || appData[id].sourceClassName === className);
-      if (!existingId) {
-        const baseId = makeClassId(className);
-        let candidateId = baseId;
-        let suffix = 2;
-        while (appData[candidateId] &amp;&amp; appData[candidateId].sourceClassName !== className) {
-          candidateId = `${baseId}_${suffix}`;
-          suffix += 1;
-        }
-        existingId = candidateId;
-        appData[existingId] = {
-          label: className,
-          sourceClassName: className,
-          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: &#x27;&#x27; },
-          curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
-          assignments: [],
-          students
-        };
-        return;
-      }
-      appData[existingId].label = className;
-      appData[existingId].sourceClassName = className;
-      const hasManualGrades = appData[existingId].students.some(s =&gt; String(s.mcq).trim() !== &#x27;&#x27; || String(s.frq).trim() !== &#x27;&#x27;);
-      if (!hasManualGrades) appData[existingId].students = students;
-    });
-    if (!appData[currentClass]) currentClass = Object.keys(appData)[0];
-    saveData();
-  }
-
-  function hasAnyStudent(students) {
-    if (!Array.isArray(students)) return false;
-    return students.some(s =&gt; {
-      if (!s) return false;
-      if (typeof s === &#x27;string&#x27;) return s.trim().length &gt; 0;
-      if (typeof s === &#x27;object&#x27; &amp;&amp; typeof s.name === &#x27;string&#x27;) return s.name.trim().length &gt; 0;
-      return false;
-    });
-  }
-
-  function pruneLegacyEmptyClasses() {
-    const initialKeys = Object.keys(appData);
-    if (initialKeys.length &lt;= 1) return;
-    let changed = false;
-    [&#x27;class1&#x27;, &#x27;class2&#x27;].forEach(key =&gt; {
-      const cls = appData[key];
-      if (!cls) return;
-      const hasStudents = hasAnyStudent(cls.students);
-      const hasAssignments = Array.isArray(cls.assignments) &amp;&amp; cls.assignments.length &gt; 0;
-      const isLegacy = !cls.sourceClassName;
-      if (isLegacy &amp;&amp; !hasStudents &amp;&amp; !hasAssignments &amp;&amp; Object.keys(appData).length &gt; 1) {
-        delete appData[key];
-        changed = true;
-      }
-    });
-    if (!changed) return;
-    if (!appData[currentClass]) currentClass = Object.keys(appData)[0];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-  }
-
-  function loadData() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        appData = { ...appData, ...parsed };
-        Object.keys(appData).forEach(key =&gt; {
-          if (!appData[key].settings) appData[key].settings = { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: &#x27;&#x27; };
-          if (!Object.prototype.hasOwnProperty.call(appData[key].settings, &#x27;assignmentName&#x27;)) appData[key].settings.assignmentName = &#x27;&#x27;;
-          if (!appData[key].label) appData[key].label = key;
-          if (!Object.prototype.hasOwnProperty.call(appData[key], &#x27;sourceClassName&#x27;)) appData[key].sourceClassName = null;
-          if (!Array.isArray(appData[key].curveBands)) appData[key].curveBands = JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS));
-          if (!Array.isArray(appData[key].assignments)) appData[key].assignments = [];
-          if (!Array.isArray(appData[key].students)) appData[key].students = [];
-        });
-        if (!appData[currentClass]) currentClass = Object.keys(appData)[0];
-      } catch {
-        loadDefaults();
-      }
-    } else {
-      loadDefaults();
-    }
-  }
-
-  function loadDefaults() {
-    const rotatorClasses = getRotatorClasses();
-    const classNames = Object.keys(rotatorClasses);
-    if (classNames.length) {
-      appData = {};
-      classNames.forEach(className =&gt; {
-        const classId = makeClassId(className);
-        appData[classId] = {
-          label: className,
-          sourceClassName: className,
-          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: &#x27;&#x27; },
-          curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
-          assignments: [],
-          students: (rotatorClasses[className] || []).map(toStudentRecord).filter(Boolean)
-        };
-      });
-      currentClass = Object.keys(appData)[0];
-      saveData();
-      return;
-    }
-    appData.class1.students = [];
-    appData.class2.students = [];
-    saveData();
-  }
-
-  async function loadClassDefaults(cls) {
-    const sourceClassName = appData[cls]?.sourceClassName;
-    if (sourceClassName) {
-      const rotatorClasses = getRotatorClasses();
-      appData[cls].students = (rotatorClasses[sourceClassName] || []).map(toStudentRecord).filter(Boolean);
-      appData[cls].curveBands = JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS));
-      saveData();
-      return;
-    }
-    appData[cls].students = await loadStudentsForClass(sourceClassName || appData[cls].label);
-    appData[cls].curveBands = JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS));
-    saveData();
-  }
-
-  async function loadStudentsForClass(className) {
-    try {
-      const response = await fetch(&#x27;students_data.json?t=&#x27; + Date.now());
-      if (!response.ok) throw new Error(&#x27;Failed to load students_data.json&#x27;);
-      const data = await response.json();
-      const roster = (data &amp;&amp; data.classes &amp;&amp; data.classes[className]) || [];
-      return roster.map(toStudentRecord).filter(Boolean);
-    } catch (error) {
-      console.error(&#x27;Error loading students_data.json:&#x27;, error);
-      return [];
-    }
-  }
-
-  function syncUIWithState() {
-    const state = appData[currentClass];
-    maxMcqInput.value = state.settings.maxMcq;
-    scaledMcqInput.value = state.settings.scaledMcq;
-    maxFrqInput.value = state.settings.maxFrq;
-    maxRawScoreInput.value = state.settings.maxRaw;
-    assignmentNameInput.value = state.settings.assignmentName || &#x27;&#x27;;
-    renderClassSelector();
-    renderLegend();
-    renderTable();
-  }
-
-  async function saveData() {
-    appData[currentClass].settings = {
-      maxMcq: parseFloat(maxMcqInput.value) || 40,
-      scaledMcq: parseFloat(scaledMcqInput.value) || 52,
-      maxFrq: parseFloat(maxFrqInput.value) || 48,
-      maxRaw: parseFloat(maxRawScoreInput.value) || 100,
-      assignmentName: assignmentNameInput.value.trim()
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-    syncOrderToOtherApp(&#x27;curving_formula_app_data_v1&#x27;);
-    if (supabaseSyncEnabled) await saveSupabaseState();
-  }
-
-  async function saveSupabaseState() {
-    try {
-      const updates = Object.entries(appData).map(([class_id, stateData]) =&gt; ({
-        class_id,
-        state: stateData,
-        updated_at: new Date().toISOString()
-      }));
-      const { error } = await supabaseClient.from(&#x27;curve_state&#x27;).upsert(updates, { onConflict: [&#x27;class_id&#x27;] });
-      if (error) console.error(&#x27;Error saving state to Supabase:&#x27;, error);
-    } catch (error) {
-      console.error(&#x27;Error saving state to Supabase:&#x27;, error);
-    }
-  }
-
-  function syncOrderToOtherApp(targetKey) {
-    try {
-      const saved = localStorage.getItem(targetKey);
-      if (!saved) return;
-      const otherData = JSON.parse(saved);
-      let changed = false;
-      Object.keys(appData).forEach(classId =&gt; {
-        if (otherData[classId] &amp;&amp; otherData[classId].students &amp;&amp; appData[classId].students) {
-          const newOrder = [];
-          const sourceStudents = appData[classId].students;
-          const targetStudents = otherData[classId].students;
-          sourceStudents.forEach(s =&gt; {
-            const matched = targetStudents.find(ts =&gt; ts.id === s.id || ts.name === s.name);
-            if (matched) newOrder.push(matched);
-            else newOrder.push({ id: s.id, name: s.name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; });
-          });
-          if (JSON.stringify(targetStudents.map(ts=&gt;ts.name)) !== JSON.stringify(newOrder.map(n=&gt;n.name))) {
-            otherData[classId].students = newOrder;
-            changed = true;
-          }
-        }
-      });
-      if (changed) {
-        localStorage.setItem(targetKey, JSON.stringify(otherData));
-      }
-    } catch {}
-  }
-
-  function renderClassSelector() {
-    classSelector.innerHTML = &#x27;&#x27;;
-    Object.keys(appData).forEach(key =&gt; {
-      const opt = document.createElement(&#x27;option&#x27;);
-      opt.value = key;
-      opt.textContent = appData[key].label || key;
-      if (key === currentClass) opt.selected = true;
-      classSelector.appendChild(opt);
-    });
-    deleteClassBtn.disabled = Object.keys(appData).length &lt;= 1;
-  }
-
-  function renderLegend() {
-    const state = appData[currentClass];
-    curveLegendContainer.innerHTML = &#x27;&#x27;;
-    state.curveBands.forEach(band =&gt; {
-      const card = document.createElement(&#x27;div&#x27;);
-      card.className = &#x27;legend-card&#x27;;
-      card.innerHTML = `
-        &lt;div class=&quot;legend-title&quot;&gt;&lt;strong&gt;AP ${band.ap}&lt;/strong&gt;&lt;span class=&quot;badge score-${band.ap}&quot;&gt;${band.ap}&lt;/span&gt;&lt;/div&gt;
-        &lt;div class=&quot;legend-row&quot;&gt;&lt;label&gt;Raw Min&lt;/label&gt;&lt;input type=&quot;number&quot; step=&quot;0.1&quot; data-ap=&quot;${band.ap}&quot; data-field=&quot;rawMin&quot; value=&quot;${band.rawMin}&quot;&gt;&lt;label&gt;Raw Max&lt;/label&gt;&lt;input type=&quot;number&quot; step=&quot;0.1&quot; data-ap=&quot;${band.ap}&quot; data-field=&quot;rawMax&quot; value=&quot;${band.rawMax}&quot;&gt;&lt;/div&gt;
-        &lt;div class=&quot;legend-row&quot;&gt;&lt;label&gt;Curve Min&lt;/label&gt;&lt;input type=&quot;number&quot; step=&quot;0.1&quot; data-ap=&quot;${band.ap}&quot; data-field=&quot;curveMin&quot; value=&quot;${band.curveMin}&quot;&gt;&lt;label&gt;Curve Max&lt;/label&gt;&lt;input type=&quot;number&quot; step=&quot;0.1&quot; data-ap=&quot;${band.ap}&quot; data-field=&quot;curveMax&quot; value=&quot;${band.curveMax}&quot;&gt;&lt;/div&gt;
-      `;
-      curveLegendContainer.appendChild(card);
-    });
-  }
-
-  function generateId() {
-    if (crypto &amp;&amp; crypto.randomUUID) return crypto.randomUUID();
-    return &#x27;id_&#x27; + Math.random().toString(36).slice(2);
-  }
-
-  function toNumber(v) {
-    const n = parseFloat(v);
-    return Number.isFinite(n) ? n : null;
-  }
-
-  function calculateCurve(rawPct) {
-    if (rawPct === null || Number.isNaN(rawPct)) return { curve: null, ap: null };
-    const bands = appData[currentClass].curveBands || [];
-    let targetBand = bands[bands.length - 1] || { rawMin: 0, rawMax: 100, curveMin: 0, curveMax: 100, ap: 1 };
-    for (const band of bands) {
-      if (rawPct &gt;= band.rawMin &amp;&amp; rawPct &lt;= band.rawMax) {
-        targetBand = band;
-        break;
-      }
-    }
-    if (rawPct &gt;= 100) return { curve: 100, ap: 5 };
-    const widthRaw = targetBand.rawMax - targetBand.rawMin || 1;
-    const widthCurve = targetBand.curveMax - targetBand.curveMin;
-    const curvedScore = ((rawPct - targetBand.rawMin) / widthRaw) * widthCurve + targetBand.curveMin;
-    return { curve: Math.max(0, Math.min(100, curvedScore)), ap: targetBand.ap };
-  }
-
-  function processStudentGrades(student) {
-    const mcq = toNumber(String(student.mcq).trim());
-    const frq = toNumber(String(student.frq).trim());
-    const state = appData[currentClass];
-    let scaledMcq = null;
-    let rawScore = null;
-    let rawPct = null;
-    let curve = null;
-    let ap = null;
-    const hasMcq = mcq !== null;
-    const hasFrq = frq !== null;
-    if (hasMcq) {
-      scaledMcq = (mcq / (state.settings.maxMcq || 40)) * (state.settings.scaledMcq || 52);
-    }
-    if (hasMcq || hasFrq) {
-      rawScore = (scaledMcq || 0) + (hasFrq ? frq : 0);
-      rawPct = (rawScore / (state.settings.maxRaw || 100)) * 100;
-      const curved = calculateCurve(rawPct);
-      curve = curved.curve;
-      ap = curved.ap;
-    }
-    return { scaledMcq, rawScore, rawPct, curve, ap };
-  }
-
-  function captureGradeInputFocus() {
-    const active = document.activeElement;
-    if (!active || active.tagName !== &#x27;INPUT&#x27;) return null;
-    if (!studentListEl.contains(active)) return null;
-    const id = active.dataset.id;
-    const field = active.dataset.field;
-    if (!id || !field) return null;
-    return {
-      id,
-      field,
-      start: typeof active.selectionStart === &#x27;number&#x27; ? active.selectionStart : null,
-      end: typeof active.selectionEnd === &#x27;number&#x27; ? active.selectionEnd : null
-    };
-  }
-
-  function restoreGradeInputFocus(focusInfo) {
-    if (!focusInfo) return;
-    const selector = `input[data-id=&quot;${focusInfo.id}&quot;][data-field=&quot;${focusInfo.field}&quot;]`;
-    const input = studentListEl.querySelector(selector);
-    if (!input) return;
-    input.focus();
-    if (focusInfo.start !== null &amp;&amp; focusInfo.end !== null) input.setSelectionRange(focusInfo.start, focusInfo.end);
-  }
-
-  function renderTable() {
-    const focusInfo = captureGradeInputFocus();
-    const state = appData[currentClass];
-    studentListEl.innerHTML = &#x27;&#x27;;
-    state.students.forEach((student, index) =&gt; {
-      const r = processStudentGrades(student);
-      const tr = document.createElement(&#x27;tr&#x27;);
-      tr.draggable = true;
-      tr.style.cursor = &#x27;move&#x27;;
-      
-      tr.addEventListener(&#x27;dragstart&#x27;, (e) =&gt; {
-        e.dataTransfer.setData(&#x27;text/plain&#x27;, index);
-        tr.style.opacity = &#x27;0.5&#x27;;
-      });
-      tr.addEventListener(&#x27;dragend&#x27;, () =&gt; {
-        tr.style.opacity = &#x27;1&#x27;;
-      });
-      tr.addEventListener(&#x27;dragover&#x27;, (e) =&gt; {
-        e.preventDefault();
-      });
-      tr.addEventListener(&#x27;drop&#x27;, (e) =&gt; {
-        e.preventDefault();
-        const fromIndex = parseInt(e.dataTransfer.getData(&#x27;text/plain&#x27;), 10);
-        const toIndex = index;
-        if (fromIndex !== toIndex &amp;&amp; !isNaN(fromIndex)) {
-          const state = appData[currentClass];
-          const movedStudent = state.students.splice(fromIndex, 1)[0];
-          state.students.splice(toIndex, 0, movedStudent);
-          saveData();
-          renderTable();
-        }
-      });
-
-      const apClass = r.ap !== null ? `score-${r.ap}` : &#x27;score-none&#x27;;
-      tr.innerHTML = `
-        &lt;td class=&quot;col-number&quot;&gt;${index + 1}&lt;/td&gt;
-        &lt;td class=&quot;col-name&quot; data-student-id=&quot;${student.id}&quot; title=&quot;Click to edit name&quot; style=&quot;cursor:pointer&quot;&gt;${student.name}&lt;/td&gt;
-        &lt;td class=&quot;td-input&quot;&gt;&lt;input type=&quot;number&quot; step=&quot;0.5&quot; min=&quot;0&quot; data-id=&quot;${student.id}&quot; data-field=&quot;mcq&quot; value=&quot;${student.mcq}&quot;&gt;&lt;/td&gt;
-        &lt;td class=&quot;td-input&quot;&gt;&lt;input type=&quot;number&quot; step=&quot;0.5&quot; min=&quot;0&quot; data-id=&quot;${student.id}&quot; data-field=&quot;frq&quot; value=&quot;${student.frq}&quot;&gt;&lt;/td&gt;
-        &lt;td class=&quot;calculated&quot;&gt;${r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : &#x27;-&#x27;}&lt;/td&gt;
-        &lt;td class=&quot;calculated highlight-score&quot;&gt;${r.rawScore !== null ? r.rawScore.toFixed(1) : &#x27;-&#x27;}&lt;/td&gt;
-        &lt;td class=&quot;calculated highlight-score&quot;&gt;${r.rawPct !== null ? r.rawPct.toFixed(1) + &#x27;%&#x27; : &#x27;-&#x27;}&lt;/td&gt;
-        &lt;td class=&quot;calculated highlight-score&quot;&gt;${r.curve !== null ? r.curve.toFixed(1) + &#x27;%&#x27; : &#x27;-&#x27;}&lt;/td&gt;
-        &lt;td&gt;&lt;span class=&quot;ap-badge ${apClass}&quot;&gt;${r.ap !== null ? r.ap : &#x27;-&#x27;}&lt;/span&gt;&lt;/td&gt;
-        &lt;td&gt;&lt;button class=&quot;delete-btn&quot; data-id=&quot;${student.id}&quot; title=&quot;Remove Student&quot;&gt;✕&lt;/button&gt;&lt;/td&gt;
-      `;
-      studentListEl.appendChild(tr);
-    });
-    restoreGradeInputFocus(focusInfo);
-  }
-
-  function updateRowDisplay(row, student) {
-    if (!row) return;
-    const r = processStudentGrades(student);
-    const apClass = r.ap !== null ? `score-${r.ap}` : &#x27;score-none&#x27;;
-    const cells = row.querySelectorAll(&#x27;td&#x27;);
-    if (cells.length &lt; 9) return;
-    cells[4].textContent = r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : &#x27;-&#x27;;
-    cells[5].textContent = r.rawScore !== null ? r.rawScore.toFixed(1) : &#x27;-&#x27;;
-    cells[6].textContent = r.rawPct !== null ? r.rawPct.toFixed(1) + &#x27;%&#x27; : &#x27;-&#x27;;
-    cells[7].textContent = r.curve !== null ? r.curve.toFixed(1) + &#x27;%&#x27; : &#x27;-&#x27;;
-    const badge = cells[8].querySelector(&#x27;.ap-badge&#x27;);
-    if (badge) {
-      badge.className = `ap-badge ${apClass}`;
-      badge.textContent = r.ap !== null ? r.ap : &#x27;-&#x27;;
-    }
-  }
-
-  function setupEventListeners() {
-    classSelector.addEventListener(&#x27;change&#x27;, (e) =&gt; {
-      currentClass = e.target.value;
-      syncUIWithState();
-    });
-    window.addEventListener(&#x27;storage&#x27;, (e) =&gt; {
-      if (e.key === ROTATOR_STORAGE_KEY) {
-        syncFromRotatorData();
-        syncUIWithState();
-      } else if (e.key === STORAGE_KEY) {
-        loadData();
-        syncUIWithState();
-      }
-    });
-    curveLegendContainer.addEventListener(&#x27;input&#x27;, (e) =&gt; {
-      const input = e.target.closest(&#x27;input[data-ap]&#x27;);
-      if (!input) return;
-      const ap = parseInt(input.dataset.ap, 10);
-      const field = input.dataset.field;
-      const val = parseFloat(input.value);
-      if (!Number.isFinite(val)) return;
-      const band = appData[currentClass].curveBands.find(b =&gt; b.ap === ap);
-      if (!band) return;
-      band[field] = val;
-      saveData();
-      renderTable();
-    });
-    studentListEl.addEventListener(&#x27;input&#x27;, (e) =&gt; {
-      if (e.target.tagName !== &#x27;INPUT&#x27;) return;
-      const id = e.target.dataset.id;
-      const field = e.target.dataset.field;
-      const student = appData[currentClass].students.find(s =&gt; s.id === id);
-      if (!student) return;
-      student[field] = e.target.value;
-      saveData();
-      updateRowDisplay(e.target.closest(&#x27;tr&#x27;), student);
-    });
-    studentListEl.addEventListener(&#x27;click&#x27;, (e) =&gt; {
-      const nameTd = e.target.closest(&#x27;td.col-name&#x27;);
-      if (nameTd) {
-        const student = appData[currentClass].students.find(s =&gt; s.id === nameTd.dataset.studentId);
-        if (student) startNameEdit(nameTd, student);
-      }
-      const deleteBtn = e.target.closest(&#x27;.delete-btn&#x27;);
-      if (deleteBtn) {
-        const id = deleteBtn.dataset.id;
-        appData[currentClass].students = appData[currentClass].students.filter(s =&gt; s.id !== id);
-        saveData();
-        renderTable();
-      }
-    });
-    [maxMcqInput, scaledMcqInput, maxFrqInput, maxRawScoreInput].forEach(input =&gt; {
-      input.addEventListener(&#x27;change&#x27;, () =&gt; {
-        saveData();
-        renderTable();
-      });
-    });
-    assignmentNameInput.addEventListener(&#x27;input&#x27;, () =&gt; saveData());
-    saveAssignmentBtn.addEventListener(&#x27;click&#x27;, saveAssignmentSnapshot);
-    resetDataBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
-      if (confirm(&#x27;This will clear all entered grades and reset the student list for the current class. Continue?&#x27;)) {
-        loadClassDefaults(currentClass);
-        syncUIWithState();
-      }
-    });
-    addStudentBtn.addEventListener(&#x27;click&#x27;, showModal);
-    closeModalBtn.addEventListener(&#x27;click&#x27;, hideModal);
-    cancelModalBtn.addEventListener(&#x27;click&#x27;, hideModal);
-    document.addEventListener(&#x27;keydown&#x27;, (e) =&gt; { if (e.key === &#x27;Escape&#x27;) hideModal(); });
-    confirmAddBtn.addEventListener(&#x27;click&#x27;, handleAddStudent);
-    newStudentNameInput.addEventListener(&#x27;keypress&#x27;, (e) =&gt; { if (e.key === &#x27;Enter&#x27;) handleAddStudent(); });
-    exportCsvBtn.addEventListener(&#x27;click&#x27;, exportToCSV);
-    renameClassBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
-      const newName = prompt(&#x27;Rename class:&#x27;, appData[currentClass].label || currentClass);
-      if (newName &amp;&amp; newName.trim()) {
-        appData[currentClass].label = newName.trim();
-        saveData();
-        renderClassSelector();
-      }
-    });
-    addClassBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
-      const name = prompt(&#x27;New class name:&#x27;);
-      if (!name || !name.trim()) return;
-      const id = &#x27;class_&#x27; + generateId().slice(0, 8);
-      appData[id] = {
-        label: name.trim(),
-        sourceClassName: null,
-        settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, assignmentName: &#x27;&#x27; },
-        curveBands: JSON.parse(JSON.stringify(DEFAULT_CURVE_BANDS)),
-        assignments: [],
-        students: []
-      };
-      currentClass = id;
-      saveData();
-      syncUIWithState();
-    });
-    deleteClassBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
-      if (Object.keys(appData).length &lt;= 1) return;
-      const label = appData[currentClass].label || currentClass;
-      if (!confirm(`Delete &quot;${label}&quot; and all its data? This cannot be undone.`)) return;
-      delete appData[currentClass];
-      currentClass = Object.keys(appData)[0];
-      saveData();
-      syncUIWithState();
-    });
-  }
-
-  function startNameEdit(td, student) {
-    if (td.querySelector(&#x27;input&#x27;)) return;
-    const prev = student.name;
-    const input = document.createElement(&#x27;input&#x27;);
-    input.type = &#x27;text&#x27;;
-    input.value = prev;
-    input.style.cssText = &#x27;width:100%;padding:0.35rem 0.5rem;font-size:inherit;font-weight:600;&#x27;;
-    td.textContent = &#x27;&#x27;;
-    td.appendChild(input);
-    input.focus();
-    input.select();
-    const commit = () =&gt; {
-      const val = input.value.trim();
-      student.name = val || prev;
-      saveData();
-      td.textContent = student.name;
-      td.title = &#x27;Click to edit name&#x27;;
-    };
-    input.addEventListener(&#x27;blur&#x27;, commit);
-    input.addEventListener(&#x27;keydown&#x27;, (e) =&gt; {
-      if (e.key === &#x27;Enter&#x27;) input.blur();
-      if (e.key === &#x27;Escape&#x27;) { input.value = prev; input.blur(); }
-    });
-  }
-
-  function showModal() {
-    modal.classList.add(&#x27;show&#x27;);
-    newStudentNameInput.value = &#x27;&#x27;;
-    setTimeout(() =&gt; newStudentNameInput.focus(), 40);
-  }
-
-  function hideModal() {
-    modal.classList.remove(&#x27;show&#x27;);
-  }
-
-  function handleAddStudent() {
-    const name = newStudentNameInput.value.trim();
-    if (!name) return;
-    appData[currentClass].students.push({ id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; });
-    saveData();
-    renderTable();
-    hideModal();
-  }
-
-  function escapeCsvField(val) {
-    return `&quot;${String(val).replace(/&quot;/g, &#x27;&quot;&quot;&#x27;)}&quot;`;
-  }
-
-  function getClassLabel() {
-    return appData[currentClass]?.label || currentClass;
-  }
-
-  function currentDateTimeIso() {
-    return new Date().toISOString();
-  }
-
-  function formatDateForFile(dateIso) {
-    return String(dateIso || &#x27;&#x27;).replace(/[:.]/g, &#x27;-&#x27;);
-  }
-
-  function buildAssignmentRows(assignmentName, savedAtIso) {
-    return appData[currentClass].students.map(student =&gt; {
-      const r = processStudentGrades(student);
-      return {
-        classLabel: getClassLabel(),
-        assignmentName,
-        savedAtIso,
-        studentName: student.name,
-        mcq: student.mcq || &#x27;&#x27;,
-        frq: student.frq || &#x27;&#x27;,
-        scaledMcq: r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : &#x27;&#x27;,
-        rawScore: r.rawScore !== null ? r.rawScore.toFixed(1) : &#x27;&#x27;,
-        rawPct: r.rawPct !== null ? r.rawPct.toFixed(1) : &#x27;&#x27;,
-        curvedScore: r.curve !== null ? r.curve.toFixed(1) : &#x27;&#x27;,
-        apScore: r.ap !== null ? r.ap : &#x27;&#x27;
-      };
-    });
-  }
-
-  function saveAssignmentSnapshot() {
-    const assignmentName = assignmentNameInput.value.trim();
-    if (!assignmentName) {
-      saveStatus.textContent = &#x27;Enter assignment name first&#x27;;
-      saveStatus.style.color = &#x27;#fda4af&#x27;;
-      assignmentNameInput.focus();
-      return;
-    }
-    const savedAtIso = currentDateTimeIso();
-    const snapshotRows = buildAssignmentRows(assignmentName, savedAtIso);
-    appData[currentClass].assignments.push({
-      id: generateId(),
-      assignmentName,
-      savedAtIso,
-      rows: snapshotRows
-    });
-    saveData();
-    exportToCSV();
-    saveStatus.textContent = `Saved &quot;${assignmentName}&quot; at ${new Date(savedAtIso).toLocaleString()}`;
-    saveStatus.style.color = &#x27;#86efac&#x27;;
-  }
-
-  function exportToCSV() {
-    const rows = [[&#x27;Class Name&#x27;, &#x27;Assignment Name&#x27;, &#x27;Saved At&#x27;, &#x27;Student Name&#x27;, &#x27;MCQ Score&#x27;, &#x27;FRQ Score&#x27;, &#x27;Scaled MCQ&#x27;, &#x27;Raw Score&#x27;, &#x27;Raw %&#x27;, &#x27;Curved Score (%)&#x27;, &#x27;AP Score&#x27;]];
-    const assignments = Array.isArray(appData[currentClass].assignments) ? appData[currentClass].assignments : [];
-    assignments.forEach(record =&gt; {
-      (record.rows || []).forEach(row =&gt; {
-        rows.push([
-          row.classLabel || getClassLabel(),
-          row.assignmentName || &#x27;&#x27;,
-          row.savedAtIso || &#x27;&#x27;,
-          row.studentName || &#x27;&#x27;,
-          row.mcq || &#x27;&#x27;,
-          row.frq || &#x27;&#x27;,
-          row.scaledMcq || &#x27;&#x27;,
-          row.rawScore || &#x27;&#x27;,
-          row.rawPct || &#x27;&#x27;,
-          row.curvedScore || &#x27;&#x27;,
-          row.apScore || &#x27;&#x27;
-        ]);
-      });
-    });
-    if (rows.length === 1) {
-      saveStatus.textContent = &#x27;No saved assignments yet. Click Save Assignment first.&#x27;;
-      saveStatus.style.color = &#x27;#fda4af&#x27;;
-      return;
-    }
-    const csvContent = rows.map(r =&gt; r.map(escapeCsvField).join(&#x27;,&#x27;)).join(&#x27;\n&#x27;);
-    const blob = new Blob([csvContent], { type: &#x27;text/csv;charset=utf-8;&#x27; });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement(&#x27;a&#x27;);
-    link.href = url;
-    const latestDate = assignments.length ? assignments[assignments.length - 1].savedAtIso : currentDateTimeIso();
-    link.download = `AP_Curves_${getClassLabel().replace(/[^\w-]+/g, &#x27;_&#x27;)}_${formatDateForFile(latestDate)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
-});
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-"></iframe>
-  <iframe id="frame-curving" srcdoc="&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;&gt;
-&lt;title&gt;Curving Tool&lt;/title&gt;
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
-&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
-&lt;link href=&quot;https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2&quot;&gt;&lt;/script&gt;
-&lt;style&gt;
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: &#x27;Inter&#x27;, system-ui, sans-serif; }
-body { background: radial-gradient(circle at top, #1e293b, #0f172a 60%); color: #e5e7eb; min-height: 100vh; padding: 16px; }
-.app-container { max-width: 1600px; margin: 0 auto; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 16px; backdrop-filter: blur(10px); box-shadow: 0 10px 35px rgba(0,0,0,0.35); }
-.header { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
-h1 { font-size: 1.5rem; margin-bottom: 4px; }
-.subtitle { color: #94a3b8; font-size: 0.9rem; }
-.class-selector-container, .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.settings-group { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
-.input-group { display: flex; flex-direction: column; gap: 4px; }
-.input-group label { font-size: 0.72rem; color: #cbd5e1; }
-.input-group input, .class-selector, .formula-input { background: rgba(30, 41, 59, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 8px 10px; outline: none; }
-.input-group input { width: 110px; }
-.class-selector { min-width: 220px; }
-.formula-wrap { display: flex; flex-direction: column; gap: 4px; min-width: 360px; }
-.formula-input { min-width: 360px; }
-.formula-status { font-size: 0.78rem; color: #a5b4fc; min-height: 18px; }
-.assignment-input { width: 230px !important; }
-.save-status { font-size: 0.78rem; color: #cbd5e1; min-height: 18px; }
-.btn { border: none; border-radius: 8px; padding: 9px 12px; font-size: 0.87rem; font-weight: 600; cursor: pointer; color: #fff; background: #3b82f6; }
-.btn:hover { filter: brightness(1.08); }
-.btn-secondary { background: #475569; }
-.btn-danger { background: #dc2626; }
-.btn-icon { width: 38px; }
-.table-container { overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); }
-table { width: 100%; border-collapse: collapse; min-width: 1080px; table-layout: fixed; }
-thead th { position: sticky; top: 0; z-index: 2; background: #1e293b; color: #f1f5f9; text-align: left; padding: 11px; font-size: 0.9rem; letter-spacing: 0.03em; text-transform: uppercase; }
-tbody td { padding: 10px 11px; border-bottom: 1px solid rgba(255,255,255,0.08); vertical-align: middle; font-size: 1rem; }
-tbody tr:hover { background: rgba(59, 130, 246, 0.08); }
-.col-number { color: #93c5fd; width: 52px; }
-.col-name { font-weight: 600; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.td-input input { width: 84px; padding: 6px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(30,41,59,0.85); color: #fff; font-size: 0.95rem; }
-.calculated { color: #f8fafc; }
-.highlight-score { font-weight: 700; color: #86efac; }
-.curve-error { color: #fda4af; font-weight: 700; }
-.delete-btn { border: none; background: #dc2626; color: white; border-radius: 6px; width: 32px; height: 32px; cursor: pointer; }
-.modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(2,6,23,0.6); z-index: 20; }
-.modal.show { display: flex; }
-.modal-content { width: 92%; max-width: 440px; background: #0f172a; border: 1px solid rgba(255,255,255,0.14); border-radius: 12px; }
-.modal-header, .modal-footer { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-.modal-footer { border-bottom: none; border-top: 1px solid rgba(255,255,255,0.1); justify-content: flex-end; gap: 8px; }
-.modal-body { padding: 16px; }
-.modal-body input { width: 100%; }
-@media (max-width: 1000px) {
-  .header { flex-direction: column; align-items: stretch; }
-  .formula-wrap, .formula-input { min-width: 100%; }
+  }catch(e){}
 }
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div class=&quot;app-container&quot;&gt;
-  &lt;header class=&quot;header&quot;&gt;
-    &lt;div&gt;
-      &lt;h1&gt;Curving Tool&lt;/h1&gt;
-      &lt;p class=&quot;subtitle&quot;&gt;Formula-Based Grading Curve Calculator&lt;/p&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;class-selector-container&quot;&gt;
-      &lt;select id=&quot;classSelector&quot; class=&quot;class-selector&quot;&gt;&lt;/select&gt;
-      &lt;button id=&quot;renameClassBtn&quot; class=&quot;btn btn-secondary btn-icon&quot; title=&quot;Rename Class&quot;&gt;✎&lt;/button&gt;
-      &lt;button id=&quot;addClassBtn&quot; class=&quot;btn btn-secondary btn-icon&quot; title=&quot;Add Class&quot;&gt;＋&lt;/button&gt;
-      &lt;button id=&quot;deleteClassBtn&quot; class=&quot;btn btn-danger&quot; title=&quot;Delete Class&quot;&gt;Delete Class&lt;/button&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;actions&quot;&gt;
-      &lt;button id=&quot;addStudentBtn&quot; class=&quot;btn&quot;&gt;Add Student&lt;/button&gt;
-      &lt;div class=&quot;settings-group&quot;&gt;
-        &lt;div class=&quot;input-group&quot;&gt;
-          &lt;label for=&quot;maxMcqInput&quot;&gt;Max MCQ&lt;/label&gt;
-          &lt;input type=&quot;number&quot; id=&quot;maxMcqInput&quot; value=&quot;40&quot; min=&quot;1&quot;&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;input-group&quot;&gt;
-          &lt;label for=&quot;scaledMcqInput&quot;&gt;Scaled MCQ&lt;/label&gt;
-          &lt;input type=&quot;number&quot; id=&quot;scaledMcqInput&quot; value=&quot;52&quot; min=&quot;1&quot;&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;input-group&quot;&gt;
-          &lt;label for=&quot;maxFrqInput&quot;&gt;Max FRQ&lt;/label&gt;
-          &lt;input type=&quot;number&quot; id=&quot;maxFrqInput&quot; value=&quot;48&quot; min=&quot;1&quot;&gt;
-        &lt;/div&gt;
-        &lt;div class=&quot;input-group&quot;&gt;
-          &lt;label for=&quot;maxRawScoreInput&quot;&gt;Max Raw Score&lt;/label&gt;
-          &lt;input type=&quot;number&quot; id=&quot;maxRawScoreInput&quot; value=&quot;100&quot; min=&quot;1&quot;&gt;
-        &lt;/div&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;formula-wrap&quot;&gt;
-        &lt;label for=&quot;curveFormulaInput&quot;&gt;Curve Formula (Excel-style)&lt;/label&gt;
-        &lt;input type=&quot;text&quot; id=&quot;curveFormulaInput&quot; class=&quot;formula-input&quot; value=&quot;=RAW_PCT&quot; placeholder=&quot;=ROUND(RAW_PCT*1.08,1)&quot;&gt;
-        &lt;div id=&quot;formulaStatus&quot; class=&quot;formula-status&quot;&gt;&lt;/div&gt;
-      &lt;/div&gt;
-      &lt;div class=&quot;input-group&quot;&gt;
-        &lt;label for=&quot;assignmentNameInput&quot;&gt;Assignment Name&lt;/label&gt;
-        &lt;input type=&quot;text&quot; id=&quot;assignmentNameInput&quot; class=&quot;assignment-input&quot; placeholder=&quot;e.g. Unit 3 Test&quot;&gt;
-      &lt;/div&gt;
-      &lt;button id=&quot;saveAssignmentBtn&quot; class=&quot;btn&quot;&gt;Save Assignment&lt;/button&gt;
-      &lt;button id=&quot;resetDataBtn&quot; class=&quot;btn btn-secondary&quot; title=&quot;Reset Current Class&quot;&gt;Reset&lt;/button&gt;
-      &lt;button id=&quot;exportCsvBtn&quot; class=&quot;btn btn-secondary&quot; title=&quot;Export to CSV&quot;&gt;Export CSV&lt;/button&gt;
-      &lt;div id=&quot;saveStatus&quot; class=&quot;save-status&quot;&gt;&lt;/div&gt;
-    &lt;/div&gt;
-  &lt;/header&gt;
 
-  &lt;div class=&quot;table-container&quot;&gt;
-    &lt;table id=&quot;gradesTable&quot;&gt;
-      &lt;thead&gt;
-        &lt;tr&gt;
-          &lt;th style=&quot;width: 50px;&quot;&gt;#&lt;/th&gt;
-          &lt;th style=&quot;width: 250px;&quot;&gt;Student Name&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;MCQ Score&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;FRQ Score&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;Scaled MCQ&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;Raw Score&lt;/th&gt;
-          &lt;th style=&quot;width: 112px;&quot;&gt;Raw %&lt;/th&gt;
-          &lt;th style=&quot;width: 128px;&quot;&gt;Curved Score (%)&lt;/th&gt;
-          &lt;th style=&quot;width: 70px;&quot;&gt;Actions&lt;/th&gt;
-        &lt;/tr&gt;
-      &lt;/thead&gt;
-      &lt;tbody id=&quot;studentList&quot;&gt;&lt;/tbody&gt;
-    &lt;/table&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
+function getClassData(){
+  try{const r=localStorage.getItem(CLSKEY);const d=JSON.parse(r);return (d&amp;&amp;d.classes)||{}}catch(e){return {}}
+}
 
-&lt;div id=&quot;addStudentModal&quot; class=&quot;modal&quot;&gt;
-  &lt;div class=&quot;modal-content&quot;&gt;
-    &lt;div class=&quot;modal-header&quot;&gt;
-      &lt;h2&gt;Add Student&lt;/h2&gt;
-      &lt;button class=&quot;btn btn-secondary close-modal&quot;&gt;Close&lt;/button&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;modal-body&quot;&gt;
-      &lt;div class=&quot;input-group&quot;&gt;
-        &lt;label for=&quot;newStudentName&quot;&gt;Student Name&lt;/label&gt;
-        &lt;input type=&quot;text&quot; id=&quot;newStudentName&quot; placeholder=&quot;e.g. John Doe&quot; autocomplete=&quot;off&quot;&gt;
-      &lt;/div&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;modal-footer&quot;&gt;
-      &lt;button class=&quot;btn btn-secondary cancel-modal&quot;&gt;Cancel&lt;/button&gt;
-      &lt;button id=&quot;confirmAddStudent&quot; class=&quot;btn&quot;&gt;Add&lt;/button&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
+window.addEventListener(&#x27;storage&#x27;,e=&gt;{if(e.key===CLSKEY){loadStudents().then(render)}});
+window.addEventListener(&#x27;message&#x27;,e=&gt;{if(e.data===&#x27;classRotatorData:changed&#x27;){loadStudents().then(render)}});
 
-&lt;script&gt;
-const SUPABASE_URL = &#x27;https://cabjyjqbfnntcdqqmjhu.supabase.co&#x27;;
-const SUPABASE_ANON_KEY = &#x27;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNhYmp5anFiZm5udGNkcXFtamh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMDY5NzgsImV4cCI6MjEwNTY4Mjk3OH0.2tpKcvCwVT7WM-30g6uCFC_5cUULkq3CghwgRHPjAAk&#x27;;
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-document.addEventListener(&#x27;DOMContentLoaded&#x27;, async () =&gt; {
-  const classSelector = document.getElementById(&#x27;classSelector&#x27;);
-  const studentListEl = document.getElementById(&#x27;studentList&#x27;);
-  const addStudentBtn = document.getElementById(&#x27;addStudentBtn&#x27;);
-  const resetDataBtn = document.getElementById(&#x27;resetDataBtn&#x27;);
-  const exportCsvBtn = document.getElementById(&#x27;exportCsvBtn&#x27;);
-  const renameClassBtn = document.getElementById(&#x27;renameClassBtn&#x27;);
-  const addClassBtn = document.getElementById(&#x27;addClassBtn&#x27;);
-  const deleteClassBtn = document.getElementById(&#x27;deleteClassBtn&#x27;);
-  const maxMcqInput = document.getElementById(&#x27;maxMcqInput&#x27;);
-  const scaledMcqInput = document.getElementById(&#x27;scaledMcqInput&#x27;);
-  const maxFrqInput = document.getElementById(&#x27;maxFrqInput&#x27;);
-  const maxRawScoreInput = document.getElementById(&#x27;maxRawScoreInput&#x27;);
-  const curveFormulaInput = document.getElementById(&#x27;curveFormulaInput&#x27;);
-  const formulaStatus = document.getElementById(&#x27;formulaStatus&#x27;);
-  const assignmentNameInput = document.getElementById(&#x27;assignmentNameInput&#x27;);
-  const saveAssignmentBtn = document.getElementById(&#x27;saveAssignmentBtn&#x27;);
-  const saveStatus = document.getElementById(&#x27;saveStatus&#x27;);
-  const modal = document.getElementById(&#x27;addStudentModal&#x27;);
-  const closeModalBtn = document.querySelector(&#x27;.close-modal&#x27;);
-  const cancelModalBtn = document.querySelector(&#x27;.cancel-modal&#x27;);
-  const confirmAddBtn = document.getElementById(&#x27;confirmAddStudent&#x27;);
-  const newStudentNameInput = document.getElementById(&#x27;newStudentName&#x27;);
-  const STORAGE_KEY = &#x27;curving_formula_app_data_v1&#x27;;
-  const ROTATOR_STORAGE_KEY = &#x27;classRotatorData&#x27;;
-  let currentClass = &#x27;class1&#x27;;
-  let supabaseSyncEnabled = false;
-  let appData = {
-    class1: {
-      label: &#x27;APP1 (Class 1)&#x27;,
-      settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: &#x27;=RAW_PCT&#x27;, assignmentName: &#x27;&#x27; },
-      assignments: [],
-      students: []
-    },
-    class2: {
-      label: &#x27;APPC-M (Class 2)&#x27;,
-      settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: &#x27;=RAW_PCT&#x27;, assignmentName: &#x27;&#x27; },
-      assignments: [],
-      students: []
-    }
-  };
+function applyLoad(){
+  if(!ab.length)ab=JSON.parse(JSON.stringify(BANDS));
+  if(!Object.keys(cs).length)CATS.forEach(c=&gt;cs[c.id]={en:true,mx:c.max,sc:c.scale});
+}
 
-  init();
+function migAndInit(){
+  let mig=false;
+  Object.keys(savedScores).forEach(k=&gt;{const v=savedScores[k];if(v&amp;&amp;typeof v===&#x27;object&#x27;&amp;&amp;(&#x27;mcq&#x27;in v||&#x27;fib&#x27;in v||&#x27;sa&#x27;in v||&#x27;frq&#x27;in v)&amp;&amp;!(&#x27;ap&#x27;in v)){const c={mcq:v.mcq||&#x27;&#x27;,fib:v.fib||&#x27;&#x27;,sa:v.sa||&#x27;&#x27;,frq:v.frq||&#x27;&#x27;};savedScores[k]={ap:Object.assign({},c),formula:Object.assign({},c)};mig=true}});
+  if(mig)save();
+  applyLoad();
+}
 
-  async function init() {
-    await loadStudentsFromJSON();
-    loadData();
-    await loadSupabaseState();
-    syncFromRotatorData();
-    pruneRedundantClasses();
-    setupEventListeners();
-    syncUIWithState();
-    supabaseSyncEnabled = true;
+function load(){
+  try{const r=localStorage.getItem(KEY);if(r){const d=JSON.parse(r);cls=d.cls||&#x27;&#x27;;cs=d.cs||{};ab=d.ab||[];fm=d.fm||&#x27;=RAW_PCT&#x27;;mr=d.mr||100;savedScores=d.scores||{};orders=d.orders||{}}}catch(e){}
+  // Prefer server copy (survives browser clearing / cross-browser) if present
+  try{
+    fetch(&#x27;/api/curve&#x27;).then(r=&gt;r.json()).then(s=&gt;{
+      if(!s||!s.scores||!Object.keys(s.scores).length){migAndInit();render();return}
+      cls=s.cls||cls;cs=s.cs||cs;ab=s.ab||ab;fm=s.fm||fm;mr=s.mr||mr;savedScores=s.scores||{};orders=s.orders||orders;
+      save();migAndInit();render();
+    }).catch(()=&gt;migAndInit());
+  }catch(e){migAndInit()}
+}
+
+function save(){localStorage.setItem(KEY,JSON.stringify({cls,cs,ab,fm,mr,scores:savedScores,orders}));
+  try{fetch(&#x27;/api/curve&#x27;,{method:&#x27;POST&#x27;,headers:{&#x27;Content-Type&#x27;:&#x27;application/json&#x27;},body:JSON.stringify({cls,cs,ab,fm,mr,scores:savedScores,orders})}).catch(()=&gt;{})}catch(e){}
+}
+
+function toast(m){$(&#x27;toast&#x27;).textContent=m;$(&#x27;toast&#x27;).style.display=&#x27;block&#x27;;setTimeout(()=&gt;$(&#x27;toast&#x27;).style.display=&#x27;none&#x27;,2500)}
+
+async function loadStudents(){
+  await initClassData();
+  const classes=getClassData();
+  const names=Object.keys(classes);
+  $(&#x27;classSelector&#x27;).innerHTML=&#x27;&#x27;;
+  if(!names.length){$(&#x27;classSelector&#x27;).innerHTML=&#x27;&lt;option&gt;No classes&lt;/option&gt;&#x27;;st=[];render();return}
+  names.forEach(n=&gt;$(&#x27;classSelector&#x27;).innerHTML+=&#x27;&lt;option value=&quot;&#x27;+n+&#x27;&quot;&gt;&#x27;+n+&#x27;&lt;/option&gt;&#x27;);
+  if(!cls||!names.includes(cls))cls=names[0];
+  $(&#x27;classSelector&#x27;).value=cls;
+  st=classes[cls].map(s=&gt;{
+    const m=(savedScores[cls+&#x27;_&#x27;+s.id]||{})[mode]||{};
+    return{
+      id:s.id||&#x27;s_&#x27;+Math.random().toString(36).slice(2,9),
+      name:s.name||s,
+      mcq:m.mcq||&#x27;&#x27;,fib:m.fib||&#x27;&#x27;,sa:m.sa||&#x27;&#x27;,frq:m.frq||&#x27;&#x27;
+    };
+  });
+  // Apply saved manual order for this class (students not listed keep their roster order at the end)
+  const ord=orders&amp;&amp;orders[cls];
+  if(Array.isArray(ord)&amp;&amp;ord.length){
+    const pos={};ord.forEach((id,i)=&gt;pos[id]=i);
+    st.sort((a,b)=&gt;{
+      const pa=pos[a.id]!==undefined?pos[a.id]:9999;
+      const pb=pos[b.id]!==undefined?pos[b.id]:9999;
+      return pa-pb;
+    });
   }
+}
 
-  async function loadStudentsFromJSON() {
-    try {
-      const response = await fetch(&#x27;students_data.json?t=&#x27; + Date.now());
-      if (!response.ok) throw new Error(&#x27;Failed to load students_data.json&#x27;);
-      const data = await response.json();
-      if (!data || !data.classes) return;
-      Object.keys(data.classes).forEach(className =&gt; {
-        const classId = makeClassId(className);
-        if (appData[classId]) return;
-        appData[classId] = {
-          label: className,
-          sourceClassName: className,
-          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: &#x27;=RAW_PCT&#x27;, assignmentName: &#x27;&#x27; },
-          assignments: [],
-          students: []
+function loadStudentScores(){
+  st.forEach(s=&gt;{
+    const m=(savedScores[cls+&#x27;_&#x27;+s.id]||{})[mode]||{};
+    s.mcq=m.mcq||&#x27;&#x27;;s.fib=m.fib||&#x27;&#x27;;s.sa=m.sa||&#x27;&#x27;;s.frq=m.frq||&#x27;&#x27;;
+  });
+}
+
+function render(){renderCats();renderTable();renderLegend();$(&#x27;maxRaw&#x27;).value=mr;$(&#x27;formulaInput&#x27;).value=fm}
+
+function renderToggle(){
+  CATS.forEach(cat=&gt;{
+    const en=cs[cat.id]&amp;&amp;cs[cat.id].en!==false;
+    document.querySelectorAll(&#x27;input[data-cat=&quot;&#x27;+cat.id+&#x27;&quot;]&#x27;).forEach(inp=&gt;{
+      inp.closest(&#x27;td&#x27;).style.display=en?&#x27;&#x27;:&#x27;none&#x27;;
+    });
+  });
+}
+
+function renderCats(){
+  const c=$(&#x27;catToggles&#x27;);c.innerHTML=&#x27;&#x27;;
+  CATS.forEach(cat=&gt;{
+    const s=cs[cat.id]||{};const en=s.en!==false;
+    const w=document.createElement(&#x27;div&#x27;);w.className=&#x27;cat-wrap&#x27;;
+    const t=document.createElement(&#x27;span&#x27;);t.className=&#x27;cat-toggle&#x27;+(en?&#x27; enabled&#x27;:&#x27;&#x27;);
+    t.innerHTML=&#x27;&lt;span class=&quot;cat-dot&quot; style=&quot;background:&#x27;+cat.color+&#x27;&quot;&gt;&lt;/span&gt;&lt;span class=&quot;cat-label&quot;&gt;&#x27;+cat.id.toUpperCase()+&#x27;&lt;/span&gt;&#x27;;
+    t.onclick=()=&gt;{cs[cat.id].en=!cs[cat.id].en;save();t.className=&#x27;cat-toggle&#x27;+(cs[cat.id].en!==false?&#x27; enabled&#x27;:&#x27;&#x27;);renderToggle();updateCalcRows()};
+    const m=document.createElement(&#x27;input&#x27;);m.className=&#x27;cat-input&#x27;;m.value=s.mx||cat.max;
+    m.oninput=()=&gt;{cs[cat.id].mx=parseFloat(m.value)||0;save();updateCalcRows()};
+    w.appendChild(t);w.appendChild(m);
+    if(cat.sc){const sc=document.createElement(&#x27;input&#x27;);sc.className=&#x27;cat-input&#x27;;sc.value=s.sc||cat.scale;sc.oninput=()=&gt;{cs[cat.id].sc=parseFloat(sc.value)||0;save();updateCalcRows()};w.appendChild(sc)}
+    c.appendChild(w);
+  });
+}
+
+function getActive(){return CATS.filter(c=&gt;cs[c.id]&amp;&amp;cs[c.id].en!==false)}
+
+function calc(s){
+  const a=getActive();let raw=0,scMcq=0;
+  a.forEach(cat=&gt;{
+    const v=parseFloat(s[cat.id]||0)||0,mx=cs[cat.id].mx||cat.max;
+    if(cat.sc){scMcq=(v/mx)*(cs[cat.id].sc||cat.scale)}else{raw+=v}
+  });
+  raw+=scMcq;
+  const pct=mr&gt;0?(raw/mr)*100:0;
+  return{raw,pct,scMcq};
+}
+
+function calcAP(p){
+  if(!p||p&lt;=0)return{cv:null,ap:null};
+  if(p&gt;=100)return{cv:100,ap:5};
+  let b=ab[ab.length-1];
+  for(const x of ab){if(p&gt;=x.rMin&amp;&amp;p&lt;=x.rMax){b=x;break}}
+  const w=(b.rMax-b.rMin)||1;
+  return{cv:Math.max(0,Math.min(100,(p-b.rMin)/w*(b.cMax-b.cMin)+b.cMin)),ap:b.ap};
+}
+
+function evalF(f,ctx){
+  let s=String(f||&#x27;&#x27;).trim();if(!s)return{v:null,e:&#x27;Empty&#x27;};
+  if(s.startsWith(&#x27;=&#x27;))s=s.slice(1);s=s.toUpperCase();
+  try{
+    const fn=new Function(&#x27;RAW&#x27;,&#x27;RAW_PCT&#x27;,&#x27;MCQ&#x27;,&#x27;FIB&#x27;,&#x27;SA&#x27;,&#x27;FRQ&#x27;,&#x27;MAX_RAW&#x27;,&#x27;ROUND&#x27;,&#x27;MIN&#x27;,&#x27;MAX&#x27;,&#x27;IF&#x27;,&#x27;ABS&#x27;,&#x27;SQRT&#x27;,&#x27;SUM&#x27;,&#x27;AVG&#x27;,&#x27;return &#x27;+s);
+    const v=fn(ctx.raw,ctx.pct,ctx.mcq||0,ctx.fib||0,ctx.sa||0,ctx.frq||0,mr,
+      (n,d=0)=&gt;{const p=Math.pow(10,d);return Math.round(n*p)/p},
+      (...a)=&gt;Math.min(...a),(...a)=&gt;Math.max(...a),(c,a,b)=&gt;c?a:b,x=&gt;Math.abs(x),x=&gt;Math.sqrt(x),(...a)=&gt;a.reduce((x,y)=&gt;x+y,0),(...a)=&gt;a.length?a.reduce((x,y)=&gt;x+y,0)/a.length:0);
+    return Number.isFinite(v)?{v,v,e:null}:{v:null,e:&#x27;Error&#x27;};
+  }catch(e){return{v:null,e:&#x27;Error&#x27;}}
+}
+
+function updateCalcRows(){
+  const bid=mode===&#x27;ap&#x27;?&#x27;apBody&#x27;:&#x27;formulaBody&#x27;;
+  const body=$(bid);
+  st.forEach((s,i)=&gt;{
+    const row=body.children[i];if(!row)return;
+    const c=calc(s);
+    const rr=row.querySelector(&#x27;[data-c=&quot;raw&quot;]&#x27;);if(rr)rr.textContent=c.raw.toFixed(1);
+    const pp=row.querySelector(&#x27;[data-c=&quot;pct&quot;]&#x27;);if(pp)pp.textContent=c.pct.toFixed(1)+&#x27;%&#x27;;
+    const cv=row.querySelector(&#x27;[data-c=&quot;curve&quot;]&#x27;);
+    if(bid===&#x27;apBody&#x27;){
+      const ap=calcAP(c.pct);
+      if(cv)cv.textContent=ap.cv?ap.cv.toFixed(1)+&#x27;%&#x27;:&#x27;-&#x27;;
+      const bd=row.querySelector(&#x27;[data-c=&quot;ap&quot;] .ap-badge&#x27;);if(bd){bd.className=&#x27;ap-badge ap-&#x27;+(ap.ap||1);bd.textContent=ap.ap||&#x27;-&#x27;}
+    }else{
+      const fr=evalF(fm,c);
+      if(cv){cv.textContent=fr.v?fr.v.toFixed(1)+&#x27;%&#x27;:(fr.e?&#x27;ERR&#x27;:&#x27;-&#x27;);cv.className=fr.e?&#x27;col-error&#x27;:&#x27;col-highlight&#x27;}
+    }
+  });
+}
+
+function renderTable(onlyActive){
+  const activeTabs=onlyActive?[mode===&#x27;ap&#x27;?&#x27;apBody&#x27;:&#x27;formulaBody&#x27;]:[&#x27;apBody&#x27;,&#x27;formulaBody&#x27;];
+  activeTabs.forEach(bid=&gt;{
+    const b=$(bid);b.innerHTML=&#x27;&#x27;;
+    st.forEach((s,i)=&gt;{
+      const c=calc(s);const tr=document.createElement(&#x27;tr&#x27;);
+      let h=&#x27;&lt;td&gt;⋮ &#x27;+ (i+1)+&#x27;&lt;/td&gt;&lt;td class=&quot;col-name&quot;&gt;&#x27;+s.name+&#x27;&lt;/td&gt;&#x27;;
+      CATS.forEach(cat=&gt;{const en=cs[cat.id]&amp;&amp;cs[cat.id].en!==false;h+=&#x27;&lt;td class=&quot;col-input&quot; style=&quot;display:&#x27;+(!en?&#x27;none&#x27;:&#x27;&#x27;)+&#x27;&quot;&gt;&lt;input data-id=&quot;&#x27;+s.id+&#x27;&quot; data-cat=&quot;&#x27;+cat.id+&#x27;&quot; value=&quot;&#x27;+(s[cat.id]||&#x27;&#x27;)+&#x27;&quot;&gt;&lt;/td&gt;&#x27;});
+      if(bid===&#x27;apBody&#x27;){
+        const ap=calcAP(c.pct);h+=&#x27;&lt;td class=&quot;col-highlight&quot; data-c=&quot;raw&quot;&gt;&#x27;+c.raw.toFixed(1)+&#x27;&lt;/td&gt;&lt;td class=&quot;col-highlight&quot; data-c=&quot;pct&quot;&gt;&#x27;+c.pct.toFixed(1)+&#x27;%&lt;/td&gt;&lt;td class=&quot;col-highlight&quot; data-c=&quot;curve&quot;&gt;&#x27;+(ap.cv?ap.cv.toFixed(1)+&#x27;%&#x27;:&#x27;-&#x27;)+&#x27;&lt;/td&gt;&lt;td data-c=&quot;ap&quot;&gt;&lt;span class=&quot;ap-badge ap-&#x27;+(ap.ap||1)+&#x27;&quot;&gt;&#x27;+(ap.ap||&#x27;-&#x27;)+&#x27;&lt;/span&gt;&lt;/td&gt;&lt;td&gt;&lt;button class=&quot;delete-btn&quot; data-id=&quot;&#x27;+s.id+&#x27;&quot;&gt;×&lt;/button&gt;&lt;/td&gt;&#x27;;
+      }else{
+        const r=evalF(fm,c);h+=&#x27;&lt;td class=&quot;col-highlight&quot; data-c=&quot;raw&quot;&gt;&#x27;+c.raw.toFixed(1)+&#x27;&lt;/td&gt;&lt;td class=&quot;col-highlight&quot; data-c=&quot;pct&quot;&gt;&#x27;+c.pct.toFixed(1)+&#x27;%&lt;/td&gt;&lt;td class=&quot;&#x27;+(r.e?&#x27;&#x27;:&#x27;col-highlight&#x27;)+&#x27;&quot; data-c=&quot;curve&quot;&gt;&#x27;+(r.v?r.v.toFixed(1)+&#x27;%&#x27;:(r.e?&#x27;ERR&#x27;:&#x27;-&#x27;))+&#x27;&lt;/td&gt;&lt;td&gt;&lt;button class=&quot;delete-btn&quot; data-id=&quot;&#x27;+s.id+&#x27;&quot;&gt;×&lt;/button&gt;&lt;/td&gt;&#x27;;
+      }
+      tr.innerHTML=h;
+      tr.dataset.stid=s.id;
+      tr.querySelectorAll(&#x27;input[data-cat]&#x27;).forEach(inp=&gt;{
+        inp.oninput=()=&gt;{
+          const id=inp.dataset.id,cat=inp.dataset.cat,stu=st.find(x=&gt;x.id===id);
+          if(stu){stu[cat]=inp.value;const k=cls+&#x27;_&#x27;+id;savedScores[k]=savedScores[k]||{};savedScores[k][mode]={mcq:stu.mcq,fib:stu.fib,sa:stu.sa,frq:stu.frq};save();updateCalcRows()}
         };
       });
-    } catch (error) {
-      console.error(&#x27;Error loading students_data.json:&#x27;, error);
-    }
-  }
-
-  async function loadSupabaseState() {
-    try {
-      const { data, error } = await supabaseClient.from(&#x27;curve_state&#x27;).select(&#x27;*&#x27;);
-      if (error) throw error;
-      if (!data || !data.length) return;
-      data.forEach(row =&gt; {
-        if (!row.class_id || !row.state) return;
-        const existing = appData[row.class_id];
-        if (!existing) {
-          appData[row.class_id] = row.state;
-          return;
-        }
-        Object.assign(existing, row.state);
-        if (!existing.sourceClassName) existing.sourceClassName = null;
-        if (!Array.isArray(existing.assignments)) existing.assignments = [];
-        if (!Array.isArray(existing.students)) existing.students = [];
-      });
-    } catch (error) {
-      console.error(&#x27;Error loading state from Supabase:&#x27;, error);
-    }
-  }
-
-  function pruneRedundantClasses() {
-    const keys = Object.keys(appData);
-    const seenLabels = new Set();
-    const toDelete = [];
-    keys.forEach(k =&gt; {
-      const lbl = appData[k].label;
-      if (lbl === &#x27;APP1 (Class 1)&#x27; || lbl === &#x27;APPC-M (Class 2)&#x27;) {
-        toDelete.push(k);
-      } else if (seenLabels.has(lbl)) {
-        toDelete.push(k);
-      } else {
-        seenLabels.add(lbl);
-      }
+      bindRowDrag(tr);
+      b.appendChild(tr);
     });
-    if (toDelete.length &lt; keys.length) {
-      toDelete.forEach(k =&gt; delete appData[k]);
-    }
-    if (!appData[currentClass]) {
-      currentClass = Object.keys(appData)[0];
-    }
-    saveData();
-  }
+  });
+}
 
-  function getRotatorClasses() {
-    try {
-      const raw = localStorage.getItem(ROTATOR_STORAGE_KEY);
-      if (!raw) return {};
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== &#x27;object&#x27; || !parsed.classes || typeof parsed.classes !== &#x27;object&#x27;) return {};
-      return parsed.classes;
-    } catch {
-      return {};
-    }
-  }
-
-  function toStudentRecord(item) {
-    if (typeof item === &#x27;string&#x27;) {
-      const name = item.trim();
-      if (!name) return null;
-      return { id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; };
-    }
-    if (item &amp;&amp; typeof item === &#x27;object&#x27; &amp;&amp; typeof item.name === &#x27;string&#x27;) {
-      const name = item.name.trim();
-      if (!name) return null;
-      return { id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; };
-    }
-    return null;
-  }
-
-  function makeClassId(name) {
-    const normalized = String(name)
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, &#x27;_&#x27;)
-      .replace(/^_+|_+$/g, &#x27;&#x27;);
-    return `rot_${normalized || generateId().slice(0, 8)}`;
-  }
-
-  function syncFromRotatorData() {
-    const classes = getRotatorClasses();
-    const classNames = Object.keys(classes);
-    if (!classNames.length) return;
-    classNames.forEach(className =&gt; {
-      const students = Array.isArray(classes[className]) ? classes[className].map(toStudentRecord).filter(Boolean) : [];
-      let existingId = Object.keys(appData).find(id =&gt;
-        appData[id].label === className || appData[id].sourceClassName === className
-      );
-      if (!existingId) {
-        const baseId = makeClassId(className);
-        let candidateId = baseId;
-        let suffix = 2;
-        while (appData[candidateId] &amp;&amp; appData[candidateId].sourceClassName !== className) {
-          candidateId = `${baseId}_${suffix}`;
-          suffix += 1;
-        }
-        existingId = candidateId;
-        appData[existingId] = {
-          label: className,
-          sourceClassName: className,
-          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: &#x27;=RAW_PCT&#x27;, assignmentName: &#x27;&#x27; },
-          assignments: [],
-          students: students
-        };
-        return;
-      }
-      appData[existingId].label = className;
-      appData[existingId].sourceClassName = className;
-      const hasManualGrades = appData[existingId].students.some(s =&gt; String(s.mcq).trim() !== &#x27;&#x27; || String(s.frq).trim() !== &#x27;&#x27;);
-      if (!hasManualGrades) {
-        appData[existingId].students = students;
-      }
-    });
-    if (!appData[currentClass]) {
-      currentClass = Object.keys(appData)[0];
-    }
-    saveData();
-  }
-
-  function loadData() {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        appData = { ...appData, ...parsed };
-        Object.keys(appData).forEach(key =&gt; {
-          if (!appData[key].settings) appData[key].settings = { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: &#x27;=RAW_PCT&#x27;, assignmentName: &#x27;&#x27; };
-          if (!Object.prototype.hasOwnProperty.call(appData[key].settings, &#x27;formula&#x27;)) appData[key].settings.formula = &#x27;=RAW_PCT&#x27;;
-          if (!Object.prototype.hasOwnProperty.call(appData[key].settings, &#x27;assignmentName&#x27;)) appData[key].settings.assignmentName = &#x27;&#x27;;
-          if (!appData[key].label) appData[key].label = key;
-          if (!Object.prototype.hasOwnProperty.call(appData[key], &#x27;sourceClassName&#x27;)) appData[key].sourceClassName = null;
-          if (!Array.isArray(appData[key].assignments)) appData[key].assignments = [];
-          if (!Array.isArray(appData[key].students)) appData[key].students = [];
-        });
-        if (!appData[currentClass]) currentClass = Object.keys(appData)[0];
-      } catch {
-        loadDefaults();
-      }
-    } else {
-      loadDefaults();
-    }
-  }
-
-  function loadDefaults() {
-    const rotatorClasses = getRotatorClasses();
-    const classNames = Object.keys(rotatorClasses);
-    if (classNames.length) {
-      appData = {};
-      classNames.forEach(className =&gt; {
-        const classId = makeClassId(className);
-        const students = (rotatorClasses[className] || []).map(toStudentRecord).filter(Boolean);
-        appData[classId] = {
-          label: className,
-          sourceClassName: className,
-          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: &#x27;=RAW_PCT&#x27;, assignmentName: &#x27;&#x27; },
-          assignments: [],
-          students
-        };
-      });
-      currentClass = Object.keys(appData)[0];
-      saveData();
-      return;
-    }
-    appData.class1.sourceClassName = null;
-    appData.class2.sourceClassName = null;
-    appData.class1.students = [];
-    appData.class2.students = [];
-    saveData();
-  }
-
-  async function loadClassDefaults(cls) {
-    const sourceClassName = appData[cls]?.sourceClassName;
-    if (sourceClassName) {
-      const rotatorClasses = getRotatorClasses();
-      const roster = Array.isArray(rotatorClasses[sourceClassName]) ? rotatorClasses[sourceClassName] : [];
-      appData[cls].students = roster.map(toStudentRecord).filter(Boolean);
-      appData[cls].settings.formula = &#x27;=RAW_PCT&#x27;;
-      saveData();
-      return;
-    }
-    appData[cls].students = await loadStudentsForClass(sourceClassName || appData[cls].label);
-    appData[cls].settings.formula = &#x27;=RAW_PCT&#x27;;
-    saveData();
-  }
-
-  async function loadStudentsForClass(className) {
-    try {
-      const response = await fetch(&#x27;students_data.json?t=&#x27; + Date.now());
-      if (!response.ok) throw new Error(&#x27;Failed to load students_data.json&#x27;);
-      const data = await response.json();
-      const roster = (data &amp;&amp; data.classes &amp;&amp; data.classes[className]) || [];
-      return roster.map(toStudentRecord).filter(Boolean);
-    } catch (error) {
-      console.error(&#x27;Error loading students_data.json:&#x27;, error);
-      return [];
-    }
-  }
-
-  function syncUIWithState() {
-    const state = appData[currentClass];
-    maxMcqInput.value = state.settings.maxMcq;
-    scaledMcqInput.value = state.settings.scaledMcq;
-    maxFrqInput.value = state.settings.maxFrq;
-    maxRawScoreInput.value = state.settings.maxRaw;
-    curveFormulaInput.value = state.settings.formula || &#x27;=RAW_PCT&#x27;;
-    assignmentNameInput.value = state.settings.assignmentName || &#x27;&#x27;;
-    renderClassSelector();
-    validateFormulaUI();
-    renderTable();
-  }
-
-  async function saveData() {
-    appData[currentClass].settings = {
-      maxMcq: parseFloat(maxMcqInput.value) || 40,
-      scaledMcq: parseFloat(scaledMcqInput.value) || 52,
-      maxFrq: parseFloat(maxFrqInput.value) || 48,
-      maxRaw: parseFloat(maxRawScoreInput.value) || 100,
-      formula: curveFormulaInput.value.trim() || &#x27;=RAW_PCT&#x27;,
-      assignmentName: assignmentNameInput.value.trim()
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-    syncOrderToOtherApp(&#x27;ap_curving_local_data_v1&#x27;);
-    if (supabaseSyncEnabled) await saveSupabaseState();
-  }
-
-  async function saveSupabaseState() {
-    try {
-      const updates = Object.entries(appData).map(([class_id, stateData]) =&gt; ({
-        class_id,
-        state: stateData,
-        updated_at: new Date().toISOString()
-      }));
-      const { error } = await supabaseClient.from(&#x27;curve_state&#x27;).upsert(updates, { onConflict: [&#x27;class_id&#x27;] });
-      if (error) console.error(&#x27;Error saving state to Supabase:&#x27;, error);
-    } catch (error) {
-      console.error(&#x27;Error saving state to Supabase:&#x27;, error);
-    }
-  }
-
-  function syncOrderToOtherApp(targetKey) {
-    try {
-      const saved = localStorage.getItem(targetKey);
-      if (!saved) return;
-      const otherData = JSON.parse(saved);
-      let changed = false;
-      Object.keys(appData).forEach(classId =&gt; {
-        if (otherData[classId] &amp;&amp; otherData[classId].students &amp;&amp; appData[classId].students) {
-          const newOrder = [];
-          const sourceStudents = appData[classId].students;
-          const targetStudents = otherData[classId].students;
-          sourceStudents.forEach(s =&gt; {
-            const matched = targetStudents.find(ts =&gt; ts.id === s.id || ts.name === s.name);
-            if (matched) newOrder.push(matched);
-            else newOrder.push({ id: s.id, name: s.name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; });
-          });
-          if (JSON.stringify(targetStudents.map(ts=&gt;ts.name)) !== JSON.stringify(newOrder.map(n=&gt;n.name))) {
-            otherData[classId].students = newOrder;
-            changed = true;
-          }
-        }
-      });
-      if (changed) {
-        localStorage.setItem(targetKey, JSON.stringify(otherData));
-      }
-    } catch {}
-  }
-
-  function renderClassSelector() {
-    classSelector.innerHTML = &#x27;&#x27;;
-    Object.keys(appData).forEach(key =&gt; {
-      const opt = document.createElement(&#x27;option&#x27;);
-      opt.value = key;
-      opt.textContent = appData[key].label || key;
-      if (key === currentClass) opt.selected = true;
-      classSelector.appendChild(opt);
-    });
-    deleteClassBtn.disabled = Object.keys(appData).length &lt;= 1;
-  }
-
-  function generateId() {
-    if (crypto &amp;&amp; crypto.randomUUID) return crypto.randomUUID();
-    return &#x27;id_&#x27; + Math.random().toString(36).slice(2);
-  }
-
-  function toNumber(v) {
-    const n = parseFloat(v);
-    return Number.isFinite(n) ? n : null;
-  }
-
-  function buildFormulaScope(ctx) {
-    const round = (n, d = 0) =&gt; {
-      const p = Math.pow(10, d);
-      return Math.round(n * p) / p;
-    };
-    const roundup = (n, d = 0) =&gt; {
-      const p = Math.pow(10, d);
-      return Math.sign(n) * Math.ceil(Math.abs(n) * p) / p;
-    };
-    const rounddown = (n, d = 0) =&gt; {
-      const p = Math.pow(10, d);
-      return Math.sign(n) * Math.floor(Math.abs(n) * p) / p;
-    };
-    return {
-      ...ctx,
-      IF: (c, a, b) =&gt; c ? a : b,
-      AND: (...args) =&gt; args.every(Boolean),
-      OR: (...args) =&gt; args.some(Boolean),
-      NOT: (x) =&gt; !x,
-      MIN: (...args) =&gt; Math.min(...args),
-      MAX: (...args) =&gt; Math.max(...args),
-      ABS: (x) =&gt; Math.abs(x),
-      SQRT: (x) =&gt; Math.sqrt(x),
-      ROUND: round,
-      ROUNDUP: roundup,
-      ROUNDDOWN: rounddown,
-      INT: (x) =&gt; Math.floor(x),
-      CEILING: (x, sig = 1) =&gt; Math.ceil(x / sig) * sig,
-      FLOOR: (x, sig = 1) =&gt; Math.floor(x / sig) * sig,
-      CEILING_MATH: (x, sig = 1) =&gt; Math.ceil(x / sig) * sig,
-      FLOOR_MATH: (x, sig = 1) =&gt; Math.floor(x / sig) * sig,
-      POWER: (x, y) =&gt; Math.pow(x, y),
-      MOD: (x, y) =&gt; x % y,
-      SUM: (...args) =&gt; args.reduce((a, b) =&gt; a + b, 0),
-      AVERAGE: (...args) =&gt; args.length ? args.reduce((a, b) =&gt; a + b, 0) / args.length : 0,
-      COUNT: (...args) =&gt; args.filter(x =&gt; Number.isFinite(x)).length,
-      COUNTA: (...args) =&gt; args.filter(x =&gt; x !== null &amp;&amp; x !== undefined &amp;&amp; x !== &#x27;&#x27;).length,
-      MEDIAN: (...args) =&gt; {
-        if (!args.length) return 0;
-        const s = [...args].sort((a, b) =&gt; a - b);
-        const m = Math.floor(s.length / 2);
-        return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
-      },
-      TRUNC: (x, d = 0) =&gt; {
-        const p = Math.pow(10, d);
-        return x &lt; 0 ? Math.ceil(x * p) / p : Math.floor(x * p) / p;
-      },
-      SIGN: (x) =&gt; Math.sign(x),
-      EXP: (x) =&gt; Math.exp(x),
-      LN: (x) =&gt; Math.log(x),
-      LOG: (x, base = 10) =&gt; Math.log(x) / Math.log(base),
-      LOG10: (x) =&gt; Math.log10(x),
-      SIN: (x) =&gt; Math.sin(x),
-      COS: (x) =&gt; Math.cos(x),
-      TAN: (x) =&gt; Math.tan(x),
-      ASIN: (x) =&gt; Math.asin(x),
-      ACOS: (x) =&gt; Math.acos(x),
-      ATAN: (x) =&gt; Math.atan(x),
-      MROUND: (x, m) =&gt; Math.round(x / m) * m,
-      RAND: () =&gt; Math.random(),
-      RANDBETWEEN: (a, b) =&gt; Math.floor(Math.random() * (b - a + 1)) + a,
-      IFERROR: (value, fallback) =&gt; {
-        if (value === null || value === undefined || Number.isNaN(value)) return fallback;
-        return value;
-      },
-      TRUE: true,
-      FALSE: false,
-      PI: Math.PI,
-      E: Math.E
-    };
-  }
-
-  function normalizeFormula(formula) {
-    let f = String(formula || &#x27;&#x27;).trim();
-    if (!f) return &#x27;&#x27;;
-    if (f.startsWith(&#x27;=&#x27;)) f = f.slice(1);
-    f = f.replace(/;/g, &#x27;,&#x27;);
-    f = f.replace(/(\d+(\.\d+)?)\s*%/g, &#x27;($1/100)&#x27;);
-    f = f.replace(/\^/g, &#x27;**&#x27;);
-    f = f.replace(/&lt;&gt;/g, &#x27;!=&#x27;);
-    f = f.replace(/(^|[^&lt;&gt;=!])=([^=])/g, &#x27;$1==$2&#x27;);
-    f = f.toUpperCase();
-    return f;
-  }
-
-  function evaluateCurveFormula(formula, ctx) {
-    const normalized = normalizeFormula(formula);
-    if (!normalized) return { value: null, error: &#x27;Formula is empty&#x27; };
-    if (/[^A-Z0-9_+\-*/().,&lt;&gt;=!%\s]/.test(normalized)) {
-      return { value: null, error: &#x27;Formula contains unsupported characters&#x27; };
-    }
-    try {
-      const scope = buildFormulaScope(ctx);
-      const argNames = Object.keys(scope);
-      const argVals = Object.values(scope);
-      const fn = Function(...argNames, `&quot;use strict&quot;; return (${normalized});`);
-      const value = fn(...argVals);
-      if (!Number.isFinite(value)) return { value: null, error: &#x27;Formula result is not a valid number&#x27; };
-      return { value, error: null };
-    } catch {
-      return { value: null, error: &#x27;Formula could not be parsed&#x27; };
-    }
-  }
-
-  function processStudentGrades(student) {
-    const mcq = toNumber(String(student.mcq).trim());
-    const frq = toNumber(String(student.frq).trim());
-    const state = appData[currentClass];
-    let scaledMcq = null;
-    let rawScore = null;
-    let rawPct = null;
-    let curve = null;
-    let curveError = null;
-    const hasMcq = mcq !== null;
-    const hasFrq = frq !== null;
-    if (hasMcq) {
-      scaledMcq = (mcq / (state.settings.maxMcq || 40)) * (state.settings.scaledMcq || 52);
-    }
-    if (hasMcq || hasFrq) {
-      rawScore = (scaledMcq || 0) + (hasFrq ? frq : 0);
-      rawPct = (rawScore / (state.settings.maxRaw || 100)) * 100;
-      const evalResult = evaluateCurveFormula(state.settings.formula || &#x27;=RAW_PCT&#x27;, {
-        RAW: rawScore,
-        RAW_PCT: rawPct,
-        MCQ: hasMcq ? mcq : 0,
-        FRQ: hasFrq ? frq : 0,
-        SCALED_MCQ: scaledMcq || 0,
-        MAX_MCQ: state.settings.maxMcq || 40,
-        SCALED_MCQ_MAX: state.settings.scaledMcq || 52,
-        MAX_FRQ: state.settings.maxFrq || 48,
-        MAX_RAW: state.settings.maxRaw || 100
-      });
-      curve = evalResult.value;
-      curveError = evalResult.error;
-    }
-    return { scaledMcq, rawScore, rawPct, curve, curveError };
-  }
-
-  function captureGradeInputFocus() {
-    const active = document.activeElement;
-    if (!active || active.tagName !== &#x27;INPUT&#x27;) return null;
-    if (!studentListEl.contains(active)) return null;
-    const id = active.dataset.id;
-    const field = active.dataset.field;
-    if (!id || !field) return null;
-    return {
-      id,
-      field,
-      start: typeof active.selectionStart === &#x27;number&#x27; ? active.selectionStart : null,
-      end: typeof active.selectionEnd === &#x27;number&#x27; ? active.selectionEnd : null
-    };
-  }
-
-  function restoreGradeInputFocus(focusInfo) {
-    if (!focusInfo) return;
-    const selector = `input[data-id=&quot;${focusInfo.id}&quot;][data-field=&quot;${focusInfo.field}&quot;]`;
-    const input = studentListEl.querySelector(selector);
-    if (!input) return;
-    input.focus();
-    if (focusInfo.start !== null &amp;&amp; focusInfo.end !== null) input.setSelectionRange(focusInfo.start, focusInfo.end);
-  }
-
-  function renderTable() {
-    const focusInfo = captureGradeInputFocus();
-    const state = appData[currentClass];
-    studentListEl.innerHTML = &#x27;&#x27;;
-    state.students.forEach((student, index) =&gt; {
-      const results = processStudentGrades(student);
-      const tr = document.createElement(&#x27;tr&#x27;);
-      tr.draggable = true;
-      tr.style.cursor = &#x27;move&#x27;;
-      
-      tr.addEventListener(&#x27;dragstart&#x27;, (e) =&gt; {
-        e.dataTransfer.setData(&#x27;text/plain&#x27;, index);
-        tr.style.opacity = &#x27;0.5&#x27;;
-      });
-      tr.addEventListener(&#x27;dragend&#x27;, () =&gt; {
-        tr.style.opacity = &#x27;1&#x27;;
-      });
-      tr.addEventListener(&#x27;dragover&#x27;, (e) =&gt; {
-        e.preventDefault();
-      });
-      tr.addEventListener(&#x27;drop&#x27;, (e) =&gt; {
-        e.preventDefault();
-        const fromIndex = parseInt(e.dataTransfer.getData(&#x27;text/plain&#x27;), 10);
-        const toIndex = index;
-        if (fromIndex !== toIndex &amp;&amp; !isNaN(fromIndex)) {
-          const state = appData[currentClass];
-          const movedStudent = state.students.splice(fromIndex, 1)[0];
-          state.students.splice(toIndex, 0, movedStudent);
-          saveData();
-          renderTable();
-        }
-      });
-
-      const scaledStr = results.scaledMcq !== null ? results.scaledMcq.toFixed(1) : &#x27;-&#x27;;
-      const rawStr = results.rawScore !== null ? results.rawScore.toFixed(1) : &#x27;-&#x27;;
-      const rawPctStr = results.rawPct !== null ? results.rawPct.toFixed(1) + &#x27;%&#x27; : &#x27;-&#x27;;
-      const curveStr = results.curve !== null ? results.curve.toFixed(1) + &#x27;%&#x27; : results.curveError ? &#x27;#ERR&#x27; : &#x27;-&#x27;;
-      const numTd = document.createElement(&#x27;td&#x27;);
-      numTd.className = &#x27;col-number&#x27;;
-      numTd.textContent = index + 1;
-      const nameTd = document.createElement(&#x27;td&#x27;);
-      nameTd.className = &#x27;col-name&#x27;;
-      nameTd.dataset.studentId = student.id;
-      nameTd.textContent = student.name;
-      nameTd.title = &#x27;Click to edit name&#x27;;
-      nameTd.style.cursor = &#x27;pointer&#x27;;
-      const mcqTd = document.createElement(&#x27;td&#x27;);
-      mcqTd.className = &#x27;td-input&#x27;;
-      const mcqInput = document.createElement(&#x27;input&#x27;);
-      mcqInput.type = &#x27;number&#x27;;
-      mcqInput.step = &#x27;0.5&#x27;;
-      mcqInput.min = &#x27;0&#x27;;
-      mcqInput.dataset.id = student.id;
-      mcqInput.dataset.field = &#x27;mcq&#x27;;
-      mcqInput.value = student.mcq;
-      mcqTd.appendChild(mcqInput);
-      const frqTd = document.createElement(&#x27;td&#x27;);
-      frqTd.className = &#x27;td-input&#x27;;
-      const frqInput = document.createElement(&#x27;input&#x27;);
-      frqInput.type = &#x27;number&#x27;;
-      frqInput.step = &#x27;0.5&#x27;;
-      frqInput.min = &#x27;0&#x27;;
-      frqInput.dataset.id = student.id;
-      frqInput.dataset.field = &#x27;frq&#x27;;
-      frqInput.value = student.frq;
-      frqTd.appendChild(frqInput);
-      const scaledTd = document.createElement(&#x27;td&#x27;);
-      scaledTd.className = &#x27;calculated&#x27;;
-      scaledTd.textContent = scaledStr;
-      const rawTd = document.createElement(&#x27;td&#x27;);
-      rawTd.className = &#x27;calculated highlight-score&#x27;;
-      rawTd.textContent = rawStr;
-      const rawPctTd = document.createElement(&#x27;td&#x27;);
-      rawPctTd.className = &#x27;calculated highlight-score&#x27;;
-      rawPctTd.textContent = rawPctStr;
-      const curveTd = document.createElement(&#x27;td&#x27;);
-      curveTd.className = results.curveError ? &#x27;curve-error&#x27; : &#x27;calculated highlight-score&#x27;;
-      curveTd.textContent = curveStr;
-      curveTd.title = results.curveError || &#x27;&#x27;;
-      const actionTd = document.createElement(&#x27;td&#x27;);
-      const deleteBtn = document.createElement(&#x27;button&#x27;);
-      deleteBtn.className = &#x27;delete-btn&#x27;;
-      deleteBtn.dataset.id = student.id;
-      deleteBtn.title = &#x27;Remove Student&#x27;;
-      deleteBtn.textContent = &#x27;✕&#x27;;
-      actionTd.appendChild(deleteBtn);
-      tr.append(numTd, nameTd, mcqTd, frqTd, scaledTd, rawTd, rawPctTd, curveTd, actionTd);
-      studentListEl.appendChild(tr);
-    });
-    restoreGradeInputFocus(focusInfo);
-  }
-
-  function validateFormulaUI() {
-    const state = appData[currentClass];
-    const probe = evaluateCurveFormula(state.settings.formula || &#x27;=RAW_PCT&#x27;, {
-      RAW: 72,
-      RAW_PCT: 72,
-      MCQ: 28,
-      FRQ: 35,
-      SCALED_MCQ: 37,
-      MAX_MCQ: state.settings.maxMcq || 40,
-      SCALED_MCQ_MAX: state.settings.scaledMcq || 52,
-      MAX_FRQ: state.settings.maxFrq || 48,
-      MAX_RAW: state.settings.maxRaw || 100
-    });
-    if (probe.error) {
-      formulaStatus.textContent = `Error: ${probe.error}`;
-      formulaStatus.style.color = &#x27;#fda4af&#x27;;
-    } else {
-      formulaStatus.textContent = &#x27;Variables: RAW, RAW_PCT, MCQ, FRQ, SCALED_MCQ, MAX_RAW, MAX_MCQ, MAX_FRQ | Functions: SQRT, IF, ROUND, MIN, MAX, LOG, LN&#x27;;
-      formulaStatus.style.color = &#x27;#a5b4fc&#x27;;
-    }
-  }
-
-  function setupEventListeners() {
-    classSelector.addEventListener(&#x27;change&#x27;, (e) =&gt; {
-      currentClass = e.target.value;
-      syncUIWithState();
-    });
-    window.addEventListener(&#x27;storage&#x27;, (e) =&gt; {
-      if (e.key === ROTATOR_STORAGE_KEY) {
-        syncFromRotatorData();
-        syncUIWithState();
-      } else if (e.key === STORAGE_KEY) {
-        loadData();
-        syncUIWithState();
-      }
-    });
-    studentListEl.addEventListener(&#x27;input&#x27;, (e) =&gt; {
-      if (e.target.tagName === &#x27;INPUT&#x27;) {
-        const id = e.target.dataset.id;
-        const field = e.target.dataset.field;
-        const val = e.target.value;
-        const state = appData[currentClass];
-        const student = state.students.find(s =&gt; s.id === id);
-        if (student) {
-          student[field] = val;
-          saveData();
-          updateRowDisplay(e.target.closest(&#x27;tr&#x27;), student);
-        }
-      }
-    });
-    studentListEl.addEventListener(&#x27;click&#x27;, (e) =&gt; {
-      const nameTd = e.target.closest(&#x27;td.col-name&#x27;);
-      if (nameTd) {
-        const id = nameTd.dataset.studentId;
-        const student = appData[currentClass].students.find(s =&gt; s.id === id);
-        if (student) startNameEdit(nameTd, student);
-      }
-      const deleteBtn = e.target.closest(&#x27;.delete-btn&#x27;);
-      if (deleteBtn) {
-        const id = deleteBtn.dataset.id;
-        const state = appData[currentClass];
-        state.students = state.students.filter(s =&gt; s.id !== id);
-        saveData();
-        renderTable();
-      }
-    });
-    [maxMcqInput, scaledMcqInput, maxFrqInput, maxRawScoreInput].forEach(input =&gt; {
-      input.addEventListener(&#x27;change&#x27;, () =&gt; {
-        saveData();
-        validateFormulaUI();
-        renderTable();
-      });
-    });
-    curveFormulaInput.addEventListener(&#x27;input&#x27;, () =&gt; {
-      saveData();
-      validateFormulaUI();
-      renderTable();
-    });
-    assignmentNameInput.addEventListener(&#x27;input&#x27;, () =&gt; {
-      saveData();
-    });
-    resetDataBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
-      if (confirm(&#x27;This will clear all entered grades and reset the student list for the current class. Continue?&#x27;)) {
-        loadClassDefaults(currentClass);
-        syncUIWithState();
-      }
-    });
-    addStudentBtn.addEventListener(&#x27;click&#x27;, showModal);
-    closeModalBtn.addEventListener(&#x27;click&#x27;, hideModal);
-    cancelModalBtn.addEventListener(&#x27;click&#x27;, hideModal);
-    document.addEventListener(&#x27;keydown&#x27;, (e) =&gt; { if (e.key === &#x27;Escape&#x27;) hideModal(); });
-    confirmAddBtn.addEventListener(&#x27;click&#x27;, handleAddStudent);
-    newStudentNameInput.addEventListener(&#x27;keypress&#x27;, (e) =&gt; { if (e.key === &#x27;Enter&#x27;) handleAddStudent(); });
-    saveAssignmentBtn.addEventListener(&#x27;click&#x27;, saveAssignmentSnapshot);
-    exportCsvBtn.addEventListener(&#x27;click&#x27;, exportToCSV);
-    renameClassBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
-      const newName = prompt(&#x27;Rename class:&#x27;, appData[currentClass].label || currentClass);
-      if (newName &amp;&amp; newName.trim()) {
-        appData[currentClass].label = newName.trim();
-        saveData();
-        renderClassSelector();
-      }
-    });
-    addClassBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
-      const name = prompt(&#x27;New class name:&#x27;);
-      if (name &amp;&amp; name.trim()) {
-        const id = &#x27;class_&#x27; + generateId().slice(0, 8);
-        appData[id] = {
-          label: name.trim(),
-          sourceClassName: null,
-          settings: { maxMcq: 40, scaledMcq: 52, maxFrq: 48, maxRaw: 100, formula: &#x27;=RAW_PCT&#x27;, assignmentName: &#x27;&#x27; },
-          assignments: [],
-          students: []
-        };
-        currentClass = id;
-        saveData();
-        syncUIWithState();
-      }
-    });
-    deleteClassBtn.addEventListener(&#x27;click&#x27;, () =&gt; {
-      if (Object.keys(appData).length &lt;= 1) return;
-      const label = appData[currentClass].label || currentClass;
-      if (!confirm(`Delete &quot;${label}&quot; and all its data? This cannot be undone.`)) return;
-      delete appData[currentClass];
-      currentClass = Object.keys(appData)[0];
-      saveData();
-      syncUIWithState();
-    });
-  }
-
-  function startNameEdit(td, student) {
-    if (td.querySelector(&#x27;input&#x27;)) return;
-    const prev = student.name;
-    const input = document.createElement(&#x27;input&#x27;);
-    input.type = &#x27;text&#x27;;
-    input.value = prev;
-    input.style.cssText = &#x27;width:100%;padding:0.35rem 0.5rem;font-size:inherit;font-weight:600;&#x27;;
-    td.textContent = &#x27;&#x27;;
-    td.appendChild(input);
-    input.focus();
-    input.select();
-    const commit = () =&gt; {
-      const val = input.value.trim();
-      student.name = val || prev;
-      saveData();
-      td.textContent = student.name;
-      td.title = &#x27;Click to edit name&#x27;;
-    };
-    input.addEventListener(&#x27;blur&#x27;, commit);
-    input.addEventListener(&#x27;keydown&#x27;, (e) =&gt; {
-      if (e.key === &#x27;Enter&#x27;) input.blur();
-      if (e.key === &#x27;Escape&#x27;) {
-        input.value = prev;
-        input.blur();
-      }
-    });
-  }
-
-  function updateRowDisplay(row, student) {
-    const results = processStudentGrades(student);
-    const scaledStr = results.scaledMcq !== null ? results.scaledMcq.toFixed(1) : &#x27;-&#x27;;
-    const rawStr = results.rawScore !== null ? results.rawScore.toFixed(1) : &#x27;-&#x27;;
-    const rawPctStr = results.rawPct !== null ? results.rawPct.toFixed(1) + &#x27;%&#x27; : &#x27;-&#x27;;
-    const curveStr = results.curve !== null ? results.curve.toFixed(1) + &#x27;%&#x27; : results.curveError ? &#x27;#ERR&#x27; : &#x27;-&#x27;;
-    const cells = row.querySelectorAll(&#x27;td&#x27;);
-    cells[4].textContent = scaledStr;
-    cells[5].textContent = rawStr;
-    cells[6].textContent = rawPctStr;
-    cells[7].textContent = curveStr;
-    cells[7].className = results.curveError ? &#x27;curve-error&#x27; : &#x27;calculated highlight-score&#x27;;
-    cells[7].title = results.curveError || &#x27;&#x27;;
-  }
-
-  function showModal() {
-    modal.classList.add(&#x27;show&#x27;);
-    newStudentNameInput.value = &#x27;&#x27;;
-    setTimeout(() =&gt; newStudentNameInput.focus(), 40);
-  }
-
-  function hideModal() {
-    modal.classList.remove(&#x27;show&#x27;);
-  }
-
-  function handleAddStudent() {
-    const name = newStudentNameInput.value.trim();
-    if (name) {
-      const state = appData[currentClass];
-      state.students.push({ id: generateId(), name, mcq: &#x27;&#x27;, frq: &#x27;&#x27; });
-      saveData();
-      renderTable();
-      hideModal();
-    }
-  }
-
-  function escapeCsvField(val) {
-    return `&quot;${String(val).replace(/&quot;/g, &#x27;&quot;&quot;&#x27;)}&quot;`;
-  }
-
-  function getClassLabel() {
-    return appData[currentClass]?.label || currentClass;
-  }
-
-  function currentDateTimeIso() {
-    return new Date().toISOString();
-  }
-
-  function formatDateForFile(dateIso) {
-    return String(dateIso || &#x27;&#x27;).replace(/[:.]/g, &#x27;-&#x27;);
-  }
-
-  function buildAssignmentRows(assignmentName, savedAtIso) {
-    const state = appData[currentClass];
-    return state.students.map(student =&gt; {
-      const r = processStudentGrades(student);
-      return {
-        classLabel: getClassLabel(),
-        assignmentName,
-        savedAtIso,
-        studentName: student.name,
-        mcq: student.mcq || &#x27;&#x27;,
-        frq: student.frq || &#x27;&#x27;,
-        scaledMcq: r.scaledMcq !== null ? r.scaledMcq.toFixed(1) : &#x27;&#x27;,
-        rawScore: r.rawScore !== null ? r.rawScore.toFixed(1) : &#x27;&#x27;,
-        rawPct: r.rawPct !== null ? r.rawPct.toFixed(1) : &#x27;&#x27;,
-        curvedScore: r.curve !== null ? r.curve.toFixed(1) : &#x27;&#x27;,
-        formula: state.settings.formula || &#x27;=RAW_PCT&#x27;
-      };
-    });
-  }
-
-  function saveAssignmentSnapshot() {
-    const assignmentName = assignmentNameInput.value.trim();
-    if (!assignmentName) {
-      saveStatus.textContent = &#x27;Enter assignment name first&#x27;;
-      saveStatus.style.color = &#x27;#fda4af&#x27;;
-      assignmentNameInput.focus();
-      return;
-    }
-    const savedAtIso = currentDateTimeIso();
-    const snapshotRows = buildAssignmentRows(assignmentName, savedAtIso);
-    if (!appData[currentClass].assignments) appData[currentClass].assignments = [];
-    appData[currentClass].assignments.push({
-      id: generateId(),
-      assignmentName,
-      savedAtIso,
-      rows: snapshotRows
-    });
-    saveData();
-    exportToCSV();
-    saveStatus.textContent = `Saved &quot;${assignmentName}&quot; at ${new Date(savedAtIso).toLocaleString()}`;
-    saveStatus.style.color = &#x27;#86efac&#x27;;
-  }
-
-  function exportToCSV() {
-    const rows = [[&#x27;Class Name&#x27;, &#x27;Assignment Name&#x27;, &#x27;Saved At&#x27;, &#x27;Student Name&#x27;, &#x27;MCQ Score&#x27;, &#x27;FRQ Score&#x27;, &#x27;Scaled MCQ&#x27;, &#x27;Raw Score&#x27;, &#x27;Raw %&#x27;, &#x27;Curved Score (%)&#x27;, &#x27;Formula&#x27;]];
-    const state = appData[currentClass];
-    const assignments = Array.isArray(state.assignments) ? state.assignments : [];
-    assignments.forEach(record =&gt; {
-      (record.rows || []).forEach(row =&gt; {
-        rows.push([
-          row.classLabel || getClassLabel(),
-          row.assignmentName || &#x27;&#x27;,
-          row.savedAtIso || &#x27;&#x27;,
-          row.studentName || &#x27;&#x27;,
-          row.mcq || &#x27;&#x27;,
-          row.frq || &#x27;&#x27;,
-          row.scaledMcq || &#x27;&#x27;,
-          row.rawScore || &#x27;&#x27;,
-          row.rawPct || &#x27;&#x27;,
-          row.curvedScore || &#x27;&#x27;,
-          row.formula || &#x27;&#x27;
-        ]);
-      });
-    });
-    if (rows.length === 1) {
-      saveStatus.textContent = &#x27;No saved assignments yet. Click Save Assignment first.&#x27;;
-      saveStatus.style.color = &#x27;#fda4af&#x27;;
-      return;
-    }
-    const csvContent = rows.map(r =&gt; r.map(escapeCsvField).join(&#x27;,&#x27;)).join(&#x27;\n&#x27;);
-    const blob = new Blob([csvContent], { type: &#x27;text/csv;charset=utf-8;&#x27; });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement(&#x27;a&#x27;);
-    link.href = url;
-    const latestDate = assignments.length ? assignments[assignments.length - 1].savedAtIso : currentDateTimeIso();
-    link.download = `Formula_Curves_${getClassLabel().replace(/[^\w-]+/g, &#x27;_&#x27;)}_${formatDateForFile(latestDate)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }
+// Drag row to reorder students
+function clearDropMarks(){
+  document.querySelectorAll(&#x27;tr.drag-over-top,tr.drag-over-bottom&#x27;).forEach(r=&gt;r.classList.remove(&#x27;drag-over-top&#x27;,&#x27;drag-over-bottom&#x27;));
+}
+function bindRowDrag(tr){
+  const handle=tr.children[0];
+  if(!handle)return;
+  handle.title=&#x27;Drag to reorder&#x27;;
+  handle.addEventListener(&#x27;mousedown&#x27;,()=&gt;{tr.draggable=true});
+  tr.addEventListener(&#x27;dragstart&#x27;,e=&gt;{
+    dragRow=tr;tr.classList.add(&#x27;dragging&#x27;);
+    e.dataTransfer.effectAllowed=&#x27;move&#x27;;
+    try{e.dataTransfer.setData(&#x27;text/plain&#x27;,tr.dataset.stid||&#x27;&#x27;)}catch(_){}
+  });
+  tr.addEventListener(&#x27;dragend&#x27;,()=&gt;{
+    tr.draggable=false;tr.classList.remove(&#x27;dragging&#x27;);clearDropMarks();dragRow=null;
+  });
+  tr.addEventListener(&#x27;dragover&#x27;,e=&gt;{
+    if(!dragRow||dragRow===tr)return;
+    e.preventDefault();e.dataTransfer.dropEffect=&#x27;move&#x27;;
+    const r=tr.getBoundingClientRect();
+    const before=(e.clientY-r.top)&lt;r.height/2;
+    clearDropMarks();
+    tr.classList.add(before?&#x27;drag-over-top&#x27;:&#x27;drag-over-bottom&#x27;);
+  });
+  tr.addEventListener(&#x27;dragleave&#x27;,()=&gt;tr.classList.remove(&#x27;drag-over-top&#x27;,&#x27;drag-over-bottom&#x27;));
+  tr.addEventListener(&#x27;drop&#x27;,e=&gt;{
+    if(!dragRow||dragRow===tr)return;
+    e.preventDefault();
+    const fromIdx=st.findIndex(x=&gt;x.id===dragRow.dataset.stid);
+    const targetId=tr.dataset.stid;
+    if(fromIdx&lt;0)return;
+    const r=tr.getBoundingClientRect();
+    const before=(e.clientY-r.top)&lt;r.height/2;
+    clearDropMarks();
+    const moved=st.splice(fromIdx,1)[0];
+    let toIdx=st.findIndex(x=&gt;x.id===targetId);
+    if(toIdx&lt;0)toIdx=st.length-1;
+    st.splice(before?toIdx:toIdx+1,0,moved);
+    orders=orders||{};orders[cls]=st.map(x=&gt;x.id);
+    save();
+    renderTable(true);
+    toast(&#x27;Order saved&#x27;);
+  });
+}
+document.addEventListener(&#x27;mouseup&#x27;,()=&gt;{
+  if(!dragRow)document.querySelectorAll(&#x27;tr[draggable=&quot;true&quot;]&#x27;).forEach(r=&gt;r.draggable=false);
 });
+
+function renderLegend(){
+  const lg=$(&#x27;apLegend&#x27;);lg.innerHTML=&#x27;&#x27;;
+  ab.forEach(b=&gt;{
+    const c=document.createElement(&#x27;div&#x27;);c.className=&#x27;legend-card&#x27;;
+    c.innerHTML=&#x27;&lt;div class=&quot;legend-card-header&quot;&gt;&lt;span&gt;AP &#x27;+b.ap+&#x27;&lt;/span&gt;&lt;span class=&quot;ap-badge ap-&#x27;+b.ap+&#x27;&quot;&gt;&#x27;+b.ap+&#x27;&lt;/span&gt;&lt;/div&gt;&#x27;+
+      &#x27;&lt;div class=&quot;legend-row&quot;&gt;&lt;label&gt;Raw Min&lt;/label&gt;&lt;input data-ap=&quot;&#x27;+b.ap+&#x27;&quot; data-f=&quot;rMin&quot; value=&quot;&#x27;+b.rMin+&#x27;&quot;&gt;&lt;label&gt;Raw Max&lt;/label&gt;&lt;input data-ap=&quot;&#x27;+b.ap+&#x27;&quot; data-f=&quot;rMax&quot; value=&quot;&#x27;+b.rMax+&#x27;&quot;&gt;&lt;/div&gt;&#x27;+
+      &#x27;&lt;div class=&quot;legend-row&quot;&gt;&lt;label&gt;Curve Min&lt;/label&gt;&lt;input data-ap=&quot;&#x27;+b.ap+&#x27;&quot; data-f=&quot;cMin&quot; value=&quot;&#x27;+b.cMin+&#x27;&quot;&gt;&lt;label&gt;Curve Max&lt;/label&gt;&lt;input data-ap=&quot;&#x27;+b.ap+&#x27;&quot; data-f=&quot;cMax&quot; value=&quot;&#x27;+b.cMax+&#x27;&quot;&gt;&lt;/div&gt;&#x27;;
+    lg.appendChild(c);
+  });
+}
+
+// Tab switching
+$(&#x27;tabAp&#x27;).onclick=function(){
+  $(&#x27;tabAp&#x27;).classList.add(&#x27;active&#x27;);$(&#x27;tabFormula&#x27;).classList.remove(&#x27;active&#x27;);
+  $(&#x27;tab-ap&#x27;).classList.add(&#x27;active&#x27;);$(&#x27;tab-formula&#x27;).classList.remove(&#x27;active&#x27;);
+  mode=&#x27;ap&#x27;;loadStudentScores();renderTable(true);
+};
+$(&#x27;tabFormula&#x27;).onclick=function(){
+  $(&#x27;tabFormula&#x27;).classList.add(&#x27;active&#x27;);$(&#x27;tabAp&#x27;).classList.remove(&#x27;active&#x27;);
+  $(&#x27;tab-formula&#x27;).classList.add(&#x27;active&#x27;);$(&#x27;tab-ap&#x27;).classList.remove(&#x27;active&#x27;);
+  mode=&#x27;formula&#x27;;loadStudentScores();renderTable(true);
+};
+
+$(&#x27;classSelector&#x27;).onchange=async()=&gt;{cls=$(&#x27;classSelector&#x27;).value;await loadStudents();render();save()};
+$(&#x27;maxRaw&#x27;).oninput=()=&gt;{mr=parseFloat($(&#x27;maxRaw&#x27;).value)||100;save();updateCalcRows()};
+$(&#x27;formulaInput&#x27;).oninput=()=&gt;{fm=$(&#x27;formulaInput&#x27;).value;save();updateCalcRows()};
+$(&#x27;apLegend&#x27;).addEventListener(&#x27;input&#x27;,e=&gt;{
+  const i=e.target.closest(&#x27;input[data-ap]&#x27;);if(!i)return;
+  const ap=parseInt(i.dataset.ap),f=i.dataset.f,v=parseFloat(i.value);
+  if(!isNaN(v)){const b=ab.find(x=&gt;x.ap===ap);if(b){b[f]=v;save();updateCalcRows()}}
+});
+$(&#x27;apBody&#x27;).addEventListener(&#x27;click&#x27;,e=&gt;{const d=e.target.closest(&#x27;.delete-btn&#x27;);if(d){const s=st.find(x=&gt;x.id===d.dataset.id);if(s&amp;&amp;!confirm(&#x27;Remove &#x27;+s.name+&#x27;?&#x27;))return;st=st.filter(x=&gt;x.id!==d.dataset.id);delete savedScores[cls+&#x27;_&#x27;+d.dataset.id];save();render();toast(&#x27;Removed&#x27;)}});
+$(&#x27;formulaBody&#x27;).addEventListener(&#x27;click&#x27;,e=&gt;{const d=e.target.closest(&#x27;.delete-btn&#x27;);if(d){const s=st.find(x=&gt;x.id===d.dataset.id);if(s&amp;&amp;!confirm(&#x27;Remove &#x27;+s.name+&#x27;?&#x27;))return;st=st.filter(x=&gt;x.id!==d.dataset.id);delete savedScores[cls+&#x27;_&#x27;+d.dataset.id];save();render();toast(&#x27;Removed&#x27;)}});
+$(&#x27;addBtn&#x27;).onclick=()=&gt;{$(&#x27;addModal&#x27;).classList.add(&#x27;show&#x27;);$(&#x27;newStudent&#x27;).value=&#x27;&#x27;;setTimeout(()=&gt;$(&#x27;newStudent&#x27;).focus(),50)};
+$(&#x27;closeModal&#x27;).onclick=$(&#x27;cancelModal&#x27;).onclick=()=&gt;$(&#x27;addModal&#x27;).classList.remove(&#x27;show&#x27;);
+$(&#x27;okModal&#x27;).onclick=()=&gt;{const n=$(&#x27;newStudent&#x27;).value.trim();if(!n){toast(&#x27;Enter name&#x27;);return}st.push({id:&#x27;s_&#x27;+Math.random().toString(36).slice(2,9),name:n,mcq:&#x27;&#x27;,fib:&#x27;&#x27;,sa:&#x27;&#x27;,frq:&#x27;&#x27;});save();$(&#x27;addModal&#x27;).classList.remove(&#x27;show&#x27;);toast(&#x27;Added&#x27;)};
+$(&#x27;newStudent&#x27;).onkeydown=e=&gt;{if(e.key===&#x27;Enter&#x27;)$(&#x27;okModal&#x27;).click()};
+$(&#x27;clearBtn&#x27;).onclick=()=&gt;{
+  if(!confirm(&#x27;Clear ALL scores for &#x27;+cls+&#x27; in &#x27;+(mode===&#x27;ap&#x27;?&#x27;AP&#x27;:&#x27;Formula&#x27;)+&#x27; mode? This cannot be undone.&#x27;))return;
+  st.forEach(s=&gt;{
+    s.mcq=&#x27;&#x27;;s.fib=&#x27;&#x27;;s.sa=&#x27;&#x27;;s.frq=&#x27;&#x27;;
+    const k=cls+&#x27;_&#x27;+s.id;
+    if(savedScores[k]) savedScores[k][mode]={mcq:&#x27;&#x27;,fib:&#x27;&#x27;,sa:&#x27;&#x27;,frq:&#x27;&#x27;};
+  });
+  save();
+  updateCalcRows();
+  renderTable(true);
+  toast(&#x27;Scores cleared&#x27;);
+};
+$(&#x27;reloadBtn&#x27;).onclick=async()=&gt;{load();await loadStudents();render();toast(&#x27;Reloaded&#x27;)};
+$(&#x27;exportBtn&#x27;).onclick=()=&gt;{
+  const a=CATS.filter(c=&gt;cs[c.id]&amp;&amp;cs[c.id].en!==false);
+  let csv=&#x27;#,Student,&#x27;+a.map(c=&gt;c.id.toUpperCase()).join(&#x27;,&#x27;)+&#x27;,Raw,Raw%,&#x27;+(mode==&#x27;ap&#x27;?&#x27;Curved%,AP&#x27;:&#x27;Curved%&#x27;)+&#x27;\n&#x27;;
+  st.forEach((s,i)=&gt;{const c=calc(s);csv+=i+1+&#x27;,&#x27;+s.name+&#x27;,&#x27;+a.map(x=&gt;s[x.id]||&#x27;&#x27;).join(&#x27;,&#x27;)+&#x27;,&#x27;+c.raw.toFixed(1)+&#x27;,&#x27;+c.pct.toFixed(1);if(mode==&#x27;ap&#x27;){const ap=calcAP(c.pct);csv+=&#x27;,&#x27;+(ap.cv?ap.cv.toFixed(1):&#x27;-&#x27;)+&#x27;,&#x27;+(ap.ap||&#x27;-&#x27;)}else{const r=evalF(fm,c);csv+=&#x27;,&#x27;+(r.v?r.v.toFixed(1):&#x27;-&#x27;)}csv+=&#x27;\n&#x27;});
+  const blob=new Blob([csv],{type:&#x27;text/csv&#x27;});const a2=document.createElement(&#x27;a&#x27;);a2.href=URL.createObjectURL(blob);a2.download=(cls||&#x27;curve&#x27;).replace(/[^\w]/g,&#x27;_&#x27;)+&#x27;.csv&#x27;;a2.click();
+};
+
+window.addEventListener(&#x27;beforeunload&#x27;,save);
+load();
+loadStudents().then(()=&gt;{render();toast(&#x27;Loaded - auto-save ON&#x27;)});
+})();
 &lt;/script&gt;
 &lt;/body&gt;
-&lt;/html&gt;
-"></iframe>
+&lt;/html&gt;"></iframe>
 </div>
 
 <script>

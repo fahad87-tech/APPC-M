@@ -7,8 +7,7 @@ files = {
     'rotation': 'Class_Rotation.html',
     'randomizer': 'Randomizer.html',
     'group': 'Random_Group.html',
-    'curving_ap': 'AP_Curving_Tool.html',
-    'curving_formula': 'Curving_Tool.html'
+    'curve': 'Curve_Manager.html'
 }
 
 contents = {}
@@ -19,7 +18,7 @@ for key, filename in files.items():
     else:
         print(f"[Error] {filename} not found!")
 
-if len(contents) < 7:
+if len(contents) < 6:
     print("Missing files. Aborting.")
     exit(1)
 
@@ -252,8 +251,7 @@ html_template = f"""<!DOCTYPE html>
       <button class="tab-btn" data-tab-id="group" draggable="true">Random Groups</button>
       <button class="tab-btn" data-tab-id="jigsaw" draggable="true">Jigsaw Expert</button>
       <button class="tab-btn" data-tab-id="rotation" draggable="true">Class Rotation</button>
-      <button class="tab-btn" data-tab-id="apcurving" draggable="true">AP Curving Tool</button>
-      <button class="tab-btn" data-tab-id="curving" draggable="true">Curving Tool</button>
+      <button class="tab-btn" data-tab-id="curve" draggable="true">Curve Manager</button>
     </div>
   </div>
 </div>
@@ -264,8 +262,7 @@ html_template = f"""<!DOCTYPE html>
   <iframe id="frame-group" srcdoc="{contents['group']}"></iframe>
   <iframe id="frame-jigsaw" srcdoc="{contents['jigsaw']}"></iframe>
   <iframe id="frame-rotation" srcdoc="{contents['rotation']}"></iframe>
-  <iframe id="frame-apcurving" srcdoc="{contents['curving_ap']}"></iframe>
-  <iframe id="frame-curving" srcdoc="{contents['curving_formula']}"></iframe>
+  <iframe id="frame-curve" srcdoc="{contents['curve']}"></iframe>
 </div>
 
 <script>
