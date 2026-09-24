@@ -130,6 +130,7 @@ tbody td:first-child:active{cursor:grabbing}
 <script>
 (function(){
 const KEY='scoring_tool_curve_v1';
+const ROSTER_VERSION='roster-2026-09-24-v1';
 // ── Embedded roster (sourced from Classroom Hub classroom_data.json) ──
 const ROSTER={"classes":{
 "AP Physics C":[
@@ -147,8 +148,23 @@ let cls='',mode='ap',cs={},ab=[],fm='=RAW_PCT',mr=100,st=[],savedScores={},order
 const $=id=>document.getElementById(id);
 
 function getClassData(){
-  try{const r=localStorage.getItem('classRotatorData');const d=JSON.parse(r);if(d&&d.classes&&Object.keys(d.classes).length)return d.classes}catch(e){}
-  return ROSTER.classes;
+  // ROSTER (embedded in this file, committed to git) is the source of truth
+  // for every class it defines. localStorage may hold a stale classRotatorData
+  // cache from an older app build — using it for classes already in the roster
+  // would resurrect outdated names/ids. We only fall back to localStorage for
+  // classes the roster does NOT define (e.g. a class you created in this browser
+  // via "Add Student" and saved locally).
+  const out=JSON.parse(JSON.stringify(ROSTER.classes));
+  try{
+    const r=localStorage.getItem('classRotatorData');
+    const d=JSON.parse(r);
+    if(d&&d.classes&&Object.keys(d.classes).length){
+      for(const c of Object.keys(d.classes)){
+        if(!out.hasOwnProperty(c)) out[c]=d.classes[c]||[];
+      }
+    }
+  }catch(e){}
+  return out;
 }
 
 function applyLoad(){
