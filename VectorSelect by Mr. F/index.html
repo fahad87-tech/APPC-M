@@ -2117,45 +2117,6 @@
         });
       }
 
-      // Point Redemption Status & Alert Banner (Question 2+ if preceding question was missed)
-      const hasMissedPrior = hasPreviousIncorrectQuestion();
-      const recoveryDone = !!recoveryAttemptedForQuestion[realIdx];
-      const isSim = activeRecoveryChallenge ? (activeRecoveryChallenge.format === 'sim') : true;
-
-      if (hasMissedPrior) {
-        const redemptionAlert = document.createElement("div");
-        redemptionAlert.id = "q-redemption-alert-banner";
-        redemptionAlert.className = "mb-4 p-4 rounded-2xl bg-gradient-to-r from-plasma-950/80 via-indigo-950/70 to-slate-900 border-2 border-plasma-500/60 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 enter";
-        if (!recoveryDone) {
-          redemptionAlert.innerHTML = `
-            <div class="flex items-center gap-3">
-              <span class="text-2xl animate-bounce">⚡</span>
-              <div>
-                <div class="font-black text-plasma-300 text-xs sm:text-sm uppercase tracking-wide flex items-center gap-2">
-                  <span>Point Redemption Active (+3.5 PTS)</span>
-                  <span class="px-2 py-0.5 rounded-full bg-plasma-500/20 text-plasma-300 border border-plasma-500/40 text-[10px]">Previous Question Missed</span>
-                </div>
-                <div class="text-xs text-slate-300 mt-0.5">Solve the interactive physics simulation or theory challenge to redeem lost points!</div>
-              </div>
-            </div>
-            <button type="button" onclick="triggerRecoveryStationManual()" class="pressable px-4 py-2 rounded-xl btn-aurora text-slate-950 font-black text-xs shadow-md shrink-0 flex items-center gap-1.5 hover:scale-105 transition cursor-pointer">
-              <span>${isSim ? '🎮 Launch Recovery Lab' : '📝 Open Theory Challenge'}</span> <span>➔</span>
-            </button>
-          `;
-        } else {
-          redemptionAlert.innerHTML = `
-            <div class="flex items-center gap-3 w-full justify-between">
-              <div class="flex items-center gap-2.5 text-xs text-plasma-300 font-bold">
-                <span>✓</span>
-                <span>Point Redemption Challenge Cleared for this question (+3.5 PTS)!</span>
-              </div>
-              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-black uppercase">Redeemed</span>
-            </div>
-          `;
-        }
-        choicesBox.insertBefore(redemptionAlert, choicesBox.firstChild);
-      }
-
       // 3. Answer Locking Controls (Manual student lock + Automatic timer lock)
       const isLocked = !!studentLockedAnswers[realIdx];
       const lockBox = document.createElement("div");
@@ -2189,16 +2150,16 @@
 
               ${hasMissedPrior ? `
                 ${!recoveryDone ? `
-                  <div class="p-4 rounded-2xl bg-gradient-to-b from-indigo-950/70 via-slate-900 to-slate-900 border-2 border-indigo-500/45 text-center shadow-2xl space-y-2.5 enter">
-                    <div class="flex items-center justify-center gap-2 text-indigo-300 font-extrabold text-xs uppercase tracking-wider">
-                      <span class="text-base">${isSim ? '🎮' : '📝'}</span>
-                      <span>${isSim ? 'Physics Simulation Arcade Active (+3.5 PTS)' : 'Analytical Theory Challenge Active (+3.5 PTS)'}</span>
+                  <div class="p-4 rounded-2xl bg-gradient-to-b from-plasma-950/80 via-slate-900 to-slate-900 border-2 border-plasma-500/60 text-center shadow-2xl space-y-2.5 enter">
+                    <div class="flex items-center justify-center gap-2 text-plasma-300 font-extrabold text-xs uppercase tracking-wider">
+                      <span class="text-base">⚡</span>
+                      <span>Point Redemption Unlocked (+3.5 PTS)</span>
                     </div>
                     <p class="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
-                      You missed a question previously! While waiting for the question timer, solve the <strong class="text-cyan-300">${isSim ? 'Interactive Physics Simulation' : 'Analytical Recovery Scenario'}</strong> below to redeem lost points!
+                      Main answer locked in! Since you missed the previous question, solve the <strong class="text-cyan-300">${isSim ? 'Interactive Physics Simulation' : 'Analytical Recovery Scenario'}</strong> while waiting to recover your score!
                     </p>
-                    <button type="button" id="btn-open-recovery" onclick="triggerRecoveryStationManual()" class="pressable px-6 py-3 rounded-xl btn-aurora text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2 mx-auto cursor-pointer animate-bounce hover:animate-none">
-                      <span>${isSim ? '🎮 Play Simulation Mini-Game (+3.5 PTS)' : '📝 Solve Analytical Scenario (+3.5 PTS)'}</span>
+                    <button type="button" id="btn-open-recovery" onclick="triggerRecoveryStationManual()" class="pressable px-6 py-3 rounded-xl btn-aurora text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2 mx-auto cursor-pointer hover:scale-105 transition">
+                      <span>${isSim ? '🎮 Launch Recovery Lab (+3.5 PTS)' : '📝 Solve Analytical Scenario (+3.5 PTS)'}</span>
                     </button>
                   </div>
                 ` : `
@@ -2275,31 +2236,16 @@
           btn.classList.add("cursor-not-allowed", "opacity-60");
         });
       } else {
-        let redemptionPreLockHtml = '';
-        if (hasMissedPrior && !recoveryDone) {
-          redemptionPreLockHtml = `
-            <div class="mb-4 p-3.5 rounded-2xl bg-plasma-950/60 border border-plasma-500/40 text-center shadow-lg space-y-2 enter">
-              <div class="flex items-center justify-center gap-2 text-plasma-300 font-bold text-xs uppercase tracking-wider">
-                <span>⚡</span> <span>Point Redemption Available for this Question (+3.5 PTS)</span>
-              </div>
-              <button type="button" onclick="triggerRecoveryStationManual()" class="pressable px-5 py-2 rounded-xl btn-aurora text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-1.5 mx-auto cursor-pointer">
-                <span>${isSim ? '🎮 Play Simulation Mini-Game (+3.5 PTS)' : '📝 Solve Analytical Scenario (+3.5 PTS)'}</span>
-              </button>
-            </div>
-          `;
-        }
-
+        // Priority is answering main question: NO redemption accessible until answer is finalized!
         if (selected) {
           lockBox.innerHTML = `
-            ${redemptionPreLockHtml}
-            <button onclick="lockCurrentAnswer()" class="pressable px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-sm shadow-xl shadow-amber-600/30 transition flex items-center justify-center gap-2 mx-auto">
+            <button onclick="lockCurrentAnswer()" class="pressable px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-sm shadow-xl shadow-amber-600/30 transition flex items-center justify-center gap-2 mx-auto cursor-pointer hover:scale-[1.02]">
               <span>🔒</span> Lock In Answer (Option ${selected})
             </button>
-            <p class="text-[11px] text-slate-400 mt-1.5 font-medium">⚠️ Once locked, you cannot alter your choice.</p>
+            <p class="text-[11px] text-slate-400 mt-1.5 font-medium">⚠️ Priority: Lock your answer to secure your choice. Point redemption unlocks once locked.</p>
           `;
         } else {
           lockBox.innerHTML = `
-            ${redemptionPreLockHtml}
             <button disabled class="px-6 py-2.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-slate-500 font-bold text-xs opacity-60 cursor-not-allowed mx-auto">
               Select an option (A, B, C, D) to lock in
             </button>
@@ -2309,16 +2255,17 @@
       choicesBox.appendChild(lockBox);
 
       // Manage Recovery Station Card visibility:
-      // STRICT GATE: NEVER open recovery station if student has answered all questions correctly!
+      // STRICT: Never show recovery station until current question is locked in!
       const recoveryCard = document.getElementById("recovery-station-card");
-      if (isLocked) {
+      if (!isLocked) {
+        if (recoveryCard) recoveryCard.classList.add("hidden");
+        if (window.RecoverySims) window.RecoverySims.stop();
+      } else {
         const hasMissedPrior = hasPreviousIncorrectQuestion();
         const recoveryDone = !!recoveryAttemptedForQuestion[realIdx];
         if (!hasMissedPrior || recoveryDone) {
           if (recoveryCard) recoveryCard.classList.add("hidden");
         }
-      } else if (recoveryCard) {
-        recoveryCard.classList.add("hidden");
       }
 
       // KaTeX math rendering
@@ -2551,6 +2498,12 @@
     function checkAndTriggerRecoveryStation(timeRemaining) {
       const realIdx = questionOrder[currentQuestionIdx];
       const card = document.getElementById("recovery-station-card");
+
+      // STRICT PRIORITY GATE: Student MUST answer and lock in the current question first!
+      if (!studentLockedAnswers[realIdx]) {
+        if (card) card.classList.add("hidden");
+        return;
+      }
 
       // STRICT GATE: Recovery engine ONLY activates if enabled, on Question 2+, and if a prior question was missed!
       if (!isPointRedemptionEnabled() || currentQuestionIdx < 1 || !hasPreviousIncorrectQuestion()) {
@@ -2787,6 +2740,13 @@
     }
 
     function triggerRecoveryStationManual() {
+      const realIdx = questionOrder[currentQuestionIdx];
+      // STRICT PRIORITY: Must answer current question first!
+      if (!studentLockedAnswers[realIdx]) {
+        showToast("Answer Question First", "Please select and lock in your answer for the current question first.", "coral", 3500);
+        return;
+      }
+
       if (!isPointRedemptionEnabled()) {
         showToast("Feature Disabled", "Point redemption has been disabled by the instructor for this session.", "copper", 3000);
         return;

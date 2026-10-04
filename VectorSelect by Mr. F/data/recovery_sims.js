@@ -86,10 +86,20 @@
     ctx.fill();
 
     if (label) {
-      ctx.font = "bold 10px 'JetBrains Mono', monospace";
+      ctx.font = "bold 9px 'JetBrains Mono', monospace";
       ctx.fillStyle = color;
-      ctx.textAlign = "left";
-      ctx.fillText(label, toX + 4, toY - 4);
+      if (Math.abs(dx) < 3 && dy > 0) {
+        // Vertical vector pointing downwards
+        ctx.textAlign = "center";
+        ctx.fillText(label, toX, toY + 11);
+      } else if (Math.abs(dx) < 3 && dy < 0) {
+        // Vertical vector pointing upwards
+        ctx.textAlign = "center";
+        ctx.fillText(label, toX, toY - 5);
+      } else {
+        ctx.textAlign = (dx >= 0) ? "left" : "right";
+        ctx.fillText(label, toX + ((dx >= 0) ? 5 : -5), toY - 4);
+      }
     }
   }
 
@@ -159,16 +169,23 @@
             </div>
           </div>
 
-          <!-- Canvas Oscilloscope Viewport -->
+          <!-- Real-Time Sensor Telemetry Strip (Integrated - Zero Canvas Overlap) -->
+          <div id="ballistics-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-cyan-300 flex flex-wrap items-center justify-between gap-2 shadow-inner">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold text-[10px]">LAUNCH</span>
+              <span>θ = ${currentAngle}°</span>
+              <span class="text-slate-500">|</span>
+              <span>v₀ = ${currentV0.toFixed(1)} m/s</span>
+            </div>
+            <div class="text-slate-400 text-[10px] sm:text-[11px]">
+              v₀x = ${(currentV0 * Math.cos(currentAngle * Math.PI / 180)).toFixed(1)} m/s · v₀y = ${(currentV0 * Math.sin(currentAngle * Math.PI / 180)).toFixed(1)} m/s
+            </div>
+            <div id="ballistics-transit-status" class="text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px]">PHOTOGATE: STANDBY</div>
+          </div>
+
+          <!-- Canvas Oscilloscope Viewport (Unobstructed) -->
           <div class="relative bg-slate-950">
             <canvas id="ballistics-canvas" class="w-full block" height="240"></canvas>
-            
-            <!-- Real-Time Sensor Telemetry Overlay -->
-            <div id="ballistics-telem" class="absolute top-2.5 left-3 font-mono text-[11px] text-cyan-300 bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 rounded-xl shadow-lg space-y-0.5 pointer-events-none">
-              <div>LAUNCH: θ = ${currentAngle}° | v₀ = ${currentV0.toFixed(1)} m/s</div>
-              <div class="text-slate-400">v₀x = ${(currentV0 * Math.cos(currentAngle * Math.PI / 180)).toFixed(1)} m/s | v₀y = ${(currentV0 * Math.sin(currentAngle * Math.PI / 180)).toFixed(1)} m/s</div>
-              <div id="ballistics-transit-status" class="text-amber-400 font-bold">PHOTOGATE: STANDBY</div>
-            </div>
           </div>
 
           <!-- Laboratory Instrument Control Panel -->
@@ -454,13 +471,20 @@
             </div>
           </div>
 
+          <!-- Real-Time Telemetry Strip -->
+          <div id="friction-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-emerald-300 flex flex-wrap items-center justify-between gap-2 shadow-inner">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">ENERGY</span>
+              <span>K_A = ${(0.5 * m * vA * vA).toFixed(1)} J</span>
+            </div>
+            <div class="text-slate-400 text-[10px] sm:text-[11px]">
+              f_k = μ_k mg = ${(currentMu * m * g).toFixed(1)} N · W_f = ${(currentMu * m * g * L).toFixed(1)} J
+            </div>
+            <div id="friction-gate-status" class="text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px]">PHOTOGATE B: STANDBY</div>
+          </div>
+
           <div class="relative bg-slate-950">
             <canvas id="friction-canvas" class="w-full block" height="230"></canvas>
-            <div id="friction-telem" class="absolute top-2.5 left-3 font-mono text-[11px] text-emerald-300 bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 rounded-xl shadow-lg space-y-0.5 pointer-events-none">
-              <div>INITIAL KINETIC ENERGY: K_A = ${(0.5 * m * vA * vA).toFixed(1)} J</div>
-              <div class="text-slate-400">FRICTION FORCE: f_k = μ_k mg = ${(currentMu * m * g).toFixed(1)} N</div>
-              <div id="friction-gate-status" class="text-amber-400 font-bold">PHOTOGATE B: STANDBY</div>
-            </div>
           </div>
 
           <div class="p-3.5 bg-slate-900/80 border-t border-slate-800 text-xs font-sans space-y-3">
@@ -502,10 +526,16 @@
           gateBText = `GATE B TRIGGER: v_B = ${photogateBRecord.v.toFixed(2)} m/s | W_nc = -${workDissipated.toFixed(1)} J`;
         }
 
+        const gateBCls = photogateBRecord ? 'text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px]' : 'text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px]';
         telemEl.innerHTML = `
-          <div>INITIAL KINETIC ENERGY: K_A = ${(0.5 * m * vA * vA).toFixed(1)} J</div>
-          <div class="text-slate-400">FRICTION FORCE: f_k = μ_k mg = ${fk.toFixed(1)} N | W_f = ${(fk * L).toFixed(1)} J</div>
-          <div class="text-emerald-400 font-bold">${gateBText}</div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold text-[10px]">ENERGY</span>
+            <span>K_A = ${(0.5 * m * vA * vA).toFixed(1)} J</span>
+          </div>
+          <div class="text-slate-400 text-[10px] sm:text-[11px]">
+            f_k = μ_k mg = ${fk.toFixed(1)} N · W_f = ${(fk * L).toFixed(1)} J
+          </div>
+          <div id="friction-gate-status" class="${gateBCls}">${gateBText}</div>
         `;
       }
 
@@ -538,33 +568,36 @@
         ctx.strokeRect(startRoughPx, trackY, roughLenPx, 16);
         ctx.setLineDash([]);
 
+        // Stagger labels cleanly: ROUGH ZONE at trackY - 40, GATE A left-offset, GATE B right-offset
         ctx.fillStyle = "#f97316";
         ctx.font = "bold 9px 'JetBrains Mono', monospace";
         ctx.textAlign = "center";
-        ctx.fillText(`ROUGH ZONE (L = ${L}m, μ_k = ${currentMu.toFixed(2)})`, startRoughPx + roughLenPx / 2, trackY - 32);
+        ctx.fillText(`ROUGH ZONE (L = ${L}m, μ_k = ${currentMu.toFixed(2)})`, startRoughPx + roughLenPx / 2, trackY - 40);
 
-        // Photogate A (at start of rough zone)
+        // Photogate A (aligned to left of marker - NO OVERLAP)
         ctx.strokeStyle = "#38bdf8";
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
-        ctx.moveTo(startRoughPx, trackY - 26);
+        ctx.moveTo(startRoughPx, trackY - 24);
         ctx.lineTo(startRoughPx, trackY);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle = "#38bdf8";
-        ctx.fillText("GATE A", startRoughPx, trackY - 32);
+        ctx.textAlign = "right";
+        ctx.fillText("GATE A", startRoughPx - 5, trackY - 22);
 
-        // Photogate B (at end of rough zone)
+        // Photogate B (aligned to right of marker - NO OVERLAP)
         const endRoughPx = startRoughPx + roughLenPx;
         ctx.strokeStyle = "#10b981";
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
-        ctx.moveTo(endRoughPx, trackY - 26);
+        ctx.moveTo(endRoughPx, trackY - 24);
         ctx.lineTo(endRoughPx, trackY);
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle = "#10b981";
-        ctx.fillText("GATE B", endRoughPx, trackY - 32);
+        ctx.textAlign = "left";
+        ctx.fillText("GATE B", endRoughPx + 5, trackY - 22);
 
         // Cart
         const cartPx = padX + (cartX / totalMeters) * trackW;
@@ -687,13 +720,20 @@
             </div>
           </div>
 
+          <!-- Real-Time Telemetry Strip -->
+          <div id="centripetal-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-purple-300 flex flex-wrap items-center justify-between gap-2 shadow-inner">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold text-[10px]">CRITICAL</span>
+              <span>v_crit = √(gR) = ${(Math.sqrt(g * R)).toFixed(1)} m/s</span>
+            </div>
+            <div class="text-slate-400 text-[10px] sm:text-[11px]">
+              RELEASE HEIGHT: H = ${currentH.toFixed(1)} m (Min H_crit: ${(2.5 * R).toFixed(1)} m)
+            </div>
+            <div id="centripetal-apex-status" class="text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px]">APEX SENSOR: STANDBY</div>
+          </div>
+
           <div class="relative bg-slate-950">
             <canvas id="centripetal-canvas" class="w-full block" height="240"></canvas>
-            <div id="centripetal-telem" class="absolute top-2.5 left-3 font-mono text-[11px] text-purple-300 bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 rounded-xl shadow-lg space-y-0.5 pointer-events-none">
-              <div>CRITICAL VELOCITY: v_crit = √(gR) = ${(Math.sqrt(g * R)).toFixed(1)} m/s</div>
-              <div class="text-slate-400">THEORETICAL MIN HEIGHT: H_crit = 2.5R = ${(2.5 * R).toFixed(1)} m</div>
-              <div id="centripetal-apex-status" class="text-amber-400 font-bold">APEX STRAIN GAUGE: STANDBY</div>
-            </div>
           </div>
 
           <div class="p-3.5 bg-slate-900/80 border-t border-slate-800 text-xs font-sans space-y-3">
@@ -738,10 +778,16 @@
           }
         }
 
+        const apexCls = (apexRecord && !apexRecord.fell) ? 'text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px]' : (apexRecord && apexRecord.fell ? 'text-rose-400 font-bold px-2 py-0.5 rounded bg-rose-500/10 border border-rose-500/30 text-[10px]' : 'text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px]');
         telemEl.innerHTML = `
-          <div>CRITICAL VELOCITY: v_crit = √(gR) = ${vCrit.toFixed(1)} m/s</div>
-          <div class="text-slate-400">RELEASE HEIGHT: H = ${currentH.toFixed(1)} m (Threshold: ${(2.5 * R).toFixed(1)} m)</div>
-          <div class="text-purple-400 font-bold">${apexStatus}</div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold text-[10px]">CRITICAL</span>
+            <span>v_crit = √(gR) = ${vCrit.toFixed(1)} m/s</span>
+          </div>
+          <div class="text-slate-400 text-[10px] sm:text-[11px]">
+            RELEASE HEIGHT: H = ${currentH.toFixed(1)} m (Min H_crit: ${(2.5 * R).toFixed(1)} m)
+          </div>
+          <div id="centripetal-apex-status" class="${apexCls}">${apexStatus}</div>
         `;
       }
 
@@ -936,13 +982,22 @@
             </div>
           </div>
 
+          <!-- Real-Time Telemetry Strip -->
+          <div id="harmonic-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-cyan-300 flex flex-wrap items-center justify-between gap-2 shadow-inner">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold text-[10px]">OSCILLATOR</span>
+              <span>ω₀ = ${(Math.sqrt(currentK / m)).toFixed(2)} rad/s</span>
+              <span class="text-slate-500">|</span>
+              <span>T = ${(2 * Math.PI / Math.sqrt(currentK / m)).toFixed(2)} s</span>
+            </div>
+            <div class="text-slate-400 text-[10px] sm:text-[11px]">
+              E = ½ k x₀² = ${(0.5 * currentK * currentX0 * currentX0).toFixed(2)} J
+            </div>
+            <div id="harmonic-energy-status" class="text-plasma-400 font-bold px-2 py-0.5 rounded bg-plasma-500/10 border border-plasma-500/30 text-[10px]">WAVEFORM: REAL-TIME</div>
+          </div>
+
           <div class="relative bg-slate-950">
             <canvas id="harmonic-canvas" class="w-full block" height="230"></canvas>
-            <div id="harmonic-telem" class="absolute top-2.5 left-3 font-mono text-[11px] text-cyan-300 bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 rounded-xl shadow-lg space-y-0.5 pointer-events-none">
-              <div>ANGULAR FREQUENCY: ω₀ = √(k/m) = ${(Math.sqrt(currentK / m)).toFixed(2)} rad/s</div>
-              <div class="text-slate-400">PERIOD: T = 2π/ω₀ = ${(2 * Math.PI / Math.sqrt(currentK / m)).toFixed(2)} s</div>
-              <div id="harmonic-energy-status" class="text-amber-400 font-bold">TOTAL MECHANICAL ENERGY: E = ${(0.5 * currentK * currentX0 * currentX0).toFixed(2)} J</div>
-            </div>
           </div>
 
           <div class="p-3.5 bg-slate-900/80 border-t border-slate-800 text-xs font-sans space-y-3">
@@ -1181,13 +1236,22 @@
             </div>
           </div>
 
+          <!-- Real-Time Telemetry Strip -->
+          <div id="torque-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-amber-300 flex flex-wrap items-center justify-between gap-2 shadow-inner">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px]">TORQUE</span>
+              <span>τ_left = ${(m1 * g * xFulcrum).toFixed(1)} N·m</span>
+              <span class="text-slate-500">|</span>
+              <span>τ_beam = ${(Mbeam * g * (L / 2 - xFulcrum)).toFixed(1)} N·m</span>
+            </div>
+            <div class="text-slate-400 text-[10px] sm:text-[11px]">
+              τ_right = ${(m2 * g * currentM2Pos).toFixed(1)} N·m
+            </div>
+            <div id="torque-equilibrium-state" class="text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px]">PIVOT SENSOR: STANDBY</div>
+          </div>
+
           <div class="relative bg-slate-950">
             <canvas id="torque-canvas" class="w-full block" height="230"></canvas>
-            <div id="torque-telem" class="absolute top-2.5 left-3 font-mono text-[11px] text-amber-300 bg-slate-900/90 border border-slate-700/80 px-3 py-1.5 rounded-xl shadow-lg space-y-0.5 pointer-events-none">
-              <div>LEFT TORQUE: τ_CCW = ${(m1 * g * xFulcrum).toFixed(1)} N·m</div>
-              <div class="text-slate-400">BEAM GRAVITY TORQUE: τ_beam = ${(Mbeam * g * (L / 2 - xFulcrum)).toFixed(1)} N·m</div>
-              <div id="torque-equilibrium-state" class="text-amber-400 font-bold">PIVOT SENSOR: STANDBY</div>
-            </div>
           </div>
 
           <div class="p-3.5 bg-slate-900/80 border-t border-slate-800 text-xs font-sans space-y-3">
@@ -1232,10 +1296,18 @@
           statusText = equilibriumStatus;
         }
 
+        const statusCls = equilibriumStatus && equilibriumStatus.includes('BALANCED') ? 'text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px]' : 'text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px]';
         telemEl.innerHTML = `
-          <div>LEFT TORQUE: τ_CCW = ${tauLeft.toFixed(1)} N·m | BEAM TORQUE: ${tauBeam.toFixed(1)} N·m</div>
-          <div class="text-slate-400">COUNTERWEIGHT TORQUE: τ_CW = ${tauRight.toFixed(1)} N·m | NET τ = ${net.toFixed(2)} N·m</div>
-          <div class="text-amber-400 font-bold">${statusText}</div>
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px]">TORQUE</span>
+            <span>τ_left = ${tauLeft.toFixed(1)} N·m</span>
+            <span class="text-slate-500">|</span>
+            <span>τ_beam = ${tauBeam.toFixed(1)} N·m</span>
+          </div>
+          <div class="text-slate-400 text-[10px] sm:text-[11px]">
+            τ_right = ${tauRight.toFixed(1)} N·m · Net = ${net.toFixed(2)} N·m
+          </div>
+          <div id="torque-equilibrium-state" class="${statusCls}">${statusText}</div>
         `;
       }
 

@@ -2793,3 +2793,67 @@ Addressed user request:
 - Validated JavaScript syntax and execution in `index.html` and `teacher.html`.
 - Mirrored all changes to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
 - Committed and pushed to GitHub main repository (`fahad87-tech/APPC-M`).
+
+---
+
+## Phase 63: Elimination of Simulation Text Overlap & Strict Answer-First Priority Gating (2026-10-04)
+
+### Context & User Directives
+1. **Simulation Text Overlap**:
+   - In the interactive physics laboratory modules (`data/recovery_sims.js`), telemetry text, sensor badges, and vector labels collided with canvas elements (e.g. sensor markers at the top of the canvas, rough zone gate labels, apex indicators, and torque vectors).
+2. **Strict Question-First Priority Gating**:
+   - The user specified: *"make sims do not have text overlap. and never let student access redemption tabuntil student has answered question. priority is answering the main question. make sense"*
+   - Students must not be distracted by recovery mini-games or simulation stations while the main question remains unanswered. Point redemption is strictly unlocked only after the student has submitted/locked their choice.
+
+---
+
+### Architectural Resolutions
+
+#### 1. Zero-Overlap Simulation Canvas & Integrated Instrument Strips (`data/recovery_sims.js`)
+- **Integrated Telemetry Instrument Strips**:
+  - Removed floating absolute HUD overlays (`absolute top-2.5 left-3`) in all 5 simulation apparatuses:
+    - **Module 1 (Kinematics & Projectiles)**: Muzzle velocity, launch angle, flight time, range, and photogate telemetry.
+    - **Module 2 (Work & Friction)**: Initial kinetic energy, work done by friction, rough zone length, exit velocity, and Gate A/B status.
+    - **Module 3 (Centripetal Acceleration & Loop-the-Loop)**: Critical velocity $v_{\text{crit}} = \sqrt{gR}$, release height $H$, and apex strain gauge telemetry.
+    - **Module 4 (Simple Harmonic Motion & Energy)**: Natural angular frequency $\omega_0 = \sqrt{k/m}$, period $T$, mechanical energy $E$, and real-time waveform tracking.
+    - **Module 5 (Rotational Statics & Torque Equilibrium)**: Counter-clockwise torque $\tau_1$, beam gravity torque $\tau_{\text{beam}}$, counterweight torque $\tau_2$, and net torque equilibrium badge.
+  - Replaced overlays with dedicated, high-contrast instrument strips (`bg-slate-900/95 border-b border-slate-800 shadow-inner`) situated directly above each canvas. This ensures 100% unobstructed canvas viewports for trajectories, sensors, oscillations, and vector arrows.
+- **Dynamic Collision Prevention within Canvases**:
+  - **Module 2**: Vertically staggered `ROUGH ZONE` to `trackY - 40` (center), right-aligned `GATE A` to `startRoughPx - 5`, and left-aligned `GATE B` to `endRoughPx + 5` to prevent horizontal text collisions on narrow friction zones.
+  - **Module 3**: Repositioned height sensor markers away from apex strain gauges.
+  - **Module 5**: Upgraded `drawVector()` so downward vertical vectors place force labels directly below the arrowhead (`toY + 11`, `textAlign = "center"`) rather than beside it, eliminating torque arrow label collisions.
+
+#### 2. Strict Question-First Priority Gating (`index.html`)
+- **Full Lockout Prior to Answer Finalization**:
+  - Prior to answer lock-in (`!isLocked`), `#recovery-station-card` is forced hidden (`classList.add("hidden")`), and any running simulation engine is halted via `window.RecoverySims.stop()`.
+  - While unlocked, students only see choices and the `Lock In Answer` button with a clear priority notice:
+    *"⚠️ Priority: Lock your answer to secure your choice. Point redemption unlocks once locked."*
+  - No redemption launch banner or distraction appears until the student selects and locks their option.
+- **Strict Guard Validation**:
+  - In `checkAndTriggerRecoveryStation()`:
+    ```javascript
+    if (!studentLockedAnswers[realIdx]) {
+      if (card) card.classList.add("hidden");
+      return;
+    }
+    ```
+  - In `triggerRecoveryStationManual()`:
+    ```javascript
+    if (!studentLockedAnswers[realIdx]) {
+      showToast("Answer Question First", "Please select and lock in your answer for the current question first.", "coral", 3500);
+      return;
+    }
+    ```
+- **Post-Lock Instant Unlock**:
+  - Immediately upon locking (`isLocked = true`), if the student missed the previous question, the rich redemption banner unlocks in place:
+    `⚡ Point Redemption Unlocked (+3.5 PTS) — Main answer locked in! Since you missed the previous question, solve the Interactive Physics Simulation / Analytical Recovery Scenario while waiting to recover your score!`
+  - Includes a direct `🎮 Launch Recovery Lab (+3.5 PTS)` button.
+
+---
+
+### Verification & Deployment
+- Validated JavaScript syntax and runtime logic in `index.html` and `data/recovery_sims.js`.
+- Verified canvas rendering and telemetry strip alignment across desktop and mobile breakpoints.
+- Mirrored all changes to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+- Committed and pushed to GitHub main repository (`fahad87-tech/APPC-M`).
+
