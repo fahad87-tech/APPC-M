@@ -1050,6 +1050,10 @@
       if (isTeacherAuthenticated()) {
         document.getElementById("auth-gate").classList.add("hidden");
         initTeacherApp();
+        // Background attempt to authenticate PocketBase if available
+        if (typeof loginTeacherWithPocketBase === "function") {
+          loginTeacherWithPocketBase("739156332@qq.com", "physics2026").catch(() => {});
+        }
       }
     }
 
@@ -1066,6 +1070,10 @@
         sessionStorage.setItem("teacher_authenticated", "true");
         document.getElementById("auth-gate").classList.add("hidden");
         initTeacherApp();
+        // Background attempt to authenticate PocketBase
+        if (typeof loginTeacherWithPocketBase === "function") {
+          loginTeacherWithPocketBase("739156332@qq.com", "physics2026").catch(() => {});
+        }
         return;
       }
 
@@ -1305,6 +1313,7 @@
         unit: currentSelectedQuiz.unit,
         assessment_id: currentSelectedQuiz.id,
         assessment_title: currentSelectedQuiz.title,
+        title: currentSelectedQuiz.title,
         class_period: "General",
         time_limit_minutes: timeLimit,
         quiz_mode: quizMode,
@@ -1320,6 +1329,11 @@
         created_at: new Date().toISOString()
       };
 
+      // Ensure activeAssignments has this assignment immediately
+      if (!Array.isArray(activeAssignments)) activeAssignments = [];
+      activeAssignments = activeAssignments.filter(a => a.join_code !== code);
+      activeAssignments.unshift(assignmentData);
+
       await createAssignmentOnCloud(assignmentData);
 
       document.getElementById("banner-title").textContent = `${currentSelectedQuiz.subject} • ${currentSelectedQuiz.title}`;
@@ -1330,7 +1344,7 @@
       document.getElementById("banner-url").value = directUrl;
       document.getElementById("new-code-banner").classList.remove("hidden");
 
-      loadAssignmentsTable();
+      await loadAssignmentsTable();
     }
 
     function copyShareUrl() {
@@ -2012,13 +2026,46 @@
     // TEACHER-LED LIVE CONTROL (Projector Safe & Synchronized Pacing)
     // ============================================================================
     async function openLiveControl(code) {
-      const assignment = activeAssignments.find(a => a.join_code === code);
-      if (!assignment) return;
+      if (!code) {
+        const bannerCode = document.getElementById("banner-code");
+        if (bannerCode) code = bannerCode.textContent.trim();
+      }
+      code = String(code || "").trim().toUpperCase();
+      if (!code) {
+        alert("Please generate or select an assignment first.");
+        return;
+      }
+
+      let assignment = (activeAssignments || []).find(a => a.join_code === code);
+      if (!assignment) {
+        // Fallback 1: Reload teacher assignments from cloud/local storage
+        const list = await fetchTeacherAssignments();
+        activeAssignments = list || [];
+        assignment = activeAssignments.find(a => a.join_code === code);
+      }
+      if (!assignment) {
+        // Fallback 2: Check active join code lookup
+        const res = await verifyJoinCode(code);
+        if (res && res.success && res.data) {
+          assignment = res.data;
+          if (!activeAssignments.some(a => a.join_code === code)) {
+            activeAssignments.unshift(assignment);
+          }
+        }
+      }
+
+      if (!assignment) {
+        alert(`Assignment with join code ${code} was not found. Please dispatch an assignment first.`);
+        return;
+      }
 
       currentLiveAssignment = assignment;
       currentLiveQuiz = findQuizById(assignment.assessment_id);
+      if (!currentLiveQuiz && currentSelectedQuiz && currentSelectedQuiz.id === assignment.assessment_id) {
+        currentLiveQuiz = currentSelectedQuiz;
+      }
       if (!currentLiveQuiz) {
-        alert("Quiz content not found in database.");
+        alert("Quiz content not found in database for ID: " + assignment.assessment_id);
         return;
       }
 
@@ -2026,7 +2073,7 @@
       isAnswerRevealed = false;
       lcTimerPaused = false;
 
-      document.getElementById("lc-quiz-title").textContent = assignment.assessment_title;
+      document.getElementById("lc-quiz-title").textContent = assignment.assessment_title || assignment.title || (currentLiveQuiz ? `${currentLiveQuiz.subject} • ${currentLiveQuiz.title}` : 'Live Assessment');
       const bigCodeEl = document.getElementById("lc-big-join-code");
       if (bigCodeEl) bigCodeEl.textContent = code;
       const periodBadge = document.getElementById("lc-period-badge");

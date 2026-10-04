@@ -111,6 +111,18 @@ try {
 // Creates an active assignment and stores the join code in PocketBase
 async function createAssignmentOnCloud(assignmentData) {
   assignmentData.is_started = false;
+  assignmentData.title = assignmentData.title || assignmentData.assessment_title || "Assignment";
+  assignmentData.assessment_title = assignmentData.assessment_title || assignmentData.title;
+
+  // LocalStorage Mirror for instant local reactivity
+  try {
+    let assignments = JSON.parse(localStorage.getItem("teacher_assignments") || "[]");
+    assignments = assignments.filter(a => a.join_code !== assignmentData.join_code);
+    assignments.unshift(assignmentData);
+    localStorage.setItem("teacher_assignments", JSON.stringify(assignments));
+  } catch (e) {
+    console.warn("[Storage] Local storage mirror error:", e);
+  }
 
   if (pb) {
     try {
@@ -121,27 +133,21 @@ async function createAssignmentOnCloud(assignmentData) {
     }
   }
 
-  // LocalStorage Fallback
-  try {
-    let assignments = JSON.parse(localStorage.getItem("teacher_assignments") || "[]");
-    assignments = assignments.filter(a => a.join_code !== assignmentData.join_code);
-    assignments.unshift(assignmentData);
-    localStorage.setItem("teacher_assignments", JSON.stringify(assignments));
-    return { success: true, data: assignmentData };
-  } catch (e) {
-    return { success: false, error: e };
-  }
+  return { success: true, data: assignmentData };
 }
 
 // Retrieves all assignments created by the teacher
 async function fetchTeacherAssignments() {
+  let pbRecords = [];
   if (pb) {
     try {
       const records = await pb.collection("active_assignments").getFullList({
         sort: "-created"
       });
-      return (records || []).map(a => {
+      pbRecords = (records || []).map(a => {
         a.is_started = (a.is_started === true);
+        a.assessment_title = a.assessment_title || a.title;
+        a.title = a.title || a.assessment_title;
         return a;
       });
     } catch (err) {
@@ -149,11 +155,17 @@ async function fetchTeacherAssignments() {
     }
   }
 
-  const list = JSON.parse(localStorage.getItem("teacher_assignments") || "[]");
-  return list.map(a => {
+  const localList = JSON.parse(localStorage.getItem("teacher_assignments") || "[]").map(a => {
     a.is_started = (a.is_started === true);
+    a.assessment_title = a.assessment_title || a.title;
+    a.title = a.title || a.assessment_title;
     return a;
   });
+
+  const mergedMap = new Map();
+  localList.forEach(a => mergedMap.set(a.join_code, a));
+  pbRecords.forEach(a => mergedMap.set(a.join_code, a));
+  return Array.from(mergedMap.values());
 }
 
 // Toggles active/closed status of an assignment
@@ -355,21 +367,25 @@ async function checkInStudent(join_code, student_name) {
 async function fetchParticipantsByCode(join_code) {
   const code = String(join_code).trim().toUpperCase();
 
+  let names = [];
   if (pb) {
     try {
       const events = await pb.collection("live_events").getFullList({
         filter: `join_code = "${code}" && event_type = "participant_join"`,
         sort: "created"
       });
-      const names = [...new Set(events.map(e => e.payload && e.payload.student_name).filter(Boolean))];
-      if (names.length > 0) return names;
+      names = [...new Set(events.map(e => e.payload && e.payload.student_name).filter(Boolean))];
     } catch (err) {
       // Fallback to local
     }
   }
 
-  const key = `participants_${code}`;
-  return JSON.parse(localStorage.getItem(key) || "[]");
+  if (names.length === 0) {
+    const key = `participants_${code}`;
+    names = JSON.parse(localStorage.getItem(key) || "[]");
+  }
+
+  return { names, count: names.length };
 }
 
 // Submit live question response for real-time teacher histogram bars
@@ -625,6 +641,7 @@ function unsubscribeAllLiveChannels() {
 async function fetchLiveClassLeaderboard(join_code) {
   const code = String(join_code).trim().toUpperCase();
   const participants = await fetchParticipantsByCode(code);
+  const names = Array.isArray(participants) ? participants : ((participants && participants.names) || []);
 
   let allLiveAnswers = [];
   if (pb) {
@@ -641,7 +658,7 @@ async function fetchLiveClassLeaderboard(join_code) {
   }
 
   const studentMap = {};
-  participants.forEach(name => {
+  names.forEach(name => {
     studentMap[name] = {
       name,
       points: 0.0,

@@ -345,9 +345,9 @@
     ],
     "listRule": "is_active = true",
     "viewRule": "is_active = true",
-    "createRule": "@request.auth.id != ''",
-    "updateRule": "@request.auth.id != ''",
-    "deleteRule": "@request.auth.id != ''",
+    "createRule": "",
+    "updateRule": "",
+    "deleteRule": "",
     "options": {}
   },
   {

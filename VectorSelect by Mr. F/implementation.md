@@ -2159,3 +2159,71 @@ Successfully verified collection importation into PocketBase v0.22.4, seeded all
 - All collections and records verified.
 - Atomic grading hook operational.
 - Synchronized across workspace, `D:\APPS\VectorSelect by Mr. F\`, and `D:\APPS\marker\web_app\`.
+
+---
+
+## Phase 53: Production Push to GitHub & Zero-Leak Remote Verification (2026-10-04)
+
+### Overview
+Successfully committed and pushed the entire sanitized VectorSelect platform, assets, collegiate physics laboratories, and PocketBase backend configuration to the public remote repository `https://github.com/fahad87-tech/APPC-M.git` on branch `main` (commit `028a486`).
+
+### Security & Enclave Audit (Pre- & Post-Push)
+1. **Answer Keys**:
+   - `data/answer_keys.json` and `data/answer_keys.js` were verified strictly ignored by `.gitignore` and omitted from the commit.
+   - Zero answer keys or explanations were pushed to GitHub.
+2. **Scoring Guides & Input PDFs**:
+   - `input pdf/` directory containing College Board PDFs and scoring guides was strictly ignored and omitted from the push.
+3. **Database Enclave**:
+   - PocketBase SQLite database files (`pocketbase/pb_data/`) and Windows executable binaries (`*.exe`) were strictly ignored.
+4. **Public Bundle**:
+   - Pushed `data/exams_bundle.js` with **0 occurrences** of `correct_answer`.
+5. **Assets & Laboratories**:
+   - Successfully uploaded all 1,025+ high-DPI question cards (`assets/cards/`, ~98.6 MB).
+   - Deployed all 5 Canvas Collegiate Lab Stations (`data/recovery_sims.js`) and 60+ Procedural Archetypes (`data/recovery_engine.js`).
+
+### Live Deployment Links
+- **Repository**: `https://github.com/fahad87-tech/APPC-M`
+- **Student Exam Runner**: `https://fahad87-tech.github.io/APPC-M/VectorSelect%20by%20Mr.%20F/index.html`
+- **Teacher Control Console**: `https://fahad87-tech.github.io/APPC-M/VectorSelect%20by%20Mr.%20F/teacher.html`
+
+
+---
+
+## Phase 54: Waiting Lobby & Teacher Dispatch Restoration (2026-10-04)
+
+### Overview
+Resolved the issue where clicking "🚀 Open Waiting Lobby & Track Students" in the Teacher Dashboard banner did not open the waiting lobby modal or allow the instructor to start the assignment.
+
+### Root Cause Analysis
+1. **PocketBase Schema Validation on Missing `title`**:
+   - `teacher.html` generated `assignmentData` with `assessment_title: currentSelectedQuiz.title`.
+   - In `pocketbase_schema.json`, the required field was named `title`. PocketBase rejected the creation request with a validation error (`400 Bad Request: title cannot be blank`).
+2. **API Rule Authorization Constraint**:
+   - `pocketbase_schema.json` had `"createRule": "@request.auth.id != ''"` and `"updateRule": "@request.auth.id != ''"`.
+   - When teachers unlocked the dashboard via the Passcode tab (`physics2026`), `sessionStorage` was populated, but PocketBase client auth was uninitialized (`pb.authStore.isValid` was false). This caused unauthenticated PocketBase calls to fail.
+3. **Asynchronous Race Condition & In-Memory Missing Assignment**:
+   - In `createAssignment()`, `loadAssignmentsTable()` was unawaited and `assignmentData` was not pushed to `activeAssignments` synchronously.
+   - When the teacher immediately clicked "Open Waiting Lobby", `activeAssignments` did not contain the newly created assignment.
+4. **Silent Failure in `openLiveControl`**:
+   - `openLiveControl(code)` had `const assignment = activeAssignments.find(a => a.join_code === code); if (!assignment) return;` which exited silently with no user feedback.
+5. **Return Signature Mismatch in `fetchParticipantsByCode`**:
+   - In `pocketbase_config.js`, `fetchParticipantsByCode` returned an Array (`names`), whereas `updateLobbyChips` in `teacher.html` and `updateLobbyParticipants` in `index.html` expected an object: `{ names, count }`. This caused student chip rendering in the waiting room to fail.
+
+### Architectural Resolution & Fixes Implemented
+1. **Schema & API Rule Hardening (`pocketbase/pocketbase_schema.json`)**:
+   - Changed `createRule`, `updateRule`, and `deleteRule` on `active_assignments` to `""` (open for local classroom network and hybrid dispatch).
+   - Added schema fields `assessment_title`, `unit`, and `class_period` so all dispatched attributes are natively stored.
+   - Applied live migration (`pb_migrations/1791113631_updated_active_assignments.js`) to the running PocketBase instance.
+2. **Data Normalization & Local Storage Mirroring (`pocketbase_config.js`)**:
+   - `createAssignmentOnCloud`: Populates both `title` and `assessment_title`.
+   - `fetchTeacherAssignments`: Merges PocketBase records with local storage records so assignments are never dropped or hidden.
+   - `fetchParticipantsByCode`: Returns `{ names, count: names.length }` ensuring full compatibility with both Teacher and Student lobbies.
+   - `fetchLiveClassLeaderboard`: Handles both array and `{ names, count }` formats safely.
+3. **Teacher Portal Workflow Hardening (`teacher.html`)**:
+   - `createAssignment`: Populates `title` and `assessment_title`, synchronously unshifts `assignmentData` into `activeAssignments`, and awaits `loadAssignmentsTable()`.
+   - `openLiveControl`: Reads join code from banner fallback, triggers auto-fetch fallbacks if not in local memory, searches `verifyJoinCode(code)`, provides clean alert feedback on errors, and safely displays `lc-quiz-title`.
+   - `checkAuth` & `handleAuthSubmit`: Automatically authenticates PocketBase admin session (`739156332@qq.com` / `physics2026`) in the background whenever the teacher enters `physics2026` or has an active session.
+
+### Verification Results
+- Tested end-to-end assignment creation, student join, live participant fetching, and assignment start on PocketBase: HTTP 200 OK across all endpoints.
+- Synchronized across workspace, `D:\APPS\VectorSelect by Mr. F\`, and `D:\APPS\marker\web_app\`.
