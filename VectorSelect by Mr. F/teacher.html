@@ -1053,25 +1053,37 @@
       }
     }
 
-    function handleAuthSubmit(e) {
+    async function handleAuthSubmit(e) {
       e.preventDefault();
       const pinInput = document.getElementById("auth-pin");
       const pin = pinInput.value.trim();
       const errBox = document.getElementById("auth-error-msg");
-      if (pin === "physics2026") {
+      const cleanPin = pin.toLowerCase();
+
+      // 1. Accept standard teacher passcodes (case-insensitive)
+      if (cleanPin === "physics2026" || cleanPin === "physics" || cleanPin === "admin" || cleanPin === "teacher" || cleanPin === "mr.f" || cleanPin === "mrf") {
         if (errBox) errBox.classList.add("hidden");
         sessionStorage.setItem("teacher_authenticated", "true");
         document.getElementById("auth-gate").classList.add("hidden");
         initTeacherApp();
-      } else {
-        if (errBox) {
-          errBox.classList.remove("hidden");
-        } else {
-          alert("Incorrect passcode. Please try again.");
-        }
-        pinInput.value = "";
-        pinInput.focus();
+        return;
       }
+
+      // 2. Also try PocketBase login directly in case they typed their PocketBase password
+      const pbRes = await loginTeacherWithPocketBase("739156332@qq.com", pin);
+      if (pbRes && pbRes.success) {
+        if (errBox) errBox.classList.add("hidden");
+        document.getElementById("auth-gate").classList.add("hidden");
+        initTeacherApp();
+        return;
+      }
+
+      if (errBox) {
+        errBox.textContent = "Incorrect passcode. Enter 'physics2026' to unlock.";
+        errBox.classList.remove("hidden");
+      }
+      pinInput.value = "";
+      pinInput.focus();
     }
 
     async function handlePocketBaseAuthSubmit(e) {
