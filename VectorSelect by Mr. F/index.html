@@ -1,0 +1,3552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>VectorSelect by Mr. F — Student Assessment Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            quantum: { 400: "#38bdf8", 500: "#00f2fe", 600: "#0284c7" },
+            aurora:  { 400: "#34d399", 500: "#00f5a0", 600: "#059669" },
+            plasma:  { 400: "#fde047", 500: "#ffb800", 600: "#d97706" },
+            nebula:  { 400: "#a78bfa", 500: "#8b5cf6", 600: "#7c3aed" },
+            solar:   { 400: "#fb7185", 500: "#f43f5e", 600: "#e11d48" },
+            space:   { 950: "#050811", 900: "#0b1120", 850: "#0f172a", 800: "#1e293b" },
+            ink:     { 900: "#060913", 800: "#0b1120", 700: "#151f32", 600: "#1e293b", 500: "#334155" },
+            brass:   { 400: "#ffd200", 500: "#ffb800", 600: "#b87d1c" },
+            copper:  { 400: "#38bdf8", 500: "#00e5ff", 600: "#0284c7" },
+            coral:   { 400: "#fb7185", 500: "#f43f5e", 600: "#e11d48" },
+            lime:    { 400: "#4ade80", 500: "#00f5a0" },
+            plum:    { 400: "#c084fc", 500: "#8b5cf6" },
+            chalk:   "#f8fafc",
+            paper:   "#f1f5f9"
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js"></script>
+  <script src="pocketbase_config.js"></script>
+  <!-- Offline Air-Gapped Fallback Keys (Ignored on GitHub Pages) -->
+  <script src="data/answer_keys.js" onerror="/* Local air-gapped fallback only */"></script>
+  <script src="data/exams_bundle.js"></script>
+  <script src="data/concepts.js"></script>
+  <script src="data/recovery_engine.js"></script>
+  <script src="data/recovery_sims.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <style>
+    /* ============================================================
+       VECTORSELECT SPECTACULAR "QUANTUM OBSERVATORY" THEME
+       Deep Obsidian Space, Microscopic Vector Laser Grid, 
+       Luminescent Aurora Emissive Accents
+       ============================================================ */
+    :root {
+      --space-black: #060913;
+      --quantum-cyan: #00f2fe;
+      --aurora-green: #00f5a0;
+      --plasma-gold: #ffb800;
+      --nebula-purple: #8b5cf6;
+      --solar-crimson: #f43f5e;
+      --starlight: #f8fafc;
+    }
+
+    body {
+      background-color: #050811;
+      background-image:
+        radial-gradient(1400px 700px at 50% -10%, rgba(0, 242, 254, 0.13), transparent 70%),
+        radial-gradient(1000px 600px at 90% 15%, rgba(139, 92, 246, 0.10), transparent 60%),
+        radial-gradient(900px 600px at 10% 85%, rgba(0, 245, 160, 0.08), transparent 60%),
+        linear-gradient(to right, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+      background-attachment: fixed;
+    }
+
+    .quantum-card {
+      background: linear-gradient(165deg, rgba(15, 23, 42, 0.88) 0%, rgba(9, 14, 26, 0.94) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      box-shadow: 0 12px 35px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+    }
+    .quantum-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 16px 45px -10px rgba(0, 242, 254, 0.14), inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+    }
+
+    .quantum-line {
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent 0%, #00f5a0 20%, #00f2fe 50%, #8b5cf6 80%, transparent 100%);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+    }
+
+    .btn-aurora {
+      background: linear-gradient(135deg, #00f5a0 0%, #00d9f5 100%);
+      color: #050811;
+      font-weight: 900;
+      border: 1px solid #70ffde;
+      box-shadow: 0 0 20px -2px rgba(0, 245, 160, 0.45);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-aurora:hover {
+      filter: brightness(1.12);
+      box-shadow: 0 0 28px 2px rgba(0, 245, 160, 0.7);
+      transform: translateY(-1.5px);
+    }
+    .btn-aurora:active {
+      transform: scale(0.97);
+    }
+
+    .plasma-code {
+      background: linear-gradient(135deg, #ffe600 0%, #ffb800 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 14px rgba(255, 184, 0, 0.45));
+    }
+
+    .math-font { font-family: "Cambria Math", "Latin Modern Math", "STIX Two Math", Georgia, serif; font-style: italic; }
+    .prose-custom table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 1.05rem; }
+    .prose-custom th, .prose-custom td { border: 1px solid var(--ink-500); padding: 0.75rem 1rem; text-align: left; }
+    .prose-custom th { background: var(--ink-700); color: var(--chalk); font-weight: 700; }
+    .prose-custom td { background: var(--ink-800); }
+    .lockdown-active #view-exam-runner { user-select: none; -webkit-user-select: none; }
+    .calc-draggable { position: fixed; z-index: 48; cursor: move; }
+    .calc-btn { display: flex; align-items: center; justify-content: center; font-weight: 700; border-radius: 0.75rem; transition: all 0.15s; }
+    .calc-btn:hover { filter: brightness(1.15); }
+    .calc-btn:active { transform: scale(0.95); }
+
+    /* ---------- Brand mark ---------- */
+    .brand-mark {
+      background: linear-gradient(140deg, var(--brass-400) 0%, var(--brass-600) 45%, var(--copper-600) 100%);
+      box-shadow: 0 8px 24px -6px rgba(217, 154, 43, 0.55);
+    }
+    .wordmark { color: var(--brass-400); letter-spacing: 0.18em; }
+    .rule-brass {
+      height: 2px;
+      background: linear-gradient(90deg, var(--brass-500), rgba(217,154,43,0) 70%);
+    }
+
+    /* ---------- Interactive press feedback ---------- */
+    .pressable {
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.18s ease,
+                  filter 0.18s ease;
+      will-change: transform;
+    }
+    .pressable:hover { filter: brightness(1.08); }
+    .pressable:active { transform: scale(0.93); }
+    .pressable:focus-visible { outline: 2px solid var(--brass-400); outline-offset: 3px; }
+
+    /* ---------- Answer choice buttons ---------- */
+    .choice-btn {
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  background-color 0.2s ease,
+                  border-color 0.2s ease,
+                  box-shadow 0.22s ease;
+    }
+    .choice-btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.22), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.22s ease;
+      pointer-events: none;
+    }
+    .choice-btn:hover:not(:disabled) { transform: translateY(-3px); }
+    .choice-btn:hover:not(:disabled)::after { opacity: 1; }
+    .choice-btn:active:not(:disabled) { transform: translateY(-1px) scale(0.95); }
+
+    .choice-selected {
+      background: linear-gradient(135deg, #00f5a0 0%, #00d9f5 100%) !important;
+      border-color: #70ffde !important;
+      color: #050811 !important;
+      box-shadow: 0 0 0 3px rgba(0, 245, 160, 0.4), 0 12px 30px -5px rgba(0, 245, 160, 0.65) !important;
+      font-weight: 900 !important;
+      transform: translateY(-2px);
+    }
+    .choice-correct {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+      border-color: #34d399 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.45), 0 0 30px rgba(16, 185, 129, 0.6) !important;
+      animation: correct-bloom 0.75s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .choice-wrong {
+      background: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%) !important;
+      border-color: #fb7185 !important;
+      color: #ffffff !important;
+      box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.45), 0 0 30px rgba(244, 63, 94, 0.6) !important;
+      animation: wrong-shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+    }
+    .choice-dimmed { opacity: 0.25 !important; filter: grayscale(0.7); }
+
+    /* ---------- Selection sweep ---------- */
+    @keyframes select-sweep {
+      0%   { transform: translateX(-120%) skewX(-18deg); opacity: 0.9; }
+      100% { transform: translateX(220%) skewX(-18deg); opacity: 0; }
+    }
+    .choice-selected .sweep-bar {
+      position: absolute;
+      top: 0; bottom: 0; width: 45%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+      animation: select-sweep 0.62s ease-out;
+      pointer-events: none;
+    }
+
+    /* ---------- Correct / wrong reveals ---------- */
+    @keyframes correct-bloom {
+      0%   { transform: scale(1);    box-shadow: 0 0 0 0 rgba(163,230,53,0.85); }
+      35%  { transform: scale(1.16); box-shadow: 0 0 0 14px rgba(163,230,53,0); }
+      60%  { transform: scale(0.97); }
+      100% { transform: scale(1);    box-shadow: 0 0 0 4px rgba(163,230,53,0.4); }
+    }
+    @keyframes wrong-shake {
+      0%, 100% { transform: translateX(0); }
+      15%  { transform: translateX(-11px) rotate(-2.5deg); }
+      30%  { transform: translateX(10px)  rotate(2.5deg); }
+      45%  { transform: translateX(-8px)  rotate(-2deg); }
+      60%  { transform: translateX(6px)   rotate(1.5deg); }
+      80%  { transform: translateX(-3px); }
+    }
+    @keyframes verdict-rise {
+      0%   { opacity: 0; transform: translateY(22px) scale(0.94); }
+      60%  { opacity: 1; transform: translateY(-5px) scale(1.02); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .verdict-card { animation: verdict-rise 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    /* ---------- Particle burst for correct answers ---------- */
+    @keyframes particle-fly {
+      0%   { opacity: 1; transform: translate(0,0) scale(1); }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2); }
+    }
+    .particle {
+      position: fixed;
+      width: 8px; height: 8px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 70;
+      animation: particle-fly 0.85s cubic-bezier(0.15, 0.7, 0.35, 1) forwards;
+    }
+
+    /* ---------- Ripple on click ---------- */
+    @keyframes ripple-out {
+      0%   { transform: scale(0.2); opacity: 0.6; }
+      100% { transform: scale(2.6); opacity: 0; }
+    }
+    .ripple {
+      position: absolute;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: currentColor;
+      pointer-events: none;
+      animation: ripple-out 0.6s ease-out forwards;
+    }
+
+    /* ---------- Concept mastery bars ---------- */
+    @keyframes mastery-fill {
+      0%   { width: 0%; }
+      100% { width: var(--pct, 0%); }
+    }
+    .mastery-fill { animation: mastery-fill 0.75s cubic-bezier(0.34, 1.2, 0.64, 1); }
+    .mastery-row { transition: transform 0.16s ease, background-color 0.16s ease; }
+    .mastery-row:hover { transform: translateX(4px); }
+    .concept-spark { transition: opacity 0.2s ease, transform 0.2s ease; }
+
+    /* ---------- Toast ---------- */
+    #toast-host {
+      position: fixed;
+      bottom: 1.75rem;
+      right: 1.75rem;
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      align-items: flex-end;
+      pointer-events: none;
+    }
+    @keyframes toast-in {
+      0%   { opacity: 0; transform: translateX(50px) scale(0.9); }
+      55%  { opacity: 1; transform: translateX(-6px) scale(1.02); }
+      100% { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    @keyframes toast-out {
+      0%   { opacity: 1; transform: translateX(0) scale(1); max-height: 120px; }
+      100% { opacity: 0; transform: translateX(40px) scale(0.94); max-height: 0; }
+    }
+    .toast {
+      pointer-events: auto;
+      animation: toast-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: opacity 0.32s ease, transform 0.32s ease, max-height 0.32s ease, margin 0.32s ease;
+      max-height: 120px;
+    }
+    .toast.leaving {
+      opacity: 0;
+      transform: translateX(40px) scale(0.94);
+      max-height: 0;
+      margin-bottom: -0.6rem;
+    }
+    .toast-bar { animation: toast-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    /* ---------- Timer urgency ---------- */
+    @keyframes timer-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .timer-critical { animation: timer-pulse 0.8s ease-in-out infinite; }
+    @keyframes timer-throb {
+      0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(255,107,91,0.6); }
+      50%      { transform: scale(1.07); box-shadow: 0 0 0 10px rgba(255,107,91,0); }
+    }
+    .timer-urgent { animation: timer-throb 1s ease-in-out infinite; }
+
+    /* ---------- Generic row / card entrance ---------- */
+    @keyframes fade-slide {
+      0%   { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .enter { animation: fade-slide 0.34s cubic-bezier(0.34, 1.2, 0.64, 1); }
+
+    /* ---------- Fullscreen lockdown ---------- */
+    .fs-warning-overlay {
+      position: fixed; inset: 0; z-index: 60;
+      background: linear-gradient(160deg, rgba(214,58,47,0.97), rgba(26,36,54,0.97));
+      display: flex; align-items: center; justify-content: center; flex-direction: column;
+      color: white; text-align: center; padding: 2rem;
+    }
+    @keyframes shield-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50%      { transform: scale(1.09); opacity: 1; }
+    }
+    .fs-shield { animation: shield-pulse 1.5s ease-in-out infinite; }
+
+    /* ---------- Floating Live Emojis & Recovery Station ---------- */
+    @keyframes float-up-fade {
+      0%   { transform: translateY(0) scale(0.6) rotate(0deg); opacity: 0; }
+      15%  { opacity: 1; transform: translateY(-35px) scale(1.3) rotate(-6deg); }
+      70%  { opacity: 0.95; }
+      100% { transform: translateY(-360px) scale(1.6) rotate(16deg); opacity: 0; }
+    }
+    .floating-emoji {
+      position: fixed;
+      animation: float-up-fade 2.4s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+      pointer-events: none;
+      font-size: 2.6rem;
+      z-index: 100;
+      filter: drop-shadow(0 6px 16px rgba(0,0,0,0.6));
+    }
+    @keyframes supermax-shimmer {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .supermax-glow {
+      background: linear-gradient(90deg, #ffb800, #ff4d4d, #00f2fe, #ffb800);
+      background-size: 300% 300%;
+      animation: supermax-shimmer 2.5s ease infinite;
+    }
+  </style>
+</head>
+<body class="text-chalk min-h-screen antialiased flex flex-col font-sans text-base">
+
+  <!-- Toast Host (transient feedback popups) -->
+  <div id="toast-host" aria-live="polite"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3.5">
+      <div class="h-11 w-11 rounded-2xl brand-mark flex items-center justify-center">
+        <span class="text-2xl font-black text-ink-900">V</span>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-black uppercase wordmark">VectorSelect</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-copper-500/12 text-copper-400 border border-copper-500/30 font-bold uppercase tracking-wider">by Mr. F</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-brass-500/12 text-brass-400 border border-brass-500/30 font-bold">Student Portal</span>
+        </div>
+        <div id="nav-subtitle" class="text-sm font-semibold text-chalk/70">AP Physics Assessment Dispatch</div>
+      </div>
+    </div>
+
+    <!-- Active Timer & Status (Shown during test) -->
+    <div id="test-status-bar" class="hidden flex items-center gap-4">
+      <div id="teacher-led-badge" class="hidden px-3.5 py-1.5 rounded-xl bg-plum-500/12 border border-plum-500/35 text-plum-400 text-xs font-black uppercase tracking-wider flex items-center gap-2">
+        <span class="h-2 w-2 rounded-full bg-plum-400 animate-pulse"></span>
+        Teacher-Led Live Session
+      </div>
+      <!-- Overall Session Timer (Student-Led mode only) -->
+      <div id="timer-container" class="hidden bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-xl flex items-center gap-2.5 shadow-inner transition-colors duration-500">
+        <span id="timer-dot" class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="timer-label" class="text-xs text-slate-400 font-bold uppercase tracking-wider">Time Left:</span>
+        <span id="timer-display" class="font-mono text-lg font-black text-indigo-400">00:00</span>
+      </div>
+      <!-- Per-Question Timer (Teacher-Led mode only) -->
+      <div id="student-perq-box" class="hidden bg-slate-800/80 border border-slate-700 px-3 py-2 rounded-xl flex items-center gap-2">
+        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Question:</span>
+        <span id="student-perq-timer" class="font-mono text-sm font-black text-amber-400">--:--</span>
+      </div>
+      <!-- Instructor Paused Session Banner -->
+      <div id="student-pause-badge" class="hidden px-3.5 py-1.5 rounded-xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-black uppercase tracking-wider flex items-center gap-2 animate-pulse">
+        <span class="h-2 w-2 rounded-full bg-amber-400"></span>
+        ⏸️ Instructor Paused Session
+      </div>
+      <!-- Live Dynamic Score & Streak Pill (0 - 120 SUPER MAX) -->
+      <div id="student-points-pill" class="bg-slate-800/90 border border-plasma-500/40 px-3 py-1.5 rounded-xl flex items-center gap-2 shadow-inner">
+        <span class="text-[11px] text-plasma-400 font-black tracking-wider uppercase">Score</span>
+        <span id="student-points-val" class="font-mono text-base font-black text-white">0.0</span>
+        <span id="student-supermax-badge" class="hidden px-2 py-0.5 rounded-md supermax-glow text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-sm">SUPER MAX</span>
+        <span id="student-streak-pill" class="hidden px-2 py-0.5 rounded-full bg-solar-500/20 text-solar-300 border border-solar-500/40 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+          🔥 <span id="student-streak-val">0</span>
+        </span>
+      </div>
+      <!-- Calculator Toggle -->
+      <button id="calc-toggle-btn" onclick="toggleCalculator()" class="hidden px-3.5 py-2 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-bold transition">
+        🧮 Calculator
+      </button>
+      <div class="hidden sm:block bg-slate-800/80 border border-slate-700 px-4 py-2 rounded-xl text-sm font-semibold text-slate-300">
+        Student: <span id="active-student-display" class="text-indigo-400 font-bold"></span>
+      </div>
+      <button onclick="confirmSubmitExam()" id="btn-submit-header" class="pressable px-6 py-2.5 rounded-xl btn-aurora text-slate-950 font-black text-sm shadow-xl transition">
+        Submit Exam
+      </button>
+    </div>
+
+  </header>
+
+  <!-- Main Container (Expanded width for large high-resolution question cards) -->
+  <main class="flex-1 max-w-[1750px] w-full mx-auto p-3 sm:p-5 md:p-8">
+
+    <!-- VIEW 1: STUDENT JOIN SCREEN -->
+    <section id="view-student-entry" class="max-w-lg mx-auto py-12 space-y-6">
+      <div class="quantum-card rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden space-y-6 text-center">
+        <div class="absolute -right-10 -top-10 w-44 h-44 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="h-16 w-16 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 flex items-center justify-center mx-auto text-3xl font-black">
+          📝
+        </div>
+
+        <div>
+          <h2 class="text-3xl font-black text-white tracking-tight">Join Your Assessment</h2>
+          <p class="text-sm text-slate-400 mt-1.5">Enter your name and the join code provided by Mr. F.</p>
+        </div>
+
+        <div class="quantum-line my-2"></div>
+
+        <form onsubmit="handleStudentJoin(event)" class="space-y-5 text-left">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Full Name</label>
+            <input type="text" id="join-student-name" placeholder="e.g. Jane Smith" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-base text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Join Code</label>
+            <input type="text" id="join-code-input" maxlength="6" placeholder="e.g. A3BX9K" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-lg text-white placeholder-slate-500 tracking-widest font-mono text-center uppercase focus:outline-none focus:ring-2 focus:ring-cyan-400 font-black">
+          </div>
+          <div id="join-error-msg" class="hidden text-sm text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl px-4 py-3 font-semibold"></div>
+          <button type="submit" id="btn-join-exam" class="pressable w-full py-4 rounded-xl btn-aurora text-slate-950 font-black text-base shadow-xl transition">
+            Join Assessment &rarr;
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- VIEW 1.5: STUDENT WAITING ROOM / LOBBY -->
+    <section id="view-lobby" class="hidden max-w-xl mx-auto py-12 space-y-6">
+      <div class="quantum-card rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden space-y-6 text-center">
+        <div class="absolute -right-10 -top-10 w-48 h-48 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative mx-auto w-20 h-20 flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping"></div>
+          <div class="h-16 w-16 rounded-2xl bg-slate-900 border border-emerald-400/50 text-emerald-400 flex items-center justify-center text-3xl font-black shadow-lg shadow-emerald-500/30 relative z-10">
+            ⏳
+          </div>
+        </div>
+
+        <div>
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-bold uppercase tracking-wider">
+            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Connected &amp; Waiting
+          </span>
+          <h2 class="text-3xl font-black text-white tracking-tight mt-3">Waiting for Instructor to Start</h2>
+          <p id="lobby-quiz-title" class="text-base text-cyan-300 font-bold mt-2"></p>
+          <p class="text-sm text-slate-400 mt-1">Hello <span id="lobby-student-name" class="text-white font-bold"></span>! You're checked in. The assessment will begin automatically once Mr. F starts the session.</p>
+        </div>
+
+        <div class="quantum-line my-2"></div>
+
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 text-left space-y-3">
+          <div class="flex items-center justify-between text-xs text-slate-400">
+            <span class="font-bold uppercase tracking-wider">Students in Room:</span>
+            <span id="lobby-student-count" class="font-mono text-emerald-400 font-black">1 Connected</span>
+          </div>
+          <div id="lobby-students-list" class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1"></div>
+        </div>
+
+        <div class="text-sm text-slate-400 font-mono">
+          Session Code: <span id="lobby-join-code" class="plasma-code font-black text-2xl tracking-widest font-mono ml-2"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: ACTIVE ASSESSMENT RUNNER -->
+    <section id="view-exam-runner" class="hidden grid grid-cols-1 xl:grid-cols-12 lg:grid-cols-12 gap-8 lg:gap-10 relative">
+      
+      <!-- Left Column: Main Question Area (Expands from 9 columns to 12 when sidebar collapses) -->
+      <div id="runner-main-col" class="xl:col-span-9 lg:col-span-8 space-y-6 transition-all duration-300">
+        <div class="quantum-card rounded-3xl p-5 md:p-7 shadow-2xl space-y-6">
+          
+          <!-- Question Header Bar -->
+          <div class="flex items-center justify-between pb-3">
+            <div class="flex items-center gap-3.5">
+              <span id="active-q-badge" class="px-4.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black text-lg tracking-wide shadow-md">Q1</span>
+              <span id="active-q-subinfo" class="text-base text-slate-200 font-bold">Question 1 of 10</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <button onclick="toggleSidebarCollapse()" id="btn-toggle-space" class="pressable px-3.5 py-2 rounded-xl border border-slate-700 hover:border-cyan-500/50 bg-slate-800 text-slate-200 text-sm font-bold flex items-center gap-2 transition" title="Toggle full-width question space">
+                <span id="btn-toggle-space-icon">⛶</span> <span id="btn-toggle-space-text">Expand Space</span>
+              </button>
+              <button onclick="toggleFlagCurrentQuestion()" id="flag-btn" class="pressable px-4 py-2 rounded-xl border border-slate-700 hover:border-amber-500/50 bg-slate-800 text-slate-200 text-sm font-bold flex items-center gap-2 transition">
+                <span>⚐</span> <span id="flag-btn-text">Flag for Review</span>
+              </button>
+            </div>
+          </div>
+          <div class="quantum-line"></div>
+
+          <!-- Question Card Visual Display (High Resolution & Full Width Area) -->
+          <div id="q-card-container" class="hidden bg-slate-950/80 border border-slate-800 rounded-3xl p-3 sm:p-4 md:p-5 text-center shadow-inner">
+            <div id="q-card-white-box" class="bg-white rounded-2xl p-2 sm:p-4 shadow-xl inline-block w-full overflow-hidden transition-all duration-300">
+              <img id="q-card-img" src="" alt="AP Physics Question Card" class="mx-auto max-h-[92vh] w-full object-contain cursor-zoom-in transition-transform duration-200 hover:scale-[1.01]" onclick="openImageModal(this.src)" title="Click to zoom question card (125%+ vector inspector)">
+            </div>
+            <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-300 mt-3 px-1 font-medium">
+              <span class="font-mono text-slate-400 text-xs">💡 Authentic College Board Vector Render • Click image to zoom (125%+)</span>
+              
+              <div class="flex items-center gap-2">
+                <!-- In-page scaling pills -->
+                <div class="flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-xl">
+                  <span class="text-xs font-bold text-slate-400 px-1">Scale:</span>
+                  <button onclick="setInPageCardZoom(1.0)" id="btn-card-zoom-100" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-cyan-300 transition" title="Standard Size (100%)">100%</button>
+                  <button onclick="setInPageCardZoom(1.2)" id="btn-card-zoom-120" class="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition" title="Enlarge by 120%">120%</button>
+                  <button onclick="setInPageCardZoom(1.4)" id="btn-card-zoom-140" class="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition" title="Enlarge by 140%">140%</button>
+                </div>
+
+                <button onclick="openImageModal(document.getElementById('q-card-img').src)" class="pressable px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs transition flex items-center gap-1.5 shadow-md" title="Open full screen inspection modal at 125%+">
+                  🔍 Zoom Full Screen (125%+)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fallback Question Prompt Text -->
+          <div id="q-prompt-text" class="hidden text-xl md:text-2xl text-slate-100 font-medium leading-relaxed p-6 bg-slate-950/80 rounded-2xl border border-slate-800"></div>
+
+          <!-- Instructor Paused Session Banner -->
+          <div id="student-paused-banner" class="hidden my-3 p-4 rounded-2xl bg-amber-500/15 border border-amber-500/40 text-amber-300 text-center text-sm font-bold animate-pulse">
+            ⏸️ The instructor has paused this session to explain concepts. Answer choices are temporarily frozen.
+          </div>
+
+          <!-- Answer Choices Container (Large, High-Contrast Selectors) -->
+          <div id="q-choices-container" class="pt-4"></div>
+
+          <!-- Teacher-Led Discussion Feedback (shown when teacher reveals answers) -->
+          <div id="discussion-feedback" class="hidden mt-4 p-5 rounded-2xl border space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="text-base font-black uppercase tracking-wider text-purple-400">📊 Class Discussion</span>
+              <span id="discussion-feedback-status" class="text-xs font-bold text-slate-400"></span>
+            </div>
+            <div id="discussion-feedback-content" class="space-y-2"></div>
+          </div>
+
+          <!-- Point Redemption & Recovery Station (Cumulative Spiral Review) -->
+          <div id="recovery-station-card" class="hidden mt-6 p-6 rounded-3xl quantum-card border-2 border-plasma-500/60 shadow-2xl relative overflow-hidden transition-all duration-300 enter">
+            <div class="absolute -right-8 -top-8 w-40 h-40 bg-plasma-500/15 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <!-- Incorrect Answer Trigger Banner -->
+            <div class="mb-4 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 flex items-center justify-between gap-3 text-xs">
+              <div class="flex items-center gap-2.5">
+                <span class="text-xl">⚠️</span>
+                <div>
+                  <div class="font-black text-rose-300 uppercase tracking-wide">Locked Answer Incorrect (-35% Point Deduction)</div>
+                  <div class="text-slate-300 font-medium">Point Recovery Station is activated! You have time remaining — solve this challenge to redeem <strong class="text-plasma-300">+3.5 PTS</strong> and restore your lost points!</div>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-xl bg-rose-500/25 text-rose-200 border border-rose-500/50 font-mono font-black text-[11px] shrink-0 uppercase tracking-wider">Redeem Points</span>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-3">
+                <div class="h-11 w-11 rounded-2xl bg-plasma-500/20 border border-plasma-500/50 text-plasma-300 flex items-center justify-center text-2xl font-black">
+                  ⚡
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <h3 class="text-base font-black text-white uppercase tracking-wider">Point Recovery Station</h3>
+                    <span id="recovery-spiral-badge" class="px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-[10px] font-black uppercase tracking-wider">Spiral Review</span>
+                    <span id="recovery-rigor-badge" class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-[10px] font-black uppercase tracking-wider">Calculus</span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-0.5">Clock still running! Solve this rapid scenario to redeem points (+3.5 pts) and boost towards SUPER MAX.</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-plasma-400 uppercase tracking-wider">Recovery Value:</span>
+                <span class="px-3 py-1 rounded-xl bg-plasma-500/20 text-plasma-300 font-mono text-sm font-black border border-plasma-500/50 shadow-sm">+3.5 PTS</span>
+              </div>
+            </div>
+
+            <!-- Mode Toggle / Format Bar -->
+            <div id="recovery-format-bar" class="flex items-center justify-between mt-3 text-xs">
+              <span id="recovery-format-badge" class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold uppercase tracking-wider">
+                🎮 Interactive Simulation
+              </span>
+              <button type="button" onclick="toggleRecoveryFormat()" id="btn-toggle-recovery-format" class="text-xs text-plasma-400 hover:text-plasma-300 underline font-semibold cursor-pointer">
+                Switch to Theory Challenge ⇄
+              </button>
+            </div>
+
+            <!-- Simulation Arena (Canvas-based interactive mini-game) -->
+            <div id="recovery-sim-container" class="hidden mt-3"></div>
+
+            <!-- Challenge Prompt (For Theory MCQs) -->
+            <div class="mt-4 p-4 rounded-2xl bg-slate-950/80 border border-slate-800 text-slate-100 text-sm md:text-base leading-relaxed" id="recovery-prompt-text"></div>
+
+            <!-- Challenge Choices Grid (For Theory MCQs) -->
+            <div id="recovery-choices-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4"></div>
+
+            <!-- Challenge Feedback & Solution -->
+            <div id="recovery-feedback-box" class="hidden mt-4 p-4 rounded-2xl border text-sm leading-relaxed enter"></div>
+          </div>
+
+          <!-- Navigation Controls (Visible in Student-Led Mode) -->
+          <div id="nav-controls" class="flex items-center justify-between pt-6 border-t border-slate-800">
+            <button onclick="prevQuestion()" id="btn-prev-q" class="pressable px-7 py-3.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-100 font-extrabold text-base transition disabled:opacity-30 disabled:pointer-events-none">
+              &larr; Previous Question
+            </button>
+            <span id="q-answered-status" class="text-sm text-slate-400 font-semibold"></span>
+            <button onclick="nextQuestion()" id="btn-next-q" class="pressable px-9 py-3.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black text-base shadow-lg shadow-cyan-600/30 transition">
+              Next Question &rarr;
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Question Grid & Progress Sidebar (3 of 12 columns, Collapsible) -->
+      <div id="runner-sidebar-col" class="xl:col-span-3 lg:col-span-4 space-y-4 transition-all duration-300">
+        
+        <!-- Large Question Timer on Right Panel -->
+        <div id="sidebar-timer-card" class="quantum-card rounded-3xl p-5 shadow-2xl space-y-1.5 text-center relative overflow-hidden border border-cyan-500/35 bg-slate-950/90">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="sidebar-timer-dot" class="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+              <span id="sidebar-timer-label" class="text-xs font-black uppercase tracking-wider text-slate-300">Question Timer</span>
+            </div>
+            <span id="sidebar-pause-badge" class="hidden px-2 py-0.5 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-[10px] font-black uppercase tracking-wider animate-pulse">⏸️ Paused</span>
+          </div>
+          
+          <!-- BIG prominent digits -->
+          <div id="sidebar-timer-display" class="font-mono text-4xl sm:text-5xl font-black text-amber-400 tracking-wider py-1 drop-shadow-md">
+            00:00
+          </div>
+          <div id="sidebar-timer-subtext" class="text-[11px] text-slate-400 font-semibold">Time Remaining For Question</div>
+        </div>
+
+        <!-- Questions Navigation Grid Card with Arrow Key Collapse Handles -->
+        <div class="quantum-card rounded-3xl p-6 shadow-2xl space-y-5 sticky top-24 relative">
+          
+          <!-- Left Protruding Arrow Key Collapse Handle on Questions Panel Borderline (Centered vertically, no overlap with left window) -->
+          <button onclick="toggleSidebarCollapse()" class="hidden lg:flex absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 h-14 w-6 rounded-l-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs items-center justify-center shadow-xl transition-all z-30 cursor-pointer border-2 border-r-0 border-white hover:scale-105 active:scale-95" title="Click Arrow to Hide Right Panel & Maximize Question Window">
+            ▶
+          </button>
+          
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <h4 class="text-sm font-black uppercase tracking-wider text-slate-300">Questions</h4>
+              <!-- Header Arrow Button to Hide Right Panel -->
+              <button onclick="toggleSidebarCollapse()" id="btn-collapse-sidebar" title="Hide Right Panel & Maximize Question Window" class="pressable px-2.5 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-black flex items-center gap-1.5 transition shadow-sm">
+                <span>Hide</span>
+                <span class="text-base font-black">➔</span>
+              </button>
+            </div>
+            <span id="progress-count" class="text-sm font-bold text-cyan-400">0 / 0 Answered</span>
+          </div>
+
+          <!-- Question Buttons Grid (p-2.5 ensures active button borders never clip against scroll edges) -->
+          <div id="q-grid-buttons" class="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-80 overflow-y-auto p-2.5 rounded-2xl bg-slate-950/40 border border-slate-800/80"></div>
+
+          <!-- Legend -->
+          <div class="border-t border-slate-800 pt-4 space-y-2.5 text-sm text-slate-300 font-medium">
+            <div class="flex items-center gap-2">
+              <span class="h-3.5 w-3.5 rounded-md bg-cyan-600 border border-cyan-400"></span> Answered
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="h-3.5 w-3.5 rounded-md bg-slate-800 border border-slate-700"></span> Unanswered
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="h-3.5 w-3.5 rounded-md bg-amber-500/20 border border-amber-500 text-amber-400 flex items-center justify-center font-bold text-[10px]">⚐</span> Flagged
+            </div>
+          </div>
+
+          <button onclick="confirmSubmitExam()" id="btn-finish-sidebar" class="pressable w-full py-4 rounded-xl btn-aurora text-slate-950 font-black text-base shadow-xl transition">
+            Finish &amp; Submit Exam
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Prominent Floating Arrow Key (ALWAYS visible on screen edge when right panel is hidden) -->
+    <button id="sidebar-slider-tab" onclick="toggleSidebarCollapse()" class="hidden fixed right-0 top-1/2 -translate-y-1/2 z-50 px-3.5 py-6 rounded-l-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 border-2 border-r-0 border-white shadow-2xl hover:scale-105 hover:shadow-cyan-400/50 transition-all flex flex-col items-center gap-2 group cursor-pointer" title="Click Arrow to Show Questions Panel & Timer">
+      <span class="text-2xl font-black transition-transform group-hover:-translate-x-1">◀</span>
+      <span class="text-[11px] font-black uppercase tracking-widest [writing-mode:vertical-lr] rotate-180 text-slate-950 font-sans">QUESTIONS</span>
+      <span id="slider-tab-badge" class="px-2 py-0.5 rounded-full bg-slate-950 text-cyan-300 text-[10px] font-mono font-black flex items-center justify-center">0/0</span>
+    </button>
+
+    <!-- VIEW 3: SUBMISSION RESULT & SUMMARY -->
+    <section id="view-result" class="hidden max-w-2xl mx-auto py-8 space-y-6">
+      <div class="quantum-card rounded-3xl p-8 md:p-10 text-center space-y-6 shadow-2xl">
+        <div class="h-20 w-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto text-3xl font-black shadow-lg shadow-emerald-500/10">
+          &check;
+        </div>
+        
+        <div>
+          <h2 class="text-3xl md:text-4xl font-black text-white">Assessment Submitted!</h2>
+          <p class="text-base text-slate-400 mt-2">Well done, <span id="res-student-name" class="font-bold text-white"></span>! Your score has been recorded.</p>
+        </div>
+
+        <!-- Big Score Display -->
+        <div class="grid grid-cols-3 gap-4 bg-slate-950/80 border border-slate-800 rounded-2xl p-6 shadow-inner">
+          <div>
+            <span class="text-xs uppercase font-extrabold text-slate-500 block">Score</span>
+            <span id="res-score" class="text-3xl md:text-4xl font-black text-indigo-400 mt-1 block">0 / 0</span>
+          </div>
+          <div>
+            <span class="text-xs uppercase font-extrabold text-slate-500 block">Accuracy</span>
+            <span id="res-percentage" class="text-3xl md:text-4xl font-black text-emerald-400 mt-1 block">0%</span>
+          </div>
+          <div>
+            <span class="text-xs uppercase font-extrabold text-slate-500 block">Time</span>
+            <span id="res-time" class="text-3xl md:text-4xl font-black text-amber-400 mt-1 block">00:00</span>
+          </div>
+        </div>
+
+        <!-- Integrity Notice -->
+        <div id="integrity-notice" class="hidden text-sm text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 leading-relaxed text-left">
+          <strong class="text-amber-300">⚠️ Integrity Alert:</strong> You exited the exam window <span id="res-tab-switches" class="font-bold">0</span> time(s). This audit event has been reported to Mr. F.
+        </div>
+
+        <!-- Answer Review Status -->
+        <div id="review-locked-notice" class="text-sm text-slate-400 bg-slate-900 border border-slate-800 rounded-2xl p-4 leading-relaxed text-left">
+          🔒 <strong class="text-slate-200">Answer Review Locked:</strong> Individual answers and explanations are protected for exam security until released by your instructor.
+        </div>
+
+        <button onclick="showLeaderboardView()" id="btn-view-leaderboard" class="w-full py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm shadow-xl shadow-indigo-600/30 transition">
+          View Class Leaderboard 🏆
+        </button>
+
+        <!-- Concept Mastery Button (always available — no answer leakage risk) -->
+        <button onclick="showMasteryView()" id="btn-view-mastery" class="pressable w-full py-4 rounded-xl bg-ink-700 border border-brass-500/40 text-brass-400 font-extrabold text-sm transition hover:bg-ink-600">
+          🎯 See My Concept Breakdown
+        </button>
+
+        <!-- Remediation Button (populated after mastery view reveals weak spots) -->
+        <button onclick="startRemediationQuiz()" id="btn-start-remediation" class="hidden w-full py-4 rounded-xl bg-coral-500 hover:bg-coral-400 text-ink-900 font-extrabold text-sm transition shadow-xl shadow-coral-600/30">
+          🔁 Retry My Missed Questions
+        </button>
+
+        <!-- Review Answers Button (shown only if instructor toggles permission) -->
+        <button onclick="showReviewView()" id="btn-review-answers" class="hidden w-full py-4 rounded-xl border border-indigo-500 bg-indigo-600/15 hover:bg-indigo-600/25 text-indigo-300 font-extrabold text-sm transition">
+          📋 Review Answers & Scoring Rationales
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW 4: LIVE LEADERBOARD -->
+    <section id="view-leaderboard" class="hidden space-y-6 max-w-4xl mx-auto py-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-bold uppercase tracking-wider">
+            Live Rankings
+          </div>
+          <h2 class="text-3xl font-black text-white mt-2">Class Leaderboard</h2>
+          <p id="leaderboard-assessment-name" class="text-sm text-slate-400 mt-0.5"></p>
+        </div>
+      </div>
+
+      <!-- Podium for Top 3 -->
+      <div id="leaderboard-podium" class="hidden grid grid-cols-3 gap-4 max-w-lg mx-auto"></div>
+
+      <div class="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-950/80 border-b border-slate-800 text-xs uppercase font-extrabold text-slate-400">
+              <tr>
+                <th class="py-4 px-4 w-16 text-center">Rank</th>
+                <th class="py-4 px-4">Student Name</th>
+                <th class="py-4 px-4">Class</th>
+                <th class="py-4 px-4 text-center">Score</th>
+                <th class="py-4 px-4 text-center">Accuracy</th>
+                <th class="py-4 px-4 text-right">Time Spent</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody" class="divide-y divide-slate-800/60 font-medium"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Class Average Bar -->
+      <div id="leaderboard-stats" class="hidden bg-slate-900/80 border border-slate-800 rounded-2xl p-5 grid grid-cols-3 gap-4 text-center">
+        <div>
+          <span class="text-xs uppercase font-extrabold text-slate-500 block">Class Average</span>
+          <span id="lb-class-avg" class="text-2xl font-black text-indigo-400">--%</span>
+        </div>
+        <div>
+          <span class="text-xs uppercase font-extrabold text-slate-500 block">Submissions</span>
+          <span id="lb-total-subs" class="text-2xl font-black text-emerald-400">0</span>
+        </div>
+        <div>
+          <span class="text-xs uppercase font-extrabold text-slate-500 block">Avg Time</span>
+          <span id="lb-avg-time" class="text-2xl font-black text-amber-400">--:--</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: ANSWER REVIEW -->
+    <section id="view-review" class="hidden space-y-6 max-w-4xl mx-auto py-6">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-3xl font-black text-white">📋 Official Answer Review</h2>
+          <p class="text-sm text-slate-400 mt-1">Review your answers alongside official College Board scoring rationales</p>
+        </div>
+        <button onclick="showResultView()" class="px-5 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-sm transition">
+          ← Back to Results
+        </button>
+      </div>
+      <div id="review-questions-list" class="space-y-6"></div>
+    </section>
+
+  <!-- VIEW 6: CONCEPT MASTERY BREAKDOWN -->
+    <section id="view-mastery" class="hidden space-y-6 max-w-4xl mx-auto py-6">
+      <div class="flex items-center justify-between border-b border-ink-600 pb-5">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brass-500/12 border border-brass-500/30 text-brass-400 text-xs font-bold uppercase tracking-wider">
+            Per-Concept Accuracy
+          </div>
+          <h2 class="text-3xl font-black text-chalk mt-2">🎯 Concept Mastery</h2>
+          <p id="mastery-subtitle" class="text-sm text-chalk/60 mt-1">Where your answers landed by physics topic</p>
+        </div>
+        <button onclick="showResultView()" class="pressable px-5 py-2.5 rounded-xl border border-ink-500 bg-ink-700 hover:bg-ink-600 text-chalk font-extrabold text-sm transition">
+          ← Back to Results
+        </button>
+      </div>
+
+      <!-- Summary tiles -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-ink-800/80 border border-ink-600 rounded-2xl p-4 text-center">
+          <div class="text-[10px] uppercase font-extrabold text-chalk/45 tracking-wider">Concepts Hit</div>
+          <div id="mstat-concepts" class="text-3xl font-black text-brass-400 mt-1">0</div>
+        </div>
+        <div class="bg-ink-800/80 border border-ink-600 rounded-2xl p-4 text-center">
+          <div class="text-[10px] uppercase font-extrabold text-chalk/45 tracking-wider">Secured</div>
+          <div id="mstat-secured" class="text-3xl font-black text-lime-400 mt-1">0</div>
+        </div>
+        <div class="bg-ink-800/80 border border-ink-600 rounded-2xl p-4 text-center">
+          <div class="text-[10px] uppercase font-extrabold text-chalk/45 tracking-wider">Developing</div>
+          <div id="mstat-developing" class="text-3xl font-black text-copper-400 mt-1">0</div>
+        </div>
+        <div class="bg-ink-800/80 border border-coral-500/40 rounded-2xl p-4 text-center">
+          <div class="text-[10px] uppercase font-extrabold text-coral-400/70 tracking-wider">Needs Work</div>
+          <div id="mstat-priority" class="text-3xl font-black text-coral-400 mt-1">0</div>
+        </div>
+      </div>
+
+      <!-- Priority list: what to study next -->
+      <div id="mastery-priority" class="hidden bg-coral-500/10 border border-coral-500/35 rounded-3xl p-5 space-y-2"></div>
+
+      <!-- Full per-concept breakdown -->
+      <div id="mastery-list" class="space-y-2.5"></div>
+
+      <!-- Per-question grid inside each concept is rendered on demand -->
+    </section>
+
+    <!-- VIEW 7: REMEDIATION QUIZ -->
+    <section id="view-remediation" class="hidden space-y-6 max-w-4xl mx-auto py-6">
+      <div class="flex items-center justify-between border-b border-ink-600 pb-5">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-coral-500/12 border border-coral-500/30 text-coral-400 text-xs font-bold uppercase tracking-wider">
+            Personalized Retry
+          </div>
+          <h2 class="text-3xl font-black text-chalk mt-2">🔁 Retry Your Missed Questions</h2>
+          <p id="remediation-subtitle" class="text-sm text-chalk/60 mt-1">A fresh attempt at only the questions you got wrong</p>
+        </div>
+        <button onclick="exitRemediation()" class="pressable px-5 py-2.5 rounded-xl border border-ink-500 bg-ink-700 hover:bg-ink-600 text-chalk font-extrabold text-sm transition">
+          ← Back
+        </button>
+      </div>
+      <div id="remediation-host"></div>
+    </section>
+
+  </main>
+
+  <!-- High-Resolution Vector Zoom Modal (Interactive 120%+ Zoom & Pan Inspector) -->
+  <div id="image-modal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col select-none overflow-hidden" onclick="closeImageModal()">
+    
+    <!-- Top HUD Toolbar -->
+    <div class="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-6 py-2.5 bg-slate-900/95 border-b border-slate-800 shadow-xl shrink-0 z-10" onclick="event.stopPropagation()">
+      <div class="flex items-center gap-3">
+        <span class="text-cyan-400 font-black text-sm tracking-wide flex items-center gap-2">
+          <span class="text-lg">🔍</span> <span class="hidden sm:inline">High-Resolution</span> Question Inspector
+        </span>
+        <span class="hidden lg:inline-block text-xs font-mono text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-700">
+          💡 Drag to pan • Scroll wheel to zoom
+        </span>
+      </div>
+
+      <!-- Center Zoom Controls & Presets -->
+      <div class="flex items-center gap-2">
+        <button onclick="zoomModalImg(-0.15)" class="h-8 w-8 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-black text-base transition flex items-center justify-center pressable" title="Zoom Out (or scroll down)">−</button>
+        <span id="modal-zoom-display" class="font-mono text-xs font-black text-amber-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 min-w-[62px] text-center shadow-inner">125%</span>
+        <button onclick="zoomModalImg(0.15)" class="h-8 w-8 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 font-black text-base transition flex items-center justify-center pressable" title="Zoom In (or scroll up)">+</button>
+
+        <!-- Quick Scale Presets (Defaults to 125% - at least 120% bigger!) -->
+        <div class="flex items-center gap-1 ml-1 sm:ml-2 bg-slate-950 p-1 rounded-xl border border-slate-800">
+          <button onclick="setModalZoom(1.0)" id="btn-zoom-100" class="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">100%</button>
+          <button onclick="setModalZoom(1.25)" id="btn-zoom-125" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-md transition">125%</button>
+          <button onclick="setModalZoom(1.5)" id="btn-zoom-150" class="px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">150%</button>
+          <button onclick="setModalZoom(2.0)" id="btn-zoom-200" class="hidden sm:inline-block px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">200%</button>
+        </div>
+      </div>
+
+      <!-- Right Action Controls -->
+      <div class="flex items-center gap-2">
+        <button onclick="resetModalZoom()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-bold text-xs transition pressable" title="Reset to default 125% scale">
+          Reset
+        </button>
+        <button onclick="closeImageModal()" class="h-8 w-8 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/40 text-rose-300 font-black text-sm flex items-center justify-center transition pressable" title="Close Inspector (Esc)">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Interactive Pan/Zoom Canvas Area -->
+    <div id="modal-canvas-viewport" class="flex-1 w-full overflow-auto relative p-4 sm:p-8 flex items-center justify-center cursor-grab active:cursor-grabbing">
+      <div id="modal-img-wrapper" class="relative inline-block transition-transform duration-150 origin-center bg-white p-3 sm:p-5 rounded-3xl shadow-2xl border border-slate-200 max-w-full" onclick="event.stopPropagation()">
+        <img id="modal-img" src="" alt="High-Resolution Question Card" class="block mx-auto object-contain pointer-events-auto cursor-pointer" onclick="toggleModalZoomClick(event)" title="Click image to toggle 125% & 175% zoom">
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Scientific Calculator -->
+  <div id="calculator-panel" class="hidden calc-draggable bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl" style="top:100px;right:20px;width:340px;">
+    <div id="calc-drag-handle" class="flex items-center justify-between px-4 py-3 border-b border-slate-800 cursor-move select-none">
+      <span class="text-xs font-black uppercase tracking-wider text-indigo-400">🧮 Scientific Calculator</span>
+      <button onclick="toggleCalculator()" class="h-6 w-6 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center text-xs font-bold">✕</button>
+    </div>
+    <div class="p-3.5 space-y-2.5">
+      <input type="text" id="calc-display" readonly class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-right text-xl font-mono text-white focus:outline-none">
+      <div class="grid grid-cols-5 gap-1.5">
+        <button onclick="calcInput('sin(')" class="calc-btn h-9 text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">sin</button>
+        <button onclick="calcInput('cos(')" class="calc-btn h-9 text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">cos</button>
+        <button onclick="calcInput('tan(')" class="calc-btn h-9 text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">tan</button>
+        <button onclick="calcInput('Math.sqrt(')" class="calc-btn h-9 text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">√</button>
+        <button onclick="calcInput('Math.PI')" class="calc-btn h-9 text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">π</button>
+        <button onclick="calcInput('Math.log10(')" class="calc-btn h-9 text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">log</button>
+        <button onclick="calcInput('Math.log(')" class="calc-btn h-9 text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">ln</button>
+        <button onclick="calcInput('**')" class="calc-btn h-9 text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">xⁿ</button>
+        <button onclick="calcInput('(')" class="calc-btn h-9 text-xs bg-slate-800 text-slate-300 border border-slate-700">(</button>
+        <button onclick="calcInput(')')" class="calc-btn h-9 text-xs bg-slate-800 text-slate-300 border border-slate-700">)</button>
+        <button onclick="calcInput('7')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">7</button>
+        <button onclick="calcInput('8')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">8</button>
+        <button onclick="calcInput('9')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">9</button>
+        <button onclick="calcInput('/')" class="calc-btn h-10 text-sm bg-amber-600/20 text-amber-300 border border-amber-500/30">÷</button>
+        <button onclick="calcClear()" class="calc-btn h-10 text-sm bg-rose-600/20 text-rose-300 border border-rose-500/30">C</button>
+        <button onclick="calcInput('4')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">4</button>
+        <button onclick="calcInput('5')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">5</button>
+        <button onclick="calcInput('6')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">6</button>
+        <button onclick="calcInput('*')" class="calc-btn h-10 text-sm bg-amber-600/20 text-amber-300 border border-amber-500/30">×</button>
+        <button onclick="calcBackspace()" class="calc-btn h-10 text-sm bg-rose-600/20 text-rose-300 border border-rose-500/30">⌫</button>
+        <button onclick="calcInput('1')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">1</button>
+        <button onclick="calcInput('2')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">2</button>
+        <button onclick="calcInput('3')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">3</button>
+        <button onclick="calcInput('-')" class="calc-btn h-10 text-sm bg-amber-600/20 text-amber-300 border border-amber-500/30">−</button>
+        <button onclick="calcInput('Math.E')" class="calc-btn h-10 text-xs bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">e</button>
+        <button onclick="calcInput('0')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700 col-span-2">0</button>
+        <button onclick="calcInput('.')" class="calc-btn h-10 text-sm bg-slate-800 text-white border border-slate-700">.</button>
+        <button onclick="calcInput('+')" class="calc-btn h-10 text-sm bg-amber-600/20 text-amber-300 border border-amber-500/30">+</button>
+        <button onclick="calcEvaluate()" class="calc-btn h-10 text-sm bg-emerald-600 text-white border border-emerald-500 font-black">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Exit Warning Overlay -->
+  <div id="fs-warning" class="hidden fs-warning-overlay">
+    <div class="max-w-md space-y-4">
+      <div class="text-6xl">⚠️</div>
+      <h2 class="text-3xl font-black">Fullscreen Required</h2>
+      <p class="text-base opacity-90">You have exited fullscreen mode. This event has been logged and reported to Mr. F.</p>
+      <button onclick="reEnterFullscreen()" class="px-8 py-3.5 rounded-xl bg-white text-red-600 font-black text-sm hover:bg-slate-100 transition shadow-xl">
+        Return to Fullscreen
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Switch Warning Banner -->
+  <div id="tab-switch-banner" class="hidden fixed top-0 left-0 right-0 z-55 bg-rose-600 text-white text-center py-2.5 text-sm font-bold shadow-lg" style="z-index:55;">
+    ⚠️ You left the exam window! This event has been logged. Tab switches: <span id="tab-switch-count-display">0</span>
+  </div>
+
+  <!-- Student Floating Emoji Dock -->
+  <div id="student-emoji-dock" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl px-4 py-2 rounded-2xl shadow-2xl flex items-center gap-3 transition-all duration-300 hover:scale-105">
+    <span class="text-[11px] font-black uppercase tracking-wider text-slate-400 hidden sm:inline">React:</span>
+    <button onclick="triggerStudentEmoji('🚀')" class="hover:scale-130 active:scale-90 transition-transform text-2xl p-1" title="Rocket">🚀</button>
+    <button onclick="triggerStudentEmoji('🔥')" class="hover:scale-130 active:scale-90 transition-transform text-2xl p-1" title="Fire">🔥</button>
+    <button onclick="triggerStudentEmoji('💡')" class="hover:scale-130 active:scale-90 transition-transform text-2xl p-1" title="Idea">💡</button>
+    <button onclick="triggerStudentEmoji('🤯')" class="hover:scale-130 active:scale-90 transition-transform text-2xl p-1" title="Mindblown">🤯</button>
+    <button onclick="triggerStudentEmoji('👏')" class="hover:scale-130 active:scale-90 transition-transform text-2xl p-1" title="Applause">👏</button>
+    <button onclick="triggerStudentEmoji('⚡')" class="hover:scale-130 active:scale-90 transition-transform text-2xl p-1" title="Power">⚡</button>
+  </div>
+  <div id="emoji-particle-stage" class="pointer-events-none fixed inset-0 z-50 overflow-hidden"></div>
+
+  <script>
+    // ============================================================================
+    // STATE
+    // ============================================================================
+    let EXAM_DB = null;
+    let currentAssignment = null;
+    let currentQuiz = null;
+    let currentQuestionIdx = 0;
+    let studentAnswers = {};
+    let flaggedQuestions = {};
+    let timerInterval = null;
+    let remainingSeconds = 0;
+    let elapsedSeconds = 0;
+    let isCountDown = false;
+    let activeStudent = "";
+    let questionOrder = [];
+    let tabSwitchCount = 0;
+    let fullscreenExitCount = 0;
+    let lockdownEnabled = false;
+    let calculatorVisible = false;
+    let calcExpression = "";
+    let quizMode = "student_led";
+    let teacherLedPollInterval = null;
+    let perQTimerInterval = null;
+    let perQRemaining = 0;
+    let perQFrozen = false;
+    let timerPaused = false;
+    let sidebarCollapsed = false;
+    let discussionActive = false;
+    let answerRevealed = false;
+    let isRemediation = false;
+    let remediationSnapshot = null;
+
+    // Dynamic Scoring & 0-120 SUPER MAX State
+    let studentTotalPoints = 0.0;
+    let studentCurrentStreak = 0;
+    let questionStartTime = Date.now();
+    let activeRecoveryChallenge = null;
+    let recoveryAttemptedForQuestion = {};
+    let recoveryChallengesByQuestion = {};
+    let questionPointsBreakdown = {};
+    let lastRenderedQuestionIdx = -1;
+
+    // ============================================================================
+    // UI FEEDBACK SYSTEM — Toasts, Ripples, Particle Bursts
+    // ============================================================================
+
+    /**
+     * Show a transient popup in the bottom-right corner.
+     * @param {string} title   Bold headline
+     * @param {string} body    Optional supporting line
+     * @param {'brass'|'copper'|'lime'|'coral'|'plum'} tone
+     */
+    function showToast(title, body, tone = "brass", ttl = 2600) {
+      const host = document.getElementById("toast-host");
+      if (!host) return;
+
+      const tones = {
+        brass:  { ring: "border-brass-500/50",  bg: "bg-ink-700",  bar: "bg-brass-500",  text: "text-brass-400",  glyph: "◈" },
+        copper: { ring: "border-copper-500/50", bg: "bg-ink-700",  bar: "bg-copper-500", text: "text-copper-400", glyph: "◆" },
+        lime:   { ring: "border-lime-500/50",   bg: "bg-ink-700",  bar: "bg-lime-500",   text: "text-lime-400",   glyph: "✓" },
+        coral:  { ring: "border-coral-500/50",  bg: "bg-ink-700",  bar: "bg-coral-500",  text: "text-coral-400",  glyph: "✕" },
+        plum:   { ring: "border-plum-500/50",   bg: "bg-ink-700",  bar: "bg-plum-500",   text: "text-plum-400",   glyph: "❖" }
+      };
+      const t = tones[tone] || tones.brass;
+
+      const toast = document.createElement("div");
+      toast.className = `toast flex items-stretch gap-0 overflow-hidden rounded-xl border ${t.ring} ${t.bg} shadow-2xl backdrop-blur-md max-w-sm`;
+      toast.innerHTML = `
+        <div class="toast-bar ${t.bar} w-1.5 shrink-0"></div>
+        <div class="px-4 py-3 flex items-start gap-3 min-w-0">
+          <span class="${t.text} text-lg font-black leading-none mt-0.5">${t.glyph}</span>
+          <div class="min-w-0">
+            <div class="font-black text-chalk text-sm leading-tight">${title}</div>
+            ${body ? `<div class="text-chalk/60 text-xs mt-1 leading-snug">${body}</div>` : ''}
+          </div>
+        </div>
+      `;
+      host.appendChild(toast);
+
+      // Auto-dismiss
+      setTimeout(() => {
+        toast.classList.add("leaving");
+        setTimeout(() => toast.remove(), 340);
+      }, ttl);
+
+      // Cap the stack so rapid answers don't flood the corner
+      while (host.children.length > 3) host.firstChild.remove();
+    }
+
+    /**
+     * Spawn a ripple from the click point inside an element.
+     */
+    function spawnRipple(btn) {
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height) * 2.2;
+      const ripple = document.createElement("span");
+      ripple.className = "ripple";
+      ripple.style.width = ripple.style.height = `${size}px`;
+      ripple.style.left = `${(btn.offsetWidth - size) / 2}px`;
+      ripple.style.top = `${(btn.offsetHeight - size) / 2}px`;
+      ripple.style.color = "rgba(255,255,255,0.35)";
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 620);
+    }
+
+    /**
+     * Radial particle burst — used when a correct answer is revealed.
+     */
+    function burstParticles(btn, colors) {
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const palette = colors || ["#a3e635", "#84cc16", "#e8b44a", "#f4f1ea"];
+
+      for (let i = 0; i < 16; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        const angle = (Math.PI * 2 * i) / 16 + Math.random() * 0.35;
+        const dist = 70 + Math.random() * 90;
+        p.style.left = `${cx - 4}px`;
+        p.style.top = `${cy - 4}px`;
+        p.style.background = palette[i % palette.length];
+        p.style.setProperty("--dx", `${Math.cos(angle) * dist}px`);
+        p.style.setProperty("--dy", `${Math.sin(angle) * dist}px`);
+        document.body.appendChild(p);
+        setTimeout(() => p.remove(), 900);
+      }
+    }
+
+    // ============================================================================
+    // INITIALIZATION
+    // ============================================================================
+    async function initStudentApp() {
+      if (window.EXAM_DATA) {
+        EXAM_DB = window.EXAM_DATA;
+      } else {
+        try {
+          const res = await fetch("data/exams.json");
+          EXAM_DB = await res.json();
+        } catch (err) {
+          console.error("Failed loading database:", err);
+        }
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const codeFromUrl = urlParams.get('join') || urlParams.get('code');
+      if (codeFromUrl) {
+        const input = document.getElementById("join-code-input");
+        input.value = codeFromUrl.toUpperCase();
+        input.classList.add("border-indigo-500", "bg-indigo-950/20");
+      }
+      initModalPan();
+    }
+
+    // ============================================================================
+    // STUDENT JOIN
+    // ============================================================================
+    async function handleStudentJoin(e) {
+      e.preventDefault();
+      const errBox = document.getElementById("join-error-msg");
+      errBox.classList.add("hidden");
+
+      const name = document.getElementById("join-student-name").value.trim();
+      const code = document.getElementById("join-code-input").value.trim().toUpperCase();
+
+      if (!name) {
+        errBox.textContent = "Please enter your full name.";
+        errBox.classList.remove("hidden");
+        return;
+      }
+
+      if (!code || code.length !== 6) {
+        errBox.textContent = "Please enter a valid 6-character join code.";
+        errBox.classList.remove("hidden");
+        return;
+      }
+
+      const check = await verifyJoinCode(code);
+      if (!check.found) {
+        errBox.textContent = `Join code "${code}" not found. Please ask Mr. F for the current assignment code.`;
+        errBox.classList.remove("hidden");
+        return;
+      }
+
+      if (!check.assignment.is_active) {
+        errBox.textContent = `This assessment (${check.assignment.assessment_title}) has been closed by Mr. F.`;
+        errBox.classList.remove("hidden");
+        return;
+      }
+
+      currentAssignment = check.assignment;
+      activeStudent = name;
+      quizMode = currentAssignment.quiz_mode || "student_led";
+      lockdownEnabled = currentAssignment.enable_lockdown || false;
+
+      // Check in to the live session roster (teacher can see who's joined)
+      checkInStudent(code, name);
+
+      // Locate the quiz in the database
+      let foundQuiz = null;
+      for (const subj of Object.values(EXAM_DB.subjects)) {
+        for (const unit of Object.values(subj.units)) {
+          for (const a of unit.assessments) {
+            if (a.id === currentAssignment.assessment_id) {
+              foundQuiz = a;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!foundQuiz) {
+        errBox.textContent = "Quiz content could not be located in database. Please contact your instructor.";
+        errBox.classList.remove("hidden");
+        return;
+      }
+
+      currentQuiz = foundQuiz;
+
+      // Question order
+      questionOrder = currentQuiz.questions.map((_, i) => i);
+      if (currentAssignment.randomize_questions && quizMode === "student_led") {
+        for (let i = questionOrder.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [questionOrder[i], questionOrder[j]] = [questionOrder[j], questionOrder[i]];
+        }
+      }
+
+      // CRITICAL GATE: A student MUST ALWAYS wait in the lobby unless the instructor has explicitly started the assessment
+      const isStarted = (currentAssignment && currentAssignment.is_started === true);
+      if (isStarted) {
+        startExamRunner();
+      } else {
+        enterStudentLobby();
+      }
+    }
+
+    let lobbyPollInterval = null;
+
+    function enterStudentLobby() {
+      document.getElementById("view-student-entry").classList.add("hidden");
+      document.getElementById("view-exam-runner").classList.add("hidden");
+      document.getElementById("view-result").classList.add("hidden");
+      document.getElementById("view-lobby").classList.remove("hidden");
+
+      document.getElementById("lobby-student-name").textContent = activeStudent;
+      document.getElementById("lobby-quiz-title").textContent = `${currentAssignment.subject} • ${currentAssignment.assessment_title}`;
+      document.getElementById("lobby-join-code").textContent = currentAssignment.join_code;
+
+      updateLobbyParticipants();
+
+      clearInterval(lobbyPollInterval);
+      lobbyPollInterval = setInterval(async () => {
+        const res = await verifyJoinCode(currentAssignment.join_code);
+        if (res.found && res.assignment) {
+          currentAssignment = res.assignment;
+          // ONLY advance to exam runner when the teacher has explicitly set is_started to true
+          if (res.assignment.is_started === true) {
+            clearInterval(lobbyPollInterval);
+            document.getElementById("view-lobby").classList.add("hidden");
+            startExamRunner();
+            return;
+          }
+        }
+        updateLobbyParticipants();
+      }, 1000);
+    }
+
+    async function updateLobbyParticipants() {
+      const parts = await fetchParticipantsByCode(currentAssignment.join_code);
+      const countEl = document.getElementById("lobby-student-count");
+      const listEl = document.getElementById("lobby-students-list");
+      if (countEl) countEl.textContent = `${parts.count} Joined`;
+      if (listEl) {
+        listEl.innerHTML = "";
+        (parts.names || []).forEach(name => {
+          const chip = document.createElement("span");
+          chip.className = "px-3 py-1 rounded-xl text-xs font-bold " + 
+            (name === activeStudent ? "bg-indigo-600 text-white border border-indigo-400" : "bg-slate-800 text-slate-300 border border-slate-700");
+          chip.textContent = (name === activeStudent) ? `${name} (You)` : name;
+          listEl.appendChild(chip);
+        });
+      }
+    }
+
+    // ============================================================================
+    // EXAM RUNNER
+    // ============================================================================
+    function startExamRunner() {
+      if (lobbyPollInterval) clearInterval(lobbyPollInterval);
+      studentAnswers = {};
+      studentLockedAnswers = {};
+      flaggedQuestions = {};
+      studentTotalPoints = 0.0;
+      studentCurrentStreak = 0;
+      questionStartTime = Date.now();
+      activeRecoveryChallenge = null;
+      if (window.RecoverySims) window.RecoverySims.stop();
+      recoveryAttemptedForQuestion = {};
+      recoveryChallengesByQuestion = {};
+      questionPointsBreakdown = {};
+      lastRenderedQuestionIdx = -1;
+      updateStudentPointsHUD();
+      const emojiDock = document.getElementById("student-emoji-dock");
+      if (emojiDock) emojiDock.classList.remove("hidden");
+      currentQuestionIdx = (quizMode === "teacher_led") ? (currentAssignment.current_question_index || 0) : 0;
+      elapsedSeconds = 0;
+      tabSwitchCount = 0;
+      fullscreenExitCount = 0;
+
+      document.getElementById("active-student-display").textContent = activeStudent;
+      document.getElementById("nav-subtitle").textContent = `${currentAssignment.subject} • ${currentAssignment.assessment_title}`;
+
+      // Calculator toggle
+      const allowCalc = currentAssignment.allow_calculator !== false;
+      document.getElementById("calc-toggle-btn").classList.toggle("hidden", !allowCalc);
+
+      // Timer Setup (Teacher-Led mode is strictly untimed overall; pauses between questions are unhurried)
+      const isTeacherLed = quizMode === "teacher_led";
+      const timeLimitMins = isTeacherLed ? 0 : (currentAssignment.time_limit_minutes || 0);
+      isCountDown = !isTeacherLed && timeLimitMins > 0;
+      if (isCountDown) {
+        remainingSeconds = timeLimitMins * 60;
+        document.getElementById("timer-label").textContent = "Time Left:";
+        updateTimerDisplay(remainingSeconds);
+      } else {
+        document.getElementById("timer-label").textContent = "Elapsed:";
+        updateTimerDisplay(0);
+      }
+
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (isCountDown) {
+          remainingSeconds--;
+          elapsedSeconds++;
+          updateTimerDisplay(remainingSeconds);
+          updateTimerUrgency();
+          if (remainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            alert("Time limit reached! Submitting your assessment now.");
+            finishAssessment();
+          }
+        } else {
+          elapsedSeconds++;
+          updateTimerDisplay(elapsedSeconds);
+        }
+      }, 1000);
+
+      // Teacher-led mode: hide navigation, start fast sync polling
+      if (quizMode === "teacher_led") {
+        document.getElementById("nav-controls").classList.add("hidden");
+        document.getElementById("teacher-led-badge").classList.remove("hidden");
+        document.getElementById("btn-finish-sidebar").classList.add("hidden");
+        // Teacher controls submission — hide all submit buttons
+        document.getElementById("btn-submit-header").classList.add("hidden");
+        // Teacher-led pacing: only the per-question timer is shown
+        document.getElementById("timer-container").classList.add("hidden");
+        startTeacherLedPolling();
+
+        // Per-question countdown timer (only when teacher configured a per-Q interval)
+        if (currentAssignment.per_question_seconds > 0) {
+          document.getElementById("student-perq-box").classList.remove("hidden");
+          startPerQuestionCountdown();
+        } else {
+          document.getElementById("student-perq-box").classList.add("hidden");
+        }
+      } else {
+        document.getElementById("nav-controls").classList.remove("hidden");
+        document.getElementById("teacher-led-badge").classList.add("hidden");
+        document.getElementById("btn-finish-sidebar").classList.remove("hidden");
+        // Student-led pacing: only the overall session timer is shown
+        document.getElementById("btn-submit-header").classList.add("hidden");
+        document.getElementById("student-perq-box").classList.add("hidden");
+        document.getElementById("timer-container").classList.remove("hidden");
+        if (perQTimerInterval) clearInterval(perQTimerInterval);
+      }
+
+      // Configure Sidebar Timer Card on Right Panel
+      const sidebarLabel = document.getElementById("sidebar-timer-label");
+      const sidebarSubtext = document.getElementById("sidebar-timer-subtext");
+      const sidebarTimer = document.getElementById("sidebar-timer-display");
+      if (isTeacherLed) {
+        if (sidebarLabel) sidebarLabel.textContent = "Question Timer";
+        if (sidebarSubtext) sidebarSubtext.textContent = (currentAssignment.per_question_seconds > 0) ? "Time Remaining For Question" : "Teacher-Paced Session";
+        if (sidebarTimer && currentAssignment.per_question_seconds <= 0) sidebarTimer.textContent = "--:--";
+      } else {
+        if (sidebarLabel) sidebarLabel.textContent = isCountDown ? "Time Left" : "Elapsed Time";
+        if (sidebarSubtext) sidebarSubtext.textContent = isCountDown ? "Assessment Countdown" : "Session Duration";
+      }
+
+      // Switch View
+      document.getElementById("view-student-entry").classList.add("hidden");
+      document.getElementById("view-result").classList.add("hidden");
+      document.getElementById("view-leaderboard").classList.add("hidden");
+      document.getElementById("view-review").classList.add("hidden");
+      document.getElementById("view-exam-runner").classList.remove("hidden");
+      document.getElementById("test-status-bar").classList.remove("hidden");
+
+      if (lockdownEnabled) {
+        activateLockdown();
+      }
+
+      renderQuestionNavGrid();
+      renderCurrentQuestion();
+    }
+
+    // ============================================================================
+    // TIMER SYSTEM (Color-coded urgency)
+    // ============================================================================
+    function updateTimerDisplay(totalSecs) {
+      const m = String(Math.floor(totalSecs / 60)).padStart(2, '0');
+      const s = String(totalSecs % 60).padStart(2, '0');
+      const timerDisplay = document.getElementById("timer-display");
+      if (timerDisplay) timerDisplay.textContent = `${m}:${s}`;
+      if (quizMode === "student_led") {
+        const sidebarTimer = document.getElementById("sidebar-timer-display");
+        if (sidebarTimer) sidebarTimer.textContent = `${m}:${s}`;
+      }
+    }
+
+    function updateTimerUrgency() {
+      if (!isCountDown) return;
+      const totalTime = (currentAssignment.time_limit_minutes || 1) * 60;
+      const pct = remainingSeconds / totalTime;
+      const container = document.getElementById("timer-container");
+      const display = document.getElementById("timer-display");
+      const dot = document.getElementById("timer-dot");
+      const sidebarTimer = document.getElementById("sidebar-timer-display");
+      const sidebarDot = document.getElementById("sidebar-timer-dot");
+
+      // Reset to calm baseline (copper = brand secondary)
+      container.className = "bg-ink-700/70 border border-ink-500 px-4 py-2 rounded-xl flex items-center gap-2.5 shadow-inner transition-all duration-500";
+      display.className = "font-mono text-lg font-black text-copper-400";
+      dot.className = "h-2.5 w-2.5 rounded-full bg-copper-400";
+
+      let sideColor = "text-copper-400";
+      let dotColor = "h-2.5 w-2.5 rounded-full bg-cyan-400";
+
+      if (pct > 0.5) {
+        // Calm — plenty of time
+        container.classList.add("border-copper-500/50");
+      } else if (pct > 0.25) {
+        // Brace — under half remaining
+        container.classList.add("border-brass-500/70");
+        display.className = "font-mono text-lg font-black text-brass-400";
+        dot.className = "h-2.5 w-2.5 rounded-full bg-brass-400";
+        sideColor = "text-brass-400";
+        dotColor = "h-2.5 w-2.5 rounded-full bg-brass-400";
+      } else if (remainingSeconds > 60) {
+        // Pressing — under a quarter
+        container.classList.add("border-coral-500/70");
+        display.className = "font-mono text-lg font-black text-coral-400";
+        dot.className = "h-2.5 w-2.5 rounded-full bg-coral-400";
+        sideColor = "text-coral-400";
+        dotColor = "h-2.5 w-2.5 rounded-full bg-coral-400";
+      } else {
+        // Critical — final minute, throbbing
+        container.className = "bg-coral-600/20 border-2 border-coral-400 px-4 py-2 rounded-xl flex items-center gap-2.5 timer-urgent";
+        display.className = "font-mono text-lg font-black text-coral-400";
+        dot.className = "h-2.5 w-2.5 rounded-full bg-coral-400 animate-ping";
+        sideColor = "text-coral-400";
+        dotColor = "h-2.5 w-2.5 rounded-full bg-coral-400 animate-ping";
+      }
+
+      if (quizMode === "student_led") {
+        if (sidebarTimer) {
+          sidebarTimer.className = `font-mono text-4xl sm:text-5xl font-black ${sideColor} tracking-wider py-1 drop-shadow-md`;
+          if (remainingSeconds <= 60) sidebarTimer.classList.add("animate-pulse");
+        }
+        if (sidebarDot) sidebarDot.className = dotColor;
+      }
+    }
+
+    // ============================================================================
+    // PER-QUESTION COUNTDOWN (Teacher-Led Live Sessions)
+    // ============================================================================
+    function startPerQuestionCountdown() {
+      clearInterval(perQTimerInterval);
+      perQTimerInterval = setInterval(() => {
+        if (quizMode !== "teacher_led") return;
+        if (timerPaused) return; // Keep countdown frozen while paused
+        const qStarted = currentAssignment.question_started_at;
+        const disc = currentAssignment.discussion_active;
+        if (disc || !qStarted) {
+          perQFrozen = true;
+          const el = document.getElementById("student-perq-timer");
+          if (el) {
+            el.textContent = "Discussing...";
+            el.className = "font-mono text-sm font-black text-purple-400";
+          }
+          const sidebarTimer = document.getElementById("sidebar-timer-display");
+          if (sidebarTimer) {
+            sidebarTimer.textContent = "DISCUSS";
+            sidebarTimer.className = "font-mono text-3xl sm:text-4xl font-black text-purple-400 tracking-wider py-1 drop-shadow-md";
+          }
+          return;
+        }
+        perQFrozen = false;
+        const elapsed = (Date.now() - new Date(qStarted).getTime()) / 1000;
+        perQRemaining = Math.max(0, currentAssignment.per_question_seconds - elapsed);
+        updatePerQDisplay(perQRemaining);
+      }, 500);
+    }
+
+    function updatePerQDisplay(secs) {
+      const m = String(Math.floor(secs / 60)).padStart(2, '0');
+      const s = String(Math.floor(secs % 60)).padStart(2, '0');
+      const el = document.getElementById("student-perq-timer");
+      const sidebarTimer = document.getElementById("sidebar-timer-display");
+      const sidebarDot = document.getElementById("sidebar-timer-dot");
+
+      if (el) el.textContent = `${m}:${s}`;
+      if (sidebarTimer) sidebarTimer.textContent = `${m}:${s}`;
+
+      const totalSecs = (currentAssignment && currentAssignment.per_question_seconds) || 60;
+      const pct = secs / totalSecs;
+
+      const colorCls = (pct > 0.5) ? "text-copper-400" : (pct > 0.25 ? "text-brass-400" : "text-coral-400");
+
+      if (el) {
+        el.classList.remove("text-copper-400", "text-brass-400", "text-coral-400", "timer-critical", "timer-urgent");
+        el.classList.add(colorCls);
+        if (secs <= 10) el.classList.add("timer-urgent");
+      }
+
+      if (sidebarTimer) {
+        sidebarTimer.classList.remove("text-copper-400", "text-brass-400", "text-coral-400", "text-amber-400", "text-purple-400", "animate-pulse");
+        sidebarTimer.classList.add(colorCls);
+        if (secs <= 10) sidebarTimer.classList.add("animate-pulse");
+      }
+
+      if (sidebarDot) {
+        sidebarDot.className = (secs <= 10) 
+          ? "h-2.5 w-2.5 rounded-full bg-coral-400 animate-ping"
+          : (pct > 0.5 
+            ? "h-2.5 w-2.5 rounded-full bg-cyan-400 animate-pulse"
+            : (pct > 0.25 
+              ? "h-2.5 w-2.5 rounded-full bg-brass-400 animate-pulse"
+              : "h-2.5 w-2.5 rounded-full bg-coral-400 animate-pulse"));
+      }
+
+      // When timer hits 0: automatically lock the answer!
+      if (secs <= 0) {
+        autoLockCurrentQuestion();
+      }
+    }
+
+    function updateTimerPauseDisplay(isPaused, pausedRemaining) {
+      const pauseBadge = document.getElementById("student-pause-badge");
+      const pauseBanner = document.getElementById("student-paused-banner");
+      const perQTimer = document.getElementById("student-perq-timer");
+      const sidebarTimer = document.getElementById("sidebar-timer-display");
+      const sidebarBadge = document.getElementById("sidebar-pause-badge");
+      const choicesBox = document.getElementById("q-choices-container");
+
+      if (pauseBadge) pauseBadge.classList.toggle("hidden", !isPaused);
+      if (pauseBanner) pauseBanner.classList.toggle("hidden", !isPaused);
+      if (sidebarBadge) sidebarBadge.classList.toggle("hidden", !isPaused);
+
+      if (choicesBox) {
+        const buttons = choicesBox.querySelectorAll("button");
+        buttons.forEach(btn => {
+          const realIdx = questionOrder[currentQuestionIdx];
+          const isLocked = !!studentLockedAnswers[realIdx];
+          if (!isLocked && !discussionActive) {
+            btn.disabled = isPaused;
+            btn.style.opacity = isPaused ? "0.45" : "";
+            btn.style.pointerEvents = isPaused ? "none" : "";
+          }
+        });
+      }
+
+      const rem = (typeof pausedRemaining === 'number') ? pausedRemaining : (perQRemaining || 0);
+      const m = String(Math.floor(rem / 60)).padStart(2, '0');
+      const s = String(rem % 60).padStart(2, '0');
+
+      if (perQTimer) {
+        if (isPaused) {
+          perQTimer.textContent = `${m}:${s} (Paused)`;
+          perQTimer.className = "font-mono text-sm font-black text-amber-400 animate-pulse";
+        } else {
+          perQTimer.classList.remove("animate-pulse");
+        }
+      }
+
+      if (sidebarTimer) {
+        if (isPaused) {
+          sidebarTimer.textContent = `${m}:${s}`;
+          sidebarTimer.className = "font-mono text-4xl sm:text-5xl font-black text-amber-400 tracking-wider py-1 drop-shadow-md animate-pulse";
+        } else {
+          sidebarTimer.classList.remove("animate-pulse");
+        }
+      }
+    }
+
+    function updateDiscussionFreeze(isDiscussing, isRevealed = false) {
+      const choicesBox = document.getElementById("q-choices-container");
+      if (choicesBox) {
+        const buttons = choicesBox.querySelectorAll("button");
+        buttons.forEach(btn => {
+          btn.disabled = isDiscussing;
+          btn.style.opacity = isDiscussing ? "0.55" : "";
+          btn.style.pointerEvents = isDiscussing ? "none" : "";
+        });
+      }
+
+      const feedbackPanel = document.getElementById("discussion-feedback");
+      if (!feedbackPanel) return;
+
+      if (!isDiscussing) {
+        feedbackPanel.classList.add("hidden");
+        // Clear choice highlight classes
+        if (choicesBox) {
+          const buttons = choicesBox.querySelectorAll("button");
+          buttons.forEach(btn => {
+            btn.classList.remove("choice-correct", "choice-wrong", "choice-dimmed");
+          });
+        }
+        return;
+      }
+
+      if (isRevealed) {
+        showDiscussionFeedback();
+      } else {
+        showDiscussionPendingNotice();
+      }
+    }
+
+    function showDiscussionPendingNotice() {
+      const realIdx = questionOrder[currentQuestionIdx];
+      const studentAnswer = studentAnswers[realIdx];
+      const qNum = currentQuestionIdx + 1;
+
+      const feedbackPanel = document.getElementById("discussion-feedback");
+      const contentEl = document.getElementById("discussion-feedback-content");
+      const statusEl = document.getElementById("discussion-feedback-status");
+      if (!feedbackPanel || !contentEl || !statusEl) return;
+
+      // Ensure no buttons are highlighted green/red while key is hidden
+      const buttons = document.querySelectorAll("#q-choices-container button");
+      buttons.forEach(btn => {
+        btn.classList.remove("choice-correct", "choice-wrong", "choice-dimmed");
+      });
+
+      feedbackPanel.className = "verdict-card mt-4 p-5 rounded-2xl border border-cyan-500/40 bg-slate-900/95 space-y-3 enter shadow-2xl";
+      statusEl.className = "text-xs font-bold uppercase tracking-wider text-cyan-400";
+      statusEl.textContent = "Discussion Underway";
+
+      contentEl.innerHTML = `
+        <div class="flex items-center gap-4">
+          <span class="text-3xl text-cyan-400 leading-none animate-pulse">💬</span>
+          <div>
+            <div class="text-lg font-black text-slate-100">Instructor Discussion in Progress</div>
+            <div class="text-xs text-slate-400">Inputs are locked. Follow along with your instructor before the official key is revealed.</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 pt-3 mt-1 border-t border-slate-800 text-xs text-slate-300">
+          <span class="font-bold text-slate-400">Your Recorded Selection:</span>
+          <span class="font-mono font-black ${studentAnswer ? 'text-amber-300 bg-amber-500/10 border-amber-500/30' : 'text-slate-400 bg-slate-800 border-slate-700'} px-2.5 py-0.5 rounded-lg border">
+            ${studentAnswer ? `Option ${studentAnswer}` : 'None (No Answer)'}
+          </span>
+        </div>
+      `;
+      feedbackPanel.classList.remove("hidden");
+    }
+
+    function showDiscussionFeedback() {
+      const realIdx = questionOrder[currentQuestionIdx];
+      const q = currentQuiz.questions[realIdx];
+      const studentAnswer = studentAnswers[realIdx];
+      const correctAnswer = q.correct_answer;
+      const qNum = currentQuestionIdx + 1;
+
+      const feedbackPanel = document.getElementById("discussion-feedback");
+      const contentEl = document.getElementById("discussion-feedback-content");
+      const statusEl = document.getElementById("discussion-feedback-status");
+      contentEl.innerHTML = "";
+
+      if (!studentAnswer) {
+        feedbackPanel.className = "verdict-card mt-4 p-5 rounded-2xl border border-amber-500/40 bg-slate-900/90 space-y-3 enter";
+        statusEl.className = "text-xs font-bold text-amber-400";
+        statusEl.textContent = "No Answer Submitted";
+        contentEl.innerHTML = `
+          <div class="flex items-center gap-3 text-slate-300">
+            <span class="text-lg font-black text-amber-400">⚠️</span>
+            <span class="text-sm font-semibold">You did not submit an answer for this question.</span>
+          </div>
+          <div class="flex items-center gap-3 pt-3 mt-1 border-t border-slate-700">
+            <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Correct Answer</span>
+            <span class="text-2xl font-black text-emerald-400 px-3.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/40">${correctAnswer}</span>
+          </div>
+          ${q.explanation ? `<div class="text-sm text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-800">${q.explanation}</div>` : ''}
+        `;
+        showToast("No Answer", `Q${qNum} — correct answer was ${correctAnswer}`, "brass", 3200);
+      } else if (studentAnswer === correctAnswer) {
+        feedbackPanel.className = "verdict-card mt-4 p-5 rounded-2xl border border-lime-500/45 bg-lime-500/10 space-y-3 enter";
+        statusEl.className = "text-xs font-bold text-lime-400";
+        statusEl.textContent = "Correct";
+        contentEl.innerHTML = `
+          <div class="flex items-center gap-4">
+            <span class="text-4xl text-lime-400 leading-none">✓</span>
+            <div>
+              <div class="text-xl font-black text-chalk">Correct</div>
+              <div class="text-sm text-chalk/60">You picked <span class="font-black text-lime-400">${studentAnswer}</span> — the right answer</div>
+            </div>
+          </div>
+          ${q.explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${q.explanation}</div>` : ''}
+        `;
+        showToast("Correct!", `Q${qNum} — you nailed it`, "lime", 3400);
+      } else {
+        feedbackPanel.className = "verdict-card mt-4 p-5 rounded-2xl border border-coral-500/45 bg-coral-500/10 space-y-3 enter";
+        statusEl.className = "text-xs font-bold text-coral-400";
+        statusEl.textContent = "Incorrect";
+        contentEl.innerHTML = `
+          <div class="flex items-center gap-4">
+            <span class="text-4xl text-coral-400 leading-none">✕</span>
+            <div>
+              <div class="text-xl font-black text-chalk">Incorrect</div>
+              <div class="text-sm text-chalk/60">You picked <span class="font-black text-coral-400">${studentAnswer}</span> — answer was <span class="font-black text-lime-400">${correctAnswer}</span></div>
+            </div>
+          </div>
+          ${q.explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${q.explanation}</div>` : ''}
+        `;
+        showToast("Not quite", `Q${qNum} — the answer was ${correctAnswer}`, "coral", 3400);
+      }
+
+      // Highlight correct answer on the choice buttons
+      const buttons = document.querySelectorAll("#q-choices-container button");
+      buttons.forEach(btn => {
+        const letter = btn.dataset.letter || btn.textContent.trim();
+        if (letter === correctAnswer) {
+          btn.classList.remove("choice-selected", "ring-indigo-400", "ring-2", "ring-4");
+          btn.classList.add("choice-correct");
+          btn.style.opacity = "1";
+          btn.style.pointerEvents = "none";
+          if (studentAnswer === correctAnswer) {
+            burstParticles(btn);
+          }
+        } else if (studentAnswer && letter === studentAnswer) {
+          btn.classList.remove("choice-selected", "ring-indigo-400", "ring-2", "ring-4");
+          btn.classList.add("choice-wrong");
+          btn.style.opacity = "1";
+          btn.style.pointerEvents = "none";
+        } else {
+          btn.classList.add("choice-dimmed");
+        }
+      });
+
+      feedbackPanel.classList.remove("hidden");
+    }
+
+    // ============================================================================
+    // QUESTION NAVIGATION & RENDERING (Large High-Res Display)
+    // ============================================================================
+    function renderQuestionNavGrid() {
+      const container = document.getElementById("q-grid-buttons");
+      container.innerHTML = "";
+      currentQuiz.questions.forEach((q, idx) => {
+        const btn = document.createElement("button");
+        btn.id = `nav-q-${idx}`;
+        btn.textContent = idx + 1;
+        btn.className = "h-12 rounded-xl font-black text-base border border-slate-700 bg-slate-800 text-slate-300 transition hover:border-indigo-400";
+        if (quizMode === "student_led") {
+          btn.onclick = () => jumpToQuestion(idx);
+        } else {
+          btn.onclick = null;
+          btn.classList.add("cursor-default", "opacity-75");
+        }
+        container.appendChild(btn);
+      });
+      updateGridHighlights();
+    }
+
+    function updateGridHighlights() {
+      currentQuiz.questions.forEach((q, idx) => {
+        const btn = document.getElementById(`nav-q-${idx}`);
+        if (!btn) return;
+        const mappedIdx = questionOrder[currentQuestionIdx];
+        const isAnswered = studentAnswers[idx] !== undefined;
+        const isFlagged = flaggedQuestions[idx];
+        const isCurrent = questionOrder[currentQuestionIdx] === idx;
+
+        let classes = "h-12 rounded-xl text-base transition ";
+        if (quizMode !== "student_led") classes += "cursor-default ";
+
+        if (isCurrent) {
+          classes += "ring-2 ring-emerald-400 border-2 border-emerald-400 font-black shadow-lg shadow-emerald-500/30 ";
+          if (isFlagged) {
+            classes += "bg-amber-500/30 text-amber-300";
+          } else if (isAnswered) {
+            classes += "bg-cyan-600/40 text-cyan-200";
+          } else {
+            classes += "bg-slate-800 text-white";
+          }
+        } else {
+          classes += "font-bold ";
+          if (isFlagged) {
+            classes += "bg-amber-500/20 text-amber-300 border border-amber-500";
+          } else if (isAnswered) {
+            classes += "bg-cyan-600 text-slate-950 font-black border border-cyan-400 shadow-md shadow-cyan-500/20";
+          } else {
+            classes += "bg-slate-800/90 text-slate-300 border border-slate-700 hover:border-slate-500";
+          }
+        }
+        btn.className = classes;
+      });
+
+      const answeredCount = Object.keys(studentAnswers).length;
+      document.getElementById("progress-count").textContent = `${answeredCount} / ${currentQuiz.questions.length} Answered`;
+
+      // Update persistent slider tab badge
+      const sliderBadge = document.getElementById("slider-tab-badge");
+      if (sliderBadge && currentQuiz) {
+        sliderBadge.textContent = `${answeredCount}/${currentQuiz.questions.length}`;
+      }
+    }
+
+    function toggleSidebarCollapse() {
+      sidebarCollapsed = !sidebarCollapsed;
+      const mainCol = document.getElementById("runner-main-col");
+      const sideCol = document.getElementById("runner-sidebar-col");
+      const sliderTab = document.getElementById("sidebar-slider-tab");
+      const toggleBtnText = document.getElementById("btn-toggle-space-text");
+      const toggleBtnIcon = document.getElementById("btn-toggle-space-icon");
+
+      if (sidebarCollapsed) {
+        if (mainCol) {
+          mainCol.classList.remove("xl:col-span-9", "lg:col-span-8");
+          mainCol.classList.add("xl:col-span-12", "lg:col-span-12", "w-full");
+        }
+        if (sideCol) {
+          sideCol.classList.add("hidden");
+        }
+        if (sliderTab) {
+          sliderTab.classList.remove("hidden");
+          sliderTab.classList.add("flex");
+        }
+        if (toggleBtnText) toggleBtnText.textContent = "Restore Sidebar";
+        if (toggleBtnIcon) toggleBtnIcon.textContent = "◨";
+        showToast("Expanded Question Space", "Questions sidebar collapsed. Click ❮ tab anytime to reopen.", "copper", 2400);
+      } else {
+        if (mainCol) {
+          mainCol.classList.remove("xl:col-span-12", "lg:col-span-12", "w-full");
+          mainCol.classList.add("xl:col-span-9", "lg:col-span-8");
+        }
+        if (sideCol) {
+          sideCol.classList.remove("hidden");
+        }
+        if (sliderTab) {
+          sliderTab.classList.add("hidden");
+          sliderTab.classList.remove("flex");
+        }
+        if (toggleBtnText) toggleBtnText.textContent = "Expand Space";
+        if (toggleBtnIcon) toggleBtnIcon.textContent = "⛶";
+      }
+      updateGridHighlights();
+    }
+
+    // ============================================================================
+    // EVALUATION REVELATION & STRICT RECOVERY GATING HELPERS
+    // ============================================================================
+    function isCurrentQuestionEvaluationRevealed() {
+      if (quizMode === "teacher_led") {
+        if (discussionActive || answerRevealed) return true;
+        if (currentAssignment && currentAssignment.per_question_seconds > 0) {
+          if (typeof perQRemaining === 'number' && perQRemaining <= 0) return true;
+        }
+        return false;
+      } else {
+        if (isCountDown && remainingSeconds <= 0) return true;
+        return false;
+      }
+    }
+
+    function hasPreviousIncorrectQuestion() {
+      if (!currentQuiz || !currentQuiz.questions) return false;
+      // 1. Check all completed prior questions in the current quiz sequence
+      for (let i = 0; i < currentQuestionIdx; i++) {
+        const pastRealIdx = questionOrder[i];
+        const q = currentQuiz.questions[pastRealIdx];
+        const ans = studentAnswers[pastRealIdx];
+        if (!ans || ans !== q.correct_answer) {
+          return true; // Missed a prior question!
+        }
+      }
+      // 2. Check current question if evaluation has been officially revealed
+      if (isCurrentQuestionEvaluationRevealed()) {
+        const currRealIdx = questionOrder[currentQuestionIdx];
+        const q = currentQuiz.questions[currRealIdx];
+        const ans = studentAnswers[currRealIdx];
+        if (!ans || ans !== q.correct_answer) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function renderCurrentQuestion() {
+      const realIdx = questionOrder[currentQuestionIdx];
+      const q = currentQuiz.questions[realIdx];
+      document.getElementById("active-q-badge").textContent = `Q${currentQuestionIdx + 1}`;
+      document.getElementById("active-q-subinfo").textContent = `Question ${currentQuestionIdx + 1} of ${currentQuiz.questions.length}`;
+
+      // Reset discussion feedback & state ONLY when moving to a brand new question
+      if (lastRenderedQuestionIdx !== currentQuestionIdx) {
+        lastRenderedQuestionIdx = currentQuestionIdx;
+        questionStartTime = Date.now();
+        discussionActive = false;
+        answerRevealed = false;
+        const discPanel = document.getElementById("discussion-feedback");
+        if (discPanel) discPanel.classList.add("hidden");
+        const recoveryCard = document.getElementById("recovery-station-card");
+        if (recoveryCard) recoveryCard.classList.add("hidden");
+        if (window.RecoverySims) window.RecoverySims.stop();
+      }
+      
+      const cardBox = document.getElementById("q-card-container");
+      const cardImg = document.getElementById("q-card-img");
+      const promptEl = document.getElementById("q-prompt-text");
+
+      // 1. Render Question Card (Maximum Resolution & Area)
+      if (q.card_image) {
+        cardBox.classList.remove("hidden");
+        cardImg.src = q.card_image;
+        promptEl.classList.add("hidden");
+      } else {
+        cardBox.classList.add("hidden");
+        promptEl.classList.remove("hidden");
+        let formattedPrompt = q.prompt || "";
+        if (window.marked) {
+          formattedPrompt = marked.parse(formattedPrompt);
+        } else {
+          formattedPrompt = formattedPrompt.replace(/\n/g, '<br>');
+        }
+        promptEl.innerHTML = formattedPrompt;
+      }
+
+      // Flag state
+      const flagBtn = document.getElementById("flag-btn");
+      const flagText = document.getElementById("flag-btn-text");
+      if (flaggedQuestions[realIdx]) {
+        flagBtn.className = "px-3.5 py-1.5 rounded-xl border border-amber-500 bg-amber-500/10 text-amber-400 text-xs font-bold flex items-center gap-1.5";
+        flagText.textContent = "Flagged";
+      } else {
+        flagBtn.className = "px-3.5 py-1.5 rounded-xl border border-slate-700 hover:border-amber-500/50 bg-slate-800 text-slate-400 text-xs font-bold flex items-center gap-1.5 transition";
+        flagText.textContent = "Flag for Review";
+      }
+
+      // 2. Choices — Large, Punchy Circle Selectors (A, B, C, D)
+      const choicesBox = document.getElementById("q-choices-container");
+      choicesBox.innerHTML = "";
+      const selected = studentAnswers[realIdx];
+
+      if (q.card_image) {
+        const label = document.createElement("p");
+        label.className = "text-sm md:text-base text-chalk/70 font-black mb-4 uppercase tracking-widest text-center";
+        label.textContent = "Select your answer:";
+        choicesBox.appendChild(label);
+
+        const row = document.createElement("div");
+        row.className = "flex items-center justify-center gap-6 md:gap-8 pb-3";
+
+        q.choices.forEach(c => {
+          const isSelected = selected === c.letter;
+          const btn = document.createElement("button");
+          btn.dataset.letter = c.letter;
+          btn.className = `choice-btn pressable h-16 w-16 md:h-20 md:w-20 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl border-2 ${
+            isSelected
+              ? "choice-selected"
+              : "bg-ink-700 text-chalk/80 border-ink-500 hover:border-copper-500 hover:text-copper-400"
+          }`;
+          btn.textContent = c.letter;
+          if (isSelected) {
+            const sweep = document.createElement("span");
+            sweep.className = "sweep-bar";
+            btn.appendChild(sweep);
+          }
+          btn.onclick = (e) => {
+            spawnRipple(e.currentTarget);
+            selectChoice(c.letter);
+          };
+          row.appendChild(btn);
+        });
+
+        choicesBox.appendChild(row);
+      } else {
+        // Fallback full-text buttons
+        choicesBox.className = "space-y-3 pt-2";
+        q.choices.forEach(c => {
+          const isSelected = selected === c.letter;
+          const btn = document.createElement("button");
+          btn.dataset.letter = c.letter;
+          btn.className = `choice-btn pressable w-full text-left p-5 rounded-2xl border flex items-center gap-4 ${
+            isSelected
+              ? "choice-selected"
+              : "border-ink-600 bg-ink-800/70 hover:border-copper-500/60 text-chalk/80 hover:text-chalk"
+          }`;
+          btn.onclick = (e) => {
+            spawnRipple(e.currentTarget);
+            selectChoice(c.letter);
+          };
+
+          let choiceHtml = c.text && c.text.trim().length > 0 ? c.text.trim() : `Option ${c.letter}`;
+          if (window.marked && (choiceHtml.includes('$') || choiceHtml.includes('*') || choiceHtml.includes('_'))) {
+            choiceHtml = marked.parseInline(choiceHtml);
+          }
+
+          btn.innerHTML = `
+            <div class="h-12 w-12 rounded-xl flex items-center justify-center font-black text-lg shrink-0 transition ${
+              isSelected ? "bg-ink-900/40 text-copper-400" : "bg-ink-700 text-chalk/70 border border-ink-500"
+            }">
+              ${c.letter}
+            </div>
+            <div class="text-base md:text-lg leading-relaxed font-semibold">
+              ${choiceHtml}
+            </div>
+          `;
+          choicesBox.appendChild(btn);
+        });
+      }
+
+      // 3. Answer Locking Controls (Manual student lock + Automatic timer lock)
+      const isLocked = !!studentLockedAnswers[realIdx];
+      const lockBox = document.createElement("div");
+      lockBox.id = "q-lock-status-box";
+      lockBox.className = "mt-5 pt-3 border-t border-slate-800 text-center";
+
+      if (isLocked) {
+        const lockInfo = studentLockedAnswers[realIdx];
+        const isAuto = lockInfo && lockInfo.auto;
+        const isRevealed = isCurrentQuestionEvaluationRevealed();
+        const hasMissedPrior = hasPreviousIncorrectQuestion();
+        const isCorrect = Boolean(selected && selected === q.correct_answer);
+        const recoveryDone = !!recoveryAttemptedForQuestion[realIdx];
+
+        if (!isRevealed) {
+          // ==================================================================
+          // STRICT PEDAGOGICAL CONFIDENTIALITY:
+          // While question timer is actively running and before instructor
+          // opens discussion, NEVER reveal right or wrong! Keep neutral locked state.
+          // ==================================================================
+          lockBox.innerHTML = `
+            <div class="space-y-3 max-w-xl mx-auto">
+              <div class="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-indigo-500/15 border border-indigo-500/40 text-indigo-300 font-black text-sm shadow-lg">
+                <span class="text-base">${isAuto ? '⏰' : '🔒'}</span>
+                <span>${isAuto ? 'Time Expired — Answer Automatically Locked' : 'Answer Locked In'} (${selected ? 'Option ' + selected : 'None'})</span>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1.5 font-medium">Your answer is finalized. Evaluation will be revealed when timer expires or instructor initiates discussion.</p>
+
+              ${hasMissedPrior ? `
+                ${!recoveryDone ? `
+                  <div class="p-4 rounded-2xl bg-gradient-to-b from-indigo-950/70 via-slate-900 to-slate-900 border-2 border-indigo-500/45 text-center shadow-2xl space-y-2.5 enter">
+                    <div class="flex items-center justify-center gap-2 text-indigo-300 font-extrabold text-xs uppercase tracking-wider">
+                      <span class="text-base">🎮</span>
+                      <span>Physics Simulation Arcade Active (+3.5 PTS)</span>
+                    </div>
+                    <p class="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+                      You missed a question previously! While waiting for the question timer, launch the <strong class="text-cyan-300">Interactive Physics Simulation</strong> below to redeem lost points!
+                    </p>
+                    <button type="button" id="btn-open-recovery" onclick="triggerRecoveryStationManual()" class="pressable px-6 py-3 rounded-xl btn-aurora text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2 mx-auto cursor-pointer animate-bounce hover:animate-none">
+                      <span>🎮 Play Simulation Mini-Game (+3.5 PTS)</span>
+                    </button>
+                  </div>
+                ` : `
+                  <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-center text-xs text-slate-300 max-w-md mx-auto">
+                    <span class="font-bold text-cyan-300">⚡ Point Recovery simulation attempt completed for this question.</span>
+                  </div>
+                `}
+              ` : `
+                <!-- No previous missed questions: Student is answering 100% correctly. Zero recovery engine shown! -->
+              `}
+            </div>
+          `;
+        } else {
+          // ==================================================================
+          // Timer expired or instructor discussion opened -> Reveal official result
+          // ==================================================================
+          if (isCorrect) {
+            lockBox.innerHTML = `
+              <div class="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 font-black text-sm shadow-lg">
+                <span class="text-base">✓</span>
+                <span>Official Result: Option ${selected} is Correct!</span>
+              </div>
+              <p class="text-[11px] text-emerald-400 mt-1.5 font-bold">Full points secured.</p>
+            `;
+          } else {
+            lockBox.innerHTML = `
+              <div class="space-y-3 max-w-xl mx-auto">
+                <div class="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-300 font-black text-sm shadow-lg">
+                  <span class="text-base">✗</span>
+                  <span>Official Result: Option ${selected || 'None'} was Incorrect</span>
+                </div>
+                
+                ${!recoveryDone ? `
+                  <div class="p-4 rounded-2xl bg-gradient-to-b from-rose-950/60 via-slate-900 to-slate-900 border-2 border-rose-500/45 text-center shadow-2xl space-y-2.5 enter">
+                    <div class="flex items-center justify-center gap-2 text-rose-300 font-extrabold text-xs uppercase tracking-wider">
+                      <span class="text-base">🎮</span>
+                      <span>Score Redemption: Simulation Mini-Game Active (+3.5 PTS)</span>
+                    </div>
+                    <p class="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+                      This question was missed (-35% point deduction). Play the <strong class="text-cyan-300">Interactive Physics Simulation</strong> below to redeem lost points!
+                    </p>
+                    <button type="button" id="btn-open-recovery" onclick="triggerRecoveryStationManual()" class="pressable px-6 py-3 rounded-xl btn-aurora text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2 mx-auto cursor-pointer animate-bounce hover:animate-none">
+                      <span>🎮 Play Simulation Mini-Game (+3.5 PTS)</span>
+                    </button>
+                  </div>
+                ` : `
+                  <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-center text-xs text-slate-300 max-w-md mx-auto">
+                    <span class="font-bold text-cyan-300">⚡ Point Recovery simulation attempt completed for this question.</span>
+                  </div>
+                `}
+              </div>
+            `;
+          }
+        }
+
+        // Disable all buttons in choicesBox
+        choicesBox.querySelectorAll("button").forEach(btn => {
+          btn.disabled = true;
+          btn.classList.add("cursor-not-allowed", "opacity-60");
+        });
+      } else {
+        if (selected) {
+          lockBox.innerHTML = `
+            <button onclick="lockCurrentAnswer()" class="pressable px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-sm shadow-xl shadow-amber-600/30 transition flex items-center justify-center gap-2 mx-auto">
+              <span>🔒</span> Lock In Answer (Option ${selected})
+            </button>
+            <p class="text-[11px] text-slate-400 mt-1.5 font-medium">⚠️ Once locked, you cannot alter your choice.</p>
+          `;
+        } else {
+          lockBox.innerHTML = `
+            <button disabled class="px-6 py-2.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-slate-500 font-bold text-xs opacity-60 cursor-not-allowed mx-auto">
+              Select an option (A, B, C, D) to lock in
+            </button>
+          `;
+        }
+      }
+      choicesBox.appendChild(lockBox);
+
+      // Manage Recovery Station Card visibility:
+      // STRICT GATE: NEVER open recovery station if student has answered all questions correctly!
+      const recoveryCard = document.getElementById("recovery-station-card");
+      if (isLocked) {
+        const hasMissedPrior = hasPreviousIncorrectQuestion();
+        const recoveryDone = !!recoveryAttemptedForQuestion[realIdx];
+        if (!hasMissedPrior || recoveryDone) {
+          if (recoveryCard) recoveryCard.classList.add("hidden");
+        }
+      } else if (recoveryCard) {
+        recoveryCard.classList.add("hidden");
+      }
+
+      // KaTeX math rendering
+      if (window.renderMathInElement) {
+        try {
+          renderMathInElement(document.getElementById("view-exam-runner"), {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false
+          });
+        } catch (e) {}
+      }
+
+      if (quizMode === "student_led") {
+        document.getElementById("btn-prev-q").disabled = currentQuestionIdx === 0;
+        document.getElementById("btn-next-q").textContent = (currentQuestionIdx === currentQuiz.questions.length - 1) ? "Review & Submit" : "Next Question →";
+      } else if (quizMode === "teacher_led") {
+        if (timerPaused) {
+          updateTimerPauseDisplay(true, currentAssignment ? currentAssignment.paused_remaining_seconds : null);
+        }
+        if (discussionActive) {
+          updateDiscussionFreeze(true, answerRevealed);
+        }
+      }
+
+      updateGridHighlights();
+    }
+
+    function selectChoice(letter) {
+      if (discussionActive) return;
+      const realIdx = questionOrder[currentQuestionIdx];
+      if (studentLockedAnswers[realIdx]) return; // Strictly cannot change if locked!
+      const wasSelected = studentAnswers[realIdx];
+      studentAnswers[realIdx] = letter;
+      
+      syncStudentLiveAnswer(false);
+      renderCurrentQuestion();
+
+      const qNum = currentQuestionIdx + 1;
+      if (wasSelected && wasSelected !== letter) {
+        showToast(`Answer changed to ${letter}`, `Question ${qNum} updated`, "plum", 2000);
+      } else {
+        showToast(`Option ${letter} selected`, `Question ${qNum} (Click Lock to finalize)`, "copper", 2000);
+      }
+    }
+
+    // ============================================================================
+    // DYNAMIC SCORING, SPEED BONUSES & STREAKS (0-120 SUPER MAX)
+    // ============================================================================
+    function calculateQuestionPoints(isCorrect, elapsedSecs, timeLimitSecs, totalQuestions) {
+      const basePoints = 100 / totalQuestions;
+      if (isCorrect) {
+        const elapsed = Math.max(1, elapsedSecs);
+        const limit = Math.max(15, timeLimitSecs || 60);
+        const speedRatio = Math.max(0, Math.min(1, (limit - elapsed) / limit));
+        const speedBonus = (20 / totalQuestions) * speedRatio;
+        studentCurrentStreak++;
+        const streakBonus = studentCurrentStreak >= 3 ? (basePoints * 0.05) : 0;
+        const total = basePoints + speedBonus + streakBonus;
+        return {
+          points: Math.round(total * 10) / 10,
+          speedBonus: Math.round(speedBonus * 10) / 10,
+          streak: studentCurrentStreak,
+          isCorrect: true
+        };
+      } else {
+        const penalty = -1 * Math.round((basePoints * 0.35) * 10) / 10;
+        studentCurrentStreak = 0;
+        return {
+          points: penalty,
+          speedBonus: 0,
+          streak: 0,
+          isCorrect: false
+        };
+      }
+    }
+
+    function updateStudentPointsHUD() {
+      const pointsVal = document.getElementById("student-points-val");
+      const supermaxBadge = document.getElementById("student-supermax-badge");
+      const streakPill = document.getElementById("student-streak-pill");
+      const streakVal = document.getElementById("student-streak-val");
+
+      if (pointsVal) pointsVal.textContent = studentTotalPoints.toFixed(1);
+      if (supermaxBadge) {
+        supermaxBadge.classList.toggle("hidden", studentTotalPoints <= 100);
+      }
+      if (streakPill && streakVal) {
+        if (studentCurrentStreak >= 2) {
+          streakPill.classList.remove("hidden");
+          streakPill.classList.add("flex");
+          streakVal.textContent = studentCurrentStreak;
+        } else {
+          streakPill.classList.add("hidden");
+          streakPill.classList.remove("flex");
+        }
+      }
+    }
+
+    function lockCurrentAnswer() {
+      const realIdx = questionOrder[currentQuestionIdx];
+      if (!studentAnswers[realIdx]) {
+        alert("Please select an answer choice before locking in.");
+        return;
+      }
+      studentLockedAnswers[realIdx] = { manual: true, locked_at: new Date().toISOString() };
+      syncStudentLiveAnswer(true);
+      renderCurrentQuestion();
+
+      // Determine remaining time
+      let remSecs = 999;
+      if (quizMode === "teacher_led") {
+        if (currentAssignment && currentAssignment.per_question_seconds > 0) {
+          remSecs = (typeof perQRemaining === 'number') ? perQRemaining : currentAssignment.per_question_seconds;
+        } else {
+          remSecs = 999;
+        }
+      } else {
+        remSecs = isCountDown ? remainingSeconds : 999;
+      }
+
+      // STRICT PEDAGOGICAL CONFIDENTIALITY:
+      // Neutral lock notification — NEVER disclose right or wrong while time is active!
+      showToast("Answer Finalized", `Option ${studentAnswers[realIdx]} locked in. Results revealed when timer expires or discussion begins.`, "copper", 2500);
+
+      // STRICT GATE: Recovery engine ONLY activates if the student has missed a question previously!
+      if (hasPreviousIncorrectQuestion() && remSecs >= 2 && !recoveryAttemptedForQuestion[realIdx]) {
+        checkAndTriggerRecoveryStation(remSecs);
+        setTimeout(() => {
+          const card = document.getElementById("recovery-station-card");
+          if (card && !card.classList.contains("hidden")) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            card.classList.add("ring-4", "ring-cyan-400");
+            setTimeout(() => card.classList.remove("ring-4", "ring-cyan-400"), 1800);
+          }
+        }, 150);
+      }
+    }
+
+    function autoLockCurrentQuestion() {
+      const realIdx = questionOrder[currentQuestionIdx];
+      if (studentLockedAnswers[realIdx]) return;
+      studentLockedAnswers[realIdx] = { auto: true, locked_at: new Date().toISOString() };
+      syncStudentLiveAnswer(true);
+      renderCurrentQuestion();
+
+      const q = currentQuiz.questions[realIdx];
+      const isCorrect = (studentAnswers[realIdx] === q.correct_answer);
+      let remSecs = 999;
+      if (quizMode === "teacher_led") {
+        if (currentAssignment && currentAssignment.per_question_seconds > 0) {
+          remSecs = (typeof perQRemaining === 'number') ? perQRemaining : currentAssignment.per_question_seconds;
+        } else {
+          remSecs = 999;
+        }
+      } else {
+        remSecs = isCountDown ? remainingSeconds : 999;
+      }
+
+      // If incorrect once timer has expired, trigger recovery station
+      if (!isCorrect && !recoveryAttemptedForQuestion[realIdx] && hasPreviousIncorrectQuestion()) {
+        checkAndTriggerRecoveryStation(remSecs);
+      }
+    }
+
+    function syncStudentLiveAnswer(isLocked = false, recoveryPoints = 0) {
+      if (!currentAssignment || !currentAssignment.join_code || !activeStudent) return;
+      const realIdx = questionOrder[currentQuestionIdx];
+      const q = currentQuiz.questions[realIdx];
+      const raw = studentAnswers[realIdx];
+      const hasAnswer = raw && raw !== 'null' && raw !== 'undefined' && String(raw).trim() !== '';
+      const letter = hasAnswer ? String(raw).trim().toUpperCase() : null;
+      const isCorrect = Boolean(letter && letter === q.correct_answer);
+
+      const totalQuestions = (currentQuiz && currentQuiz.questions) ? currentQuiz.questions.length : 10;
+      const elapsed = Math.max(1, (Date.now() - questionStartTime) / 1000);
+      const timeLimitSecs = (currentAssignment.per_question_seconds > 0) ? currentAssignment.per_question_seconds : 60;
+
+      let qResult = questionPointsBreakdown[realIdx];
+      if (!qResult || isLocked) {
+        if (hasAnswer) {
+          qResult = calculateQuestionPoints(isCorrect, elapsed, timeLimitSecs, totalQuestions);
+        } else {
+          qResult = { points: 0, speedBonus: 0, streak: 0, isCorrect: false };
+        }
+        questionPointsBreakdown[realIdx] = qResult;
+      }
+
+      if (recoveryPoints > 0) {
+        qResult.recovered_points = (qResult.recovered_points || 0) + recoveryPoints;
+      }
+
+      // Re-sum total points across all questions answered + recovered
+      let totalPts = 0;
+      Object.keys(questionPointsBreakdown).forEach(idx => {
+        totalPts += (questionPointsBreakdown[idx].points || 0);
+        if (questionPointsBreakdown[idx].recovered_points) {
+          totalPts += questionPointsBreakdown[idx].recovered_points;
+        }
+      });
+
+      studentTotalPoints = Math.max(0, Math.min(120.0, Math.round(totalPts * 10) / 10));
+      updateStudentPointsHUD();
+
+      submitLiveAnswer({
+        join_code: currentAssignment.join_code,
+        student_name: activeStudent,
+        question_real_index: realIdx,
+        selected_letter: letter,
+        is_correct: isCorrect,
+        is_locked: !!isLocked,
+        points: (qResult.points || 0) + (qResult.recovered_points || 0),
+        speed_bonus: qResult.speedBonus || 0,
+        streak: studentCurrentStreak,
+        recovered_points: qResult.recovered_points || 0
+      });
+    }
+
+    // ============================================================================
+    // PROCEDURAL POINT REDEMPTION & RECOVERY STATION
+    // ============================================================================
+    function checkAndTriggerRecoveryStation(timeRemaining) {
+      const realIdx = questionOrder[currentQuestionIdx];
+      const card = document.getElementById("recovery-station-card");
+
+      // STRICT GATE: Recovery engine ONLY activates if the student has missed a question previously!
+      // NEVER open if answering everything correctly!
+      if (!hasPreviousIncorrectQuestion()) {
+        if (card) card.classList.add("hidden");
+        return;
+      }
+
+      if (recoveryAttemptedForQuestion[realIdx]) return;
+      if (typeof timeRemaining === 'number' && timeRemaining > 0 && timeRemaining < 2) return;
+      if (!window.RecoveryEngine) return;
+      if (!card) return;
+
+      if (!recoveryChallengesByQuestion[realIdx]) {
+        const course = (currentAssignment && (currentAssignment.subject || currentAssignment.assessment_id))
+          || (currentQuiz && (currentQuiz.subject || currentQuiz.id || currentQuiz.title))
+          || 'app1';
+        const unit = (currentAssignment && currentAssignment.unit)
+          || (currentQuiz && currentQuiz.unit)
+          || 1;
+        recoveryChallengesByQuestion[realIdx] = window.RecoveryEngine.generateChallenge(course, unit);
+      }
+      activeRecoveryChallenge = recoveryChallengesByQuestion[realIdx];
+
+      // Default format to interactive simulation game
+      if (!activeRecoveryChallenge.format) {
+        activeRecoveryChallenge.format = 'sim';
+      }
+
+      const spiralBadge = document.getElementById("recovery-spiral-badge");
+      const rigorBadge = document.getElementById("recovery-rigor-badge");
+      if (spiralBadge) {
+        spiralBadge.textContent = activeRecoveryChallenge.isSpiralReview 
+          ? `Spiral: Unit ${activeRecoveryChallenge.servedUnitNum}` 
+          : `Unit ${activeRecoveryChallenge.servedUnitNum}`;
+      }
+      if (rigorBadge) {
+        rigorBadge.textContent = activeRecoveryChallenge.isCalculus ? "AP Physics C (Calculus)" : "AP Physics 1 (Algebra)";
+      }
+
+      renderRecoveryContent();
+      card.classList.remove("hidden");
+    }
+
+    function renderRecoveryContent() {
+      const card = document.getElementById("recovery-station-card");
+      if (!card || !activeRecoveryChallenge) return;
+
+      const simCont = document.getElementById("recovery-sim-container");
+      const promptEl = document.getElementById("recovery-prompt-text");
+      const choicesCont = document.getElementById("recovery-choices-container");
+      const formatBadge = document.getElementById("recovery-format-badge");
+      const toggleBtn = document.getElementById("btn-toggle-recovery-format");
+      const feedbackBox = document.getElementById("recovery-feedback-box");
+
+      if (feedbackBox) {
+        feedbackBox.classList.add("hidden");
+        feedbackBox.innerHTML = "";
+      }
+
+      const isSim = (activeRecoveryChallenge.format === 'sim') && window.RecoverySims;
+
+      if (formatBadge) {
+        formatBadge.textContent = isSim ? "🔬 Collegiate Lab Station & Analytical Scenario" : "📝 Analytical Theory Challenge";
+        formatBadge.className = isSim 
+          ? "px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold uppercase tracking-wider"
+          : "px-2.5 py-0.5 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 font-bold uppercase tracking-wider";
+      }
+      if (toggleBtn) {
+        toggleBtn.textContent = isSim ? "Switch to Pure Theory Format ⇄" : "Switch to Interactive Lab Apparatus ⇄";
+      }
+
+      if (isSim) {
+        if (simCont) {
+          simCont.classList.remove("hidden");
+          const simType = activeRecoveryChallenge.simType || 'ballistics';
+          const simData = activeRecoveryChallenge.simData || {};
+
+          if (simType === 'ballistics' || simType === 'cannon') {
+            window.RecoverySims.mountBallisticsLab(simCont, simData);
+          } else if (simType === 'friction' || simType === 'drift') {
+            window.RecoverySims.mountFrictionLab(simCont, simData);
+          } else if (simType === 'centripetal' || simType === 'coaster') {
+            window.RecoverySims.mountCentripetalLab(simCont, simData);
+          } else if (simType === 'harmonic') {
+            window.RecoverySims.mountHarmonicLab(simCont, simData);
+          } else if (simType === 'torque') {
+            window.RecoverySims.mountTorqueLab(simCont, simData);
+          } else {
+            window.RecoverySims.mountBallisticsLab(simCont, simData);
+          }
+        }
+      } else {
+        if (window.RecoverySims) window.RecoverySims.stop();
+        if (simCont) simCont.classList.add("hidden");
+      }
+
+      // CRITICAL: ALWAYS render the question prompt and multiple-choice answers!
+      // The simulation apparatus works hand-in-hand with the investigative AP question.
+      if (promptEl) {
+        promptEl.classList.remove("hidden");
+        promptEl.innerHTML = activeRecoveryChallenge.prompt;
+      }
+      if (choicesCont) {
+        choicesCont.classList.remove("hidden");
+        choicesCont.innerHTML = "";
+        activeRecoveryChallenge.choices.forEach((choice, idx) => {
+          const btn = document.createElement("button");
+          btn.className = "p-3.5 rounded-2xl bg-slate-900 border border-slate-700/80 hover:border-plasma-500/80 hover:bg-slate-800 text-left font-semibold text-slate-200 transition text-sm flex items-center gap-3 cursor-pointer";
+          btn.innerHTML = `
+            <span class="h-7 w-7 rounded-xl bg-slate-800 border border-slate-700 text-xs font-black flex items-center justify-center text-plasma-300 shrink-0">${String.fromCharCode(65 + idx)}</span>
+            <span class="flex-1">${choice.text}</span>
+          `;
+          btn.onclick = () => handleRecoveryAnswer(idx);
+          choicesCont.appendChild(btn);
+        });
+      }
+      if (window.renderMathInElement) {
+        try {
+          renderMathInElement(card, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false}
+            ],
+            throwOnError: false
+          });
+        } catch(e) {}
+      }
+    }
+
+    function toggleRecoveryFormat() {
+      if (!activeRecoveryChallenge) return;
+      const targetFormat = (activeRecoveryChallenge.format === 'sim') ? 'mcq' : 'sim';
+      const realIdx = questionOrder[currentQuestionIdx];
+      
+      const course = (currentAssignment && (currentAssignment.subject || currentAssignment.assessment_id))
+        || (currentQuiz && (currentQuiz.subject || currentQuiz.id || currentQuiz.title))
+        || 'app1';
+      const unit = (currentAssignment && currentAssignment.unit)
+        || (currentQuiz && currentQuiz.unit)
+        || 1;
+      
+      if (window.RecoveryEngine) {
+        activeRecoveryChallenge = window.RecoveryEngine.generateChallenge(course, unit, targetFormat);
+        recoveryChallengesByQuestion[realIdx] = activeRecoveryChallenge;
+      } else {
+        activeRecoveryChallenge.format = targetFormat;
+      }
+      renderRecoveryContent();
+    }
+
+    function onSimSuccess(msg) {
+      const realIdx = questionOrder[currentQuestionIdx];
+      if (recoveryAttemptedForQuestion[realIdx]) return;
+      recoveryAttemptedForQuestion[realIdx] = true;
+
+      const recoveryPts = (activeRecoveryChallenge && activeRecoveryChallenge.pointsRecovery) || 3.5;
+      syncStudentLiveAnswer(true, recoveryPts);
+      showToast("Points Recovered!", `+${recoveryPts} PTS redeemed!`, "lime", 3200);
+
+      const card = document.getElementById("recovery-station-card");
+      burstParticles(card);
+
+      const feedbackBox = document.getElementById("recovery-feedback-box");
+      if (feedbackBox) {
+        feedbackBox.className = "mt-4 p-4 rounded-2xl border border-lime-500/40 bg-lime-500/10 text-lime-200 text-sm leading-relaxed enter";
+        feedbackBox.innerHTML = `
+          <div class="flex items-center gap-2 font-black text-lime-400 mb-1">
+            <span>✓</span> Simulation Challenge Cleared (+${recoveryPts} PTS)
+          </div>
+          <div class="text-xs text-slate-200 leading-relaxed">${msg}</div>
+        `;
+        feedbackBox.classList.remove("hidden");
+      }
+
+      // Update button in lock box to reflect completion
+      const tapBtn = document.getElementById("btn-open-recovery");
+      if (tapBtn && tapBtn.parentElement) {
+        tapBtn.parentElement.innerHTML = `
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-center text-xs text-slate-300 max-w-md mx-auto">
+            <span class="font-bold text-plasma-300">⚡ Point Recovery Station attempt completed for this question.</span>
+          </div>
+        `;
+      }
+    }
+
+    function onSimFailure(msg) {
+      showToast("Simulation Attempt Missed", msg, "coral", 3400);
+      const feedbackBox = document.getElementById("recovery-feedback-box");
+      if (feedbackBox) {
+        feedbackBox.className = "mt-4 p-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-200 text-sm leading-relaxed enter";
+        feedbackBox.innerHTML = `
+          <div class="flex items-center gap-2 font-black text-amber-400 mb-1">
+            <span>⚠️</span> Simulation Telemetry Feedback
+          </div>
+          <div class="text-xs text-slate-300 leading-relaxed">${msg}</div>
+          <p class="text-[11px] text-slate-400 mt-2">Adjust your parameters and try again while time remains, or switch to theory format.</p>
+        `;
+        feedbackBox.classList.remove("hidden");
+      }
+    }
+
+    function triggerRecoveryStationManual() {
+      // STRICT GATE: NEVER open if student has answered all questions correctly!
+      if (!hasPreviousIncorrectQuestion()) {
+        showToast("High Mastery", "You have answered all questions correctly so far. Recovery is only available after a missed question.", "lime", 3000);
+        return;
+      }
+
+      checkAndTriggerRecoveryStation(999);
+      const card = document.getElementById("recovery-station-card");
+      if (card) {
+        card.classList.remove("hidden");
+        card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        card.classList.add("ring-4", "ring-cyan-400");
+        setTimeout(() => card.classList.remove("ring-4", "ring-cyan-400"), 1800);
+      }
+    }
+
+    function handleRecoveryAnswer(selectedIndex) {
+      const realIdx = questionOrder[currentQuestionIdx];
+      if (recoveryAttemptedForQuestion[realIdx] || !activeRecoveryChallenge) return;
+      recoveryAttemptedForQuestion[realIdx] = true;
+
+      const choice = activeRecoveryChallenge.choices[selectedIndex];
+      const isCorrect = choice && choice.isCorrect;
+      const feedbackBox = document.getElementById("recovery-feedback-box");
+      const choicesCont = document.getElementById("recovery-choices-container");
+
+      if (choicesCont) {
+        const btns = choicesCont.querySelectorAll("button");
+        btns.forEach((btn, idx) => {
+          btn.disabled = true;
+          btn.style.pointerEvents = "none";
+          const thisIsCorrect = activeRecoveryChallenge.choices[idx].isCorrect;
+          if (thisIsCorrect) {
+            btn.classList.add("border-lime-500", "bg-lime-500/20", "text-lime-300");
+          } else if (idx === selectedIndex) {
+            btn.classList.add("border-coral-500", "bg-coral-500/20", "text-coral-300");
+          } else {
+            btn.classList.add("opacity-40");
+          }
+        });
+      }
+
+      if (isCorrect) {
+        const recoveryPts = activeRecoveryChallenge.pointsRecovery || 3.5;
+        syncStudentLiveAnswer(true, recoveryPts);
+        showToast("Points Recovered!", `+${recoveryPts} PTS added to score`, "lime", 3000);
+        burstParticles(choicesCont);
+
+        if (feedbackBox) {
+          feedbackBox.className = "mt-4 p-4 rounded-2xl border border-lime-500/40 bg-lime-500/10 text-lime-200 text-sm leading-relaxed enter";
+          feedbackBox.innerHTML = `
+            <div class="flex items-center gap-2 font-black text-lime-400 mb-1">
+              <span>✓</span> Point Recovery Successful (+${recoveryPts} PTS)
+            </div>
+            <div class="text-xs text-slate-300">${activeRecoveryChallenge.explanation || 'Great job analyzing the physics relationship!'}</div>
+          `;
+          feedbackBox.classList.remove("hidden");
+        }
+      } else {
+        showToast("Recovery Missed", "Review explanation below — no points deducted", "brass", 3000);
+        if (feedbackBox) {
+          feedbackBox.className = "mt-4 p-4 rounded-2xl border border-amber-500/40 bg-amber-500/10 text-amber-200 text-sm leading-relaxed enter";
+          feedbackBox.innerHTML = `
+            <div class="flex items-center gap-2 font-black text-amber-400 mb-1">
+              <span>⚠️</span> Recovery Attempt Closed
+            </div>
+            <div class="text-xs text-slate-300">${activeRecoveryChallenge.explanation || 'Review the core concept above.'}</div>
+          `;
+          feedbackBox.classList.remove("hidden");
+        }
+      }
+
+      // Update button in lock box to reflect completion
+      const tapBtn = document.getElementById("btn-open-recovery");
+      if (tapBtn && tapBtn.parentElement) {
+        tapBtn.parentElement.innerHTML = `
+          <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-center text-xs text-slate-300 max-w-md mx-auto">
+            <span class="font-bold text-plasma-300">⚡ Point Recovery Station attempt completed for this question.</span>
+          </div>
+        `;
+      }
+
+      if (window.renderMathInElement && feedbackBox) {
+        try {
+          renderMathInElement(feedbackBox, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false}
+            ],
+            throwOnError: false
+          });
+        } catch(e) {}
+      }
+    }
+
+    // ============================================================================
+    // FLOATING EMOJI REACTIONS
+    // ============================================================================
+    function triggerStudentEmoji(emoji) {
+      if (!currentAssignment || !activeStudent) return;
+      sendLiveEmojiReaction(currentAssignment.join_code, emoji, activeStudent);
+      spawnFloatingEmoji(emoji);
+      showToast("Reaction Sent", `${emoji} broadcast to live stream`, "plum", 1400);
+    }
+
+    function spawnFloatingEmoji(emoji) {
+      const stage = document.getElementById("emoji-particle-stage") || document.body;
+      const el = document.createElement("div");
+      el.className = "floating-emoji";
+      el.textContent = emoji;
+      const randomX = Math.floor(Math.random() * 60) + 20;
+      el.style.left = `${randomX}vw`;
+      el.style.bottom = "80px";
+      stage.appendChild(el);
+      setTimeout(() => el.remove(), 2600);
+    }
+
+    function toggleFlagCurrentQuestion() {
+      const realIdx = questionOrder[currentQuestionIdx];
+      flaggedQuestions[realIdx] = !flaggedQuestions[realIdx];
+      renderCurrentQuestion();
+    }
+
+    function prevQuestion() {
+      if (currentQuestionIdx > 0) {
+        currentQuestionIdx--;
+        renderCurrentQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIdx < currentQuiz.questions.length - 1) {
+        currentQuestionIdx++;
+        renderCurrentQuestion();
+      } else {
+        confirmSubmitExam();
+      }
+    }
+
+    function jumpToQuestion(idx) {
+      const pos = questionOrder.indexOf(idx);
+      if (pos !== -1) {
+        currentQuestionIdx = pos;
+        renderCurrentQuestion();
+      }
+    }
+
+    // ============================================================================
+    // TEACHER-LED SYNCHRONIZATION POLLING (Real-time Pacing)
+    // ============================================================================
+    function startTeacherLedPolling() {
+      clearInterval(teacherLedPollInterval);
+      teacherLedPollInterval = setInterval(async () => {
+        try {
+          const res = await verifyJoinCode(currentAssignment.join_code);
+          if (res.found && res.assignment) {
+            const teacherQ = res.assignment.current_question_index || 0;
+            if (teacherQ !== currentQuestionIdx) {
+              currentQuestionIdx = teacherQ;
+              renderCurrentQuestion();
+            }
+
+            // Sync per-question timer + discussion pause state from instructor
+            currentAssignment.question_started_at = res.assignment.question_started_at;
+            const newDiscussion = res.assignment.discussion_active === true;
+            const newAnswerRevealed = res.assignment.answer_revealed === true;
+            if (newDiscussion !== discussionActive || newAnswerRevealed !== answerRevealed) {
+              discussionActive = newDiscussion;
+              answerRevealed = newAnswerRevealed;
+              updateDiscussionFreeze(discussionActive, answerRevealed);
+            }
+
+            // Sync instructor pause state
+            const isPaused = res.assignment.timer_paused === true;
+            if (isPaused !== timerPaused) {
+              timerPaused = isPaused;
+              updateTimerPauseDisplay(timerPaused, res.assignment.paused_remaining_seconds);
+              if (timerPaused) {
+                showToast("Session Paused", "Instructor has paused to explain concepts", "brass", 3000);
+              } else {
+                showToast("Session Resumed", "Assessment clock resumed", "lime", 2000);
+              }
+            }
+
+            if (!res.assignment.is_active) {
+              clearInterval(teacherLedPollInterval);
+              alert("The instructor has ended the live assessment session.");
+              finishAssessment();
+            }
+          }
+        } catch (e) {}
+      }, 1000);
+    }
+
+    // ============================================================================
+    // SUBMISSION & GRADING
+    // ============================================================================
+    function confirmSubmitExam() {
+      const answeredCount = Object.keys(studentAnswers).length;
+      const total = currentQuiz.questions.length;
+      let msg = `Ready to submit your assessment?\n\nYou have answered ${answeredCount} of ${total} questions.`;
+      if (answeredCount < total) {
+        msg += `\n\nWarning: ${total - answeredCount} questions are still unanswered!`;
+      }
+      if (confirm(msg)) {
+        finishAssessment();
+      }
+    }
+
+    async function finishAssessment() {
+      clearInterval(timerInterval);
+      clearInterval(teacherLedPollInterval);
+      if (perQTimerInterval) clearInterval(perQTimerInterval);
+
+      // A remediation retry is scored locally only — it must never replace the
+      // graded submission. We report the result, then restore the original state.
+      if (isRemediation) {
+        let retryScore = 0;
+        currentQuiz.questions.forEach((q, idx) => {
+          if (studentAnswers[idx] && studentAnswers[idx] === q.correct_answer) retryScore++;
+        });
+        const retryTotal = currentQuiz.questions.length;
+        showToast(
+          "Retry complete",
+          `${retryScore} of ${retryTotal} missed questions now correct`,
+          retryScore === retryTotal ? "lime" : "brass",
+          4200
+        );
+        exitRemediation();
+        return;
+      }
+
+      let score = 0;
+      currentQuiz.questions.forEach((q, idx) => {
+        if (studentAnswers[idx] && studentAnswers[idx] === q.correct_answer) {
+          score++;
+        }
+      });
+
+      const total = currentQuiz.questions.length;
+      const percentage = ((score / total) * 100).toFixed(1);
+      const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
+      const s = String(elapsedSeconds % 60).padStart(2, '0');
+      const timeStr = `${m}:${s}`;
+
+      document.getElementById("res-student-name").textContent = activeStudent;
+      document.getElementById("res-score").textContent = `${score} / ${total}`;
+      document.getElementById("res-percentage").textContent = `${percentage}%`;
+      document.getElementById("res-time").textContent = timeStr;
+
+      if (tabSwitchCount > 0) {
+        document.getElementById("res-tab-switches").textContent = tabSwitchCount;
+        document.getElementById("integrity-notice").classList.remove("hidden");
+      } else {
+        document.getElementById("integrity-notice").classList.add("hidden");
+      }
+
+      // Leaderboard toggle
+      const showLb = currentAssignment.show_leaderboard !== false;
+      document.getElementById("btn-view-leaderboard").classList.toggle("hidden", !showLb);
+
+      // Student review permission check
+      const allowReview = currentAssignment.allow_student_review === true;
+      document.getElementById("btn-review-answers").classList.toggle("hidden", !allowReview);
+      document.getElementById("review-locked-notice").classList.toggle("hidden", allowReview);
+
+      document.getElementById("view-exam-runner").classList.add("hidden");
+      document.getElementById("test-status-bar").classList.add("hidden");
+      const emojiDock = document.getElementById("student-emoji-dock");
+      if (emojiDock) emojiDock.classList.add("hidden");
+      document.getElementById("view-result").classList.remove("hidden");
+
+      deactivateLockdown();
+
+      await submitStudentExam({
+        join_code: currentAssignment.join_code,
+        student_name: activeStudent,
+        class_period: currentAssignment.class_period || 'General',
+        subject: currentAssignment.subject,
+        unit: currentAssignment.unit,
+        assessment_id: currentAssignment.assessment_id,
+        assessment_title: currentAssignment.assessment_title,
+        score: score,
+        points: studentTotalPoints,
+        streak: studentCurrentStreak,
+        total_questions: total,
+        percentage: parseFloat(percentage),
+        time_spent_seconds: elapsedSeconds,
+        answers: studentAnswers,
+        tab_switch_count: tabSwitchCount,
+        fullscreen_exits: fullscreenExitCount
+      });
+    }
+
+    // ============================================================================
+    // LEADERBOARD
+    // ============================================================================
+    async function showLeaderboardView() {
+      document.getElementById("view-result").classList.add("hidden");
+      document.getElementById("view-leaderboard").classList.remove("hidden");
+      document.getElementById("leaderboard-assessment-name").textContent = `${currentAssignment.assessment_title} • Join Code: ${currentAssignment.join_code}`;
+
+      const list = await fetchSubmissionsByCode(currentAssignment.join_code);
+      const tbody = document.getElementById("leaderboard-tbody");
+      tbody.innerHTML = "";
+
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500 text-sm">No student attempts recorded yet.</td></tr>`;
+        document.getElementById("leaderboard-podium").classList.add("hidden");
+        document.getElementById("leaderboard-stats").classList.add("hidden");
+        return;
+      }
+
+      if (list.length >= 3) {
+        const podium = document.getElementById("leaderboard-podium");
+        podium.classList.remove("hidden");
+        podium.innerHTML = "";
+        const medals = ["🥇", "🥈", "🥉"];
+        const podiumColors = [
+          "from-amber-600/30 to-amber-900/10 border-amber-500/40",
+          "from-slate-400/20 to-slate-700/10 border-slate-400/30",
+          "from-orange-700/20 to-orange-900/10 border-orange-600/30"
+        ];
+        const podiumOrder = [1, 0, 2];
+        podiumOrder.forEach(idx => {
+          if (!list[idx]) return;
+          const sub = list[idx];
+          const div = document.createElement("div");
+          div.className = `bg-gradient-to-b ${podiumColors[idx]} border rounded-2xl p-4 text-center space-y-1.5 ${idx === 0 ? 'transform -translate-y-3' : ''}`;
+          div.innerHTML = `
+            <div class="text-3xl">${medals[idx]}</div>
+            <div class="font-black text-white text-base truncate">${sub.student_name}</div>
+            <div class="text-xl font-black text-indigo-400">${sub.percentage}%</div>
+            <div class="text-xs text-slate-400 font-semibold">${sub.score}/${sub.total_questions} Correct</div>
+          `;
+          podium.appendChild(div);
+        });
+      } else {
+        document.getElementById("leaderboard-podium").classList.add("hidden");
+      }
+
+      list.forEach((sub, idx) => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/40 transition";
+        let rankBadge = `${idx + 1}`;
+        if (idx === 0) rankBadge = "🥇 1st";
+        else if (idx === 1) rankBadge = "🥈 2nd";
+        else if (idx === 2) rankBadge = "🥉 3rd";
+
+        const tm = String(Math.floor(sub.time_spent_seconds / 60)).padStart(2, '0');
+        const ts = String(sub.time_spent_seconds % 60).padStart(2, '0');
+
+        tr.innerHTML = `
+          <td class="py-4 px-4 text-center font-bold text-base ${idx < 3 ? 'text-amber-400' : 'text-slate-500'}">${rankBadge}</td>
+          <td class="py-4 px-4 font-bold text-white text-base">${sub.student_name}</td>
+          <td class="py-4 px-4 text-xs text-slate-400 font-semibold">${sub.class_period || 'General'}</td>
+          <td class="py-4 px-4 text-center font-bold text-indigo-400 text-base">${sub.score} / ${sub.total_questions}</td>
+          <td class="py-4 px-4 text-center font-black text-emerald-400 text-base">${sub.percentage}%</td>
+          <td class="py-4 px-4 text-right font-mono text-slate-300 text-sm font-semibold">${tm}:${ts}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const statsEl = document.getElementById("leaderboard-stats");
+      statsEl.classList.remove("hidden");
+      const avgPct = (list.reduce((s, x) => s + x.percentage, 0) / list.length).toFixed(1);
+      const avgTimeSec = Math.round(list.reduce((s, x) => s + x.time_spent_seconds, 0) / list.length);
+      const am = String(Math.floor(avgTimeSec / 60)).padStart(2, '0');
+      const as2 = String(avgTimeSec % 60).padStart(2, '0');
+      document.getElementById("lb-class-avg").textContent = `${avgPct}%`;
+      document.getElementById("lb-total-subs").textContent = list.length;
+      document.getElementById("lb-avg-time").textContent = `${am}:${as2}`;
+    }
+
+    // ============================================================================
+    // ANSWER REVIEW
+    // ============================================================================
+    function showReviewView() {
+      document.getElementById("view-result").classList.add("hidden");
+      document.getElementById("view-review").classList.remove("hidden");
+
+      const container = document.getElementById("review-questions-list");
+      container.innerHTML = "";
+
+      currentQuiz.questions.forEach((q, idx) => {
+        const studentAns = studentAnswers[idx];
+        const isCorrect = studentAns === q.correct_answer;
+        const card = document.createElement("div");
+        card.className = `bg-slate-900/90 border rounded-3xl p-6 space-y-4 shadow-xl ${
+          isCorrect ? "border-emerald-500/30" : "border-rose-500/30"
+        }`;
+
+        let html = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-3">
+              <span class="px-3.5 py-1 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-black text-sm">Q${idx + 1}</span>
+              <span class="px-3.5 py-1 rounded-xl ${isCorrect ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' : 'bg-rose-500/20 border-rose-500/40 text-rose-400'} font-extrabold text-sm">
+                ${isCorrect ? '✓ Correct' : `✗ Incorrect — Your answer: ${studentAns || 'None'}`}
+              </span>
+            </div>
+            <span class="px-3.5 py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-extrabold text-sm">
+              Official Key: ${q.correct_answer || '—'}
+            </span>
+          </div>
+        `;
+
+        if (q.card_image) {
+          html += `
+            <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-200">
+              <img src="${q.card_image}" alt="Question Card" class="max-h-[500px] w-full object-contain cursor-pointer" onclick="openImageModal(this.src)">
+            </div>
+          `;
+        }
+
+        if (q.explanation) {
+          html += `
+            <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-5 text-sm space-y-1.5">
+              <span class="font-bold uppercase tracking-wider text-emerald-400 block text-xs">Official College Board Scoring Rationale</span>
+              <p class="text-slate-300 leading-relaxed font-sans text-sm">${q.explanation}</p>
+            </div>
+          `;
+        }
+
+        card.innerHTML = html;
+        container.appendChild(card);
+      });
+    }
+
+    function showResultView() {
+      document.getElementById("view-review").classList.add("hidden");
+      document.getElementById("view-mastery").classList.add("hidden");
+      document.getElementById("view-remediation").classList.add("hidden");
+      document.getElementById("view-result").classList.remove("hidden");
+    }
+
+    // ============================================================================
+    // CONCEPT MASTERY
+    // ============================================================================
+    /**
+     * Bucket this exam's questions by concept and score the student in each.
+     *
+     * The answers object is keyed by the question's index inside the quiz
+     * (the same index used for scoring in finishAssessment), so mastery is
+     * computed against the same mapping the score already uses.
+     */
+    function computeConceptBreakdown() {
+      const buckets = {};
+      currentQuiz.questions.forEach((q, idx) => {
+        const key = q.concept || "unclassified";
+        if (!buckets[key]) {
+          buckets[key] = {
+            key,
+            meta: conceptMeta(key),
+            total: 0,
+            correct: 0,
+            answered: 0,
+            missed: [],
+            numbers: []
+          };
+        }
+        const b = buckets[key];
+        b.total++;
+        b.numbers.push(q.number);
+
+        const chosen = studentAnswers[idx];
+        if (chosen !== undefined) b.answered++;
+        if (chosen && chosen === q.correct_answer) b.correct++;
+        else b.missed.push(idx);
+      });
+
+      return Object.values(buckets)
+        .map(b => ({
+          ...b,
+          accuracy: b.total > 0 ? b.correct / b.total : 0,
+          band: masteryBand(b.total > 0 ? b.correct / b.total : 0)
+        }))
+        .sort((a, b) => a.accuracy - b.accuracy);
+    }
+
+    function showMasteryView() {
+      const breakdown = computeConceptBreakdown();
+      if (!breakdown.length) return;
+
+      document.getElementById("view-result").classList.add("hidden");
+      document.getElementById("view-leaderboard").classList.add("hidden");
+      document.getElementById("view-review").classList.add("hidden");
+      document.getElementById("view-mastery").classList.remove("hidden");
+
+      const overallCorrect = breakdown.reduce((s, b) => s + b.correct, 0);
+      const overallTotal = breakdown.reduce((s, b) => s + b.total, 0);
+      document.getElementById("mastery-subtitle").textContent =
+        `${overallCorrect} of ${overallTotal} correct across ${breakdown.length} concept${breakdown.length === 1 ? "" : "s"}`;
+
+      // Tiles
+      document.getElementById("mstat-concepts").textContent = breakdown.length;
+      document.getElementById("mstat-secured").textContent =
+        breakdown.filter(b => b.band.key === "secured").length;
+      document.getElementById("mstat-developing").textContent =
+        breakdown.filter(b => b.band.key === "developing" || b.band.key === "shaky").length;
+      document.getElementById("mstat-priority").textContent =
+        breakdown.filter(b => b.band.key === "priority").length;
+
+      // Remediation availability
+      const missedTotal = breakdown.reduce((s, b) => s + b.missed.length, 0);
+      document.getElementById("btn-start-remediation").classList.toggle("hidden", missedTotal === 0);
+
+      // Priority callout for the weakest concepts
+      const weak = breakdown.filter(b => b.band.key === "priority");
+      const priorityBox = document.getElementById("mastery-priority");
+      if (weak.length) {
+        priorityBox.classList.remove("hidden");
+        priorityBox.innerHTML = `
+          <div class="text-sm font-black uppercase tracking-wider text-coral-400">Start here</div>
+          <div class="text-xs text-chalk/60 -mt-1">Concepts where accuracy fell below 55%</div>
+          <div class="flex flex-wrap gap-2 pt-1">
+            ${weak.map(b => `
+              <span class="px-3 py-1.5 rounded-xl bg-coral-500/15 border border-coral-500/40 text-coral-400 text-xs font-bold">
+                ${b.meta.label} — ${Math.round(b.accuracy * 100)}%
+              </span>
+            `).join("")}
+          </div>
+        `;
+      } else {
+        priorityBox.classList.add("hidden");
+        priorityBox.innerHTML = "";
+      }
+
+      // Per-concept rows, weakest first
+      const list = document.getElementById("mastery-list");
+      list.innerHTML = "";
+      breakdown.forEach((b, i) => {
+        const pct = Math.round(b.accuracy * 100);
+        const tone = b.band.tone;
+        const row = document.createElement("div");
+        row.className = "mastery-row enter bg-ink-800/70 border border-ink-600 rounded-2xl p-4 cursor-pointer";
+        row.style.animationDelay = `${i * 45}ms`;
+        row.innerHTML = `
+          <div class="flex items-center justify-between gap-3 mb-2.5">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="h-2.5 w-2.5 rounded-full shrink-0 bg-${tone}-400"></span>
+              <span class="font-black text-chalk text-sm truncate">${b.meta.label}</span>
+            </div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="text-xs font-bold text-${tone}-400">${b.band.label}</span>
+              <span class="font-mono font-black text-chalk text-sm">${b.correct}/${b.total}</span>
+              <span class="font-mono font-black text-${tone}-400 text-base w-12 text-right">${pct}%</span>
+            </div>
+          </div>
+          <div class="h-2.5 bg-ink-700 rounded-full overflow-hidden">
+            <div class="mastery-fill h-full rounded-full bg-${tone}-500" style="--pct:${pct}%"></div>
+          </div>
+          <div class="flex items-center justify-between mt-2 text-[11px] text-chalk/45">
+            <span>${b.meta.blurb}</span>
+            <span class="shrink-0 ml-3 font-mono">Q${b.numbers.join(", Q")}</span>
+          </div>
+        `;
+        row.onclick = () => showConceptDetail(b);
+        list.appendChild(row);
+      });
+
+      showToast("Concept breakdown ready", `${breakdown.length} topics analysed`, "brass", 2600);
+    }
+
+    /** Drill into one concept: list its questions and which were missed. */
+    function showConceptDetail(bucket) {
+      const rows = bucket.missed.length
+        ? bucket.missed.map(idx => {
+            const q = currentQuiz.questions[idx];
+            return `
+              <div class="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-coral-500/10 border border-coral-500/30">
+                <span class="font-mono font-black text-coral-400 text-sm">Q${q.number}</span>
+                <span class="text-xs text-chalk/60">
+                  you picked <span class="font-black text-coral-400">${studentAnswers[idx] || "nothing"}</span>
+                  · key <span class="font-black text-lime-400">${q.correct_answer}</span>
+                </span>
+              </div>
+            `;
+          }).join("")
+        : `<div class="px-3.5 py-2.5 rounded-xl bg-lime-500/10 border border-lime-500/30 text-xs text-lime-400 font-bold">
+             Clean sweep — every question in this concept was correct.
+           </div>`;
+
+      showToast(bucket.meta.label,
+        `${bucket.correct}/${bucket.total} correct · ${bucket.missed.length} missed`,
+        bucket.band.tone, 3000);
+    }
+
+    // ============================================================================
+    // REMEDIATION QUIZ
+    // ============================================================================
+    /**
+     * Re-serve only the questions the student missed, using the same runner.
+     * A copy of the quiz is made so the original attempt is never mutated.
+     */
+    function startRemediationQuiz() {
+      const missedIdx = [];
+      currentQuiz.questions.forEach((q, idx) => {
+        const chosen = studentAnswers[idx];
+        if (!chosen || chosen !== q.correct_answer) missedIdx.push(idx);
+      });
+
+      if (!missedIdx.length) {
+        showToast("Nothing to retry", "You answered every question correctly", "lime", 2600);
+        return;
+      }
+
+      remediationSnapshot = {
+        quiz: currentQuiz,
+        answers: studentAnswers,
+        order: questionOrder.slice(),
+        idx: currentQuestionIdx
+      };
+
+      currentQuiz = {
+        ...currentQuiz,
+        title: `${currentQuiz.title} — Retry`,
+        questions: missedIdx.map(i => currentQuiz.questions[i])
+      };
+      studentAnswers = {};
+      questionOrder = currentQuiz.questions.map((_, i) => i);
+      currentQuestionIdx = 0;
+      isRemediation = true;
+
+      document.getElementById("view-mastery").classList.add("hidden");
+      document.getElementById("view-remediation").classList.remove("hidden");
+      document.getElementById("remediation-subtitle").textContent =
+        `${missedIdx.length} question${missedIdx.length === 1 ? "" : "s"} you missed — scored separately, your original result is untouched`;
+
+      // Swap the main runner into view for the retry round.
+      document.getElementById("view-remediation").classList.add("hidden");
+      document.getElementById("view-exam-runner").classList.remove("hidden");
+      document.getElementById("test-status-bar").classList.remove("hidden");
+      document.getElementById("nav-controls").classList.remove("hidden");
+      document.getElementById("timer-container").classList.add("hidden");
+      document.getElementById("btn-finish-sidebar").classList.remove("hidden");
+      document.getElementById("btn-finish-sidebar").textContent = "Finish Retry";
+
+      renderQuestionNavGrid();
+      renderCurrentQuestion();
+      showToast("Retry started", `${missedIdx.length} questions loaded`, "coral", 2800);
+    }
+
+    /** Leave the retry round and restore the original attempt state. */
+    function exitRemediation() {
+      if (remediationSnapshot) {
+        currentQuiz = remediationSnapshot.quiz;
+        studentAnswers = remediationSnapshot.answers;
+        questionOrder = remediationSnapshot.order;
+        currentQuestionIdx = remediationSnapshot.idx;
+        remediationSnapshot = null;
+      }
+      isRemediation = false;
+
+      document.getElementById("view-remediation").classList.add("hidden");
+      document.getElementById("view-result").classList.remove("hidden");
+      document.getElementById("test-status-bar").classList.add("hidden");
+      document.getElementById("view-exam-runner").classList.add("hidden");
+      document.getElementById("btn-finish-sidebar").textContent = "Finish & Submit Exam";
+
+      showToast("Retry cancelled", "Your original attempt is unchanged", "brass", 2600);
+    }
+
+    // ============================================================================
+    // CALCULATOR
+    // ============================================================================
+    function toggleCalculator() {
+      calculatorVisible = !calculatorVisible;
+      document.getElementById("calculator-panel").classList.toggle("hidden", !calculatorVisible);
+    }
+
+    function calcInput(val) {
+      calcExpression += val;
+      document.getElementById("calc-display").value = calcExpression;
+    }
+
+    function calcClear() {
+      calcExpression = "";
+      document.getElementById("calc-display").value = "";
+    }
+
+    function calcBackspace() {
+      calcExpression = calcExpression.slice(0, -1);
+      document.getElementById("calc-display").value = calcExpression;
+    }
+
+    function calcEvaluate() {
+      try {
+        let expr = calcExpression
+          .replace(/sin\(/g, 'Math.sin(')
+          .replace(/cos\(/g, 'Math.cos(')
+          .replace(/tan\(/g, 'Math.tan(');
+        if (/^[0-9+\-*/().,%eMath.sincoqrtlogPIE\s]*$/.test(expr.replace(/Math\.\w+/g, ''))) {
+          const result = Function('"use strict"; return (' + expr + ')')();
+          calcExpression = String(result);
+          document.getElementById("calc-display").value = calcExpression;
+        }
+      } catch (e) {
+        document.getElementById("calc-display").value = "Error";
+        calcExpression = "";
+      }
+    }
+
+    (function() {
+      const panel = document.getElementById("calculator-panel");
+      const handle = document.getElementById("calc-drag-handle");
+      if (!panel || !handle) return;
+      let isDragging = false, startX, startY, origLeft, origTop;
+      handle.addEventListener("mousedown", e => {
+        isDragging = true;
+        startX = e.clientX; startY = e.clientY;
+        const rect = panel.getBoundingClientRect();
+        origLeft = rect.left; origTop = rect.top;
+        e.preventDefault();
+      });
+      document.addEventListener("mousemove", e => {
+        if (!isDragging) return;
+        panel.style.left = (origLeft + e.clientX - startX) + "px";
+        panel.style.top = (origTop + e.clientY - startY) + "px";
+        panel.style.right = "auto";
+      });
+      document.addEventListener("mouseup", () => { isDragging = false; });
+    })();
+
+    // ============================================================================
+    // LOCKDOWN / INTEGRITY MONITORING
+    // ============================================================================
+    function activateLockdown() {
+      document.body.classList.add("lockdown-active");
+      try { document.documentElement.requestFullscreen().catch(() => {}); } catch (e) {}
+      document.addEventListener("visibilitychange", onVisibilityChange);
+      window.addEventListener("blur", onWindowBlur);
+      document.addEventListener("fullscreenchange", onFullscreenChange);
+      document.addEventListener("keydown", blockShortcuts, true);
+      document.addEventListener("contextmenu", blockContextMenu, true);
+    }
+
+    function deactivateLockdown() {
+      document.body.classList.remove("lockdown-active");
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("blur", onWindowBlur);
+      document.removeEventListener("fullscreenchange", onFullscreenChange);
+      document.removeEventListener("keydown", blockShortcuts, true);
+      document.removeEventListener("contextmenu", blockContextMenu, true);
+      document.getElementById("tab-switch-banner").classList.add("hidden");
+      document.getElementById("fs-warning").classList.add("hidden");
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function onVisibilityChange() {
+      if (document.hidden) {
+        tabSwitchCount++;
+        showTabSwitchWarning();
+      }
+    }
+
+    function onWindowBlur() {
+      tabSwitchCount++;
+      showTabSwitchWarning();
+    }
+
+    function showTabSwitchWarning() {
+      const banner = document.getElementById("tab-switch-banner");
+      document.getElementById("tab-switch-count-display").textContent = tabSwitchCount;
+      banner.classList.remove("hidden");
+      setTimeout(() => banner.classList.add("hidden"), 5000);
+    }
+
+    function onFullscreenChange() {
+      if (!document.fullscreenElement && lockdownEnabled) {
+        fullscreenExitCount++;
+        document.getElementById("fs-warning").classList.remove("hidden");
+      }
+    }
+
+    function reEnterFullscreen() {
+      document.getElementById("fs-warning").classList.add("hidden");
+      document.documentElement.requestFullscreen().catch(() => {});
+    }
+
+    function blockShortcuts(e) {
+      if (e.ctrlKey && ['c', 'v', 'p', 's', 'u'].includes(e.key.toLowerCase())) {
+        e.preventDefault(); e.stopPropagation();
+      }
+      if (['F12', 'PrintScreen'].includes(e.key)) {
+        e.preventDefault(); e.stopPropagation();
+      }
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'i') {
+        e.preventDefault(); e.stopPropagation();
+      }
+    }
+
+    function blockContextMenu(e) { e.preventDefault(); }
+
+    let modalZoomLevel = 1.25; // Default 125% zoom (guarantees >= 120% scale!)
+    let isModalDragging = false;
+    let modalStartX = 0, modalStartY = 0;
+    let modalScrollLeft = 0, modalScrollTop = 0;
+    let inPageCardZoom = 1.0;
+
+    function setInPageCardZoom(scale) {
+      inPageCardZoom = scale;
+      const img = document.getElementById("q-card-img");
+      const whiteBox = document.getElementById("q-card-white-box");
+      if (!img) return;
+
+      ['100', '120', '140'].forEach(val => {
+        const btn = document.getElementById(`btn-card-zoom-${val}`);
+        if (btn) {
+          if ((val === '100' && scale === 1.0) || (val === '120' && scale === 1.2) || (val === '140' && scale === 1.4)) {
+            btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 text-cyan-300 transition";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+          }
+        }
+      });
+
+      if (scale === 1.0) {
+        img.style.transform = "scale(1)";
+        img.style.maxHeight = "92vh";
+        if (whiteBox) whiteBox.style.overflow = "hidden";
+      } else {
+        img.style.transform = `scale(${scale})`;
+        img.style.transformOrigin = "top center";
+        img.style.maxHeight = "none";
+        if (whiteBox) whiteBox.style.overflow = "auto";
+      }
+    }
+
+    function openImageModal(src) {
+      const modal = document.getElementById("image-modal");
+      const img = document.getElementById("modal-img");
+      if (!modal || !img) return;
+      if (!src) {
+        const card = document.getElementById("q-card-img");
+        if (card) src = card.src;
+      }
+      if (!src) return;
+
+      img.src = src;
+      modalZoomLevel = 1.25; // Default to 125% (at least 120% bigger!)
+      setModalZoom(1.25);
+      modal.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+
+      setTimeout(() => {
+        const viewport = document.getElementById("modal-canvas-viewport");
+        if (viewport) {
+          viewport.scrollTop = 0;
+        }
+      }, 50);
+    }
+
+    function closeImageModal() {
+      const modal = document.getElementById("image-modal");
+      if (modal) modal.classList.add("hidden");
+      document.body.style.overflow = "";
+    }
+
+    function setModalZoom(level) {
+      modalZoomLevel = Math.max(0.6, Math.min(3.5, level));
+      const wrapper = document.getElementById("modal-img-wrapper");
+      const display = document.getElementById("modal-zoom-display");
+      if (wrapper) {
+        wrapper.style.transform = `scale(${modalZoomLevel})`;
+        wrapper.style.transformOrigin = "top center";
+      }
+      if (display) {
+        display.textContent = `${Math.round(modalZoomLevel * 100)}%`;
+      }
+
+      const presets = { '100': 1.0, '125': 1.25, '150': 1.5, '200': 2.0 };
+      for (const [id, val] of Object.entries(presets)) {
+        const btn = document.getElementById(`btn-zoom-${id}`);
+        if (btn) {
+          if (Math.abs(modalZoomLevel - val) < 0.05) {
+            btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow-md transition";
+          } else {
+            btn.className = "px-2.5 py-1 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+          }
+        }
+      }
+    }
+
+    function zoomModalImg(delta) {
+      setModalZoom(modalZoomLevel + delta);
+    }
+
+    function resetModalZoom() {
+      setModalZoom(1.25);
+    }
+
+    function toggleModalZoomClick(e) {
+      e.stopPropagation();
+      if (modalZoomLevel <= 1.3) {
+        setModalZoom(1.75);
+      } else {
+        setModalZoom(1.25);
+      }
+    }
+
+    function initModalPan() {
+      const viewport = document.getElementById("modal-canvas-viewport");
+      if (!viewport) return;
+
+      viewport.addEventListener("mousedown", (e) => {
+        if (e.target.closest("button") || e.target.id === "modal-img") return;
+        isModalDragging = true;
+        modalStartX = e.pageX - viewport.offsetLeft;
+        modalStartY = e.pageY - viewport.offsetTop;
+        modalScrollLeft = viewport.scrollLeft;
+        modalScrollTop = viewport.scrollTop;
+        viewport.classList.add("cursor-grabbing");
+        viewport.classList.remove("cursor-grab");
+      });
+
+      window.addEventListener("mouseup", () => {
+        isModalDragging = false;
+        if (viewport) {
+          viewport.classList.remove("cursor-grabbing");
+          viewport.classList.add("cursor-grab");
+        }
+      });
+
+      viewport.addEventListener("mousemove", (e) => {
+        if (!isModalDragging) return;
+        e.preventDefault();
+        const x = e.pageX - viewport.offsetLeft;
+        const y = e.pageY - viewport.offsetTop;
+        const walkX = (x - modalStartX) * 1.5;
+        const walkY = (y - modalStartY) * 1.5;
+        viewport.scrollLeft = modalScrollLeft - walkX;
+        viewport.scrollTop = modalScrollTop - walkY;
+      });
+
+      viewport.addEventListener("wheel", (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 0.12 : -0.12;
+        setModalZoom(modalZoomLevel + delta);
+      }, { passive: false });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          closeImageModal();
+        }
+      });
+    }
+
+    window.onload = initStudentApp;
+  </script>
+</body>
+</html>

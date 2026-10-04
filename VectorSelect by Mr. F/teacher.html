@@ -1,0 +1,3259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>VectorSelect by Mr. F — Instructor Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            quantum: { 400: "#38bdf8", 500: "#00f2fe", 600: "#0284c7" },
+            aurora:  { 400: "#34d399", 500: "#00f5a0", 600: "#059669" },
+            plasma:  { 400: "#fde047", 500: "#ffb800", 600: "#d97706" },
+            nebula:  { 400: "#a78bfa", 500: "#8b5cf6", 600: "#7c3aed" },
+            solar:   { 400: "#fb7185", 500: "#f43f5e", 600: "#e11d48" },
+            space:   { 950: "#050811", 900: "#0b1120", 850: "#0f172a", 800: "#1e293b" },
+            ink:     { 900: "#060913", 800: "#0b1120", 700: "#151f32", 600: "#1e293b", 500: "#334155" },
+            brass:   { 400: "#ffd200", 500: "#ffb800", 600: "#b87d1c" },
+            copper:  { 400: "#38bdf8", 500: "#00e5ff", 600: "#0284c7" },
+            coral:   { 400: "#fb7185", 500: "#f43f5e", 600: "#e11d48" },
+            lime:    { 400: "#4ade80", 500: "#00f5a0" },
+            plum:    { 400: "#c084fc", 500: "#8b5cf6" },
+            chalk:   "#f8fafc",
+            paper:   "#f1f5f9"
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js"></script>
+  <script src="pocketbase_config.js"></script>
+  <!-- Offline Air-Gapped Fallback Keys (Ignored on GitHub Pages) -->
+  <script src="data/answer_keys.js" onerror="/* Local air-gapped fallback only */"></script>
+  <script src="data/exams_bundle.js"></script>
+  <script src="data/concepts.js"></script>
+  <script src="data/recovery_engine.js"></script>
+  <style>
+    /* ============================================================
+       VECTORSELECT SPECTACULAR "QUANTUM OBSERVATORY" THEME
+       Deep Obsidian Space, Microscopic Vector Laser Grid, 
+       Luminescent Aurora Emissive Accents
+       ============================================================ */
+    :root {
+      --space-black: #060913;
+      --quantum-cyan: #00f2fe;
+      --aurora-green: #00f5a0;
+      --plasma-gold: #ffb800;
+      --nebula-purple: #8b5cf6;
+      --solar-crimson: #f43f5e;
+      --starlight: #f8fafc;
+    }
+
+    body {
+      background-color: #050811;
+      background-image:
+        radial-gradient(1400px 700px at 50% -10%, rgba(0, 242, 254, 0.13), transparent 70%),
+        radial-gradient(1000px 600px at 90% 15%, rgba(139, 92, 246, 0.10), transparent 60%),
+        radial-gradient(900px 600px at 10% 85%, rgba(0, 245, 160, 0.08), transparent 60%),
+        linear-gradient(to right, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+      background-attachment: fixed;
+    }
+
+    .quantum-card {
+      background: linear-gradient(165deg, rgba(15, 23, 42, 0.88) 0%, rgba(9, 14, 26, 0.94) 100%);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      box-shadow: 0 12px 35px -10px rgba(0, 0, 0, 0.7), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+    }
+    .quantum-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 16px 45px -10px rgba(0, 242, 254, 0.14), inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+    }
+
+    .quantum-line {
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent 0%, #00f5a0 20%, #00f2fe 50%, #8b5cf6 80%, transparent 100%);
+      box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+    }
+
+    .btn-aurora {
+      background: linear-gradient(135deg, #00f5a0 0%, #00d9f5 100%);
+      color: #050811;
+      font-weight: 900;
+      border: 1px solid #70ffde;
+      box-shadow: 0 0 20px -2px rgba(0, 245, 160, 0.45);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-aurora:hover {
+      filter: brightness(1.12);
+      box-shadow: 0 0 28px 2px rgba(0, 245, 160, 0.7);
+      transform: translateY(-1.5px);
+    }
+    .btn-aurora:active {
+      transform: scale(0.97);
+    }
+
+    .plasma-code {
+      background: linear-gradient(135deg, #ffe600 0%, #ffb800 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 14px rgba(255, 184, 0, 0.45));
+    }
+
+    .math-font { font-family: "Cambria Math", "Latin Modern Math", "STIX Two Math", Georgia, serif; font-style: italic; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(11, 17, 32, 0.8); }
+    ::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(0, 242, 254, 0.6); }
+
+    .brand-mark {
+      background: linear-gradient(140deg, #00f5a0 0%, #00f2fe 50%, #8b5cf6 100%);
+      box-shadow: 0 0 24px rgba(0, 242, 254, 0.45);
+    }
+    .wordmark {
+      background: linear-gradient(135deg, #f8fafc 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: 0.18em;
+    }
+
+    .pressable {
+      transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  box-shadow 0.18s ease,
+                  filter 0.18s ease;
+      will-change: transform;
+    }
+    .pressable:hover { filter: brightness(1.08); }
+    .pressable:active { transform: scale(0.93); }
+    .pressable:focus-visible { outline: 2px solid var(--brass-400); outline-offset: 3px; }
+
+    @keyframes toast-in {
+      0%   { opacity: 0; transform: translateX(50px) scale(0.9); }
+      55%  { opacity: 1; transform: translateX(-6px) scale(1.02); }
+      100% { opacity: 1; transform: translateX(0) scale(1); }
+    }
+    @keyframes toast-out {
+      0%   { opacity: 1; transform: translateX(0) scale(1); max-height: 120px; }
+      100% { opacity: 0; transform: translateX(40px) scale(0.94); max-height: 0; }
+    }
+    .toast {
+      pointer-events: auto;
+      animation: toast-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+      transition: opacity 0.32s ease, transform 0.32s ease, max-height 0.32s ease, margin 0.32s ease;
+      max-height: 120px;
+    }
+    .toast.leaving {
+      opacity: 0;
+      transform: translateX(40px) scale(0.94);
+      max-height: 0;
+      margin-bottom: -0.6rem;
+    }
+    .toast-bar { animation: toast-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    @keyframes fade-slide {
+      0%   { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .enter { animation: fade-slide 0.34s cubic-bezier(0.34, 1.2, 0.64, 1); }
+
+    @keyframes bar-grow {
+      0%   { width: 0%; }
+      100% { width: var(--target, 0%); }
+    }
+    .bar-animate { animation: bar-grow 0.6s cubic-bezier(0.34, 1.2, 0.64, 1); }
+
+    @keyframes mastery-fill {
+      0%   { width: 0%; }
+      100% { width: var(--pct, 0%); }
+    }
+    .mastery-fill { animation: mastery-fill 0.75s cubic-bezier(0.34, 1.2, 0.64, 1); }
+    .mastery-row { transition: transform 0.16s ease, background-color 0.16s ease; }
+    .mastery-row:hover { transform: translateX(4px); }
+
+    @keyframes dot-pop {
+      0%   { transform: scale(0.4); opacity: 0; }
+      60%  { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .dot-enter { animation: dot-pop 0.32s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+    @keyframes throb {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.06); }
+    }
+    .throb { animation: throb 2s ease-in-out infinite; }
+
+    /* ---------- Live Floating Emojis on Projector ---------- */
+    @keyframes teacher-float-up {
+      0%   { transform: translateY(0) scale(0.6); opacity: 0; }
+      15%  { opacity: 1; transform: translateY(-40px) scale(1.2); }
+      75%  { opacity: 0.95; }
+      100% { transform: translateY(-420px) scale(1.5); opacity: 0; }
+    }
+    .teacher-floating-emoji {
+      position: absolute;
+      animation: teacher-float-up 3s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+      pointer-events: none;
+      z-index: 45;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    @keyframes supermax-shimmer {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .supermax-glow {
+      background: linear-gradient(90deg, #ffb800, #ff4d4d, #00f2fe, #ffb800);
+      background-size: 300% 300%;
+      animation: supermax-shimmer 2.5s ease infinite;
+    }
+    @keyframes podium-rise {
+      0%   { transform: translateY(40px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    .podium-enter { animation: podium-rise 0.6s cubic-bezier(0.34, 1.2, 0.64, 1) forwards; }
+  </style>
+</head>
+<body class="text-chalk min-h-screen antialiased flex flex-col font-sans text-base">
+
+  <!-- Toast Host (transient feedback popups) -->
+  <div id="toast-host" aria-live="polite"></div>
+
+  <!-- Teacher Auth Gate -->
+  <div id="auth-gate" class="fixed inset-0 z-50 bg-slate-950 flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 md:p-10 max-w-md w-full text-center space-y-6 shadow-2xl">
+      <div class="h-16 w-16 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mx-auto text-3xl font-black">
+        🔒
+      </div>
+      <div>
+        <h2 class="text-3xl font-black text-white">Instructor Access</h2>
+        <p class="text-sm text-slate-400 mt-1.5">Sign in to dispatch assessments, control live sessions, and view analytics.</p>
+      </div>
+
+      <!-- Auth Mode Tabs -->
+      <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 text-xs font-bold">
+        <button type="button" id="tab-passcode" onclick="setAuthTab('passcode')" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white transition">Passcode</button>
+        <button type="button" id="tab-pocketbase" onclick="setAuthTab('pocketbase')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">PocketBase Login</button>
+      </div>
+
+      <form id="form-passcode" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+        <input type="password" id="auth-pin" placeholder="Enter instructor passcode" autocomplete="current-password" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-base text-center text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <div id="auth-error-msg" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl py-2 px-3 font-semibold">Incorrect instructor passcode. Please try again.</div>
+        <button type="submit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-base shadow-xl shadow-indigo-600/25 transition">
+          Unlock Dashboard
+        </button>
+      </form>
+
+      <form id="form-pocketbase" onsubmit="handlePocketBaseAuthSubmit(event)" class="space-y-3 hidden">
+        <input type="email" id="pb-auth-email" placeholder="Teacher / Admin Email" autocomplete="username" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <input type="password" id="pb-auth-password" placeholder="Password" autocomplete="current-password" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <div id="pb-auth-error-msg" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl py-2 px-3 font-semibold">Invalid email or password.</div>
+        <button type="submit" id="btn-pb-login" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-base shadow-xl shadow-indigo-600/25 transition">
+          Login via PocketBase
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Navigation Bar -->
+  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur-md sticky top-0 z-50 px-4 lg:px-8 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3.5">
+      <div class="h-11 w-11 rounded-2xl brand-mark flex items-center justify-center">
+        <span class="text-2xl font-black text-ink-900">V</span>
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm font-black uppercase wordmark">VectorSelect</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-copper-500/12 text-copper-400 border border-copper-500/30 font-bold uppercase tracking-wider">by Mr. F</span>
+          <span class="text-xs px-2.5 py-0.5 rounded-full bg-brass-500/12 text-brass-400 border border-brass-500/30 font-bold uppercase tracking-wider">Teacher Hub</span>
+        </div>
+        <div class="text-sm font-semibold text-chalk/70">AP Physics Assessment Dispatcher & Live Analytics</div>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a href="index.html" target="_blank" class="px-4 py-2 rounded-xl border border-slate-700 hover:border-slate-600 bg-slate-800 text-sm font-bold text-slate-200 hover:text-white transition flex items-center gap-2">
+        <span>👁</span> Preview Student Portal
+      </a>
+      <button onclick="logoutTeacher()" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-300 transition">
+        Lock Portal
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Container (Expanded width to eliminate black borders and maximize viewing area) -->
+  <main class="flex-1 max-w-[1850px] w-full mx-auto p-4 md:p-6 lg:p-8 space-y-8">
+
+    <!-- Section 1: Create New Assignment Card -->
+    <section class="quantum-card rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
+      <div class="flex items-center justify-between pb-3">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold uppercase tracking-wider">
+            Assignment Dispatcher
+          </div>
+          <h2 class="text-2xl font-black text-white mt-1">Assign an Assessment to Students</h2>
+        </div>
+        <span class="text-sm text-slate-400 hidden sm:inline font-medium">Students only see the test you assign</span>
+      </div>
+      <div class="quantum-line"></div>
+
+      <!-- Cascading Selectors -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">1. Course</label>
+          <select id="teacher-select-subject" onchange="onTeacherSubjectChange()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-base font-bold text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+            <option value="">-- Choose Course --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">2. Unit</label>
+          <select id="teacher-select-unit" onchange="onTeacherUnitChange()" disabled class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 text-base font-semibold text-slate-300 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+            <option value="">-- Select Unit --</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">3. Assessment</label>
+          <select id="teacher-select-assessment" onchange="onTeacherAssessmentChange()" disabled class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 text-base font-semibold text-slate-300 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+            <option value="">-- Select Quiz --</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Assignment Parameters (Target Class Period removed; dynamic mode switcher) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Quiz Mode</label>
+          <select id="teacher-quiz-mode" onchange="onQuizModeChange()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-base text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+            <option value="student_led">Student-Led (Self-Paced)</option>
+            <option value="teacher_led">Teacher-Led (Synchronized)</option>
+          </select>
+          <span class="text-xs text-slate-400 mt-1.5 block">In Teacher-Led mode, all students advance together with instructor pacing.</span>
+        </div>
+
+        <div>
+          <!-- Student-Led: Overall Time Limit -->
+          <div id="overall-time-box">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Overall Time Limit</label>
+            <select id="teacher-time-limit" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-base text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+              <option value="0">Untimed (Stopwatch)</option>
+              <option value="10">10 Minutes</option>
+              <option value="15" selected>15 Minutes</option>
+              <option value="20">20 Minutes</option>
+              <option value="30">30 Minutes</option>
+              <option value="45">45 Minutes</option>
+              <option value="60">60 Minutes</option>
+            </select>
+            <span class="text-xs text-slate-400 mt-1.5 block">Total exam duration for self-paced student completion.</span>
+          </div>
+
+          <!-- Teacher-Led: Time Per Question ONLY (Overall time is completely hidden) -->
+          <div id="per-question-box" class="hidden">
+            <label class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Time Per Question</label>
+            <select id="teacher-per-question" class="w-full bg-slate-950 border border-amber-500/40 rounded-xl p-3.5 text-base text-white focus:outline-none focus:ring-2 focus:ring-amber-400">
+              <option value="0">Manual Pacing (Teacher clicks Next to explain)</option>
+              <option value="30">30 Seconds Auto</option>
+              <option value="45">45 Seconds Auto</option>
+              <option value="60">60 Seconds Auto</option>
+              <option value="90">90 Seconds Auto</option>
+              <option value="120">120 Seconds Auto</option>
+            </select>
+            <span class="text-xs text-amber-300/80 mt-1.5 block">⚡ No overall timer. Pause freely between questions to discuss and explain concepts.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Integrity & Pedagogical Toggles -->
+      <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 md:p-5">
+        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Integrity & Assessment Controls</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-sm">
+          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700">
+            <input type="checkbox" id="opt-calc" checked class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+            <span class="font-bold text-slate-200">🧮 Allow Calculator</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700">
+            <input type="checkbox" id="opt-leaderboard" checked class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+            <span class="font-bold text-slate-200">🏆 Show Leaderboard</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700">
+            <input type="checkbox" id="opt-lockdown" class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+            <span class="font-bold text-slate-200">🔒 Lockdown Mode</span>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700">
+            <input type="checkbox" id="opt-randomize" class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+            <div>
+              <span class="font-bold text-slate-200">🔀 Shuffle Questions</span>
+              <span class="text-[10px] text-slate-400 block font-normal leading-tight">(Randomizes question order across students)</span>
+            </div>
+          </label>
+          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-cyan-500/30 p-3 rounded-xl hover:border-cyan-500 col-span-1 sm:col-span-2">
+            <input type="checkbox" id="opt-review" class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+            <span class="font-bold text-cyan-300">📋 Allow Students to Review Answers &amp; Explanations After Submission</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex justify-end gap-3 pt-2">
+        <button onclick="openQuizPreviewModal()" id="btn-preview-quiz" disabled class="pressable px-6 py-3.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-extrabold text-sm transition disabled:opacity-40 disabled:pointer-events-none">
+          👁️ Preview Quiz Questions
+        </button>
+        <button onclick="handleCreateAssignment()" id="btn-create-assign" disabled class="pressable px-8 py-3.5 rounded-xl btn-aurora font-black text-base shadow-xl transition disabled:opacity-40 disabled:pointer-events-none">
+          Generate Join Code &amp; Assign &rarr;
+        </button>
+      </div>
+
+      <!-- Generated Join Code Banner -->
+      <div id="new-code-banner" class="hidden p-6 md:p-8 rounded-3xl quantum-card shadow-2xl space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-black uppercase tracking-wider text-cyan-400">Assignment Dispatched!</span>
+            <h3 id="banner-title" class="text-2xl font-black text-white mt-1"></h3>
+            <p class="text-base text-slate-300">Share this code or direct URL with your students:</p>
+          </div>
+          <div class="text-center sm:text-right bg-slate-950/80 px-6 py-3.5 rounded-2xl border border-amber-500/40 shadow-inner">
+            <span class="text-xs uppercase font-extrabold text-slate-400 block tracking-wider">Student Join Code</span>
+            <span id="banner-code" class="text-5xl font-black plasma-code tracking-wider font-mono"></span>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+          <input type="text" id="banner-url" readonly class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-base text-cyan-200 font-mono focus:outline-none">
+          <button onclick="copyShareUrl()" class="pressable px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-base border border-slate-700 shadow-md transition flex items-center justify-center gap-2">
+            📋 Copy Direct Link
+          </button>
+          <button onclick="openLiveControl(document.getElementById('banner-code').textContent.trim())" class="pressable px-7 py-3.5 rounded-xl btn-aurora font-black text-base shadow-xl transition flex items-center justify-center gap-2">
+            <span>🚀</span> Open Waiting Lobby &amp; Track Students
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Active Assignments List -->
+    <section class="space-y-6">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div>
+          <h2 class="text-3xl font-black text-white">Active Assignments &amp; Dispatch Control</h2>
+          <p class="text-base text-slate-400">Manage open sessions, launch teacher-led synchronized pacing, and inspect live rosters.</p>
+        </div>
+        <button onclick="loadAssignmentsTable()" class="pressable px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-sm font-bold text-slate-200 hover:text-white transition flex items-center gap-2">
+          <span>↻</span> Refresh
+        </button>
+      </div>
+
+      <!-- Table of Assignments -->
+      <div class="quantum-card rounded-3xl overflow-hidden shadow-2xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-base">
+            <thead class="bg-slate-950/90 border-b border-slate-700 text-sm uppercase font-extrabold text-slate-300">
+              <tr>
+                <th class="py-4 px-4 w-28">Join Code</th>
+                <th class="py-4 px-4">Course &amp; Assessment</th>
+                <th class="py-4 px-4">Mode</th>
+                <th class="py-4 px-4">Timing</th>
+                <th class="py-4 px-4 text-center">Review</th>
+                <th class="py-4 px-4 text-center">Status</th>
+                <th class="py-4 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="assignments-tbody" class="divide-y divide-slate-800/60 font-medium"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Live Class Analytics Card -->
+    <section id="analytics-section" class="hidden quantum-card rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-wider">
+            📊 Class Performance Analytics
+          </div>
+          <h3 id="analytics-title" class="text-2xl font-black text-white mt-1">Assessment Performance</h3>
+          <p id="analytics-meta" class="text-sm text-slate-400"></p>
+        </div>
+        <button onclick="downloadCSV()" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm font-bold text-slate-200 transition flex items-center gap-2">
+          <span>📥</span> Export CSV Report
+        </button>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 text-center">
+          <span class="text-xs uppercase font-extrabold text-slate-500 block">Class Average</span>
+          <span id="metric-class-avg" class="text-3xl font-black text-indigo-400 mt-1 block">--%</span>
+        </div>
+        <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 text-center">
+          <span class="text-xs uppercase font-extrabold text-slate-500 block">Submissions</span>
+          <span id="metric-subs-count" class="text-3xl font-black text-emerald-400 mt-1 block">0</span>
+        </div>
+        <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 text-center">
+          <span class="text-xs uppercase font-extrabold text-slate-500 block">Integrity Flags</span>
+          <span id="metric-flag-count" class="text-3xl font-black text-rose-400 mt-1 block">0</span>
+        </div>
+        <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-5 text-center">
+          <span class="text-xs uppercase font-extrabold text-slate-500 block">Avg Time</span>
+          <span id="metric-avg-time" class="text-3xl font-black text-amber-400 mt-1 block">--:--</span>
+        </div>
+      </div>
+
+      <!-- Score Distribution Bar -->
+      <div class="space-y-2">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Score Distribution</span>
+        <div id="distribution-bars" class="grid grid-cols-5 gap-3 text-center text-xs"></div>
+      </div>
+
+      <!-- Hardest Questions Insights -->
+      <div class="space-y-3">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Hardest Questions (Class-wide Accuracy)</span>
+        <div id="hardest-q-list" class="space-y-2.5 text-sm"></div>
+      </div>
+
+      <!-- Concept-Level Mastery (what to reteach) -->
+      <div class="space-y-3">
+        <div class="flex items-baseline justify-between gap-3">
+          <span class="text-xs font-bold uppercase tracking-wider text-brass-400">Concept Mastery — class-wide</span>
+          <span class="text-[11px] text-chalk/40">Reorder: weakest concept first</span>
+        </div>
+        <div id="concept-mastery-list" class="space-y-2"></div>
+      </div>
+
+      <!-- Systemic Misconceptions (auto-detected) -->
+      <div class="space-y-3">
+        <span class="text-xs font-bold uppercase tracking-wider text-coral-400">Systemic Misconceptions Detected</span>
+        <div id="misconception-list" class="space-y-2.5"></div>
+      </div>
+
+      <!-- Concept Remediation Planner -->
+      <div id="remediation-planner" class="hidden bg-coral-500/8 border border-coral-500/35 rounded-2xl p-5 space-y-3">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-black uppercase tracking-wider text-coral-400">Remediation Planner</span>
+            <p class="text-[11px] text-chalk/50 mt-0.5">Students grouped by the concept they are weakest in</p>
+          </div>
+          <button onclick="exportRemediationPlan()" class="pressable px-3 py-1.5 rounded-xl bg-coral-500 hover:bg-coral-400 text-ink-900 text-xs font-black transition">
+            ⭳ Export Plan (CSV)
+          </button>
+        </div>
+        <div id="remediation-groups" class="space-y-2"></div>
+      </div>
+    </section>
+
+    <!-- MODAL 1: Quiz Questions Preview Modal -->
+    <div id="preview-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4">
+      <div class="quantum-card rounded-3xl p-6 md:p-8 max-w-[96vw] xl:max-w-[1800px] w-full max-h-[96vh] flex flex-col space-y-6 shadow-2xl backdrop-blur-md">
+        <div class="flex items-center justify-between pb-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Teacher Quiz Preview</span>
+            <h3 id="preview-title" class="text-2xl font-black text-white mt-1"></h3>
+            <p id="preview-meta" class="text-sm text-slate-400"></p>
+          </div>
+          <button onclick="closeQuizPreviewModal()" class="h-9 w-9 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center font-bold text-sm">✕</button>
+        </div>
+        <div class="quantum-line"></div>
+
+        <div id="preview-questions-list" class="flex-1 overflow-y-auto space-y-8 pr-2"></div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: Live Submissions Roster Modal -->
+    <div id="roster-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="quantum-card rounded-3xl p-6 md:p-8 max-w-5xl w-full max-h-[92vh] flex flex-col space-y-6 shadow-2xl">
+        <div class="flex items-center justify-between pb-3">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-cyan-400">Class Roster &amp; Exam Integrity</span>
+            <h3 id="roster-title" class="text-2xl font-black text-white mt-1"></h3>
+            <p id="roster-meta" class="text-sm text-slate-400"></p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="downloadCSV()" class="pressable px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition flex items-center gap-1.5">
+              <span>📥</span> Export CSV
+            </button>
+            <button onclick="closeRosterModal()" class="h-9 w-9 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center font-bold text-sm">✕</button>
+          </div>
+        </div>
+        <div class="quantum-line"></div>
+
+        <div class="flex-1 overflow-y-auto pr-1">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-950 border-b border-slate-800 text-xs uppercase font-extrabold text-slate-400 sticky top-0">
+              <tr>
+                <th class="py-3.5 px-3 w-16 text-center">Rank</th>
+                <th class="py-3.5 px-3">Student Name</th>
+                <th class="py-3.5 px-3 text-center">Score</th>
+                <th class="py-3.5 px-3 text-center">Accuracy</th>
+                <th class="py-3.5 px-3 text-center">Tab Switches</th>
+                <th class="py-3.5 px-3 text-center">Integrity</th>
+                <th class="py-3.5 px-3 text-right">Time Taken</th>
+              </tr>
+            </thead>
+            <tbody id="roster-tbody" class="divide-y divide-slate-800/60"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 4: Live Class Leaderboard (0-120 SUPER MAX Podium & Standings) -->
+    <div id="live-leaderboard-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+      <div class="quantum-card rounded-3xl p-5 sm:p-8 max-w-5xl w-full max-h-[92vh] flex flex-col space-y-5 shadow-2xl border-2 border-plasma-500/60 relative overflow-hidden">
+        <div class="absolute -right-12 -top-12 w-56 h-56 bg-plasma-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-black uppercase tracking-wider text-plasma-400">Live Assessment Standings</span>
+              <span class="px-2.5 py-0.5 rounded-full supermax-glow text-slate-950 text-[10px] font-black uppercase tracking-wider">0 - 120 SUPER MAX</span>
+            </div>
+            <h3 class="text-2xl font-black text-white mt-1 flex items-center gap-2">
+              <span>🏆</span> Class Leaderboard &amp; Velocity
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">Top speed bonus (up to +20 pts) &amp; streak multipliers active • Press <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-200">L</kbd> or <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-200">Esc</kbd> to toggle</p>
+          </div>
+          <button onclick="closeLiveLeaderboardModal()" class="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-md">✕</button>
+        </div>
+
+        <!-- TOP-3 ANIMATED PODIUM -->
+        <div id="lc-podium-container" class="grid grid-cols-3 gap-3 sm:gap-4 items-end pt-3 pb-2 max-w-2xl mx-auto w-full">
+          <!-- 2nd Place (Left) -->
+          <div id="podium-2" class="podium-enter flex flex-col items-center text-center space-y-2 order-1">
+            <div class="text-xs font-black text-slate-300">🥈 2nd Place</div>
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-slate-800 border-2 border-slate-400/60 flex items-center justify-center text-2xl font-black shadow-lg" id="podium-2-avatar">
+              🥈
+            </div>
+            <div class="font-extrabold text-sm text-slate-200 truncate w-full px-1" id="podium-2-name">—</div>
+            <div class="font-mono text-base sm:text-lg font-black text-cyan-400" id="podium-2-points">0.0 pts</div>
+            <div class="w-full bg-gradient-to-t from-slate-900 to-slate-800/80 rounded-t-2xl border-t-2 border-slate-400/50 h-20 sm:h-24 flex items-center justify-center text-xl font-black text-slate-400">2</div>
+          </div>
+
+          <!-- 1st Place (Center - Tallest) -->
+          <div id="podium-1" class="podium-enter flex flex-col items-center text-center space-y-2 order-2">
+            <div class="text-xs font-black text-plasma-400 animate-pulse">👑 1st Place</div>
+            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-plasma-500/20 border-2 border-plasma-400 flex items-center justify-center text-3xl font-black shadow-xl shadow-plasma-500/20" id="podium-1-avatar">
+              🥇
+            </div>
+            <div class="font-black text-base text-white truncate w-full px-1" id="podium-1-name">—</div>
+            <div class="font-mono text-xl sm:text-2xl font-black text-plasma-300 flex items-center gap-1.5" id="podium-1-points">
+              0.0 pts
+            </div>
+            <div class="w-full bg-gradient-to-t from-plasma-500/20 to-plasma-500/30 rounded-t-2xl border-t-2 border-plasma-400 h-28 sm:h-32 flex items-center justify-center text-2xl font-black text-plasma-300">1</div>
+          </div>
+
+          <!-- 3rd Place (Right) -->
+          <div id="podium-3" class="podium-enter flex flex-col items-center text-center space-y-2 order-3">
+            <div class="text-xs font-black text-amber-500">🥉 3rd Place</div>
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-950/40 border-2 border-amber-600/60 flex items-center justify-center text-2xl font-black shadow-lg" id="podium-3-avatar">
+              🥉
+            </div>
+            <div class="font-extrabold text-sm text-slate-200 truncate w-full px-1" id="podium-3-name">—</div>
+            <div class="font-mono text-base sm:text-lg font-black text-amber-400" id="podium-3-points">0.0 pts</div>
+            <div class="w-full bg-gradient-to-t from-slate-900 to-amber-950/40 rounded-t-2xl border-t-2 border-amber-600/50 h-16 sm:h-20 flex items-center justify-center text-xl font-black text-amber-500">3</div>
+          </div>
+        </div>
+
+        <div class="quantum-line"></div>
+
+        <!-- FULL STANDINGS TABLE -->
+        <div class="flex-1 overflow-y-auto pr-1">
+          <table class="w-full text-left text-sm">
+            <thead class="bg-slate-950 border-b border-slate-800 text-xs uppercase font-extrabold text-slate-400 sticky top-0">
+              <tr>
+                <th class="py-3 px-3 w-16 text-center">Rank</th>
+                <th class="py-3 px-3">Student Name</th>
+                <th class="py-3 px-3 text-center">Total Score (0-120)</th>
+                <th class="py-3 px-3 text-center">Speed Bonus</th>
+                <th class="py-3 px-3 text-center">Streak</th>
+                <th class="py-3 px-3 text-center">Recoveries</th>
+                <th class="py-3 px-3 text-right">Velocity Status</th>
+              </tr>
+            </thead>
+            <tbody id="live-leaderboard-tbody" class="divide-y divide-slate-800/60"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 3: Teacher-Led Live Control Center (Projector-Safe with Answer Hidden & Timed Pacing) -->
+    <div id="live-control-modal" class="hidden fixed inset-0 z-40 bg-black/85 backdrop-blur-md flex flex-col items-center justify-start pt-20 sm:pt-22 pb-3 px-2 sm:px-4 overflow-hidden overscroll-none">
+      <div id="lc-floating-emoji-stream" class="pointer-events-none absolute inset-0 z-30 overflow-hidden"></div>
+      <div class="quantum-card rounded-3xl p-4 sm:p-6 max-w-[98vw] xl:max-w-[1900px] w-full h-[calc(100vh-5.5rem)] max-h-[calc(100vh-5.5rem)] flex flex-col space-y-3 shadow-2xl backdrop-blur-md overflow-hidden relative z-30">
+        
+        <!-- Header Bar with HUGE Class Joining Key for Late Students -->
+        <div class="flex flex-wrap items-center justify-between pb-3 gap-3">
+          <div class="flex items-center gap-3.5 min-w-0">
+            <span class="h-4 w-4 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-black uppercase tracking-wider text-emerald-400">Teacher-Led Live Session</span>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/25 font-bold">🔒 Projector Mode</span>
+                <span id="lc-period-badge" class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 font-bold"></span>
+              </div>
+              <h3 id="lc-quiz-title" class="text-xl sm:text-2xl font-black text-white mt-0.5 truncate"></h3>
+            </div>
+          </div>
+
+          <!-- MASSIVE Class Joining Key for Late Students -->
+          <div class="flex items-center gap-3.5 bg-gradient-to-r from-amber-500/15 via-amber-500/25 to-amber-500/15 border-2 border-amber-400/80 px-5 py-1.5 rounded-2xl shadow-2xl hover:scale-105 transition-all shrink-0 cursor-pointer" onclick="copyJoinCodeToClipboard()" title="Click to copy join code & link for late students">
+            <div class="text-right">
+              <span class="text-[11px] uppercase font-black text-amber-300 tracking-wider block leading-none">Class Join Code</span>
+              <span class="text-[9px] text-slate-300 font-medium leading-none">Late students enter code:</span>
+            </div>
+            <div id="lc-big-join-code" class="font-mono text-3xl sm:text-4xl lg:text-5xl font-black tracking-widest text-amber-300 drop-shadow-[0_0_18px_rgba(245,158,11,0.6)]">
+              ------
+            </div>
+            <button class="h-9 w-9 rounded-xl bg-amber-500/20 hover:bg-amber-500/40 text-amber-200 border border-amber-400/40 flex items-center justify-center text-sm font-bold shadow transition" title="Copy join link">
+              📋
+            </button>
+          </div>
+
+          <button onclick="closeLiveControlModal()" class="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-md">✕</button>
+        </div>
+        <div class="quantum-line"></div>
+
+        <!-- LOBBY / WAITING ROOM VIEW (Shown when assignment has not been started yet) -->
+        <div id="lc-lobby-body" class="hidden flex-1 flex flex-col justify-center max-w-2xl mx-auto w-full py-8 space-y-6 text-center">
+          <div class="h-20 w-20 rounded-3xl bg-cyan-600/20 border-2 border-cyan-500/40 text-cyan-300 flex items-center justify-center mx-auto text-4xl font-black shadow-xl shadow-cyan-600/20">
+            👥
+          </div>
+          <div>
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold uppercase tracking-wider">
+              <span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>
+              Waiting Room Active
+            </span>
+            <h3 class="text-3xl font-black text-white mt-3">Students Are in the Lobby</h3>
+            <p class="text-sm text-slate-400 mt-1">Students have entered the join code and are waiting on their screens. Review joined students below and launch the session when everyone is ready.</p>
+          </div>
+
+          <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 text-left space-y-3 shadow-inner">
+            <div class="flex items-center justify-between text-xs text-slate-400">
+              <span class="font-bold uppercase tracking-wider">Connected Students in Room:</span>
+              <span id="lc-lobby-count" class="font-mono text-emerald-400 font-black text-sm">0 Joined</span>
+            </div>
+            <div id="lc-lobby-chips" class="flex flex-wrap gap-2 min-h-16 items-center">
+              <span class="text-xs text-slate-500 italic">Waiting for students to join...</span>
+            </div>
+          </div>
+
+          <button onclick="startLiveAssignmentNow()" class="pressable w-full py-4 rounded-2xl btn-aurora text-slate-950 font-black text-base shadow-xl transition flex items-center justify-center gap-2.5">
+            <span class="text-xl">🚀</span> Start Assessment for All Students Now
+          </button>
+        </div>
+
+        <!-- ACTIVE RUNNER VIEW (Zero-Scroll Dual-Pane Layout + Cinema Mode) -->
+        <div id="lc-runner-body" class="flex flex-col space-y-3 flex-1 min-h-0 overflow-hidden">
+          
+          <!-- Unified Ultra-Compact Control HUD Bar (~48px height) -->
+          <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-950 px-4 py-2.5 rounded-2xl border border-slate-800 shadow-md shrink-0">
+            
+            <!-- Left Group: Navigation & Question Counter -->
+            <div class="flex items-center gap-2.5">
+              <button onclick="lcPrevQuestion()" id="lc-btn-prev" class="pressable px-3.5 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-extrabold text-xs transition disabled:opacity-30 disabled:pointer-events-none" title="Previous Question">
+                &larr; Prev
+              </button>
+              <span id="lc-q-badge" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black text-sm tracking-wide shadow-md">Question 1 of 10</span>
+              <button onclick="lcNextQuestion()" id="lc-btn-next" class="pressable px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md transition" title="Next Question">
+                Next &rarr;
+              </button>
+            </div>
+            
+            <!-- Center Group: Live Pacing & Pause Control -->
+            <div id="lc-timer-box" class="flex items-center gap-2.5">
+              <span id="lc-timer-label" class="text-xs font-bold uppercase text-slate-400 tracking-wider">Time:</span>
+              <span id="lc-timer-display" class="font-mono text-lg font-black text-amber-400">00:00</span>
+              <span id="lc-pause-pill" class="hidden px-2 py-0.5 rounded-lg bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-black uppercase tracking-wider animate-pulse">⏸️ Paused</span>
+              <button onclick="lcToggleTimerPause()" id="lc-btn-pause" class="pressable px-3.5 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-300 transition flex items-center gap-1.5">
+                <span id="lc-btn-pause-icon">⏸️</span> <span id="lc-btn-pause-text">Pause</span>
+              </button>
+              <button onclick="lcResetTimer()" id="lc-btn-addtime" class="pressable px-2.5 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 hover:text-white transition" title="Add 30 seconds">
+                +30s
+              </button>
+            </div>
+
+            <!-- Center-Right Group: Live Reaction Stream & Leaderboard -->
+            <div class="flex items-center gap-2">
+              <button onclick="openLiveLeaderboardModal()" id="lc-btn-leaderboard" class="pressable px-3 py-1.5 rounded-xl border border-plasma-500/50 bg-plasma-500/15 hover:bg-plasma-500/30 text-plasma-300 font-black text-xs transition flex items-center gap-1.5 shadow-md" title="Pull up Live Standings (Shortcut: L)">
+                <span>🏆</span> <span>Leaderboard</span>
+              </button>
+
+              <div id="lc-emoji-ticker" class="hidden sm:flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-xl text-xs font-mono text-slate-300">
+                <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Live:</span>
+                <span id="lc-recent-emojis" class="flex items-center gap-1 text-sm"></span>
+              </div>
+            </div>
+
+            <!-- Right Group: Telemetry, Layout Switcher & End Session -->
+            <div class="flex items-center gap-2.5">
+              <span id="lc-active-students-count" class="text-xs font-bold text-emerald-400 font-mono hidden sm:inline">👥 Joined: 0 • Answered: 0</span>
+              
+              <!-- Layout Toggle: Split View vs Cinema Fullscreen View -->
+              <div class="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-0.5">
+                <button onclick="setLcLayoutMode('split')" id="btn-lc-split" class="px-2.5 py-1 rounded-lg btn-aurora text-slate-950 font-black text-xs shadow-md transition" title="Side-by-Side: Full Question on Left + Telemetry Dock on Right">
+                  ◨ Split
+                </button>
+                <button onclick="setLcLayoutMode('cinema')" id="btn-lc-cinema" class="px-2.5 py-1 rounded-lg border border-transparent hover:border-slate-700 text-slate-400 hover:text-white text-xs font-bold transition" title="Cinema View: Question fills 100% of screen">
+                  🎬 Cinema
+                </button>
+              </div>
+
+              <button onclick="lcEndSession()" class="pressable px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-bold text-xs transition">
+                End Session
+              </button>
+            </div>
+          </div>
+
+          <!-- Dual-Pane Workspace (Zero-Scroll: Question on Left, Telemetry & Key on Right) -->
+          <div id="lc-workspace" class="flex-1 min-h-0 flex flex-col lg:flex-row gap-8 lg:gap-10 overflow-hidden pt-1">
+            
+            <!-- Left Stage: High-Resolution Question Display (Scrollable Question Stage with Overscroll Protection) -->
+            <div id="lc-stage-pane" class="flex-1 min-w-0 min-h-0 h-full overflow-y-auto overscroll-contain bg-slate-950/80 rounded-2xl p-2 sm:p-4 border border-slate-800 shadow-inner relative transition-all duration-300">
+              <div class="min-h-full flex items-center justify-center w-full py-2">
+                <div id="lc-card-box" class="bg-white p-2 sm:p-4 rounded-2xl shadow-2xl flex flex-col items-center justify-center max-w-full transition-all shrink-0">
+                  <img id="lc-card-img" src="" alt="Active Question Card" class="max-w-full w-auto object-contain mx-auto block transition-transform">
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Telemetry Dock: Student Progress, Live Dots & Answer Key (Docked on Right, never pushes question down!) -->
+            <div id="lc-dock-wrapper" class="w-full lg:w-80 xl:w-96 shrink-0 relative flex flex-col h-full min-h-0 transition-all duration-300">
+              
+              <!-- Left Protruding Arrow Key Collapse Handle on Borderline (Centered vertically, no overlap with left stage window) -->
+              <button onclick="toggleTeacherDockCollapse()" class="hidden lg:flex absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 h-14 w-6 rounded-l-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs items-center justify-center shadow-xl transition-all z-30 cursor-pointer border-2 border-r-0 border-white hover:scale-105 active:scale-95" title="Click Arrow to Hide Right Panel & Maximize Stage">
+                ▶
+              </button>
+
+              <div id="lc-dock-pane" class="w-full flex-1 flex flex-col gap-3 overflow-y-auto pr-1">
+                <!-- Dock Header with Collapse Button -->
+                <div class="flex items-center justify-between bg-slate-950 px-3.5 py-2.5 rounded-2xl border border-slate-800 shadow-sm shrink-0">
+                  <span class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <span class="text-indigo-400">📊</span> Telemetry & Key
+                  </span>
+                  <button onclick="toggleTeacherDockCollapse()" id="btn-collapse-teacher-dock" title="Hide Right Panel & Maximize Question Stage" class="pressable px-2.5 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-black flex items-center gap-1.5 transition shadow-sm">
+                    <span>Hide</span> <span class="text-sm">➔</span>
+                  </button>
+                </div>
+
+                <!-- Question Progress Strip -->
+                <div id="lc-progress-strip" class="hidden bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2.5 shadow-md">
+                  <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider">
+                    <span class="text-slate-400">Class Progress</span>
+                    <span id="lc-progress-text" class="text-emerald-400 font-mono">0 / 0 answered</span>
+                  </div>
+                  <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="lc-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500" style="width:0%"></div>
+                  </div>
+                  <div id="lc-student-dots" class="flex flex-wrap gap-1 max-h-24 overflow-y-auto pr-0.5"></div>
+                  <button onclick="lcTriggerDiscussionEarly()" id="lc-btn-discuss-early" class="w-full py-2 rounded-xl bg-indigo-600/30 border border-indigo-500/50 hover:bg-indigo-600/50 text-indigo-300 font-bold text-xs transition">
+                    💬 Reveal Discussion Now
+                  </button>
+                </div>
+
+                <!-- Instructor Answer Key Protection (In Side Dock - No Vertical Stacking under question) -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-md">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <span class="text-xs uppercase font-extrabold text-slate-400 block">Instructor Key</span>
+                      <span id="lc-answer-status" class="text-[11px] text-slate-500 italic">🔒 Hidden on Projector</span>
+                    </div>
+                    <button onclick="toggleTeacherAnswerReveal()" id="btn-toggle-reveal" class="px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-600/10 hover:bg-indigo-600/20 text-xs font-bold text-indigo-300 transition">
+                      👁️ Reveal Key
+                    </button>
+                  </div>
+
+                  <!-- Hidden Answer Content -->
+                  <div id="lc-answer-content" class="hidden pt-3 border-t border-slate-800 space-y-2">
+                    <div class="flex items-center gap-3">
+                      <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Correct:</span>
+                      <span id="lc-key-text" class="text-xl font-black text-white px-3 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 font-mono"></span>
+                    </div>
+                    <div class="text-xs text-slate-300 leading-relaxed font-sans bg-slate-900 p-3 rounded-xl border border-slate-800 max-h-48 overflow-y-auto" id="lc-rationale-text"></div>
+                  </div>
+                </div>
+
+                <!-- Wayground-Style Discussion Panel (In Side Dock) -->
+                <div id="lc-discussion-panel" class="hidden bg-slate-950 border border-indigo-500/40 rounded-2xl p-4 space-y-3 shadow-md">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="text-xs font-black uppercase tracking-wider text-indigo-400">Class Response</span>
+                    <button onclick="openApClassroomModal()" id="lc-discussion-stats-btn" class="pressable px-2.5 py-1 rounded-lg bg-indigo-950/80 border border-indigo-500/40 hover:border-indigo-400 text-[11px] font-black text-indigo-300 hover:text-white transition flex items-center gap-1.5 shadow-sm group cursor-pointer" title="Click to view AP Classroom Right/Wrong student breakdown">
+                      <span id="lc-discussion-stats">0/0 correct</span>
+                      <span class="text-[10px] text-cyan-400 font-bold underline group-hover:text-cyan-300">📊 AP Breakdown</span>
+                    </button>
+                  </div>
+                  <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-300 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg hover:border-slate-700">
+                    <input type="checkbox" id="lc-anonymize-toggle" onchange="toggleAnonymizeDiscussion()" class="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-0 text-xs">
+                    <span>👁️ Hide Names</span>
+                  </label>
+                  <div id="lc-distribution-bars" class="space-y-1.5"></div>
+                  <div class="flex items-center gap-2 pt-1">
+                    <button onclick="lcPrevQuestion()" id="lc-disc-btn-prev" class="flex-1 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-extrabold text-xs transition disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-1.5" title="Go back to previous question">
+                      <span>&larr;</span> <span>Prev Question</span>
+                    </button>
+                    <button onclick="confirmAdvanceFromDiscussion()" id="lc-disc-btn-advance" class="flex-[2] py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/25 transition flex items-center justify-center gap-1.5">
+                      <span>Confirm Advance</span> <span>&rarr;</span>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        </div>
+
+        <!-- Persistent Floating Slider Tab on Teacher Portal (Appears when right panel is collapsed) -->
+        <button id="teacher-dock-slider-tab" onclick="toggleTeacherDockCollapse()" class="hidden fixed right-0 top-1/2 -translate-y-1/2 z-50 px-3.5 py-6 rounded-l-2xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 border-2 border-r-0 border-white shadow-2xl hover:scale-105 hover:shadow-cyan-400/50 transition-all flex flex-col items-center gap-2 group cursor-pointer" title="Click Arrow to Show Telemetry Dock & Answer Key">
+          <span class="text-lg font-black transform group-hover:-translate-x-1 transition-transform">◀</span>
+          <span class="text-[11px] font-black uppercase tracking-widest [writing-mode:vertical-lr] rotate-180 select-none">TELEMETRY & KEY</span>
+          <span id="teacher-slider-progress-pill" class="mt-1 px-1.5 py-0.5 rounded-md bg-slate-950 text-emerald-400 font-mono text-[10px] font-black tracking-tight">0 / 0</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- MODAL 4: AP Classroom Style Question Telemetry & Accuracy Breakdown -->
+    <div id="lc-ap-modal" class="hidden fixed inset-0 z-[60] bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+      <div class="quantum-card rounded-3xl p-6 md:p-8 max-w-4xl w-full max-h-[94vh] flex flex-col space-y-5 shadow-2xl border border-indigo-500/50">
+        
+        <!-- Header -->
+        <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-black uppercase tracking-wider">AP Classroom Analytics</span>
+              <span id="ap-modal-q-badge" class="px-2 py-0.5 rounded-lg bg-slate-800 text-slate-300 text-xs font-bold font-mono">Q1</span>
+            </div>
+            <h3 class="text-2xl font-black text-white mt-1">Question Response &amp; Student Accuracy Telemetry</h3>
+            <p id="ap-modal-sub" class="text-xs text-slate-400 mt-0.5">Real-time performance distribution mirroring AP Classroom item telemetry</p>
+          </div>
+          <button onclick="closeApClassroomModal()" class="h-9 w-9 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center font-bold text-sm">✕</button>
+        </div>
+
+        <!-- 4 High-Level AP Metric Cards (Clickable Filters) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div onclick="filterApStudentList('ALL')" id="ap-filter-all" class="cursor-pointer p-4 rounded-2xl border border-slate-700 bg-slate-900/90 hover:border-slate-500 transition-all text-center group">
+            <span class="text-[11px] font-black uppercase tracking-wider text-slate-400 group-hover:text-white">Total Roster</span>
+            <div id="ap-metric-total" class="font-mono text-2xl font-black text-slate-100 mt-1">0</div>
+            <span class="text-[10px] text-slate-500 block">All connected</span>
+          </div>
+
+          <div onclick="filterApStudentList('RIGHT')" id="ap-filter-right" class="cursor-pointer p-4 rounded-2xl border border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all text-center group">
+            <span class="text-[11px] font-black uppercase tracking-wider text-emerald-400 flex items-center justify-center gap-1">
+              <span>✓</span> Correct (Right)
+            </span>
+            <div id="ap-metric-right" class="font-mono text-2xl font-black text-emerald-300 mt-1">0 (0%)</div>
+            <span class="text-[10px] text-emerald-400/70 block">Official Answer</span>
+          </div>
+
+          <div onclick="filterApStudentList('WRONG')" id="ap-filter-wrong" class="cursor-pointer p-4 rounded-2xl border border-rose-500/50 bg-rose-500/10 hover:bg-rose-500/20 transition-all text-center group">
+            <span class="text-[11px] font-black uppercase tracking-wider text-rose-400 flex items-center justify-center gap-1">
+              <span>✗</span> Incorrect (Wrong)
+            </span>
+            <div id="ap-metric-wrong" class="font-mono text-2xl font-black text-rose-300 mt-1">0 (0%)</div>
+            <span class="text-[10px] text-rose-400/70 block">Chose distractor</span>
+          </div>
+
+          <div onclick="filterApStudentList('BLANK')" id="ap-filter-blank" class="cursor-pointer p-4 rounded-2xl border border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20 transition-all text-center group">
+            <span class="text-[11px] font-black uppercase tracking-wider text-amber-400 flex items-center justify-center gap-1">
+              <span>⚠️</span> No Answer
+            </span>
+            <div id="ap-metric-blank" class="font-mono text-2xl font-black text-amber-300 mt-1">0 (0%)</div>
+            <span class="text-[10px] text-amber-400/70 block">Timed out / Unanswered</span>
+          </div>
+        </div>
+
+        <!-- Choice Breakdown Strip (A, B, C, D, Blank) -->
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+          <div class="flex items-center justify-between text-xs font-bold text-slate-300">
+            <span>Option Distribution</span>
+            <span id="ap-official-key-banner" class="text-emerald-400 font-black">Official Key: Option B</span>
+          </div>
+          <div id="ap-choices-breakdown" class="space-y-2"></div>
+        </div>
+
+        <!-- Student Roster Telemetry List -->
+        <div class="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[160px]">
+          <div class="flex items-center justify-between text-xs text-slate-400 pb-1">
+            <span id="ap-list-filter-label" class="font-bold text-slate-300">Showing: All Students</span>
+            <label class="flex items-center gap-1.5 cursor-pointer text-xs text-slate-400 hover:text-white">
+              <input type="checkbox" id="ap-anonymize-toggle" onchange="toggleApModalAnonymize()" class="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-0 text-xs">
+              <span>Hide Names</span>
+            </label>
+          </div>
+          <div id="ap-student-roster" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-3 border-t border-slate-800 flex justify-between items-center text-xs text-slate-400">
+          <span>Click any metric card or choice bar above to filter students.</span>
+          <button onclick="closeApClassroomModal()" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // ============================================================================
+    // STATE
+    // ============================================================================
+    let EXAM_DB = null;
+    let currentSelectedQuiz = null;
+    let activeAssignments = [];
+    let currentRosterSubmissions = [];
+    let currentRosterAssignment = null;
+    let currentConceptAnalytics = null;
+    let currentLiveAssignment = null;
+    let currentLiveQuiz = null;
+    let currentLiveIndex = 0;
+    let liveSyncInterval = null;
+    let lcTimerInterval = null;
+    let lcTimerRemaining = 0;
+    let lcTimerPaused = false;
+    let isAnswerRevealed = false;
+
+    // ============================================================================
+    // AUTH (PASSCODE & POCKETBASE)
+    // ============================================================================
+    function setAuthTab(tab) {
+      const isPass = tab === 'passcode';
+      const tabPass = document.getElementById('tab-passcode');
+      const tabPb = document.getElementById('tab-pocketbase');
+      if (tabPass && tabPb) {
+        tabPass.className = isPass 
+          ? "flex-1 py-2 rounded-lg bg-indigo-600 text-white transition" 
+          : "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition";
+        tabPb.className = !isPass 
+          ? "flex-1 py-2 rounded-lg bg-indigo-600 text-white transition" 
+          : "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition";
+      }
+      const formPass = document.getElementById('form-passcode');
+      const formPb = document.getElementById('form-pocketbase');
+      if (formPass) formPass.classList.toggle('hidden', !isPass);
+      if (formPb) formPb.classList.toggle('hidden', isPass);
+    }
+
+    function checkAuth() {
+      if (isTeacherAuthenticated()) {
+        document.getElementById("auth-gate").classList.add("hidden");
+        initTeacherApp();
+      }
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const pinInput = document.getElementById("auth-pin");
+      const pin = pinInput.value.trim();
+      const errBox = document.getElementById("auth-error-msg");
+      if (pin === "physics2026") {
+        if (errBox) errBox.classList.add("hidden");
+        sessionStorage.setItem("teacher_authenticated", "true");
+        document.getElementById("auth-gate").classList.add("hidden");
+        initTeacherApp();
+      } else {
+        if (errBox) {
+          errBox.classList.remove("hidden");
+        } else {
+          alert("Incorrect passcode. Please try again.");
+        }
+        pinInput.value = "";
+        pinInput.focus();
+      }
+    }
+
+    async function handlePocketBaseAuthSubmit(e) {
+      e.preventDefault();
+      const email = document.getElementById("pb-auth-email").value.trim();
+      const pass = document.getElementById("pb-auth-password").value;
+      const errBox = document.getElementById("pb-auth-error-msg");
+      const btn = document.getElementById("btn-pb-login");
+
+      btn.disabled = true;
+      btn.textContent = "Authenticating...";
+      errBox.classList.add("hidden");
+
+      const res = await loginTeacherWithPocketBase(email, pass);
+      btn.disabled = false;
+      btn.textContent = "Login via PocketBase";
+
+      if (res.success) {
+        document.getElementById("auth-gate").classList.add("hidden");
+        initTeacherApp();
+      } else {
+        errBox.textContent = res.error || "Authentication failed. Check your email and password.";
+        errBox.classList.remove("hidden");
+      }
+    }
+
+    function logoutTeacher() {
+      logoutTeacherFromPocketBase();
+      location.reload();
+    }
+
+    // ============================================================================
+    // INITIALIZATION
+    // ============================================================================
+    async function initTeacherApp() {
+      if (window.EXAM_DATA && window.EXAM_DATA.subjects) {
+        EXAM_DB = window.EXAM_DATA;
+      } else {
+        try {
+          const res = await fetch("data/exams.json");
+          EXAM_DB = await res.json();
+        } catch (err) {
+          console.error("Failed loading database:", err);
+          if (window.EXAM_DATA) EXAM_DB = window.EXAM_DATA;
+        }
+      }
+      populateTeacherSubjectDropdown();
+      loadAssignmentsTable();
+    }
+
+    function populateTeacherSubjectDropdown() {
+      const sel = document.getElementById("teacher-select-subject");
+      if (!sel) return;
+      sel.innerHTML = '<option value="">-- Choose Course --</option>';
+
+      if (!EXAM_DB || !EXAM_DB.subjects) {
+        if (window.EXAM_DATA && window.EXAM_DATA.subjects) {
+          EXAM_DB = window.EXAM_DATA;
+        }
+      }
+
+      if (!EXAM_DB || !EXAM_DB.subjects) {
+        // Retry in 200ms if data script is still parsing
+        setTimeout(populateTeacherSubjectDropdown, 200);
+        return;
+      }
+
+      for (const [key, subj] of Object.entries(EXAM_DB.subjects)) {
+        const opt = document.createElement("option");
+        opt.value = key;
+        opt.textContent = subj.name;
+        sel.appendChild(opt);
+      }
+    }
+
+    function onTeacherSubjectChange() {
+      const subjKey = document.getElementById("teacher-select-subject").value;
+      const unitSel = document.getElementById("teacher-select-unit");
+      const assessSel = document.getElementById("teacher-select-assessment");
+      document.getElementById("btn-create-assign").disabled = true;
+
+      if (!subjKey) {
+        unitSel.disabled = true;
+        assessSel.disabled = true;
+        return;
+      }
+
+      const units = EXAM_DB.subjects[subjKey].units;
+      unitSel.innerHTML = '<option value="">-- Select Unit --</option>';
+      const unitEntries = Object.entries(units).sort((a, b) => {
+        const numA = parseInt((a[0].match(/\d+/) || [999])[0], 10);
+        const numB = parseInt((b[0].match(/\d+/) || [999])[0], 10);
+        return numA - numB;
+      });
+      for (const [uKey, uData] of unitEntries) {
+        const opt = document.createElement("option");
+        opt.value = uKey;
+        opt.textContent = uData.title.startsWith(uKey) ? uData.title : `${uKey}: ${uData.title}`;
+        unitSel.appendChild(opt);
+      }
+
+      unitSel.disabled = false;
+      assessSel.disabled = true;
+      assessSel.innerHTML = '<option value="">-- Select Quiz --</option>';
+    }
+
+    function getAssessmentSortKey(title) {
+      if (!title) return [5, 0, 0, ''];
+      const mSec = title.match(/^(\d+)\.(\d+)/);
+      if (mSec) return [0, parseInt(mSec[1], 10), parseInt(mSec[2], 10), title];
+      const mSq = title.match(/Section\s*(\d+)/i);
+      if (mSq) return [1, parseInt(mSq[1], 10), 0, title];
+      if (/Mid-Term Review|Midterm Review/i.test(title)) {
+        const mPart = title.match(/Part\s*(\d+)/i);
+        return [2, mPart ? parseInt(mPart[1], 10) : 1, 0, title];
+      }
+      if (/Practice Exam|Unit Test/i.test(title)) return [3, 0, 0, title];
+      if (/Progress Check|PC/i.test(title)) return [4, 0, 0, title];
+      return [5, 0, 0, title];
+    }
+
+    function onTeacherUnitChange() {
+      const subjKey = document.getElementById("teacher-select-subject").value;
+      const unitKey = document.getElementById("teacher-select-unit").value;
+      const assessSel = document.getElementById("teacher-select-assessment");
+      document.getElementById("btn-create-assign").disabled = true;
+
+      if (!unitKey) {
+        assessSel.disabled = true;
+        return;
+      }
+
+      const rawAssessments = EXAM_DB.subjects[subjKey].units[unitKey].assessments || [];
+      const assessments = [...rawAssessments].sort((a, b) => {
+        const kA = getAssessmentSortKey(a.title || '');
+        const kB = getAssessmentSortKey(b.title || '');
+        for (let i = 0; i < Math.max(kA.length, kB.length); i++) {
+          if (kA[i] !== kB[i]) {
+            if (typeof kA[i] === 'number' && typeof kB[i] === 'number') {
+              return kA[i] - kB[i];
+            }
+            return String(kA[i]).localeCompare(String(kB[i]));
+          }
+        }
+        return 0;
+      });
+
+      assessSel.innerHTML = '<option value="">-- Select Quiz --</option>';
+      assessments.forEach(a => {
+        const opt = document.createElement("option");
+        opt.value = a.id;
+        opt.textContent = `${a.title} (${a.question_count} MCQs)`;
+        assessSel.appendChild(opt);
+      });
+
+      assessSel.disabled = false;
+    }
+
+    function onTeacherAssessmentChange() {
+      const subjKey = document.getElementById("teacher-select-subject").value;
+      const unitKey = document.getElementById("teacher-select-unit").value;
+      const assessId = document.getElementById("teacher-select-assessment").value;
+
+      if (!assessId) {
+        document.getElementById("btn-create-assign").disabled = true;
+        document.getElementById("btn-preview-quiz").disabled = true;
+        return;
+      }
+
+      currentSelectedQuiz = EXAM_DB.subjects[subjKey].units[unitKey].assessments.find(x => x.id === assessId);
+      document.getElementById("btn-create-assign").disabled = false;
+      document.getElementById("btn-preview-quiz").disabled = false;
+    }
+
+    function onQuizModeChange() {
+      const mode = document.getElementById("teacher-quiz-mode").value;
+      const perQBox = document.getElementById("per-question-box");
+      const overallTimeBox = document.getElementById("overall-time-box");
+      if (mode === "teacher_led") {
+        perQBox.classList.remove("hidden");
+        overallTimeBox.classList.add("hidden");
+      } else {
+        perQBox.classList.add("hidden");
+        overallTimeBox.classList.remove("hidden");
+      }
+    }
+
+    // ============================================================================
+    // ASSIGNMENT CREATION
+    // ============================================================================
+    function generateJoinCode() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let code = "";
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    async function handleCreateAssignment() {
+      if (!currentSelectedQuiz) return;
+
+      const code = generateJoinCode();
+      const quizMode = document.getElementById("teacher-quiz-mode").value;
+      const isTeacherLed = quizMode === "teacher_led";
+      // Teacher-led assignments have NO overall time limit (0 = untimed session so instructor can pause freely)
+      const timeLimit = isTeacherLed ? 0 : (parseInt(document.getElementById("teacher-time-limit").value, 10) || 0);
+      const perQuestionSecs = isTeacherLed ? (parseInt(document.getElementById("teacher-per-question").value, 10) || 0) : 0;
+
+      const allowCalc = document.getElementById("opt-calc").checked;
+      const showLeaderboard = document.getElementById("opt-leaderboard").checked;
+      const enableLockdown = document.getElementById("opt-lockdown").checked;
+      const randomizeQuestions = document.getElementById("opt-randomize").checked;
+      const allowReview = document.getElementById("opt-review").checked;
+
+      const assignmentData = {
+        join_code: code,
+        subject: currentSelectedQuiz.subject,
+        unit: currentSelectedQuiz.unit,
+        assessment_id: currentSelectedQuiz.id,
+        assessment_title: currentSelectedQuiz.title,
+        class_period: "General",
+        time_limit_minutes: timeLimit,
+        quiz_mode: quizMode,
+        per_question_seconds: perQuestionSecs,
+        allow_calculator: allowCalc,
+        show_leaderboard: showLeaderboard,
+        enable_lockdown: enableLockdown,
+        randomize_questions: randomizeQuestions,
+        allow_student_review: allowReview,
+        current_question_index: 0,
+        is_active: true,
+        is_started: false,
+        created_at: new Date().toISOString()
+      };
+
+      await createAssignmentOnCloud(assignmentData);
+
+      document.getElementById("banner-title").textContent = `${currentSelectedQuiz.subject} • ${currentSelectedQuiz.title}`;
+      document.getElementById("banner-code").textContent = code;
+
+      const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + "/index.html";
+      const directUrl = `${baseUrl}?join=${code}`;
+      document.getElementById("banner-url").value = directUrl;
+      document.getElementById("new-code-banner").classList.remove("hidden");
+
+      loadAssignmentsTable();
+    }
+
+    function copyShareUrl() {
+      const urlInput = document.getElementById("banner-url");
+      urlInput.select();
+      navigator.clipboard.writeText(urlInput.value);
+      alert("Direct student link copied to clipboard!\n\n" + urlInput.value);
+    }
+
+    // ============================================================================
+    // ASSIGNMENTS TABLE
+    // ============================================================================
+    async function loadAssignmentsTable() {
+      const list = await fetchTeacherAssignments();
+      activeAssignments = list || [];
+      const tbody = document.getElementById("assignments-tbody");
+      tbody.innerHTML = "";
+
+      if (!activeAssignments || activeAssignments.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 text-sm">No active assignments created yet. Use the generator above to dispatch an assessment!</td></tr>`;
+        return;
+      }
+
+      activeAssignments.forEach(a => {
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-800/60 transition border-b border-slate-800/80";
+        const timeBadge = a.quiz_mode === 'teacher_led'
+          ? (a.per_question_seconds > 0 ? `${a.per_question_seconds}s / Question` : "Manual Pacing")
+          : (a.time_limit_minutes > 0 ? `${a.time_limit_minutes} mins` : "Untimed");
+        const modeBadge = a.quiz_mode === 'teacher_led'
+          ? `<span class="px-3 py-1 rounded-full text-xs md:text-sm font-bold bg-violet-500/15 text-violet-300 border border-violet-500/40">Teacher-Led</span>`
+          : `<span class="px-3 py-1 rounded-full text-xs md:text-sm font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/40">Student-Led</span>`;
+        
+        const reviewBadge = a.allow_student_review 
+          ? `<span class="text-emerald-400 font-bold text-xs md:text-sm">✓ Allowed</span>`
+          : `<span class="text-slate-400 text-xs md:text-sm">🔒 Locked</span>`;
+
+        const statusBadge = !a.is_active 
+          ? `<span class="px-3 py-1 rounded-full text-xs md:text-sm font-semibold bg-rose-500/15 text-rose-300 border border-rose-500/30">Closed</span>`
+          : (a.is_started !== true
+              ? `<span class="px-3 py-1 rounded-full text-xs md:text-sm font-bold bg-amber-500/15 text-amber-300 border border-amber-500/40 inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-amber-400 animate-pulse"></span>In Lobby</span>`
+              : `<span class="px-3 py-1 rounded-full text-xs md:text-sm font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 inline-flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-400"></span>Active</span>`);
+
+        let actionBtns = `
+          <button onclick="toggleActiveStatus('${a.join_code}', ${!a.is_active})" class="pressable px-3.5 py-2 rounded-xl border border-slate-700 bg-slate-900/90 hover:bg-slate-800 text-xs md:text-sm font-bold text-slate-200 transition">
+            ${a.is_active ? 'Close' : 'Re-open'}
+          </button>
+          <button onclick="viewAssignmentRoster('${a.join_code}')" class="pressable px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs md:text-sm font-bold text-cyan-300 border border-slate-600 transition flex items-center gap-1.5 shadow-sm">
+            <span>📊</span> Roster &amp; Analytics
+          </button>
+          <button onclick="confirmDeleteAssignment('${a.join_code}', '${a.assessment_title.replace(/'/g, "\\'")}')" class="pressable px-3.5 py-2 rounded-xl border border-rose-500/30 hover:border-rose-500/60 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 text-xs md:text-sm font-bold transition" title="Delete this assignment permanently">
+            Delete
+          </button>
+        `;
+
+        if (a.is_active) {
+          if (a.is_started !== true) {
+            actionBtns = `
+              <button onclick="openLiveControl('${a.join_code}')" class="pressable px-4 py-2 rounded-xl btn-aurora text-xs md:text-sm font-black transition shadow-md flex items-center gap-1.5">
+                <span>🚀</span> Lobby &amp; Start
+              </button>
+              ${actionBtns}
+            `;
+          } else if (a.quiz_mode === 'teacher_led') {
+            actionBtns = `
+              <button onclick="openLiveControl('${a.join_code}')" class="pressable px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-xs md:text-sm font-bold text-white transition shadow-md border border-violet-400/40 flex items-center gap-1.5">
+                <span>🎮</span> Live Control
+              </button>
+              ${actionBtns}
+            `;
+          }
+        }
+
+        tr.innerHTML = `
+          <td class="py-4 px-4 font-mono font-black plasma-code text-2xl tracking-wider">${a.join_code}</td>
+          <td class="py-4 px-4">
+            <div class="font-bold text-white text-base md:text-lg">${a.assessment_title}</div>
+            <div class="text-xs md:text-sm text-slate-400 mt-0.5">${a.subject} • ${a.unit}</div>
+          </td>
+          <td class="py-4 px-4">${modeBadge}</td>
+          <td class="py-4 px-4 text-xs md:text-sm font-mono text-slate-300 font-semibold">${timeBadge}</td>
+          <td class="py-4 px-4 text-center">${reviewBadge}</td>
+          <td class="py-4 px-4 text-center">${statusBadge}</td>
+          <td class="py-4 px-4 text-right">
+            <div class="flex items-center justify-end gap-2 flex-wrap">${actionBtns}</div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function toggleActiveStatus(code, newStatus) {
+      await setAssignmentStatus(code, newStatus);
+      loadAssignmentsTable();
+    }
+
+    async function confirmDeleteAssignment(code, title) {
+      const msg =
+        `Permanently delete this assignment?\n\n` +
+        `Join Code: ${code}\n` +
+        `Assessment: ${title}\n\n` +
+        `Students will no longer be able to join or submit. ` +
+        `Note: individual student submissions are kept for your records, but the ` +
+        `assignment itself is removed. This cannot be undone.`;
+
+      if (!confirm(msg)) return;
+
+      await deleteAssignment(code);
+      await loadAssignmentsTable();
+      showTeacherToast("Assignment deleted", `${code} — ${title}`, "coral");
+    }
+
+    function showTeacherToast(title, body, tone = "brass", ttl = 3000) {
+      const host = document.getElementById("toast-host");
+      if (!host) return;
+
+      const tones = {
+        brass:  { ring: "border-brass-500/50",  bar: "bg-brass-500",  text: "text-brass-400",  glyph: "◈" },
+        copper: { ring: "border-copper-500/50", bar: "bg-copper-500", text: "text-copper-400", glyph: "◆" },
+        lime:   { ring: "border-lime-500/50",   bar: "bg-lime-500",   text: "text-lime-400",   glyph: "✓" },
+        coral:  { ring: "border-coral-500/50",  bar: "bg-coral-500",  text: "text-coral-400",  glyph: "✕" },
+        plum:   { ring: "border-plum-500/50",   bar: "bg-plum-500",   text: "text-plum-400",   glyph: "❖" }
+      };
+      const t = tones[tone] || tones.brass;
+
+      const toast = document.createElement("div");
+      toast.className = `toast flex items-stretch gap-0 overflow-hidden rounded-xl border ${t.ring} bg-ink-700 shadow-2xl backdrop-blur-md max-w-sm`;
+      toast.innerHTML = `
+        <div class="toast-bar ${t.bar} w-1.5 shrink-0"></div>
+        <div class="px-4 py-3 flex items-start gap-3 min-w-0">
+          <span class="${t.text} text-lg font-black leading-none mt-0.5">${t.glyph}</span>
+          <div class="min-w-0">
+            <div class="font-black text-chalk text-sm leading-tight">${title}</div>
+            ${body ? `<div class="text-chalk/60 text-xs mt-1 leading-snug">${body}</div>` : ''}
+          </div>
+        </div>
+      `;
+      host.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add("leaving");
+        setTimeout(() => toast.remove(), 340);
+      }, ttl);
+
+      while (host.children.length > 3) host.firstChild.remove();
+    }
+
+    function findQuizById(id) {
+      for (const subj of Object.values(EXAM_DB.subjects)) {
+        for (const unit of Object.values(subj.units)) {
+          for (const a of unit.assessments) {
+            if (a.id === id) {
+              hydrateQuizKeys(a);
+              return a;
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    function hydrateQuizKeys(quiz) {
+      if (!quiz || !quiz.questions) return;
+      if (window.OFFLINE_ANSWER_KEYS && window.OFFLINE_ANSWER_KEYS[quiz.id]) {
+        const keyMap = {};
+        (window.OFFLINE_ANSWER_KEYS[quiz.id].keys || []).forEach(k => {
+          if (k.question_id) keyMap[k.question_id] = k;
+          if (k.number) keyMap[k.number] = k;
+        });
+        quiz.questions.forEach((q, idx) => {
+          const k = keyMap[q.question_id] || keyMap[q.number] || keyMap[idx + 1];
+          if (k) {
+            q.correct_answer = k.correct_answer;
+            q.explanation = k.explanation;
+          }
+        });
+      }
+    }
+
+    // ============================================================================
+    // ROSTER & CLASS ANALYTICS
+    // ============================================================================
+    async function viewAssignmentRoster(code) {
+      const assignment = activeAssignments.find(a => a.join_code === code);
+      if (!assignment) return;
+
+      currentRosterAssignment = assignment;
+      document.getElementById("roster-title").textContent = assignment.assessment_title;
+      document.getElementById("roster-meta").textContent = `Join Code: ${code} • ${assignment.subject} • Class: ${assignment.class_period}`;
+      document.getElementById("roster-modal").classList.remove("hidden");
+
+      const submissions = await fetchSubmissionsByCode(code);
+      currentRosterSubmissions = submissions || [];
+      const tbody = document.getElementById("roster-tbody");
+      tbody.innerHTML = "";
+
+      if (currentRosterSubmissions.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 text-sm">No student submissions recorded yet for code ${code}.</td></tr>`;
+      } else {
+        currentRosterSubmissions.forEach((sub, idx) => {
+          const tr = document.createElement("tr");
+          tr.className = "hover:bg-slate-800/40 transition";
+          let rankBadge = `${idx + 1}`;
+          if (idx === 0) rankBadge = "🥇 1st";
+          else if (idx === 1) rankBadge = "🥈 2nd";
+          else if (idx === 2) rankBadge = "🥉 3rd";
+
+          const tm = String(Math.floor(sub.time_spent_seconds / 60)).padStart(2, '0');
+          const ts = String(sub.time_spent_seconds % 60).padStart(2, '0');
+
+          const tabSwitches = sub.tab_switch_count || 0;
+          const integrityBadge = tabSwitches === 0 
+            ? `<span class="px-2.5 py-0.5 rounded text-emerald-400 bg-emerald-500/10 font-bold text-xs">✅ Clean</span>`
+            : `<span class="px-2.5 py-0.5 rounded text-amber-400 bg-amber-500/10 font-bold text-xs">⚠️ ${tabSwitches} exits</span>`;
+
+          tr.innerHTML = `
+            <td class="py-3.5 px-3 text-center font-bold ${idx < 3 ? 'text-amber-400' : 'text-slate-500'}">${rankBadge}</td>
+            <td class="py-3.5 px-3 font-bold text-white text-base">${sub.student_name}</td>
+            <td class="py-3.5 px-3 text-center font-bold text-indigo-400 text-base">${sub.score} / ${sub.total_questions}</td>
+            <td class="py-3.5 px-3 text-center font-black text-emerald-400 text-base">${sub.percentage}%</td>
+            <td class="py-3.5 px-3 text-center font-mono text-sm ${tabSwitches > 0 ? 'text-amber-400 font-bold' : 'text-slate-400'}">${tabSwitches}</td>
+            <td class="py-3.5 px-3 text-center">${integrityBadge}</td>
+            <td class="py-3.5 px-3 text-right font-mono text-slate-300 text-sm font-semibold">${tm}:${ts}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      renderClassAnalytics(assignment, currentRosterSubmissions);
+    }
+
+    function renderClassAnalytics(assignment, subs) {
+      const section = document.getElementById("analytics-section");
+      section.classList.remove("hidden");
+      document.getElementById("analytics-title").textContent = assignment.assessment_title;
+      document.getElementById("analytics-meta").textContent = `Code: ${assignment.join_code} • ${subs.length} Students Submitted`;
+
+      if (subs.length === 0) {
+        document.getElementById("metric-class-avg").textContent = "--%";
+        document.getElementById("metric-subs-count").textContent = "0";
+        document.getElementById("metric-flag-count").textContent = "0";
+        document.getElementById("metric-avg-time").textContent = "--:--";
+        document.getElementById("distribution-bars").innerHTML = '<p class="text-slate-500 col-span-5 py-4">No submissions yet.</p>';
+        document.getElementById("hardest-q-list").innerHTML = '<p class="text-slate-500 py-2">No submission data.</p>';
+        document.getElementById("concept-mastery-list").innerHTML = '<p class="text-slate-500 py-2">No submission data.</p>';
+        document.getElementById("misconception-list").innerHTML = '<p class="text-slate-500 py-2">No submission data.</p>';
+        document.getElementById("remediation-planner").classList.add("hidden");
+        return;
+      }
+
+      const avgScore = (subs.reduce((acc, s) => acc + s.percentage, 0) / subs.length).toFixed(1);
+      const flagCount = subs.filter(s => (s.tab_switch_count || 0) > 0).length;
+      const avgSecs = Math.round(subs.reduce((acc, s) => acc + s.time_spent_seconds, 0) / subs.length);
+      const m = String(Math.floor(avgSecs / 60)).padStart(2, '0');
+      const s = String(avgSecs % 60).padStart(2, '0');
+
+      document.getElementById("metric-class-avg").textContent = `${avgScore}%`;
+      document.getElementById("metric-subs-count").textContent = subs.length;
+      document.getElementById("metric-flag-count").textContent = flagCount;
+      document.getElementById("metric-avg-time").textContent = `${m}:${s}`;
+
+      const buckets = [0, 0, 0, 0, 0];
+      subs.forEach(sub => {
+        const p = sub.percentage;
+        if (p <= 20) buckets[0]++;
+        else if (p <= 40) buckets[1]++;
+        else if (p <= 60) buckets[2]++;
+        else if (p <= 80) buckets[3]++;
+        else buckets[4]++;
+      });
+
+      const distContainer = document.getElementById("distribution-bars");
+      distContainer.innerHTML = "";
+      const labels = ["0–20%", "21–40%", "41–60%", "61–80%", "81–100%"];
+      const colors = ["bg-rose-500", "bg-amber-500", "bg-yellow-500", "bg-indigo-500", "bg-emerald-500"];
+      buckets.forEach((count, idx) => {
+        const pct = ((count / subs.length) * 100).toFixed(0);
+        const col = document.createElement("div");
+        col.className = "bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-1.5";
+        col.innerHTML = `
+          <div class="text-xs text-slate-400 font-bold">${labels[idx]}</div>
+          <div class="text-xl font-black text-white">${count}</div>
+          <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+            <div class="${colors[idx]} h-full rounded-full" style="width: ${pct}%"></div>
+          </div>
+          <div class="text-xs text-slate-500 font-mono font-semibold">${pct}%</div>
+        `;
+        distContainer.appendChild(col);
+      });
+
+      const quiz = findQuizById(assignment.assessment_id);
+      const hardestList = document.getElementById("hardest-q-list");
+      hardestList.innerHTML = "";
+
+      if (quiz && quiz.questions) {
+        const qStats = quiz.questions.map((q, qIdx) => {
+          let correctCount = 0;
+          subs.forEach(s => {
+            if (s.answers && s.answers[qIdx] === q.correct_answer) correctCount++;
+          });
+          const acc = ((correctCount / subs.length) * 100).toFixed(0);
+          return { questionNum: qIdx + 1, accuracy: parseFloat(acc), cardImage: q.card_image };
+        });
+
+        qStats.sort((a, b) => a.accuracy - b.accuracy);
+
+        qStats.slice(0, 5).forEach(stat => {
+          const item = document.createElement("div");
+          item.className = "flex items-center justify-between p-3.5 rounded-2xl bg-slate-950 border border-slate-800";
+          item.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-black text-sm">Q${stat.questionNum}</span>
+              <span class="text-slate-200 font-bold text-sm">Question ${stat.questionNum}</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="w-36 bg-slate-800 rounded-full h-2.5 overflow-hidden">
+                <div class="${stat.accuracy < 50 ? 'bg-rose-500' : 'bg-emerald-500'} h-full rounded-full" style="width: ${stat.accuracy}%"></div>
+              </div>
+              <span class="font-mono font-bold text-sm ${stat.accuracy < 50 ? 'text-rose-400' : 'text-emerald-400'} w-14 text-right">${stat.accuracy}%</span>
+            </div>
+          `;
+          hardestList.appendChild(item);
+        });
+      }
+
+      renderConceptAnalytics(quiz, subs);
+    }
+
+    // ============================================================================
+    // CONCEPT-LEVEL ANALYTICS + MISCONCEPTION DETECTION
+    // ============================================================================
+    /**
+     * Aggregate every submission by concept and per-question distractor choice.
+     *
+     * `sub.answers` is keyed by the question's index in the quiz, matching the
+     * key used when the student submitted. A missing key means unanswered and
+     * is excluded from distractor tallies so a blank never looks like a choice.
+     */
+    function buildConceptAnalytics(quiz, subs) {
+      const byConcept = {};
+      const perQuestion = quiz.questions.map((q, qIdx) => {
+        const key = q.concept || "unclassified";
+        const stats = {
+          qIdx,
+          number: q.number,
+          concept: key,
+          correct: q.correct_answer,
+          total: 0,
+          correctCount: 0,
+          distractor: {}
+        };
+
+        subs.forEach(s => {
+          if (!s.answers) return;
+          const chosen = s.answers[qIdx];
+          if (chosen === undefined || chosen === null || chosen === "") return;
+          stats.total++;
+          if (chosen === q.correct_answer) stats.correctCount++;
+          else stats.distractor[chosen] = (stats.distractor[chosen] || 0) + 1;
+        });
+
+        if (!byConcept[key]) {
+          byConcept[key] = {
+            key,
+            meta: conceptMeta(key),
+            questions: 0,
+            opportunities: 0,
+            correct: 0
+          };
+        }
+        byConcept[key].questions++;
+        byConcept[key].opportunities += stats.total;
+        byConcept[key].correct += stats.correctCount;
+
+        return stats;
+      });
+
+      const concepts = Object.values(byConcept)
+        .map(c => ({
+          ...c,
+          accuracy: c.opportunities > 0 ? c.correct / c.opportunities : 0,
+          band: masteryBand(c.opportunities > 0 ? c.correct / c.opportunities : 0)
+        }))
+        .sort((a, b) => a.accuracy - b.accuracy);
+
+      // Misconception: a single wrong distractor chosen by >=30% of all
+      // students who attempted the question. Requiring an absolute floor of
+      // 3 students stops a 1-of-1 attempt from being reported as a class trend.
+      const misconceptions = [];
+      perQuestion.forEach(qs => {
+        if (qs.total < 3) return;
+        Object.entries(qs.distractor).forEach(([letter, count]) => {
+          const share = count / qs.total;
+          if (share >= 0.3) {
+            misconceptions.push({
+              qIdx: qs.qIdx,
+              number: qs.number,
+              concept: qs.concept,
+              letter,
+              count,
+              total: qs.total,
+              share,
+              correct: qs.correct
+            });
+          }
+        });
+      });
+      misconceptions.sort((a, b) => b.share - a.share);
+
+      // Remediation grouping: each student's weakest concept.
+      const groups = {};
+      subs.forEach(s => {
+        if (!s.answers) return;
+        const perStudent = {};
+        quiz.questions.forEach((q, qIdx) => {
+          const key = q.concept || "unclassified";
+          const chosen = s.answers[qIdx];
+          if (chosen === undefined) return;
+          if (!perStudent[key]) perStudent[key] = { right: 0, total: 0 };
+          perStudent[key].total++;
+          if (chosen === q.correct_answer) perStudent[key].right++;
+        });
+
+        const scored = Object.entries(perStudent)
+          .filter(([, v]) => v.total > 0)
+          .map(([key, v]) => ({ key, acc: v.right / v.total, total: v.total }));
+
+        if (!scored.length) return;
+        scored.sort((a, b) => a.acc - b.acc);
+        const weakest = scored[0];
+        if (!groups[weakest.key]) {
+          groups[weakest.key] = {
+            key: weakest.key,
+            meta: conceptMeta(weakest.key),
+            students: []
+          };
+        }
+        groups[weakest.key].students.push({
+          name: s.student_name,
+          accuracy: weakest.acc,
+          right: Math.round(weakest.acc * weakest.total),
+          total: weakest.total
+        });
+      });
+
+      const remediation = Object.values(groups)
+        .filter(g => g.students.length >= 2)
+        .sort((a, b) => a.meta.label.localeCompare(b.meta.label));
+
+      return { concepts, misconceptions, remediation, perQuestion };
+    }
+
+    function renderConceptAnalytics(quiz, subs) {
+      const masteryList = document.getElementById("concept-mastery-list");
+      const miscList = document.getElementById("misconception-list");
+      const planner = document.getElementById("remediation-planner");
+
+      if (!quiz || !quiz.questions) {
+        masteryList.innerHTML = '<p class="text-slate-500 py-2">Assessment not found in database.</p>';
+        miscList.innerHTML = "";
+        planner.classList.add("hidden");
+        return;
+      }
+
+      const data = buildConceptAnalytics(quiz, subs);
+      currentConceptAnalytics = data;
+
+      // ---- Concept mastery bars (weakest first) ----
+      masteryList.innerHTML = "";
+      if (!data.concepts.length) {
+        masteryList.innerHTML = '<p class="text-slate-500 py-2">No concept data.</p>';
+      }
+
+      data.concepts.forEach((c, i) => {
+        const pct = Math.round(c.accuracy * 100);
+        const row = document.createElement("div");
+        row.className = "mastery-row enter bg-ink-900/60 border border-ink-600 rounded-2xl p-3.5 cursor-default";
+        row.style.animationDelay = `${i * 40}ms`;
+        row.innerHTML = `
+          <div class="flex items-center justify-between gap-3 mb-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="h-2.5 w-2.5 rounded-full shrink-0 bg-${c.band.tone}-400"></span>
+              <span class="font-black text-chalk text-sm truncate">${c.meta.label}</span>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <span class="text-[11px] text-chalk/40 font-mono">${c.questions} q</span>
+              <span class="text-[11px] font-bold text-${c.band.tone}-400">${c.band.label}</span>
+              <span class="font-mono font-black text-chalk text-sm">${c.correct}/${c.opportunities}</span>
+              <span class="font-mono font-black text-${c.band.tone}-400 text-base w-12 text-right">${pct}%</span>
+            </div>
+          </div>
+          <div class="h-2.5 bg-ink-700 rounded-full overflow-hidden">
+            <div class="mastery-fill h-full rounded-full bg-${c.band.tone}-500" style="--pct:${pct}%"></div>
+          </div>
+          <div class="text-[11px] text-chalk/40 mt-1.5">${c.meta.blurb}</div>
+        `;
+        masteryList.appendChild(row);
+      });
+
+      // ---- Misconceptions ----
+      miscList.innerHTML = "";
+      if (!data.misconceptions.length) {
+        miscList.innerHTML = `
+          <div class="flex items-center gap-2.5 px-4 py-3.5 rounded-2xl bg-lime-500/8 border border-lime-500/30">
+            <span class="text-lime-400 text-lg">✓</span>
+            <span class="text-xs text-lime-400 font-bold">No systemic misconceptions — no wrong distractor reached 30% consensus.</span>
+          </div>
+        `;
+      } else {
+        data.misconceptions.slice(0, 6).forEach(m => {
+          const meta = conceptMeta(m.concept);
+          const item = document.createElement("div");
+          item.className = "flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl bg-coral-500/8 border border-coral-500/35";
+          item.innerHTML = `
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="px-2.5 py-1 rounded-xl bg-coral-500/20 border border-coral-500/45 text-coral-400 font-black text-sm shrink-0">${m.letter}</span>
+              <div class="min-w-0">
+                <div class="font-black text-chalk text-sm">
+                  Q${m.number} — <span class="text-coral-400">${Math.round(m.share * 100)}%</span> of students chose this
+                </div>
+                <div class="text-[11px] text-chalk/45 truncate">${meta.label} · key is ${m.correct}</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <span class="font-mono text-xs text-chalk/50">${m.count}/${m.total}</span>
+              <div class="w-20 h-2 bg-ink-700 rounded-full overflow-hidden">
+                <div class="h-full bg-coral-500 bar-animate rounded-full" style="--target:${Math.round(m.share * 100)}%"></div>
+              </div>
+            </div>
+          `;
+          miscList.appendChild(item);
+        });
+      }
+
+      // ---- Remediation planner ----
+      if (!data.remediation.length) {
+        planner.classList.add("hidden");
+      } else {
+        planner.classList.remove("hidden");
+        const groupsHost = document.getElementById("remediation-groups");
+        groupsHost.innerHTML = "";
+        data.remediation.forEach(g => {
+          const names = g.students
+            .sort((a, b) => a.accuracy - b.accuracy)
+            .map(s => `${s.name} <span class="text-chalk/40 font-mono">${s.right}/${s.total}</span>`)
+            .join(", ");
+          const row = document.createElement("div");
+          row.className = "flex items-start gap-3 px-3.5 py-2.5 rounded-xl bg-ink-900/50 border border-ink-600";
+          row.innerHTML = `
+            <div class="shrink-0 w-40">
+              <div class="font-black text-chalk text-xs">${g.meta.label}</div>
+              <div class="text-[10px] text-chalk/40 font-mono">${g.students.length} students</div>
+            </div>
+            <div class="text-[11px] text-chalk/60 leading-relaxed">${names}</div>
+          `;
+          groupsHost.appendChild(row);
+        });
+      }
+    }
+
+    function exportRemediationPlan() {
+      if (!currentConceptAnalytics || !currentConceptAnalytics.remediation.length) return;
+
+      const rows = [["Concept", "Student", "Correct", "Attempted", "Accuracy"]];
+      currentConceptAnalytics.remediation.forEach(g => {
+        g.students
+          .sort((a, b) => a.accuracy - b.accuracy)
+          .forEach(s => {
+            rows.push([
+              g.meta.label,
+              s.name,
+              s.right,
+              s.total,
+              `${Math.round(s.accuracy * 100)}%`
+            ]);
+          });
+      });
+
+      const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `vectorselect_remediation_${currentRosterAssignment ? currentRosterAssignment.join_code : "plan"}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+
+      showTeacherToast("Remediation plan exported", `${rows.length - 1} rows written to CSV`, "lime", 3000);
+    }
+
+    function closeRosterModal() {
+      document.getElementById("roster-modal").classList.add("hidden");
+    }
+
+    // ============================================================================
+    // CSV EXPORT
+    // ============================================================================
+    function downloadCSV() {
+      if (!currentRosterSubmissions || currentRosterSubmissions.length === 0) {
+        alert("No submissions available to export.");
+        return;
+      }
+
+      const headers = ["Rank", "Student Name", "Class Period", "Score", "Total", "Accuracy %", "Time (seconds)", "Tab Switches", "Submitted At"];
+      const rows = currentRosterSubmissions.map((sub, idx) => [
+        idx + 1,
+        `"${sub.student_name}"`,
+        `"${sub.class_period || 'General'}"`,
+        sub.score,
+        sub.total_questions,
+        sub.percentage,
+        sub.time_spent_seconds,
+        sub.tab_switch_count || 0,
+        `"${sub.submitted_at || ''}"`
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      const slug = (currentRosterAssignment ? currentRosterAssignment.assessment_title : 'roster').replace(/[^a-zA-Z0-9]/g, '_');
+      link.setAttribute("download", `VectorSelect_${slug}_Submissions.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // ============================================================================
+    // PREVIEW MODAL
+    // ============================================================================
+    function openQuizPreviewModal() {
+      if (!currentSelectedQuiz) return;
+      document.getElementById("preview-title").textContent = currentSelectedQuiz.title;
+      document.getElementById("preview-meta").textContent = `${currentSelectedQuiz.subject} • ${currentSelectedQuiz.unit} • ${currentSelectedQuiz.question_count} Questions`;
+      
+      const container = document.getElementById("preview-questions-list");
+      container.innerHTML = "";
+
+      currentSelectedQuiz.questions.forEach((q, idx) => {
+        const card = document.createElement("div");
+        card.className = "bg-slate-950/80 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-lg";
+
+        let cardHtml = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+            <span class="px-3.5 py-1 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 font-black text-sm">Question ${idx + 1}</span>
+            <span class="px-3.5 py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-extrabold text-sm">Official Answer: ${q.correct_answer || 'Pending Key'}</span>
+          </div>
+        `;
+
+        if (q.card_image) {
+          cardHtml += `
+            <div class="bg-white p-2 sm:p-4 rounded-2xl shadow-md border border-slate-200">
+              <img src="${q.card_image}" alt="Question Card" class="max-h-[850px] w-full object-contain mx-auto">
+            </div>
+          `;
+        }
+
+        if (q.explanation) {
+          cardHtml += `
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 text-sm space-y-1.5">
+              <span class="font-bold uppercase tracking-wider text-emerald-400 block text-xs">Official College Board Scoring Rationale</span>
+              <p class="text-slate-300 leading-relaxed font-sans">${q.explanation}</p>
+            </div>
+          `;
+        }
+
+        card.innerHTML = cardHtml;
+        container.appendChild(card);
+      });
+
+      document.getElementById("preview-modal").classList.remove("hidden");
+    }
+
+    function closeQuizPreviewModal() {
+      document.getElementById("preview-modal").classList.add("hidden");
+    }
+
+    // ============================================================================
+    // TEACHER-LED LIVE CONTROL (Projector Safe & Synchronized Pacing)
+    // ============================================================================
+    async function openLiveControl(code) {
+      const assignment = activeAssignments.find(a => a.join_code === code);
+      if (!assignment) return;
+
+      currentLiveAssignment = assignment;
+      currentLiveQuiz = findQuizById(assignment.assessment_id);
+      if (!currentLiveQuiz) {
+        alert("Quiz content not found in database.");
+        return;
+      }
+
+      currentLiveIndex = assignment.current_question_index || 0;
+      isAnswerRevealed = false;
+      lcTimerPaused = false;
+
+      document.getElementById("lc-quiz-title").textContent = assignment.assessment_title;
+      const bigCodeEl = document.getElementById("lc-big-join-code");
+      if (bigCodeEl) bigCodeEl.textContent = code;
+      const periodBadge = document.getElementById("lc-period-badge");
+      if (periodBadge) periodBadge.textContent = assignment.class_period || 'General';
+      document.body.style.overflow = "hidden";
+      teacherDockCollapsed = false;
+      const dockWrapper = document.getElementById("lc-dock-wrapper") || document.getElementById("lc-dock-pane");
+      if (dockWrapper) dockWrapper.classList.remove("hidden");
+      const sliderTab = document.getElementById("teacher-dock-slider-tab");
+      if (sliderTab) {
+        sliderTab.classList.add("hidden");
+        sliderTab.classList.remove("flex");
+      }
+      document.getElementById("live-control-modal").classList.remove("hidden");
+      initLiveControlWheelScroll();
+
+      // Check if assignment has not been launched yet (waiting room)
+      if (assignment.is_started !== true) {
+        document.getElementById("lc-lobby-body").classList.remove("hidden");
+        document.getElementById("lc-runner-body").classList.add("hidden");
+        updateLobbyChips(code);
+        clearInterval(liveSyncInterval);
+        liveSyncInterval = setInterval(() => {
+          updateLobbyChips(code);
+        }, 1200);
+        return;
+      }
+
+      // Assessment is already active
+      document.getElementById("lc-lobby-body").classList.add("hidden");
+      document.getElementById("lc-runner-body").classList.remove("hidden");
+      setLcLayoutMode('split');
+
+      renderLiveControl();
+
+      // Set initial question timer state so students' countdowns start
+      if (assignment.per_question_seconds > 0) {
+        setAssignmentTimerState(code, {
+          question_started_at: new Date().toISOString(),
+          discussion_active: false
+        });
+      }
+
+      // Show progress tracker
+      document.getElementById("lc-progress-strip").classList.remove("hidden");
+
+      // Start live participants + answers + reactions poller
+      clearInterval(liveSyncInterval);
+      liveSyncInterval = setInterval(async () => {
+        const participants = await fetchParticipantsByCode(code);
+        const answers = await fetchLiveAnswersByCode(code, currentLiveIndex);
+        renderLiveProgress(participants, answers);
+        pollLiveReactions(code);
+        if (isLeaderboardModalOpen) {
+          refreshLiveLeaderboard(code);
+        }
+      }, 1500);
+
+      // Setup question timer if configured
+      setupQuestionTimer();
+    }
+
+    async function updateLobbyChips(code) {
+      const parts = await fetchParticipantsByCode(code);
+      const countEl = document.getElementById("lc-lobby-count");
+      const chipsEl = document.getElementById("lc-lobby-chips");
+      if (countEl) countEl.textContent = `${parts.count} Joined`;
+      if (chipsEl) {
+        if (!parts.names || parts.names.length === 0) {
+          chipsEl.innerHTML = '<span class="text-xs text-slate-500 italic">Waiting for students to enter join code...</span>';
+        } else {
+          chipsEl.innerHTML = "";
+          parts.names.forEach(name => {
+            const chip = document.createElement("span");
+            chip.className = "px-3 py-1.5 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1.5";
+            chip.innerHTML = `<span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>${name}`;
+            chipsEl.appendChild(chip);
+          });
+        }
+      }
+    }
+
+    async function startLiveAssignmentNow() {
+      const code = currentLiveAssignment.join_code;
+      await startAssignment(code);
+      currentLiveAssignment.is_started = true;
+
+      // Update table
+      loadAssignmentsTable();
+
+      if (currentLiveAssignment.quiz_mode === "student_led") {
+        closeLiveControlModal();
+        showTeacherToast("Assessment Launched", `All students in ${code} have been released to begin!`, "lime", 4000);
+        return;
+      }
+
+      // If teacher_led, proceed to runner
+      document.body.style.overflow = "hidden";
+      document.getElementById("lc-lobby-body").classList.add("hidden");
+      document.getElementById("lc-runner-body").classList.remove("hidden");
+      setLcLayoutMode('split');
+      initLiveControlWheelScroll();
+      renderLiveControl();
+
+      if (currentLiveAssignment.per_question_seconds > 0) {
+        setAssignmentTimerState(code, {
+          question_started_at: new Date().toISOString(),
+          discussion_active: false
+        });
+      }
+
+      document.getElementById("lc-progress-strip").classList.remove("hidden");
+
+      clearInterval(liveSyncInterval);
+      liveSyncInterval = setInterval(async () => {
+        const participants = await fetchParticipantsByCode(code);
+        const answers = await fetchLiveAnswersByCode(code, currentLiveIndex);
+        renderLiveProgress(participants, answers);
+        pollLiveReactions(code);
+        if (isLeaderboardModalOpen) {
+          refreshLiveLeaderboard(code);
+        }
+      }, 1500);
+
+      setupQuestionTimer();
+    }
+
+    async function lcTriggerDiscussionEarly() {
+      const answers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex);
+      showDiscussionPanel(answers);
+      setAssignmentTimerState(currentLiveAssignment.join_code, {
+        question_started_at: null,
+        discussion_active: true
+      });
+      if (!lcTimerPaused) lcToggleTimerPause();
+    }
+
+    let teacherDockCollapsed = false;
+
+    function initLiveControlWheelScroll() {
+      const stage = document.getElementById("lc-stage-pane");
+      if (stage && !stage._hasWheelListener) {
+        stage._hasWheelListener = true;
+        stage.addEventListener("wheel", (e) => {
+          if (stage.scrollHeight > stage.clientHeight) {
+            stage.scrollTop += e.deltaY;
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }, { passive: false });
+      }
+
+      const modal = document.getElementById("live-control-modal");
+      if (modal && !modal._hasModalWheelHandler) {
+        modal._hasModalWheelHandler = true;
+        modal.addEventListener("wheel", (e) => {
+          const target = e.target;
+          const scrollable = target.closest('#lc-stage-pane, #lc-dock-pane, #preview-questions-list, #roster-modal, #ap-student-roster');
+          if (!scrollable) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+      }
+    }
+
+    function toggleTeacherDockCollapse() {
+      teacherDockCollapsed = !teacherDockCollapsed;
+      const stage = document.getElementById("lc-stage-pane");
+      const dockWrapper = document.getElementById("lc-dock-wrapper") || document.getElementById("lc-dock-pane");
+      const sliderTab = document.getElementById("teacher-dock-slider-tab");
+      const btnSplit = document.getElementById("btn-lc-split");
+      const btnCinema = document.getElementById("btn-lc-cinema");
+
+      if (teacherDockCollapsed) {
+        if (dockWrapper) dockWrapper.classList.add("hidden");
+        if (stage) stage.className = "flex-1 min-w-0 min-h-0 w-full h-full overflow-y-auto overscroll-contain bg-slate-950/80 rounded-2xl p-2 sm:p-4 border border-slate-800 shadow-inner relative transition-all duration-300";
+        if (sliderTab) {
+          sliderTab.classList.remove("hidden");
+          sliderTab.classList.add("flex");
+        }
+        if (btnCinema) btnCinema.className = "px-2.5 py-1 rounded-lg btn-aurora text-slate-950 font-black text-xs shadow-md transition";
+        if (btnSplit) btnSplit.className = "px-2.5 py-1 rounded-lg border border-transparent hover:border-slate-700 text-slate-400 hover:text-white text-xs font-bold transition";
+        showTeacherToast("Expanded Question Stage", "Telemetry dock collapsed. Click ❮ tab anytime to reopen.", "copper", 2200);
+      } else {
+        if (dockWrapper) dockWrapper.classList.remove("hidden");
+        if (stage) stage.className = "flex-1 min-w-0 min-h-0 h-full overflow-y-auto overscroll-contain bg-slate-950/80 rounded-2xl p-2 sm:p-4 border border-slate-800 shadow-inner relative transition-all duration-300";
+        if (sliderTab) {
+          sliderTab.classList.add("hidden");
+          sliderTab.classList.remove("flex");
+        }
+        if (btnSplit) btnSplit.className = "px-2.5 py-1 rounded-lg btn-aurora text-slate-950 font-black text-xs shadow-md transition";
+        if (btnCinema) btnCinema.className = "px-2.5 py-1 rounded-lg border border-transparent hover:border-slate-700 text-slate-400 hover:text-white text-xs font-bold transition";
+        showTeacherToast("Restored Telemetry Dock", "Right panel and Answer Key restored.", "lime", 2000);
+      }
+    }
+
+    function setLcLayoutMode(mode) {
+      if (mode === 'cinema') {
+        if (!teacherDockCollapsed) toggleTeacherDockCollapse();
+      } else {
+        if (teacherDockCollapsed) toggleTeacherDockCollapse();
+      }
+    }
+
+    function renderLiveControl() {
+      const q = currentLiveQuiz.questions[currentLiveIndex];
+      const total = currentLiveQuiz.questions.length;
+
+      document.getElementById("lc-q-badge").textContent = `Question ${currentLiveIndex + 1} of ${total}`;
+      document.getElementById("lc-card-img").src = q.card_image || "";
+      const stage = document.getElementById("lc-stage-pane");
+      if (stage) stage.scrollTop = 0;
+      document.getElementById("lc-key-text").textContent = q.correct_answer || 'Pending';
+      document.getElementById("lc-rationale-text").textContent = q.explanation || "No rationale recorded.";
+
+      // Re-hide answer key when moving questions (projector protection)
+      isAnswerRevealed = false;
+      document.getElementById("lc-answer-content").classList.add("hidden");
+      document.getElementById("lc-answer-status").textContent = "🔒 Hidden (Click reveal when ready to discuss)";
+      document.getElementById("btn-toggle-reveal").textContent = "👁️ Reveal Answer Key";
+
+      document.getElementById("lc-btn-prev").disabled = currentLiveIndex === 0;
+      const discPrev = document.getElementById("lc-disc-btn-prev");
+      if (discPrev) discPrev.disabled = currentLiveIndex === 0;
+      resetLcNextButton();
+
+      // Persist to sync all students immediately
+      setAssignmentQuestionIndex(currentLiveAssignment.join_code, currentLiveIndex);
+    }
+
+    function renderLiveProgress(participants, answers) {
+      const strip = document.getElementById("lc-progress-strip");
+      if (!strip) return;
+
+      const names = (participants && participants.names) || [];
+      const total = names.length;
+      const answeredMap = {};
+      (answers || []).forEach(a => { answeredMap[a.student_name] = a; });
+
+      // Count only students who submitted an actual answer (non-null and non-blank)
+      const answeredCount = Object.values(answeredMap).filter(rec => {
+        const raw = rec ? rec.selected_letter : null;
+        return raw && raw !== 'null' && raw !== 'undefined' && String(raw).trim() !== '';
+      }).length;
+
+      // Header counts
+      document.getElementById("lc-active-students-count").textContent =
+        `👥 Joined: ${total} • ✅ Answered: ${answeredCount}`;
+
+      const pct = total > 0 ? Math.round((answeredCount / total) * 100) : 0;
+      document.getElementById("lc-progress-text").textContent = `${answeredCount} / ${total} answered`;
+      const sliderProgress = document.getElementById("teacher-slider-progress-pill");
+      if (sliderProgress) sliderProgress.textContent = `${answeredCount} / ${total}`;
+      const bar = document.getElementById("lc-progress-bar");
+      bar.style.width = `${pct}%`;
+
+      // Completion banner when everyone has answered
+      const progressText = document.getElementById("lc-progress-text");
+      if (total > 0 && answeredCount >= total) {
+        progressText.textContent = `${answeredCount} / ${total} — ALL ANSWERED ✓`;
+        progressText.className = "text-emerald-400 font-black";
+        bar.className = "h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500";
+      } else {
+        progressText.className = total > 0 ? "text-amber-400" : "text-slate-500";
+        bar.className = "h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500";
+      }
+
+      // Per-student dots:
+      // When answer is revealed: green = correct, rose = wrong, amber/slate = no answer
+      // When answer is hidden (default / discussion): neutral cyan = answered, slate = pending
+      const dots = document.getElementById("lc-student-dots");
+      dots.innerHTML = "";
+      names.forEach(name => {
+        const rec = answeredMap[name];
+        const dot = document.createElement("span");
+        let cls, mark, tip;
+        const rawLetter = rec ? rec.selected_letter : null;
+        const hasAnswered = rawLetter && rawLetter !== 'null' && rawLetter !== 'undefined' && String(rawLetter).trim() !== '';
+
+        if (!rec || !hasAnswered) {
+          cls = "bg-slate-800 text-slate-500 border border-slate-700";
+          mark = "—";
+          tip = `${name} — no answer submitted`;
+        } else if (isAnswerRevealed) {
+          if (rec.is_correct) {
+            cls = "bg-emerald-500/20 text-emerald-300 border border-emerald-500/50";
+            mark = "✓";
+            tip = `${name} — chose ${rawLetter} — CORRECT`;
+          } else {
+            cls = "bg-rose-500/20 text-rose-300 border border-rose-500/50";
+            mark = "✗";
+            tip = `${name} — chose ${rawLetter} — incorrect`;
+          }
+        } else {
+          // Neutral answered state (projector safe, does not reveal correctness)
+          cls = "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40";
+          mark = "●";
+          tip = `${name} — answered`;
+        }
+        dot.className = `px-2 py-0.5 rounded-lg font-black text-xs ${cls}`;
+        dot.textContent = mark;
+        dot.title = tip;
+        dots.appendChild(dot);
+      });
+    }
+
+    async function toggleTeacherAnswerReveal() {
+      isAnswerRevealed = !isAnswerRevealed;
+      const content = document.getElementById("lc-answer-content");
+      const status = document.getElementById("lc-answer-status");
+      const btn = document.getElementById("btn-toggle-reveal");
+
+      if (isAnswerRevealed) {
+        if (content) content.classList.remove("hidden");
+        if (status) status.textContent = "🔓 Revealed";
+        if (btn) {
+          btn.textContent = "🔒 Hide Key";
+          btn.className = "px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-600/20 text-xs font-bold text-emerald-300 transition";
+        }
+        showTeacherToast("Answer Key Revealed", "Correct answer & explanation visible", "lime", 2000);
+      } else {
+        if (content) content.classList.add("hidden");
+        if (status) status.textContent = "🔒 Hidden on Projector";
+        if (btn) {
+          btn.textContent = "👁️ Reveal Key";
+          btn.className = "px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-600/10 hover:bg-indigo-600/20 text-xs font-bold text-indigo-300 transition";
+        }
+        showTeacherToast("Answer Key Hidden", "Answer key hidden from projector", "copper", 2000);
+      }
+
+      // Synchronize answer reveal state to cloud & students
+      if (currentLiveAssignment) {
+        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+          answer_revealed: isAnswerRevealed
+        });
+
+        // Re-render student dots and discussion panel with updated reveal state
+        const participants = await fetchParticipantsByCode(currentLiveAssignment.join_code);
+        const answers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex);
+        renderLiveProgress(participants, answers);
+
+        const discPanel = document.getElementById("lc-discussion-panel");
+        if (discPanel && !discPanel.classList.contains("hidden")) {
+          renderDiscussionContent(answers);
+        }
+      }
+    }
+
+    function setupQuestionTimer() {
+      clearInterval(lcTimerInterval);
+      const perQ = currentLiveAssignment.per_question_seconds || 0;
+      const timerBox = document.getElementById("lc-timer-box");
+      const addTimeBtn = document.getElementById("lc-btn-addtime");
+      const timerLabel = document.getElementById("lc-timer-label");
+
+      timerBox.classList.remove("hidden");
+      lcTimerPaused = false;
+      updateLcPauseUI();
+
+      if (perQ > 0) {
+        if (addTimeBtn) addTimeBtn.classList.remove("hidden");
+        if (timerLabel) timerLabel.textContent = "Question Time:";
+        lcTimerRemaining = perQ;
+        updateLcTimerDisplay();
+
+        lcTimerInterval = setInterval(() => {
+          if (!lcTimerPaused) {
+            lcTimerRemaining--;
+            updateLcTimerDisplay();
+            if (lcTimerRemaining <= 0) {
+              // Auto-advance to next question or end
+              if (currentLiveIndex < currentLiveQuiz.questions.length - 1) {
+                lcNextQuestion();
+                lcTimerRemaining = perQ;
+                updateLcTimerDisplay();
+              } else {
+                clearInterval(lcTimerInterval);
+                alert("Final question time expired! You can now end the session.");
+              }
+            }
+          }
+        }, 1000);
+      } else {
+        // Manual Pacing (Teacher controls next)
+        if (addTimeBtn) addTimeBtn.classList.add("hidden");
+        if (timerLabel) timerLabel.textContent = "Pacing:";
+        document.getElementById("lc-timer-display").textContent = "Manual";
+      }
+    }
+
+    function updateLcTimerDisplay() {
+      const perQ = currentLiveAssignment.per_question_seconds || 0;
+      if (perQ > 0) {
+        const m = String(Math.floor(lcTimerRemaining / 60)).padStart(2, '0');
+        const s = String(lcTimerRemaining % 60).padStart(2, '0');
+        document.getElementById("lc-timer-display").textContent = `${m}:${s}`;
+      } else {
+        document.getElementById("lc-timer-display").textContent = "Manual";
+      }
+    }
+
+    function updateLcPauseUI() {
+      const pill = document.getElementById("lc-pause-pill");
+      const icon = document.getElementById("lc-btn-pause-icon");
+      const text = document.getElementById("lc-btn-pause-text");
+      const btn = document.getElementById("lc-btn-pause");
+
+      if (lcTimerPaused) {
+        if (pill) pill.classList.remove("hidden");
+        if (icon) icon.textContent = "▶️";
+        if (text) text.textContent = "Resume";
+        if (btn) {
+          btn.className = "pressable px-4 py-1.5 rounded-xl btn-aurora text-slate-950 font-black text-xs shadow-lg animate-pulse flex items-center gap-1.5";
+        }
+      } else {
+        if (pill) pill.classList.add("hidden");
+        if (icon) icon.textContent = "⏸️";
+        if (text) text.textContent = "Pause";
+        if (btn) {
+          btn.className = "pressable px-4 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-300 transition flex items-center gap-1.5";
+        }
+      }
+    }
+
+    async function lcToggleTimerPause() {
+      lcTimerPaused = !lcTimerPaused;
+      updateLcPauseUI();
+
+      const perQ = currentLiveAssignment.per_question_seconds || 0;
+
+      if (lcTimerPaused) {
+        // Broadcast pause to cloud & localStorage
+        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+          timer_paused: true,
+          paused_remaining_seconds: (perQ > 0) ? lcTimerRemaining : 0
+        });
+        showTeacherToast("Session Paused", (perQ > 0) ? `Timer paused at ${lcTimerRemaining}s` : "Student interactions paused for explanation", "brass", 2500);
+      } else {
+        // Resume session: calculate updated started_at timestamp
+        let newStartedAt = new Date().toISOString();
+        if (perQ > 0) {
+          const elapsedSecs = Math.max(0, perQ - lcTimerRemaining);
+          newStartedAt = new Date(Date.now() - (elapsedSecs * 1000)).toISOString();
+        }
+        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+          timer_paused: false,
+          paused_remaining_seconds: null,
+          question_started_at: newStartedAt
+        });
+        showTeacherToast("Session Resumed", "Timer and question pacing resumed", "lime", 2500);
+      }
+    }
+
+    async function lcResetTimer() {
+      lcTimerRemaining += 30;
+      updateLcTimerDisplay();
+      const perQ = (currentLiveAssignment.per_question_seconds || 0) + 30;
+      currentLiveAssignment.per_question_seconds = perQ;
+      const newStartedAt = new Date(Date.now() - Math.max(0, perQ - lcTimerRemaining) * 1000).toISOString();
+      await setAssignmentTimerState(currentLiveAssignment.join_code, {
+        question_started_at: newStartedAt,
+        paused_remaining_seconds: lcTimerRemaining
+      });
+      showTeacherToast("+30 Seconds Added", `New time: ${lcTimerRemaining}s remaining`, "copper", 2000);
+    }
+
+    let lcNextConfirmActive = false;
+    let lcNextConfirmTimeout = null;
+
+    function resetLcNextButton() {
+      lcNextConfirmActive = false;
+      clearTimeout(lcNextConfirmTimeout);
+      const nextBtn = document.getElementById("lc-btn-next");
+      if (nextBtn && currentLiveQuiz) {
+        const total = currentLiveQuiz.questions.length;
+        nextBtn.innerHTML = (currentLiveIndex === total - 1) ? "Final Question" : "Next &rarr;";
+        nextBtn.className = "pressable px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md transition";
+        nextBtn.disabled = (currentLiveIndex === total - 1);
+      }
+    }
+
+    function lcPrevQuestion() {
+      resetLcNextButton();
+      if (currentLiveIndex > 0) {
+        currentLiveIndex--;
+        hideDiscussionPanel();
+        renderLiveControl();
+        // Set fresh server timestamp so students' per-question timers restart
+        setAssignmentTimerState(currentLiveAssignment.join_code, {
+          question_started_at: new Date().toISOString(),
+          discussion_active: false,
+          answer_revealed: false
+        });
+        if (currentLiveAssignment.per_question_seconds > 0) {
+          lcTimerRemaining = currentLiveAssignment.per_question_seconds;
+          updateLcTimerDisplay();
+        }
+        showTeacherToast("Previous Question Loaded", `Returned to Question ${currentLiveIndex + 1}`, "copper", 2000);
+      }
+    }
+
+    async function lcNextQuestion() {
+      if (currentLiveIndex >= currentLiveQuiz.questions.length - 1) {
+        lcEndSession();
+        return;
+      }
+
+      const nextBtn = document.getElementById("lc-btn-next");
+      if (!lcNextConfirmActive) {
+        lcNextConfirmActive = true;
+        if (nextBtn) {
+          nextBtn.innerHTML = `⚠️ Confirm Advance &rarr;`;
+          nextBtn.className = "pressable px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/40 transition animate-pulse";
+        }
+        clearTimeout(lcNextConfirmTimeout);
+        lcNextConfirmTimeout = setTimeout(() => {
+          resetLcNextButton();
+        }, 4000);
+        return;
+      }
+
+      // Second click within 4 seconds: Confirm advance!
+      resetLcNextButton();
+
+      // Fetch current answers; if anyone answered, show discussion panel first
+      const answers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex);
+
+      if (!answers || answers.length === 0) {
+        // No answers yet — advance immediately
+        advanceNow();
+      } else {
+        // Show discussion state before advancing (keeps answer hidden initially)
+        showDiscussionPanel(answers);
+      }
+    }
+
+    function advanceNow() {
+      currentLiveIndex++;
+      hideDiscussionPanel();
+      renderLiveControl();
+      // Set server timestamp so students' per-question timers sync
+      setAssignmentTimerState(currentLiveAssignment.join_code, {
+        question_started_at: new Date().toISOString(),
+        discussion_active: false,
+        answer_revealed: false
+      });
+      if (currentLiveAssignment.per_question_seconds > 0) {
+        lcTimerRemaining = currentLiveAssignment.per_question_seconds;
+        updateLcTimerDisplay();
+      }
+    }
+
+    function confirmAdvanceFromDiscussion() {
+      hideDiscussionPanel();
+      advanceNow();
+    }
+
+    function copyJoinCodeToClipboard() {
+      if (!currentLiveAssignment || !currentLiveAssignment.join_code) return;
+      const code = currentLiveAssignment.join_code;
+      const shareUrl = `${window.location.origin}${window.location.pathname.replace('teacher.html', 'index.html')}?join=${code}`;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          showTeacherToast("Class Join Link Copied!", `Link with code ${code} copied for late students`, "lime", 3000);
+        }).catch(() => {
+          prompt("Copy Join Code for students:", code);
+        });
+      } else {
+        prompt("Copy Join Code for students:", code);
+      }
+    }
+
+    let currentDiscussionAnswers = [];
+    let isAnonymized = false;
+
+    function toggleAnonymizeDiscussion() {
+      const toggle = document.getElementById("lc-anonymize-toggle");
+      isAnonymized = toggle ? toggle.checked : false;
+      renderDiscussionStudents(currentDiscussionAnswers);
+    }
+
+    function renderDiscussionStudents(answers) {
+      const studentGrid = document.getElementById("lc-discussion-students");
+      if (!studentGrid) return;
+      studentGrid.innerHTML = "";
+      (answers || []).forEach((a, idx) => {
+        const cell = document.createElement("div");
+        const displayName = isAnonymized ? `Student #${idx + 1}` : a.student_name;
+        const rawLetter = a.selected_letter;
+        const isAnswered = rawLetter && rawLetter !== 'null' && rawLetter !== 'undefined' && String(rawLetter).trim() !== '';
+        const chosenLetter = isAnswered ? String(rawLetter).toUpperCase() : null;
+
+        if (!isAnswered) {
+          // Explicitly No Answer / Blank — NEVER logged as correct or displayed as (null)
+          cell.className = "p-2 rounded-lg border bg-slate-900/90 border-amber-500/30 text-amber-300 flex items-center gap-2";
+          cell.innerHTML = `
+            <span class="font-bold text-amber-400">⚠️</span>
+            <span class="text-slate-200 truncate flex-1 font-medium">${displayName}</span>
+            <span class="font-bold text-amber-400/90 text-[10px] uppercase tracking-wider">(No Answer)</span>
+          `;
+        } else if (isAnswerRevealed) {
+          const correct = !!a.is_correct;
+          cell.className = `p-2 rounded-lg border ${correct ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300' : 'bg-rose-500/10 border-rose-500/40 text-rose-300'} flex items-center gap-2`;
+          cell.innerHTML = `
+            <span class="font-bold">${correct ? '✓' : '✗'}</span>
+            <span class="text-slate-200 truncate flex-1 font-medium">${displayName}</span>
+            <span class="font-black ${correct ? 'text-emerald-400' : 'text-rose-400'}">(${chosenLetter})</span>
+          `;
+        } else {
+          // Neutral display during discussion before answer is revealed
+          cell.className = "p-2 rounded-lg border bg-slate-900 border-slate-800 text-slate-300 flex items-center gap-2";
+          cell.innerHTML = `
+            <span class="text-indigo-400 font-bold">●</span>
+            <span class="text-slate-200 truncate flex-1 font-medium">${displayName}</span>
+            <span class="font-bold text-slate-400">(Answered)</span>
+          `;
+        }
+        studentGrid.appendChild(cell);
+      });
+    }
+
+    function renderDiscussionContent(answers) {
+      currentDiscussionAnswers = answers || [];
+      const correctLetter = (currentLiveQuiz.questions[currentLiveIndex].correct_answer || '').toUpperCase();
+      const counts = { A: 0, B: 0, C: 0, D: 0, NO_ANSWER: 0 };
+      let answeredCount = 0;
+
+      (answers || []).forEach(a => {
+        const rawLetter = a.selected_letter;
+        const isAnswered = rawLetter && rawLetter !== 'null' && rawLetter !== 'undefined' && String(rawLetter).trim() !== '';
+        if (isAnswered) {
+          const letter = String(rawLetter).toUpperCase();
+          if (counts[letter] !== undefined) {
+            counts[letter]++;
+            answeredCount++;
+          }
+        } else {
+          counts.NO_ANSWER++;
+        }
+      });
+      const totalAnswers = (answers || []).length;
+
+      const distContainer = document.getElementById("lc-distribution-bars");
+      if (distContainer) {
+        distContainer.innerHTML = "";
+        ["A", "B", "C", "D"].forEach(letter => {
+          const count = counts[letter];
+          const pct = totalAnswers > 0 ? Math.round((count / totalAnswers) * 100) : 0;
+          const isCorrect = letter === correctLetter;
+
+          let barColor, labelColor, badgeHtml = '';
+          if (isAnswerRevealed) {
+            barColor = isCorrect ? "bg-emerald-500" : (count > 0 ? "bg-rose-500/80" : "bg-slate-800");
+            labelColor = isCorrect ? "text-emerald-400 font-black" : "text-slate-300";
+            if (isCorrect) badgeHtml = '<span class="text-xs font-black text-emerald-400 shrink-0">✓ CORRECT</span>';
+          } else {
+            // Neutral discussion state (no correct answers revealed initially)
+            barColor = count > 0 ? "bg-indigo-600" : "bg-slate-800";
+            labelColor = "text-slate-300";
+            badgeHtml = '';
+          }
+
+          const row = document.createElement("div");
+          row.className = "flex items-center gap-3 cursor-pointer group hover:opacity-90 transition";
+          row.onclick = () => openApClassroomModal(letter);
+          row.title = `Click to inspect students who chose Option ${letter} (AP Classroom style)`;
+          row.innerHTML = `
+            <span class="font-black text-sm w-5 ${labelColor}">${letter}</span>
+            <div class="flex-1 h-7 bg-slate-800 rounded-full overflow-hidden relative shadow-inner group-hover:ring-1 group-hover:ring-indigo-400">
+              <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width:${pct}%"></div>
+              <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">${count} (${pct}%)</span>
+            </div>
+            ${badgeHtml}
+          `;
+          distContainer.appendChild(row);
+        });
+
+        // Unanswered / Blank row if any students did not write an answer
+        if (counts.NO_ANSWER > 0) {
+          const noAnsPct = totalAnswers > 0 ? Math.round((counts.NO_ANSWER / totalAnswers) * 100) : 0;
+          const blankRow = document.createElement("div");
+          blankRow.className = "flex items-center gap-3 cursor-pointer group hover:opacity-90 transition pt-1";
+          blankRow.onclick = () => openApClassroomModal('BLANK');
+          blankRow.title = "Click to inspect students who left this blank / timed out";
+          blankRow.innerHTML = `
+            <span class="font-bold text-xs w-5 text-amber-400">⚠️</span>
+            <div class="flex-1 h-6 bg-slate-900 rounded-full overflow-hidden relative border border-amber-500/30">
+              <div class="h-full bg-amber-500/40 rounded-full transition-all duration-500" style="width:${noAnsPct}%"></div>
+              <span class="absolute inset-0 flex items-center justify-center text-[11px] font-bold text-amber-200">No Answer: ${counts.NO_ANSWER} (${noAnsPct}%)</span>
+            </div>
+            <span class="text-[10px] text-amber-400 font-bold uppercase shrink-0">Unanswered</span>
+          `;
+          distContainer.appendChild(blankRow);
+        }
+      }
+
+      renderDiscussionStudents(currentDiscussionAnswers);
+
+      const statsEl = document.getElementById("lc-discussion-stats");
+      if (statsEl) {
+        if (isAnswerRevealed) {
+          const correctCount = (answers || []).filter(a => {
+            const raw = a.selected_letter;
+            const valid = raw && raw !== 'null' && raw !== 'undefined' && String(raw).trim() !== '';
+            return valid && a.is_correct;
+          }).length;
+          const pct = totalAnswers > 0 ? Math.round((correctCount / totalAnswers) * 100) : 0;
+          statsEl.textContent = `${correctCount}/${totalAnswers} correct (${pct}%)`;
+          statsEl.className = "text-xs font-black text-emerald-400";
+        } else {
+          statsEl.textContent = `${answeredCount}/${totalAnswers} submitted`;
+          statsEl.className = "text-xs font-bold text-slate-400";
+        }
+      }
+    }
+
+    // ============================================================================
+    // AP CLASSROOM STYLE TELEMETRY & REDUNDANCY BREAKDOWN
+    // ============================================================================
+    let apModalCurrentFilter = 'ALL';
+    let apModalIsAnonymized = false;
+    let apModalDataCache = null;
+
+    async function openApClassroomModal(initialFilter = 'ALL') {
+      if (!currentLiveAssignment || !currentLiveQuiz) return;
+      apModalCurrentFilter = initialFilter;
+      const code = currentLiveAssignment.join_code;
+      const q = currentLiveQuiz.questions[currentLiveIndex];
+      const correctLetter = (q.correct_answer || '').toUpperCase();
+
+      const qBadge = document.getElementById("ap-modal-q-badge");
+      if (qBadge) qBadge.textContent = `Q${currentLiveIndex + 1} of ${currentLiveQuiz.questions.length}`;
+      const keyBanner = document.getElementById("ap-official-key-banner");
+      if (keyBanner) keyBanner.textContent = `Official Answer Key: Option ${correctLetter}`;
+
+      const participants = await fetchParticipantsByCode(code);
+      const answers = await fetchLiveAnswersByCode(code, currentLiveIndex);
+
+      const names = (participants && participants.names) || [];
+      const answeredMap = {};
+      (answers || []).forEach(a => { answeredMap[a.student_name] = a; });
+
+      // Build student telemetry items
+      const studentItems = [];
+      const choiceCounts = { A: 0, B: 0, C: 0, D: 0, BLANK: 0 };
+      let rightCount = 0;
+      let wrongCount = 0;
+      let blankCount = 0;
+
+      // Group students
+      const allNames = Array.from(new Set([...names, ...Object.keys(answeredMap)]));
+      allNames.forEach(name => {
+        const rec = answeredMap[name];
+        const rawLetter = rec ? rec.selected_letter : null;
+        const isAnswered = rawLetter && rawLetter !== 'null' && rawLetter !== 'undefined' && String(rawLetter).trim() !== '';
+        const chosenLetter = isAnswered ? String(rawLetter).toUpperCase() : null;
+
+        if (!isAnswered) {
+          blankCount++;
+          choiceCounts.BLANK++;
+          studentItems.push({
+            name,
+            status: 'BLANK',
+            chosen: 'None',
+            isCorrect: false
+          });
+        } else if (chosenLetter === correctLetter) {
+          rightCount++;
+          if (choiceCounts[chosenLetter] !== undefined) choiceCounts[chosenLetter]++;
+          studentItems.push({
+            name,
+            status: 'RIGHT',
+            chosen: chosenLetter,
+            isCorrect: true
+          });
+        } else {
+          wrongCount++;
+          if (choiceCounts[chosenLetter] !== undefined) choiceCounts[chosenLetter]++;
+          studentItems.push({
+            name,
+            status: 'WRONG',
+            chosen: chosenLetter,
+            isCorrect: false
+          });
+        }
+      });
+
+      const totalStudents = allNames.length || 1;
+      const rightPct = Math.round((rightCount / totalStudents) * 100);
+      const wrongPct = Math.round((wrongCount / totalStudents) * 100);
+      const blankPct = Math.round((blankCount / totalStudents) * 100);
+
+      // Cache data
+      apModalDataCache = {
+        totalStudents,
+        rightCount,
+        wrongCount,
+        blankCount,
+        choiceCounts,
+        correctLetter,
+        studentItems
+      };
+
+      // Populate Metric Cards
+      const metricTotal = document.getElementById("ap-metric-total");
+      if (metricTotal) metricTotal.textContent = totalStudents;
+      const metricRight = document.getElementById("ap-metric-right");
+      if (metricRight) metricRight.textContent = `${rightCount} (${rightPct}%)`;
+      const metricWrong = document.getElementById("ap-metric-wrong");
+      if (metricWrong) metricWrong.textContent = `${wrongCount} (${wrongPct}%)`;
+      const metricBlank = document.getElementById("ap-metric-blank");
+      if (metricBlank) metricBlank.textContent = `${blankCount} (${blankPct}%)`;
+
+      // Populate Choice Breakdown
+      const choicesBox = document.getElementById("ap-choices-breakdown");
+      if (choicesBox) {
+        choicesBox.innerHTML = "";
+        ["A", "B", "C", "D"].forEach(letter => {
+          const count = choiceCounts[letter];
+          const pct = Math.round((count / totalStudents) * 100);
+          const isOfficial = letter === correctLetter;
+          const barColor = isOfficial ? "bg-emerald-500" : (count > 0 ? "bg-rose-500/80" : "bg-slate-800");
+
+          const row = document.createElement("div");
+          row.className = `p-2 rounded-xl border ${isOfficial ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-slate-800 bg-slate-900/60'} flex items-center gap-3 cursor-pointer hover:border-indigo-400 transition`;
+          row.onclick = () => filterApStudentList(letter);
+          row.innerHTML = `
+            <span class="h-7 w-7 rounded-lg flex items-center justify-center font-black text-sm ${isOfficial ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-200'}">${letter}</span>
+            <div class="flex-1 h-6 bg-slate-800 rounded-full overflow-hidden relative shadow-inner">
+              <div class="h-full ${barColor} rounded-full transition-all duration-500" style="width:${pct}%"></div>
+              <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">${count} Student${count === 1 ? '' : 's'} (${pct}%)</span>
+            </div>
+            ${isOfficial ? '<span class="text-xs font-black text-emerald-400 shrink-0">✓ OFFICIAL KEY</span>' : ''}
+          `;
+          choicesBox.appendChild(row);
+        });
+
+        if (choiceCounts.BLANK > 0) {
+          const bCount = choiceCounts.BLANK;
+          const bPct = Math.round((bCount / totalStudents) * 100);
+          const row = document.createElement("div");
+          row.className = "p-2 rounded-xl border border-amber-500/30 bg-amber-500/5 flex items-center gap-3 cursor-pointer hover:border-amber-400 transition";
+          row.onclick = () => filterApStudentList('BLANK');
+          row.innerHTML = `
+            <span class="h-7 w-7 rounded-lg flex items-center justify-center font-black text-sm bg-amber-500 text-slate-950">⚠️</span>
+            <div class="flex-1 h-6 bg-slate-900 rounded-full overflow-hidden relative border border-amber-500/30">
+              <div class="h-full bg-amber-500/40 rounded-full transition-all duration-500" style="width:${bPct}%"></div>
+              <span class="absolute inset-0 flex items-center justify-center text-xs font-bold text-amber-200">${bCount} Unanswered / Blank (${bPct}%)</span>
+            </div>
+            <span class="text-xs font-black text-amber-400 shrink-0">NO ANSWER</span>
+          `;
+          choicesBox.appendChild(row);
+        }
+      }
+
+      // Sync anonymize toggle state
+      const anonToggle = document.getElementById("ap-anonymize-toggle");
+      if (anonToggle) anonToggle.checked = isAnonymized;
+      apModalIsAnonymized = isAnonymized;
+
+      // Render student list according to filter
+      filterApStudentList(initialFilter);
+
+      document.getElementById("lc-ap-modal").classList.remove("hidden");
+    }
+
+    function closeApClassroomModal() {
+      const modal = document.getElementById("lc-ap-modal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function toggleApModalAnonymize() {
+      const toggle = document.getElementById("ap-anonymize-toggle");
+      apModalIsAnonymized = toggle ? toggle.checked : false;
+      renderApStudentListFiltered();
+    }
+
+    function filterApStudentList(filter) {
+      apModalCurrentFilter = filter;
+      renderApStudentListFiltered();
+    }
+
+    function renderApStudentListFiltered() {
+      if (!apModalDataCache) return;
+      const { studentItems } = apModalDataCache;
+      const listEl = document.getElementById("ap-student-roster");
+      const labelEl = document.getElementById("ap-list-filter-label");
+      if (!listEl) return;
+      listEl.innerHTML = "";
+
+      let filtered = studentItems;
+      let filterText = "All Students";
+
+      if (apModalCurrentFilter === 'RIGHT') {
+        filtered = studentItems.filter(s => s.status === 'RIGHT');
+        filterText = "Correct Students Only (✓)";
+      } else if (apModalCurrentFilter === 'WRONG') {
+        filtered = studentItems.filter(s => s.status === 'WRONG');
+        filterText = "Incorrect Students Only (✗)";
+      } else if (apModalCurrentFilter === 'BLANK') {
+        filtered = studentItems.filter(s => s.status === 'BLANK');
+        filterText = "Unanswered / Blank Students (⚠️)";
+      } else if (['A', 'B', 'C', 'D'].includes(apModalCurrentFilter)) {
+        filtered = studentItems.filter(s => s.chosen === apModalCurrentFilter);
+        filterText = `Students who selected Option ${apModalCurrentFilter}`;
+      }
+
+      if (labelEl) labelEl.textContent = `Showing: ${filterText} (${filtered.length})`;
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="col-span-full py-6 text-center text-slate-500 text-xs italic">No students match this filter.</div>';
+        return;
+      }
+
+      filtered.forEach((s, idx) => {
+        const item = document.createElement("div");
+        const displayName = apModalIsAnonymized ? `Student #${idx + 1}` : s.name;
+
+        if (s.status === 'RIGHT') {
+          item.className = "p-2.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 flex items-center justify-between text-xs";
+          item.innerHTML = `
+            <div class="flex items-center gap-2 truncate">
+              <span class="font-black text-emerald-400">✓</span>
+              <span class="text-slate-100 font-bold truncate">${displayName}</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 font-mono font-black text-xs">Chose ${s.chosen}</span>
+          `;
+        } else if (s.status === 'WRONG') {
+          item.className = "p-2.5 rounded-xl border border-rose-500/40 bg-rose-500/10 flex items-center justify-between text-xs";
+          item.innerHTML = `
+            <div class="flex items-center gap-2 truncate">
+              <span class="font-black text-rose-400">✗</span>
+              <span class="text-slate-100 font-bold truncate">${displayName}</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-lg bg-rose-500/20 text-rose-300 font-mono font-black text-xs">Chose ${s.chosen}</span>
+          `;
+        } else {
+          item.className = "p-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 flex items-center justify-between text-xs";
+          item.innerHTML = `
+            <div class="flex items-center gap-2 truncate">
+              <span class="font-black text-amber-400">⚠️</span>
+              <span class="text-slate-200 font-bold truncate">${displayName}</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 font-black text-[10px] uppercase">No Answer</span>
+          `;
+        }
+        listEl.appendChild(item);
+      });
+    }
+
+    async function showDiscussionPanel(answers) {
+      if (!lcTimerPaused) lcToggleTimerPause();
+      // Set discussion_active on server — freezes student interaction without revealing answers
+      await setAssignmentTimerState(currentLiveAssignment.join_code, {
+        question_started_at: currentLiveAssignment.question_started_at || null,
+        discussion_active: true,
+        answer_revealed: isAnswerRevealed
+      });
+
+      // Render distribution and students (respects isAnswerRevealed = false initially)
+      renderDiscussionContent(answers);
+
+      // Hide nav buttons, show discussion panel
+      document.getElementById("lc-btn-prev").classList.add("hidden");
+      document.getElementById("lc-btn-next").classList.add("hidden");
+      document.getElementById("lc-discussion-panel").classList.remove("hidden");
+    }
+
+    async function hideDiscussionPanel() {
+      document.getElementById("lc-discussion-panel").classList.add("hidden");
+      document.getElementById("lc-btn-prev").classList.remove("hidden");
+      document.getElementById("lc-btn-next").classList.remove("hidden");
+      
+      // Reset answer reveal state to hidden
+      isAnswerRevealed = false;
+      const content = document.getElementById("lc-answer-content");
+      const status = document.getElementById("lc-answer-status");
+      const btn = document.getElementById("btn-toggle-reveal");
+      if (content) content.classList.add("hidden");
+      if (status) status.textContent = "🔒 Hidden on Projector";
+      if (btn) {
+        btn.textContent = "👁️ Reveal Key";
+        btn.className = "px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-600/10 hover:bg-indigo-600/20 text-xs font-bold text-indigo-300 transition";
+      }
+
+      // Unset discussion_active and reset answer_revealed on server
+      await setAssignmentTimerState(currentLiveAssignment.join_code, {
+        question_started_at: new Date().toISOString(),
+        discussion_active: false,
+        answer_revealed: false
+      });
+
+      // Resume teacher timer if it was paused
+      if (lcTimerPaused) lcToggleTimerPause();
+    }
+
+    async function lcEndSession() {
+      if (confirm("End this live session? This will close the assessment for all students.")) {
+        clearInterval(lcTimerInterval);
+        // Clear timer state
+        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+          question_started_at: null,
+          discussion_active: false
+        });
+        await setAssignmentStatus(currentLiveAssignment.join_code, false);
+        closeLiveControlModal();
+        loadAssignmentsTable();
+      }
+    }
+
+    function closeLiveControlModal() {
+      clearInterval(liveSyncInterval);
+      clearInterval(lcTimerInterval);
+      closeLiveLeaderboardModal();
+      document.body.style.overflow = "";
+      teacherDockCollapsed = false;
+      const dockWrapper = document.getElementById("lc-dock-wrapper") || document.getElementById("lc-dock-pane");
+      if (dockWrapper) dockWrapper.classList.remove("hidden");
+      const sliderTab = document.getElementById("teacher-dock-slider-tab");
+      if (sliderTab) {
+        sliderTab.classList.add("hidden");
+        sliderTab.classList.remove("flex");
+      }
+      document.getElementById("live-control-modal").classList.add("hidden");
+      document.getElementById("lc-progress-strip").classList.add("hidden");
+      document.getElementById("lc-discussion-panel").classList.add("hidden");
+      document.getElementById("lc-btn-prev").classList.remove("hidden");
+      document.getElementById("lc-btn-next").classList.remove("hidden");
+    }
+
+    // ============================================================================
+    // LIVE REACTIONS STREAM (Projector Floating Emojis)
+    // ============================================================================
+    let isLeaderboardModalOpen = false;
+    let lcSeenReactionTimestamps = new Set();
+    let previousLeaderboardRanks = {};
+
+    async function pollLiveReactions(code) {
+      if (!code) return;
+      try {
+        const reactions = await fetchRecentEmojiReactions(code, 3500);
+        if (!reactions || reactions.length === 0) return;
+
+        const stream = document.getElementById("lc-floating-emoji-stream");
+        const ticker = document.getElementById("lc-recent-emojis");
+        const tickerBox = document.getElementById("lc-emoji-ticker");
+
+        reactions.forEach(r => {
+          if (!lcSeenReactionTimestamps.has(r.timestamp)) {
+            lcSeenReactionTimestamps.add(r.timestamp);
+
+            if (stream) {
+              const el = document.createElement("div");
+              el.className = "teacher-floating-emoji";
+              const randomX = Math.floor(Math.random() * 65) + 15; // 15vw to 80vw
+              el.style.left = `${randomX}vw`;
+              el.style.bottom = "60px";
+              el.innerHTML = `
+                <span class="text-4xl sm:text-5xl drop-shadow-lg">${r.emoji}</span>
+                <span class="text-[10px] font-black bg-slate-900/90 text-slate-100 border border-slate-700 px-2 py-0.5 rounded-full shadow-xl whitespace-nowrap">${r.student_name}</span>
+              `;
+              stream.appendChild(el);
+              setTimeout(() => el.remove(), 3100);
+            }
+          }
+        });
+
+        if (ticker && tickerBox) {
+          tickerBox.classList.remove("hidden");
+          const recent3 = reactions.slice(-4).map(r => r.emoji).join(' ');
+          ticker.textContent = recent3;
+        }
+
+        if (lcSeenReactionTimestamps.size > 200) {
+          lcSeenReactionTimestamps.clear();
+        }
+      } catch (e) {}
+    }
+
+    // ============================================================================
+    // LIVE LEADERBOARD (0-120 SUPER MAX Standings & Podium)
+    // ============================================================================
+    async function openLiveLeaderboardModal() {
+      if (!currentLiveAssignment) return;
+      isLeaderboardModalOpen = true;
+      document.getElementById("live-leaderboard-modal").classList.remove("hidden");
+      await refreshLiveLeaderboard(currentLiveAssignment.join_code);
+    }
+
+    function closeLiveLeaderboardModal() {
+      isLeaderboardModalOpen = false;
+      const modal = document.getElementById("live-leaderboard-modal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    async function refreshLiveLeaderboard(code) {
+      if (!code) return;
+      try {
+        const standings = await fetchLiveClassLeaderboard(code);
+        renderLeaderboardPodiumAndTable(standings);
+      } catch (e) {}
+    }
+
+    function renderLeaderboardPodiumAndTable(standings) {
+      // 1. Top 3 Podium
+      const first = standings[0] || null;
+      const second = standings[1] || null;
+      const third = standings[2] || null;
+
+      // 1st Place
+      const p1Name = document.getElementById("podium-1-name");
+      const p1Pts = document.getElementById("podium-1-points");
+      const p1Avatar = document.getElementById("podium-1-avatar");
+      if (first) {
+        if (p1Name) p1Name.textContent = first.name;
+        if (p1Pts) {
+          p1Pts.innerHTML = `${first.points.toFixed(1)} pts ${first.isSuperMax ? '<span class="text-xs">👑</span>' : ''}`;
+        }
+        if (p1Avatar) p1Avatar.innerHTML = first.isSuperMax ? '👑' : '🥇';
+      } else {
+        if (p1Name) p1Name.textContent = "—";
+        if (p1Pts) p1Pts.textContent = "0.0 pts";
+        if (p1Avatar) p1Avatar.textContent = "🥇";
+      }
+
+      // 2nd Place
+      const p2Name = document.getElementById("podium-2-name");
+      const p2Pts = document.getElementById("podium-2-points");
+      if (second) {
+        if (p2Name) p2Name.textContent = second.name;
+        if (p2Pts) p2Pts.textContent = `${second.points.toFixed(1)} pts`;
+      } else {
+        if (p2Name) p2Name.textContent = "—";
+        if (p2Pts) p2Pts.textContent = "0.0 pts";
+      }
+
+      // 3rd Place
+      const p3Name = document.getElementById("podium-3-name");
+      const p3Pts = document.getElementById("podium-3-points");
+      if (third) {
+        if (p3Name) p3Name.textContent = third.name;
+        if (p3Pts) p3Pts.textContent = `${third.points.toFixed(1)} pts`;
+      } else {
+        if (p3Name) p3Name.textContent = "—";
+        if (p3Pts) p3Pts.textContent = "0.0 pts";
+      }
+
+      // 2. Full Table
+      const tbody = document.getElementById("live-leaderboard-tbody");
+      if (!tbody) return;
+      tbody.innerHTML = "";
+
+      if (standings.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="7" class="py-8 text-center text-slate-500 italic">No student telemetry received yet. As students answer, live standings appear here.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      standings.forEach((s, idx) => {
+        const curRank = idx + 1;
+        const prevRank = previousLeaderboardRanks[s.name];
+        let shiftBadge = `<span class="text-slate-500 text-xs font-mono">—</span>`;
+        if (prevRank !== undefined) {
+          const diff = prevRank - curRank;
+          if (diff > 0) {
+            shiftBadge = `<span class="text-emerald-400 font-black text-xs font-mono">▲ +${diff}</span>`;
+          } else if (diff < 0) {
+            shiftBadge = `<span class="text-rose-400 font-black text-xs font-mono">▼ ${diff}</span>`;
+          }
+        }
+        previousLeaderboardRanks[s.name] = curRank;
+
+        let statusBadge = `<span class="text-xs text-slate-400 font-semibold">Active</span>`;
+        if (s.isSuperMax) {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full supermax-glow text-slate-950 font-black text-[10px] tracking-wider uppercase shadow-md">👑 SUPER MAX</span>`;
+        } else if (s.maxStreak >= 3) {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-solar-500/20 text-solar-300 border border-solar-500/40 font-bold text-[10px] uppercase">🔥 Streak x${s.maxStreak}</span>`;
+        } else if (s.speedBonus >= 3.0) {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold text-[10px] uppercase">🚀 High Velocity</span>`;
+        }
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-900/60 transition";
+        tr.innerHTML = `
+          <td class="py-3 px-3 text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="font-black ${curRank === 1 ? 'text-plasma-400 text-base' : (curRank <= 3 ? 'text-slate-200' : 'text-slate-400')}">#${curRank}</span>
+              ${shiftBadge}
+            </div>
+          </td>
+          <td class="py-3 px-3 font-bold text-white flex items-center gap-2">
+            <span>${s.name}</span>
+          </td>
+          <td class="py-3 px-3 text-center font-mono font-black ${s.isSuperMax ? 'text-plasma-300 text-base' : 'text-slate-100'}">
+            ${s.points.toFixed(1)}
+          </td>
+          <td class="py-3 px-3 text-center font-mono font-bold text-cyan-400">
+            +${(s.speedBonus || 0).toFixed(1)}
+          </td>
+          <td class="py-3 px-3 text-center font-mono font-bold text-solar-300">
+            ${s.streak > 0 ? `🔥 ${s.streak}` : '—'}
+          </td>
+          <td class="py-3 px-3 text-center font-mono font-bold text-emerald-400">
+            ${s.recoveredCount > 0 ? `⚡ ${s.recoveredCount}` : '—'}
+          </td>
+          <td class="py-3 px-3 text-right">
+            ${statusBadge}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Keyboard Shortcuts (Hotkey: L for Leaderboard)
+    window.addEventListener("keydown", (e) => {
+      const liveModal = document.getElementById("live-control-modal");
+      const isLiveOpen = liveModal && !liveModal.classList.contains("hidden");
+      if (!isLiveOpen) return;
+
+      const activeEl = document.activeElement;
+      const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
+      if (isInput) return;
+
+      if (e.key === 'l' || e.key === 'L') {
+        e.preventDefault();
+        if (isLeaderboardModalOpen) {
+          closeLiveLeaderboardModal();
+        } else {
+          openLiveLeaderboardModal();
+        }
+      } else if (e.key === 'Escape' && isLeaderboardModalOpen) {
+        closeLiveLeaderboardModal();
+      }
+    });
+
+    window.onload = checkAuth;
+  </script>
+</body>
+</html>

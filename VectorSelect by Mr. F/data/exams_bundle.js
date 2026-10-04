@@ -1,0 +1,27019 @@
+// VectorSelect by Mr. F — AP Physics Assessments Database (Sanitized - Zero Key Exposure)
+window.EXAM_DATA = {
+  "subjects": {
+    "APP1": {
+      "name": "AP Physics 1: Algebra-Based",
+      "units": {
+        "Unit 1": {
+          "title": "Unit 1: Kinematics",
+          "assessments": [
+            {
+              "id": "app1_unit1_1_1",
+              "title": "1.1: Scalars and Vectors in One Dimension",
+              "unit": "Unit 1",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit1_1_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "unit, because in one dimension vectors with opposite directions have opposite signs."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "unit, because the magnitude of the difference of two vectors is always equal to the difference between\r\nthe magnitudes of the vectors."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "units, because the magnitude of the sum of two vectors is always equal to the sum of the magnitudes\r\nof the vectors."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "units, because the object moves a distance of units followed by a distance of units."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit1_1_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit1_1_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and the vectors have the same direction."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and the vectors have opposite directions."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and the vectors have the same direction."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and the vectors have opposite directions."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit1_1_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit1_1_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The claim is correct, because the magnitude of the sum of two vectors is always less than the sum of the\r\nmagnitudes of the vectors."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The claim is correct, because the vectors and could be in opposite directions."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The claim is incorrect, because the values of and must be equal since the vectors and are\r\nparallel."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The claim is incorrect, because the values of and must be equal since the magnitude of a vector sum\r\nmust equal the sum of the individual vector magnitudes.\r\nScoring Guide\r\n1.1"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit1_1_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "to the right"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "to the left"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "to the right"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "to the left"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit1_1_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Car"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Car"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Car"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Car"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit1_1_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit1_1_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because both vectors have the same magnitude."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because both vectors point in the same direction."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because has a magnitude of and has a magnitude of ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the vectors are in opposite directions, which means the velocities are different."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit1_1_2",
+              "title": "1.2: Displacement, Velocity, and Acceleration",
+              "unit": "Unit 1",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit1_1_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Less than because the cart has a velocity of for the first half of the interval and zero\r\nvelocity for the second half."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Less than because the cart is traveling at a speed of or less during the time interval."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Equal to because the cart is initially at rest and then moves at a constant speed of during\r\nthe second half of the interval."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Equal to because the cart has an average acceleration of over an interval of ."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit1_1_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit1_1_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit1_1_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The transition between intervals and ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The transition between intervals and ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The transition between intervals and ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The transition between intervals and ."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit1_1_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit1_1_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the final velocity of the cart is equal to the initial velocity."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the cart returns to its original position."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the values of the acceleration at time and time are unknown."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the cart spends more time with a positive acceleration than with a negative acceleration."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit1_1_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Cart"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Cart"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Cart"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "None of the carts has a leftward acceleration."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit1_1_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.2"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit1_1_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Case , because the toy travels for less time"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Case , because the toy has a greater displacement"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Case , because the toy travels a greater distance"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Case , because the toy travels for a longer time"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit1_1_3",
+              "title": "1.3: Representing Motion (Graphs & Kinematics)",
+              "unit": "Unit 1",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit1_1_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The cart is moving left with speed ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The cart is moving right with speed ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The cart is moving left with speed ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The cart is moving right with speed ."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit1_1_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined without knowing the distance traveled by the cars."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit1_1_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit1_1_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The car moves with constant speed, momentarily stops, and then moves again with the same speed"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The car is speeding up at a constant rate, then continues to speed up but at a slower constant rate"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The car moves with constant speed, then it quickly slows down to a different, constant speed"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The car is speeding up at a constant rate, then slows down at a constant rate"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit1_1_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit1_1_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit1_1_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.3"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit1_1_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The object is moving with constant speed in the -direction."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The object is moving with constant speed in the -direction."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The velocity and acceleration are both in the -direction"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The velocity is in the -direction and the acceleration is in the -direction"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit1_1_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Acceleration"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Displacement"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Elapsed time"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Average velocity"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit1_1_4",
+              "title": "1.4: Reference Frames and Relative Motion",
+              "unit": "Unit 1",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit1_1_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The passenger is moving at relative to the shore because the boat is moving at relative to\r\nthe shore and the passenger is moving at relative to the water."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The passenger is moving at relative to the shore because the sum of all of the velocities (\r\n, , and ) is ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The passenger is stationary relative to the shore because the boat is moving at relative to the\r\nshore and the passenger is moving at relative to the boat in the opposite direction."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The passenger is stationary relative to the shore because the boat is moving at relative to the\r\nwater and the passenger is moving at in the opposite direction relative to the water."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit1_1_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No, because the student is included in the same frame of reference as the bus so the student and bus\r\nmust be traveling at the same speed."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "No, because the student, bus, and observer are all included in Earth’s reference frame so the student and\r\nbus must be traveling at the same speed."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Yes, because according to the stationary observer, the student’s velocity is the velocity of the bus plus\r\nthe velocity of the student relative to the bus."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Yes, because according to the stationary observer, the student’s velocity is the difference between the\r\nvelocity of the bus and the velocity of the student relative to the bus."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit1_1_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No, because the observer on the other boat is in a non-inertial reference frame."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "No, because the observers have different velocities relative to the rowboat."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Yes, because both observers are in inertial reference frames."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Yes, because both observers are external to the rowboat’s frame of reference and will therefore measure\r\nzero acceleration."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit1_1_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit1_1_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit1_1_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit1_1_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit1_1_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "seconds"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "seconds"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "seconds"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "seconds"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit1_1_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "to the east"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "to the west"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "to the east"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "to the west"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit1_1_5",
+              "title": "1.5: Vectors and Motion in Two Dimensions",
+              "unit": "Unit 1",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit1_1_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit1_1_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit1_1_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the initial vertical components of the velocity are the same for both marbles."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the second marble has half the mass of the first marble, but it will experience twice the\r\nvertical acceleration."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the less massive marble will have a smaller acceleration."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the less massive marble will have a smaller initial vertical velocity."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit1_1_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit1_1_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit1_1_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit1_1_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.5"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit1_1_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the ball on the Moon will travel a greater horizontal distance before reaching the ground"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the ball on the Moon has less acceleration to slow it down when it is on the Moon"
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the ball on the Moon achieves a smaller vertical component of velocity before reaching the\r\nground"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because the ball on the moon travels less distance horizontally each second than the ball on the Earth"
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit1_1_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Projectile 1, because it will have a greater initial speed, which means it will have a larger average speed\r\nand therefore spend less time in the air."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Projectile 2, because it will have a smaller initial vertical velocity."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Projectiles 1 and 2 hit the ground at the same time because they have the same initial speed."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The flight time cannot be compared without knowing the relative initial speeds."
+                    }
+                  ],
+                  "question_id": "app1_unit1_1_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit1_section_2_quiz",
+              "title": "Section 2 Quiz",
+              "unit": "Unit 1",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 2,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit1_section_2_quiz_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_section_2_quiz_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit1_section_2_quiz_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_section_2_quiz_q2"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit1_midterm_review",
+              "title": "Unit 1 Mid-Term Review: MCQ",
+              "unit": "Unit 1",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 11,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_midterm_review_q11"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit1_unit_1_practice_exam",
+              "title": "Unit 1 Practice Exam: MCQ",
+              "unit": "Unit 1",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 13,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "tA"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "tB"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "tC"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "tD"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Acceleration a Time to Hit Ground\r\nGreater for ball 2 Greater for ball 2"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Acceleration a Time to Hit Ground\r\nGreater for ball 2 Equal"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Acceleration a Time to Hit Ground\r\nEqual Greater for ball 2"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Acceleration a Time to Hit Ground\r\nEqual Less for ball 2\r\n(E)\r\nAcceleration a Time to Hit Ground\r\nEqual Equal"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Between 10 s and 20 s"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Between 20 s and 30 s"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "At 30 s exactly"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Between 30 s and 40 s\r\n(E) After 40 s\nUnit 1 - TEST\r\nScoring Guide"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Horizontal Displacement Vertical Velocity Component"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Horizontal Displacement Vertical Velocity Component\nUnit 1 - TEST\r\nScoring Guide"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Horizontal Displacement Vertical Velocity Component"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Horizontal Displacement Vertical Velocity Component"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "3 m/s"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "√2 m/s"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "3\r\n√2\r\nm/s"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "3\r\n2\r\nm/s"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "at\r\n2\r\n2"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "a\r\n2t\r\n2\r\n2g"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "at\r\n2\r\n2 + a\r\n2t\r\n2\r\n2g"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "at\r\n2\r\n2 −\r\na\r\n2t\r\n2\r\n2g"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "6 m/s"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "10 m/s"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "16 m/s"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "22 m/s"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "√hv0"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "h/v"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "hv /g"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "2h/g\r\n(E) √2h/g\r\no\r\n0\r\n0\nUnit 1 - TEST\r\nScoring Guide"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "6 m"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "9 m"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "18 m"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "45 m"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "S1 > S2 > S3"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "S1 > S3 > S2"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "S3 > S2 > S1"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "S3 > S1 > S2"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Above and to the right of the spring launcher"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Directly above the spring launcher"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Above and to the left of the spring launcher"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The relative position of the ball depends on the horizontal speed of the block."
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_practice_exam_q13"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit1_unit_1_progress_check",
+              "title": "Unit 1 Progress Check: MCQ",
+              "unit": "Unit 1",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The cart only moved in the positive direction because the position of the cart was always positive."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The cart only moved in the positive direction because the velocity was never zero, so the cart did not\r\nstop and change direction."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The cart moved first in the positive direction and then in the negative direction because it was moving\r\nfaster at the end of the recorded motion."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The cart moved first in the negative direction and then in the positive direction because the velocity of\r\nthe cart was negative and then changed to positive."
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 1 Progress Check: MCQ\r\nPage 2 of 14 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Find the change in velocity between and and divide that value by ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Find the change in velocity between and and divide that value by ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Find the average velocity between and and divide that value by ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Find the average velocity between and and divide that value by ."
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the car has zero velocity for part of the first time interval."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the acceleration of the car is less during the first time interval."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the car travels the same distance over the same amount of time in both intervals."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the car had to go faster in the first time interval since it was at rest for the first second."
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The object is moving at a constant speed at and is at rest at ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The object is moving at a constant speed at both and ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The object is accelerating at and moving at a constant speed at ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The object is accelerating at both and ."
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The acceleration is not constant because the spacings between successive coins increase and then\r\ndecrease."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The acceleration is not constant because the spacings between the coins are not all the same."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The acceleration is zero because the spacing between the last two coins is the same as the spacing\r\nbetween the first two coins."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The acceleration is zero because only the position is changing, while acceleration is the change in the\r\nvelocity."
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Scoring Guide\r\nUnit 1 Progress Check: MCQ\r\nPage 10 of 14 AP Physics 1"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The relationship between and cannot be determined without knowing the relative heights of the\r\ntables and the initial speed of the ball in Figure 2."
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It decreases from a maximum value to zero at a constant rate."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It decreases from a maximum value to zero at a rate with an increasing magnitude."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It increases from zero to a maximum value at a constant rate."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It increases from zero to a maximum value at a rate with an increasing magnitude."
+                    }
+                  ],
+                  "question_id": "app1_unit1_unit_1_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 2": {
+          "title": "Unit 2: Force and Translational Dynamics",
+          "assessments": [
+            {
+              "id": "app1_unit2_2_1",
+              "title": "2.1: Systems and Center of Mass",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_2_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "To the left"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "To the right"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The fulcrum will not need to be moved."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined without knowing the mass of the third block."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_2_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Zero"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_2_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined without knowing the exact ratio of the diameters of the nail heads."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_2_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_2_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Moves to the left by an amount less than"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Moves to the left by an amount greater than"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Moves to the right by an amount less than"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Moves to the right by an amount greater than"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_2_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "meters"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "meters"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "meters"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "meters\r\nScoring Guide\r\n2.1"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_2_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_2_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_2_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_2_2",
+              "title": "2.2: Forces and Free-Body Diagrams",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_2_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It decreases."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It increases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It stays the same."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It could either increase or decrease depending on the materials that the crate and floor are made of."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_2_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_2_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_2_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the horizontal components add to zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the vertical components add to zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the vertical components of the forces do not completely add to zero."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the magnitudes of all the forces are not equal"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_2_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_2_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_2_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_2_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "To the right, because it will balance the leftward component of the force from the string"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "To the right, because it will balance the downward gravitational force"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Down and to the left, because it will balance the force from the string"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Down and to the left, because it will balance the downward gravitational force"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_2_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The tension forces from the ropes do not point in the correct directions."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The diagram does not include components of the tension forces in the ropes."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The horizontal forces are unbalanced."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The vertical forces are unbalanced."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_2_3",
+              "title": "2.3: Newton's Third Law",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_2_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No, because the person and step are moving to the right."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "No, because the step exerts a force on the person greater than the person’s weight."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Yes, because the person and step move with constant velocity."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Yes, because the person and the step create an interacting force pair."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_2_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_2_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The magnitude of the force that the hammer exerts on the nail is equal to the magnitude of the force that\r\nthe nail exerts on the hammer."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The magnitude of the force that the wood exerts on the nail is equal to the magnitude of the force that\r\nthe hammer exerts on the nail."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The magnitude of the force that the hammer exerts on the nail is equal to the magnitude of the force that\r\nthe nail exerts on the wood."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The magnitude of the force that the nail exerts on the hammer is equal to the force that the wood exerts\r\non the nail."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_2_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_2_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The tension in String is greatest where it connects to the upper block because it has to support the\r\nweight of the string and Block ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The tension in String is greatest where it connects to the upper block because String is the bottom\r\nstring."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The tension in String is equal throughout its length because it is the bottom string."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The tension in String is equal throughout its length because tension is always the same through a\r\nstring.\r\nScoring Guide\r\n2.3"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_2_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the chain links are moving upward."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the rope only exerts a force on the top link."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the chain links are moving at a constant speed."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because the chain links are an interacting Newton’s third law pair."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_2_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "None of the four forces are an interacting force pair because all four forces are exerted on the same\r\nobject."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_2_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The tension at Point is greater."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The tension at Point is greater."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The tensions at Point and Point are equal."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The tensions cannot be compared without knowing the relative masses of the boxes."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_2_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_2_4",
+              "title": "2.4: Newton's First Law and Inertia",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_2_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the astronaut only has a constant horizontal velocity."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the astronaut’s vertical velocity is instantaneously zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the astronaut has a component of velocity in the horizontal direction."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because there is a downward net force on the astronaut."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_2_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The tension must be zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The tension must be less than but greater than zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The tension must be equal to ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The tension must be greater than ."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_2_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The velocity of the box remains constant because the sum of all the forces on the box remains constant."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The velocity of the box remains constant because the horizontal components of the forces do not change."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The velocity of the box changes because the sum of the vertical components of the forces no longer\r\nequals zero."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The velocity of the box changes because the sum of the horizontal components of the forces no longer\r\nequals zero."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_2_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_2_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The puck will slide with a constant nonzero acceleration."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The puck will slide with a decreasing acceleration."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The puck will slide with an increasing acceleration."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The puck will slide with a constant velocity."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_2_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2.4"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_2_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_2_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_2_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Up and to the left, because there is a force that is directed upward and a force that is directed leftward."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Up and to the left, because the sum of the magnitudes of the upward force and the leftward force are\r\ngreater than the magnitude of the force down and to the right."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "To the left only, because the vertical components of the forces are balanced, but the horizontal\r\ncomponents are not balanced."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "To the left only, because the leftward force has the greatest magnitude of the three forces."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_2_5",
+              "title": "2.5: Newton's Second Law",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_2_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_2_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The center of mass also moves in circular motion."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The center of mass does not accelerate."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The acceleration of the center of mass depends on the relative masses of the stars."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The acceleration of the center of mass depends on the relative speeds of the stars."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_2_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_2_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2.5"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_2_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The net force on the system is zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The net force on the right block is greater than the net force on the left block."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "There is a net force exerted on the system directed to the left."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is a net force exerted on the system directed to the right."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_2_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_2_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_2_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_2_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The elevator must be moving upward."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The elevator could possibly be moving upward and slowing down."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The elevator must be moving downward."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The elevator could possibly be moving downward and slowing down."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_2_6",
+              "title": "2.6: Gravitational Force and Weight",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_2_6_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_6_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_2_6_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_6_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_2_6_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "because Elevator is moving up while Elevator is moving down."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "because Elevator has a greater speed than Elevator ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "because two objects with the same mass always have the same apparent weight."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "because both elevators are traveling with a constant speed."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_6_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_2_6_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Because Earth’s radius is constant."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Because is a fundamental constant of nature and has the same value everywhere."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Because the field strength is proportional to the universal gravitational constant, ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Because distance scales near Earth’s surface are very small compared to Earth’s radius."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_6_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_2_6_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The scale reading is between and , because the scale is not precise enough to read the\r\nexact value of the object’s weight."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The scale reading is between and , because the weight of the object is inversely\r\nproportional to the square of the distance to the center of Earth."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The scale reading is between and , because the height of the mountain is negligible\r\ncompared to the radius of the earth."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The scale reading is between and , because weight is an intrinsic property of an object\r\nwhich doesn’t change even when the gravitational field changes."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_6_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_2_6_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_6_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_2_6_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_6_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_2_6_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_6_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_2_6_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_6_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_2_7",
+              "title": "2.7: Kinetic and Static Friction",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_2_7_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is nearly equal to"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is nearly equal to zero"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "increases and decreases as the board’s angle is increased"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "decreases and increases as the board’s angle is increased"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_7_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_2_7_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_7_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_2_7_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_7_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_2_7_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2.7"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_7_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_2_7_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The comparison cannot be made without knowing the surface areas of the blocks."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_7_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_2_7_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is the same for both boxes."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is greater for Box ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is greater for Box ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It may or may not be the same depending on the surface area of the boxes in contact with the surface."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_7_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_2_7_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The force of static friction on the box will be equal to ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The force of static friction on the box will be equal to ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The box will begin sliding to the left."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The box will begin sliding to the right."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_7_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_2_7_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The object must be accelerating to the right."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The object must be accelerating to the left."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The object must be at rest and have no acceleration."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is not enough information to make a claim about the direction of the object’s acceleration."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_7_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_2_7_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_7_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_2_8",
+              "title": "2.8: Spring Forces and Hooke's Law",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_2_8_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_8_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_2_8_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_8_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_2_8_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "to the left"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "to the right"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "to the left"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "to the right"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_8_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_2_8_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_8_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_2_8_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is constant and equal to ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is constant and greater than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is constant and less than ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It starts off greater than and slowly decreases."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_8_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_2_8_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The spring constant decreases."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The spring constant increases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The block has less weight."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is an additional force exerted on the block."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_8_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_2_8_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The weight’s acceleration is downward."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The weight’s acceleration is upward."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The weight’s velocity is downward."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The weight’s velocity is upward."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_8_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_2_8_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_8_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_2_8_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_8_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_2_9",
+              "title": "2.9: Circular Motion and Centripetal Force",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_2_9_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_9_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_2_9_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Zero"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_9_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_2_9_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the centripetal force increases proportionally with the speed."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because centripetal force increases proportional to the square of the speed."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the force should increase linearly with speed."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the force would decrease as speed increases.\r\nScoring Guide\r\n2.9"
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_9_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_2_9_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_9_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_2_9_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the centripetal force always points toward the center of the circular motion."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the speed of the cart is increasing so there must be a nonzero net force."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the cart has both a tangential acceleration parallel to the track and a centripetal acceleration\r\nperpendicular to the track."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the speed is increasing and therefore the net force is directed to the right."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_9_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_2_9_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_9_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_2_9_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_9_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_2_9_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_9_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_2_9_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "At the topmost point, because the tension force and gravitational force are both directed toward the\r\ncenter of the ball’s motion."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "At the topmost point, because the net force on the ball is zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "At the bottommost point, because the tension offsets the gravitational force."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "At the bottommost point, because the net force on the ball is a maximum."
+                    }
+                  ],
+                  "question_id": "app1_unit2_2_9_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_midterm_review_1",
+              "title": "Unit 2 Mid-Term Review: MCQ (Part 1)",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 10,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_1_q10"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_midterm_review_2",
+              "title": "Unit 2 Mid-Term Review: MCQ (Part 2)",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 10,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_midterm_review_2_q10"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_unit_2_progress_check",
+              "title": "Unit 2 Progress Check: MCQ",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 30,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ\r\nPage 6 of 28 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Between and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "At"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "At"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Between and"
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The force the rope exerts on the bucket is greater than the combined weight of the rock and bucket."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The force the bucket exerts on the rope is in the opposite direction of the force the rock exerts on the\r\nbucket."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The force the rock exerts on the bucket is equal in magnitude to the force the bucket exerts on the rock."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The force the bucket exerts on the rock is greater in magnitude than the force Earth exerts on the rock."
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "An object undergoing projectile motion with no air resistance"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "A car turning a corner on level pavement at constant speed"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "A sled sliding at constant velocity down a hill."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "A ball being swung in a vertical circle at constant speed."
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ"
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The part of the toolbox to the left of the dashed line has more mass than the part of the toolbox to the\r\nright of the dashed line."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The part of the toolbox to the right of the dashed line has more mass than the part of the toolbox to the\r\nleft of the dashed line."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The center of mass of the toolbox is to the left of the dashed line."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The center of mass of the toolbox is to the right of the dashed line."
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q18"
+                },
+                {
+                  "number": 19,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q19.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q19"
+                },
+                {
+                  "number": 20,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q20.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q20"
+                },
+                {
+                  "number": 21,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q21.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ"
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q21"
+                },
+                {
+                  "number": 22,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q22.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q22"
+                },
+                {
+                  "number": 23,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q23.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The force exerted by the spring is increasing and the speed of the block is increasing."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The force exerted by the spring is increasing and the speed of the block is decreasing."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The force exerted by the spring is decreasing and the speed of the block is increasing."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The force exerted by the spring is decreasing and the speed of the block is decreasing."
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q23"
+                },
+                {
+                  "number": 24,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q24.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q24"
+                },
+                {
+                  "number": 25,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q25.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The normal force should be directed vertically upward because it always opposes the gravitational force."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The magnitude of the gravitational force should be equal to the magnitude of the normal force because\r\nthe normal force on an object is always equal to the object’s weight."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The magnitude of the friction force should be smaller than that of the normal force because the\r\ncoefficient of static friction is always less than ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The friction force should be directed up the ramp because the box is slowing down and therefore the\r\nacceleration of the box is opposite its direction of motion.\r\nScoring Guide\r\nUnit 2 Progress Check: MCQ"
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q25"
+                },
+                {
+                  "number": 26,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q26.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because they are equal in magnitude and opposite in direction."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because they are both internal to the rover-parachute-Mars system."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because they are not equal in magnitude and opposite in direction."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the forces are not an interaction between the same two objects."
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q26"
+                },
+                {
+                  "number": 27,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q27.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the orientation of Rope is the same in both cases."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the tension in Rope is zero in both cases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because in Case the vertical component of the tension force of Rope is smaller."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because in Case the horizontal component of the tension force in Rope is smaller."
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q27"
+                },
+                {
+                  "number": 28,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q28.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q28"
+                },
+                {
+                  "number": 29,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q29.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the acceleration of the three-block system will be the same as in the original setup."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the net external force acting on the three-block system is the same as in the original setup."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the force of tension in the string accelerates a less massive block than in the original setup."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the acceleration of the system will be larger than in the original setup when the more\r\nmassive block is moved closer to the pulley."
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q29"
+                },
+                {
+                  "number": 30,
+                  "card_image": "assets/cards/app1_unit2_unit_2_progress_check_q30.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Equal to , because the other block is also in free-fall and therefore the tension in the string is zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Equal to , because the force exerted by the string on the bottom block is equal and opposite to the\r\nweight of the bottom block."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Less than , because the string exerts an upward tension force on the bottom block."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Less than , because the mass of the block is less than the inertial mass of the two-block system."
+                    }
+                  ],
+                  "question_id": "app1_unit2_unit_2_progress_check_q30"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 3": {
+          "title": "Unit 3: Work, Energy, and Power",
+          "assessments": [
+            {
+              "id": "app1_unit3a_3_1",
+              "title": "3.1: Work and Kinetic Energy",
+              "unit": "Unit 3",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit3a_3_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the mass and the speed of the car are the same at and ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the kinetic energy of the car is constant between and ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the kinetic energy changes from negative to positive."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because the velocity of the car changes direction."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit3a_3_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit3a_3_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is correct, because the frictional force accelerates the puck, causing its speed to increase."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is correct, because the kinetic energy is always a positive scalar quantity."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is not correct, because the frictional force accelerates the puck, causing its speed to decrease."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It is not correct, because the puck is moving at a constant velocity."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit3a_3_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because kinetic energy is a scalar quantity."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because carts and have the same speed."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because Cart is at rest and has zero kinetic energy."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because the speed of Cart relative to Cart is less than the speed of Cart relative\r\nto Cart ."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit3a_3_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The kinetic energy of the ball relative to Person is the same as the kinetic energy of the ball relative to\r\nPerson ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The kinetic energy of the ball relative to Person is greater than the kinetic energy of the ball relative\r\nto Person ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The kinetic energy of the ball relative to Person is less than the kinetic energy of the ball relative to\r\nPerson ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energy of the ball relative to Person is positive and the kinetic energy of the ball relative\r\nto Person is negative."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit3a_3_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The object’s kinetic energy decreases, then increases."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The object’s kinetic energy increases, then decreases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The object’s kinetic energy increases throughout the entire time interval."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The object’s kinetic energy decreases throughout the entire time interval."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit3a_3_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit3a_3_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The kinetic energy is constant and equal to zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The kinetic energy is constant and nonzero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The kinetic energy is increasing."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energy is decreasing.\r\nScoring Guide\r\n1"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit3a_3_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit3a_3_2",
+              "title": "3.2: Work-Energy Theorem",
+              "unit": "Unit 3",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit3a_3_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Work is done only by the tension force from the rod."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Work is done only by the gravitational force."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Work is done by a combination of the tension force and the gravitational force."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No work is done on the block."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit3a_3_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit3a_3_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit3a_3_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit3a_3_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit3a_3_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit3a_3_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit3a_3_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit3a_3_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The net work on the block is non-zero the entire time."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Non-zero net work is being done on the block only when it is accelerating."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Non-zero net work is being done on the block only when it is moving with constant speed."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Non-zero net work could be done on the block either when it is accelerating or when it is moving with\r\nconstant speed, depending on the values of the block’s mass, acceleration, and maximum speed."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit3a_3_3",
+              "title": "3.3: Gravitational Potential Energy",
+              "unit": "Unit 3",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit3a_3_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The magnitudes of the changes in the gravitational potential energies cannot be compared without\r\nknowing the height of the ceiling."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit3a_3_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The potential energy decreases throughout the motion"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The potential energy increases throughout the motion"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The potential energy decreases and then increases"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The potential energy increases and then decreases"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit3a_3_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit3a_3_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit3a_3_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit3a_3_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The gravitational potential energy remains constant during the initial acceleration period but then\r\ndecreases as the object falls at terminal velocity."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The gravitational potential energy decreases during the initial acceleration period but then remains\r\nconstant as the object falls at terminal velocity."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The gravitational potential energy remains constant both during the initial acceleration period and as the\r\nobject falls at terminal velocity."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The gravitational potential energy decreases both during the initial acceleration period and as the object\r\nfalls at terminal velocity."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit3a_3_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The changes in potential energy cannot be determined without knowing the original compression."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit3a_3_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit3a_3_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit3a_3_4",
+              "title": "3.4: Conservation of Mechanical Energy",
+              "unit": "Unit 3",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit3a_3_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit3a_3_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit3a_3_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Decreases, because a force external to the system is dissipating energy"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Decreases, because the gravitational potential energy of the system decreases"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Stays the same because energy is always conserved"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Stays the same because gravitational potential energy is converted into kinetic energy"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit3a_3_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit3a_3_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the kinetic energy of the skydiver remains constant."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the net force on the skydiver-Earth system is zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the potential energy of the system decreases, and the kinetic energy of the skydiver remains\r\nconstant."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the kinetic energy of the skydiver increases, and the potential energy of the system remains\r\nconstant."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit3a_3_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit3a_3_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit3a_3_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit3a_3_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The mechanical energy decreases because energy is dissipated by the external force of friction."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The mechanical energy decreases because kinetic energy is converted to gravitational potential energy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The mechanical energy remains constant because the block remains at the same vertical position\r\nthroughout."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The mechanical energy remains constant because energy is always conserved."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit3a_3_5",
+              "title": "3.5: Power and Energy Transformations",
+              "unit": "Unit 3",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit3a_3_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit3a_3_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit3a_3_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Decreases, because a force external to the system is dissipating energy"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Decreases, because the gravitational potential energy of the system decreases"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Stays the same because energy is always conserved"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Stays the same because gravitational potential energy is converted into kinetic energy"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit3a_3_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit3a_3_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the kinetic energy of the skydiver remains constant."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the net force on the skydiver-Earth system is zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the potential energy of the system decreases, and the kinetic energy of the skydiver remains\r\nconstant."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the kinetic energy of the skydiver increases, and the potential energy of the system remains\r\nconstant."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit3a_3_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit3a_3_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit3a_3_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit3a_3_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The mechanical energy decreases because energy is dissipated by the external force of friction."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The mechanical energy decreases because kinetic energy is converted to gravitational potential energy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The mechanical energy remains constant because the block remains at the same vertical position\r\nthroughout."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The mechanical energy remains constant because energy is always conserved."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_3_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit3a_unit_3_progress_check",
+              "title": "Unit 3 Progress Check: MCQ",
+              "unit": "Unit 3",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nPage 4 of 13 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nPage 6 of 13 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The kinetic energy must be decreasing."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The kinetic energy must be increasing."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The kinetic energy may be increasing or decreasing depending on the magnitude of the acceleration."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energy is not changing."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "must be less than ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "must be equal to ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "must be greater than ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "could be less than, equal to, or greater than ."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nPage 8 of 13 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because both blocks are moving with the same acceleration and therefore the spring is unstretched."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the spring potential energy has been converted to the kinetic energy of the blocks."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because even though the spring is unstretched it is moving and therefore has energy."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the spring must be exerting a force on the left block and therefore must be stretched beyond\r\nits equilibrium length."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because in Figure the force exerted on the bell is the same but it is moving with less speed\r\nthan in Figure ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because in Figure the force exerted on the bell is less than in Figure ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because in Figure the speed is half that in Figure , but the force on the bell is twice that in\r\nFigure ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because in Figure the person is doing the same amount of work on the bell as in Figure ."
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/app1_unit3a_unit_3_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Immediately after the acrobat releases the bar, because the acrobat is the greatest distance above the\r\nlowest point of motion and has the greatest amount of gravitational potential energy"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Immediately after the acrobat releases the bar because the spring is at its maximum length"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "When the acrobat and platform come to rest, because the acrobat has fallen the maximum amount and all\r\nthe work done by gravity on the acrobat has been converted to potential energy in the spring"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "When the acrobat and platform come to rest, because the spring has transferred all of its energy to the\r\nacrobat"
+                    }
+                  ],
+                  "question_id": "app1_unit3a_unit_3_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 4": {
+          "title": "Unit 4: Linear Momentum",
+          "assessments": [
+            {
+              "id": "app1_unit4_4_1",
+              "title": "4.1: Momentum and Impulse",
+              "unit": "Unit 4",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit4_4_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "vA > vC > vB"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "vC > vA > vB"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "vB > vC > vA"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "(vA = vB) > vC"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit4_4_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "v1 < v2 and p1 < p2"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "v1 < v2 and p1 = p2"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "v1 = v2 and p1 < p2"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "v1 = v2 and p1 = p2"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit4_4_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "0"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "0.02 N⋅s"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "0.03 N⋅s"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined without knowing the initial mass of the cart and sand."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit4_4_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit4_4_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The device is external to the system and exerts a constant force on the two pieces as they\r\nmove away from each other."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The pieces of the cart are exerting constant repulsive forces on each other as they move away."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The device is internal to the system and exerts a very brief force of equal magnitude but\r\nopposite direction on each piece of the cart."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The device is internal to the system and therefore does not exert any forces on the pieces of\r\nthe cart."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit4_4_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "p2 =\r\np1\r\n2"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "p2 = p1"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "p2 = 2p1"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "p2 = 4p1"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit4_4_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "0.25 m/s to the right"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "0.25 m/s to the left"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "0.50 m/s to the right"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "0.50 m/s to the left"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit4_4_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "4.0 × 10\r\n2 N ⋅ s"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "4.0 × 10\r\n3 N ⋅ s"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "5.5 × 10\r\n3 N ⋅ s"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "2.2 × 10\r\n5 N ⋅ s"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit4_4_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit4_4_2",
+              "title": "4.2: Impulse and Momentum Conservation",
+              "unit": "Unit 4",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit4_4_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "ma"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "maΔt"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "m (v0 + aΔt)"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "v0Δt + 1\r\n2\r\na(Δt)\r\n2"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit4_4_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "mvf"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "m (vi − vf)"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "μkg"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "μkmg"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit4_4_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "FΔt"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "FΔt\r\nm"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "F\r\nm"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "FmΔt"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit4_4_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Because the foam pad reduces the impulse applied to the brick to stop it."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Because the foam pad reduces the work done on the brick to stop it."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Because the foam pad increases the magnitude of the force applied on the brick to stop it."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Because the foam pad increases the time that the force is applied to the brick to stop it."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit4_4_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "F\r\n2"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "F"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "2F"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "4F"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit4_4_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Ball A, because its momentum changes by a greater amount during the collision."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Ball A, because it gained kinetic energy during the collision."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Neither ball, because both were dropped from the same height and thus had the same\r\nmomentum before impact."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Neither ball, because both had the same acceleration during the collision."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit4_4_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit4_4_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the force on Cart B increases to a value greater than that of Cart A."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the slope of the graph is greater for Cart B than Cart A."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the mass of Cart B is twice that of Cart A."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the areas under the curve for both cars are equal."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit4_4_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Favg\r\n8"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Favg\r\n2"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "2Favg"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "8Favg"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit4_4_3",
+              "title": "4.3: Systems of Variable Mass",
+              "unit": "Unit 4",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit4_4_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "v\r\n4"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "v"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "5v\r\n4"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "3v"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit4_4_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The clay, because the rod is more massive and therefore delivers more impulse to the clay than\r\nthe clay delvers to the rod."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The clay, because the speed of the clay increases more than the speed of the rod decreases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Neither, because the clay and the rod have equal and opposite accelerations."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Neither, because the change in momentum of the clay is equal and opposite to that of the rod."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit4_4_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "vR\r\n4"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "vR"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "3vR\r\n2"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "3vR"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit4_4_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It must decrease by a factor of 2."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It must increase by a factor of 2."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It must increase by a factor of 4."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The three objects will not move for any value of block mass."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit4_4_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "pA + pC = pB + pD"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "pA + pC + pB + pD = 0"
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit4_4_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because there is no net external force on the system in the horizontal direction."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because momentum stored in the spring was transferred to the cart and marble."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the total momentum of the system after the launch is greater than before the lunch."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the mechanical energy was zero before launch but greater than zero after launch."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit4_4_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "m1\r\nm2\r\nv0"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "2m1\r\nm2\r\nv0"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "(m2−m1)\r\nm2\r\nv0"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "(m2+m1)\r\nm2\r\nv0"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit4_4_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "An external force on the system slows down the piece of mass m."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "An external force on the system increases the speed of the piece of mass 2m."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "There is no external force on the system so the momentum of the system must remain constant."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is no external force on the system so kinetic energy must remain constant."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit4_4_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit4_4_4",
+              "title": "4.4: Collisions in 1D and 2D",
+              "unit": "Unit 4",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit4_4_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "K2 =\r\nK1\r\n2"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "K2 = K1"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "K2 = 2K1"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "K2 = 4K1"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit4_4_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "None of the kinetic energy is lost during the collision."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "More than zero, but less than half, of the kinetic energy is lost during the collision."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "More than half, but not all, of the kinetic energy is lost during the collision."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "All of the kinetic energy is lost during the collision."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit4_4_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Both momentum and total kinetic energy are the same before and after the collision."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Only momentum is the same before and after the collision."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Only total kinetic energy is the same before and after the collision."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It can’t be determined without knowing the relative masses of the carts."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit4_4_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The kinetic energy is greater than that of the clay just before the collision."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The kinetic energy is less than that of the clay just before the collision."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The kinetic energy is equal to that of the clay just before the collision."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energy cannot be determined without knowing if the cart has greater or less mass\r\nthan the clay."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit4_4_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit4_4_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "(ΔK1 = ΔK2) > ΔK3"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "ΔK3 > (ΔK1 = ΔK2)"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "ΔK2 > ΔK3 > ΔK1"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "ΔK3 > ΔK2 > ΔK1"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit4_4_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "1\r\n2\r\n(m1 + m2)v\r\n2"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "m1v\r\nm1 + m2"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "1\r\n2\r\n(m1 + m2)(\r\nm1\r\nm2\r\n)\r\n2\r\nv\r\n2"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "1\r\n2\r\n(\r\nm2\r\n1\r\nm1 + m2\r\n)v\r\n2"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit4_4_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It decreases by\r\n1\r\n3\r\nmv\r\n2\r\n."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It decreases by mv\r\n2\r\n."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It increases by\r\n1\r\n3\r\nmv\r\n2\r\n."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It increases by mv\r\n2\r\n."
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit4_4_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "{"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "{"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "{"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "{"
+                    }
+                  ],
+                  "question_id": "app1_unit4_4_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit4_unit_4_progress_check",
+              "title": "Unit 4 Progress Check: MCQ",
+              "unit": "Unit 4",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "12 kg ⋅ m/s"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "20 kg ⋅ m/s"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "24 kg ⋅ m/s"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "30 kg ⋅ m/s"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "F1tf"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "F2−F1\r\ntf"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "(\r\nF2−F1\r\n2 )tf"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "(F1 +\r\nF2−F1\r\n2 )tf"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "(\r\n2mc\r\nmc−mb\r\n)v0"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "(\r\n2mc\r\nmc+mb\r\n)v0"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "(\r\n2mc−mb\r\nmc+mb\r\n)v0"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "(\r\n2mc+mb\r\nmc+mb\r\n)v0"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "0"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Mv\r\n2"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "2 Mv\r\n2"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "3 Mv\r\n2"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "−2.7 m/s"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "−0.4 m/s"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "+0.4 m/s"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "+2.7 m/s"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Greater than hmax"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Equal to hmax"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Equal to\r\n1\r\n2 hmax"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Less than\r\n1\r\n2 hmax"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "0"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "J0\r\n2"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "J0"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "2 J0"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The momentum doesn’t change in either system."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The momentum only changes in the system consisting of all three skaters."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The momentum only changes in the system consisting of only Skaters B and C."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The momentum changes in both systems."
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "2 : 3"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "1 : 1"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "3 : 2"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "9 : 2"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It will decrease by a factor of 2"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It will decrease by a factor less than 2"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It will increase by a factor less than 2"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It will increase by a factor of 2"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "0"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "v\r\n2"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "v"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "2v"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "J1 < J2, because the average momentum of the brick is larger during the second second of the\r\nfall."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "J1 < J2, because the magnitude of the gravitational force increases as the brick gets closer to\r\nthe ground."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "J1 = J2\r\n, because the gravitational force and the total time are the same for both intervals."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "J1 = J2, because the momentum of the brick is constant."
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because both blocks reverse direction between Figure 1 and Figure 2."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the total momentum in Figure 2 is different than the total momentum in Figure 1."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the total momentum of the two-block system is the same in both figures."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the total momentum in Figure 2 is zero."
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "0 J"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "0.02 J"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "0.14 J"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "0.26 J"
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/app1_unit4_unit_4_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It does not change, because no mechanical energy is lost during the collision."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It does not change, because momentum is constant in the collision."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It increases, because momentum is transferred from the cart to the block during the collision."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It increases, because some mechanical energy is transferred from the block to the cart during the\r\ncollision."
+                    }
+                  ],
+                  "question_id": "app1_unit4_unit_4_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 5": {
+          "title": "Unit 5: Torque and Rotational Dynamics",
+          "assessments": [
+            {
+              "id": "app1_unit5_5_1",
+              "title": "5.1: Connecting Linear and Rotational Motion",
+              "unit": "Unit 5",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit5_5_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The angular accelerations cannot be determined without know the mass of each block."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit5_5_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit5_5_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit5_5_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The angular speed of the insect is greater at Point than at Point ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The angular speed of the insect is greater at Point than at Point ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The linear speed of the insect is greater at Point than at Point ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The linear speed of the insect is greater at Point than at Point ."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit5_5_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit5_5_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit5_5_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Less than"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Equal to"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Greater than"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined without knowing the relative radii of the axles and the disk"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit5_5_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ";"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ";"
+                    },
+                    {
+                      "letter": "C",
+                      "text": ";"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ";"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit5_5_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nConnecting Linear and Rotational Motion Quiz\r\nPage 8 of 9 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit5_5_2",
+              "title": "5.2: Rotational Kinematics",
+              "unit": "Unit 5",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit5_5_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit5_5_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit5_5_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit5_5_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the area under the graph is positive."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the graph is linear."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the graph is not a horizontal line."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the graph has a vertical intercept of zero.\r\nScoring Guide\r\nRotational Kinematics Quiz"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit5_5_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit5_5_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Angular displacement is always opposite the direction of angular acceleration."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Angular displacement is independent of the angular acceleration."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The angular velocity continued to be in the counterclockwise direction."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The magnitude of the angular acceleration was less than the magnitude of the angular velocity.\r\nScoring Guide\r\nRotational Kinematics Quiz\r\nPage 4 of 6 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit5_5_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit5_5_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nRotational Kinematics Quiz"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit5_5_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the average angular acceleration only depends on the change in angular speed and the time."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the angular acceleration only depends on the final values of the angular speed and the time."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the angular displacement needs to be known along with change in angular speed and time."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the initial direction of rotation must be known to calculate the change in the angular\r\nvelocity."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit5_5_3",
+              "title": "5.3: Torque Calculations and Vector Forces",
+              "unit": "Unit 5",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit5_5_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit5_5_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nTorque Quiz"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit5_5_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nTorque Quiz\r\nPage 4 of 12 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit5_5_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "θ θ θ"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "θ θ"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "θ θ"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit5_5_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit5_5_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The torque will be the same no matter where the force is exerted."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "At the right edge"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "At the pivot"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "At the center of the rod"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit5_5_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit5_5_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit5_5_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Scoring Guide\r\nTorque Quiz"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit5_5_4",
+              "title": "5.4: Rotational Inertia",
+              "unit": "Unit 5",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit5_5_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit5_5_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Moving the rotational axis from the center of mass to another axis parallel to the original axis will\r\nalways increase the rotational inertia of the object about the axis."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Moving the rotational axis from the center of mass to another axis parallel to the original axis will only\r\nincrease the rotational inertia of the object about the axis if the mass is distributed symmetrically about\r\nthe center of mass."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Moving the rotational axis from the center of mass to another axis parallel to the original axis will\r\nalways decrease the rotational inertia of the object about the axis."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Moving the rotational axis from the center of mass to another axis parallel to the original axis will only\r\ndecrease the rotational inertia of the object about the axis if the mass is distributed symmetrically about\r\nthe center of mass."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit5_5_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Axis"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Axis"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Axis"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Axis"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit5_5_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit5_5_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit5_5_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit5_5_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The rod and the disk both contribute the same amount to the system’s rotational inertia."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The rod contributes more to the system’s rotational inertia than the disk."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The disk contributes more to the system’s rotational inertia than the rod."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The faster the system spins, the more the disk contributes to the system’s rotational inertia."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit5_5_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit5_5_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit5_5_5",
+              "title": "5.5: Rotational Equilibrium & Newton's 1st Law",
+              "unit": "Unit 5",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit5_5_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit5_5_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit5_5_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The disk will rotate at a constant angular speed."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The disk will rotate with an increasing angular speed."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The disk will rotate with a decreasing angular speed."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The disk will be at rest and not rotating."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit5_5_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Graph only"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Graphs and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Graph only"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Graphs and"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit5_5_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nPage 4 of 8 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit5_5_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "only"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "only"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The bar is not in rotational equilibrium in any of the orientations."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit5_5_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit5_5_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit5_5_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit5_5_6",
+              "title": "5.6: Newton's 2nd Law in Rotational Form",
+              "unit": "Unit 5",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit5_5_6_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No, because the rotational inertia of the two-disk system is greater than that of the single disk."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "No, because the two-disk system has twice the mass as the first disk and will therefore have twice the\r\nangular acceleration."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Yes, because the net torque exerted by the force is the same in both cases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Yes, because the force is exerted at the same distance from the axis in both cases."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_6_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit5_5_6_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_6_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit5_5_6_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_6_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit5_5_6_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The force decreases the entire time."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The force increases the entire time."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The force increases at first, then decreases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The force is constant the entire time."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_6_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit5_5_6_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the forces and torques are unbalanced. Therefore, the pivot must balance the forces and\r\ntorques."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the pivot will act to prevent the rotation and sliding of the bar."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because while the pivot does exert a nonzero force on the bar to balance the applied forces, the pivot\r\nexerts no torque because the force is applied at the axis of rotation."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because frictional forces are negligible, and therefore the bar slides freely on the pivot and the pivot\r\nexerts no force or torque on the bar."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_6_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit5_5_6_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The net force and the net torque are zero in both figures."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The net force is zero in both figures, but the net torque is nonzero in Figure ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The net torque is zero in both figures, but the net force is nonzero in Figure ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The net force and net torque are both zero in Figure , but the net torque and net force are both nonzero\r\nin Figure ."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_6_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit5_5_6_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_6_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit5_5_6_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_6_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit5_5_6_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Figure , because both forces exert a clockwise torque."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Figure , because the net force on the disk is greater."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Figure , because the line of action of one of the forces passes through the center of mass."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Figure , because the forces in Figure cancel each other out."
+                    }
+                  ],
+                  "question_id": "app1_unit5_5_6_q9"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 6": {
+          "title": "Unit 6: Energy and Momentum of Rotating Systems",
+          "assessments": [
+            {
+              "id": "app1_unit6_6_1",
+              "title": "6.1: Rotational Kinetic Energy",
+              "unit": "Unit 6",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit6_6_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit6_6_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The rotational kinetic energy must be less than the translational kinetic energy."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The rotational kinetic energy must be equal to the translational kinetic energy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The rotational kinetic energy must be greater than the translational kinetic energy."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The rotational kinetic energy can be less than, equal to, or greater than the translational kinetic energy."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit6_6_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit6_6_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit6_6_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit6_6_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit6_6_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit6_6_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit6_6_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit6_6_2",
+              "title": "6.2: Angular Momentum and Torque",
+              "unit": "Unit 6",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit6_6_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit6_6_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit6_6_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit6_6_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit6_6_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit6_6_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The ratio cannot be determined without knowing the relative masses of the disks."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit6_6_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit6_6_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit6_6_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit6_6_3",
+              "title": "6.3: Conservation of Angular Momentum",
+              "unit": "Unit 6",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit6_6_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The angular impulse is zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The angular impulse is less than zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The angular impulse is greater than zero."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The angular impulse could be greater than or less than zero depending on the initial direction of rotation."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit6_6_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit6_6_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit6_6_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The angular momentum is constant and zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The angular momentum is constant and greater than zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The angular momentum decreases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The angular momentum increases."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit6_6_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit6_6_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit6_6_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit6_6_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The torque decreases in magnitude and is in the same direction as the angular momentum."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The torque decreases in magnitude and is in the opposite direction of the angular momentum."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The torque increases in magnitude and is in the same direction as the angular momentum."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The torque increases in magnitude and is in the opposite direction of the angular momentum."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit6_6_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit6_6_4",
+              "title": "6.4: Rolling Motion without Slipping",
+              "unit": "Unit 6",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit6_6_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because both systems start with the same gravitational potential energy."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because both objects have zero kinetic energy when their centers of mass are momentarily at rest."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the work done by gravity is not the same for both objects."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because when the center of mass of the hoop is momentarily at rest it has nonzero rotational kinetic\r\nenergy."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit6_6_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit6_6_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the linear acceleration of the center of mass is related to the angular acceleration by\r\n."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the friction force dissipates an unknown amount of energy from the cylinder-surface\r\nsystem."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because when an object is slipping, the motion of the center of mass and the rotational motion of the\r\nobject are not related."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit6_6_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit6_6_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit6_6_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit6_6_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The comparison cannot be made without knowing the coefficient of static friction between the hoop and\r\nRamp ."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit6_6_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The sphere, because its rolling motion will contribute to its translational motion, while the cube does not\r\nhave any rolling motion."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The sphere, because work is done on the sphere by both gravity and friction, while only gravity does\r\nwork on the cube."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The cube, because the cube’s kinetic energy will all be in the form of translational kinetic energy, while\r\nsome of the sphere’s kinetic energy will be in the form of rotational kinetic energy."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The cube, because none of the mechanical energy of the cube will be dissipated by friction, while some\r\nof the mechanical energy of the sphere will be dissipated by friction."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit6_6_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit6_6_5",
+              "title": "6.5: Gravitation and Orbital Dynamics",
+              "unit": "Unit 6",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit6_6_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit6_6_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit6_6_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The comparison of the escape speeds cannot be made without knowing the masses of the satellites."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit6_6_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the thruster exerts a force equal in magnitude and opposite in direction to the\r\ngravitational force exerted by Earth."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the satellite has the same kinetic energy at both points."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the gravitational potential energy increases with increasing distance from Earth’s\r\ncenter."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because the total mechanical energy of the system is proportional to the distance between\r\nthe satellite and Earth’s center."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit6_6_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit6_6_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit6_6_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n6"
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit6_6_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because both satellite-planet systems have the same total mechanical energy."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the escape speed does not depend on the masses of the satellites."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because Satellite has a larger amount of total mechanical energy so needs less energy to escape."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because Satellite requires less energy to escape because it has a smaller mass than Satellite ."
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit6_6_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Zero, because the lever arm of the gravitational force on the satellite is always zero"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Zero, because the speed of the satellite is constant"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Nonzero, because the velocity of the satellite sometimes has a nonzero radial component"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Nonzero, because the magnitude of the gravitational force changes throughout the orbit"
+                    }
+                  ],
+                  "question_id": "app1_unit6_6_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit6_unit_6_progress_check",
+              "title": "Unit 6 Progress Check: MCQ",
+              "unit": "Unit 6",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 2 of 15 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ"
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 4 of 15 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Remains constant, because the torque exerted by the string on the pulley is constant"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Remains constant, because the angular speed of the pulley is constant"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Increases, because the torque exerted by the string on the pulley increases"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Increases, because the angular speed of the pulley increases"
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The magnitude of the comet’s angular momentum increases."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The centripetal acceleration of the comet stays constant."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The work done by the star on the comet increases the total energy of the comet-star system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The magnitude of the gravitational potential energy of the comet-star system will never be zero."
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "because the graph reaches a horizontal asymptote."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "because the rock escapes the gravitational pull of the planet."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "because the slope of the graph becomes less negative with increasing distance."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "because the rock will have nonzero kinetic energy when it is very far from the planet.\r\nScoring Guide\r\nUnit 6 Progress Check: MCQ"
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The block has a greater translational speed because all of the work done on the block by gravity is\r\nconverted to translational kinetic energy."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The block has a greater translational speed because neither object experiences a friction force, giving\r\nboth the block and the cylinder the same acceleration."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The cylinder and the block have the same translational speed because the work done by gravity on both\r\nthe block and the cylinder is the same."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The cylinder and the block have the same translational speed because the normal force exerted on both\r\nthe block and the cylinder is the same."
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The angular speed does not change."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The angular speed decreases to zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The angular speed decreases but remains greater than zero."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The angular speed increases."
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/app1_unit6_unit_6_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 14 of 15 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit6_unit_6_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 7": {
+          "title": "Unit 7: Oscillations",
+          "assessments": [
+            {
+              "id": "app1_unit7_7_1",
+              "title": "7.1: Restoring Forces and Simple Harmonic Motion",
+              "unit": "Unit 7",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit7_7_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Location , because the spring is exerting an upward force that counteracts gravity."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Location , because equilibrium position is a location at which the net force is zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Location , because the spring exerts a force opposite to the block’s displacement from equilibrium."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Location , because the horizontal force exerted by the spring is equal in magnitude to the weight of the\r\nblock."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit7_7_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the magnitude of the acceleration is proportional to the displacement from equilibrium and\r\nits direction is opposite that of the displacement."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the graph is linear and passes through the origin."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the acceleration is negative when the displacement from equilibrium is positive, and\r\npositive when the displacement is negative."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the acceleration is always decreasing with increasing position."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit7_7_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The spring will exert a force with a greater magnitude on the cart at Point than in the first scenario."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The spring will exert a force with a smaller magnitude on the cart at Point than in the first scenario."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The cart will have the same acceleration at Point as it did in the first scenario."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The cart will reach equilibrium at a different position than in the first scenario."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit7_7_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit7_7_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit7_7_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit7_7_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "because the force is zero when the block is at its equilibrium position and when it is at its\r\nmaximum displacement."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "because the force on the block is constant throughout the block’s motion."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "because the speed of the block is a maximum when the displacement is a maximum and zero\r\nwhen the displacement is zero."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "because the force is zero at the equilibrium position and a maximum at maximum\r\ndisplacement."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit7_7_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "An ice cube sliding down one side of a curved bowl, past the bottom and back up the other side"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "A ball rolling down a ramp and back up another ramp where the angle of both ramps with the vertical is\r\nthe same"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "A cart sliding back and forth on a surface while attached to a spring"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "A dropped ball that collides elastically with the floor and returns to its initial height"
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit7_7_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The force exerted on the object is in the direction of the object’s displacement."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The magnitude of the force exerted on the object is proportional to the object’s displacement from\r\nequilibrium."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The magnitude of the acceleration of the object is at its maximum value when the object is at its\r\nequilibrium position."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The speed of the object is at its maximum value when the object is at its maximum displacement."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit7_7_2",
+              "title": "7.2: Mass-Spring Oscillators",
+              "unit": "Unit 7",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit7_7_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit7_7_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the effect of increasing the mass of the sphere counteracts the effect of decreasing the\r\nstring length."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the frequency of the pendulum is independent of the mass of the sphere and the length of\r\nstring."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the greater sphere mass will cause the pendulum to have a smaller frequency."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the shorter string will cause the pendulum to have a greater frequency."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit7_7_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the amplitude of the pendulum’s oscillation will be smaller."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the period is proportional to the angular displacement."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because for small angles the period of an object undergoing simple harmonic motion does not\r\ndepend on the amplitude of oscillation."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the pendulum will have a smaller average speed, so will take longer to complete a full\r\noscillation."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit7_7_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the period is proportional to the square root of the mass."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the period is proportional to the square root of the ratio ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because quadrupling the mass and the spring constant will cause the period to quadruple."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the ratio will not change if both quantities are quadrupled."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit7_7_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit7_7_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit7_7_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit7_7_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit7_7_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit7_7_3",
+              "title": "7.3: Kinematics of Simple Harmonic Motion",
+              "unit": "Unit 7",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit7_7_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Object has twice the amplitude and twice the period of Object ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Object has twice the amplitude and half the period of Object ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Object has half the amplitude and twice the period of Object ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Object has half the amplitude and half the period of Object ."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit7_7_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the period in Figure is greater than that in Figure ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the amplitude in Figure is greater than that in Figure ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the period in Figure is greater than that in Figure ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because the amplitude in Figure is greater than that in Figure ."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit7_7_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit7_7_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n3"
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit7_7_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit7_7_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The graph would shift upward, because the equilibrium position has shifted upward and the spring\r\nconstant remains the same."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The graph would shift upward, because the spring constant has increased."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The graph would be compressed horizontally, because the block has a smaller effective mass."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The graph would be compressed horizontally, because the spring constant has decreased."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit7_7_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit7_7_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit7_7_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the maximum force exerted by the spring on Block is less than that exerted on Block ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the period of oscillation for Block is less than that of Block ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the initial displacements of the blocks are unknown."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the springs are identical."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit7_7_4",
+              "title": "7.4: Simple Pendulums and Period",
+              "unit": "Unit 7",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit7_7_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit7_7_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit7_7_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ";"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ";"
+                    },
+                    {
+                      "letter": "C",
+                      "text": ";"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ";"
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit7_7_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit7_7_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined without knowing the length of the strings."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit7_7_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit7_7_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit7_7_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The maximum kinetic energy is greater than the maximum potential energy."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The maximum kinetic energy is equal to the maximum potential energy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The maximum kinetic energy is less than the maximum potential energy."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The relative values of the maximum kinetic and potential energies depend on the mass of the block and\r\nthe spring constant of the spring."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit7_7_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Both and are decreasing."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is decreasing and is increasing."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is increasing and is decreasing."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Both and are increasing."
+                    }
+                  ],
+                  "question_id": "app1_unit7_7_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit7_unit_7_progress_check",
+              "title": "Unit 7 Progress Check: MCQ",
+              "unit": "Unit 7",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is no equilibrium position because the force is nonzero at ."
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Because the equilibrium position will change when the initial displacement changes such that the block\r\noscillates with the same amplitude and the same average speed."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Because the spring constant of the spring decreases with increasing displacement, which makes the\r\nblock move with greater average speed when it is displaced more."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Because the spring exerts the same force on the block at the maximum displacement of the block, in\r\nboth scenarios."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Because even though the block travels a larger distance during one oscillation when the initial\r\ndisplacement is greater, the average speed also increases by the same factor."
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The comparison cannot be made without knowing the relative spring constants.\r\nScoring Guide\r\nUnit 7 Progress Check: MCQ\r\nPage 8 of 18 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the motion of the block is periodic."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the restoring force exerted by the component of the gravitational force parallel to the ramp\r\nis always opposite the direction of the displacement of the block from equilibrium."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the average net force on the block over one complete oscillation is zero."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the restoring force exerted by the component of the gravitational force parallel to the ramp\r\nis not proportional to the block’s displacement from equilibrium.\r\nScoring Guide\r\nUnit 7 Progress Check: MCQ"
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Scoring Guide\r\nUnit 7 Progress Check: MCQ"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 7 Progress Check: MCQ"
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/app1_unit7_unit_7_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the less massive block will have a greater average speed."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because even though the magnitude of the average force exerted on the block decreases, the less\r\nmassive block requires less force to achieve the same acceleration."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the less massive block will have less kinetic energy as the original block no matter what the\r\namplitude is."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because changing the amplitude of the oscillation changes the initial potential energy, which is\r\nequal to the maximum kinetic energy of the block."
+                    }
+                  ],
+                  "question_id": "app1_unit7_unit_7_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 8": {
+          "title": "Unit 8: Fluids",
+          "assessments": [
+            {
+              "id": "app1_unit8_8_1",
+              "title": "8.1: Internal Structure, Density, and Pressure",
+              "unit": "Unit 8",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit8_8_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit8_8_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The comparison cannot be made without knowing the mass of each block."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit8_8_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit8_8_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Dividing by , because density is the ratio of mass to volume."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Dividing by , because the scale reading represents the mass of the object and the volume reading\r\nrepresents the volume of the object."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Dividing by , because the difference in mass is equal to the mass of the object\r\nand the difference in volume is equal to the volume of the object."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Dividing by , because the difference in mass represents the mass of the object\r\nand the difference in volume represents the volume of the water."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit8_8_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The density of the gas will remain the same because the same amount of gas is in the balloon."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The density of the gas will remain the same because the shape of the balloon does not change."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The density of the gas will increase because the mass of the gas is constant and the volume of the\r\nballoon decreases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The density of the gas will increase because the mass of the gas increases.\r\nScoring Guide\r\n1"
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit8_8_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit8_8_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit8_8_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the ratio of mass to volume of the two fluids is the same."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the containers are identical."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the student neglected to account for the effect that the mass of the cylinders has on the scale\r\nreading."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the student neglected to account for the total volume of the cylinders."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit8_8_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit8_8_2",
+              "title": "8.2: Pressure and Depth in Static Fluids",
+              "unit": "Unit 8",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit8_8_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the pressure increases with increasing surface area in contact with the table."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the weight of the box is greatest in Orientation ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the pressure is the same regardless of orientation."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the pressure decreases with increasing surface area in contact with the table."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit8_8_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit8_8_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit8_8_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit8_8_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Divide the pressure at the very bottom of the pool by the product of the depth of the water and because\r\nthe pressure at the surface of the pool is zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Divide the pressure at the very bottom of the pool by the depth of the water because the pressure at the\r\nsurface of the pool is zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Graph pressure as a function of distance below the surface and divide the slope of the line by because\r\npressure is given by ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Graph pressure as a function of distance below the surface. The density of the water is the slope of the\r\nline because pressure is given by ."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit8_8_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2"
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit8_8_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The comparison cannot be made without knowing the relative densities of the fluids."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit8_8_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit8_8_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The claim is correct, because the pressure on the top surface of each cylinder is the same."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The claim is correct, because the density and height of the fluid above each cylinder is the same."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The claim is incorrect, because the pressure at the surface of each cylinder is the same but the area of the\r\ntop surface of each cylinder is different."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The claim is incorrect, because Cylinder has a smaller surface area so the pressure at the top surface of\r\nCylinder is greater than the pressure at the top surface of Cylinder .\r\nScoring Guide\r\n2"
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit8_8_3",
+              "title": "8.3: Buoyant Force and Archimedes' Principle",
+              "unit": "Unit 8",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit8_8_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit8_8_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The density is equal to the vertical intercept of the graph."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The density is related to but not equal to the vertical intercept of the graph."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The density is equal to the slope of the graph."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The density is related to but not equal to the slope of the graph."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit8_8_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The magnitude of the buoyant force must be zero because the object is at rest."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The magnitude of the buoyant force may be zero or nonzero, depending on the density of the object."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The buoyant force may be directed upward or downward, depending on the density of the object."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The buoyant force is directed upward."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit8_8_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit8_8_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit8_8_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The magnitude of the normal force on the block is less than the weight of the block."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The magnitude of the normal force on the block is equal to the weight of the block."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The magnitude of the normal force on the block is greater than the weight of the block."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The forces cannot be compared without knowing the ratio of the densities of iron and water."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit8_8_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Scoring Guide\r\n3"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit8_8_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit8_8_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit8_8_4",
+              "title": "8.4: Fluid Dynamics and Continuity Equation",
+              "unit": "Unit 8",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit8_8_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "If the container were filled to the top with water, the water would land further from the container."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "If the container were filled to a height with saltwater, which is more dense than fresh water, the water\r\nwould land closer to the container."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "If the container were filled to the top with water, and the container was sealed with a lid, the water\r\nwould land further from the container."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "If the container had a larger diameter, the water would land closer to the container."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit8_8_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit8_8_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Zero"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit8_8_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The pressures cannot be compared without knowing the ratio of the diameters of the reservoir and tube"
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit8_8_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit8_8_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit8_8_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The radius of the section through which the bead flows is less during than it is during ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The radius of the section through which the bead flows is greater during than it is during\r\n."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The radius of the section through which the bead flows during is is the largest of all the sections\r\nshown."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The radius of the section through which the bead flows during is one-third of the radius of the\r\nsection through which the bead flows during ."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit8_8_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit8_8_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The speeds cannot be compared without knowing the density of the fluid."
+                    }
+                  ],
+                  "question_id": "app1_unit8_8_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit8_unit_8_progress_check",
+              "title": "Unit 8 Progress Check: MCQ",
+              "unit": "Unit 8",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 8 Progress Check: MCQ\r\nPage 4 of 15 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ";"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ";"
+                    },
+                    {
+                      "letter": "C",
+                      "text": ";"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ";"
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Material is more dense than Material ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Material is more dense than Material ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Materials and have the same density."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The density of each block increases with increasing volume."
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the total depth of liquid in each cylinder is the same."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the total depth of liquid and the average density of the liquid in each cylinder is the same."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the pressure at the bottom of Cylinder must be greater than the pressure at the bottom of\r\nCylinder because Cylinder contains some liquid that is more dense than the liquid in Cylinder ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the pressure at the bottom of the two columns of liquid cannot be compared without\r\nknowing the relative values of the densities of the individual fluids."
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined without knowing the ratio of the densities of the blocks."
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The speed of the water"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The pressure of the water"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The flow rate of the water"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The cross-sectional area of the pipe"
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The buoyant force is equal to ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The buoyant force is greater than but less than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The buoyant force is equal to ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The buoyant force is greater than .\r\nScoring Guide\r\nUnit 8 Progress Check: MCQ\r\nPage 12 of 15 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the raft has a greater cross-sectional area than the block."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the density of the raft is less than that of the block."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the buoyant force on the raft is equal to that on the block."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because the total volume of water displaced by the raft-block system is the same before\r\nand after the block is lowered.\r\nScoring Guide\r\nUnit 8 Progress Check: MCQ"
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 8 Progress Check: MCQ\r\nPage 14 of 15 AP Physics 1"
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/app1_unit8_unit_8_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the speed of the water at point is the same as the speed at Point ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the flow rate must remain constant throughout the pipe."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the greater cross-sectional area at Point means the speed of the water at Point\r\nis less than the speed of the water at Point ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because the water slows down as it moves vertically upward between Point and Point ."
+                    }
+                  ],
+                  "question_id": "app1_unit8_unit_8_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "APPC": {
+      "name": "AP Physics C: Mechanics",
+      "units": {
+        "Unit 1": {
+          "title": "Unit 1: Kinematics",
+          "assessments": [
+            {
+              "id": "appc_unit1_1_1",
+              "title": "1.1: Kinematics in 1D (Vectors & Calculus)",
+              "unit": "Unit 1",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit1_1_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit1_1_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit1_1_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.1\r\nPage 2 of 7 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit1_1_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is a vector that has a smaller magnitude than both and , but nonzero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is a vector that has a greater magnitude than both and ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is a vector of length zero."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It is a vector that has the same magnitude as both and ."
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit1_1_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit1_1_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.1\r\nPage 4 of 7 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit1_1_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.1\r\nAP Physics C: Mechanics Page 5 of 7"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit1_1_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit1_1_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit1_1_2",
+              "title": "1.2: Motion with Constant Acceleration",
+              "unit": "Unit 1",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 8,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit1_1_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit1_1_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "AP PHYSICS C: MECHANICS Scoring Guide\r\n1.2\r\nAP Physics C: Mechanics Page 1 of 5"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit1_1_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No because at any given time."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "No because the acceleration is constant and nonzero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Yes because the object is located at the origin at ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Yes because the velocity of the object changes sign at ."
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit1_1_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit1_1_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit1_1_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit1_1_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.2\r\nPage 4 of 5 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit1_1_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The student’s equation does not account for the initial position of the object."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The student’s equation does not account for the initial velocity of the object."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The student’s equation does not substitute in the term."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The student’s equation should not have a term, as integrating the acceleration function twice yields\r\n."
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_2_q8"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit1_1_3",
+              "title": "1.3: Motion with Variable Acceleration",
+              "unit": "Unit 1",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 10,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit1_1_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit1_1_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No, because the distance between the object and its initial position is increasing during the entire time\r\ninterval."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "No, because the object has a constant acceleration during this time interval."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Yes, because the velocity of the object is zero at ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Yes, because the acceleration of the object is negative during this time interval.\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n1.3\r\nAP Physics C: Mechanics Page 1 of 7"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit1_1_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The car has a positive initial velocity and a negative acceleration because the position values are positive\r\nand are decreasing."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The car has a positive initial velocity and a negative acceleration because the position is decreasing and\r\nthe magnitude of displacement in each time interval increases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The car has a negative initial velocity and a negative acceleration because the position values are\r\npositive and are decreasing."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The car has a negative initial velocity and a negative acceleration because the position is decreasing and\r\nthe magnitude of displacement in each time interval increases."
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit1_1_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "One time because the graph indicates that there is a single point where the object’s velocity is zero and\r\nits acceleration is zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "One time because the graph indicates that there is a single point where the object’s velocity is zero and\r\nits acceleration is nonzero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Two times because the graph indicates that the velocity of the object is zero at two different points."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Two times because the graph indicates that the position of the object is zero at two different points."
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit1_1_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The position of the object is , because the object moves from to during the entire time\r\ninterval."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The position of the object is , because the area under the velocity graph is during the time\r\ninterval when is positive."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The position of the object is the same as its position at , because the velocity is zero exactly\r\nhalfway through the time interval."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The position of the object is the same as its position at , because the area under the velocity graph\r\nis zero for the entire time interval."
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit1_1_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.3\r\nPage 4 of 7 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit1_1_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit1_1_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit1_1_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit1_1_3_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.3\r\nPage 6 of 7 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_3_q10"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit1_1_4",
+              "title": "1.4: Relative Motion and Reference Frames",
+              "unit": "Unit 1",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit1_1_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit1_1_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "north of west"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "north of east"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "south of east"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "West"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit1_1_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit1_1_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit1_1_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit1_1_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit1_1_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit1_1_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit1_1_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit1_1_5",
+              "title": "1.5: 2D Kinematics and Projectiles",
+              "unit": "Unit 1",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit1_1_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit1_1_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "At . The product is at its greatest value."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "At . and are equal in magnitude."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "At and . is at its greatest value."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "At and . is at its greatest value."
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit1_1_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1.5\r\nPage 2 of 7 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit1_1_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Boat takes less time because it travels a shorter distance than Boat ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Boat takes less time because its velocity with respect to the water and the current velocity add\r\ntogether, giving Boat a greater resultant velocity."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Boat takes less time because its velocity has a greater -component with respect to the ground than\r\nBoat ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Boat takes less time because the current increases the boat’s speed relative to the ground."
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit1_1_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit1_1_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit1_1_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit1_1_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Ball takes less time. Its initial speed is less than that of Ball ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Ball takes less time. The horizontal distance it travels is less than that of Ball ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Ball takes less time. Its initial speed is greater than that of Ball ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Ball takes less time. The maximum height it reaches is less than that of Ball ."
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit1_1_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_1_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit1_midterm_review",
+              "title": "Unit 1 Mid-Term Review: MCQ",
+              "unit": "Unit 1",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_midterm_review_q18"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit1_unit_1_practice_exam",
+              "title": "Unit 1 Practice Exam: MCQ",
+              "unit": "Unit 1",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 12,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "at above the -direction"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "at above the -direction"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "in the -direction"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "in the -direction\r\nAP PHYSICS C: MECHANICS\r\nUnit 1 - Test\r\nDuration - 45 minutes\r\nSection 1 - MCQ\r\nAP Physics C: Mechanics Page 1 of 13\r\nName:_____________\nA toy rocket moves in the -direction with an acceleration given by the equation , where is time in\r\nseconds, and is in . At , the toy rocket is located at position and has a velocity ."
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": "(D"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nPage 4 of 13 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A vector with magnitude zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "A vector with a magnitude greater than zero and less than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "A vector with a magnitude equal to ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "A vector with a magnitude greater than .\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nPage 8 of 13 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 9 of 13"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water but in the opposite direction."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Toward Point because the magnitude of the boat’s velocity with respect to the water is greater than the\r\nmagnitude of the velocity of the water."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water is not affected\r\nby the motion of the water.\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nPage 10 of 13 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit1_unit_1_practice_exam_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_practice_exam_q12"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit1_unit_1_progress_check",
+              "title": "Unit 1 Progress Check: MCQ",
+              "unit": "Unit 1",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "at above the -direction"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "at above the -direction"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "in the -direction"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "in the -direction\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\nUnit 1 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 1 of 13"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 1 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 5 of 13"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A vector with magnitude zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "A vector with a magnitude greater than zero and less than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "A vector with a magnitude equal to ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "A vector with a magnitude greater than .\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nPage 8 of 13 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 9 of 13"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water but in the opposite direction."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Toward Point because the magnitude of the boat’s velocity with respect to the water is greater than the\r\nmagnitude of the velocity of the water."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water is not affected\r\nby the motion of the water."
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No, because the object’s speed is increasing, the acceleration should be positive."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "No, because the object’s speed is increasing, the acceleration should be increasing in magnitude."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Yes, because the area under the curve of the acceleration versus time graph could represent a negative\r\nvelocity that would be increasing in magnitude."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Yes, because the slope of the graph of acceleration versus time is constant, so the velocity of the object\r\napproaches a constant value."
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "North"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "South"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "East"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "West\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 11 of 13"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The average acceleration of the car is to the left because the ratio of the position to time decreases\r\nduring the motion of the car."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The average acceleration is to the left because the average velocity during successive two second time\r\nintervals is decreasing."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The average acceleration is to the right because the average velocity of each second time interval is\r\npositive."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The average acceleration is to the right because the position of the car is increasing."
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/appc_unit1_unit_1_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "North"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "at North of East"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "at North of West"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "East"
+                    }
+                  ],
+                  "question_id": "appc_unit1_unit_1_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 2": {
+          "title": "Unit 2: Force and Translational Dynamics",
+          "assessments": [
+            {
+              "id": "appc_unit2_2_1",
+              "title": "2.1: Systems and Center of Mass",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Cannot be determined without knowing the coordinates of the vertices of each triangle"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Location"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Location"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Location"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Location"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_2_2",
+              "title": "2.2: Free-Body Diagrams and Equilibrium",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Earth and the book"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Earth and the desk"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The book and the desk"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Earth, the book, and the desk"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The force of friction only"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The force of friction and the normal force"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The force of friction, the normal force, and the force exerted by the student"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The force of friction, the normal force, the force exerted by the student, and the weight of the box"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "because Block is pulling the string down the incline."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "because the string attached only to Block is also pulling Block up the incline."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "because Block is being pulled up the incline by the string which is attached to it."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "because the string between the blocks is pulling Block down the incline."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The diagrams are accurate because the force of the string is less than the force of gravity on both blocks."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The diagrams are accurate because the string is pulling up with the same force on both blocks and the\r\ngravitational force is greater for Block ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The diagrams are not accurate because the string will pull up with more force on Block than Block\r\nsince Block has a smaller mass."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The diagrams are not accurate because the gravitational force is independent of mass and will be the\r\nsame on both blocks."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Two upward forces are exerted on the system because there are two strings which exert upward forces\r\non the system."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Two upward forces are exerted on the system because there are two pulleys which exert upward forces\r\non the system."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Four upward forces are exerted on the system because there are two strings and two pulleys which exert\r\nupward forces on the system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Four upward forces are exerted on the system because there are four tensions which exert upward forces\r\non the system."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No change is needed."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The arrow should be labeled as for the force that Block exerts on Block ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "There should be an additional force pointing down the incline."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Each of the above statements is possible depending on which object or system the free-body diagram\r\nrepresents."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_2_3",
+              "title": "2.3: Newton's Second Law (Differential Equations)",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The center of mass shifts to the right because the astronaut moves to the right and the rock remains\r\nstationary."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The center of mass shifts to the right because the force on the astronaut is greater than the force on the\r\nrock due to their different masses."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The center of mass does not move because the astronaut and the rock each move the same distance\r\ntowards the original location of the center of mass."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The center of mass does not move because the astronaut will move a larger distance to the right than the\r\nrock moves to the left."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The tension in the rope is at every location along the rope."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The tension in the rope is at every location the rope."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The tension in the rope changes uniformly from at the top of the rope to at the bottom of the\r\nrope."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The tension in the rope changes uniformly from at the bottom of the rope to at the top of the\r\nrope."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2.3\r\nPage 2 of 7 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "This claim is true only if the boxes are moving with a constant velocity."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "This claim is true only if the masses are equal."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "This claim is true only if the boxes have equal mass and are moving with a constant velocity."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "This claim is true regardless of the type of motion or the relative mass of the object."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "because the weight of the box is greater than that of the box."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "because the normal force exerted on the box must be greater than the normal force\r\nexerted on the box."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "because the force that the wall exerts on the box has a magnitude of in each case."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "because the force of friction is negligible in each case."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The launcher exerts a greater force on the block than the block exerts on the launcher."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The block exerts a greater force on the launcher than the launcher exerts on the block."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The block and the launcher exert forces of equal magnitude on each other."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The relative magnitude of the force exerted on the spring by the block and launcher cannot be\r\ndetermined without knowing and ."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "would decrease and would increase."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "would increase and would decrease."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is greater than , but both increase as increases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and would both increase and would remain equal to each other.\r\nScoring Guide\r\n2.3\r\nAP Physics C: Mechanics Page 5 of 7"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_2_4",
+              "title": "2.4: Newton's Third Law",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.4\r\nAP Physics C: Mechanics Page 1 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, an additional force could cause the object to move with a constant velocity, if the additional force is\r\nperpendicular to the single force, because the two forces exerted on the object would be balanced."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, an additional force could cause the object to move with a constant velocity, if the additional force is\r\nopposite to the single force, because the two forces exerted on the object would be balanced."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, an additional force could not cause the object to move with a constant velocity, because the object is\r\nalready in motion, therefore, any additional force will cause the object to either increase or decrease its\r\nvelocity."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, an additional force could not cause the object to move with a constant velocity, because the object is\r\nalready in motion, and any additional force will cause the object to change its direction while\r\nmaintaining the speed the object had before the additional force."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ". The magnitude of the -components of the strings must equal each other and the\r\n-component of is greater than that of because ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ". The magnitude of the -components of the strings must each equal half the weight of the\r\nhanging mass and the -component of is greater than that of because ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ". The length of the first string is less than the length of the second string, so it has less tension."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ". The -components of the strings must each equal half the weight of the hanging mass and the\r\n-component of is greater than that of because ."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and is positive"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is positive and is positive"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "is negative and is positive"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_2_5",
+              "title": "2.5: Friction (Kinetic and Static)",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "because the large block exerts a greater force on the small block than the small block exerts on\r\nthe large block."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "because the small block has less mass than the large block and the blocks exert forces of equal\r\nmagnitude on each other."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "because Newton’s third law states that every action has an equal and opposite reaction."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "because the acceleration of the center of mass of the two-block system is zero as there is no\r\nexternal net force exerted on the system.\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.5\r\nAP Physics C: Mechanics Page 1 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is not the same as the first situation because Block now has the same acceleration but a different\r\nmass."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is not the same as the first situation because Block now has a different acceleration."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is the same as the first situation because Block is also being pushed by Block by the same\r\namount in both situations."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "is the same as the first situation because the net force on Block is the same in both situations."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The block on the right has a greater acceleration. The net force on the system with the motor is greater\r\nthan the net force on the two-block system."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The block on the right has a greater acceleration. Each system has the same net force exerted on it, but\r\nthe system on the right has less total mass."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Each block has the same acceleration. The tension in the string pulling on the blocks is the same in each\r\ncase."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Each block has the same acceleration. The system of blocks on the left has twice the mass and also twice\r\nthe weight compared to the block on the right."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_2_6",
+              "title": "2.6: Drag Forces and Terminal Velocity",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_6_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is zero everywhere inside the planet."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is a nonzero constant everywhere inside the planet."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It decreases with increasing distance from the planet’s center."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It increases with increasing distance from the planet’s center."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_6_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_6_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "At the center of the shell"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Between the center of the shell and the shell’s inner surface"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Between the shell’s inner surface and the object’s original location"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Between the object’s original location and the shell’s outer surface\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.6\r\nAP Physics C: Mechanics Page 1 of 6"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_6_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_6_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_6_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_6_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_6_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_6_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_6_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_6_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A thin spherical shell"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "A spherical shell of non-negligible thickness"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "A solid sphere of uniform density"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "A solid sphere of non-uniform density"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_6_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_6_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_6_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_6_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_6_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_6_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_6_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_2_7",
+              "title": "2.7: Gravitational Force",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_7_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_7_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_7_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_7_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_7_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Trial"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Trial"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Trial"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The string tension is the same in all three trials."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_7_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_7_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Side"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Side"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Side"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Any side, since the acceleration would be the same for all three sides\r\nScoring Guide\r\n2.7\r\nPage 2 of 5 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_7_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_7_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The box will remain at rest on the incline."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The box will start sliding down the incline at a constant velocity."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The box will start sliding down the incline and then slow down at a constant rate."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The box will start sliding down the incline and then continue to speed up at a constant rate."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_7_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_7_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_7_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_7_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_7_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_7_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2.7\r\nPage 4 of 5 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_7_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_7_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_7_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_2_8",
+              "title": "2.8: Spring Forces and Restoring Forces",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_8_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_8_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_8_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_8_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_8_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_8_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_8_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_8_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_8_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_8_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_8_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2.8\r\nPage 4 of 7 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_8_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_8_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The effective spring constant is less than because the force exerted by the combination is the same as\r\nexerted by any individual spring and the stretched distance is the sum of each of the spring’s individual\r\nstretch."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The effective spring constant is less than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring’s\r\nindividual stretch."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The effective spring constant is more than because the force exerted by the combination is the same\r\nas exerted by any individual spring and the stretched distance is the sum of each of the spring’s\r\nindividual stretch."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The effective spring constant is more than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring’s\r\nindividual stretch."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_8_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_8_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is less than . The sum of the forces exerted by each spring is the weight of the supported object\r\nwhich effectively increases the spring constant of the system."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is less than . Each spring exerts a force equal to the weight of the supported object which\r\neffectively decreases the spring constant of the system."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is greater than . The sum of the forces exerted by each spring is the weight of the supported object\r\nwhich effectively increases the spring constant of the system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It is greater than . Each spring exerts a force equal to the weight of the supported object which\r\neffectively decreases the spring constant of the system."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_8_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_8_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "because in Scenario both springs pull up on the block."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "because the combination of both springs will stretch more than the original spring."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "because the same weight will cause more stretching with two springs than with one."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "because in Scenario both springs stretch by the same amount."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_8_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_2_9",
+              "title": "2.9: Circular Motion Dynamics",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_9_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_9_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_9_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_9_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_9_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_9_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_9_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_9_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_9_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2.9\r\nAP Physics C: Mechanics Page 3 of 6"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_9_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_9_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The object will reach its terminal velocity at time , because at this time the weight of the object\r\nequals the resistive force."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The object will reach its terminal velocity at , because at this time the magnitude of the resistive\r\nforce becomes zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The object will not reach its terminal velocity before reaching the ground, because the downward\r\nacceleration will not reach zero until a time greater than ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The object will not reach its terminal velocity before reaching the ground because the weight of the\r\nobject increases as the object approaches Earth’s surface."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_9_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_9_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_9_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_9_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No, because the acceleration is constant and equal to ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "No, because the terminal velocity of the object increases as its mass increases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Yes, because Newton’s second law indicates that acceleration is inversely proportional to mass."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Yes, because the weight of the object is proportional to its mass, while the resistive force is independent\r\nof its mass."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_9_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_9_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The ball takes more time to rise. The ball travels the same distance up and down, but the magnitude of\r\nthe average acceleration for the trip up is less than the magnitude of the average acceleration from the\r\ntrip down."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Each trip takes equal time. The ball travels the same distance up and down and the average acceleration\r\nfor each trip is the same."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The ball takes more time to fall. The ball travels the same distance up and down, but the magnitude of\r\nthe average acceleration for trip down is less than the magnitude of the average acceleration for the trip\r\nup."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The ball takes more time to fall. The ball travels the same distance up and down, but the ball moves at a\r\nslow constant velocity on the way down and decelerates on the way up."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_9_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_2_10",
+              "title": "2.10: Variable Forces and Applications",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_2_10_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_10_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_2_10_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "AP PHYSICS C: MECHANICS Scoring Guide\r\n2.10\r\nAP Physics C: Mechanics Page 1 of 6"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_10_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_2_10_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Block is more likely to slide off because it has less mass than Block ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Block is more likely to slide off because it moves in a circular path with a greater radius than Block\r\n."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Block is more likely to slide off because it moves in a circular path with a smaller radius than Block\r\n."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Block is more likely to slide off because it has more mass than Block ."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_10_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_2_10_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2.10\r\nPage 2 of 6 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_10_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_2_10_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_10_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_2_10_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_10_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_2_10_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Car . The acceleration of Car is zero because it moves with constant speed."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Car . The car’s acceleration is the vector sum of both tangential and centripetal accelerations."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Car . The centripetal acceleration of Car is less than that Car ’s because Car is slowing down."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Car . The centripetal acceleration of Car is partially canceled by its tangential deceleration."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_10_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_2_10_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The water is accelerated outward by the circular motion."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The water is moving fast enough to have a downward centripetal acceleration greater than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The centripetal force balances the force of gravity exerted on the water."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The force of the bucket on the water and the weight of the water balance the centripetal force on the\r\nwater."
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_10_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_2_10_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2.10\r\nAP Physics C: Mechanics Page 5 of 6"
+                    }
+                  ],
+                  "question_id": "appc_unit2_2_10_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_midterm_review",
+              "title": "Unit 2 Mid-Term Review: MCQ",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 15,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_midterm_review_q15"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit2_unit_2_progress_check",
+              "title": "Unit 2 Progress Check: MCQ",
+              "unit": "Unit 2",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 30,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D\r\nScoring Guide\r\nUnit 2 Progress Check: MCQ\r\nPage 4 of 27 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 7 of 27"
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 9 of 27"
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The sum of the force vectors is zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The sum of the force vectors is in the -direction."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The sum of the force vectors is in the -direction."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The sum of the force vectors has components in both the -direction and the -direction."
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Situation only"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Situation only"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Both situations"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Neither situation"
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ\r\nPage 12 of 27 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/appc_unit2_unit_2_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q18"
+                },
+                {
+                  "number": 19,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "At Point for ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Directly above Point for ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Directly below Point for ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Directly below Point for , at Point for , and directly above Point for\r\n."
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q19"
+                },
+                {
+                  "number": 20,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Claim must be true, but not Claim ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Claim must be true, but not Claim ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "One of the two claims must be true, but it cannot be determined which from the scale reading alone."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Neither claim is necessarily true."
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q20"
+                },
+                {
+                  "number": 21,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is greater than ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is less than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is equal to ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It is equal to ."
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q21"
+                },
+                {
+                  "number": 22,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q22"
+                },
+                {
+                  "number": 23,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 21 of 27"
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q23"
+                },
+                {
+                  "number": 24,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q24"
+                },
+                {
+                  "number": 25,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The object cannot be gaining speed with the forces drawn as shown."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The object would be slowing down with the forces drawn as shown."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The object would be gaining speed vertically with the forces drawn as shown."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The normal force must be equal to the weight of the object."
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q25"
+                },
+                {
+                  "number": 26,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The tension is in the middle of the string because the tension along the length of the string varies\r\nlinearly from zero at the block to at the person."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The tension is in the middle of the string because the leftward and rightward tension forces both act\r\non half of the string length at this location."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "There is no location along the string where the tension is because the tension has a magnitude of\r\nat any location between the person and the block."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is no location along the string where the tension is because the block remains at rest.\r\nScoring Guide\r\nUnit 2 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 23 of 27"
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q26"
+                },
+                {
+                  "number": 27,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "must be the largest because its horizontal component has a magnitude of and its vertical\r\ncomponent has a magnitude of ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "must be the largest because the magnitude of must be less than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "must be the largest because it needs to provide an opposing force to both and ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "must be the largest because the magnitude of is less than ."
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q27"
+                },
+                {
+                  "number": 28,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "because the additional mass of the block-box system increases the force of friction exerted on\r\nthe block by the ramp."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "because the tension in the string becomes larger to support the additional weight in the box."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "because the force of friction between the block and the box is negligible."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "because the component of the weight force parallel to the ramp increases in proportion to the\r\nmass of the box-block system."
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q28"
+                },
+                {
+                  "number": 29,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q29"
+                },
+                {
+                  "number": 30,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the tangential acceleration is caused by a component of the gravitational force."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the tangential acceleration is caused by non-zero components of the gravitational and\r\nnormal forces."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the tangential acceleration is caused by a component of the gravitational force."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because the tangential acceleration is caused by non-zero components of the gravitational and\r\nnormal forces."
+                    }
+                  ],
+                  "question_id": "appc_unit2_unit_2_progress_check_q30"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 3": {
+          "title": "Unit 3: Work, Energy, and Power",
+          "assessments": [
+            {
+              "id": "appc_unit3_3_1",
+              "title": "3.1: Work Done by a Variable Force",
+              "unit": "Unit 3",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit3_3_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The work done on the object is negative."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The work done on the object is zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The work done on the object is positive."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined from a graph of force as a function of displacement."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit3_3_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "AP PHYSICS C: MECHANICS Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 1 of 6"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit3_3_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit3_3_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit3_3_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit3_3_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is positive and the object speeds up"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is positive and the object slows down"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is negative and the object speeds up"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "is negative and the object slows down"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit3_3_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1\r\nPage 4 of 6 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit3_3_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit3_3_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The kinetic energy remains the same."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The kinetic energy increases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The kinetic energy decreases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energy increases when and decreases when ."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit3_3_2",
+              "title": "3.2: Kinetic Energy and Work-Energy Theorem",
+              "unit": "Unit 3",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit3_3_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The kinetic energy of the object decreases uniformly for the first seconds, then decreases uniformly at\r\na higher rate for the next seconds."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The kinetic energy of the object remains constant for the first seconds and then changes to a higher\r\nconstant value for the next seconds."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The kinetic energy of the object remains constant for the first seconds and then changes to a lower\r\nconstant value for the next seconds."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energy of the object remains constant for the first seconds and then decreases to zero over\r\nthe next seconds."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit3_3_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is less than ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is equal to ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is greater than ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The relationship between and cannot be determined without knowing the masses of the blocks."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit3_3_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Group because the slope of an object’s kinetic energy graph is proportional to its acceleration."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Group because the object’s speed is increasing at a decreasing rate, so its kinetic energy is also\r\nincreasing at a decreasing rate."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Group because it shows that the kinetic energy decreases as the magnitude of its acceleration\r\ndecreases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Group because as the object falls it will approach a terminal speed which is where the speed reaches a\r\nhorizontal asymptote."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit3_3_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Object"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Object"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Object"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "All three objects have the same kinetic energy\r\nScoring Guide\r\n1\r\nAP Physics C: Mechanics Page 3 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit3_3_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit3_3_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The kinetic energy is the same at every point from to ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The kinetic energy is greatest at and decreases as time increases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The kinetic energy is greatest at ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energy is greatest at and ."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit3_3_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit3_3_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The claim is true. The block immediately begins to slow down as soon as it collides with the spring\r\nbecause the spring is exerting a force on the block."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The claim is true. The block stops immediately after making contact with the spring, losing all kinetic\r\nenergy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The claim is false. The block speeds up until the net force on the block is zero."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The claim is false. The block speeds up for its entire motion down the plane."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit3_3_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because kinetic energy is proportional to the speed of the block."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because half of the block’s kinetic energy is converted into gravitational potential energy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because kinetic energy depends on velocity."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because kinetic energy is proportional to velocity squared.\r\nScoring Guide\r\n1\r\nAP Physics C: Mechanics Page 7 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit3_3_3",
+              "title": "3.3: Potential Energy and Conservative Forces",
+              "unit": "Unit 3",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit3_3_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The object will move toward Planet and the gravitational potential energy of the system will decrease."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The object will move toward Planet and the gravitational potential energy of the system will increase."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The object will move toward Planet and the gravitational potential energy of the system will decrease."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The object will move toward Planet and the gravitational potential energy of the system will increase."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit3_3_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit3_3_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1\r\nPage 2 of 8 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit3_3_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 3 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit3_3_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit3_3_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit3_3_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit3_3_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit3_3_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The mechanical energy of the movable object in the region shown can never be greater than ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "There are positions of stable equilibrium for the movable object in the region shown."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The speed of the movable object is greatest at position ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The acceleration of the movable object will be positive in the region between and ."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit3_3_4",
+              "title": "3.4: Conservation of Mechanical Energy",
+              "unit": "Unit 3",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit3_3_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit3_3_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1\r\nPage 2 of 9 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit3_3_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit3_3_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1\r\nPage 4 of 9 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit3_3_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit3_3_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit3_3_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit3_3_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit3_3_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The power delivered is constant."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The power delivered is always positive."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The power delivered is always negative."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The power is positive, then zero then negative."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit3_3_5",
+              "title": "3.5: Power",
+              "unit": "Unit 3",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit3_3_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit3_3_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "In the block only system, the total energy increases because the net work done on the box is greater than\r\nzero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "In the block only system, the total energy remains constant because energy is dissipated by friction."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "In the block-Earth system, the total energy increases because the force of gravity does more work on the\r\nblock than is dissipated by the force of friction exerted on the block."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "In the block-Earth system, the total energy remains constant because energy is always conserved."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit3_3_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit3_3_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit3_3_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit3_3_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit3_3_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The blocks have the same total displacement and will take the same amount of time."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The change in gravitational potential energy for each block-Earth system is the same from the start\r\nof the track to the end."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "At the end of the track, the final kinetic energy is equal to the final gravitational energy for each\r\nof the block-Earth systems."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energy of each block is always equal to the gravitational potential energy for that\r\nblock-Earth system."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit3_3_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 7 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit3_3_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because mechanical energy is conserved."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the maximum height of the block is always equal to the initial height from\r\nwhich the block is released."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the increasing angle at which the block leaves the incline decreases the kinetic\r\nenergy of the block when it is at its maximum height."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because increasing the angle at which the block leaves the incline increases the amount\r\nof work the incline does on the block."
+                    }
+                  ],
+                  "question_id": "appc_unit3_3_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit3_unit_3_progress_check",
+              "title": "Unit 3 Progress Check: MCQ",
+              "unit": "Unit 3",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 3 of 13"
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Observer"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Observer"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Observer"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "All three observers measure the kinetic energy of the object to be the same."
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nPage 6 of 13 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and are the same because the direction of velocity does not affect an object’s kinetic energy."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and are the same because the acceleration is constant and therefore the kinetic energy is the\r\nsame at all times between and ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and are different because the object is moving in opposite directions at these times."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and are different because the object is moving with a constant acceleration between and ."
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The comparison cannot be made without knowing the relative values of the block masses and spring\r\nconstants of the springs."
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The directions of the force and velocity are the same as each other."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The directions of the force and velocity are opposite to each other."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The directions of the force and velocity are perpendicular to each other."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The directions of the force and velocity are neither parallel nor perpendicular to each other."
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The block-ramp system, because the surface of the ramp does negative work on the block which reduces\r\nthe total energy of the system."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The block-ramp system, because the Earth does negative work on the block which reduces the total\r\nenergy of the system."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The block-Earth system. The component of the force exerted by the ramp's surface on the block parallel\r\nto the ramp dissipates energy, reducing the mechanical energy of the system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The block-Earth system. The component of the force exerted by the ramp's surface on the block\r\nperpendicular to the ramp dissipates energy, reducing the mechanical energy of the system."
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The claim is correct. At , the slope of the velocity curve for Object ’s is greater than the\r\nslope of the velocity curve for Object ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The claim is correct. At , the net force on Object is greater than the net force on Object ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The claim is correct. At , the product of the net force and velocity for Object is greater than\r\nthe product of the net force and velocity for Object ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The claim is incorrect. The area under the force-time graph for Object from to is less\r\nthan the area for Object ."
+                    }
+                  ],
+                  "question_id": "appc_unit3_unit_3_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 4": {
+          "title": "Unit 4: Linear Momentum",
+          "assessments": [
+            {
+              "id": "appc_unit4_4_1",
+              "title": "4.1: Momentum and Impulse",
+              "unit": "Unit 4",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit4_4_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit4_4_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit4_4_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit4_4_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit4_4_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit4_4_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 3 of 6"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit4_4_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is greater than the speed of Object ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is equal to the speed of Object ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is less than the speed of Object ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It could be greater than, equal to, or less than the speed of Object depending on the directions of the\r\nmomenta."
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit4_4_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit4_4_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The magnitude of the momentum is increasing."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The magnitude of the momentum remains the same."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The magnitude of the momentum is decreasing."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The answer cannot be determined without knowing the cart's mass and the mass of water that leaks\r\nthrough the hole each second."
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit4_4_2",
+              "title": "4.2: Impulse and Momentum Conservation",
+              "unit": "Unit 4",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit4_4_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Both students have the same final speed because the student-chair system and the ball￾student-chair system have the same mass and experience impulses of the same magnitude."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Both students have the same final speed because each ball-chair-student system experiences the same\r\nimpulse regardless of the mass of the system."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The student has a greater final speed because the student-chair system has less mass than\r\nthe student-chair system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The student has a greater final speed because the ball transfers all of its momentum to the student\r\nwhen it is caught."
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit4_4_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit4_4_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D\r\nScoring Guide\r\n2\r\nPage 2 of 8 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit4_4_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "zero"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit4_4_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit4_4_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the change in momentum is equal to the area under the curve of the force-versus-time\r\ngraph."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because the change in momentum is equal to the slope of the force-versus-time graph."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the initial momentum is unknown and therefore the change in momentum cannot be\r\ndetermined."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the force is not constant and therefore the change in momentum cannot be determined."
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit4_4_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit4_4_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit4_4_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The launcher will remain in place because there is no horizontal force acting on the launcher."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The launcher will move at a constant speed because the water is ejected at a constant speed."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The launcher will move at a constant acceleration because the system of the launcher and remaining\r\nwater experiences the same impulse during any time interval of length ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The launcher will move at an increasing acceleration because the mass of the system of the launcher and\r\nremaining water is decreasing, and the system experiences the same impulse during any time interval of\r\nlength .\r\nScoring Guide\r\n2\r\nAP Physics C: Mechanics Page 7 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit4_4_3",
+              "title": "4.3: Systems of Variable Mass",
+              "unit": "Unit 4",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit4_4_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Scenario"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Scenario"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Scenario"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The speed of the center of mass is the same in all three scenarios."
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit4_4_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit4_4_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit4_4_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit4_4_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The slope of the line would be less."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The slope of the line would be greater."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The line would become a curve with a slope that is not constant."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The line would not change."
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit4_4_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "They must be moving to the left."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "They must be moving to the right."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "They must be at rest."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The combined objects' direction of motion, if any, cannot be determined without knowing the ratio of\r\nthe speeds of the objects before the collision.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 5 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit4_4_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The momentum of the two-object system is constant, and the magnitude of the relative velocity between\r\nthe objects is the same before and after the collision."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The momentum of the two-object system is constant, and the magnitude of the relative velocity between\r\nthe objects is different before and after the collision."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The momentum of the object is constant, and the magnitude of the relative velocity between the\r\nobjects is the same before and after the collision."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The momentum of the object is not constant, and the magnitude of the relative velocity between\r\nthe objects is different before and after the collision."
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit4_4_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit4_4_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit4_4_4",
+              "title": "4.4: Collisions in 1D and 2D",
+              "unit": "Unit 4",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit4_4_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit4_4_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "At position only"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "At position only"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "At position only"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "At positions , , and"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit4_4_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit4_4_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Immediately after Collision . During Collision , Cart gains an amount of kinetic energy equal to\r\n, while in Collision , Cart gains an amount of kinetic energy less than ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Immediately after Collision . During Collision , Cart gains an amount of kinetic energy greater\r\nthan , while in Collision , Cart gains an amount of kinetic energy equal to ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Immediately after Collision . In Collision , the two-cart system loses more kinetic energy than in\r\nCollision ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Immediately after Collision . When the carts stick together, Cart transfers more energy to Cart\r\nthan when the carts bounce off of one another.\r\nScoring Guide\r\n4\r\nAP Physics C: Mechanics Page 3 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit4_4_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit4_4_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes, because the fact that the velocity of Object changed direction during the collision means that the\r\ncollision was not elastic."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes, because conservation of momentum can be used to determine the final speed of Object , and the\r\ntotal kinetic energy of the two-object system after the collision can be calculated."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No, because the final speed of Object cannot be determined without knowing whether the collision\r\nwas elastic or inelastic."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No, because the collision can be elastic for many different values of the final speed of Object .\r\nScoring Guide\r\n4\r\nPage 4 of 8 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit4_4_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit4_4_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Scoring Guide\r\n4\r\nPage 6 of 8 AP Physics C: Mechanics"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit4_4_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_4_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit4_unit_4_practice_exam",
+              "title": "Unit 4 Practice Exam: MCQ",
+              "unit": "Unit 4",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 11,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit4_unit_4_practice_exam_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "AP PHYSICS C: MECHANICS Scoring Guide\r\nUnit 4 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 1 of 14"
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q1"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit4_unit_4_practice_exam_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q3"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit4_unit_4_practice_exam_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nPage 4 of 14 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit4_unit_4_practice_exam_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nPage 6 of 14 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q8"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit4_unit_4_practice_exam_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit4_unit_4_practice_exam_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit4_unit_4_practice_exam_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q12"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/appc_unit4_unit_4_practice_exam_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because there is no net external force acting on the system."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because there is a net external force acting on the system."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because there is no net external force acting on the system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because there is a net external force acting on the system.\r\nScoring Guide\r\nUnit 4 Progress Check: MCQ\r\nPage 12 of 14 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/appc_unit4_unit_4_practice_exam_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Object because its momentum is greater in magnitude than Object ’s momentum at all times shown."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Object because the area under the curve during the entire interval of motion is greater than the area\r\nunder the curve for Object ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Both objects have the same net force because the objects have the same change in velocity during the\r\ntime interval."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Both objects have the same net force because the slope of each object’s momentum versus time graph is\r\nthe same.\r\nScoring Guide\r\nUnit 4 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 13 of 14"
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_practice_exam_q17"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit4_unit_4_progress_check",
+              "title": "Unit 4 Progress Check: MCQ",
+              "unit": "Unit 4",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 4 Progress Check: MCQ\r\nPage 4 of 14 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The cart’s momentum changes direction at exactly one instant."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The cart’s momentum changes direction at exactly two different instants."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The cart’s momentum is constant."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The cart’s momentum is not constant and does not change directions at any point in this interval."
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 4 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 9 of 14"
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No relationship can be determined since the mass is unknown."
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because there is no net external force acting on the system."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because there is a net external force acting on the system."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because there is no net external force acting on the system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because there is a net external force acting on the system."
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Object because its momentum is greater in magnitude than Object ’s momentum at all times shown."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Object because the area under the curve during the entire interval of motion is greater than the area\r\nunder the curve for Object ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Both objects have the same net force because the objects have the same change in velocity during the\r\ntime interval."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Both objects have the same net force because the slope of each object’s momentum versus time graph is\r\nthe same."
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/appc_unit4_unit_4_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The collision is elastic because the momentum of the two-object system before the collision is equal to\r\nthe momentum of the system after the collision."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The collision is elastic because the kinetic energy of the two-object system before the collision is equal\r\nto the kinetic energy of the system after the collision."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The collision is not elastic because the momentum of the two-object system before the collision is not\r\nequal to the momentum of the system after the collision."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The collision is not elastic because the kinetic energy of the two-object system before the collision is not\r\nequal to the kinetic energy of the system after the collision."
+                    }
+                  ],
+                  "question_id": "appc_unit4_unit_4_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 5": {
+          "title": "Unit 5: Torque and Rotational Dynamics",
+          "assessments": [
+            {
+              "id": "appc_unit5_5_1",
+              "title": "5.1: Rotational Kinematics (Angular Acceleration)",
+              "unit": "Unit 5",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit5_5_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "clockwise"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "counterclockwise"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "clockwise"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "counterclockwise"
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit5_5_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit5_5_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit5_5_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit5_5_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit5_5_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Evaluate ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Evaluate and . Take the average of the two values."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Evaluate the derivative at . Multiply the result by ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Evaluate the integral . Divide the result by ."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit5_5_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit5_5_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is at its maximum magnitude and in the counterclockwise direction."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is at its maximum magnitude and in the clockwise direction."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is increasing in magnitude."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It is decreasing in magnitude."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit5_5_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit5_5_2",
+              "title": "5.2: Connecting Linear and Rotational Quantities",
+              "unit": "Unit 5",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit5_5_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It has magnitude and is directed toward the center of the platform."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It has magnitude and is directed tangent to the coin’s circular path."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It has magnitude . It is initially directed toward the center of the platform, with an\r\nincreasing component tangent to the coin’s circular path."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It has magnitude . It is initially tangent to the coin’s circular path, with an increasing\r\ncomponent directed toward the center of the platform."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit5_5_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit5_5_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit5_5_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit5_5_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The angular and linear speeds are both the same."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The angular and linear speeds are both different."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The angular speeds are the same, and the linear speeds are different."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The angular speeds are different, and the linear speeds are the same."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit5_5_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Multiply the given rotation rate by and then multiply by the given radius."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Multiply the given rotation rate by and then divide by the given radius."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Multiply the given rotation rate by the given radius."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Divide the given rotation rate by the given radius.\r\nScoring Guide\r\n2\r\nAP Physics C: Mechanics Page 3 of 6"
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit5_5_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", both clockwise"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", both counterclockwise"
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", both clockwise"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", both counterclockwise"
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit5_5_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The linear and angular speeds are both the same."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The linear and angular speeds are both different."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The linear speeds are the same, and the angular speeds are different."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The linear speeds are different, and the angular speeds are the same."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit5_5_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit5_5_3",
+              "title": "5.3: Torque Calculation & Vector Cross Products",
+              "unit": "Unit 5",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit5_5_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit5_5_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit5_5_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Point . The rope is shorter when attached to Point ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Point . The lever arm is shorter when the rope is attached to Point ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Point . The rope is longer when attached to Point ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Point . The lever arm is longer when the rope is attached to Point ."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit5_5_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit5_5_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit5_5_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Only Student is correct. Student does not account for the angle of the force."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Only Student is correct. The force is exerted at a distance , not , from the pivot."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Both students are correct. The line of action is parallel to the force."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Both students are correct. The perpendicular distance is equivalent to ."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit5_5_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", , and"
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit5_5_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit5_5_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit5_5_4",
+              "title": "5.4: Rotational Inertia (Calculus & Parallel Axis)",
+              "unit": "Unit 5",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit5_5_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Zero"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit5_5_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The rotational inertia is the same before and after the cube is crushed."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The rotational inertia is greater for the solid cube."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The rotational inertia is less for the solid cube."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The rotational inertia cannot be compared without knowing the mass and size of the cube."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit5_5_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit5_5_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "System"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "System"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "System"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "All three systems have the same rotational inertia."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit5_5_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit5_5_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Rod"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Rod"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Rod"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Rods , , and have the same rotational inertia."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit5_5_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit5_5_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit5_5_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit5_5_5",
+              "title": "5.5: Rotational Dynamics & Newton's 2nd Law",
+              "unit": "Unit 5",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit5_5_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The bar is in both rotational and translational equilibrium."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The bar is in neither rotational nor translational equilibrium."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The bar is in rotational equilibrium but not in translational equilibrium."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The bar is not in rotational equilibrium but is in translational equilibrium."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit5_5_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit5_5_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit5_5_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit5_5_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit5_5_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit5_5_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit5_5_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The board does not move."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The board rotates clockwise."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The board rotates counterclockwise."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The board rotates counterclockwise at first, then clockwise to return to its initial orientation."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit5_5_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Between and only"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Between and , and between and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Between and only"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "At no time between and seconds is the angular velocity of the disk constant."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit5_5_6",
+              "title": "5.6: Combined Translation and Rotation",
+              "unit": "Unit 5",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit5_5_6_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_6_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit5_5_6_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_6_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit5_5_6_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_6_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit5_5_6_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_6_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit5_5_6_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ". The angular acceleration cannot be zero because the two torques about the rod's center of mass\r\nare in the same direction."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ". The angular acceleration cannot be zero because the distances from the center of mass to the\r\npoint at which each force is exerted are different."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ". The angular acceleration cannot be zero because the two torques about the rod's center of mass\r\nare in the same direction."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ". The angular acceleration cannot be zero because the distances from the center of mass to the\r\npoint at which each force is exerted are different."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_6_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit5_5_6_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It increases. The area under the curve increases with time."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It increases. The second derivative of the curve is positive."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It decreases. The slope of the curve decreases as time increases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It decreases. The angular speed value decreases as time increases."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_6_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit5_5_6_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_6_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit5_5_6_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The same. The force exerted on and the rotational inertia of each pulley is the same."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The same. The larger-radius pulley also has a smaller mass, which cancels the effect of the larger radius."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Different. A larger pulley radius results in a greater torque for a given force."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Different. The larger-radius pulley spins more slowly for a given linear speed of the string."
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_6_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit5_5_6_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_5_6_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit5_unit_5_progress_check",
+              "title": "Unit 5 Progress Check: MCQ",
+              "unit": "Unit 5",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "radian"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "radians"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "radians"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "radians"
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 5 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 9 of 16"
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 5 Progress Check: MCQ\r\nPage 10 of 16 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "A relationship cannot be determined for in terms of and ."
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Object only"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Object only"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Object only"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Objects and"
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "seconds"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "seconds"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "seconds"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "seconds\r\nScoring Guide\r\nUnit 5 Progress Check: MCQ\r\nPage 12 of 16 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The disk stops in a time greater than ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The disk stops in a time less than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The disk rotates through an angle greater than before stopping."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The disk rotates through an angle less than before stopping."
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because the lever arm is zero for ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because the product is greater than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because is greater than ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because is directed along the length of the rod."
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ", because has a longer lever arm than , so it must be smaller in order to contribute a\r\ntorque of equal magnitude."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ", because contributes a torque to counteract the torques from both and the weight of the\r\nbeam."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", because the net force on each side of the pivot must be equal for the beam to be in rotational\r\nequilibrium."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", because and are the same distance from the pivot, and contributes a torque in the\r\nsame direction as ."
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/appc_unit5_unit_5_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Clockwise. The sum of the torques from the two forces is greater than torque from the force."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Clockwise. The sum of the lever arms for the two forces is greater than the lever arm for the\r\nforce."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Counterclockwise. The torque from the force is greater than each of the torques from the\r\nforces."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Counterclockwise. The force is greater than the sum of the two forces."
+                    }
+                  ],
+                  "question_id": "appc_unit5_unit_5_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 6": {
+          "title": "Unit 6: Energy and Momentum of Rotating Systems",
+          "assessments": [
+            {
+              "id": "appc_unit6_6_1",
+              "title": "6.1: Rotational Kinetic Energy",
+              "unit": "Unit 6",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit6_6_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ". The hollow cylinder had more mechanical energy at the bottom of the ramp than the solid\r\ncylinder."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ". The force of gravity exerted on the hollow cylinder is less than the force of gravity exerted on\r\nthe solid cylinder."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ". The solid cylinder had more mechanical energy at the bottom of the ramp than the hollow\r\ncylinder."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ". The force of gravity exerted on the solid cylinder is less than the force of gravity exerted on\r\nthe hollow cylinder."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit6_6_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is greater after the torque is applied."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is greater before the torque is applied."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is the same before and after the torque is applied."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined when the rotational kinetic energy is greater without additional information."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit6_6_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is the same as . The gravitational force on the cylinder does the same amount of work."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is the same as . The initial total kinetic energy is still converted to gravitational potential energy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is less than . The initial translational kinetic energy does not get converted to gravitational potential\r\nenergy."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It is less than . The initial rotational kinetic energy does not get converted to gravitational potential\r\nenergy."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit6_6_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The rotational kinetic energy is zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The rotational kinetic energy is not zero and is less than the translational kinetic energy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The rotational kinetic energy equals the translational kinetic energy."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The rotational kinetic energy is greater than the translational kinetic energy."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit6_6_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is zero. The velocity of the disk’s center of mass is zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is zero. For every point on the disk moving with a translational velocity , there is another point on\r\nthe disk moving with the opposite velocity ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is greater than zero. The disk’s mass and rotational inertia are both greater than zero."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "is greater than zero. Except for the disk’s center, all parts of the disk are moving."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit6_6_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Disk has the most total kinetic energy."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Disk has the most total kinetic energy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Disk has the most total kinetic energy."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It cannot be determined which disk has the most total kinetic energy without more information on ,\r\n, and the radius of the disks."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit6_6_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit6_6_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 5 of 7"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit6_6_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", but it cannot be determined how compares without more information about\r\nand .\r\nScoring Guide\r\n1\r\nPage 6 of 7 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit6_6_2",
+              "title": "6.2: Rolling Motion & Energy Conservation",
+              "unit": "Unit 6",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit6_6_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is greater during the first five rotations."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is greater during the last five rotations."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is the same during the first five and last five rotations."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energy transfer cannot be compared without knowing the rotational inertia and initial\r\nangular speed of the disk."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit6_6_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The rotational kinetic energy decreases more during the first rotation."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The rotational kinetic energy decreases more during the last rotation."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The rotational kinetic energy decreases by the same amount during the first and the last rotation."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The decrease in rotational kinetic energy cannot be compared without knowing whether the torque\r\nincreases at a greater rate during the first or the last rotation"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit6_6_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Multiply by ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Divide by the slope of the ‐ graph."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Determine the area under the ‐ graph."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Multiply the area under the ‐ graph by ."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit6_6_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit6_6_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit6_6_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit6_6_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The total work is zero. The rotational kinetic energy is a maximum when ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The total work is zero. The rotational kinetic energy is a maximum when ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The total work is negative. The rotational kinetic energy is a maximum when ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The total work is negative. The rotational kinetic energy is a maximum when ."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit6_6_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit6_6_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit6_6_3",
+              "title": "6.3: Angular Momentum of Particles and Rigid Bodies",
+              "unit": "Unit 6",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit6_6_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is greater than . The bar’s angular momentum changes by a greater amount in Collision ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is greater than . The kinetic energy of the bar-disk system is the same before and after Collision ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and are equal. Both disks bounce off the bar without sticking."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and are equal. There is no external torque exerted on either bar-disk system about the pivot."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit6_6_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "to second"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "to seconds"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "to seconds"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "to seconds"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit6_6_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The cylinder. The slope of the graph is negative."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The cylinder. The torque has the same sign as the cylinder’s angular velocity."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The sphere. The slope of the graph decreases in magnitude as time increases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The sphere. The torque has the opposite sign to the sphere’s angular velocity."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit6_6_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Counterclockwise. The angular impulse has the same direction as the angular velocity."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Counterclockwise. When an object’s rotational motion is slowing down, the angular impulse has the\r\nopposite direction as the torque."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Clockwise. The angular impulse has the same direction as the torque."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Clockwise. When an object’s rotational motion is slowing down, the angular impulse has the same\r\ndirection as the angular displacement.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 3 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit6_6_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit6_6_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Zero"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit6_6_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Between and seconds"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Between and seconds"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Between and seconds"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Between and seconds"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit6_6_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Zero"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit6_6_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit6_6_4",
+              "title": "6.4: Conservation of Angular Momentum",
+              "unit": "Unit 6",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit6_6_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Because the total angular momentum of the two-disk system is the same at and ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Because the rotational inertia of the small disk is less than that of the large disk."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Because the total kinetic energy of the two-disk system is the same at and ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Because the gravitational potential energy of the disks-Earth system is lower at than at ."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit6_6_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Student only"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Student and the platform only"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Student , Student , and the platform"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is no system involving just the students and the platform for which angular momentum is\r\nconstant."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit6_6_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit6_6_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The rest of the bicycle does not rotate because there is no net torque exerted on the bicycle."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The rest of the bicycle does not rotate because angular momentum is constant for the bicycle-cyclist\r\nsystem."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The rest of the bicycle rotates clockwise because there is an external torque exerted on the bicycle￾cyclist system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The rest of the bicycle rotates clockwise because the decrease in clockwise rotation of the wheels is\r\nbalanced by an increase in clockwise rotation of the bicycle."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit6_6_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is the same because the clay and the wheel do not exert torques on each other. is different\r\nbecause the axle exerts a net force on the system."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is the same because the clay and the wheel do not exert torques on each other. is different\r\nbecause the force exerted by the clay on the wheel is a net force on the system."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is the same because the axle does not exert a torque on the system. is different because the\r\naxle exerts a net force on the system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "is the same because the axle does not exert a torque on the system. is different because the\r\nforce exerted by the clay on the wheel is a net force on the system."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit6_6_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit6_6_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit6_6_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The skater’s angular speed is increasing in magnitude."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The skater’s angular speed is decreasing in magnitude."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The skater’s angular momentum is increasing in magnitude."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The skater’s angular momentum is decreasing in magnitude."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit6_6_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The angular momenta must be equal in magnitude. The kinetic energies must be equal."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The angular momenta must be equal in magnitude. The kinetic energies are not necessarily equal."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The angular momenta are not necessarily equal in magnitude. The kinetic energies must be equal."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The angular momenta are not necessarily equal in magnitude. The kinetic energies are not necessarily\r\nequal."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit6_6_5",
+              "title": "6.5: Angular Impulse",
+              "unit": "Unit 6",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit6_6_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit6_6_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Wheel is more massive and on average, its mass is distributed closer to the wheel’s center."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Wheel is more massive and on average, its mass is distributed farther from the wheel’s center."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Wheel is less massive and on average, its mass is distributed closer to the wheel’s center."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Wheel is less massive and on average, its mass is distributed farther from the wheel’s center."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit6_6_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit6_6_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit6_6_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "There is a nonzero force of static friction exerted on the sphere that increases in magnitude as the\r\nrotation of the sphere increases."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "There is a nonzero force of static friction exerted on the sphere that does not dissipate any mechanical\r\nenergy."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "There is a nonzero force of kinetic friction exerted on the sphere because the sphere is moving."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is a nonzero force of kinetic friction exerted on the sphere that dissipates mechanical energy."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit6_6_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit6_6_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Zero"
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit6_6_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n5\r\nAP Physics C: Mechanics Page 7 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit6_6_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The angular speed of the cylinder"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The angular acceleration of the cylinder"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The translational speed of a point on the outside surface of the cylinder"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The translational acceleration of a point on the outside surface of the cylinder"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit6_6_6",
+              "title": "6.6: Planetary Orbits and Kepler's Laws",
+              "unit": "Unit 6",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit6_6_6_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "remains constant. The acceleration of each asteroid is independent of its mass."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "remains constant. The gravitational force on each asteroid does not result in a torque about the star."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "has a maximum magnitude when the asteroids are at points and . These are the locations where\r\nthe asteroids’ speeds are greatest."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "has a maximum magnitude when the asteroids are at points and . These locations are where the\r\nasteroids are the closest to the star."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_6_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit6_6_6_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_6_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit6_6_6_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_6_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit6_6_6_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_6_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit6_6_6_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The satellite’s angular momentum has a nonzero magnitude."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The satellite’s angular momentum has the same direction throughout the orbit."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The gravitational force exerted on the satellite by the planet does work on the satellite."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The gravitational forces that the satellite and the planet exert on each other are opposite in direction.\r\nScoring Guide\r\n6\r\nPage 4 of 7 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_6_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit6_6_6_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_6_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit6_6_6_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_6_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit6_6_6_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is the same. There is no torque about the center of the planet when the thrusters are fired."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is the same. Angular momentum is constant for all orbits, both circular and elliptical."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is the same. The point where the thrusters are fired is on both the circular and the elliptical orbit."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "is the same. The thrusters are fired in a direction that does not change the translational speed of the\r\nspaceship."
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_6_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit6_6_6_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_6_6_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit6_unit_6_progress_check",
+              "title": "Unit 6 Progress Check: MCQ",
+              "unit": "Unit 6",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 2 of 17 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 3 of 17"
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Cases and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Cases and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Cases and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Cases and\r\nScoring Guide\r\nUnit 6 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 7 of 17"
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is the same at points , , and ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "increases from Point to Point , then decreases from Point to Point ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "decreases from Point to Point , then increases from Point to Point ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "cannot be compared for the positions shown because angular momentum is undefined for an object\r\nmoving in a straight line."
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The frictional force remains constant."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The frictional force decreases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The frictional force increases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The frictional force initially increases until the cylinder reaches its maximum speed, and then decreases."
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The thin disk has more kinetic energy than the small cylinder."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The small cylinder has more kinetic energy than the thin disk."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The kinetic energy is the same for the two objects."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The kinetic energies of the objects cannot be compared, since the thin disk has rotational kinetic energy\r\nand the small cylinder has translational kinetic energy."
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Point and Point"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Point and Point"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Point and Point"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There are no two labeled points with the same amount of rotational kinetic energy."
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ". The slope of the graph is less than the slope during ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": ". The value of changes by more than it does during ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ". The slope of the graph is greater than the slope during ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ". The value of changes by less than it does during ."
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The system is not rotating after the collision because the clay and wheel have the same mass."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The system is not rotating after the collision because the initial angular momenta of the clay and wheel\r\nare in opposite directions."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The rotation of the system after the collision cannot be determined because the initial angular velocity of\r\nthe wheel is unknown."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The rotation of the system after the collision cannot be determined because translational motion and\r\nrotational motion are independent motions."
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/appc_unit6_unit_6_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It decreases because the satellite’s speed decreases."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It decreases because the gravitational potential energy of the planet-satellite system becomes closer to\r\nzero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It remains the same because the gravitational force exerted on the satellite is directed toward the center\r\nof the planet."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It remains the same because the satellite is always traveling counterclockwise.\r\nScoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 16 of 17 AP Physics C: Mechanics"
+                    }
+                  ],
+                  "question_id": "appc_unit6_unit_6_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        },
+        "Unit 7": {
+          "title": "Unit 7: Oscillations",
+          "assessments": [
+            {
+              "id": "appc_unit7_7_1",
+              "title": "7.1: Simple Harmonic Motion Foundations",
+              "unit": "Unit 7",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit7_7_1_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "At Point"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "To the left of Point"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "To the right of Point"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The new equilibrium position cannot be determined without more information about how much the\r\nspring constant and initial spring compression were changed."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_1_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit7_7_1_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_1_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit7_7_1_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes. The initial push on the ball displaces it from the equilibrium position."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes. The potential energy of the ball-Earth system is a quadratic function of position, resulting in a\r\nlinear restoring force."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No. There is no equilibrium position for the ball."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No. The net force on the ball is in the same direction as the ball’s displacement from equilibrium."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_1_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit7_7_1_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "There is no equilibrium position where the net force on the cart is zero."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "There is an equilibrium position, but the spring is not at its relaxed length when the cart is in\r\nequilibrium."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "There is an equilibrium position, but there is no restoring force toward equilibrium when the cart is not\r\nin contact with the spring."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is an equilibrium position and a restoring force in both directions from equilibrium, but the\r\nrestoring force is not proportional to the cart’s displacement from equilibrium."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_1_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit7_7_1_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes. The net force is a linear function of position."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes. There is an equilibrium position where the net force is zero."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No. The net force is not zero at ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No. The net force is not in the opposite direction from the object’s displacement from equilibrium."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_1_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit7_7_1_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The cart oscillates about Point in simple harmonic motion."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The cart oscillates about Point , but not in simple harmonic motion."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The cart oscillates about a point other than Point in simple harmonic motion."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The cart oscillates about a point other than Point , but not in simple harmonic motion."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_1_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit7_7_1_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It continually decreases."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It continually increases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It decreases at first and then increases."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It increases at first and then decreases."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_1_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit7_7_1_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_1_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit7_7_1_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "There is an equilibrium position within the tunnel, and the net force is a restoring force."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "There is an equilibrium position within the tunnel, and the net force is not a restoring force."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "There is not an equilibrium position within the tunnel, and the net force is a restoring force."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "There is not an equilibrium position within the tunnel, and the net force is not a restoring force."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_1_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit7_7_2",
+              "title": "7.2: Mass-Spring Systems & Differential Equations",
+              "unit": "Unit 7",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit7_7_2_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_2_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit7_7_2_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_2_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit7_7_2_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It remains constant at while the car is accelerating."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It becomes lower than and is constant while the car is accelerating."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It becomes higher than and is constant while the car is accelerating."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It increases steadily from the initial frequency while the car is accelerating."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_2_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit7_7_2_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The ratio can be determined from and only."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The ratio can be determined from and only."
+                    },
+                    {
+                      "letter": "C",
+                      "text": ", , , and are all needed and can be used to determine the ratio."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The spring constant must still be determined in order to determine the ratio."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_2_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit7_7_2_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Scoring Guide\r\n2\r\nAP Physics C: Mechanics Page 5 of 9"
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_2_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit7_7_2_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_2_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit7_7_2_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_2_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit7_7_2_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_2_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit7_7_2_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_2_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit7_7_3",
+              "title": "7.3: Simple Pendulums",
+              "unit": "Unit 7",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit7_7_3_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_3_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit7_7_3_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_3_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit7_7_3_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_3_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit7_7_3_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A different constant greater than is used."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "A different constant less than is used."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "An additional constant is added to the right-hand side of the equation."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The equation is the same.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 3 of 7"
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_3_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit7_7_3_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The angular speed is a maximum at and , and the magnitude of the angular acceleration is a\r\nmaximum at , , and ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The angular speed is a maximum at , , and , and the magnitude of the angular acceleration is a\r\nmaximum at and ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Both the angular speed and the magnitude of the angular acceleration are maximum at and ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Both the angular speed and the magnitude of the angular acceleration are maximum at , , and ."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_3_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit7_7_3_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_3_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit7_7_3_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The block is passing through the equilibrium position while moving to the left."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The block is passing through the equilibrium position while moving to the right."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The block is at its maximum displacement to the left of the equilibrium position. It is instantaneously at\r\nrest, so there is no direction for the velocity."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The block is at its maximum displacement to the right of the equilibrium position. It is instantaneously at\r\nrest, so there is no direction for the velocity."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_3_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit7_7_3_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The object’s displacement from equilibrium and its velocity are both in the positive direction."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The object’s displacement from equilibrium and its velocity are both in the negative direction."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "The object’s displacement from equilibrium is in the positive direction, and its velocity is in the negative\r\ndirection."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "The object’s displacement from equilibrium is in the negative direction, and its velocity is in the positive\r\ndirection."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_3_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit7_7_3_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_3_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit7_7_4",
+              "title": "7.4: Physical Pendulums & Torsion Pendulums",
+              "unit": "Unit 7",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit7_7_4_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_4_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit7_7_4_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_4_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit7_7_4_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_4_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit7_7_4_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_4_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit7_7_4_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "D"
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_4_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit7_7_4_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes. The amplitude of the oscillations is the same for both systems."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes. The two blocks have the same maximum speed."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No. The two springs are different lengths when each system is at equilibrium."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No. The period of oscillation is different for the two systems.\r\nScoring Guide\r\n4\r\nAP Physics C: Mechanics Page 5 of 8"
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_4_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit7_7_4_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes. The total mechanical energy of the object-spring system can be calculated by adding and ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes. Most of the system’s total mechanical energy is in the form of potential energy, which is true\r\nwhenever the object’s distance from equilibrium is a maximum."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No. The system still has kinetic energy that must be completely converted to potential energy when the\r\nobject’s distance from equilibrium is a maximum."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No. When the kinetic energy is less than half of the system’s total mechanical energy, the object is\r\napproaching the equilibrium position."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_4_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit7_7_4_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is closer to the surface. The gravitational force on the rock is a maximum at the surface."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is closer to the surface. The potential energy of the rock-moon system is proportional to the square of\r\nthe rock’s distance from the center."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is closer to the center. The kinetic energy of the rock is more than half of the total mechanical energy\r\nof the rock-moon system."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It is closer to the center. The gravitational force on the rock is inversely proportional to the square of the\r\ndistance from the center."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_4_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit7_7_4_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_4_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit7_7_5",
+              "title": "7.5: Energy in Simple Harmonic Motion",
+              "unit": "Unit 7",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 9,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit7_7_5_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_5_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit7_7_5_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_5_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit7_7_5_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_5_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit7_7_5_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "It is half as much."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "It is less, but more than half as much."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "It is greater, but less than twice as much."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "It is twice as much."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_5_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit7_7_5_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Doubling the pivot-to-center distance."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Halving the pivot-to-center distance."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Increasing the mass of the rod to ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Decreasing the mass of the rod to ."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_5_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit7_7_5_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_5_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit7_7_5_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_5_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit7_7_5_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_5_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit7_7_5_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "only."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and only."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "only."
+                    },
+                    {
+                      "letter": "D",
+                      "text": ", , and ."
+                    }
+                  ],
+                  "question_id": "appc_unit7_7_5_q9"
+                }
+              ]
+            },
+            {
+              "id": "appc_unit7_unit_7_progress_check",
+              "title": "Unit 7 Progress Check: MCQ",
+              "unit": "Unit 7",
+              "subject": "AP Physics C: Mechanics",
+              "question_count": 18,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q1.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q1"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q2.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q2"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q3.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q3"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q4.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q4"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q5.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q5"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q6.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Track A"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Track B"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Track C"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "None of the tracks"
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q6"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q7.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q7"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q8.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q8"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q9.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q9"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q10.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q10"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q11.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "Yes. The displacement of Object O can be represented by a sinusoidal function of time."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "Yes. The force exerted on Object O is in the opposite direction of Object O’s displacement from\r\nequilibrium."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "No. The force exerted on Object O is not proportional to Object O’s displacement from equilibrium."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "No. The total mechanical energy of the system does not remain constant while Object O is in motion."
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q11"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q12.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q12"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q13.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "C",
+                      "text": "and"
+                    },
+                    {
+                      "letter": "D",
+                      "text": "and"
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q13"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q14.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "No. In the second trial, the elastic energy initially stored in the spring is less than in the first trial."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "No. In the second trial, the acceleration of the box at a given displacement is greater in magnitude than\r\nin the first trial."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Yes. In the second trial, the maximum force exerted by the spring on the box is the same as in the first\r\ntrial."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Yes. In the second trial, the spring exerts twice the amount of force over half the distance as in the first\r\ntrial when moving the box from its maximum displacement to the equilibrium position."
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q14"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q15.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "and are both still equal to ."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "and are equal to each other, but are both less than ."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is less than , and is greater than ."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "is less than , and is still equal to ."
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q15"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q16.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "The period of the motion increases, and the amplitude of the motion remains the same."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "The period of the motion remains the same, and the amplitude of the motion increases."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "Both the period and the amplitude of the motion increase."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "Both the period and the amplitude of the motion remain the same."
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q16"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q17.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q17"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/appc_unit7_unit_7_progress_check_q18.png",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": "is greater than . The ratio of the rotational inertia of to is greater than the ratio of the\r\nrestoring torque of to at the same angular displacements."
+                    },
+                    {
+                      "letter": "B",
+                      "text": "is greater than . The ratio of the restoring torque of to is greater than the ratio of the\r\nrotational inertia of to at the same angular displacements."
+                    },
+                    {
+                      "letter": "C",
+                      "text": "is greater than . The ratio of the rotational inertia of to is greater than the ratio of the\r\nrestoring torque of to at the same angular displacements."
+                    },
+                    {
+                      "letter": "D",
+                      "text": "is greater than . The ratio of the restoring torque of to is greater than the ratio of the\r\nrotational inertia of to at the same angular displacements."
+                    }
+                  ],
+                  "question_id": "appc_unit7_unit_7_progress_check_q18"
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+};

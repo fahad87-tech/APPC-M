@@ -1,0 +1,16 @@
+# Offline Air-Gapped Answer Keys (Enclave)
+data/answer_keys.json
+data/answer_keys.js
+
+# Original PDFs with Scoring Guides & Keys
+input pdf/
+
+# PocketBase Local Database & Logs
+pocketbase/pb_data/
+*.exe
+
+# Python Cache & OS Temp
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
