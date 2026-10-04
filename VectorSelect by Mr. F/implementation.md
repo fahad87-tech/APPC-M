@@ -2342,3 +2342,94 @@ Addressed comprehensive user feedback:
   - `D:\APPS\VectorSelect by Mr. F\`
   - `D:\APPS\marker\web_app\`
 
+---
+
+## Phase 56: Strict Immediate-Preceding Question Gating Logic (2026-10-04)
+
+### Overview
+Addressed user specification:
+*"so if they get q3 right no redemption on q4, they get q4 right, no redemption on q5. make sense? and so on."*
+
+### Architectural Changes & Technical Solutions
+
+#### 1. Immediate-Preceding Dependency Evaluation (`index.html`)
+- **Previous Behavior**:
+  Previously, `hasPreviousIncorrectQuestion()` scanned all questions from $0$ up to $N-1$. If a student missed Question 1 early in the exam, every subsequent question ($Q_2, Q_3, Q_4, Q_5, \dots$) observed that a prior question was missed and allowed point redemption.
+- **Updated Strict Model**:
+  Point redemption on Question $N$ now depends **strictly and solely on the result of Question $N-1$ (the immediately preceding question)**:
+  - If Question $N-1$ was answered **correctly**:
+    $\rightarrow$ **NO redemption on Question $N$**.
+  - If Question $N-1$ was answered **incorrectly** (or skipped / missed):
+    $\rightarrow$ **Point redemption is offered on Question $N$**.
+  - For Question 1 ($N = 1$):
+    $\rightarrow$ **NEVER offers redemption** (no preceding question exists).
+- **Implementation in `hasPreviousIncorrectQuestion()`**:
+  ```javascript
+  function hasPreviousIncorrectQuestion() {
+    if (!isPointRedemptionEnabled()) return false;
+    if (currentQuestionIdx < 1) return false;
+    if (!currentQuiz || !currentQuiz.questions) return false;
+
+    // Check ONLY the immediately preceding question in the sequence
+    const prevStepIdx = currentQuestionIdx - 1;
+    const prevRealIdx = questionOrder[prevStepIdx];
+
+    if (studentMissedQuestions.has(prevRealIdx)) {
+      return true;
+    }
+
+    const prevQ = currentQuiz.questions[prevRealIdx];
+    const prevAns = studentAnswers[prevRealIdx];
+    const officialKey = (prevQ && prevQ.correct_answer) 
+      || currentRevealedAnswers[prevStepIdx] 
+      || currentRevealedAnswers[prevRealIdx];
+
+    if (officialKey) {
+      if (!prevAns || prevAns !== officialKey) {
+        studentMissedQuestions.add(prevRealIdx);
+        return true;
+      } else {
+        studentMissedQuestions.delete(prevRealIdx);
+        return false;
+      }
+    }
+
+    return false;
+  }
+  ```
+
+#### 2. Synchronized Advance & Evaluated Key Broadcast (`teacher.html` & PocketBase)
+- In `teacher.html` (`advanceNow()`):
+  - When the instructor advances from Question $N-1$ to Question $N$, the teacher's console broadcasts `previous_correct_answer` containing Question $N-1$'s official answer key along with `current_question_index`:
+    ```javascript
+    const prevCorrectKey = currentLiveQuiz.questions[prevIndex]?.correct_answer || "";
+    setAssignmentTimerState(currentLiveAssignment.join_code, {
+      current_question_index: currentLiveIndex,
+      question_started_at: new Date().toISOString(),
+      discussion_active: false,
+      answer_revealed: false,
+      revealed_answer: "",
+      previous_correct_answer: prevCorrectKey
+    });
+    ```
+- In `pocketbase_schema.json`:
+  - Added `previous_correct_answer` (text) to the `active_assignments` collection schema and applied the schema patch to the running PocketBase instance.
+- In `index.html` (`startTeacherLedPolling()`):
+  - When the student receives `res.assignment.previous_correct_answer` upon advancing to Question $N$, their answer to Question $N-1$ is evaluated immediately:
+    - If correct: `studentMissedQuestions.delete(prevReal)` $\rightarrow$ No redemption appears on Question $N$.
+    - If incorrect: `studentMissedQuestions.add(prevReal)` $\rightarrow$ Redemption unlocks on Question $N$.
+
+---
+
+### Verification
+- **Test Scenarios**:
+  1. Student gets Q1 wrong $\rightarrow$ Q2 offers redemption.
+  2. Student gets Q2 right $\rightarrow$ Q3 does NOT offer redemption.
+  3. Student gets Q3 right $\rightarrow$ Q4 does NOT offer redemption.
+  4. Student gets Q4 right $\rightarrow$ Q5 does NOT offer redemption.
+  5. Student gets Q4 wrong $\rightarrow$ Q5 DOES offer redemption.
+  6. Student on Q1 $\rightarrow$ Zero redemption offered.
+- All code tested with 0 syntax errors.
+- Synchronized across workspace, `D:\APPS\VectorSelect by Mr. F\`, and `D:\APPS\marker\web_app\`.
+
+

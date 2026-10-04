@@ -2610,6 +2610,7 @@
         renderLiveControl();
         // Set fresh server timestamp so students' per-question timers restart
         setAssignmentTimerState(currentLiveAssignment.join_code, {
+          current_question_index: currentLiveIndex,
           question_started_at: new Date().toISOString(),
           discussion_active: false,
           answer_revealed: false,
@@ -2659,15 +2660,23 @@
     }
 
     function advanceNow() {
+      const prevIndex = currentLiveIndex;
       currentLiveIndex++;
       hideDiscussionPanel();
       renderLiveControl();
+
+      const prevCorrectKey = (currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[prevIndex])
+        ? currentLiveQuiz.questions[prevIndex].correct_answer
+        : "";
+
       // Set server timestamp so students' per-question timers sync
       setAssignmentTimerState(currentLiveAssignment.join_code, {
+        current_question_index: currentLiveIndex,
         question_started_at: new Date().toISOString(),
         discussion_active: false,
         answer_revealed: false,
-        revealed_answer: ""
+        revealed_answer: "",
+        previous_correct_answer: prevCorrectKey
       });
       if (currentLiveAssignment.per_question_seconds > 0) {
         lcTimerRemaining = currentLiveAssignment.per_question_seconds;

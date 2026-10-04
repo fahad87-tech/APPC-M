@@ -1906,26 +1906,36 @@
       if (!isPointRedemptionEnabled()) return false;
 
       // 1. STRICT REQUIREMENT: Point redemption NEVER activates on the first question (currentQuestionIdx === 0)!
-      // It is only available from Question 2 onward if a student missed a prior question.
       if (currentQuestionIdx < 1) return false;
       if (!currentQuiz || !currentQuiz.questions) return false;
 
-      // 2. Check all completed prior questions in the quiz sequence
-      for (let i = 0; i < currentQuestionIdx; i++) {
-        const pastRealIdx = questionOrder[i];
-        if (studentMissedQuestions.has(pastRealIdx)) {
+      // 2. STRICT IMMEDIATE-PRECEDING GATE:
+      // Redemption on question N depends strictly on question N - 1 (the immediately preceding question)!
+      // "so if they get q3 right no redemption on q4, they get q4 right, no redemption on q5. and so on."
+      const prevStepIdx = currentQuestionIdx - 1;
+      const prevRealIdx = questionOrder[prevStepIdx];
+
+      // If student recorded a miss on the immediately preceding question:
+      if (studentMissedQuestions.has(prevRealIdx)) {
+        return true;
+      }
+
+      // Check if official answer is available locally (self-paced / practice / teacher key)
+      const prevQ = currentQuiz.questions[prevRealIdx];
+      const prevAns = studentAnswers[prevRealIdx];
+      const officialKey = (prevQ && prevQ.correct_answer) || currentRevealedAnswers[prevStepIdx] || currentRevealedAnswers[prevRealIdx];
+
+      if (officialKey) {
+        if (!prevAns || prevAns !== officialKey) {
+          studentMissedQuestions.add(prevRealIdx);
           return true;
-        }
-        const q = currentQuiz.questions[pastRealIdx];
-        const ans = studentAnswers[pastRealIdx];
-        if (q && q.correct_answer && ans && ans !== q.correct_answer) {
-          return true;
-        }
-        const revKey = currentRevealedAnswers[i];
-        if (revKey && ans && ans !== revKey) {
-          return true;
+        } else {
+          studentMissedQuestions.delete(prevRealIdx);
+          return false;
         }
       }
+
+      // If no miss was recorded for the immediately preceding question, no redemption!
       return false;
     }
 
@@ -2842,6 +2852,22 @@
               const studentChoice = studentAnswers[teacherRealIdx];
               if (studentChoice && studentChoice !== res.assignment.revealed_answer) {
                 studentMissedQuestions.add(teacherRealIdx);
+              } else if (studentChoice && studentChoice === res.assignment.revealed_answer) {
+                studentMissedQuestions.delete(teacherRealIdx);
+              }
+            }
+
+            // Sync previous question's evaluated answer from instructor when advancing
+            if (res.assignment.previous_correct_answer && teacherQ > 0) {
+              const prevStep = teacherQ - 1;
+              const prevReal = questionOrder[prevStep];
+              currentRevealedAnswers[prevStep] = res.assignment.previous_correct_answer;
+              currentRevealedAnswers[prevReal] = res.assignment.previous_correct_answer;
+              const prevChoice = studentAnswers[prevReal];
+              if (!prevChoice || prevChoice !== res.assignment.previous_correct_answer) {
+                studentMissedQuestions.add(prevReal);
+              } else {
+                studentMissedQuestions.delete(prevReal);
               }
             }
 

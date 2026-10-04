@@ -358,6 +358,16 @@
         "presentable": false,
         "unique": false,
         "options": {}
+      },
+      {
+        "system": false,
+        "id": "fld_aa_prevans",
+        "name": "previous_correct_answer",
+        "type": "text",
+        "required": false,
+        "presentable": false,
+        "unique": false,
+        "options": {}
       }
     ],
     "indexes": [
