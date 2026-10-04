@@ -2432,4 +2432,46 @@ Addressed user specification:
 - All code tested with 0 syntax errors.
 - Synchronized across workspace, `D:\APPS\VectorSelect by Mr. F\`, and `D:\APPS\marker\web_app\`.
 
+---
+
+## Phase 57: Student Portal Brand Logo & Mark Styling Alignment (2026-10-04)
+
+### Overview
+Addressed user request:
+*"fix logo color on student portal"* (with user screenshot `media_1791115473227.png` showing a dark, illegible "V" on an unstyled dark background).
+
+### Root Cause Analysis
+- In `index.html`, `.brand-mark` was defined using CSS variables that were never declared in `:root`:
+  `background: linear-gradient(140deg, var(--brass-400) 0%, var(--brass-600) 45%, var(--copper-600) 100%);`
+- Because `var(--brass-400)` and `var(--brass-600)` were undefined, the CSS linear gradient failed validation, causing the badge container to fall back to a transparent background.
+- Inside the badge, the letter "V" had class `text-ink-900` (an obsidian/dark-slate tone). Against the dark `#050811` background, the black letter on transparent dark background appeared virtually pitch black and illegible.
+
+### Architectural Resolution
+1. **Restored Radiant Brand Gradient**:
+   - Replaced undefined CSS variable calls with the authentic VectorSelect glowing gradient matching the Teacher Portal:
+     ```css
+     .brand-mark {
+       background: linear-gradient(140deg, #00f5a0 0%, #00f2fe 50%, #8b5cf6 100%);
+       box-shadow: 0 0 24px rgba(0, 242, 254, 0.45);
+     }
+     ```
+2. **Restored Metallic Wordmark**:
+   - Added metallic gradient fill on `.wordmark`:
+     ```css
+     .wordmark {
+       background: linear-gradient(135deg, #f8fafc 0%, #38bdf8 100%);
+       -webkit-background-clip: text;
+       -webkit-text-fill-color: transparent;
+       letter-spacing: 0.12em;
+     }
+     ```
+3. **Contrast-Maximized "V" Glyph**:
+   - Updated the inner `<span>` to `<span class="text-2xl font-black text-slate-950 select-none">V</span>` with container `shadow-lg shadow-cyan-500/25`.
+   - The deep obsidian glyph `#020617` now sharply contrasts against the glowing electric cyan, neon mint, and purple background badge.
+
+### Verification
+- Tested layout and rendering: the glowing brand badge and metallic wordmark match `teacher.html` with high contrast and zero visual clipping.
+- Synchronized across workspace, `D:\APPS\VectorSelect by Mr. F\`, and `D:\APPS\marker\web_app\`.
+
+
 
