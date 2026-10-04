@@ -1961,18 +1961,31 @@
         return true;
       }
 
-      // Check if official answer is available locally (self-paced / practice / teacher key)
+      // Check if official answer is available locally or from teacher server broadcast
       const prevQ = currentQuiz.questions[prevRealIdx];
       const prevAns = studentAnswers[prevRealIdx];
-      const officialKey = (prevQ && prevQ.correct_answer) || currentRevealedAnswers[prevStepIdx] || currentRevealedAnswers[prevRealIdx];
+      const officialKey = currentRevealedAnswers[prevStepIdx] 
+        || currentRevealedAnswers[prevRealIdx]
+        || (currentAssignment && currentAssignment.previous_correct_answer)
+        || (prevQ && prevQ.correct_answer);
 
       if (officialKey) {
-        if (!prevAns || prevAns !== officialKey) {
+        const hasChoice = prevAns && prevAns !== 'null' && prevAns !== 'undefined' && String(prevAns).trim() !== '';
+        if (!hasChoice || String(prevAns).trim().toUpperCase() !== String(officialKey).trim().toUpperCase()) {
           studentMissedQuestions.add(prevRealIdx);
           return true;
         } else {
           studentMissedQuestions.delete(prevRealIdx);
           return false;
+        }
+      }
+
+      // In teacher-led mode, if question 2+ is reached and student did not answer question N - 1:
+      if (quizMode === "teacher_led") {
+        const hasChoice = prevAns && prevAns !== 'null' && prevAns !== 'undefined' && String(prevAns).trim() !== '';
+        if (!hasChoice) {
+          studentMissedQuestions.add(prevRealIdx);
+          return true;
         }
       }
 
@@ -2104,6 +2117,45 @@
         });
       }
 
+      // Point Redemption Status & Alert Banner (Question 2+ if preceding question was missed)
+      const hasMissedPrior = hasPreviousIncorrectQuestion();
+      const recoveryDone = !!recoveryAttemptedForQuestion[realIdx];
+      const isSim = activeRecoveryChallenge ? (activeRecoveryChallenge.format === 'sim') : true;
+
+      if (hasMissedPrior) {
+        const redemptionAlert = document.createElement("div");
+        redemptionAlert.id = "q-redemption-alert-banner";
+        redemptionAlert.className = "mb-4 p-4 rounded-2xl bg-gradient-to-r from-plasma-950/80 via-indigo-950/70 to-slate-900 border-2 border-plasma-500/60 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-3 enter";
+        if (!recoveryDone) {
+          redemptionAlert.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="text-2xl animate-bounce">⚡</span>
+              <div>
+                <div class="font-black text-plasma-300 text-xs sm:text-sm uppercase tracking-wide flex items-center gap-2">
+                  <span>Point Redemption Active (+3.5 PTS)</span>
+                  <span class="px-2 py-0.5 rounded-full bg-plasma-500/20 text-plasma-300 border border-plasma-500/40 text-[10px]">Previous Question Missed</span>
+                </div>
+                <div class="text-xs text-slate-300 mt-0.5">Solve the interactive physics simulation or theory challenge to redeem lost points!</div>
+              </div>
+            </div>
+            <button type="button" onclick="triggerRecoveryStationManual()" class="pressable px-4 py-2 rounded-xl btn-aurora text-slate-950 font-black text-xs shadow-md shrink-0 flex items-center gap-1.5 hover:scale-105 transition cursor-pointer">
+              <span>${isSim ? '🎮 Launch Recovery Lab' : '📝 Open Theory Challenge'}</span> <span>➔</span>
+            </button>
+          `;
+        } else {
+          redemptionAlert.innerHTML = `
+            <div class="flex items-center gap-3 w-full justify-between">
+              <div class="flex items-center gap-2.5 text-xs text-plasma-300 font-bold">
+                <span>✓</span>
+                <span>Point Redemption Challenge Cleared for this question (+3.5 PTS)!</span>
+              </div>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-black uppercase">Redeemed</span>
+            </div>
+          `;
+        }
+        choicesBox.insertBefore(redemptionAlert, choicesBox.firstChild);
+      }
+
       // 3. Answer Locking Controls (Manual student lock + Automatic timer lock)
       const isLocked = !!studentLockedAnswers[realIdx];
       const lockBox = document.createElement("div");
@@ -2223,8 +2275,23 @@
           btn.classList.add("cursor-not-allowed", "opacity-60");
         });
       } else {
+        let redemptionPreLockHtml = '';
+        if (hasMissedPrior && !recoveryDone) {
+          redemptionPreLockHtml = `
+            <div class="mb-4 p-3.5 rounded-2xl bg-plasma-950/60 border border-plasma-500/40 text-center shadow-lg space-y-2 enter">
+              <div class="flex items-center justify-center gap-2 text-plasma-300 font-bold text-xs uppercase tracking-wider">
+                <span>⚡</span> <span>Point Redemption Available for this Question (+3.5 PTS)</span>
+              </div>
+              <button type="button" onclick="triggerRecoveryStationManual()" class="pressable px-5 py-2 rounded-xl btn-aurora text-slate-950 font-black text-xs shadow-md flex items-center justify-center gap-1.5 mx-auto cursor-pointer">
+                <span>${isSim ? '🎮 Play Simulation Mini-Game (+3.5 PTS)' : '📝 Solve Analytical Scenario (+3.5 PTS)'}</span>
+              </button>
+            </div>
+          `;
+        }
+
         if (selected) {
           lockBox.innerHTML = `
+            ${redemptionPreLockHtml}
             <button onclick="lockCurrentAnswer()" class="pressable px-8 py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-sm shadow-xl shadow-amber-600/30 transition flex items-center justify-center gap-2 mx-auto">
               <span>🔒</span> Lock In Answer (Option ${selected})
             </button>
@@ -2232,6 +2299,7 @@
           `;
         } else {
           lockBox.innerHTML = `
+            ${redemptionPreLockHtml}
             <button disabled class="px-6 py-2.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 text-slate-500 font-bold text-xs opacity-60 cursor-not-allowed mx-auto">
               Select an option (A, B, C, D) to lock in
             </button>
@@ -2666,6 +2734,19 @@
       const card = document.getElementById("recovery-station-card");
       burstParticles(card);
 
+      const topBanner = document.getElementById("q-redemption-alert-banner");
+      if (topBanner) {
+        topBanner.innerHTML = `
+          <div class="flex items-center gap-3 w-full justify-between">
+            <div class="flex items-center gap-2.5 text-xs text-plasma-300 font-bold">
+              <span>✓</span>
+              <span>Point Redemption Challenge Cleared for this question (+3.5 PTS)!</span>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-black uppercase">Redeemed</span>
+          </div>
+        `;
+      }
+
       const feedbackBox = document.getElementById("recovery-feedback-box");
       if (feedbackBox) {
         feedbackBox.className = "mt-4 p-4 rounded-2xl border border-lime-500/40 bg-lime-500/10 text-lime-200 text-sm leading-relaxed enter";
@@ -2869,13 +2950,35 @@
         try {
           const res = await verifyJoinCode(currentAssignment.join_code);
           if (res.found && res.assignment) {
+            // 1. Sync dynamic live point redemption toggle FIRST
+            if (res.assignment.enable_point_redemption !== undefined) {
+              currentAssignment.enable_point_redemption = (res.assignment.enable_point_redemption !== false);
+            }
+
             const teacherQ = res.assignment.current_question_index || 0;
+
+            // 2. Sync previous question's evaluated answer from instructor FIRST
+            if (res.assignment.previous_correct_answer && teacherQ > 0) {
+              const prevStep = teacherQ - 1;
+              const prevReal = questionOrder[prevStep];
+              currentRevealedAnswers[prevStep] = res.assignment.previous_correct_answer;
+              currentRevealedAnswers[prevReal] = res.assignment.previous_correct_answer;
+              const prevChoice = studentAnswers[prevReal];
+              const hasChoice = prevChoice && prevChoice !== 'null' && prevChoice !== 'undefined' && String(prevChoice).trim() !== '';
+              if (!hasChoice || String(prevChoice).trim().toUpperCase() !== String(res.assignment.previous_correct_answer).trim().toUpperCase()) {
+                studentMissedQuestions.add(prevReal);
+              } else {
+                studentMissedQuestions.delete(prevReal);
+              }
+            }
+
+            // 3. Question transition check
             if (teacherQ !== currentQuestionIdx) {
               currentQuestionIdx = teacherQ;
               renderCurrentQuestion();
             }
 
-            // Sync revealed answer & explanation from instructor
+            // 4. Sync revealed answer & explanation from instructor for the current question
             let isNewReveal = false;
             if (res.assignment.revealed_answer) {
               const teacherRealIdx = questionOrder[teacherQ];
@@ -2889,9 +2992,10 @@
                 currentRevealedExplanations[teacherRealIdx] = res.assignment.revealed_explanation;
               }
               const studentChoice = studentAnswers[teacherRealIdx];
-              if (studentChoice && studentChoice !== res.assignment.revealed_answer) {
+              const hasChoice = studentChoice && studentChoice !== 'null' && studentChoice !== 'undefined' && String(studentChoice).trim() !== '';
+              if (!hasChoice || String(studentChoice).trim().toUpperCase() !== String(res.assignment.revealed_answer).trim().toUpperCase()) {
                 studentMissedQuestions.add(teacherRealIdx);
-              } else if (studentChoice && studentChoice === res.assignment.revealed_answer) {
+              } else {
                 studentMissedQuestions.delete(teacherRealIdx);
               }
             } else if (res.assignment.answer_revealed === false) {
@@ -2900,7 +3004,7 @@
               if (teacherRealIdx !== undefined) delete currentRevealedAnswers[teacherRealIdx];
             }
 
-            // Sync per-question timer + discussion pause state from instructor
+            // 5. Sync per-question timer + discussion pause state from instructor
             currentAssignment.question_started_at = res.assignment.question_started_at;
             currentAssignment.revealed_answer = res.assignment.revealed_answer;
             currentAssignment.revealed_explanation = res.assignment.revealed_explanation;
@@ -2912,7 +3016,7 @@
               updateDiscussionFreeze(discussionActive, answerRevealed);
             }
 
-            // Sync instructor pause state
+            // 6. Sync instructor pause state
             const isPaused = res.assignment.timer_paused === true;
             if (isPaused !== timerPaused) {
               timerPaused = isPaused;
@@ -2921,25 +3025,6 @@
                 showToast("Session Paused", "Instructor has paused to explain concepts", "brass", 3000);
               } else {
                 showToast("Session Resumed", "Assessment clock resumed", "lime", 2000);
-              }
-            }
-
-            // Sync dynamic live point redemption toggle
-            if (res.assignment.enable_point_redemption !== undefined) {
-              currentAssignment.enable_point_redemption = (res.assignment.enable_point_redemption !== false);
-            }
-
-            // Sync previous question's evaluated answer from instructor when advancing
-            if (res.assignment.previous_correct_answer && teacherQ > 0) {
-              const prevStep = teacherQ - 1;
-              const prevReal = questionOrder[prevStep];
-              currentRevealedAnswers[prevStep] = res.assignment.previous_correct_answer;
-              currentRevealedAnswers[prevReal] = res.assignment.previous_correct_answer;
-              const prevChoice = studentAnswers[prevReal];
-              if (!prevChoice || prevChoice !== res.assignment.previous_correct_answer) {
-                studentMissedQuestions.add(prevReal);
-              } else {
-                studentMissedQuestions.delete(prevReal);
               }
             }
 

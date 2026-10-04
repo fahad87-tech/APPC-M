@@ -2741,3 +2741,55 @@ Addressed user request:
 
 
 
+
+
+---
+
+## Phase 62: Dual-Button Advance Redundancy & End-to-End Point Redemption Fixes (2026-10-04)
+
+### Context & User Directives
+1. **Top-Bar Redundancy for Advancing**:
+   - Provide redundancy so that after the instructor clicks `💬 End & Discuss ➔` on Question $N$, the top-bar button (`#lc-btn-next`) does NOT disappear.
+   - It must transform in-place into `➔ Next Question (Answers Hidden)` right in the top navigation bar where the teacher's mouse cursor already resides, while simultaneously keeping the large advance button inside the discussion panel (`#lc-disc-btn-advance`).
+2. **Point Redemption Defect Remediation**:
+   - Ensure the Point Redemption & Interactive Simulation feature works reliably when enabled by the instructor.
+   - Strictly honor the sequential dependency rule: if a student misses Question $N-1$, Point Redemption is active on Question $N$; if they get Question $N-1$ right, Point Redemption is disabled on Question $N$.
+
+---
+
+### Root Cause Analysis & Architected Solutions
+
+#### 1. Teacher Console Top-Bar Redundancy (`teacher.html`)
+- **Root Cause**: `showDiscussionPanel()` was hiding `#lc-btn-next` with `classList.add("hidden")`, forcing the teacher to scroll down to the bottom of the discussion panel modal to click `#lc-disc-btn-advance`.
+- **Solution**:
+  - In `showDiscussionPanel()`, `#lc-btn-next` remains visible and transforms into:
+    `<span>➔ Next Question (Answers Hidden)</span>` with `btn-aurora` styling and `onclick = () => confirmAdvanceFromDiscussion();` (or `🏁 End Session` on the final question).
+  - Both the top-bar button and the discussion panel button are wired to `confirmAdvanceFromDiscussion()`, providing instant dual redundancy.
+  - In `resetLcNextButton()` and `hideDiscussionPanel()`, `#lc-btn-next` is seamlessly restored to `💬 End & Discuss ➔` with `onclick = () => lcNextQuestion()`.
+  - In `advanceNow()`, `hideDiscussionPanel(true)` skips intermediate conflicting server state writes, ensuring a single atomic server broadcast with `current_question_index`, `previous_correct_answer`, `discussion_active: false`, and `answer_revealed: false`.
+
+#### 2. Point Redemption & Interactive Simulation Repair (`index.html`)
+- **Root Causes**:
+  1. *Race Condition on Key Wipeout*: In `pollLiveSession()`, the question index check `teacherQ !== currentQuestionIdx` was executing BEFORE `previous_correct_answer` was synced, causing `hasPreviousIncorrectQuestion()` to evaluate against unpopulated state and return `false`.
+  2. *Hidden UI Barrier*: Before locking Question $N$, the recovery station was completely hidden with no visual cue or launch button, making students believe the feature was dead.
+  3. *Blank Answer Tracking*: Students who ran out of time or left Question $N-1$ blank were not properly recorded as misses.
+- **Architected Fixes**:
+  1. **Strict Sync Ordering in `pollLiveSession()`**:
+     - Synced `enable_point_redemption` and `previous_correct_answer` FIRST, recording misses and evaluating correctness before triggering `renderCurrentQuestion()`.
+     - Preserved historical evaluated keys in `currentRevealedAnswers` across transitions without purging prior questions.
+  2. **Prominent Real-Time Alert Banner (`#q-redemption-alert-banner`)**:
+     - When `hasPreviousIncorrectQuestion()` is true on Question 2+, a vibrant aurora alert card is rendered right above the answer choices:
+       `⚡ Point Redemption Active (+3.5 PTS) — Previous Question Missed`.
+     - Includes a direct action button: `🎮 Launch Recovery Lab ➔` (or `📝 Open Theory Challenge`).
+     - Clicking the button mounts the HTML5 canvas laboratory apparatus (or analytical theory scenario) and scrolls smoothly to `#recovery-station-card`.
+  3. **Inline Pre-Lock Helper**:
+     - In `#q-lock-status-box`, provides an inline launch button even before locking, so students are fully aware they can recover lost points.
+  4. **Dynamic Completion Badging**:
+     - Both `onSimSuccess()` and `handleRecoveryAnswer()` instantly update the banner and lock box with `✓ Point Redemption Challenge Cleared (+3.5 PTS) [Redeemed]`, sync the live score to the server, and award the points.
+
+---
+
+### Verification & Deployment
+- Validated JavaScript syntax and execution in `index.html` and `teacher.html`.
+- Mirrored all changes to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+- Committed and pushed to GitHub main repository (`fahad87-tech/APPC-M`).

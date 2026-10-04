@@ -2677,6 +2677,7 @@
           : `<span>💬 End &amp; Discuss</span> <span>&rarr;</span>`;
         nextBtn.className = "pressable px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5";
         nextBtn.disabled = false;
+        nextBtn.onclick = () => lcNextQuestion();
       }
     }
 
@@ -2685,7 +2686,7 @@
       if (currentLiveIndex > 0) {
         currentLiveIndex--;
         lastAllAnsweredNotifiedIdx = -1;
-        hideDiscussionPanel();
+        hideDiscussionPanel(true);
         renderLiveControl();
         // Set fresh server timestamp so students' per-question timers restart
         setAssignmentTimerState(currentLiveAssignment.join_code, {
@@ -2694,7 +2695,8 @@
           discussion_active: false,
           answer_revealed: false,
           revealed_answer: "",
-          revealed_explanation: ""
+          revealed_explanation: "",
+          enable_point_redemption: currentLiveAssignment.enable_point_redemption !== false
         });
         if (currentLiveAssignment.per_question_seconds > 0) {
           lcTimerRemaining = currentLiveAssignment.per_question_seconds;
@@ -2722,26 +2724,32 @@
       showDiscussionPanel(answers || [], true);
     }
 
-    function advanceNow() {
+    async function advanceNow() {
       const prevIndex = currentLiveIndex;
       currentLiveIndex++;
       lastAllAnsweredNotifiedIdx = -1;
-      hideDiscussionPanel();
-      renderLiveControl();
+
+      // Hydrate keys to ensure prevCorrectKey is always authoritative
+      await ensureQuizKeysHydrated(currentLiveQuiz);
 
       const prevCorrectKey = (currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[prevIndex])
-        ? currentLiveQuiz.questions[prevIndex].correct_answer
+        ? (currentLiveQuiz.questions[prevIndex].correct_answer || "")
         : "";
 
-      // Set server timestamp so students' per-question timers sync
-      setAssignmentTimerState(currentLiveAssignment.join_code, {
+      // Hide discussion panel UI without triggering a conflicting intermediate server update
+      hideDiscussionPanel(true);
+      renderLiveControl();
+
+      // Single authoritative atomic server update for the newly activated question
+      await setAssignmentTimerState(currentLiveAssignment.join_code, {
         current_question_index: currentLiveIndex,
         question_started_at: new Date().toISOString(),
         discussion_active: false,
         answer_revealed: false,
         revealed_answer: "",
         revealed_explanation: "",
-        previous_correct_answer: prevCorrectKey
+        previous_correct_answer: prevCorrectKey,
+        enable_point_redemption: currentLiveAssignment.enable_point_redemption !== false
       });
       if (currentLiveAssignment.per_question_seconds > 0) {
         lcTimerRemaining = currentLiveAssignment.per_question_seconds;
@@ -2751,7 +2759,6 @@
     }
 
     function confirmAdvanceFromDiscussion() {
-      hideDiscussionPanel();
       advanceNow();
     }
 
@@ -3186,16 +3193,30 @@
       // Render distribution and students
       renderDiscussionContent(answers);
 
-      // Hide nav buttons, show discussion panel
+      // Keep top-bar next button visible for instant redundancy, transforming into Next Question
+      const topNextBtn = document.getElementById("lc-btn-next");
+      if (topNextBtn && currentLiveQuiz) {
+        topNextBtn.classList.remove("hidden");
+        const total = currentLiveQuiz.questions.length;
+        const isLast = (currentLiveIndex === total - 1);
+        if (isLast) {
+          topNextBtn.innerHTML = `<span>🏁 End Session</span>`;
+          topNextBtn.className = "pressable px-4 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs shadow-lg shadow-rose-600/30 transition flex items-center gap-1.5";
+          topNextBtn.onclick = () => lcEndSession();
+        } else {
+          topNextBtn.innerHTML = `<span>➔ Next Question (Answers Hidden)</span>`;
+          topNextBtn.className = "pressable px-4 py-1.5 rounded-xl btn-aurora text-slate-950 font-black text-xs shadow-lg shadow-cyan-500/30 transition flex items-center gap-1.5 hover:scale-105 cursor-pointer";
+          topNextBtn.onclick = () => confirmAdvanceFromDiscussion();
+        }
+      }
       document.getElementById("lc-btn-prev").classList.add("hidden");
-      document.getElementById("lc-btn-next").classList.add("hidden");
       document.getElementById("lc-discussion-panel").classList.remove("hidden");
     }
 
-    async function hideDiscussionPanel() {
+    async function hideDiscussionPanel(skipServerUpdate = false) {
       document.getElementById("lc-discussion-panel").classList.add("hidden");
       document.getElementById("lc-btn-prev").classList.remove("hidden");
-      document.getElementById("lc-btn-next").classList.remove("hidden");
+      resetLcNextButton();
       
       // Reset answer reveal state to hidden
       isAnswerRevealed = false;
@@ -3209,14 +3230,17 @@
         btn.className = "px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-600/10 hover:bg-indigo-600/20 text-xs font-bold text-indigo-300 transition";
       }
 
-      // Unset discussion_active and reset answer_revealed on server
-      await setAssignmentTimerState(currentLiveAssignment.join_code, {
-        question_started_at: new Date().toISOString(),
-        discussion_active: false,
-        answer_revealed: false,
-        revealed_answer: "",
-        revealed_explanation: ""
-      });
+      if (!skipServerUpdate && currentLiveAssignment) {
+        // Unset discussion_active and reset answer_revealed on server
+        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+          question_started_at: new Date().toISOString(),
+          discussion_active: false,
+          answer_revealed: false,
+          revealed_answer: "",
+          revealed_explanation: "",
+          enable_point_redemption: currentLiveAssignment.enable_point_redemption !== false
+        });
+      }
 
       // Resume teacher timer if it was paused
       if (lcTimerPaused) lcToggleTimerPause();
