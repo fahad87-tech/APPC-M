@@ -2688,6 +2688,54 @@ Addressed user request: *"fix all issues"*, resolving all 8 architectural and pe
 - Verified zero errors on all inline scripts in `index.html` and `teacher.html`.
 - Mirrored all files to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
 
+---
+
+## Phase 61: All-Students-Answered Audio-Visual Notification & Streamlined Question Advance Flow (2026-10-04)
+
+### Overview
+Addressed user request:
+1. *"a notification would be awesome for the teacher when all students have answer questions before the time is over so i can advance to the next question."*
+2. *"also tell me if i advance to the next question what button do i press because if i click next it automatically goes into discussion mode and answer key should be revealed and if i press sure to move forward then it should open the next question without showing any answers to the new question. make sense or should this be made better"*
+
+---
+
+### Architectural Resolutions
+
+#### 1. Real-Time Audio-Visual "All Students Answered" Notification (`teacher.html`)
+- **Web Audio Chime (`playSuccessChime()`)**:
+  - Implemented a pure Web Audio API synthesizer chime (D5 $\rightarrow$ A5 harmonic interval at 587Hz $\rightarrow$ 880Hz with exponential gain decay). Requires zero external sound assets or network fetches.
+- **Progress Poller Detection (`renderLiveProgress`)**:
+  - Monitors `total > 0 && answeredCount >= total`.
+  - Fires once per question index (`lastAllAnsweredNotifiedIdx !== currentLiveIndex`):
+    - Plays the chime.
+    - Shows an emerald toast: `🎉 All Students Answered! (X/X) — Ready to reveal key & discuss.`
+    - Applies an active pulse & bounce animation to the action button so the teacher can immediately see they are clear to advance early.
+
+#### 2. Streamlined Two-Step Advance & Discussion Flow (`teacher.html`)
+- **Phase 1: Question N (Answering Phase)**:
+  - Top action button clearly labeled: `💬 End & Discuss ➔`.
+  - When clicked (or when the countdown timer hits `00:00`):
+    - Pauses the timer at `00:00`.
+    - Freezes student interactions (`discussion_active = true`).
+    - Opens the discussion breakdown panel.
+    - **Automatically reveals the official answer key & College Board rationale** to projector and students (`isAnswerRevealed = true`, `revealed_answer`, `revealed_explanation`), eliminating manual button hunting.
+- **Phase 2: Question N (Discussion Phase)**:
+  - Primary button in discussion panel clearly labeled: `➔ Next Question (Answers Hidden)`.
+  - When clicked (`confirmAdvanceFromDiscussion()` $\rightarrow$ `advanceNow()`):
+    - Closes discussion panel.
+    - Increments question index to Question $N+1$.
+    - **Guarantees clean slate**: Automatically resets `isAnswerRevealed = false`, `revealed_answer = ""`, `revealed_explanation = ""`, and sets projector answer box to `🔒 Hidden`.
+    - Unfreezes student screens with Question $N+1$'s image and blank, active answer choices.
+    - Starts Question $N+1$'s timer fresh.
+
+---
+
+### Verification
+- Tested script syntax across all modified files (`node -c`).
+- Verified zero errors on all inline scripts in `teacher.html`.
+- Mirrored all files to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+
+
 
 
 

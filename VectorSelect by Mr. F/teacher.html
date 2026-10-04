@@ -771,8 +771,8 @@
                 &larr; Prev
               </button>
               <span id="lc-q-badge" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-black text-sm tracking-wide shadow-md">Question 1 of 10</span>
-              <button onclick="lcNextQuestion()" id="lc-btn-next" class="pressable px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md transition" title="Next Question">
-                Next &rarr;
+              <button onclick="lcNextQuestion()" id="lc-btn-next" class="pressable px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5" title="Reveal Answer Key &amp; Enter Discussion Phase">
+                <span>💬 End &amp; Discuss</span> <span>&rarr;</span>
               </button>
             </div>
             
@@ -910,8 +910,8 @@
                     <button onclick="lcPrevQuestion()" id="lc-disc-btn-prev" class="flex-1 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-extrabold text-xs transition disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-1.5" title="Go back to previous question">
                       <span>&larr;</span> <span>Prev Question</span>
                     </button>
-                    <button onclick="confirmAdvanceFromDiscussion()" id="lc-disc-btn-advance" class="flex-[2] py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-lg shadow-indigo-600/25 transition flex items-center justify-center gap-1.5">
-                      <span>Confirm Advance</span> <span>&rarr;</span>
+                    <button onclick="confirmAdvanceFromDiscussion()" id="lc-disc-btn-advance" class="flex-[2] py-2.5 rounded-xl btn-aurora text-slate-950 font-black text-xs shadow-lg shadow-cyan-500/25 transition flex items-center justify-center gap-1.5 hover:scale-[1.02]">
+                      <span>➔ Next Question (Answers Hidden)</span>
                     </button>
                   </div>
                 </div>
@@ -2351,6 +2351,26 @@
       setAssignmentQuestionIndex(currentLiveAssignment.join_code, currentLiveIndex);
     }
 
+    let lastAllAnsweredNotifiedIdx = -1;
+
+    function playSuccessChime() {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(587.33, now); // D5
+        osc.frequency.setValueAtTime(880.00, now + 0.12); // A5
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.6);
+      } catch(e) {}
+    }
+
     function renderLiveProgress(participants, answers) {
       const strip = document.getElementById("lc-progress-strip");
       if (!strip) return;
@@ -2377,12 +2397,29 @@
       const bar = document.getElementById("lc-progress-bar");
       bar.style.width = `${pct}%`;
 
-      // Completion banner when everyone has answered
+      // Completion banner & one-time teacher notification when everyone has answered
       const progressText = document.getElementById("lc-progress-text");
       if (total > 0 && answeredCount >= total) {
         progressText.textContent = `${answeredCount} / ${total} — ALL ANSWERED ✓`;
         progressText.className = "text-emerald-400 font-black";
         bar.className = "h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500";
+
+        if (lastAllAnsweredNotifiedIdx !== currentLiveIndex) {
+          lastAllAnsweredNotifiedIdx = currentLiveIndex;
+          showTeacherToast(
+            "🎉 All Students Answered!",
+            `All ${total} students have submitted answers for Question ${currentLiveIndex + 1}. Click 'End & Discuss' to reveal the key!`,
+            "lime",
+            6000
+          );
+          playSuccessChime();
+
+          const nextBtn = document.getElementById("lc-btn-next");
+          if (nextBtn) {
+            nextBtn.classList.add("ring-4", "ring-emerald-400", "animate-bounce");
+            setTimeout(() => nextBtn.classList.remove("ring-4", "ring-emerald-400", "animate-bounce"), 4500);
+          }
+        }
       } else {
         progressText.className = total > 0 ? "text-amber-400" : "text-slate-500";
         bar.className = "h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500";
@@ -2634,9 +2671,12 @@
       const nextBtn = document.getElementById("lc-btn-next");
       if (nextBtn && currentLiveQuiz) {
         const total = currentLiveQuiz.questions.length;
-        nextBtn.innerHTML = (currentLiveIndex === total - 1) ? "Final Question" : "Next &rarr;";
-        nextBtn.className = "pressable px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md transition";
-        nextBtn.disabled = (currentLiveIndex === total - 1);
+        const isLast = (currentLiveIndex === total - 1);
+        nextBtn.innerHTML = isLast 
+          ? `<span>💬 Reveal &amp; Finish</span>` 
+          : `<span>💬 End &amp; Discuss</span> <span>&rarr;</span>`;
+        nextBtn.className = "pressable px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs shadow-md transition flex items-center gap-1.5";
+        nextBtn.disabled = false;
       }
     }
 
@@ -2644,6 +2684,7 @@
       resetLcNextButton();
       if (currentLiveIndex > 0) {
         currentLiveIndex--;
+        lastAllAnsweredNotifiedIdx = -1;
         hideDiscussionPanel();
         renderLiveControl();
         // Set fresh server timestamp so students' per-question timers restart
@@ -2652,7 +2693,8 @@
           question_started_at: new Date().toISOString(),
           discussion_active: false,
           answer_revealed: false,
-          revealed_answer: ""
+          revealed_answer: "",
+          revealed_explanation: ""
         });
         if (currentLiveAssignment.per_question_seconds > 0) {
           lcTimerRemaining = currentLiveAssignment.per_question_seconds;
@@ -2663,43 +2705,27 @@
     }
 
     async function lcNextQuestion() {
-      if (currentLiveIndex >= currentLiveQuiz.questions.length - 1) {
-        lcEndSession();
-        return;
-      }
-
-      const nextBtn = document.getElementById("lc-btn-next");
-      if (!lcNextConfirmActive) {
-        lcNextConfirmActive = true;
-        if (nextBtn) {
-          nextBtn.innerHTML = `⚠️ Confirm Advance &rarr;`;
-          nextBtn.className = "pressable px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-lg shadow-amber-500/40 transition animate-pulse";
-        }
-        clearTimeout(lcNextConfirmTimeout);
-        lcNextConfirmTimeout = setTimeout(() => {
-          resetLcNextButton();
-        }, 4000);
-        return;
-      }
-
-      // Second click within 4 seconds: Confirm advance!
       resetLcNextButton();
-
-      // Fetch current answers; if anyone answered, show discussion panel first
       const answers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex);
 
-      if (!answers || answers.length === 0) {
-        // No answers yet — advance immediately
-        advanceNow();
-      } else {
-        // Show discussion state before advancing (keeps answer hidden initially)
-        showDiscussionPanel(answers);
+      if (currentLiveIndex >= currentLiveQuiz.questions.length - 1) {
+        showDiscussionPanel(answers || [], true);
+        const advBtn = document.getElementById("lc-disc-btn-advance");
+        if (advBtn) {
+          advBtn.innerHTML = "<span>🏁 End Assessment Session</span>";
+          advBtn.onclick = () => lcEndSession();
+        }
+        return;
       }
+
+      // Automatically transition into discussion phase and auto-reveal the official answer key!
+      showDiscussionPanel(answers || [], true);
     }
 
     function advanceNow() {
       const prevIndex = currentLiveIndex;
       currentLiveIndex++;
+      lastAllAnsweredNotifiedIdx = -1;
       hideDiscussionPanel();
       renderLiveControl();
 
@@ -2714,12 +2740,14 @@
         discussion_active: false,
         answer_revealed: false,
         revealed_answer: "",
+        revealed_explanation: "",
         previous_correct_answer: prevCorrectKey
       });
       if (currentLiveAssignment.per_question_seconds > 0) {
         lcTimerRemaining = currentLiveAssignment.per_question_seconds;
         updateLcTimerDisplay();
       }
+      showTeacherToast("Next Question Loaded", `Question ${currentLiveIndex + 1} is now live with answers hidden.`, "lime", 2500);
     }
 
     function confirmAdvanceFromDiscussion() {
@@ -3120,20 +3148,42 @@
       });
     }
 
-    async function showDiscussionPanel(answers) {
+    async function showDiscussionPanel(answers, autoReveal = true) {
       if (!lcTimerPaused) lcToggleTimerPause();
-      // Set discussion_active on server — freezes student interaction without revealing answers
-      const correctKey = (isAnswerRevealed && currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[currentLiveIndex])
-        ? currentLiveQuiz.questions[currentLiveIndex].correct_answer
-        : "";
+
+      // Ensure question keys & rationales are hydrated before revealing
+      await ensureQuizKeysHydrated(currentLiveQuiz);
+
+      const q = currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[currentLiveIndex];
+      const correctKey = q ? (q.correct_answer || "") : "";
+      const explanationText = q ? (q.explanation || "") : "";
+
+      if (autoReveal) {
+        isAnswerRevealed = true;
+        const content = document.getElementById("lc-answer-content");
+        const status = document.getElementById("lc-answer-status");
+        const btn = document.getElementById("btn-toggle-reveal");
+        const keyEl = document.getElementById("lc-key-text");
+        const ratEl = document.getElementById("lc-rationale-text");
+        if (keyEl) keyEl.textContent = correctKey || 'Pending';
+        if (ratEl) ratEl.textContent = explanationText || "Official College Board rationale.";
+        if (content) content.classList.remove("hidden");
+        if (status) status.textContent = "🔓 Revealed";
+        if (btn) {
+          btn.textContent = "🔒 Hide Key";
+          btn.className = "px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-600/10 hover:bg-rose-600/20 text-xs font-bold text-rose-300 transition";
+        }
+      }
+
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         question_started_at: currentLiveAssignment.question_started_at || null,
         discussion_active: true,
         answer_revealed: isAnswerRevealed,
-        revealed_answer: correctKey
+        revealed_answer: isAnswerRevealed ? correctKey : "",
+        revealed_explanation: isAnswerRevealed ? explanationText : ""
       });
 
-      // Render distribution and students (respects isAnswerRevealed = false initially)
+      // Render distribution and students
       renderDiscussionContent(answers);
 
       // Hide nav buttons, show discussion panel
@@ -3153,9 +3203,9 @@
       const status = document.getElementById("lc-answer-status");
       const btn = document.getElementById("btn-toggle-reveal");
       if (content) content.classList.add("hidden");
-      if (status) status.textContent = "🔒 Hidden on Projector";
+      if (status) status.textContent = "🔒 Hidden (Click reveal when ready to discuss)";
       if (btn) {
-        btn.textContent = "👁️ Reveal Key";
+        btn.textContent = "👁️ Reveal Answer Key";
         btn.className = "px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-600/10 hover:bg-indigo-600/20 text-xs font-bold text-indigo-300 transition";
       }
 
@@ -3164,7 +3214,8 @@
         question_started_at: new Date().toISOString(),
         discussion_active: false,
         answer_revealed: false,
-        revealed_answer: ""
+        revealed_answer: "",
+        revealed_explanation: ""
       });
 
       // Resume teacher timer if it was paused
