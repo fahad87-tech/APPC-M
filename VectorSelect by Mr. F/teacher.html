@@ -404,6 +404,13 @@
             <input type="checkbox" id="opt-review" class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
             <span class="font-bold text-cyan-300">📋 Allow Students to Review Answers &amp; Explanations After Submission</span>
           </label>
+          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-emerald-500/40 p-3 rounded-xl hover:border-emerald-500 col-span-1 sm:col-span-2 lg:col-span-3">
+            <input type="checkbox" id="opt-point-redemption" checked class="rounded border-slate-700 bg-slate-950 text-emerald-400 focus:ring-0">
+            <div>
+              <span class="font-bold text-emerald-300">🎮 Enable Point Redemption &amp; Interactive Physics Sims</span>
+              <span class="text-[10px] text-slate-400 block font-normal leading-tight">(When enabled, students who miss a question can recover points from Question 2 onward via 50/50 split of simulations &amp; analytical theory)</span>
+            </div>
+          </label>
         </div>
       </div>
 
@@ -782,8 +789,11 @@
               </button>
             </div>
 
-            <!-- Center-Right Group: Live Reaction Stream & Leaderboard -->
+            <!-- Center-Right Group: Live Reaction Stream, Redemption Toggle & Leaderboard -->
             <div class="flex items-center gap-2">
+              <button onclick="toggleLivePointRedemption()" id="lc-btn-redemption" class="pressable px-3 py-1.5 rounded-xl border border-emerald-500/50 bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs transition flex items-center gap-1.5 shadow-md" title="Toggle Point Recovery Simulations for Students">
+                <span>🎮</span> <span id="lc-redemption-text">Redemption: ON</span>
+              </button>
               <button onclick="openLiveLeaderboardModal()" id="lc-btn-leaderboard" class="pressable px-3 py-1.5 rounded-xl border border-plasma-500/50 bg-plasma-500/15 hover:bg-plasma-500/30 text-plasma-300 font-black text-xs transition flex items-center gap-1.5 shadow-md" title="Pull up Live Standings (Shortcut: L)">
                 <span>🏆</span> <span>Leaderboard</span>
               </button>
@@ -1306,6 +1316,7 @@
       const enableLockdown = document.getElementById("opt-lockdown").checked;
       const randomizeQuestions = document.getElementById("opt-randomize").checked;
       const allowReview = document.getElementById("opt-review").checked;
+      const allowPointRedemption = document.getElementById("opt-point-redemption") ? document.getElementById("opt-point-redemption").checked : true;
 
       const assignmentData = {
         join_code: code,
@@ -1323,6 +1334,7 @@
         enable_lockdown: enableLockdown,
         randomize_questions: randomizeQuestions,
         allow_student_review: allowReview,
+        enable_point_redemption: allowPointRedemption,
         current_question_index: 0,
         is_active: true,
         is_started: false,
@@ -2090,6 +2102,16 @@
       document.getElementById("live-control-modal").classList.remove("hidden");
       initLiveControlWheelScroll();
 
+      const redemptionBtn = document.getElementById("lc-btn-redemption");
+      const redemptionText = document.getElementById("lc-redemption-text");
+      const isRedemptionOn = assignment.enable_point_redemption !== false;
+      if (redemptionText) redemptionText.textContent = isRedemptionOn ? "Redemption: ON" : "Redemption: OFF";
+      if (redemptionBtn) {
+        redemptionBtn.className = isRedemptionOn
+          ? "pressable px-3 py-1.5 rounded-xl border border-emerald-500/50 bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs transition flex items-center gap-1.5 shadow-md"
+          : "pressable px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 font-bold text-xs transition flex items-center gap-1.5 shadow-md";
+      }
+
       // Check if assignment has not been launched yet (waiting room)
       if (assignment.is_started !== true) {
         document.getElementById("lc-lobby-body").classList.remove("hidden");
@@ -2406,8 +2428,12 @@
 
       // Synchronize answer reveal state to cloud & students
       if (currentLiveAssignment) {
+        const correctKey = (isAnswerRevealed && currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[currentLiveIndex])
+          ? currentLiveQuiz.questions[currentLiveIndex].correct_answer
+          : "";
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
-          answer_revealed: isAnswerRevealed
+          answer_revealed: isAnswerRevealed,
+          revealed_answer: correctKey
         });
 
         // Re-render student dots and discussion panel with updated reveal state
@@ -2420,6 +2446,27 @@
           renderDiscussionContent(answers);
         }
       }
+    }
+
+    async function toggleLivePointRedemption() {
+      if (!currentLiveAssignment) return;
+      const currentVal = currentLiveAssignment.enable_point_redemption !== false;
+      const newVal = !currentVal;
+      currentLiveAssignment.enable_point_redemption = newVal;
+
+      const btnText = document.getElementById("lc-redemption-text");
+      const btn = document.getElementById("lc-btn-redemption");
+      if (btnText) btnText.textContent = newVal ? "Redemption: ON" : "Redemption: OFF";
+      if (btn) {
+        btn.className = newVal
+          ? "pressable px-3 py-1.5 rounded-xl border border-emerald-500/50 bg-emerald-500/15 hover:bg-emerald-500/30 text-emerald-300 font-bold text-xs transition flex items-center gap-1.5 shadow-md"
+          : "pressable px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 font-bold text-xs transition flex items-center gap-1.5 shadow-md";
+      }
+
+      await setAssignmentTimerState(currentLiveAssignment.join_code, {
+        enable_point_redemption: newVal
+      });
+      showTeacherToast("Point Redemption", newVal ? "Point recovery enabled for students" : "Point recovery disabled for students", newVal ? "lime" : "copper", 2000);
     }
 
     function setupQuestionTimer() {
@@ -2565,7 +2612,8 @@
         setAssignmentTimerState(currentLiveAssignment.join_code, {
           question_started_at: new Date().toISOString(),
           discussion_active: false,
-          answer_revealed: false
+          answer_revealed: false,
+          revealed_answer: ""
         });
         if (currentLiveAssignment.per_question_seconds > 0) {
           lcTimerRemaining = currentLiveAssignment.per_question_seconds;
@@ -2618,7 +2666,8 @@
       setAssignmentTimerState(currentLiveAssignment.join_code, {
         question_started_at: new Date().toISOString(),
         discussion_active: false,
-        answer_revealed: false
+        answer_revealed: false,
+        revealed_answer: ""
       });
       if (currentLiveAssignment.per_question_seconds > 0) {
         lcTimerRemaining = currentLiveAssignment.per_question_seconds;
@@ -3027,10 +3076,14 @@
     async function showDiscussionPanel(answers) {
       if (!lcTimerPaused) lcToggleTimerPause();
       // Set discussion_active on server — freezes student interaction without revealing answers
+      const correctKey = (isAnswerRevealed && currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[currentLiveIndex])
+        ? currentLiveQuiz.questions[currentLiveIndex].correct_answer
+        : "";
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         question_started_at: currentLiveAssignment.question_started_at || null,
         discussion_active: true,
-        answer_revealed: isAnswerRevealed
+        answer_revealed: isAnswerRevealed,
+        revealed_answer: correctKey
       });
 
       // Render distribution and students (respects isAnswerRevealed = false initially)
@@ -3063,7 +3116,8 @@
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         question_started_at: new Date().toISOString(),
         discussion_active: false,
-        answer_revealed: false
+        answer_revealed: false,
+        revealed_answer: ""
       });
 
       // Resume teacher timer if it was paused

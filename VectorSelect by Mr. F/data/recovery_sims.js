@@ -16,7 +16,26 @@
 
   function setupHiDpiCanvas(canvas, logicalHeight = 240) {
     const dpr = Math.min(2, window.devicePixelRatio || 1);
-    const w = canvas.parentElement ? canvas.parentElement.clientWidth : 640;
+    let parentW = 0;
+    if (canvas) {
+      if (canvas.parentElement && canvas.parentElement.clientWidth > 50) {
+        parentW = canvas.parentElement.clientWidth;
+      } else {
+        let p = canvas.parentElement;
+        while (p) {
+          if (p.clientWidth > 50) {
+            parentW = p.clientWidth;
+            break;
+          }
+          p = p.parentElement;
+        }
+      }
+    }
+    if (!parentW || parentW <= 50) {
+      const screenW = typeof window !== 'undefined' ? window.innerWidth : 800;
+      parentW = Math.min(1000, Math.max(340, screenW - 64));
+    }
+    const w = Math.max(300, parentW);
     const h = logicalHeight;
     canvas.width = Math.floor(w * dpr);
     canvas.height = Math.floor(h * dpr);
@@ -77,13 +96,35 @@
   window.RecoverySims = {
     activeSim: null,
     animFrameId: null,
+    _activeObserver: null,
 
     stop: function() {
       if (this.animFrameId) {
         cancelAnimationFrame(this.animFrameId);
         this.animFrameId = null;
       }
+      if (this._activeObserver) {
+        this._activeObserver.disconnect();
+        this._activeObserver = null;
+      }
       this.activeSim = null;
+    },
+
+    attachResizeObserver: function(canvas, onResize) {
+      if (typeof ResizeObserver !== 'undefined' && canvas && canvas.parentElement) {
+        const ro = new ResizeObserver((entries) => {
+          for (const entry of entries) {
+            if (entry.contentRect.width > 50) {
+              onResize();
+            }
+          }
+        });
+        ro.observe(canvas.parentElement);
+        if (this._activeObserver) {
+          this._activeObserver.disconnect();
+        }
+        this._activeObserver = ro;
+      }
     },
 
     // --------------------------------------------------------------------------
@@ -302,7 +343,9 @@
         drawScene();
       }
       window.addEventListener("resize", handleResize);
+      RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene();
+      setTimeout(handleResize, 60);
 
       angleSlider.oninput = (e) => {
         if (isSimulating) return;
@@ -548,11 +591,14 @@
         }
       }
 
-      window.addEventListener("resize", () => {
+      function handleResize() {
         hiDpi = setupHiDpiCanvas(canvas, 230);
         drawScene(cart ? cart.x : 0);
-      });
+      }
+      window.addEventListener("resize", handleResize);
+      RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene(0);
+      setTimeout(handleResize, 60);
 
       slider.oninput = (e) => {
         if (isSimulating) return;
@@ -796,11 +842,14 @@
         }
       }
 
-      window.addEventListener("resize", () => {
+      function handleResize() {
         hiDpi = setupHiDpiCanvas(canvas, 240);
         drawScene(0);
-      });
+      }
+      window.addEventListener("resize", handleResize);
+      RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene(0);
+      setTimeout(handleResize, 60);
 
       slider.oninput = (e) => {
         if (isSimulating) return;
@@ -1042,11 +1091,14 @@
         }
       }
 
-      window.addEventListener("resize", () => {
+      function handleResize() {
         hiDpi = setupHiDpiCanvas(canvas, 230);
         drawScene(currentX0);
-      });
+      }
+      window.addEventListener("resize", handleResize);
+      RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene(currentX0);
+      setTimeout(handleResize, 60);
 
       kSlider.oninput = (e) => {
         if (isSimulating) return;
@@ -1255,11 +1307,14 @@
         ctx.restore();
       }
 
-      window.addEventListener("resize", () => {
+      function handleResize() {
         hiDpi = setupHiDpiCanvas(canvas, 230);
         drawScene(0);
-      });
+      }
+      window.addEventListener("resize", handleResize);
+      RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene(0);
+      setTimeout(handleResize, 60);
 
       slider.oninput = (e) => {
         if (isSimulating) return;

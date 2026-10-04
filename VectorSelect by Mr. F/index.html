@@ -1055,6 +1055,15 @@
     let recoveryChallengesByQuestion = {};
     let questionPointsBreakdown = {};
     let lastRenderedQuestionIdx = -1;
+    let studentMissedQuestions = new Set();
+    let currentRevealedAnswers = {};
+
+    function isPointRedemptionEnabled() {
+      if (currentAssignment && currentAssignment.enable_point_redemption === false) {
+        return false;
+      }
+      return true;
+    }
 
     // ============================================================================
     // UI FEEDBACK SYSTEM — Toasts, Ripples, Particle Bursts
@@ -1317,6 +1326,8 @@
       recoveryAttemptedForQuestion = {};
       recoveryChallengesByQuestion = {};
       questionPointsBreakdown = {};
+      studentMissedQuestions = new Set();
+      currentRevealedAnswers = {};
       lastRenderedQuestionIdx = -1;
       updateStudentPointsHUD();
       const emojiDock = document.getElementById("student-emoji-dock");
@@ -1891,22 +1902,27 @@
     }
 
     function hasPreviousIncorrectQuestion() {
+      // 0. Point redemption must be enabled by teacher
+      if (!isPointRedemptionEnabled()) return false;
+
+      // 1. STRICT REQUIREMENT: Point redemption NEVER activates on the first question (currentQuestionIdx === 0)!
+      // It is only available from Question 2 onward if a student missed a prior question.
+      if (currentQuestionIdx < 1) return false;
       if (!currentQuiz || !currentQuiz.questions) return false;
-      // 1. Check all completed prior questions in the current quiz sequence
+
+      // 2. Check all completed prior questions in the quiz sequence
       for (let i = 0; i < currentQuestionIdx; i++) {
         const pastRealIdx = questionOrder[i];
+        if (studentMissedQuestions.has(pastRealIdx)) {
+          return true;
+        }
         const q = currentQuiz.questions[pastRealIdx];
         const ans = studentAnswers[pastRealIdx];
-        if (!ans || ans !== q.correct_answer) {
-          return true; // Missed a prior question!
+        if (q && q.correct_answer && ans && ans !== q.correct_answer) {
+          return true;
         }
-      }
-      // 2. Check current question if evaluation has been officially revealed
-      if (isCurrentQuestionEvaluationRevealed()) {
-        const currRealIdx = questionOrder[currentQuestionIdx];
-        const q = currentQuiz.questions[currRealIdx];
-        const ans = studentAnswers[currRealIdx];
-        if (!ans || ans !== q.correct_answer) {
+        const revKey = currentRevealedAnswers[i];
+        if (revKey && ans && ans !== revKey) {
           return true;
         }
       }
@@ -2048,8 +2064,11 @@
         const isAuto = lockInfo && lockInfo.auto;
         const isRevealed = isCurrentQuestionEvaluationRevealed();
         const hasMissedPrior = hasPreviousIncorrectQuestion();
-        const isCorrect = Boolean(selected && selected === q.correct_answer);
+        const revealedKey = currentRevealedAnswers[currentQuestionIdx] || q.correct_answer;
+        const isEvaluated = Boolean(revealedKey);
+        const isCorrect = isEvaluated && (selected === revealedKey);
         const recoveryDone = !!recoveryAttemptedForQuestion[realIdx];
+        const isSim = activeRecoveryChallenge ? (activeRecoveryChallenge.format === 'sim') : true;
 
         if (!isRevealed) {
           // ==================================================================
@@ -2069,23 +2088,23 @@
                 ${!recoveryDone ? `
                   <div class="p-4 rounded-2xl bg-gradient-to-b from-indigo-950/70 via-slate-900 to-slate-900 border-2 border-indigo-500/45 text-center shadow-2xl space-y-2.5 enter">
                     <div class="flex items-center justify-center gap-2 text-indigo-300 font-extrabold text-xs uppercase tracking-wider">
-                      <span class="text-base">🎮</span>
-                      <span>Physics Simulation Arcade Active (+3.5 PTS)</span>
+                      <span class="text-base">${isSim ? '🎮' : '📝'}</span>
+                      <span>${isSim ? 'Physics Simulation Arcade Active (+3.5 PTS)' : 'Analytical Theory Challenge Active (+3.5 PTS)'}</span>
                     </div>
                     <p class="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
-                      You missed a question previously! While waiting for the question timer, launch the <strong class="text-cyan-300">Interactive Physics Simulation</strong> below to redeem lost points!
+                      You missed a question previously! While waiting for the question timer, solve the <strong class="text-cyan-300">${isSim ? 'Interactive Physics Simulation' : 'Analytical Recovery Scenario'}</strong> below to redeem lost points!
                     </p>
                     <button type="button" id="btn-open-recovery" onclick="triggerRecoveryStationManual()" class="pressable px-6 py-3 rounded-xl btn-aurora text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2 mx-auto cursor-pointer animate-bounce hover:animate-none">
-                      <span>🎮 Play Simulation Mini-Game (+3.5 PTS)</span>
+                      <span>${isSim ? '🎮 Play Simulation Mini-Game (+3.5 PTS)' : '📝 Solve Analytical Scenario (+3.5 PTS)'}</span>
                     </button>
                   </div>
                 ` : `
                   <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-center text-xs text-slate-300 max-w-md mx-auto">
-                    <span class="font-bold text-cyan-300">⚡ Point Recovery simulation attempt completed for this question.</span>
+                    <span class="font-bold text-cyan-300">⚡ Point Recovery attempt completed for this question.</span>
                   </div>
                 `}
               ` : `
-                <!-- No previous missed questions: Student is answering 100% correctly. Zero recovery engine shown! -->
+                <!-- No previous missed questions or Question 1: Zero recovery engine shown! -->
               `}
             </div>
           `;
@@ -2093,7 +2112,17 @@
           // ==================================================================
           // Timer expired or instructor discussion opened -> Reveal official result
           // ==================================================================
-          if (isCorrect) {
+          if (!isEvaluated) {
+            lockBox.innerHTML = `
+              <div class="space-y-2 max-w-xl mx-auto">
+                <div class="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-indigo-500/15 border border-indigo-500/40 text-indigo-300 font-black text-sm shadow-lg">
+                  <span class="text-base">${isAuto ? '⏰' : '🔒'}</span>
+                  <span>Answer Finalized (${selected ? 'Option ' + selected : 'None'})</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1 font-medium">Follow instructor discussion before official key reveal.</p>
+              </div>
+            `;
+          } else if (isCorrect) {
             lockBox.innerHTML = `
               <div class="inline-flex items-center gap-2.5 px-6 py-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 font-black text-sm shadow-lg">
                 <span class="text-base">✓</span>
@@ -2102,30 +2131,35 @@
               <p class="text-[11px] text-emerald-400 mt-1.5 font-bold">Full points secured.</p>
             `;
           } else {
+            studentMissedQuestions.add(realIdx);
             lockBox.innerHTML = `
               <div class="space-y-3 max-w-xl mx-auto">
                 <div class="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 text-rose-300 font-black text-sm shadow-lg">
                   <span class="text-base">✗</span>
-                  <span>Official Result: Option ${selected || 'None'} was Incorrect</span>
+                  <span>Official Result: Option ${selected || 'None'} was Incorrect ${revealedKey ? `(Correct: Option ${revealedKey})` : ''}</span>
                 </div>
                 
-                ${!recoveryDone ? `
-                  <div class="p-4 rounded-2xl bg-gradient-to-b from-rose-950/60 via-slate-900 to-slate-900 border-2 border-rose-500/45 text-center shadow-2xl space-y-2.5 enter">
-                    <div class="flex items-center justify-center gap-2 text-rose-300 font-extrabold text-xs uppercase tracking-wider">
-                      <span class="text-base">🎮</span>
-                      <span>Score Redemption: Simulation Mini-Game Active (+3.5 PTS)</span>
+                ${hasMissedPrior ? `
+                  ${!recoveryDone ? `
+                    <div class="p-4 rounded-2xl bg-gradient-to-b from-rose-950/60 via-slate-900 to-slate-900 border-2 border-rose-500/45 text-center shadow-2xl space-y-2.5 enter">
+                      <div class="flex items-center justify-center gap-2 text-rose-300 font-extrabold text-xs uppercase tracking-wider">
+                        <span class="text-base">${isSim ? '🎮' : '📝'}</span>
+                        <span>${isSim ? 'Score Redemption: Simulation Mini-Game Active (+3.5 PTS)' : 'Score Redemption: Analytical Challenge Active (+3.5 PTS)'}</span>
+                      </div>
+                      <p class="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
+                        This question was missed (-35% point deduction). Play the <strong class="text-cyan-300">${isSim ? 'Interactive Physics Simulation' : 'Analytical Recovery Scenario'}</strong> below to redeem lost points!
+                      </p>
+                      <button type="button" id="btn-open-recovery" onclick="triggerRecoveryStationManual()" class="pressable px-6 py-3 rounded-xl btn-aurora text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2 mx-auto cursor-pointer animate-bounce hover:animate-none">
+                        <span>${isSim ? '🎮 Play Simulation Mini-Game (+3.5 PTS)' : '📝 Solve Analytical Scenario (+3.5 PTS)'}</span>
+                      </button>
                     </div>
-                    <p class="text-xs text-slate-300 max-w-md mx-auto leading-relaxed">
-                      This question was missed (-35% point deduction). Play the <strong class="text-cyan-300">Interactive Physics Simulation</strong> below to redeem lost points!
-                    </p>
-                    <button type="button" id="btn-open-recovery" onclick="triggerRecoveryStationManual()" class="pressable px-6 py-3 rounded-xl btn-aurora text-slate-950 font-black text-xs sm:text-sm shadow-xl shadow-cyan-500/30 flex items-center justify-center gap-2 mx-auto cursor-pointer animate-bounce hover:animate-none">
-                      <span>🎮 Play Simulation Mini-Game (+3.5 PTS)</span>
-                    </button>
-                  </div>
+                  ` : `
+                    <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-center text-xs text-slate-300 max-w-md mx-auto">
+                      <span class="font-bold text-cyan-300">⚡ Point Recovery attempt completed for this question.</span>
+                    </div>
+                  `}
                 ` : `
-                  <div class="p-3 rounded-2xl bg-slate-900/90 border border-slate-700/80 text-center text-xs text-slate-300 max-w-md mx-auto">
-                    <span class="font-bold text-cyan-300">⚡ Point Recovery simulation attempt completed for this question.</span>
-                  </div>
+                  <!-- On Question 1 or if no prior misses: Redemption only appears starting from Question 2! -->
                 `}
               </div>
             `;
@@ -2318,6 +2352,10 @@
 
       const q = currentQuiz.questions[realIdx];
       const isCorrect = (studentAnswers[realIdx] === q.correct_answer);
+      if (q && q.correct_answer && (!studentAnswers[realIdx] || studentAnswers[realIdx] !== q.correct_answer)) {
+        studentMissedQuestions.add(realIdx);
+      }
+
       let remSecs = 999;
       if (quizMode === "teacher_led") {
         if (currentAssignment && currentAssignment.per_question_seconds > 0) {
@@ -2329,8 +2367,8 @@
         remSecs = isCountDown ? remainingSeconds : 999;
       }
 
-      // If incorrect once timer has expired, trigger recovery station
-      if (!isCorrect && !recoveryAttemptedForQuestion[realIdx] && hasPreviousIncorrectQuestion()) {
+      // If incorrect once timer has expired, trigger recovery station (strictly question 2+ and if redemption enabled)
+      if (isPointRedemptionEnabled() && currentQuestionIdx >= 1 && !recoveryAttemptedForQuestion[realIdx] && hasPreviousIncorrectQuestion()) {
         checkAndTriggerRecoveryStation(remSecs);
       }
     }
@@ -2395,9 +2433,8 @@
       const realIdx = questionOrder[currentQuestionIdx];
       const card = document.getElementById("recovery-station-card");
 
-      // STRICT GATE: Recovery engine ONLY activates if the student has missed a question previously!
-      // NEVER open if answering everything correctly!
-      if (!hasPreviousIncorrectQuestion()) {
+      // STRICT GATE: Recovery engine ONLY activates if enabled, on Question 2+, and if a prior question was missed!
+      if (!isPointRedemptionEnabled() || currentQuestionIdx < 1 || !hasPreviousIncorrectQuestion()) {
         if (card) card.classList.add("hidden");
         return;
       }
@@ -2414,14 +2451,11 @@
         const unit = (currentAssignment && currentAssignment.unit)
           || (currentQuiz && currentQuiz.unit)
           || 1;
-        recoveryChallengesByQuestion[realIdx] = window.RecoveryEngine.generateChallenge(course, unit);
+        // 50/50 split between interactive lab simulation and analytical theory scenario
+        const preferredFormat = (Math.random() < 0.5) ? 'sim' : 'mcq';
+        recoveryChallengesByQuestion[realIdx] = window.RecoveryEngine.generateChallenge(course, unit, preferredFormat);
       }
       activeRecoveryChallenge = recoveryChallengesByQuestion[realIdx];
-
-      // Default format to interactive simulation game
-      if (!activeRecoveryChallenge.format) {
-        activeRecoveryChallenge.format = 'sim';
-      }
 
       const spiralBadge = document.getElementById("recovery-spiral-badge");
       const rigorBadge = document.getElementById("recovery-rigor-badge");
@@ -2434,8 +2468,12 @@
         rigorBadge.textContent = activeRecoveryChallenge.isCalculus ? "AP Physics C (Calculus)" : "AP Physics 1 (Algebra)";
       }
 
-      renderRecoveryContent();
+      // CRITICAL: Unhide the card container FIRST so that the canvas inside has positive client dimensions!
       card.classList.remove("hidden");
+      renderRecoveryContent();
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event('resize'));
+      });
     }
 
     function renderRecoveryContent() {
@@ -2543,6 +2581,9 @@
         activeRecoveryChallenge.format = targetFormat;
       }
       renderRecoveryContent();
+      requestAnimationFrame(() => {
+        window.dispatchEvent(new Event('resize'));
+      });
     }
 
     function onSimSuccess(msg) {
@@ -2597,6 +2638,14 @@
     }
 
     function triggerRecoveryStationManual() {
+      if (!isPointRedemptionEnabled()) {
+        showToast("Feature Disabled", "Point redemption has been disabled by the instructor for this session.", "copper", 3000);
+        return;
+      }
+      if (currentQuestionIdx < 1) {
+        showToast("First Question", "Point redemption is only available from Question 2 onward after evaluating Question 1.", "copper", 3000);
+        return;
+      }
       // STRICT GATE: NEVER open if student has answered all questions correctly!
       if (!hasPreviousIncorrectQuestion()) {
         showToast("High Mastery", "You have answered all questions correctly so far. Recovery is only available after a missed question.", "lime", 3000);
@@ -2605,8 +2654,7 @@
 
       checkAndTriggerRecoveryStation(999);
       const card = document.getElementById("recovery-station-card");
-      if (card) {
-        card.classList.remove("hidden");
+      if (card && !card.classList.contains("hidden")) {
         card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         card.classList.add("ring-4", "ring-cyan-400");
         setTimeout(() => card.classList.remove("ring-4", "ring-cyan-400"), 1800);
@@ -2778,6 +2826,22 @@
                 showToast("Session Paused", "Instructor has paused to explain concepts", "brass", 3000);
               } else {
                 showToast("Session Resumed", "Assessment clock resumed", "lime", 2000);
+              }
+            }
+
+            // Sync dynamic live point redemption toggle
+            if (res.assignment.enable_point_redemption !== undefined) {
+              currentAssignment.enable_point_redemption = (res.assignment.enable_point_redemption !== false);
+            }
+
+            // Sync revealed answer from instructor
+            if (res.assignment.revealed_answer) {
+              const teacherRealIdx = questionOrder[teacherQ];
+              currentRevealedAnswers[teacherQ] = res.assignment.revealed_answer;
+              currentRevealedAnswers[teacherRealIdx] = res.assignment.revealed_answer;
+              const studentChoice = studentAnswers[teacherRealIdx];
+              if (studentChoice && studentChoice !== res.assignment.revealed_answer) {
+                studentMissedQuestions.add(teacherRealIdx);
               }
             }
 

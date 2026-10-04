@@ -2227,3 +2227,118 @@ Resolved the issue where clicking "🚀 Open Waiting Lobby & Track Students" in 
 ### Verification Results
 - Tested end-to-end assignment creation, student join, live participant fetching, and assignment start on PocketBase: HTTP 200 OK across all endpoints.
 - Synchronized across workspace, `D:\APPS\VectorSelect by Mr. F\`, and `D:\APPS\marker\web_app\`.
+
+---
+
+## Phase 55: Question 1 Point Redemption Gate, 50/50 Lab/Theory Split, Canvas Simulation Render Fix, and Teacher Portal Redemption Toggle (2026-10-04)
+
+### Overview
+Addressed comprehensive user feedback:
+1. *"point redemption showing up after the first question...........my logic was that let students a wrong question so the logic would be that point redemption would only show up from the second (not only) if they got the first one wrong or any other question wrong"*
+2. *"50 50 split with sim/question"*
+3. *"also the sims are not working. i see nothing! check all sims and fix them bro"* (simulations rendered as pitch-black boxes)
+4. *"also add a toggle on the teacher portal if i want to turn on the point redemption feature"*
+
+---
+
+### Key Architectural Changes & Technical Solutions
+
+#### 1. Strict Question 1 Gating & Sequential Prior-Miss Verification
+- **Root Cause of Question 1 Trigger**:
+  - `hasPreviousIncorrectQuestion()` previously included a fallback branch checking `isCurrentQuestionEvaluationRevealed()`. When Question 1's timer expired or was auto-locked, it treated Question 1 itself as a "missed prior question" and displayed the recovery station immediately on Question 1.
+- **Architectural Resolution (`index.html`)**:
+  - Defined strict zero-activation on Question 1:
+    ```javascript
+    function hasPreviousIncorrectQuestion() {
+      if (!isPointRedemptionEnabled()) return false;
+      if (currentQuestionIdx < 1) return false; // STRICT: NEVER on Question 1!
+      if (!currentQuiz || !currentQuiz.questions) return false;
+
+      for (let i = 0; i < currentQuestionIdx; i++) {
+        const pastRealIdx = questionOrder[i];
+        if (studentMissedQuestions.has(pastRealIdx)) return true;
+        const q = currentQuiz.questions[pastRealIdx];
+        const ans = studentAnswers[pastRealIdx];
+        if (q && q.correct_answer && ans && ans !== q.correct_answer) return true;
+        const revKey = currentRevealedAnswers[i] || currentRevealedAnswers[pastRealIdx];
+        if (revKey && ans && ans !== revKey) return true;
+      }
+      return false;
+    }
+    ```
+  - Added strict check in `checkAndTriggerRecoveryStation(timeRemaining)`:
+    ```javascript
+    if (!isPointRedemptionEnabled() || currentQuestionIdx < 1 || !hasPreviousIncorrectQuestion()) {
+      if (card) card.classList.add("hidden");
+      return;
+    }
+    ```
+  - Added student toast feedback in `triggerRecoveryStationManual()` explaining that redemption is only available from Question 2 onward after Question 1 has been completed and evaluated.
+
+#### 2. Balanced 50/50 Procedural Split (Interactive Apparatus vs Analytical Theory)
+- In `checkAndTriggerRecoveryStation()` (`index.html`):
+  - When generating a procedural recovery challenge for a question, the format is balanced with a 50/50 probability:
+    ```javascript
+    const preferredFormat = (Math.random() < 0.5) ? 'sim' : 'mcq';
+    recoveryChallengesByQuestion[realIdx] = window.RecoveryEngine.generateChallenge(course, unit, preferredFormat);
+    ```
+  - Seamless format toggle button `#btn-toggle-recovery-format` allows the student to switch back and forth between "🔬 Collegiate Lab Station & Analytical Scenario" and "📝 Analytical Theory Challenge" at any time.
+
+#### 3. Resolution of Black Screen Simulation Canvas Bug (`data/recovery_sims.js` & `index.html`)
+- **Root Cause Analysis**:
+  - `renderRecoveryContent()` was called while the parent card `#recovery-station-card` still possessed `display: none` (`hidden`).
+  - In `setupHiDpiCanvas`, `canvas.parentElement.clientWidth` evaluated to `0`, sizing the canvas width to `0px` and rendering a pitch-black box.
+- **Engine Hardening (`data/recovery_sims.js`)**:
+  - Updated `setupHiDpiCanvas` to inspect parent and ancestor containers for visible layout width, with fallback to clamped `window.innerWidth`:
+    ```javascript
+    let parentW = (canvas.parentElement && canvas.parentElement.clientWidth) || 0;
+    if (!parentW) {
+      let node = canvas.parentElement;
+      while (node && !parentW) {
+        if (node.clientWidth > 0) parentW = node.clientWidth;
+        node = node.parentElement;
+      }
+    }
+    if (!parentW || parentW < 50) {
+      parentW = Math.min(1000, Math.max(340, window.innerWidth - 64));
+    }
+    ```
+  - Added `attachResizeObserver(canvas, onResize)` with clean disconnection when `stop()` is called.
+  - Attached layout recalculation hooks across all 5 apparatuses:
+    1. Precision Ballistics & Dual-Axis Photogate (`mountBallisticsLab`)
+    2. Dynamic Friction & Work-Energy Air Track (`mountFrictionLab`)
+    3. Centripetal Acceleration & Vertical Loop (`mountCentripetalLab`)
+    4. Damped & Driven Harmonic Oscillator (`mountHarmonicLab`)
+    5. Static & Rotational Equilibrium Beam (`mountTorqueLab`)
+- **Render Order Fix (`index.html`)**:
+  - In `checkAndTriggerRecoveryStation`: unhides the container *first* (`card.classList.remove("hidden")`) before calling `renderRecoveryContent()`, and triggers `window.dispatchEvent(new Event('resize'))` in `requestAnimationFrame`.
+
+#### 4. Teacher Portal Point Redemption Feature Toggle (`teacher.html` & PocketBase)
+- **Dispatch Panel Control**:
+  - Added `#opt-point-redemption` checkbox under "Integrity & Assessment Controls" in `teacher.html` (checked by default).
+  - Included `enable_point_redemption` property in the `createAssignment()` payload.
+- **Live Control Toolbar Toggle**:
+  - Added `#lc-btn-redemption` button with `#lc-redemption-text` ("Redemption: ON" / "Redemption: OFF") in the instructor's Live Control bar.
+  - Implemented `toggleLivePointRedemption()` to broadcast live updates to PocketBase and localStorage via `setAssignmentTimerState(join_code, { enable_point_redemption })`.
+- **Teacher-Led Answer Synchronization**:
+  - Updated `toggleAnswerReveal`, `showDiscussionPanel`, `hideDiscussionPanel`, and navigation methods to broadcast `revealed_answer` when key reveal is toggled.
+  - In `index.html`, `startTeacherLedPolling` synchronizes `enable_point_redemption` and evaluates misses against `res.assignment.revealed_answer` without leaking keys ahead of time.
+- **PocketBase Schema Update**:
+  - Added `enable_point_redemption` (bool) and `revealed_answer` (text) to the `active_assignments` collection schema in `pocketbase/pocketbase_schema.json` and applied migration to the active PocketBase database.
+
+---
+
+### Verification Results
+- **Node.js Syntax Checks**:
+  - `node -c data/recovery_sims.js` -> Clean exit code 0.
+- **Gating Logic Test**:
+  - Question 1 (index 0): `hasPreviousIncorrectQuestion()` returns `false` -> Point redemption card hidden.
+  - Question 2 (index 1) with missed Q1: `hasPreviousIncorrectQuestion()` returns `true` -> Point redemption station activates.
+  - Point redemption toggle set to OFF: `isPointRedemptionEnabled()` returns `false` -> Point redemption card hidden across all questions.
+- **Canvas Rendering Test**:
+  - Resized and verified all 5 apparatuses initialize with positive pixel dimensions and active animation loops.
+- **Synchronized Codebases**:
+  - `c:\Users\fahad\Documents\GitHub\APPC-M\VectorSelect by Mr. F\`
+  - `D:\APPS\VectorSelect by Mr. F\`
+  - `D:\APPS\marker\web_app\`
+
