@@ -2587,6 +2587,54 @@ Addressed two user requests:
 - **Visual Alignment**: Tested card padding and text alignment; top and bottom margins are completely balanced with zero label wrapping.
 - **Deployment**: Synchronized across workspace, `D:\APPS\VectorSelect by Mr. F\`, and `D:\APPS\marker\web_app\`.
 
+---
+
+## Phase 59: Compact Header Spacing & System Tightening Audit (2026-10-04)
+
+### Overview
+Addressed user requests:
+1. *"make the text move toward top border"* (referencing `media_1791116462108.png`).
+2. *"also give me a list of other broken things that need to be tightned?"*
+
+---
+
+### Architectural Changes & Refinements
+
+#### 1. Compact Header Positioning on Sidebar Cards (`index.html`)
+- **Question Timer Card (`#sidebar-timer-card`)**:
+  - Reduced top padding from `py-6` (24px) to `pt-3.5 pb-4 px-5` (14px top padding).
+  - Reduced header bottom padding from `pb-2.5` to `pb-2` with divider `border-slate-800/70`.
+  - Adjusted container min-height to `min-h-[142px]` with `my-auto py-1.5` on timer digits.
+  - Reduced bottom subtext padding to `pt-2`.
+  - **Result**: The "● QUESTION TIMER" header moves significantly closer to the card's top rounded border, removing the excessive empty space.
+- **Questions Navigation Card**:
+  - Reduced container top padding from `py-6` to `pt-3.5 pb-5 px-5 space-y-4`.
+  - Tightened the header row padding to `pb-2.5 border-b border-slate-800/80`.
+  - **Result**: The "QUESTIONS" title, "Hide ➔" pill, and "0 / 9 Answered" badge sit snugly against the top border while maintaining balanced bottom padding.
+
+---
+
+### System-Wide Tightening Audit Findings
+1. **Teacher-Led Timer Expiration Abrupt Advance**:
+   - `teacher.html`: When question timer reaches `00:00`, it immediately skips to `lcNextQuestion()` without waiting for discussion. Needs pause at `00:00` with input lock and discussion trigger.
+2. **Finish Exam Button Active During Live Class**:
+   - `index.html`: Students in `teacher_led` mode can click "Finish & Submit Exam" at any time, disconnecting them from the live session. Needs locking or hiding during teacher-led mode.
+3. **Simulation Canvas Auto-Resize on Card Reveal**:
+   - When `#recovery-station-card` is unhidden, canvas dimensions must re-evaluate via `ResizeObserver` or deferred resize event to prevent initial layout clipping.
+4. **Instant Score Flash Before Server Grading**:
+   - In zero-key client environments, `res-score` calculates as 0 before `submitStudentExam()` returns. Needs seamless loading indicator or server-verified score binding.
+5. **Post-Exam Review Official Key Hydration**:
+   - `#view-review` must query `fetchAnswerKeysForQuiz()` so official College Board keys and rationales are visible after submission.
+6. **Mobile Emoji Dock Overlap**:
+   - Fixed `#student-emoji-dock` positioning on small screens to avoid obstructing question choices.
+
+---
+
+### Deployment & Verification
+- Tested sidebar layout on responsive viewports.
+- Mirrored all files to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+
+
 
 
 
