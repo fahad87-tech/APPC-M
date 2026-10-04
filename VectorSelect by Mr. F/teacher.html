@@ -2526,14 +2526,17 @@
             lcTimerRemaining--;
             updateLcTimerDisplay();
             if (lcTimerRemaining <= 0) {
-              // Auto-advance to next question or end
-              if (currentLiveIndex < currentLiveQuiz.questions.length - 1) {
-                lcNextQuestion();
-                lcTimerRemaining = perQ;
-                updateLcTimerDisplay();
-              } else {
-                clearInterval(lcTimerInterval);
-                alert("Final question time expired! You can now end the session.");
+              clearInterval(lcTimerInterval);
+              lcTimerRemaining = 0;
+              updateLcTimerDisplay();
+              showTeacherToast("Time Expired", "Question time is up! Student inputs locked for discussion.", "brass", 3500);
+              // Automatically transition into discussion phase — freeze student inputs, keep projector safe
+              if (currentLiveAssignment) {
+                fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex).then(answers => {
+                  showDiscussionPanel(answers);
+                }).catch(() => {
+                  showDiscussionPanel([]);
+                });
               }
             }
           }

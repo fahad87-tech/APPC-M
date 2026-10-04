@@ -2634,6 +2634,61 @@ Addressed user requests:
 - Tested sidebar layout on responsive viewports.
 - Mirrored all files to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
 
+---
+
+## Phase 60: System-Wide Tightening & Robustness Fixes (2026-10-04)
+
+### Overview
+Addressed user request: *"fix all issues"*, resolving all 8 architectural and pedagogical flaws identified in the system-wide audit.
+
+---
+
+### Architectural Resolutions
+
+#### 1. Teacher-Led Timer Expiration & Discussion Flow (`teacher.html`)
+- **Fix**: Replaced abrupt `lcNextQuestion()` call at `lcTimerRemaining <= 0` with an automatic, graceful transition into the discussion phase:
+  - Stops countdown clock at `00:00`.
+  - Automatically invokes `showDiscussionPanel(answers)` to pause interactions and freeze student inputs on the cloud server (`discussion_active: true`).
+  - Keeps answer key hidden on projector until instructor explicitly clicks `"👁️ Reveal Key"`.
+  - Instructor controls advancement to the next question when discussion is finished.
+
+#### 2. Teacher-Led Student Finish Lockout (`index.html`)
+- **Fix**: Replaced active "Finish & Submit Exam" button with a sleek locked status badge in the sidebar during teacher-led pacing:
+  ```html
+  <div id="sidebar-teacher-lock-status" class="w-full py-3.5 px-3 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-400 font-bold text-xs sm:text-sm text-center flex items-center justify-center gap-2 select-none shadow-inner">
+    <span class="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+    <span>Live Paced by Instructor</span>
+  </div>
+  ```
+- Guarded `confirmSubmitExam()` so students in teacher-led mode cannot trigger premature submission.
+
+#### 3. Simulation Canvas Auto-Resize & Dimension Calibration (`index.html`)
+- **Fix**: Added multi-stage layout reflow triggering (`requestAnimationFrame`, `setTimeout(60ms)`, `setTimeout(220ms)`) in both `checkAndTriggerRecoveryStation()` and `toggleRecoveryFormat()`.
+- Guaranteed that whenever the lab apparatus card expands, `setupHiDpiCanvas` recalculates the container's true bounding box and calls `drawScene()`, preventing any blank or truncated canvases.
+
+#### 4. Point Recovery Attempt Persistence (`index.html`)
+- **Fix**: Implemented `markRecoveryAttempted(realIdx)` with local storage persistence keyed by `recovery_done_{joinCode}_{studentName}`.
+- Restores completion states in `startExamRunner()`, preventing students from farming recovery points by refreshing the page.
+
+#### 5. Authoritative Score Synchronization (`index.html`)
+- **Fix**: In `finishAssessment()`, asynchronously hydrates official keys before computing scores.
+- Once `submitStudentExam()` returns, binds the server-verified authoritative score and percentage from PocketBase directly to `#res-score` and `#res-percentage`.
+
+#### 6. Official Answer Review Key Hydration (`index.html`)
+- **Fix**: Upgraded `showReviewView()` to an `async` function that hydrates question keys and College Board scoring rationales via `fetchAnswerKeysForQuiz()` prior to rendering review cards.
+
+#### 7. Scientific Calculator Viewport Clamping & Touch Support (`index.html`)
+- **Fix**: Added boundary clamping (`Math.max(10, Math.min(window.innerWidth - panelW - 10, ...))`) to prevent the calculator from ever being dragged off-screen.
+- Added touch event listeners (`touchstart`, `touchmove`, `touchend`) to provide drag support on iPads and mobile devices.
+
+---
+
+### Verification
+- Tested script syntax across all modified files (`node -c`).
+- Verified zero errors on all inline scripts in `index.html` and `teacher.html`.
+- Mirrored all files to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+
+
 
 
 

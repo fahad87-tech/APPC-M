@@ -701,6 +701,11 @@
             </div>
           </div>
 
+          <div id="sidebar-teacher-lock-status" class="hidden w-full py-3.5 px-3 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-400 font-bold text-xs sm:text-sm text-center flex items-center justify-center gap-2 select-none shadow-inner">
+            <span class="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span>Live Paced by Instructor</span>
+          </div>
+
           <button onclick="confirmSubmitExam()" id="btn-finish-sidebar" class="pressable w-full py-3.5 rounded-xl btn-aurora text-slate-950 font-black text-sm sm:text-base shadow-xl transition">
             Finish &amp; Submit Exam
           </button>
@@ -1331,7 +1336,16 @@
       questionStartTime = Date.now();
       activeRecoveryChallenge = null;
       if (window.RecoverySims) window.RecoverySims.stop();
+
+      // Restore any recovery attempts completed in this session
       recoveryAttemptedForQuestion = {};
+      if (currentAssignment && currentAssignment.join_code && activeStudent) {
+        try {
+          const storageKey = `recovery_done_${currentAssignment.join_code}_${activeStudent}`;
+          recoveryAttemptedForQuestion = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        } catch(e) {}
+      }
+
       recoveryChallengesByQuestion = {};
       questionPointsBreakdown = {};
       studentMissedQuestions = new Set();
@@ -1385,10 +1399,12 @@
       }, 1000);
 
       // Teacher-led mode: hide navigation, start fast sync polling
+      const lockStatus = document.getElementById("sidebar-teacher-lock-status");
       if (quizMode === "teacher_led") {
         document.getElementById("nav-controls").classList.add("hidden");
         document.getElementById("teacher-led-badge").classList.remove("hidden");
         document.getElementById("btn-finish-sidebar").classList.add("hidden");
+        if (lockStatus) lockStatus.classList.remove("hidden");
         // Teacher controls submission — hide all submit buttons
         document.getElementById("btn-submit-header").classList.add("hidden");
         // Teacher-led pacing: only the per-question timer is shown
@@ -1406,6 +1422,7 @@
         document.getElementById("nav-controls").classList.remove("hidden");
         document.getElementById("teacher-led-badge").classList.add("hidden");
         document.getElementById("btn-finish-sidebar").classList.remove("hidden");
+        if (lockStatus) lockStatus.classList.add("hidden");
         // Student-led pacing: only the overall session timer is shown
         document.getElementById("btn-submit-header").classList.add("hidden");
         document.getElementById("student-perq-box").classList.add("hidden");
@@ -2508,6 +2525,8 @@
       requestAnimationFrame(() => {
         window.dispatchEvent(new Event('resize'));
       });
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 220);
     }
 
     function renderRecoveryContent() {
@@ -2583,9 +2602,10 @@
           choicesCont.appendChild(btn);
         });
       }
+
       if (window.renderMathInElement) {
         try {
-          renderMathInElement(card, {
+          renderMathInElement(promptEl, {
             delimiters: [
               {left: '$$', right: '$$', display: true},
               {left: '$', right: '$', display: false}
@@ -2618,12 +2638,26 @@
       requestAnimationFrame(() => {
         window.dispatchEvent(new Event('resize'));
       });
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 220);
+    }
+
+    function markRecoveryAttempted(realIdx) {
+      recoveryAttemptedForQuestion[realIdx] = true;
+      if (currentAssignment && currentAssignment.join_code && activeStudent) {
+        try {
+          const storageKey = `recovery_done_${currentAssignment.join_code}_${activeStudent}`;
+          const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+          saved[realIdx] = true;
+          localStorage.setItem(storageKey, JSON.stringify(saved));
+        } catch(e) {}
+      }
     }
 
     function onSimSuccess(msg) {
       const realIdx = questionOrder[currentQuestionIdx];
       if (recoveryAttemptedForQuestion[realIdx]) return;
-      recoveryAttemptedForQuestion[realIdx] = true;
+      markRecoveryAttempted(realIdx);
 
       const recoveryPts = (activeRecoveryChallenge && activeRecoveryChallenge.pointsRecovery) || 3.5;
       syncStudentLiveAnswer(true, recoveryPts);
@@ -2698,7 +2732,7 @@
     function handleRecoveryAnswer(selectedIndex) {
       const realIdx = questionOrder[currentQuestionIdx];
       if (recoveryAttemptedForQuestion[realIdx] || !activeRecoveryChallenge) return;
-      recoveryAttemptedForQuestion[realIdx] = true;
+      markRecoveryAttempted(realIdx);
 
       const choice = activeRecoveryChallenge.choices[selectedIndex];
       const isCorrect = choice && choice.isCorrect;
@@ -2923,6 +2957,10 @@
     // SUBMISSION & GRADING
     // ============================================================================
     function confirmSubmitExam() {
+      if (quizMode === "teacher_led") {
+        showToast("Instructor Paced", "This assessment session is paced live by your instructor.", "brass", 3000);
+        return;
+      }
       const answeredCount = Object.keys(studentAnswers).length;
       const total = currentQuiz.questions.length;
       let msg = `Ready to submit your assessment?\n\nYou have answered ${answeredCount} of ${total} questions.`;
@@ -2957,6 +2995,27 @@
         return;
       }
 
+      // Hydrate answer keys if stripped for zero-key exposure
+      if (!currentQuiz.questions.some(q => q.correct_answer) && typeof fetchAnswerKeysForQuiz === 'function' && currentAssignment) {
+        try {
+          const keys = await fetchAnswerKeysForQuiz(currentAssignment.assessment_id);
+          if (keys && keys.length > 0) {
+            const keyMap = {};
+            keys.forEach(k => {
+              if (k.question_id) keyMap[k.question_id] = k;
+              if (k.number) keyMap[k.number] = k;
+            });
+            currentQuiz.questions.forEach((q, idx) => {
+              const k = keyMap[q.question_id] || keyMap[q.number] || keyMap[idx + 1];
+              if (k) {
+                q.correct_answer = k.correct_answer;
+                q.explanation = k.explanation;
+              }
+            });
+          }
+        } catch(e) {}
+      }
+
       let score = 0;
       currentQuiz.questions.forEach((q, idx) => {
         if (studentAnswers[idx] && studentAnswers[idx] === q.correct_answer) {
@@ -2965,7 +3024,7 @@
       });
 
       const total = currentQuiz.questions.length;
-      const percentage = ((score / total) * 100).toFixed(1);
+      let percentage = ((score / total) * 100).toFixed(1);
       const m = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
       const s = String(elapsedSeconds % 60).padStart(2, '0');
       const timeStr = `${m}:${s}`;
@@ -2999,7 +3058,7 @@
 
       deactivateLockdown();
 
-      await submitStudentExam({
+      const subResult = await submitStudentExam({
         join_code: currentAssignment.join_code,
         student_name: activeStudent,
         class_period: currentAssignment.class_period || 'General',
@@ -3017,6 +3076,14 @@
         tab_switch_count: tabSwitchCount,
         fullscreen_exits: fullscreenExitCount
       });
+
+      // Synchronize verified server score if atomic hook returned authoritative grading
+      if (subResult && subResult.data && typeof subResult.data.score === 'number') {
+        const verifiedScore = subResult.data.score;
+        const verifiedPct = ((verifiedScore / total) * 100).toFixed(1);
+        document.getElementById("res-score").textContent = `${verifiedScore} / ${total}`;
+        document.getElementById("res-percentage").textContent = `${verifiedPct}%`;
+      }
     }
 
     // ============================================================================
@@ -3102,7 +3169,28 @@
     // ============================================================================
     // ANSWER REVIEW
     // ============================================================================
-    function showReviewView() {
+    async function showReviewView() {
+      // Ensure official keys and rationales are hydrated before rendering review cards
+      if (!currentQuiz.questions.some(q => q.correct_answer) && typeof fetchAnswerKeysForQuiz === 'function' && currentAssignment) {
+        try {
+          const keys = await fetchAnswerKeysForQuiz(currentAssignment.assessment_id);
+          if (keys && keys.length > 0) {
+            const keyMap = {};
+            keys.forEach(k => {
+              if (k.question_id) keyMap[k.question_id] = k;
+              if (k.number) keyMap[k.number] = k;
+            });
+            currentQuiz.questions.forEach((q, idx) => {
+              const k = keyMap[q.question_id] || keyMap[q.number] || keyMap[idx + 1];
+              if (k) {
+                q.correct_answer = k.correct_answer;
+                q.explanation = k.explanation;
+              }
+            });
+          }
+        } catch(e) {}
+      }
+
       document.getElementById("view-result").classList.add("hidden");
       document.getElementById("view-review").classList.remove("hidden");
 
@@ -3432,20 +3520,47 @@
       const handle = document.getElementById("calc-drag-handle");
       if (!panel || !handle) return;
       let isDragging = false, startX, startY, origLeft, origTop;
-      handle.addEventListener("mousedown", e => {
+
+      function onStart(clientX, clientY) {
         isDragging = true;
-        startX = e.clientX; startY = e.clientY;
+        startX = clientX; startY = clientY;
         const rect = panel.getBoundingClientRect();
         origLeft = rect.left; origTop = rect.top;
+      }
+
+      function onMove(clientX, clientY) {
+        if (!isDragging) return;
+        const panelW = panel.offsetWidth || 340;
+        const panelH = panel.offsetHeight || 380;
+        const maxLeft = Math.max(10, window.innerWidth - panelW - 10);
+        const maxTop = Math.max(10, window.innerHeight - panelH - 10);
+        const newLeft = Math.max(10, Math.min(maxLeft, origLeft + clientX - startX));
+        const newTop = Math.max(10, Math.min(maxTop, origTop + clientY - startY));
+        panel.style.left = newLeft + "px";
+        panel.style.top = newTop + "px";
+        panel.style.right = "auto";
+      }
+
+      function onEnd() { isDragging = false; }
+
+      handle.addEventListener("mousedown", e => {
+        onStart(e.clientX, e.clientY);
         e.preventDefault();
       });
-      document.addEventListener("mousemove", e => {
-        if (!isDragging) return;
-        panel.style.left = (origLeft + e.clientX - startX) + "px";
-        panel.style.top = (origTop + e.clientY - startY) + "px";
-        panel.style.right = "auto";
-      });
-      document.addEventListener("mouseup", () => { isDragging = false; });
+      document.addEventListener("mousemove", e => { onMove(e.clientX, e.clientY); });
+      document.addEventListener("mouseup", onEnd);
+
+      handle.addEventListener("touchstart", e => {
+        if (e.touches && e.touches[0]) {
+          onStart(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+      document.addEventListener("touchmove", e => {
+        if (isDragging && e.touches && e.touches[0]) {
+          onMove(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+      document.addEventListener("touchend", onEnd);
     })();
 
     // ============================================================================
