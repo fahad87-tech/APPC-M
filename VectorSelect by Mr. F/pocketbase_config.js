@@ -239,6 +239,45 @@ async function verifyJoinCode(join_code) {
   return { found: false };
 }
 
+// Fetch answer keys from PocketBase answer_keys collection or window.OFFLINE_ANSWER_KEYS
+async function fetchAnswerKeysForQuiz(assessment_id) {
+  if (!assessment_id) return null;
+  const aid = String(assessment_id).trim();
+
+  // 1. Try local offline air-gapped fallback
+  if (window.OFFLINE_ANSWER_KEYS && window.OFFLINE_ANSWER_KEYS[aid]) {
+    return window.OFFLINE_ANSWER_KEYS[aid].keys || [];
+  }
+
+  // 2. Query PocketBase answer_keys collection
+  if (pb) {
+    try {
+      const record = await pb.collection("answer_keys").getFirstListItem(`assessment_id = "${aid}"`);
+      if (record && record.keys) {
+        return record.keys;
+      }
+    } catch (err) {
+      console.warn("[PocketBase] Could not query answer_keys collection via SDK:", err);
+    }
+  }
+
+  // 3. Fallback: try direct fetch from server
+  try {
+    const serverUrl = getPocketBaseUrl();
+    const token = (pb && pb.authStore && pb.authStore.token) || "";
+    const headers = token ? { "Authorization": token } : {};
+    const res = await fetch(`${serverUrl}/api/collections/answer_keys/records?filter=(assessment_id='${aid}')`, { headers });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.items && data.items.length > 0 && data.items[0].keys) {
+        return data.items[0].keys;
+      }
+    }
+  } catch (e) {}
+
+  return null;
+}
+
 // Submits student test results (via Atomic Server-Side Hook or Offline Fallback)
 async function submitStudentExam(submissionData) {
   const serverUrl = getPocketBaseUrl();

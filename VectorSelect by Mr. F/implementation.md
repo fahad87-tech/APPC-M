@@ -2473,5 +2473,120 @@ Addressed user request:
 - Tested layout and rendering: the glowing brand badge and metallic wordmark match `teacher.html` with high contrast and zero visual clipping.
 - Synchronized across workspace, `D:\APPS\VectorSelect by Mr. F\`, and `D:\APPS\marker\web_app\`.
 
+---
+
+## Phase 58: Teacher Answer Key Reveal Hydration & Sidebar Card Border Symmetrical Alignment (2026-10-04)
+
+### Overview
+Addressed two user requests:
+1. *"even though i clicked reveal answer key on teacher portal but it did not show"* (Student portal displayed: `You picked C — answer was undefined`).
+2. *"make alignment of text with top and bottom border better for these two"* (referencing `media_1791115883136.png` showing uneven vertical spacing, awkward top/bottom alignment, and wrapping text in the runner sidebar cards).
+
+---
+
+### Key Issues & Root Cause Analysis
+
+#### 1. "Answer was undefined" on Student Portal During Answer Reveal
+- **Root Cause 1 (Zero-Key Leak Protection)**:
+  - In `exams_bundle.js`, `correct_answer` and `explanation` are deliberately removed from questions on the student client to prevent cheating via DevTools inspection.
+  - In `index.html`, `showDiscussionFeedback()` originally read `const correctAnswer = q.correct_answer;`, which was always `undefined`.
+- **Root Cause 2 (Instructor-Side Key Hydration)**:
+  - When the instructor launched a live assignment directly from the assignment lobby without visiting the full bank editor first, `currentLiveQuiz.questions` did not have `correct_answer` or `explanation` populated in memory if loaded from an un-hydrated record.
+  - `toggleTeacherAnswerReveal()` in `teacher.html` was attempting to read `q.correct_answer`, which was empty, thus transmitting `""` to `active_assignments.revealed_answer`.
+- **Root Cause 3 (Missing Explanation Sync)**:
+  - The live assignment collection only had a placeholder for `revealed_answer` and lacked a dedicated `revealed_explanation` field.
+
+#### 2. Sidebar Card Layout & Text Misalignment (`media_1791115883136.png`)
+- In `#sidebar-timer-card` and the Questions Navigation Card:
+  - Header text and bottom text were flush against card borders without balanced vertical padding.
+  - The progress count badge (`0 / 0 Answered`) had insufficient horizontal width in the 3-column layout, causing the word "Answered" to wrap onto a second line below "0 / 0".
+  - The timer digits in `#sidebar-timer-card` were not centered vertically relative to the top and bottom borders.
+
+---
+
+### Architectural Resolutions
+
+#### 1. Asynchronous Key Hydration & Live Cloud Broadcast (`pocketbase_config.js` & `teacher.html`)
+- **Key Fetching Utility (`pocketbase_config.js`)**:
+  - Implemented `fetchAnswerKeysForQuiz(assessment_id)` which queries:
+    1. `window.OFFLINE_ANSWER_KEYS[aid]` (air-gapped offline fallback).
+    2. PocketBase `answer_keys` collection via SDK.
+    3. PocketBase REST API with authorization header fallback.
+- **Teacher Console Hydration (`teacher.html`)**:
+  - Added `ensureQuizKeysHydrated(quiz)`:
+    ```javascript
+    async function ensureQuizKeysHydrated(quiz) {
+      if (!quiz || !quiz.questions) return;
+      hydrateQuizKeys(quiz);
+      if (quiz.questions.some(q => q.correct_answer)) return;
+      if (typeof fetchAnswerKeysForQuiz === 'function') {
+        const keys = await fetchAnswerKeysForQuiz(quiz.id);
+        if (keys && keys.length > 0) {
+          const keyMap = {};
+          keys.forEach(k => {
+            if (k.question_id) keyMap[k.question_id] = k;
+            if (k.number) keyMap[k.number] = k;
+          });
+          quiz.questions.forEach((q, idx) => {
+            const k = keyMap[q.question_id] || keyMap[q.number] || keyMap[idx + 1];
+            if (k) {
+              q.correct_answer = k.correct_answer;
+              q.explanation = k.explanation;
+            }
+          });
+        }
+      }
+    }
+    ```
+  - Executed inside `openLiveControl()` upon opening live assignment session and before running `toggleTeacherAnswerReveal()`.
+  - Added `revealed_explanation` to PocketBase database schema (`fld_aa_revexp`) and schema JSON.
+  - Updated `toggleTeacherAnswerReveal()` to broadcast both `revealed_answer` and `revealed_explanation` to `active_assignments`.
+
+#### 2. Student Portal Real-Time Discussion Sync (`index.html`)
+- Added `currentRevealedExplanations` state dictionary alongside `currentRevealedAnswers`.
+- In `startTeacherLedPolling()`:
+  - Detects incoming `res.assignment.revealed_answer` and `res.assignment.revealed_explanation`.
+  - Stores answers keyed by both teacher index and student shuffled index:
+    ```javascript
+    currentRevealedAnswers[teacherQ] = res.assignment.revealed_answer;
+    currentRevealedAnswers[teacherRealIdx] = res.assignment.revealed_answer;
+    currentRevealedExplanations[teacherQ] = res.assignment.revealed_explanation;
+    currentRevealedExplanations[teacherRealIdx] = res.assignment.revealed_explanation;
+    ```
+  - When instructor revokes reveal, cleanly purges the keys.
+  - Re-triggers `updateDiscussionFreeze(discussionActive, answerRevealed)` immediately on new reveal.
+- In `showDiscussionFeedback()`:
+  - Resolves correct answer hierarchically:
+    ```javascript
+    const correctAnswer = currentRevealedAnswers[currentQuestionIdx] 
+      || currentRevealedAnswers[realIdx] 
+      || (currentAssignment && currentAssignment.revealed_answer)
+      || q.correct_answer;
+    ```
+  - If `!correctAnswer`, gracefully calls `showDiscussionPendingNotice()` to wait for instructor broadcast instead of showing `"undefined"`.
+  - Displays College Board explanation directly from `explanation` string when available.
+
+#### 3. Symmetrical Card Layout & Typography Alignment (`index.html`)
+- **Question Timer Card (`#sidebar-timer-card`)**:
+  - Upgraded container to `py-6 px-6 min-h-[170px] flex flex-col justify-between`.
+  - Header: Added `pb-2.5 border-b border-slate-800/70` for crisp separation from timer digits.
+  - Timer digits: Centered vertically with `my-auto py-2.5` to ensure perfect distance from top header and bottom label.
+  - Subtext: Added `pt-2.5 border-t border-slate-800/50` for top/bottom border symmetry.
+- **Questions Navigation Card**:
+  - Container padding set to `py-6 px-6 space-y-5` matching timer card symmetry.
+  - Header: Added `pb-3.5 border-b border-slate-800/80` with flex separation.
+  - Progress Count Badge: Added `whitespace-nowrap shrink-0 px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/25` to permanently prevent "Answered" text from wrapping onto a secondary line in narrow viewports.
+  - Legend: Styled with compact badges (`h-3 w-3 rounded`) and consistent text alignment.
+  - Finish Button: Standardized padding (`py-3.5 rounded-xl`) with balanced bottom margin.
+
+---
+
+### Verification
+- **Syntax Check**: All JavaScript scripts and modules verified (`node -c`).
+- **Answer Key Reveal**: Tested that student portal receives teacher-revealed keys without bundling keys into client code.
+- **Visual Alignment**: Tested card padding and text alignment; top and bottom margins are completely balanced with zero label wrapping.
+- **Deployment**: Synchronized across workspace, `D:\APPS\VectorSelect by Mr. F\`, and `D:\APPS\marker\web_app\`.
+
+
 
 

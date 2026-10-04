@@ -1536,6 +1536,30 @@
       }
     }
 
+    async function ensureQuizKeysHydrated(quiz) {
+      if (!quiz || !quiz.questions) return;
+      hydrateQuizKeys(quiz);
+      if (quiz.questions.some(q => q.correct_answer)) return;
+
+      if (typeof fetchAnswerKeysForQuiz === 'function') {
+        const keys = await fetchAnswerKeysForQuiz(quiz.id);
+        if (keys && keys.length > 0) {
+          const keyMap = {};
+          keys.forEach(k => {
+            if (k.question_id) keyMap[k.question_id] = k;
+            if (k.number) keyMap[k.number] = k;
+          });
+          quiz.questions.forEach((q, idx) => {
+            const k = keyMap[q.question_id] || keyMap[q.number] || keyMap[idx + 1];
+            if (k) {
+              q.correct_answer = k.correct_answer;
+              q.explanation = k.explanation;
+            }
+          });
+        }
+      }
+    }
+
     // ============================================================================
     // ROSTER & CLASS ANALYTICS
     // ============================================================================
@@ -2080,6 +2104,7 @@
         alert("Quiz content not found in database for ID: " + assignment.assessment_id);
         return;
       }
+      await ensureQuizKeysHydrated(currentLiveQuiz);
 
       currentLiveIndex = assignment.current_question_index || 0;
       isAnswerRevealed = false;
@@ -2403,12 +2428,24 @@
     }
 
     async function toggleTeacherAnswerReveal() {
+      if (currentLiveQuiz && !currentLiveQuiz.questions[currentLiveIndex]?.correct_answer) {
+        await ensureQuizKeysHydrated(currentLiveQuiz);
+      }
+      const q = currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[currentLiveIndex];
+      const correctKey = q ? (q.correct_answer || "") : "";
+      const explanationText = q ? (q.explanation || "") : "";
+
       isAnswerRevealed = !isAnswerRevealed;
       const content = document.getElementById("lc-answer-content");
       const status = document.getElementById("lc-answer-status");
       const btn = document.getElementById("btn-toggle-reveal");
 
       if (isAnswerRevealed) {
+        const keyEl = document.getElementById("lc-key-text");
+        const ratEl = document.getElementById("lc-rationale-text");
+        if (keyEl) keyEl.textContent = correctKey || 'Pending';
+        if (ratEl) ratEl.textContent = explanationText || "Official College Board rationale.";
+
         if (content) content.classList.remove("hidden");
         if (status) status.textContent = "🔓 Revealed";
         if (btn) {
@@ -2428,12 +2465,10 @@
 
       // Synchronize answer reveal state to cloud & students
       if (currentLiveAssignment) {
-        const correctKey = (isAnswerRevealed && currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[currentLiveIndex])
-          ? currentLiveQuiz.questions[currentLiveIndex].correct_answer
-          : "";
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
           answer_revealed: isAnswerRevealed,
-          revealed_answer: correctKey
+          revealed_answer: isAnswerRevealed ? correctKey : "",
+          revealed_explanation: isAnswerRevealed ? explanationText : ""
         });
 
         // Re-render student dots and discussion panel with updated reveal state

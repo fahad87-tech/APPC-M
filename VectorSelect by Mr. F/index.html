@@ -647,8 +647,8 @@
       <div id="runner-sidebar-col" class="xl:col-span-3 lg:col-span-4 space-y-4 transition-all duration-300">
         
         <!-- Large Question Timer on Right Panel -->
-        <div id="sidebar-timer-card" class="quantum-card rounded-3xl p-5 shadow-2xl space-y-1.5 text-center relative overflow-hidden border border-cyan-500/35 bg-slate-950/90">
-          <div class="flex items-center justify-between">
+        <div id="sidebar-timer-card" class="quantum-card rounded-3xl py-6 px-6 shadow-2xl flex flex-col justify-between text-center relative overflow-hidden border border-cyan-500/35 bg-slate-950/90 min-h-[170px]">
+          <div class="flex items-center justify-between pb-2.5 border-b border-slate-800/70">
             <div class="flex items-center gap-2">
               <span id="sidebar-timer-dot" class="h-2.5 w-2.5 rounded-full bg-amber-400 animate-pulse"></span>
               <span id="sidebar-timer-label" class="text-xs font-black uppercase tracking-wider text-slate-300">Question Timer</span>
@@ -657,49 +657,51 @@
           </div>
           
           <!-- BIG prominent digits -->
-          <div id="sidebar-timer-display" class="font-mono text-4xl sm:text-5xl font-black text-amber-400 tracking-wider py-1 drop-shadow-md">
-            00:00
+          <div class="py-2.5 flex items-center justify-center my-auto">
+            <div id="sidebar-timer-display" class="font-mono text-4xl sm:text-5xl font-black text-amber-400 tracking-wider drop-shadow-md">
+              00:00
+            </div>
           </div>
-          <div id="sidebar-timer-subtext" class="text-[11px] text-slate-400 font-semibold">Time Remaining For Question</div>
+          <div id="sidebar-timer-subtext" class="text-[11px] text-slate-400 font-semibold pt-2.5 border-t border-slate-800/50">Time Remaining For Question</div>
         </div>
 
         <!-- Questions Navigation Grid Card with Arrow Key Collapse Handles -->
-        <div class="quantum-card rounded-3xl p-6 shadow-2xl space-y-5 sticky top-24 relative">
+        <div class="quantum-card rounded-3xl py-6 px-6 shadow-2xl space-y-5 sticky top-24 relative">
           
           <!-- Left Protruding Arrow Key Collapse Handle on Questions Panel Borderline (Centered vertically, no overlap with left window) -->
           <button onclick="toggleSidebarCollapse()" class="hidden lg:flex absolute left-0 top-1/2 -translate-x-full -translate-y-1/2 h-14 w-6 rounded-l-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs items-center justify-center shadow-xl transition-all z-30 cursor-pointer border-2 border-r-0 border-white hover:scale-105 active:scale-95" title="Click Arrow to Hide Right Panel & Maximize Question Window">
             ▶
           </button>
           
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <h4 class="text-sm font-black uppercase tracking-wider text-slate-300">Questions</h4>
+          <div class="flex items-center justify-between gap-2 pb-3.5 border-b border-slate-800/80">
+            <div class="flex items-center gap-2 shrink-0">
+              <h4 class="text-xs font-black uppercase tracking-wider text-slate-300">Questions</h4>
               <!-- Header Arrow Button to Hide Right Panel -->
-              <button onclick="toggleSidebarCollapse()" id="btn-collapse-sidebar" title="Hide Right Panel & Maximize Question Window" class="pressable px-2.5 py-1 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-500/40 text-xs font-black flex items-center gap-1.5 transition shadow-sm">
+              <button onclick="toggleSidebarCollapse()" id="btn-collapse-sidebar" title="Hide Right Panel & Maximize Question Window" class="pressable px-2 py-0.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 hover:text-white border border-cyan-500/40 text-[11px] font-bold flex items-center gap-1 transition shadow-sm">
                 <span>Hide</span>
-                <span class="text-base font-black">➔</span>
+                <span class="text-xs font-black">➔</span>
               </button>
             </div>
-            <span id="progress-count" class="text-sm font-bold text-cyan-400">0 / 0 Answered</span>
+            <span id="progress-count" class="text-xs font-mono font-bold text-cyan-400 whitespace-nowrap shrink-0 px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/25">0 / 0 Answered</span>
           </div>
 
           <!-- Question Buttons Grid (p-2.5 ensures active button borders never clip against scroll edges) -->
           <div id="q-grid-buttons" class="grid grid-cols-4 sm:grid-cols-5 gap-3 max-h-80 overflow-y-auto p-2.5 rounded-2xl bg-slate-950/40 border border-slate-800/80"></div>
 
           <!-- Legend -->
-          <div class="border-t border-slate-800 pt-4 space-y-2.5 text-sm text-slate-300 font-medium">
+          <div class="border-t border-slate-800 pt-4 space-y-2 text-xs text-slate-300 font-medium">
             <div class="flex items-center gap-2">
-              <span class="h-3.5 w-3.5 rounded-md bg-cyan-600 border border-cyan-400"></span> Answered
+              <span class="h-3 w-3 rounded bg-cyan-600 border border-cyan-400"></span> Answered
             </div>
             <div class="flex items-center gap-2">
-              <span class="h-3.5 w-3.5 rounded-md bg-slate-800 border border-slate-700"></span> Unanswered
+              <span class="h-3 w-3 rounded bg-slate-800 border border-slate-700"></span> Unanswered
             </div>
             <div class="flex items-center gap-2">
-              <span class="h-3.5 w-3.5 rounded-md bg-amber-500/20 border border-amber-500 text-amber-400 flex items-center justify-center font-bold text-[10px]">⚐</span> Flagged
+              <span class="h-3 w-3 rounded bg-amber-500/20 border border-amber-500 text-amber-400 flex items-center justify-center font-bold text-[9px]">⚐</span> Flagged
             </div>
           </div>
 
-          <button onclick="confirmSubmitExam()" id="btn-finish-sidebar" class="pressable w-full py-4 rounded-xl btn-aurora text-slate-950 font-black text-base shadow-xl transition">
+          <button onclick="confirmSubmitExam()" id="btn-finish-sidebar" class="pressable w-full py-3.5 rounded-xl btn-aurora text-slate-950 font-black text-sm sm:text-base shadow-xl transition">
             Finish &amp; Submit Exam
           </button>
         </div>
@@ -1062,6 +1064,7 @@
     let lastRenderedQuestionIdx = -1;
     let studentMissedQuestions = new Set();
     let currentRevealedAnswers = {};
+    let currentRevealedExplanations = {};
 
     function isPointRedemptionEnabled() {
       if (currentAssignment && currentAssignment.enable_point_redemption === false) {
@@ -1333,6 +1336,7 @@
       questionPointsBreakdown = {};
       studentMissedQuestions = new Set();
       currentRevealedAnswers = {};
+      currentRevealedExplanations = {};
       lastRenderedQuestionIdx = -1;
       updateStudentPointsHUD();
       const emojiDock = document.getElementById("student-emoji-dock");
@@ -1702,7 +1706,22 @@
       const realIdx = questionOrder[currentQuestionIdx];
       const q = currentQuiz.questions[realIdx];
       const studentAnswer = studentAnswers[realIdx];
-      const correctAnswer = q.correct_answer;
+      const correctAnswer = currentRevealedAnswers[currentQuestionIdx] 
+        || currentRevealedAnswers[realIdx] 
+        || (currentAssignment && currentAssignment.revealed_answer)
+        || q.correct_answer;
+
+      if (!correctAnswer) {
+        showDiscussionPendingNotice();
+        return;
+      }
+
+      const explanation = currentRevealedExplanations[currentQuestionIdx]
+        || currentRevealedExplanations[realIdx]
+        || (currentAssignment && currentAssignment.revealed_explanation)
+        || q.explanation
+        || "";
+
       const qNum = currentQuestionIdx + 1;
 
       const feedbackPanel = document.getElementById("discussion-feedback");
@@ -1723,7 +1742,7 @@
             <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Correct Answer</span>
             <span class="text-2xl font-black text-emerald-400 px-3.5 py-1 rounded-xl bg-emerald-500/15 border border-emerald-500/40">${correctAnswer}</span>
           </div>
-          ${q.explanation ? `<div class="text-sm text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-800">${q.explanation}</div>` : ''}
+          ${explanation ? `<div class="text-sm text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-800">${explanation}</div>` : ''}
         `;
         showToast("No Answer", `Q${qNum} — correct answer was ${correctAnswer}`, "brass", 3200);
       } else if (studentAnswer === correctAnswer) {
@@ -1738,7 +1757,7 @@
               <div class="text-sm text-chalk/60">You picked <span class="font-black text-lime-400">${studentAnswer}</span> — the right answer</div>
             </div>
           </div>
-          ${q.explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${q.explanation}</div>` : ''}
+          ${explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${explanation}</div>` : ''}
         `;
         showToast("Correct!", `Q${qNum} — you nailed it`, "lime", 3400);
       } else {
@@ -1753,7 +1772,7 @@
               <div class="text-sm text-chalk/60">You picked <span class="font-black text-coral-400">${studentAnswer}</span> — answer was <span class="font-black text-lime-400">${correctAnswer}</span></div>
             </div>
           </div>
-          ${q.explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${q.explanation}</div>` : ''}
+          ${explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${explanation}</div>` : ''}
         `;
         showToast("Not quite", `Q${qNum} — the answer was ${correctAnswer}`, "coral", 3400);
       }
@@ -2822,11 +2841,38 @@
               renderCurrentQuestion();
             }
 
+            // Sync revealed answer & explanation from instructor
+            let isNewReveal = false;
+            if (res.assignment.revealed_answer) {
+              const teacherRealIdx = questionOrder[teacherQ];
+              if (currentRevealedAnswers[teacherQ] !== res.assignment.revealed_answer) {
+                isNewReveal = true;
+              }
+              currentRevealedAnswers[teacherQ] = res.assignment.revealed_answer;
+              currentRevealedAnswers[teacherRealIdx] = res.assignment.revealed_answer;
+              if (res.assignment.revealed_explanation) {
+                currentRevealedExplanations[teacherQ] = res.assignment.revealed_explanation;
+                currentRevealedExplanations[teacherRealIdx] = res.assignment.revealed_explanation;
+              }
+              const studentChoice = studentAnswers[teacherRealIdx];
+              if (studentChoice && studentChoice !== res.assignment.revealed_answer) {
+                studentMissedQuestions.add(teacherRealIdx);
+              } else if (studentChoice && studentChoice === res.assignment.revealed_answer) {
+                studentMissedQuestions.delete(teacherRealIdx);
+              }
+            } else if (res.assignment.answer_revealed === false) {
+              delete currentRevealedAnswers[teacherQ];
+              const teacherRealIdx = questionOrder[teacherQ];
+              if (teacherRealIdx !== undefined) delete currentRevealedAnswers[teacherRealIdx];
+            }
+
             // Sync per-question timer + discussion pause state from instructor
             currentAssignment.question_started_at = res.assignment.question_started_at;
+            currentAssignment.revealed_answer = res.assignment.revealed_answer;
+            currentAssignment.revealed_explanation = res.assignment.revealed_explanation;
             const newDiscussion = res.assignment.discussion_active === true;
             const newAnswerRevealed = res.assignment.answer_revealed === true;
-            if (newDiscussion !== discussionActive || newAnswerRevealed !== answerRevealed) {
+            if (newDiscussion !== discussionActive || newAnswerRevealed !== answerRevealed || (discussionActive && isNewReveal)) {
               discussionActive = newDiscussion;
               answerRevealed = newAnswerRevealed;
               updateDiscussionFreeze(discussionActive, answerRevealed);
@@ -2847,19 +2893,6 @@
             // Sync dynamic live point redemption toggle
             if (res.assignment.enable_point_redemption !== undefined) {
               currentAssignment.enable_point_redemption = (res.assignment.enable_point_redemption !== false);
-            }
-
-            // Sync revealed answer from instructor
-            if (res.assignment.revealed_answer) {
-              const teacherRealIdx = questionOrder[teacherQ];
-              currentRevealedAnswers[teacherQ] = res.assignment.revealed_answer;
-              currentRevealedAnswers[teacherRealIdx] = res.assignment.revealed_answer;
-              const studentChoice = studentAnswers[teacherRealIdx];
-              if (studentChoice && studentChoice !== res.assignment.revealed_answer) {
-                studentMissedQuestions.add(teacherRealIdx);
-              } else if (studentChoice && studentChoice === res.assignment.revealed_answer) {
-                studentMissedQuestions.delete(teacherRealIdx);
-              }
             }
 
             // Sync previous question's evaluated answer from instructor when advancing
