@@ -7,7 +7,181 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>VectorSelect by Mr. F — Student Assessment Portal</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com">
+  // ============================================================================
+  // FORMULA SHEET MODAL LOGIC
+  // ============================================================================
+  function openFormulaSheetModal() {
+    const modal = document.getElementById("formula-sheet-modal");
+    if (modal) modal.classList.remove("hidden");
+  }
+
+  function closeFormulaSheetModal(e) {
+    if (e && e.target && e.target.id !== "formula-sheet-modal") return;
+    const modal = document.getElementById("formula-sheet-modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  function filterFormulaCat(cat) {
+    document.querySelectorAll(".cat-pill").forEach(p => {
+      p.className = p.textContent.toLowerCase().includes(cat.toLowerCase())
+        ? "cat-pill active px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition"
+        : "cat-pill px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
+    });
+    document.querySelectorAll(".formula-card").forEach(c => {
+      if (cat === "all" || c.dataset.cat === cat) {
+        c.classList.remove("hidden");
+      } else {
+        c.classList.add("hidden");
+      }
+    });
+  }
+
+  // ============================================================================
+  // FBD / SCRATCHPAD CANVAS LOGIC
+  // ============================================================================
+  let scratchCanvas = null;
+  let scratchCtx = null;
+  let isScratchDrawing = false;
+  let scratchColor = "#ffffff";
+  let scratchSize = 2;
+  let scratchShowGrid = true;
+  let scratchStrokes = [];
+
+  function toggleScratchpadModal() {
+    const modal = document.getElementById("scratchpad-modal");
+    if (!modal) return;
+    const isHidden = modal.classList.contains("hidden");
+    if (isHidden) {
+      modal.classList.remove("hidden");
+      initScratchpad();
+    } else {
+      modal.classList.add("hidden");
+    }
+  }
+
+  function initScratchpad() {
+    scratchCanvas = document.getElementById("scratchpad-canvas");
+    if (!scratchCanvas) return;
+    scratchCtx = scratchCanvas.getContext("2d");
+
+    // HiDPI setup
+    const rect = scratchCanvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    scratchCanvas.width = rect.width * dpr;
+    scratchCanvas.height = 340 * dpr;
+    scratchCanvas.style.height = "340px";
+    scratchCtx.scale(dpr, dpr);
+
+    redrawScratchpad();
+
+    // Event listeners
+    scratchCanvas.onpointerdown = handleScratchDown;
+    scratchCanvas.onpointermove = handleScratchMove;
+    scratchCanvas.onpointerup = handleScratchUp;
+    scratchCanvas.onpointercancel = handleScratchUp;
+  }
+
+  function handleScratchDown(e) {
+    isScratchDrawing = true;
+    const r = scratchCanvas.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    scratchStrokes.push([{ x, y, color: scratchColor, size: scratchSize }]);
+  }
+
+  function handleScratchMove(e) {
+    if (!isScratchDrawing) return;
+    const r = scratchCanvas.getBoundingClientRect();
+    const x = e.clientX - r.left;
+    const y = e.clientY - r.top;
+    const curStroke = scratchStrokes[scratchStrokes.length - 1];
+    if (curStroke) {
+      curStroke.push({ x, y, color: scratchColor, size: scratchSize });
+      redrawScratchpad();
+    }
+  }
+
+  function handleScratchUp() {
+    isScratchDrawing = false;
+  }
+
+  function redrawScratchpad() {
+    if (!scratchCtx || !scratchCanvas) return;
+    const w = scratchCanvas.getBoundingClientRect().width;
+    const h = 340;
+    scratchCtx.clearRect(0, 0, w, h);
+
+    // Draw grid if active
+    if (scratchShowGrid) {
+      scratchCtx.strokeStyle = "rgba(148, 163, 184, 0.08)";
+      scratchCtx.lineWidth = 1;
+      const step = 20;
+      for (let x = 0; x < w; x += step) {
+        scratchCtx.beginPath();
+        scratchCtx.moveTo(x, 0);
+        scratchCtx.lineTo(x, h);
+        scratchCtx.stroke();
+      }
+      for (let y = 0; y < h; y += step) {
+        scratchCtx.beginPath();
+        scratchCtx.moveTo(0, y);
+        scratchCtx.lineTo(w, y);
+        scratchCtx.stroke();
+      }
+    }
+
+    // Draw strokes
+    scratchStrokes.forEach(stroke => {
+      if (stroke.length < 2) return;
+      scratchCtx.beginPath();
+      scratchCtx.moveTo(stroke[0].x, stroke[0].y);
+      scratchCtx.strokeStyle = stroke[0].color === 'eraser' ? '#020617' : stroke[0].color;
+      scratchCtx.lineWidth = stroke[0].size;
+      scratchCtx.lineCap = "round";
+      scratchCtx.lineJoin = "round";
+      for (let i = 1; i < stroke.length; i++) {
+        scratchCtx.lineTo(stroke[i].x, stroke[i].y);
+      }
+      scratchCtx.stroke();
+    });
+  }
+
+  function setScratchColor(c) {
+    scratchColor = c;
+    document.querySelectorAll(".scratch-color-btn").forEach(btn => {
+      btn.classList.remove("active", "border-2", "border-cyan-400");
+    });
+    if (event && event.currentTarget) {
+      event.currentTarget.classList.add("active", "border-2", "border-cyan-400");
+    }
+  }
+
+  function setScratchSize(s) {
+    scratchSize = s;
+    document.querySelectorAll(".scratch-size-btn").forEach(btn => {
+      btn.classList.remove("active", "text-slate-300");
+      btn.classList.add("text-slate-400");
+    });
+    if (event && event.currentTarget) {
+      event.currentTarget.classList.add("active", "text-slate-300");
+      event.currentTarget.classList.remove("text-slate-400");
+    }
+  }
+
+  function toggleScratchGrid() {
+    scratchShowGrid = !scratchShowGrid;
+    const btn = document.getElementById("btn-scratch-grid");
+    if (btn) btn.textContent = scratchShowGrid ? "# Grid: ON" : "# Grid: OFF";
+    redrawScratchpad();
+  }
+
+  function clearScratchpad() {
+    scratchStrokes = [];
+    redrawScratchpad();
+  }
+
+</script>
   <script>
     tailwind.config = {
       theme: {
@@ -903,6 +1077,17 @@
       </div>
       <div id="remediation-host"></div>
     </section>
+
+  
+  <!-- Student Floating Toolbox (Formula Sheet & FBD Scratchpad) -->
+  <div id="student-floating-toolbox" class="fixed bottom-4 right-4 z-40 flex items-center gap-2 select-none">
+    <button type="button" onclick="openFormulaSheetModal()" class="pressable px-3.5 py-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border-2 border-indigo-500/40 text-indigo-300 font-black text-xs shadow-2xl backdrop-blur-md flex items-center gap-2 hover:scale-105 transition cursor-pointer" title="Open AP Physics Formula Sheet">
+      <span>📐</span> <span class="hidden sm:inline">AP Formula Sheet</span>
+    </button>
+    <button type="button" onclick="toggleScratchpadModal()" class="pressable px-3.5 py-2.5 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border-2 border-cyan-500/40 text-cyan-300 font-black text-xs shadow-2xl backdrop-blur-md flex items-center gap-2 hover:scale-105 transition cursor-pointer" title="Open Free-Body Diagram & Scratchpad">
+      <span>✏️</span> <span class="hidden sm:inline">FBD Scratchpad</span>
+    </button>
+  </div>
 
   </main>
 
@@ -3836,5 +4021,213 @@
 
     window.onload = initStudentApp;
   </script>
+
+  <!-- ============================================================================ -->
+  <!-- MODAL: AP PHYSICS OFFICIAL FORMULA SHEET & CONSTANTS                         -->
+  <!-- ============================================================================ -->
+  <div id="formula-sheet-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-5 select-none" onclick="closeFormulaSheetModal(event)">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 sm:p-7 max-w-4xl w-full max-h-[90vh] flex flex-col space-y-4 shadow-2xl overflow-hidden relative" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800 shrink-0">
+        <div class="flex items-center gap-2.5">
+          <span class="text-2xl">📐</span>
+          <div>
+            <h3 class="text-xl sm:text-2xl font-black text-white">AP Physics Formula Reference</h3>
+            <p class="text-xs text-slate-400">College Board AP Physics 1 &amp; C: Mechanics Tables &amp; Physical Constants</p>
+          </div>
+        </div>
+        <button onclick="closeFormulaSheetModal()" class="h-9 w-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-sm flex items-center justify-center transition">✕</button>
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-1 shrink-0 text-xs font-bold no-scrollbar">
+        <button onclick="filterFormulaCat('all')" class="cat-pill active px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition">All Equations</button>
+        <button onclick="filterFormulaCat('constants')" class="cat-pill px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Constants</button>
+        <button onclick="filterFormulaCat('kinematics')" class="cat-pill px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Kinematics</button>
+        <button onclick="filterFormulaCat('dynamics')" class="cat-pill px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Dynamics &amp; Circular</button>
+        <button onclick="filterFormulaCat('energy')" class="cat-pill px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Energy &amp; Momentum</button>
+        <button onclick="filterFormulaCat('rotation')" class="cat-pill px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">Rotation &amp; Torque</button>
+        <button onclick="filterFormulaCat('shm')" class="cat-pill px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition">SHM &amp; Gravity</button>
+      </div>
+
+      <!-- Equations Scrollable Body -->
+      <div id="formula-cards-container" class="flex-1 overflow-y-auto pr-1 space-y-3 text-sm select-text">
+        <!-- Constants -->
+        <div class="formula-card p-4 rounded-2xl bg-slate-950/70 border border-slate-800" data-cat="constants">
+          <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 block mb-2">⚡ Fundamental Constants</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-slate-300">
+            <div>Acceleration due to gravity: <strong class="text-white">g = 9.8 m/s²</strong> (9.80 m/s²)</div>
+            <div>Universal Gravitational constant: <strong class="text-white">G = 6.67 × 10⁻¹¹ N·m²/kg²</strong></div>
+            <div>Earth Radius: <strong class="text-white">R_E = 6.37 × 10⁶ m</strong></div>
+            <div>Earth Mass: <strong class="text-white">M_E = 5.97 × 10²⁴ kg</strong></div>
+          </div>
+        </div>
+
+        <!-- Kinematics -->
+        <div class="formula-card p-4 rounded-2xl bg-slate-950/70 border border-slate-800" data-cat="kinematics">
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 block mb-2">🏃 Kinematics (Constant Acceleration)</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-base text-cyan-300 font-mono">v_x = v_{x0} + a_x t</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-base text-cyan-300 font-mono">x = x_0 + v_{x0}t + ½ a_x t²</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-base text-cyan-300 font-mono">v_x² = v_{x0}² + 2a_x(x - x_0)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamics -->
+        <div class="formula-card p-4 rounded-2xl bg-slate-950/70 border border-slate-800" data-cat="dynamics">
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 block mb-2">⚖️ Dynamics &amp; Circular Motion</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-center">
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-emerald-300 font-mono">Σ F = m a</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-emerald-300 font-mono">F_g = m g</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-emerald-300 font-mono">F_f ≤ μ F_N</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-emerald-300 font-mono">a_c = v² / r = ω² r</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Energy & Momentum -->
+        <div class="formula-card p-4 rounded-2xl bg-slate-950/70 border border-slate-800" data-cat="energy">
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-400 block mb-2">💥 Work, Energy &amp; Momentum</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-amber-300 font-mono">W = F_{||} d = F d cosθ</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-amber-300 font-mono">K = ½ m v²</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-amber-300 font-mono">U_g = m g h | U_s = ½ k x²</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-amber-300 font-mono">P = ΔE/Δt = F · v</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-amber-300 font-mono">p = m v</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-amber-300 font-mono">J = Δp = F_{avg} Δt</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rotation & Torque -->
+        <div class="formula-card p-4 rounded-2xl bg-slate-950/70 border border-slate-800" data-cat="rotation">
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-400 block mb-2">🔄 Rotational Mechanics</span>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-purple-300 font-mono">τ = r F sinθ = I α</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-purple-300 font-mono">L = I ω = m v r_⊥</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-purple-300 font-mono">K_{rot} = ½ I ω²</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-purple-300 font-mono">ω = ω_0 + α t</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-purple-300 font-mono">θ = θ_0 + ω_0 t + ½ α t²</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-purple-300 font-mono">v = ω r | a_t = α r</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHM & Gravitation -->
+        <div class="formula-card p-4 rounded-2xl bg-slate-950/70 border border-slate-800" data-cat="shm">
+          <span class="text-xs font-bold uppercase tracking-wider text-rose-400 block mb-2">🪐 Oscillations &amp; Universal Gravitation</span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-center">
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-rose-300 font-mono">T_s = 2π √(m/k)</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-rose-300 font-mono">T_p = 2π √(L/g)</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-rose-300 font-mono">F_g = G m₁m₂ / r²</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-rose-300 font-mono">U_g = -G m₁m₂ / r</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-rose-300 font-mono">v_{orbit} = √(GM/r)</span>
+            </div>
+            <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-sm text-rose-300 font-mono">T² / a³ = 4π² / (GM)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================================ -->
+  <!-- MODAL: FREE-BODY DIAGRAM (FBD) / SCRATCHPAD CANVAS                          -->
+  <!-- ============================================================================ -->
+  <div id="scratchpad-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 select-none">
+    <div class="bg-slate-900 border-2 border-cyan-500/50 rounded-3xl p-4 max-w-2xl w-full flex flex-col space-y-3 shadow-2xl relative overflow-hidden">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">✏️</span>
+          <div>
+            <h3 class="text-base font-black text-white">Free-Body Diagram &amp; Scratchpad</h3>
+            <p class="text-[11px] text-slate-400">Sketch vectors, resolve components &amp; calculate scratch work</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="clearScratchpad()" class="px-2.5 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/40 transition">
+            Clear
+          </button>
+          <button onclick="toggleScratchpadModal()" class="h-8 w-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs flex items-center justify-center transition">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Tool Controls: Colors, Sizes, Grid Toggle -->
+      <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-950 p-2 rounded-2xl border border-slate-800 text-xs">
+        <!-- Color Palette -->
+        <div class="flex items-center gap-1.5">
+          <span class="text-[10px] uppercase font-bold text-slate-400 mr-1">Pen:</span>
+          <button onclick="setScratchColor('#ffffff')" class="scratch-color-btn active h-6 w-6 rounded-full bg-white border-2 border-cyan-400 shadow-sm" title="White (Chalk)"></button>
+          <button onclick="setScratchColor('#06b6d4')" class="scratch-color-btn h-6 w-6 rounded-full bg-cyan-400 border border-slate-700 shadow-sm" title="Cyan (Force / Velocity)"></button>
+          <button onclick="setScratchColor('#f59e0b')" class="scratch-color-btn h-6 w-6 rounded-full bg-amber-400 border border-slate-700 shadow-sm" title="Amber (Components / Angles)"></button>
+          <button onclick="setScratchColor('eraser')" class="scratch-color-btn h-6 w-6 rounded-full bg-slate-800 text-[10px] text-rose-300 border border-rose-500/50 flex items-center justify-center" title="Eraser">🧹</button>
+        </div>
+
+        <!-- Size Buttons -->
+        <div class="flex items-center gap-1 bg-slate-900 p-0.5 rounded-xl border border-slate-800">
+          <button onclick="setScratchSize(2)" class="scratch-size-btn active px-2 py-0.5 rounded-lg text-slate-300 font-bold text-[10px]">Thin</button>
+          <button onclick="setScratchSize(4)" class="scratch-size-btn px-2 py-0.5 rounded-lg text-slate-400 font-bold text-[10px]">Med</button>
+          <button onclick="setScratchSize(8)" class="scratch-size-btn px-2 py-0.5 rounded-lg text-slate-400 font-bold text-[10px]">Thick</button>
+        </div>
+
+        <!-- Grid Toggle -->
+        <button onclick="toggleScratchGrid()" id="btn-scratch-grid" class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 font-bold text-[10px] hover:text-white transition">
+          # Grid: ON
+        </button>
+      </div>
+
+      <!-- Canvas Viewport with Grid Pattern -->
+      <div class="relative bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 shadow-inner">
+        <canvas id="scratchpad-canvas" class="w-full block touch-none cursor-crosshair" height="340"></canvas>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

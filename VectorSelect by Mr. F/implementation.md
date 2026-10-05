@@ -2969,6 +2969,91 @@ Addressed user request:
 - Updated [`SCORING_TOOL_POCKETBASE_PLAN.md`](file:///c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect%20by%20Mr.%20F/SCORING_TOOL_POCKETBASE_PLAN.md) in the project directory.
 - Mirrored to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
 
+---
+
+## Phase 68: VectorSelect Portal Access Endpoints & Website Directory (2026-10-05)
+
+### Context & User Directives
+- **Directives**: Provide the website URLs and access endpoints for both the VectorSelect Student Portal and Teacher Portal.
+
+### Official Portal Access Points
+
+#### 1. Live Web Deployment (GitHub Pages)
+- **Student Exam Runner**:  
+  `https://fahad87-tech.github.io/APPC-M/VectorSelect%20by%20Mr.%20F/index.html`  
+  *Features: Self-paced or teacher-synchronized exam runner, scientific calculator, KaTeX math parsing, instant feedback, and student review.*
+- **Teacher / Instructor Live Console**:  
+  `https://fahad87-tech.github.io/APPC-M/VectorSelect%20by%20Mr.%20F/teacher.html`  
+  *Features: Assignment dispatch, live question pacing control, real-time student monitoring, 0–120 SUPER MAX grading, answer key visibility toggle, and CSV analytics export.*
+- **Main Hub**:  
+  `https://fahad87-tech.github.io/APPC-M/`
+
+#### 2. Local Classroom & Offline Deployment (Localhost)
+- Start the server using [`run_server.bat`](file:///c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect%20by%20Mr.%20F/run_server.bat):
+  - **Student Portal**: `http://localhost:8888/index.html`
+  - **Teacher Portal**: `http://localhost:8888/teacher.html`
+  - **PocketBase Admin UI**: `http://127.0.0.1:8090/_/`
+- Direct launcher batch files:
+  - [`launch_student_portal.bat`](file:///c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect%20by%20Mr.%20F/launch_student_portal.bat)
+  - [`launch_teacher_portal.bat`](file:///c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect%20by%20Mr.%20F/launch_teacher_portal.bat)
+
+#### 3. Direct Local Filesystem Paths
+- **Student Portal**: `c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect by Mr. F/index.html`
+- **Teacher Portal**: `c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect by Mr. F/teacher.html`
+
+---
+
+## Phase 69: High-Impact Classroom Features — Live Distractor Distribution, Quick Timer Agility, In-App AP Formula Reference, FBD Scratchpad, and Scoring Tool Export Bridge (2026-10-05)
+
+### Context & User Directives
+- **Directives**: Implement high-value improvements to VectorSelect:
+  1. Teacher live session flow (quick timer adjustments + live distractor distribution).
+  2. Student physics tooling (in-app official formula sheet + FBD scratchpad).
+  3. Seamless bridge to the standalone Scoring Tool on port `8091`.
+  4. Ensure zero disruption to VectorSelect's core exam pacing and data structures.
+
+### Architectural Enhancements Implemented
+
+#### 1. Teacher Console Agility & Live Distractor Distribution (`teacher.html`)
+- **Quick Timer Extensions (`+30s` & `+60s`)**:
+  - In `#lc-timer-box`, upgraded the timer controls with dual pill buttons (`[+30s]` and `[+60s]`).
+  - Generalized `lcResetTimer(sec = 30)` to dynamically grant either 30 or 60 seconds on the fly and sync the extended countdown to students via PocketBase `setAssignmentTimerState`.
+- **Live Choice Breakdown (A, B, C, D)**:
+  - Added `#lc-distractor-box` inside the class progress strip.
+  - As students lock in answers, `renderLiveProgress` dynamically calculates and renders real-time percentages and colored progress bars for options A, B, C, and D:
+    - **A**: Blue (`#3b82f6`)
+    - **B**: Emerald (`#10b981`)
+    - **C**: Amber (`#f59e0b`)
+    - **D**: Purple (`#a855f7`)
+  - Gives the instructor an immediate, anonymized visual heatmap of common student misconceptions before entering discussion mode.
+- **1-Click "Export to Scoring Tool" (Approach B Bridge)**:
+  - Added `[⚡ Export to Scoring Tool]` button to the Live Leaderboard modal header.
+  - Implemented `exportLiveSessionToScoringTool()`:
+    - Generates and downloads a clean CSV (`#, Student, MCQ, Raw, Raw%`) directly compatible with the Scoring Tool's import engine.
+    - Copies a clean JSON payload to the clipboard for instant pasting into Scoring Tool on port `8091`.
+
+#### 2. Student Physics Tooling & Accessibility (`index.html`)
+- **Floating Physics Action Toolbox**:
+  - Added a responsive, non-intrusive floating pill toolbar at the bottom-right of the quiz view (`#student-floating-toolbox`):
+    - `[📐 AP Formula Sheet]`
+    - `[✏️ FBD Scratchpad]`
+- **Official AP Physics Formula Sheet & Physical Constants Quick-Drawer**:
+  - Added `#formula-sheet-modal` with category pills (`All`, `Constants`, `Kinematics`, `Dynamics`, `Energy & Momentum`, `Rotation & Torque`, `SHM & Gravity`).
+  - Contains complete, official AP Physics 1 & C: Mechanics formulas and physical constants ($g = 9.8\,\text{m/s}^2$, $G = 6.67 \times 10^{-11}\,\text{N}\cdot\text{m}^2/\text{kg}^2$, Earth radius/mass).
+- **In-App Free-Body Diagram (FBD) & Scratchpad Canvas**:
+  - Added `#scratchpad-modal` with an interactive HTML5 2D canvas:
+    - Pen colors: Chalk White, Force/Velocity Cyan, Component Amber, and Eraser.
+    - Stroke widths: Thin (2px), Medium (4px), Thick (8px).
+    - Grid background toggle (`# Grid: ON/OFF`) for drawing orthogonal force vectors and resolving components on inclined planes.
+    - Clear button and persistent stroke storage during the question.
+
+### Verification & Mirroring
+- Validated JavaScript syntax across all `<script>` tags in `teacher.html` and `index.html` via Node `vm.Script`: 0 errors detected.
+- Mirrored all updated files to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+- Committed and pushed to GitHub main repository (`fahad87-tech/APPC-M`).
+
+
+
 
 
 

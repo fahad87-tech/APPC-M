@@ -630,7 +630,12 @@
             </h3>
             <p class="text-xs text-slate-400 mt-0.5">Top speed bonus (up to +20 pts) &amp; streak multipliers active • Press <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-200">L</kbd> or <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 font-mono text-[10px] text-slate-200">Esc</kbd> to toggle</p>
           </div>
-          <button onclick="closeLiveLeaderboardModal()" class="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-md">✕</button>
+          <div class="flex items-center gap-2">
+            <button onclick="exportLiveSessionToScoringTool()" class="pressable px-3.5 py-1.5 rounded-xl border border-cyan-500/40 bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 font-bold text-xs transition flex items-center gap-1.5 shadow-md" title="Export grades formatted for Scoring Tool">
+              <span>⚡</span> <span>Export to Scoring Tool</span>
+            </button>
+            <button onclick="closeLiveLeaderboardModal()" class="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-md">✕</button>
+          </div>
         </div>
 
         <!-- TOP-3 ANIMATED PODIUM -->
@@ -784,8 +789,11 @@
               <button onclick="lcToggleTimerPause()" id="lc-btn-pause" class="pressable px-3.5 py-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 text-xs font-bold text-amber-300 transition flex items-center gap-1.5">
                 <span id="lc-btn-pause-icon">⏸️</span> <span id="lc-btn-pause-text">Pause</span>
               </button>
-              <button onclick="lcResetTimer()" id="lc-btn-addtime" class="pressable px-2.5 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 hover:text-white transition" title="Add 30 seconds">
+              <button onclick="lcResetTimer(30)" id="lc-btn-addtime" class="pressable px-2.5 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 hover:text-white transition" title="Add 30 seconds">
                 +30s
+              </button>
+              <button onclick="lcResetTimer(60)" class="pressable px-2.5 py-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 hover:text-white transition" title="Add 60 seconds">
+                +60s
               </button>
             </div>
 
@@ -865,6 +873,45 @@
                     <div id="lc-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-500" style="width:0%"></div>
                   </div>
                   <div id="lc-student-dots" class="flex flex-wrap gap-1 max-h-24 overflow-y-auto pr-0.5"></div>
+
+                  <!-- Live Choice Breakdown (A, B, C, D) -->
+                  <div id="lc-distractor-box" class="pt-2 border-t border-slate-800 space-y-1.5">
+                    <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      <span>Live Choices</span>
+                      <span id="lc-distractor-summary" class="font-mono text-cyan-300">0 locked</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1.5 text-center font-mono">
+                      <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+                        <div class="text-[10px] font-bold text-slate-400">A</div>
+                        <div id="lc-dist-a-val" class="text-xs font-black text-white">0%</div>
+                        <div class="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
+                          <div id="lc-dist-a-bar" class="h-full bg-blue-500 transition-all duration-300" style="width:0%"></div>
+                        </div>
+                      </div>
+                      <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+                        <div class="text-[10px] font-bold text-slate-400">B</div>
+                        <div id="lc-dist-b-val" class="text-xs font-black text-white">0%</div>
+                        <div class="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
+                          <div id="lc-dist-b-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width:0%"></div>
+                        </div>
+                      </div>
+                      <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+                        <div class="text-[10px] font-bold text-slate-400">C</div>
+                        <div id="lc-dist-c-val" class="text-xs font-black text-white">0%</div>
+                        <div class="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
+                          <div id="lc-dist-c-bar" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
+                        </div>
+                      </div>
+                      <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5">
+                        <div class="text-[10px] font-bold text-slate-400">D</div>
+                        <div id="lc-dist-d-val" class="text-xs font-black text-white">0%</div>
+                        <div class="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
+                          <div id="lc-dist-d-bar" class="h-full bg-purple-500 transition-all duration-300" style="width:0%"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <button onclick="lcTriggerDiscussionEarly()" id="lc-btn-discuss-early" class="w-full py-2 rounded-xl bg-indigo-600/30 border border-indigo-500/50 hover:bg-indigo-600/50 text-indigo-300 font-bold text-xs transition">
                     💬 Reveal Discussion Now
                   </button>
@@ -2429,6 +2476,30 @@
       // When answer is revealed: green = correct, rose = wrong, amber/slate = no answer
       // When answer is hidden (default / discussion): neutral cyan = answered, slate = pending
       const dots = document.getElementById("lc-student-dots");
+      // Compute and update live distractor breakdown (A, B, C, D)
+      const distCounts = { A: 0, B: 0, C: 0, D: 0 };
+      let distTotal = 0;
+      Object.values(answeredMap).forEach(rec => {
+        const raw = rec ? rec.selected_letter : null;
+        if (raw && typeof raw === 'string') {
+          const letter = raw.trim().toUpperCase();
+          if (distCounts.hasOwnProperty(letter)) {
+            distCounts[letter]++;
+            distTotal++;
+          }
+        }
+      });
+      const distSummary = document.getElementById("lc-distractor-summary");
+      if (distSummary) distSummary.textContent = `${distTotal} locked`;
+      ['A', 'B', 'C', 'D'].forEach(letter => {
+        const cnt = distCounts[letter];
+        const p = distTotal > 0 ? Math.round((cnt / distTotal) * 100) : 0;
+        const valEl = document.getElementById(`lc-dist-${letter.toLowerCase()}-val`);
+        const barEl = document.getElementById(`lc-dist-${letter.toLowerCase()}-bar`);
+        if (valEl) valEl.textContent = `${p}% (${cnt})`;
+        if (barEl) barEl.style.width = `${p}%`;
+      });
+
       dots.innerHTML = "";
       names.forEach(name => {
         const rec = answeredMap[name];
@@ -2649,17 +2720,18 @@
       }
     }
 
-    async function lcResetTimer() {
-      lcTimerRemaining += 30;
+    async function lcResetTimer(sec = 30) {
+      const addSeconds = typeof sec === 'number' ? sec : 30;
+      lcTimerRemaining += addSeconds;
       updateLcTimerDisplay();
-      const perQ = (currentLiveAssignment.per_question_seconds || 0) + 30;
+      const perQ = (currentLiveAssignment.per_question_seconds || 0) + addSeconds;
       currentLiveAssignment.per_question_seconds = perQ;
       const newStartedAt = new Date(Date.now() - Math.max(0, perQ - lcTimerRemaining) * 1000).toISOString();
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         question_started_at: newStartedAt,
         paused_remaining_seconds: lcTimerRemaining
       });
-      showTeacherToast("+30 Seconds Added", `New time: ${lcTimerRemaining}s remaining`, "copper", 2000);
+      showTeacherToast(`+${addSeconds} Seconds Added`, `New time: ${lcTimerRemaining}s remaining`, "copper", 2000);
     }
 
     let lcNextConfirmActive = false;
@@ -3337,6 +3409,58 @@
       isLeaderboardModalOpen = true;
       document.getElementById("live-leaderboard-modal").classList.remove("hidden");
       await refreshLiveLeaderboard(currentLiveAssignment.join_code);
+    }
+
+    
+    function exportLiveSessionToScoringTool() {
+      if (!currentLiveAssignment) {
+        showTeacherToast("No Active Session", "Please open a live session or assignment first.", "copper", 2500);
+        return;
+      }
+      fetchLiveClassLeaderboard(currentLiveAssignment.join_code).then(standings => {
+        if (!standings || standings.length === 0) {
+          showTeacherToast("No Submissions", "No student scores found to export yet.", "copper", 2500);
+          return;
+        }
+
+        // Generate CSV formatted for Scoring Tool
+        let csv = "#,Student,MCQ,Raw,Raw%\n";
+        standings.forEach((s, idx) => {
+          const rawScore = (s.points || 0).toFixed(1);
+          const rawPct = (s.accuracy || 0).toFixed(1);
+          csv += `${idx + 1},${s.name},${rawScore},${rawScore},${rawPct}%\n`;
+        });
+
+        // Trigger CSV download
+        const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        const safeTitle = (currentLiveAssignment.assessment_title || "assessment").replace(/[^a-zA-Z0-9_-]/g, "_");
+        a.href = url;
+        a.download = `scoring_tool_${safeTitle}_${currentLiveAssignment.join_code}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        // Also copy clean JSON payload to clipboard for instant pasting
+        const payload = {
+          assessment_title: currentLiveAssignment.assessment_title,
+          join_code: currentLiveAssignment.join_code,
+          exported_at: new Date().toISOString(),
+          students: standings.map(s => ({
+            name: s.name,
+            points: s.points,
+            accuracy: s.accuracy,
+            maxStreak: s.maxStreak
+          }))
+        };
+        navigator.clipboard.writeText(JSON.stringify(payload, null, 2)).catch(() => {});
+
+        showTeacherToast("⚡ Exported to Scoring Tool", "CSV downloaded and JSON copied to clipboard for Scoring Tool (port 8091)!", "lime", 4000);
+      }).catch(err => {
+        showTeacherToast("Export Error", err.message, "coral", 3000);
+      });
     }
 
     function closeLiveLeaderboardModal() {
