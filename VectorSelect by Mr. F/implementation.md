@@ -3052,6 +3052,75 @@ Addressed user request:
 - Mirrored all updated files to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
 - Committed and pushed to GitHub main repository (`fahad87-tech/APPC-M`).
 
+---
+
+## Phase 70: Operational Breakdown & Pedagogical Classroom Workflows (2026-10-05)
+
+### Context & User Directives
+- **Directives**: Provide a detailed pedagogical and operational breakdown of how teachers and students use each of the newly implemented features in live classroom settings.
+
+### Feature-by-Feature Operational Workflows
+
+#### 1. Live Distractor Distribution Breakdown (A, B, C, D)
+- **Role / User**: Instructor (Teacher Console - `teacher.html`).
+- **Location**: Right-hand Telemetry Dock (`#lc-progress-strip`), directly below the student dots.
+- **When to Use**: While students are solving a question in lockstep mode.
+- **Workflow**:
+  1. The teacher launches a question. As students submit their answers, the four option boxes (A, B, C, D) dynamically fill with percentages and counts (e.g. A: 14%, B: 72%, C: 14%, D: 0%).
+  2. The teacher monitors the distribution without showing answers.
+  3. If 40% of the class picked distractor C (a known misconception, such as forgetting normal force reduction on an incline), the teacher immediately knows what concept to highlight before advancing to the discussion phase.
+- **Impact**: Eliminates guesswork; allows data-driven, targeted instruction instead of generic lectures.
+
+#### 2. Quick Timer Extensions (`+30s` & `+60s`)
+- **Role / User**: Instructor (Teacher Console - `teacher.html`).
+- **Location**: Top Navigation Bar (`#lc-timer-box`), directly beside the countdown timer.
+- **When to Use**: When a complex problem requires more calculation time than originally allotted.
+- **Workflow**:
+  1. If the timer has 15 seconds remaining but several students are still writing out force balance equations, the teacher taps `[+30s]` or `[+60s]`.
+  2. The teacher countdown increases immediately (e.g. 15s $\rightarrow$ 45s).
+  3. PocketBase broadcasts the new `question_started_at` timestamp via SSE, automatically extending the countdown clock on every student's screen in real time.
+- **Impact**: Provides instant classroom pacing flexibility without needing to pause or disrupt the test flow.
+
+#### 3. In-App AP Physics Formula Sheet & Physical Constants Quick-Drawer
+- **Role / User**: Student (Student Runner - `index.html`).
+- **Location**: Persistent Floating Action Toolbar at the bottom-right corner (`[📐 AP Formula Sheet]`).
+- **When to Use**: During active practice or timed assessments when looking up formulas or physical constants.
+- **Workflow**:
+  1. The student clicks `[📐 AP Formula Sheet]`.
+  2. A modal slides in with category filter pills (`All`, `Constants`, `Kinematics`, `Dynamics`, `Energy & Momentum`, `Rotation`, `SHM & Gravity`).
+  3. The student selects a category or scrolls to review equations formatted in KaTeX (e.g. $\sum \tau = I\alpha$, $v = \sqrt{GM/r}$).
+  4. The student presses `Esc` or clicks `✕` to return to the question without losing any selected choices.
+- **Impact**: Eliminates the distraction of external tabs or searching for paper reference sheets, keeping students focused in the app.
+
+#### 4. In-App Free-Body Diagram (FBD) & Scratchpad Canvas
+- **Role / User**: Student (Student Runner - `index.html`).
+- **Location**: Persistent Floating Action Toolbar at the bottom-right corner (`[✏️ FBD Scratchpad]`).
+- **When to Use**: When sketching forces on an object, resolving vectors into components, or doing quick arithmetic.
+- **Workflow**:
+  1. The student clicks `[✏️ FBD Scratchpad]`.
+  2. A drawing canvas modal opens over a subtle dot grid.
+  3. The student chooses a pen color:
+     - **Chalk White**: For drawing masses, ramps, or geometry.
+     - **Cyan**: For primary force vectors ($F_N, mg, F_{\text{thrust}}$).
+     - **Amber**: For resolved vector components ($mg\sin\theta, mg\cos\theta$) and angles.
+     - **Eraser**: For corrections.
+  4. The student sketches the diagram and selects brush thickness (Thin, Medium, Thick).
+  5. The canvas preserves strokes during the question, allowing students to close and re-open the scratchpad freely while selecting their answer choice.
+- **Impact**: Encourages proper physics modeling habits (drawing FBDs before calculating) and reduces reliance on scratch paper.
+
+#### 5. 1-Click "Export to Scoring Tool" (Approach B Bridge)
+- **Role / User**: Instructor (Teacher Console - `teacher.html`).
+- **Location**: Top bar of the Live Leaderboard Modal (`#live-leaderboard-modal`).
+- **When to Use**: At the conclusion of a live quiz or test session to transfer grades into the Scoring Tool.
+- **Workflow**:
+  1. The teacher opens the Leaderboard / Results view by pressing `L` or clicking `🏆 Leaderboard`.
+  2. The teacher clicks the cyan `[⚡ Export to Scoring Tool]` button in the modal header.
+  3. VectorSelect instantly generates a pre-formatted CSV file (`scoring_tool_<title>_<code>.csv`) containing `# , Student, MCQ, Raw, Raw%` and downloads it to the teacher's machine.
+  4. Simultaneously, VectorSelect copies a structured JSON payload of all student scores to the clipboard.
+  5. In the standalone Scoring Tool (port `8091`), the teacher imports the file or pastes the scores, completing the grading and curve calculation in seconds.
+- **Impact**: Provides a frictionless bridge between VectorSelect and the standalone Scoring Tool without requiring complex cloud database federation.
+
+
 
 
 
