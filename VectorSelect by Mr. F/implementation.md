@@ -2913,5 +2913,34 @@ Addressed user request:
 - Updated [`SCORING_TOOL_POCKETBASE_PLAN.md`](file:///c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect%20by%20Mr.%20F/SCORING_TOOL_POCKETBASE_PLAN.md) in the project directory.
 - Mirrored to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
 
+---
+
+## Phase 66: Architectural Clarifications — Jamstack Conformance & PocketBase Multi-App Database Multi-Tenancy (2026-10-05)
+
+### Context & User Directives
+- **Inquiries**:
+  1. *"with your plan are you sure that scoring tool will become jamstack just like vector select."*
+  2. *"also can i add more than one website's database on pocketbase under my username?"*
+
+### Architectural Analysis & Verification
+
+#### 1. Jamstack Conformance (100% Guaranteed)
+- **What makes VectorSelect Jamstack**:
+  - **J (JavaScript)**: Pure static, client-side vanilla JavaScript (`index.html`, `teacher.html`, `pocketbase_config.js`). Zero Node.js runtime, Python, or Ruby backend dependencies for rendering views.
+  - **A (APIs)**: All dynamic data operations (saving scores, real-time pacing, auth verification) are performed over asynchronous REST & SSE APIs against PocketBase.
+  - **M (Markup)**: Static pre-built HTML/CSS deployable to any CDN (GitHub Pages, Cloudflare Pages, Netlify) or served statically by PocketBase's `pb_public/`.
+- **Scoring Tool Alignment**:
+  - Scoring Tool (`Scoring Tool/index.html`) satisfies all three pillars identically. It remains a 100% static, client-rendered web page that communicates asynchronously with PocketBase collections via REST and SSE.
+  - **Offline-First PWA Trait**: It also features local storage caching, guaranteeing it loads and functions even without a network connection.
+
+#### 2. Multi-App / Multi-Website PocketBase Management
+- **Single PocketBase Instance (Multi-Tenancy under 1 Admin)**:
+  - PocketBase is designed to manage unlimited collections inside a single instance and database under one administrator username (`739156332@qq.com`).
+  - By namespacing collection names (`vs_*`, `scoring_*`, `lms_*`, `marker_*`), multiple websites can share a single PocketBase deployment seamlessly.
+  - Single dashboard (`/_/`) to manage all apps, one port/domain to host on the cloud, and single-click backups.
+- **Separate PocketBase Instances (Physical Isolation)**:
+  - If complete database physical separation is desired, multiple PocketBase executables can run on separate ports (e.g. `8090` for VectorSelect, `8091` for Scoring Tool), each configured with the same admin credentials.
+
+
 
 
