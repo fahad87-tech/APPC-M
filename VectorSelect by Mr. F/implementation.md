@@ -2941,6 +2941,35 @@ Addressed user request:
 - **Separate PocketBase Instances (Physical Isolation)**:
   - If complete database physical separation is desired, multiple PocketBase executables can run on separate ports (e.g. `8090` for VectorSelect, `8091` for Scoring Tool), each configured with the same admin credentials.
 
+---
+
+## Phase 67: Specification of Approach B (Physically Isolated Multi-Instance PocketBase) in Scoring Tool Plan (2026-10-05)
+
+### Context & User Directives
+- **Directives**:
+  - *"Approach b update plan"*
+- **Target File**: `SCORING_TOOL_POCKETBASE_PLAN.md` (Revision 3.0) in the project directory.
+
+### Key Architectural Updates under Approach B
+1. **Physical Process & Database Decoupling**:
+   - **VectorSelect Instance**: Runs on port `8090` (`VectorSelect by Mr. F\pocketbase\`), using its own SQLite database (`pb_data\data.db`), completely untouched.
+   - **Scoring Tool Instance**: Runs on port `8091` (`Scoring Tool\pocketbase\`), using its own dedicated SQLite database (`pb_data\data.db`).
+   - Prevents any cross-app database contamination, schema collisions, or downtime risks.
+2. **Unified Teacher Identity**:
+   - Both PocketBase instances recognize the exact same teacher administrative credentials (`739156332@qq.com` / `physics2026`).
+3. **Jamstack Dual-Storage Client Adapter**:
+   - Scoring Tool (`Scoring Tool/index.html`) operates as a static Jamstack frontend communicating asynchronously with `http://127.0.0.1:8091`.
+   - Uses a dual-storage pattern: instant writes to `localStorage` (<1ms) paired with asynchronous sync to PocketBase and real-time SSE broadcasts.
+4. **Complete Elimination of Supabase**:
+   - Formally removes all legacy Supabase plans and dead Classroom Hub `/api/curve` stubs.
+5. **Passive Read-Only VectorSelect Integration**:
+   - Any score import into Scoring Tool is strictly read-only via HTTP `GET` to port `8090` or manual CSV drag-and-drop. Scoring Tool will never execute write operations against VectorSelect's database.
+
+### Files Created & Updated
+- Updated [`SCORING_TOOL_POCKETBASE_PLAN.md`](file:///c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect%20by%20Mr.%20F/SCORING_TOOL_POCKETBASE_PLAN.md) in the project directory.
+- Mirrored to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+
+
 
 
 
