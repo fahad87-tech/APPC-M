@@ -2883,4 +2883,35 @@ Addressed user request:
 - Created [`SCORING_TOOL_POCKETBASE_PLAN.md`](file:///c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect%20by%20Mr.%20F/SCORING_TOOL_POCKETBASE_PLAN.md) in the project directory.
 - Mirrored to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
 
+---
+
+## Phase 65: Refined Standalone Scoring Tool Plan & Strict VectorSelect Isolation (2026-10-05)
+
+### Context & User Directives
+- **Directives**:
+  1. *"make another directory of pocketbsae on the scoring tool."*
+  2. *"also i think it is connected to supabase..... so that needs to be removed."*
+  3. *"refind plan"*
+  4. *"for now i just wanted you to refine plan"*
+  5. *"do not fuck up vector select"*
+
+### Key Architectural Refinements in Plan (`SCORING_TOOL_POCKETBASE_PLAN.md`)
+1. **Absolute Zero-Touch Isolation for VectorSelect**:
+   - VectorSelect on port `8090` remains 100% untouched. Its database (`VectorSelect by Mr. F\pocketbase\pb_data\data.db`), collections (`answer_keys`, `active_assignments`, `exam_submissions`, `live_events`), hooks, and student runner are completely isolated and unmodified.
+2. **Dedicated Scoring Tool PocketBase Instance**:
+   - Scoring Tool gets its own dedicated directory: `..\Scoring Tool\pocketbase\`.
+   - Runs independently on port `8091` (`http://127.0.0.1:8091`), preventing any port conflicts with VectorSelect (`8090`).
+   - Maintains its own SQLite database (`Scoring Tool\pocketbase\pb_data\data.db`).
+   - Managed via its own launcher: `..\Scoring Tool\pocketbase\run_pocketbase.bat`.
+3. **Complete Elimination of Supabase**:
+   - Purged all historical plans and stubs related to Supabase (`cabjyjqbfnntcdqqmjhu.supabase.co`) or legacy Classroom Hub `/api/curve` endpoints.
+   - Replaced entirely with local, offline-capable PocketBase collections (`scoring_classes`, `scoring_assignments`, `scoring_records`, `scoring_presets`) with a reliable, non-blocking `localStorage` fallback.
+4. **Passive, Read-Only Bridge**:
+   - Any score import from VectorSelect into Scoring Tool is strictly passive and read-only over HTTP or CSV export. Scoring Tool will never execute write operations against VectorSelect's database.
+
+### Files Created & Updated
+- Updated [`SCORING_TOOL_POCKETBASE_PLAN.md`](file:///c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect%20by%20Mr.%20F/SCORING_TOOL_POCKETBASE_PLAN.md) in the project directory.
+- Mirrored to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+
+
 
