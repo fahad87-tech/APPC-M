@@ -2857,3 +2857,30 @@ Addressed user request:
 - Mirrored all changes to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
 - Committed and pushed to GitHub main repository (`fahad87-tech/APPC-M`).
 
+---
+
+## Phase 64: Architectural & Deployment Plan for Pushing Scoring Tool to PocketBase (2026-10-05)
+
+### Context & User Directives
+- **User Request**: *"can you write a plan for pushing another app to pocketbase called scoring tool. it is in the root folder. save the plan int the project folder"*
+- **Target File**: `SCORING_TOOL_POCKETBASE_PLAN.md` saved in the project directory (`c:\Users\fahad\Documents\GitHub\APPC-M\VectorSelect by Mr. F\`).
+
+### Architectural Analysis & Plan Structure
+1. **Source Application Audit (`..\Scoring Tool\index.html`)**:
+   - Single-file grading calculator supporting AP Curve (bands 1–5) and Formula Curve (`=RAW_PCT`, custom expressions).
+   - 4 embedded physics rosters: AP Physics C (15), AP Physics 1 (15), Honors Physics 1 (25), Honors Physics 2 (19).
+   - Currently tied to fragile browser `localStorage` (`scoring_tool_curve_v1`).
+2. **Key Capabilities Designed in Plan**:
+   - **Static Hosting via PocketBase (`pb_public/scoring/`)**: Allows serving both VectorSelect and Scoring Tool on a single PocketBase binary without separate web servers (`http://127.0.0.1:8090/scoring/`).
+   - **Relational Schema Design**: 4 new namespaced collections (`scoring_classes`, `scoring_assignments`, `scoring_records`, `scoring_presets`) to persist rosters, multi-category grading setups (MCQ, FIB, SA, FRQ), curved results, and AP boundary presets.
+   - **VectorSelect $\leftrightarrow$ Scoring Tool Bridge**: Automated 1-click import pulling student MCQ exam scores from `exam_submissions` into the Scoring Tool grade grid, matching student rosters.
+   - **Sub-30ms Real-Time Sync**: PocketBase SSE subscriptions for live collaborative grading across multiple teacher devices.
+   - **Offline-First Resilience**: Transparent fallback to `localStorage` when offline, with dual-storage adapter pattern.
+3. **Execution Roadmap**:
+   - Outlined 6 concrete execution phases covering schema migration, static asset packaging, client SDK adapter, live import bridge, security rules, and verification.
+
+### File Outputs & Mirroring
+- Created [`SCORING_TOOL_POCKETBASE_PLAN.md`](file:///c:/Users/fahad/Documents/GitHub/APPC-M/VectorSelect%20by%20Mr.%20F/SCORING_TOOL_POCKETBASE_PLAN.md) in the project directory.
+- Mirrored to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+
+
