@@ -2845,19 +2845,29 @@
           simCont.classList.remove("hidden");
           const simType = activeRecoveryChallenge.simType || 'ballistics';
           const simData = activeRecoveryChallenge.simData || {};
+          const simOptions = {
+            onResult: (result) => {
+              if (!result || typeof result.success !== "boolean") return;
+              if (result.success) {
+                onSimSuccess(result.message || "The apparatus result matches the challenge target.");
+              } else {
+                onSimFailure(result.message || "The apparatus result does not match the challenge target yet.");
+              }
+            }
+          };
 
           if (simType === 'ballistics' || simType === 'cannon') {
-            window.RecoverySims.mountBallisticsLab(simCont, simData);
+            window.RecoverySims.mountBallisticsLab(simCont, simData, simOptions);
           } else if (simType === 'friction' || simType === 'drift') {
-            window.RecoverySims.mountFrictionLab(simCont, simData);
+            window.RecoverySims.mountFrictionLab(simCont, simData, simOptions);
           } else if (simType === 'centripetal' || simType === 'coaster') {
-            window.RecoverySims.mountCentripetalLab(simCont, simData);
+            window.RecoverySims.mountCentripetalLab(simCont, simData, simOptions);
           } else if (simType === 'harmonic') {
-            window.RecoverySims.mountHarmonicLab(simCont, simData);
+            window.RecoverySims.mountHarmonicLab(simCont, simData, simOptions);
           } else if (simType === 'torque') {
-            window.RecoverySims.mountTorqueLab(simCont, simData);
+            window.RecoverySims.mountTorqueLab(simCont, simData, simOptions);
           } else {
-            window.RecoverySims.mountBallisticsLab(simCont, simData);
+            window.RecoverySims.mountBallisticsLab(simCont, simData, simOptions);
           }
         }
       } else {
@@ -3035,6 +3045,15 @@
     function handleRecoveryAnswer(selectedIndex) {
       const realIdx = questionOrder[currentQuestionIdx];
       if (recoveryAttemptedForQuestion[realIdx] || !activeRecoveryChallenge) return;
+
+      // Simulation challenges are redeemed by a measured apparatus result.
+      // Keep the written choices visible as analytical guidance, but do not
+      // let a click bypass the experiment.
+      if (activeRecoveryChallenge.format === 'sim') {
+        onSimFailure("This laboratory challenge is validated by the apparatus. Adjust the controls, run the simulation, and use the measured telemetry to clear it.");
+        return;
+      }
+
       markRecoveryAttempted(realIdx);
 
       const choice = activeRecoveryChallenge.choices[selectedIndex];
