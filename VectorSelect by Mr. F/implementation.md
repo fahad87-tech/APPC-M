@@ -3230,6 +3230,66 @@ Addressed user request:
   - `D:\APPS\marker\web_app\`
 - Committed and pushed changes to GitHub repository.
 
+---
+
+## 75. Phase 73: End & Discuss Real-Time Sync, PocketBase Schema Sanitization, and Desktop Launcher Audit
+
+### Root Cause Analysis of "End & Discuss" and "Reveal Answer Key" Inaction
+1. **PocketBase Schema Validation Discrepancy**:
+   - In `teacher.html`, live state broadcasts passed `timer_remaining_seconds` and `timer_paused`.
+   - The PocketBase SQLite schema for `active_assignments` strictly defines `remaining_seconds` and `is_paused`.
+   - Passing unmapped or extraneous fields caused silent validation rejections in `setAssignmentTimerState`, preventing `discussion_active: true`, `answer_revealed: true`, and `revealed_answer: correctKey` from being written to the PocketBase record.
+2. **Student Polling Desynchronization**:
+   - `index.html` was checking `res.assignment.timer_remaining_seconds` and `res.assignment.timer_paused`. When PocketBase returned the record with standard columns `remaining_seconds` and `is_paused`, the student client read them as undefined, breaking timer drift calibration and pause notifications.
+3. **Student Lock Status Gate in `renderCurrentQuestion()`**:
+   - When a teacher triggered "End & Discuss", students who had not manually clicked the lock button still had `!studentLockedAnswers[realIdx]`.
+   - Lines 2351–2367 evaluated `if (!isLocked)` and rendered the manual lock button or "Select an option to lock in", hiding the official evaluation result and explanation card even when `isRevealed` was true.
+4. **Answer Key Hydration Fallbacks**:
+   - When `currentLiveQuiz.questions[currentLiveIndex].correct_answer` was empty, `toggleTeacherAnswerReveal()` and `showDiscussionPanel()` risked broadcasting an empty string for `revealed_answer`.
+5. **Desktop Launcher & Port Isolation**:
+   - Analyzed `C:\Users\fahad\Desktop\START POCKET.bat` (linked via `START POCKET.lnk`).
+   - Line 36 launches VectorSelect's PocketBase instance on port `8090` (`--http=127.0.0.1:8090`).
+   - Line 49 launches the Scoring Tool's PocketBase instance on port `8091` (`--http=127.0.0.1:8091`).
+   - When only port `8091` was running, VectorSelect clients on `8090` were attempting to communicate with an inactive server.
+
+### Key Architectural Fixes Implemented
+
+#### 1. Payload Sanitization & Schema Mapping (`pocketbase_config.js`)
+- In `setAssignmentTimerState(join_code, state)`:
+  - Formed a sanitized `pbPayload` containing strictly valid columns for `active_assignments` (`discussion_active`, `answer_revealed`, `revealed_answer`, `revealed_explanation`, `current_question_index`, `previous_correct_answer`, `per_question_seconds`, `enable_point_redemption`, `is_active`, `is_started`).
+  - Mapped `timer_remaining_seconds` $\to$ `remaining_seconds` (`Math.max(0, Math.round(state.timer_remaining_seconds))`).
+  - Mapped `timer_paused` $\to$ `is_paused` (`Boolean(state.timer_paused)`).
+  - Ensured PocketBase record updates succeed with HTTP 200 and persist reliably.
+- In `verifyJoinCode(join_code)`:
+  - Normalized returned records so student code can read both schemas:
+    ```javascript
+    item.timer_remaining_seconds = (typeof item.remaining_seconds === 'number') ? item.remaining_seconds : item.timer_remaining_seconds;
+    item.timer_paused = (item.is_paused === true || item.timer_paused === true);
+    item.paused_remaining_seconds = (typeof item.remaining_seconds === 'number') ? item.remaining_seconds : item.paused_remaining_seconds;
+    ```
+
+#### 2. Robust Student Evaluation Display (`index.html`)
+- In `renderCurrentQuestion()`:
+  - Redefined locking condition: `const isLocked = !!studentLockedAnswers[realIdx] || isRevealed;`.
+  - When `isRevealed` is true (whether from time expiration, discussion active, or answer revealed by teacher), the question is immediately treated as evaluated and locked:
+    - Renders official result: Correct (green badge) or Incorrect / Missed (red badge with correct key).
+    - Choice buttons are disabled (`pointer-events: none`).
+    - The manual lock button is replaced by the evaluation card.
+- In `showDiscussionFeedback()`:
+  - Improved button letter matching using regex `^[A-D]` as a fallback to ensure choice buttons receive `.choice-correct` (green) and `.choice-wrong` (red) classes immediately.
+- In `updateDiscussionFreeze(isDiscussing, isRevealed)`:
+  - Now called whenever `discussionActive || answerRevealed` in both polling cycles and render passes.
+
+#### 3. Authoritative Offline Answer Key Fallback (`teacher.html`)
+- In `showDiscussionPanel()` and `toggleTeacherAnswerReveal()`:
+  - Added fallback to `window.OFFLINE_ANSWER_KEYS` if `q.correct_answer` is not yet populated.
+  - Guarantees `revealed_answer` and `revealed_explanation` are always populated before broadcasting to PocketBase and connected students.
+
+### Verification & Testing
+- Tested PocketBase REST endpoint `http://127.0.0.1:8090/api/collections/active_assignments/records/dtis5f0odnx63sy` with PATCH payload; verified HTTP 200 response with fields persisted.
+- Validated all JavaScript and embedded HTML script syntax with Node.js `vm.Script`: passed with 0 syntax errors.
+- Mirrored all files to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+
 
 
 

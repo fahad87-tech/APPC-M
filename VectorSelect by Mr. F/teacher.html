@@ -2694,8 +2694,24 @@
         await ensureQuizKeysHydrated(currentLiveQuiz);
       }
       const q = currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[currentLiveIndex];
-      const correctKey = q ? (q.correct_answer || "") : "";
-      const explanationText = q ? (q.explanation || "") : "";
+      let correctKey = q ? (q.correct_answer || "") : "";
+      let explanationText = q ? (q.explanation || "") : "";
+
+      if (!correctKey) {
+        const qid = (currentLiveQuiz && currentLiveQuiz.id) || (currentLiveAssignment && currentLiveAssignment.assessment_id);
+        if (window.OFFLINE_ANSWER_KEYS && qid && window.OFFLINE_ANSWER_KEYS[qid]) {
+          const keys = window.OFFLINE_ANSWER_KEYS[qid].keys || [];
+          const k = keys.find(item => item.question_id === q?.question_id || item.number === (currentLiveIndex + 1));
+          if (k) {
+            correctKey = k.correct_answer || "";
+            explanationText = k.explanation || "";
+            if (q) {
+              q.correct_answer = correctKey;
+              q.explanation = explanationText;
+            }
+          }
+        }
+      }
 
       isAnswerRevealed = !isAnswerRevealed;
       const content = document.getElementById("lc-answer-content");
@@ -3418,8 +3434,24 @@
       await ensureQuizKeysHydrated(currentLiveQuiz);
 
       const q = currentLiveQuiz && currentLiveQuiz.questions && currentLiveQuiz.questions[currentLiveIndex];
-      const correctKey = q ? (q.correct_answer || "") : "";
-      const explanationText = q ? (q.explanation || "") : "";
+      let correctKey = q ? (q.correct_answer || "") : "";
+      let explanationText = q ? (q.explanation || "") : "";
+
+      if (!correctKey) {
+        const qid = (currentLiveQuiz && currentLiveQuiz.id) || (currentLiveAssignment && currentLiveAssignment.assessment_id);
+        if (window.OFFLINE_ANSWER_KEYS && qid && window.OFFLINE_ANSWER_KEYS[qid]) {
+          const keys = window.OFFLINE_ANSWER_KEYS[qid].keys || [];
+          const k = keys.find(item => item.question_id === q?.question_id || item.number === (currentLiveIndex + 1));
+          if (k) {
+            correctKey = k.correct_answer || "";
+            explanationText = k.explanation || "";
+            if (q) {
+              q.correct_answer = correctKey;
+              q.explanation = explanationText;
+            }
+          }
+        }
+      }
 
       if (autoReveal) {
         isAnswerRevealed = true;

@@ -1866,11 +1866,11 @@
       // Highlight correct answer and wrong choice on the choice buttons
       const buttons = document.querySelectorAll("#q-choices-container .choice-btn");
       buttons.forEach(btn => {
-        const letter = btn.dataset.letter || btn.textContent.trim();
+        const letter = (btn.dataset.letter || "").trim() || (btn.textContent.trim().match(/^[A-D]/) ? btn.textContent.trim().match(/^[A-D]/)[0] : "");
         btn.disabled = true;
         btn.style.pointerEvents = "none";
         btn.classList.remove("choice-selected", "ring-indigo-400", "ring-2", "ring-4");
-        if (letter === correctAnswer) {
+        if (letter && letter === correctAnswer) {
           btn.classList.remove("choice-wrong", "choice-dimmed");
           btn.classList.add("choice-correct");
           btn.style.opacity = "1";
@@ -2225,15 +2225,15 @@
         });
       }
 
-      // 3. Answer Locking Controls (Manual student lock + Automatic timer lock)
-      const isLocked = !!studentLockedAnswers[realIdx];
+      // 3. Answer Locking Controls (Manual student lock + Automatic timer lock + Discussion/Reveal phase)
+      const isLocked = !!studentLockedAnswers[realIdx] || isRevealed;
       const lockBox = document.createElement("div");
       lockBox.id = "q-lock-status-box";
       lockBox.className = "mt-5 pt-3 border-t border-slate-800 text-center";
 
       if (isLocked) {
         const lockInfo = studentLockedAnswers[realIdx];
-        const isAuto = lockInfo && lockInfo.auto;
+        const isAuto = lockInfo ? lockInfo.auto : true;
         const hasMissedPrior = hasPreviousIncorrectQuestion();
         const revealedKey = getQuestionCorrectAnswer(realIdx);
         const isEvaluated = Boolean(revealedKey);
@@ -2403,7 +2403,7 @@
         if (timerPaused) {
           updateTimerPauseDisplay(true, currentAssignment ? currentAssignment.paused_remaining_seconds : null);
         }
-        if (discussionActive) {
+        if (discussionActive || answerRevealed) {
           updateDiscussionFreeze(true, answerRevealed);
         }
       }

@@ -221,6 +221,10 @@ async function verifyJoinCode(join_code) {
       const item = await pb.collection("active_assignments").getFirstListItem(`join_code = "${code}"`);
       if (item) {
         item.is_started = (item.is_started === true);
+        // Normalize timer and pause fields for student polling compatibility
+        item.timer_remaining_seconds = (typeof item.remaining_seconds === 'number') ? item.remaining_seconds : item.timer_remaining_seconds;
+        item.timer_paused = (item.is_paused === true || item.timer_paused === true);
+        item.paused_remaining_seconds = (typeof item.remaining_seconds === 'number') ? item.remaining_seconds : item.paused_remaining_seconds;
         return { found: true, assignment: item };
       }
     } catch (err) {
@@ -233,6 +237,8 @@ async function verifyJoinCode(join_code) {
   const match = assignments.find(a => a.join_code === code);
   if (match) {
     match.is_started = (match.is_started === true);
+    match.timer_remaining_seconds = (typeof match.remaining_seconds === 'number') ? match.remaining_seconds : match.timer_remaining_seconds;
+    match.timer_paused = (match.is_paused === true || match.timer_paused === true);
     return { found: true, assignment: match };
   }
 
@@ -512,7 +518,34 @@ async function setAssignmentTimerState(join_code, state) {
     try {
       const item = await pb.collection("active_assignments").getFirstListItem(`join_code = "${code}"`);
       if (item) {
-        await pb.collection("active_assignments").update(item.id, state);
+        // Build sanitized payload strictly conforming to PocketBase active_assignments schema
+        const pbPayload = {};
+        if (state.discussion_active !== undefined) pbPayload.discussion_active = Boolean(state.discussion_active);
+        if (state.answer_revealed !== undefined) pbPayload.answer_revealed = Boolean(state.answer_revealed);
+        if (state.revealed_answer !== undefined) pbPayload.revealed_answer = String(state.revealed_answer || "");
+        if (state.revealed_explanation !== undefined) pbPayload.revealed_explanation = String(state.revealed_explanation || "");
+        if (state.current_question_index !== undefined) pbPayload.current_question_index = Number(state.current_question_index);
+        if (state.previous_correct_answer !== undefined) pbPayload.previous_correct_answer = String(state.previous_correct_answer || "");
+        if (state.per_question_seconds !== undefined) pbPayload.per_question_seconds = Number(state.per_question_seconds);
+        if (state.enable_point_redemption !== undefined) pbPayload.enable_point_redemption = Boolean(state.enable_point_redemption);
+        if (state.is_active !== undefined) pbPayload.is_active = Boolean(state.is_active);
+        if (state.is_started !== undefined) pbPayload.is_started = Boolean(state.is_started);
+
+        // Map timer fields: timer_remaining_seconds -> remaining_seconds
+        if (state.timer_remaining_seconds !== undefined) {
+          pbPayload.remaining_seconds = Math.max(0, Math.round(Number(state.timer_remaining_seconds) || 0));
+        } else if (state.remaining_seconds !== undefined) {
+          pbPayload.remaining_seconds = Math.max(0, Math.round(Number(state.remaining_seconds) || 0));
+        }
+
+        // Map pause fields: timer_paused -> is_paused
+        if (state.timer_paused !== undefined) {
+          pbPayload.is_paused = Boolean(state.timer_paused);
+        } else if (state.is_paused !== undefined) {
+          pbPayload.is_paused = Boolean(state.is_paused);
+        }
+
+        await pb.collection("active_assignments").update(item.id, pbPayload);
       }
     } catch (err) {
       console.warn("[PocketBase] Timer state update error:", err);
