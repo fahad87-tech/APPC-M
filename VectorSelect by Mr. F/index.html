@@ -1794,7 +1794,13 @@
       const studentAnswer = studentAnswers[realIdx];
       const correctAnswer = getQuestionCorrectAnswer(realIdx);
 
-      if (!correctAnswer) {
+      // In teacher-led mode, strictly wait for instructor discussion or answer key reveal
+      if (quizMode === "teacher_led" && !discussionActive && !answerRevealed) {
+        showDiscussionPendingNotice();
+        return;
+      }
+
+      if (!correctAnswer || !isCurrentQuestionEvaluationRevealed()) {
         showDiscussionPendingNotice();
         return;
       }
@@ -2002,17 +2008,8 @@
     // EVALUATION REVELATION & STRICT RECOVERY GATING HELPERS
     // ============================================================================
     function isCurrentQuestionEvaluationRevealed() {
-      const realIdx = questionOrder[currentQuestionIdx];
-      if (currentRevealedAnswers[currentQuestionIdx] || (realIdx !== undefined && currentRevealedAnswers[realIdx]) || (currentAssignment && currentAssignment.revealed_answer)) {
-        return true;
-      }
       if (quizMode === "teacher_led") {
-        if (discussionActive || answerRevealed) return true;
-        // In teacher-led mode, evaluation is revealed if time expired AND student had locked or timed out
-        if (currentAssignment && currentAssignment.per_question_seconds > 0) {
-          if (typeof perQRemaining === 'number' && perQRemaining <= 0 && !!studentLockedAnswers[realIdx]) return true;
-        }
-        return false;
+        return Boolean(discussionActive || answerRevealed);
       } else {
         if (isCountDown && remainingSeconds <= 0) return true;
         return false;
@@ -2525,10 +2522,18 @@
 
     function autoLockCurrentQuestion() {
       const realIdx = questionOrder[currentQuestionIdx];
+      if (realIdx === undefined) return;
       const wasLocked = !!studentLockedAnswers[realIdx];
       if (!wasLocked) {
         studentLockedAnswers[realIdx] = { auto: true, locked_at: new Date().toISOString() };
         syncStudentLiveAnswer(true);
+      }
+
+      if (quizMode === "teacher_led" && !discussionActive && !answerRevealed) {
+        // Teacher-led mode: Keep in neutral locked state until teacher initiates discussion/reveal
+        renderCurrentQuestion();
+        showDiscussionPendingNotice();
+        return;
       }
 
       if (discussionFeedbackShownForQuestion[realIdx]) return;
@@ -3027,154 +3032,201 @@
     // ============================================================================
     // TEACHER-LED SYNCHRONIZATION POLLING (Real-time Pacing)
     // ============================================================================
+    function syncStudentWithTeacherAssignment(assignment) {
+      if (!assignment) return;
+
+      // 1. Sync dynamic live point redemption toggle
+      if (assignment.enable_point_redemption !== undefined) {
+        currentAssignment.enable_point_redemption = (assignment.enable_point_redemption !== false);
+      }
+
+      // 2. Sync per_question_seconds if updated (e.g. +30s / +60s)
+      if (assignment.per_question_seconds && assignment.per_question_seconds !== currentAssignment.per_question_seconds) {
+        currentAssignment.per_question_seconds = assignment.per_question_seconds;
+      }
+
+      const teacherQ = (typeof assignment.current_question_index === 'number') ? assignment.current_question_index : 0;
+      const isQuestionTransition = (teacherQ !== currentQuestionIdx);
+
+      // 3. Question transition check - ALWAYS PRIORITIZE QUESTION INDEX FIRST!
+      if (isQuestionTransition) {
+        currentQuestionIdx = teacherQ;
+        const newRealIdx = questionOrder[teacherQ];
+
+        // Unconditionally wipe clean all locks, reveals, and explanations for this new question
+        delete studentLockedAnswers[newRealIdx];
+        delete studentLockedAnswers[teacherQ];
+        delete currentRevealedAnswers[teacherQ];
+        delete currentRevealedAnswers[newRealIdx];
+        delete currentRevealedExplanations[teacherQ];
+        delete currentRevealedExplanations[newRealIdx];
+        delete discussionFeedbackShownForQuestion[newRealIdx];
+        delete recoveryAttemptedForQuestion[newRealIdx];
+
+        // Hide any previous question feedback panel
+        const feedbackPanel = document.getElementById("discussion-feedback");
+        if (feedbackPanel) {
+          feedbackPanel.classList.add("hidden");
+          feedbackPanel.className = "hidden";
+        }
+
+        discussionActive = Boolean(assignment.discussion_active);
+        answerRevealed = Boolean(assignment.answer_revealed);
+
+        currentAssignment.revealed_answer = answerRevealed ? (assignment.revealed_answer || "") : "";
+        currentAssignment.revealed_explanation = answerRevealed ? (assignment.revealed_explanation || "") : "";
+        currentAssignment.discussion_active = discussionActive;
+        currentAssignment.answer_revealed = answerRevealed;
+
+        const newSecs = (typeof assignment.timer_remaining_seconds === 'number' && assignment.timer_remaining_seconds > 0)
+          ? assignment.timer_remaining_seconds
+          : (assignment.per_question_seconds || 60);
+        perQRemaining = newSecs;
+        questionStartTime = Date.now();
+
+        updatePerQDisplay(perQRemaining);
+        renderCurrentQuestion();
+        updateDiscussionFreeze(discussionActive, answerRevealed);
+      }
+
+      // 4. Sync previous question's evaluated answer from instructor
+      if (assignment.previous_correct_answer && teacherQ > 0) {
+        const prevStep = teacherQ - 1;
+        const prevReal = questionOrder[prevStep];
+        currentRevealedAnswers[prevStep] = assignment.previous_correct_answer;
+        currentRevealedAnswers[prevReal] = assignment.previous_correct_answer;
+        const prevChoice = studentAnswers[prevReal];
+        const hasChoice = prevChoice && prevChoice !== 'null' && prevChoice !== 'undefined' && String(prevChoice).trim() !== '';
+        if (!hasChoice || String(prevChoice).trim().toUpperCase() !== String(assignment.previous_correct_answer).trim().toUpperCase()) {
+          studentMissedQuestions.add(prevReal);
+        } else {
+          studentMissedQuestions.delete(prevReal);
+        }
+      }
+
+      // 5. Timer synchronization with instructor (when on the same question)
+      if (!isQuestionTransition && typeof assignment.timer_remaining_seconds === 'number') {
+        const teacherRemaining = assignment.timer_remaining_seconds;
+        if (teacherRemaining <= 0) {
+          if (perQRemaining > 0) {
+            perQRemaining = 0;
+            updatePerQDisplay(0);
+          }
+        } else {
+          if (Math.abs(perQRemaining - teacherRemaining) > 1.5 || perQRemaining <= 0) {
+            perQRemaining = teacherRemaining;
+            updatePerQDisplay(perQRemaining);
+          }
+        }
+      }
+
+      // 6. Sync discussion and answer reveal state
+      const newDiscussion = Boolean(assignment.discussion_active);
+      const newAnswerRevealed = Boolean(assignment.answer_revealed);
+      let isNewReveal = false;
+
+      if (assignment.revealed_answer && (newDiscussion || newAnswerRevealed)) {
+        const teacherRealIdx = questionOrder[teacherQ];
+        if (currentRevealedAnswers[teacherQ] !== assignment.revealed_answer) {
+          isNewReveal = true;
+        }
+        currentRevealedAnswers[teacherQ] = assignment.revealed_answer;
+        currentRevealedAnswers[teacherRealIdx] = assignment.revealed_answer;
+        if (assignment.revealed_explanation) {
+          currentRevealedExplanations[teacherQ] = assignment.revealed_explanation;
+          currentRevealedExplanations[teacherRealIdx] = assignment.revealed_explanation;
+        }
+        const studentChoice = studentAnswers[teacherRealIdx];
+        const hasChoice = studentChoice && studentChoice !== 'null' && studentChoice !== 'undefined' && String(studentChoice).trim() !== '';
+        if (!hasChoice || String(studentChoice).trim().toUpperCase() !== String(assignment.revealed_answer).trim().toUpperCase()) {
+          studentMissedQuestions.add(teacherRealIdx);
+        } else {
+          studentMissedQuestions.delete(teacherRealIdx);
+        }
+      } else if (!newDiscussion && !newAnswerRevealed) {
+        delete currentRevealedAnswers[teacherQ];
+        const teacherRealIdx = questionOrder[teacherQ];
+        if (teacherRealIdx !== undefined) delete currentRevealedAnswers[teacherRealIdx];
+        currentAssignment.revealed_answer = "";
+        currentAssignment.revealed_explanation = "";
+      }
+
+      currentAssignment.question_started_at = assignment.question_started_at;
+      currentAssignment.revealed_answer = (newDiscussion || newAnswerRevealed) ? (assignment.revealed_answer || "") : "";
+      currentAssignment.revealed_explanation = (newDiscussion || newAnswerRevealed) ? (assignment.revealed_explanation || "") : "";
+
+      // Auto-lock answer if instructor initiated discussion or revealed answer
+      if (newDiscussion || newAnswerRevealed) {
+        const currentReal = questionOrder[currentQuestionIdx];
+        if (!studentLockedAnswers[currentReal]) {
+          studentLockedAnswers[currentReal] = { auto: true, locked_at: new Date().toISOString() };
+          syncStudentLiveAnswer(true);
+        }
+      } else {
+        // Ensure if discussion and reveal are cleared, choice buttons are fully clickable
+        const choicesBox = document.getElementById("q-choices-container");
+        if (choicesBox) {
+          const currentReal = questionOrder[currentQuestionIdx];
+          if (!studentLockedAnswers[currentReal]) {
+            choicesBox.querySelectorAll("button.choice-btn").forEach(btn => {
+              btn.disabled = false;
+              btn.style.opacity = "1";
+              btn.style.pointerEvents = "auto";
+            });
+          }
+        }
+      }
+
+      if (newDiscussion !== discussionActive || newAnswerRevealed !== answerRevealed || (discussionActive && isNewReveal)) {
+        discussionActive = newDiscussion;
+        answerRevealed = newAnswerRevealed;
+        renderCurrentQuestion();
+        updateDiscussionFreeze(discussionActive, answerRevealed);
+      }
+
+      // 7. Sync instructor pause state
+      const isPaused = assignment.timer_paused === true;
+      if (isPaused !== timerPaused) {
+        timerPaused = isPaused;
+        updateTimerPauseDisplay(timerPaused, assignment.paused_remaining_seconds);
+        if (timerPaused) {
+          showToast("Session Paused", "Instructor has paused to explain concepts", "brass", 3000);
+        } else {
+          showToast("Session Resumed", "Assessment clock resumed", "lime", 2000);
+        }
+      }
+
+      // 8. Session active check
+      if (assignment.is_active === false) {
+        clearInterval(teacherLedPollInterval);
+        alert("The instructor has ended the live assessment session.");
+        finishAssessment();
+      }
+    }
+
     function startTeacherLedPolling() {
       clearInterval(teacherLedPollInterval);
       teacherLedPollInterval = setInterval(async () => {
         try {
           const res = await verifyJoinCode(currentAssignment.join_code);
           if (res.found && res.assignment) {
-            // 1. Sync dynamic live point redemption toggle FIRST
-            if (res.assignment.enable_point_redemption !== undefined) {
-              currentAssignment.enable_point_redemption = (res.assignment.enable_point_redemption !== false);
-            }
-
-            // Sync per_question_seconds if updated (e.g. +30s / +60s)
-            if (res.assignment.per_question_seconds && res.assignment.per_question_seconds !== currentAssignment.per_question_seconds) {
-              currentAssignment.per_question_seconds = res.assignment.per_question_seconds;
-            }
-
-            // Direct timer synchronization with instructor
-            if (typeof res.assignment.timer_remaining_seconds === 'number') {
-              const teacherRemaining = res.assignment.timer_remaining_seconds;
-              if (teacherRemaining <= 0) {
-                if (perQRemaining > 0) {
-                  perQRemaining = 0;
-                  updatePerQDisplay(0);
+            // Subscribe to SSE if PocketBase is active and not yet subscribed
+            if (pb && res.assignment.id && activeAssignmentSubscription !== res.assignment.id) {
+              subscribeToLiveAssignment(res.assignment.id, (record) => {
+                if (record) {
+                  record.timer_remaining_seconds = (typeof record.remaining_seconds === 'number') ? record.remaining_seconds : record.timer_remaining_seconds;
+                  record.timer_paused = (record.is_paused === true || record.timer_paused === true);
+                  record.paused_remaining_seconds = (typeof record.remaining_seconds === 'number') ? record.remaining_seconds : record.paused_remaining_seconds;
+                  syncStudentWithTeacherAssignment(record);
                 }
-              } else {
-                if (Math.abs(perQRemaining - teacherRemaining) > 1.5 || perQRemaining <= 0) {
-                  perQRemaining = teacherRemaining;
-                  updatePerQDisplay(perQRemaining);
-                }
-              }
+              });
             }
 
-            const teacherQ = res.assignment.current_question_index || 0;
-
-            // 2. Sync previous question's evaluated answer from instructor FIRST
-            if (res.assignment.previous_correct_answer && teacherQ > 0) {
-              const prevStep = teacherQ - 1;
-              const prevReal = questionOrder[prevStep];
-              currentRevealedAnswers[prevStep] = res.assignment.previous_correct_answer;
-              currentRevealedAnswers[prevReal] = res.assignment.previous_correct_answer;
-              const prevChoice = studentAnswers[prevReal];
-              const hasChoice = prevChoice && prevChoice !== 'null' && prevChoice !== 'undefined' && String(prevChoice).trim() !== '';
-              if (!hasChoice || String(prevChoice).trim().toUpperCase() !== String(res.assignment.previous_correct_answer).trim().toUpperCase()) {
-                studentMissedQuestions.add(prevReal);
-              } else {
-                studentMissedQuestions.delete(prevReal);
-              }
-            }
-
-            // 3. Question transition check
-            if (teacherQ !== currentQuestionIdx) {
-              currentQuestionIdx = teacherQ;
-              const newRealIdx = questionOrder[teacherQ];
-              discussionActive = res.assignment.discussion_active === true;
-              answerRevealed = res.assignment.answer_revealed === true;
-              perQRemaining = (typeof res.assignment.timer_remaining_seconds === 'number' && res.assignment.timer_remaining_seconds > 0)
-                ? res.assignment.timer_remaining_seconds
-                : (res.assignment.per_question_seconds || 60);
-              // Clean any stale locks or reveals for this new question
-              if (!discussionActive && !answerRevealed) {
-                delete studentLockedAnswers[newRealIdx];
-                delete currentRevealedAnswers[teacherQ];
-                delete currentRevealedAnswers[newRealIdx];
-              }
-              renderCurrentQuestion();
-            }
-
-            // 4. Sync revealed answer & explanation from instructor for the current question
-            let isNewReveal = false;
-            if (res.assignment.revealed_answer) {
-              const teacherRealIdx = questionOrder[teacherQ];
-              if (currentRevealedAnswers[teacherQ] !== res.assignment.revealed_answer) {
-                isNewReveal = true;
-              }
-              currentRevealedAnswers[teacherQ] = res.assignment.revealed_answer;
-              currentRevealedAnswers[teacherRealIdx] = res.assignment.revealed_answer;
-              if (res.assignment.revealed_explanation) {
-                currentRevealedExplanations[teacherQ] = res.assignment.revealed_explanation;
-                currentRevealedExplanations[teacherRealIdx] = res.assignment.revealed_explanation;
-              }
-              const studentChoice = studentAnswers[teacherRealIdx];
-              const hasChoice = studentChoice && studentChoice !== 'null' && studentChoice !== 'undefined' && String(studentChoice).trim() !== '';
-              if (!hasChoice || String(studentChoice).trim().toUpperCase() !== String(res.assignment.revealed_answer).trim().toUpperCase()) {
-                studentMissedQuestions.add(teacherRealIdx);
-              } else {
-                studentMissedQuestions.delete(teacherRealIdx);
-              }
-            } else if (res.assignment.answer_revealed === false) {
-              delete currentRevealedAnswers[teacherQ];
-              const teacherRealIdx = questionOrder[teacherQ];
-              if (teacherRealIdx !== undefined) delete currentRevealedAnswers[teacherRealIdx];
-            }
-
-            // 5. Sync per-question timer + discussion pause state from instructor
-            currentAssignment.question_started_at = res.assignment.question_started_at;
-            currentAssignment.revealed_answer = res.assignment.revealed_answer;
-            currentAssignment.revealed_explanation = res.assignment.revealed_explanation;
-            const newDiscussion = res.assignment.discussion_active === true;
-            const newAnswerRevealed = res.assignment.answer_revealed === true;
-
-            // Auto-lock answer if instructor initiated discussion or revealed answer
-            if (newDiscussion || newAnswerRevealed) {
-              const currentReal = questionOrder[currentQuestionIdx];
-              if (!studentLockedAnswers[currentReal]) {
-                studentLockedAnswers[currentReal] = { auto: true, locked_at: new Date().toISOString() };
-                syncStudentLiveAnswer(true);
-              }
-            } else {
-              // Ensure if discussion and reveal are cleared, choice buttons are fully clickable
-              const choicesBox = document.getElementById("q-choices-container");
-              if (choicesBox) {
-                const currentReal = questionOrder[currentQuestionIdx];
-                if (!studentLockedAnswers[currentReal]) {
-                  choicesBox.querySelectorAll("button.choice-btn").forEach(btn => {
-                    btn.disabled = false;
-                    btn.style.opacity = "1";
-                    btn.style.pointerEvents = "auto";
-                  });
-                }
-              }
-            }
-
-            if (newDiscussion !== discussionActive || newAnswerRevealed !== answerRevealed || (discussionActive && isNewReveal)) {
-              discussionActive = newDiscussion;
-              answerRevealed = newAnswerRevealed;
-              renderCurrentQuestion();
-              updateDiscussionFreeze(discussionActive, answerRevealed);
-            }
-
-            // 6. Sync instructor pause state
-            const isPaused = res.assignment.timer_paused === true;
-            if (isPaused !== timerPaused) {
-              timerPaused = isPaused;
-              updateTimerPauseDisplay(timerPaused, res.assignment.paused_remaining_seconds);
-              if (timerPaused) {
-                showToast("Session Paused", "Instructor has paused to explain concepts", "brass", 3000);
-              } else {
-                showToast("Session Resumed", "Assessment clock resumed", "lime", 2000);
-              }
-            }
-
-            if (!res.assignment.is_active) {
-              clearInterval(teacherLedPollInterval);
-              alert("The instructor has ended the live assessment session.");
-              finishAssessment();
-            }
+            syncStudentWithTeacherAssignment(res.assignment);
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn("[Student Sync] Polling tick error:", e);
+        }
       }, 1000);
     }
 

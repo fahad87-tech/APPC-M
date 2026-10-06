@@ -16,11 +16,12 @@ VectorSelect is a high-performance web classroom assessment platform designed fo
 ### A. Dual Assessment Modes
 1. **Teacher-Led Live Pacing (`teacher_led`)**:
    - The instructor centrally controls the active question index (`current_question_index`).
-   - All student clients automatically sync within 1 second to the instructor's active question.
+   - All student clients automatically sync instantaneously via Server-Sent Events (SSE) backed by a 1-second heartbeat polling fallback.
    - Per-question countdown timer synchronized with instructor pause/resume and time adjustment (+30s / +60s).
-   - Pedagogical Confidentiality: During active timers, student choices remain neutrally locked.
-   - When time expires or when the instructor clicks **End & Discuss**, the question enters discussion phase, freezing student inputs and displaying the official answer key and College Board rationales.
-   - Advancing to the next question clears discussion and reveal states atomically and immediately unlocks student choice buttons for the new question.
+   - **Pedagogical Confidentiality**: During live question answering, student choices remain neutrally locked without revealing correctness or distractor keys.
+   - **Discussion & Evaluation Phase**: When the timer expires or when the instructor clicks **End & Discuss**, the question enters discussion phase, freezing student inputs and displaying the official answer key and College Board rationales.
+   - **Clean Question State Isolation**: Advancing to the next question clears discussion and reveal states atomically, wiping all previous locks and evaluation banners, and immediately restores choice buttons (A, B, C, D) to active, clickable states.
+   - **Strict Response Deduplication**: Student live telemetry answers are strictly deduplicated by student name per question, ensuring each student accounts for exactly one entry in class response histograms, AP Classroom telemetry, and the live leaderboard.
 2. **Student-Led Self-Paced (`student_led`)**:
    - Students navigate between questions freely via sidebar navigation grid or Next/Previous buttons.
    - Overall exam timer counts down to submission.

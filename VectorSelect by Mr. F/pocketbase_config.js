@@ -463,7 +463,7 @@ async function submitLiveAnswer(payload) {
   }
 }
 
-// Fetch live answer choices for histogram bar rendering
+// Fetch live answer choices for histogram bar rendering (strictly deduplicated by student)
 async function fetchLiveAnswersByCode(join_code, question_real_index) {
   const code = String(join_code).trim().toUpperCase();
 
@@ -473,16 +473,32 @@ async function fetchLiveAnswersByCode(join_code, question_real_index) {
         filter: `join_code = "${code}" && event_type = "live_answer"`,
         sort: "-created"
       });
-      const relevant = events
-        .map(e => e.payload)
-        .filter(p => p && p.question_real_index === question_real_index);
-      return relevant;
+      const studentMap = new Map();
+      events.forEach(e => {
+        const p = e.payload;
+        if (p && p.question_real_index === question_real_index && p.student_name) {
+          const sKey = String(p.student_name).trim().toLowerCase();
+          if (!studentMap.has(sKey)) {
+            studentMap.set(sKey, p);
+          }
+        }
+      });
+      return Array.from(studentMap.values());
     } catch (err) {}
   }
 
   const key = `live_answers_${code}`;
   const list = JSON.parse(localStorage.getItem(key) || "[]");
-  return list.filter(a => a.question_real_index === question_real_index);
+  const studentMap = new Map();
+  list.slice().reverse().forEach(p => {
+    if (p && p.question_real_index === question_real_index && p.student_name) {
+      const sKey = String(p.student_name).trim().toLowerCase();
+      if (!studentMap.has(sKey)) {
+        studentMap.set(sKey, p);
+      }
+    }
+  });
+  return Array.from(studentMap.values());
 }
 
 // Delete an assignment
@@ -719,14 +735,36 @@ async function fetchLiveClassLeaderboard(join_code) {
   if (pb) {
     try {
       const events = await pb.collection("live_events").getFullList({
-        filter: `join_code = "${code}" && event_type = "live_answer"`
+        filter: `join_code = "${code}" && event_type = "live_answer"`,
+        sort: "-created"
       });
-      allLiveAnswers = events.map(e => e.payload).filter(Boolean);
+      // Group by student + question_real_index taking only the latest entry per question
+      const studentQMap = new Map();
+      events.forEach(e => {
+        const p = e.payload;
+        if (p && p.student_name && p.question_real_index !== undefined) {
+          const sKey = `${String(p.student_name).trim().toLowerCase()}__${p.question_real_index}`;
+          if (!studentQMap.has(sKey)) {
+            studentQMap.set(sKey, p);
+          }
+        }
+      });
+      allLiveAnswers = Array.from(studentQMap.values());
     } catch (err) {}
   }
   if (allLiveAnswers.length === 0) {
     const key = `live_answers_${code}`;
-    allLiveAnswers = JSON.parse(localStorage.getItem(key) || "[]");
+    const list = JSON.parse(localStorage.getItem(key) || "[]");
+    const studentQMap = new Map();
+    list.slice().reverse().forEach(p => {
+      if (p && p.student_name && p.question_real_index !== undefined) {
+        const sKey = `${String(p.student_name).trim().toLowerCase()}__${p.question_real_index}`;
+        if (!studentQMap.has(sKey)) {
+          studentQMap.set(sKey, p);
+        }
+      }
+    });
+    allLiveAnswers = Array.from(studentQMap.values());
   }
 
   const studentMap = {};

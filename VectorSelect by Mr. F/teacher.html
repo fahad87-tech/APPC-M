@@ -2547,21 +2547,6 @@
       const discPrev = document.getElementById("lc-disc-btn-prev");
       if (discPrev) discPrev.disabled = currentLiveIndex === 0;
       resetLcNextButton();
-
-      // Persist to sync all students immediately with timer reset and discussion cleared
-      const perQ = currentLiveAssignment.per_question_seconds || 0;
-      setAssignmentTimerState(currentLiveAssignment.join_code, {
-        current_question_index: currentLiveIndex,
-        question_started_at: new Date().toISOString(),
-        discussion_active: false,
-        answer_revealed: false,
-        revealed_answer: "",
-        revealed_explanation: "",
-        timer_remaining_seconds: perQ,
-        per_question_seconds: perQ,
-        timer_paused: false,
-        paused_remaining_seconds: null
-      });
     }
 
     let lastAllAnsweredNotifiedIdx = -1;
@@ -3110,12 +3095,23 @@
     }
 
     function renderDiscussionContent(answers) {
-      currentDiscussionAnswers = answers || [];
+      // Defensively deduplicate answers by student_name, taking only the latest submission per unique student
+      const uniqueAnswersMap = new Map();
+      (answers || []).forEach(a => {
+        if (a && a.student_name) {
+          const sKey = String(a.student_name).trim().toLowerCase();
+          if (!uniqueAnswersMap.has(sKey)) {
+            uniqueAnswersMap.set(sKey, a);
+          }
+        }
+      });
+      const dedupedAnswers = Array.from(uniqueAnswersMap.values());
+      currentDiscussionAnswers = dedupedAnswers;
       const correctLetter = (currentLiveQuiz.questions[currentLiveIndex].correct_answer || '').toUpperCase();
       const counts = { A: 0, B: 0, C: 0, D: 0, NO_ANSWER: 0 };
       let answeredCount = 0;
 
-      (answers || []).forEach(a => {
+      dedupedAnswers.forEach(a => {
         const rawLetter = a.selected_letter;
         const isAnswered = rawLetter && rawLetter !== 'null' && rawLetter !== 'undefined' && String(rawLetter).trim() !== '';
         if (isAnswered) {
@@ -3128,7 +3124,7 @@
           counts.NO_ANSWER++;
         }
       });
-      const totalAnswers = (answers || []).length;
+      const totalAnswers = dedupedAnswers.length;
 
       const distContainer = document.getElementById("lc-distribution-bars");
       if (distContainer) {
@@ -3189,7 +3185,7 @@
       const statsEl = document.getElementById("lc-discussion-stats");
       if (statsEl) {
         if (isAnswerRevealed) {
-          const correctCount = (answers || []).filter(a => {
+          const correctCount = dedupedAnswers.filter(a => {
             const raw = a.selected_letter;
             const valid = raw && raw !== 'null' && raw !== 'undefined' && String(raw).trim() !== '';
             return valid && a.is_correct;
