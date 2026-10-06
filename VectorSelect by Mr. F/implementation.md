@@ -3120,6 +3120,39 @@ Addressed user request:
   5. In the standalone Scoring Tool (port `8091`), the teacher imports the file or pastes the scores, completing the grading and curve calculation in seconds.
 - **Impact**: Provides a frictionless bridge between VectorSelect and the standalone Scoring Tool without requiring complex cloud database federation.
 
+---
+
+## Phase 71: Multi-Select & Batch Deletion for Active Assignments (`teacher.html`) (2026-10-06)
+
+### Context & User Directives
+- **Directives**: *"can you add multi select/all select so i can delete more than one at the same time"*
+- **Reference Image**: User uploaded image (`media_1791258359678.png`) of the Active Assignments table showing multiple sessions with individual `Delete` buttons.
+
+### Architectural Enhancements Implemented
+1. **Per-Row Checkboxes**:
+   - Added a dedicated checkbox column (`th` and `td`) in the Active Assignments table.
+   - Each row features an accessible checkbox `<input type="checkbox" data-code="${a.join_code}">`.
+   - Checking a row instantly highlights it with an indigo background tint and accent border (`bg-indigo-950/25 border-l-4 border-l-indigo-500`).
+2. **Master "Select All" Checkbox**:
+   - Placed a master checkbox in the table header: `<input type="checkbox" id="select-all-assignments">`.
+   - Supports tri-state behavior: checked when all are selected, unchecked when none, and indeterminate when a subset is selected.
+3. **Dynamic Floating Batch Actions Bar**:
+   - Placed `#batch-assignments-bar` above the assignments table.
+   - Automatically reveals when 1 or more assignments are selected:
+     - Displays live selection tally: `X assignments selected`.
+     - `Deselect All` button for quick cancellation.
+     - Prominent rose `[🗑️ Delete Selected (X)]` button.
+4. **Safe Batch Deletion Execution**:
+   - Clicking `Delete Selected` displays a single confirmation dialog listing the selected join codes.
+   - Upon confirmation, deletes each selected assignment from PocketBase `active_assignments` and local storage in sequence.
+   - Displays a clean status indicator `Deleting X...` and updates with a success toast notification.
+
+### Verification & Mirroring
+- Validated JavaScript syntax in `teacher.html` via Node `vm.Script`: 0 errors detected.
+- Mirrored `teacher.html` and `implementation.md` to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
+- Committed and pushed to GitHub main repository (`fahad87-tech/APPC-M`).
+
+
 
 
 

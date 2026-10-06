@@ -462,12 +462,36 @@
         </button>
       </div>
 
+      <!-- Batch Actions Bar (Revealed when 1+ assignments selected) -->
+      <div id="batch-assignments-bar" class="hidden enter p-3.5 sm:p-4 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/50 to-slate-900 border-2 border-indigo-500/50 shadow-2xl flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="h-9 w-9 rounded-xl bg-indigo-600/20 border border-indigo-500/40 text-indigo-300 flex items-center justify-center font-black text-sm">
+            ✓
+          </div>
+          <div>
+            <div id="batch-selected-count" class="text-sm sm:text-base font-black text-white">0 assignments selected</div>
+            <div class="text-[11px] text-slate-400">Perform bulk actions on all selected assignments</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="clearSelectedAssignments()" class="pressable px-3 py-2 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition">
+            Deselect All
+          </button>
+          <button type="button" onclick="confirmDeleteSelectedAssignments()" id="btn-batch-delete" class="pressable px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-rose-500 hover:from-rose-500 hover:to-rose-400 text-white font-black text-xs sm:text-sm shadow-lg shadow-rose-600/30 flex items-center gap-1.5 transition cursor-pointer">
+            <span>🗑️</span> <span>Delete Selected (<span id="batch-delete-btn-count">0</span>)</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Table of Assignments -->
       <div class="quantum-card rounded-3xl overflow-hidden shadow-2xl">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-base">
             <thead class="bg-slate-950/90 border-b border-slate-700 text-sm uppercase font-extrabold text-slate-300">
               <tr>
+                <th class="py-4 px-3 w-12 text-center">
+                  <input type="checkbox" id="select-all-assignments" onchange="toggleSelectAllAssignments(this.checked)" class="h-4 w-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-slate-950 cursor-pointer" title="Select All Assignments">
+                </th>
                 <th class="py-4 px-4 w-28">Join Code</th>
                 <th class="py-4 px-4">Course &amp; Assessment</th>
                 <th class="py-4 px-4">Mode</th>
@@ -1414,22 +1438,148 @@
     }
 
     // ============================================================================
-    // ASSIGNMENTS TABLE
+    // ASSIGNMENTS TABLE & MULTI-SELECT BATCH CONTROLS
     // ============================================================================
+    let selectedAssignmentCodes = new Set();
+
+    function handleAssignmentCheckboxChange(checkbox) {
+      const code = checkbox.dataset.code;
+      if (!code) return;
+      if (checkbox.checked) {
+        selectedAssignmentCodes.add(code);
+      } else {
+        selectedAssignmentCodes.delete(code);
+      }
+      const tr = checkbox.closest("tr");
+      if (tr) {
+        if (checkbox.checked) {
+          tr.className = "hover:bg-slate-800/80 bg-indigo-950/25 border-l-4 border-l-indigo-500 transition border-b border-slate-800/80";
+        } else {
+          tr.className = "hover:bg-slate-800/60 transition border-b border-slate-800/80";
+        }
+      }
+      updateBatchActionBar();
+    }
+
+    function toggleSelectAllAssignments(checked) {
+      const checkboxes = document.querySelectorAll(".assignment-row-checkbox");
+      checkboxes.forEach(cb => {
+        cb.checked = checked;
+        const code = cb.dataset.code;
+        const tr = cb.closest("tr");
+        if (checked) {
+          if (code) selectedAssignmentCodes.add(code);
+          if (tr) tr.className = "hover:bg-slate-800/80 bg-indigo-950/25 border-l-4 border-l-indigo-500 transition border-b border-slate-800/80";
+        } else {
+          if (code) selectedAssignmentCodes.delete(code);
+          if (tr) tr.className = "hover:bg-slate-800/60 transition border-b border-slate-800/80";
+        }
+      });
+      if (!checked) selectedAssignmentCodes.clear();
+      updateBatchActionBar();
+    }
+
+    function clearSelectedAssignments() {
+      selectedAssignmentCodes.clear();
+      const selectAll = document.getElementById("select-all-assignments");
+      if (selectAll) {
+        selectAll.checked = false;
+        selectAll.indeterminate = false;
+      }
+      document.querySelectorAll(".assignment-row-checkbox").forEach(cb => {
+        cb.checked = false;
+        const tr = cb.closest("tr");
+        if (tr) tr.className = "hover:bg-slate-800/60 transition border-b border-slate-800/80";
+      });
+      updateBatchActionBar();
+    }
+
+    function updateBatchActionBar() {
+      const count = selectedAssignmentCodes.size;
+      const total = (activeAssignments && activeAssignments.length) || 0;
+      const bar = document.getElementById("batch-assignments-bar");
+      const countText = document.getElementById("batch-selected-count");
+      const btnCount = document.getElementById("batch-delete-btn-count");
+      const selectAll = document.getElementById("select-all-assignments");
+
+      if (selectAll) {
+        selectAll.checked = total > 0 && count === total;
+        selectAll.indeterminate = count > 0 && count < total;
+      }
+
+      if (bar) {
+        if (count > 0) {
+          bar.classList.remove("hidden");
+          if (countText) countText.textContent = `${count} assignment${count > 1 ? 's' : ''} selected`;
+          if (btnCount) btnCount.textContent = `${count}`;
+        } else {
+          bar.classList.add("hidden");
+        }
+      }
+    }
+
+    async function confirmDeleteSelectedAssignments() {
+      const count = selectedAssignmentCodes.size;
+      if (count === 0) return;
+
+      const codes = Array.from(selectedAssignmentCodes);
+      const msg =
+        `Permanently delete ${count} selected assignment${count > 1 ? 's' : ''}?\n\n` +
+        `Join Codes: ${codes.join(', ')}\n\n` +
+        `Students will no longer be able to join or submit to these assignments. This action cannot be undone.`;
+
+      if (!confirm(msg)) return;
+
+      const btn = document.getElementById("btn-batch-delete");
+      const origText = btn ? btn.innerHTML : "";
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span>⏳</span> Deleting ${count}...`;
+      }
+
+      try {
+        for (const code of codes) {
+          await deleteAssignment(code);
+        }
+        selectedAssignmentCodes.clear();
+        await loadAssignmentsTable();
+        showTeacherToast("Assignments Deleted", `Successfully deleted ${count} assignment${count > 1 ? 's' : ''}`, "coral", 3500);
+      } catch (err) {
+        console.error("Batch delete error:", err);
+        showTeacherToast("Deletion Error", err.message, "coral", 3500);
+        await loadAssignmentsTable();
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origText;
+        }
+      }
+    }
+
     async function loadAssignmentsTable() {
       const list = await fetchTeacherAssignments();
       activeAssignments = list || [];
       const tbody = document.getElementById("assignments-tbody");
       tbody.innerHTML = "";
 
+      // Clean up selected codes for assignments that no longer exist
+      const activeCodes = new Set((activeAssignments || []).map(a => a.join_code));
+      for (const code of selectedAssignmentCodes) {
+        if (!activeCodes.has(code)) selectedAssignmentCodes.delete(code);
+      }
+
       if (!activeAssignments || activeAssignments.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-slate-500 text-sm">No active assignments created yet. Use the generator above to dispatch an assessment!</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-500 text-sm">No active assignments created yet. Use the generator above to dispatch an assessment!</td></tr>`;
+        updateBatchActionBar();
         return;
       }
 
       activeAssignments.forEach(a => {
         const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-800/60 transition border-b border-slate-800/80";
+        const isSelected = selectedAssignmentCodes.has(a.join_code);
+        tr.className = isSelected 
+          ? "hover:bg-slate-800/80 bg-indigo-950/25 border-l-4 border-l-indigo-500 transition border-b border-slate-800/80"
+          : "hover:bg-slate-800/60 transition border-b border-slate-800/80";
         const timeBadge = a.quiz_mode === 'teacher_led'
           ? (a.per_question_seconds > 0 ? `${a.per_question_seconds}s / Question` : "Manual Pacing")
           : (a.time_limit_minutes > 0 ? `${a.time_limit_minutes} mins` : "Untimed");
@@ -1478,6 +1628,9 @@
         }
 
         tr.innerHTML = `
+          <td class="py-4 px-3 text-center" onclick="event.stopPropagation()">
+            <input type="checkbox" data-code="${a.join_code}" data-title="${a.assessment_title.replace(/"/g, '&quot;')}" ${isSelected ? 'checked' : ''} onchange="handleAssignmentCheckboxChange(this)" class="assignment-row-checkbox h-4 w-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 cursor-pointer" title="Select assignment ${a.join_code}">
+          </td>
           <td class="py-4 px-4 font-mono font-black plasma-code text-2xl tracking-wider">${a.join_code}</td>
           <td class="py-4 px-4">
             <div class="font-bold text-white text-base md:text-lg">${a.assessment_title}</div>
@@ -1493,6 +1646,7 @@
         `;
         tbody.appendChild(tr);
       });
+      updateBatchActionBar();
     }
 
     async function toggleActiveStatus(code, newStatus) {
