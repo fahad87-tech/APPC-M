@@ -88,8 +88,9 @@ Run the SQL script [`supabase_schema.sql`](supabase_schema.sql) in your **Supaba
    - Create a `.env` file from `.env.example` with `SUPABASE_URL` and `SUPABASE_ANON_KEY`, **OR**
    - Fill in `window.VECTORSELECT_SUPABASE_URL` and `window.VECTORSELECT_SUPABASE_ANON_KEY` in `supabase_public_config.js`.
 3. In your Supabase Dashboard SQL Editor, run `supabase_schema.sql` to initialize tables, indexes, and Realtime publications.
-4. Serve locally with Python (`python -m http.server 8888`) or open via VS Code Live Server.
-5. Access:
+4. In your Supabase Dashboard SQL Editor, run `data/supabase_seed.sql` to populate all 120+ official answer keys into the `answer_keys` table.
+5. Serve locally with Python (`python -m http.server 8888`) or open via VS Code Live Server.
+6. Access:
    - Student Runner: `http://localhost:8888/index.html`
    - Teacher Console: `http://localhost:8888/teacher.html`
 
