@@ -7,181 +7,7 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <title>VectorSelect by Mr. F — Student Assessment Portal</title>
-  <script src="https://cdn.tailwindcss.com">
-  // ============================================================================
-  // FORMULA SHEET MODAL LOGIC
-  // ============================================================================
-  function openFormulaSheetModal() {
-    const modal = document.getElementById("formula-sheet-modal");
-    if (modal) modal.classList.remove("hidden");
-  }
-
-  function closeFormulaSheetModal(e) {
-    if (e && e.target && e.target.id !== "formula-sheet-modal") return;
-    const modal = document.getElementById("formula-sheet-modal");
-    if (modal) modal.classList.add("hidden");
-  }
-
-  function filterFormulaCat(cat) {
-    document.querySelectorAll(".cat-pill").forEach(p => {
-      p.className = p.textContent.toLowerCase().includes(cat.toLowerCase())
-        ? "cat-pill active px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition"
-        : "cat-pill px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition";
-    });
-    document.querySelectorAll(".formula-card").forEach(c => {
-      if (cat === "all" || c.dataset.cat === cat) {
-        c.classList.remove("hidden");
-      } else {
-        c.classList.add("hidden");
-      }
-    });
-  }
-
-  // ============================================================================
-  // FBD / SCRATCHPAD CANVAS LOGIC
-  // ============================================================================
-  let scratchCanvas = null;
-  let scratchCtx = null;
-  let isScratchDrawing = false;
-  let scratchColor = "#ffffff";
-  let scratchSize = 2;
-  let scratchShowGrid = true;
-  let scratchStrokes = [];
-
-  function toggleScratchpadModal() {
-    const modal = document.getElementById("scratchpad-modal");
-    if (!modal) return;
-    const isHidden = modal.classList.contains("hidden");
-    if (isHidden) {
-      modal.classList.remove("hidden");
-      initScratchpad();
-    } else {
-      modal.classList.add("hidden");
-    }
-  }
-
-  function initScratchpad() {
-    scratchCanvas = document.getElementById("scratchpad-canvas");
-    if (!scratchCanvas) return;
-    scratchCtx = scratchCanvas.getContext("2d");
-
-    // HiDPI setup
-    const rect = scratchCanvas.getBoundingClientRect();
-    const dpr = window.devicePixelRatio || 1;
-    scratchCanvas.width = rect.width * dpr;
-    scratchCanvas.height = 340 * dpr;
-    scratchCanvas.style.height = "340px";
-    scratchCtx.scale(dpr, dpr);
-
-    redrawScratchpad();
-
-    // Event listeners
-    scratchCanvas.onpointerdown = handleScratchDown;
-    scratchCanvas.onpointermove = handleScratchMove;
-    scratchCanvas.onpointerup = handleScratchUp;
-    scratchCanvas.onpointercancel = handleScratchUp;
-  }
-
-  function handleScratchDown(e) {
-    isScratchDrawing = true;
-    const r = scratchCanvas.getBoundingClientRect();
-    const x = e.clientX - r.left;
-    const y = e.clientY - r.top;
-    scratchStrokes.push([{ x, y, color: scratchColor, size: scratchSize }]);
-  }
-
-  function handleScratchMove(e) {
-    if (!isScratchDrawing) return;
-    const r = scratchCanvas.getBoundingClientRect();
-    const x = e.clientX - r.left;
-    const y = e.clientY - r.top;
-    const curStroke = scratchStrokes[scratchStrokes.length - 1];
-    if (curStroke) {
-      curStroke.push({ x, y, color: scratchColor, size: scratchSize });
-      redrawScratchpad();
-    }
-  }
-
-  function handleScratchUp() {
-    isScratchDrawing = false;
-  }
-
-  function redrawScratchpad() {
-    if (!scratchCtx || !scratchCanvas) return;
-    const w = scratchCanvas.getBoundingClientRect().width;
-    const h = 340;
-    scratchCtx.clearRect(0, 0, w, h);
-
-    // Draw grid if active
-    if (scratchShowGrid) {
-      scratchCtx.strokeStyle = "rgba(148, 163, 184, 0.08)";
-      scratchCtx.lineWidth = 1;
-      const step = 20;
-      for (let x = 0; x < w; x += step) {
-        scratchCtx.beginPath();
-        scratchCtx.moveTo(x, 0);
-        scratchCtx.lineTo(x, h);
-        scratchCtx.stroke();
-      }
-      for (let y = 0; y < h; y += step) {
-        scratchCtx.beginPath();
-        scratchCtx.moveTo(0, y);
-        scratchCtx.lineTo(w, y);
-        scratchCtx.stroke();
-      }
-    }
-
-    // Draw strokes
-    scratchStrokes.forEach(stroke => {
-      if (stroke.length < 2) return;
-      scratchCtx.beginPath();
-      scratchCtx.moveTo(stroke[0].x, stroke[0].y);
-      scratchCtx.strokeStyle = stroke[0].color === 'eraser' ? '#020617' : stroke[0].color;
-      scratchCtx.lineWidth = stroke[0].size;
-      scratchCtx.lineCap = "round";
-      scratchCtx.lineJoin = "round";
-      for (let i = 1; i < stroke.length; i++) {
-        scratchCtx.lineTo(stroke[i].x, stroke[i].y);
-      }
-      scratchCtx.stroke();
-    });
-  }
-
-  function setScratchColor(c) {
-    scratchColor = c;
-    document.querySelectorAll(".scratch-color-btn").forEach(btn => {
-      btn.classList.remove("active", "border-2", "border-cyan-400");
-    });
-    if (event && event.currentTarget) {
-      event.currentTarget.classList.add("active", "border-2", "border-cyan-400");
-    }
-  }
-
-  function setScratchSize(s) {
-    scratchSize = s;
-    document.querySelectorAll(".scratch-size-btn").forEach(btn => {
-      btn.classList.remove("active", "text-slate-300");
-      btn.classList.add("text-slate-400");
-    });
-    if (event && event.currentTarget) {
-      event.currentTarget.classList.add("active", "text-slate-300");
-      event.currentTarget.classList.remove("text-slate-400");
-    }
-  }
-
-  function toggleScratchGrid() {
-    scratchShowGrid = !scratchShowGrid;
-    const btn = document.getElementById("btn-scratch-grid");
-    if (btn) btn.textContent = scratchShowGrid ? "# Grid: ON" : "# Grid: OFF";
-    redrawScratchpad();
-  }
-
-  function clearScratchpad() {
-    scratchStrokes = [];
-    redrawScratchpad();
-  }
-
-</script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -1242,6 +1068,7 @@
     let answerRevealed = false;
     let isRemediation = false;
     let remediationSnapshot = null;
+    let discussionFeedbackShownForQuestion = {};
 
     // Dynamic Scoring & 0-120 SUPER MAX State
     let studentTotalPoints = 0.0;
@@ -1261,6 +1088,55 @@
         return false;
       }
       return true;
+    }
+
+    function hydrateQuizKeys(quiz) {
+      if (!quiz || !quiz.questions) return;
+      const qid = quiz.id || (currentAssignment && currentAssignment.assessment_id);
+      if (window.OFFLINE_ANSWER_KEYS && qid && window.OFFLINE_ANSWER_KEYS[qid]) {
+        const keyMap = {};
+        (window.OFFLINE_ANSWER_KEYS[qid].keys || []).forEach(k => {
+          if (k.question_id) keyMap[k.question_id] = k;
+          if (k.number) keyMap[k.number] = k;
+        });
+        quiz.questions.forEach((q, idx) => {
+          const k = keyMap[q.question_id] || keyMap[q.number] || keyMap[idx + 1];
+          if (k) {
+            q.correct_answer = k.correct_answer;
+            q.explanation = k.explanation;
+          }
+        });
+      }
+    }
+
+    function getQuestionCorrectAnswer(realIdx) {
+      const q = currentQuiz && currentQuiz.questions && currentQuiz.questions[realIdx];
+      if (currentRevealedAnswers[currentQuestionIdx]) return currentRevealedAnswers[currentQuestionIdx];
+      if (currentRevealedAnswers[realIdx]) return currentRevealedAnswers[realIdx];
+      if (currentAssignment && currentAssignment.revealed_answer) return currentAssignment.revealed_answer;
+      if (q && q.correct_answer) return q.correct_answer;
+      const qid = (currentQuiz && currentQuiz.id) || (currentAssignment && currentAssignment.assessment_id);
+      if (window.OFFLINE_ANSWER_KEYS && qid && window.OFFLINE_ANSWER_KEYS[qid]) {
+        const keys = window.OFFLINE_ANSWER_KEYS[qid].keys || [];
+        const k = keys.find(item => item.question_id === q?.question_id || item.number === (realIdx + 1));
+        if (k && k.correct_answer) return k.correct_answer;
+      }
+      return "";
+    }
+
+    function getQuestionExplanation(realIdx) {
+      const q = currentQuiz && currentQuiz.questions && currentQuiz.questions[realIdx];
+      if (currentRevealedExplanations[currentQuestionIdx]) return currentRevealedExplanations[currentQuestionIdx];
+      if (currentRevealedExplanations[realIdx]) return currentRevealedExplanations[realIdx];
+      if (currentAssignment && currentAssignment.revealed_explanation) return currentAssignment.revealed_explanation;
+      if (q && q.explanation) return q.explanation;
+      const qid = (currentQuiz && currentQuiz.id) || (currentAssignment && currentAssignment.assessment_id);
+      if (window.OFFLINE_ANSWER_KEYS && qid && window.OFFLINE_ANSWER_KEYS[qid]) {
+        const keys = window.OFFLINE_ANSWER_KEYS[qid].keys || [];
+        const k = keys.find(item => item.question_id === q?.question_id || item.number === (realIdx + 1));
+        if (k && k.explanation) return k.explanation;
+      }
+      return "";
     }
 
     // ============================================================================
@@ -1441,6 +1317,7 @@
       }
 
       currentQuiz = foundQuiz;
+      hydrateQuizKeys(currentQuiz);
 
       // Question order
       questionOrder = currentQuiz.questions.map((_, i) => i);
@@ -1536,6 +1413,7 @@
       studentMissedQuestions = new Set();
       currentRevealedAnswers = {};
       currentRevealedExplanations = {};
+      discussionFeedbackShownForQuestion = {};
       lastRenderedQuestionIdx = -1;
       updateStudentPointsHUD();
       const emojiDock = document.getElementById("student-emoji-dock");
@@ -1598,9 +1476,11 @@
 
         // Per-question countdown timer (only when teacher configured a per-Q interval)
         if (currentAssignment.per_question_seconds > 0) {
+          perQRemaining = currentAssignment.per_question_seconds;
           document.getElementById("student-perq-box").classList.remove("hidden");
           startPerQuestionCountdown();
         } else {
+          perQRemaining = 60;
           document.getElementById("student-perq-box").classList.add("hidden");
         }
       } else {
@@ -1719,9 +1599,8 @@
       perQTimerInterval = setInterval(() => {
         if (quizMode !== "teacher_led") return;
         if (timerPaused) return; // Keep countdown frozen while paused
-        const qStarted = currentAssignment.question_started_at;
-        const disc = currentAssignment.discussion_active;
-        if (disc || !qStarted) {
+        const disc = discussionActive || (currentAssignment && currentAssignment.discussion_active);
+        if (disc) {
           perQFrozen = true;
           const el = document.getElementById("student-perq-timer");
           if (el) {
@@ -1736,9 +1615,14 @@
           return;
         }
         perQFrozen = false;
-        const elapsed = (Date.now() - new Date(qStarted).getTime()) / 1000;
-        perQRemaining = Math.max(0, currentAssignment.per_question_seconds - elapsed);
-        updatePerQDisplay(perQRemaining);
+
+        // Smooth tick down: decrement by 0.5s every 500ms
+        if (typeof perQRemaining === 'number' && perQRemaining > 0) {
+          perQRemaining = Math.max(0, perQRemaining - 0.5);
+          updatePerQDisplay(perQRemaining);
+        } else if (typeof perQRemaining === 'number' && perQRemaining <= 0) {
+          updatePerQDisplay(0);
+        }
       }, 500);
     }
 
@@ -1908,27 +1792,27 @@
       const realIdx = questionOrder[currentQuestionIdx];
       const q = currentQuiz.questions[realIdx];
       const studentAnswer = studentAnswers[realIdx];
-      const correctAnswer = currentRevealedAnswers[currentQuestionIdx] 
-        || currentRevealedAnswers[realIdx] 
-        || (currentAssignment && currentAssignment.revealed_answer)
-        || q.correct_answer;
+      const correctAnswer = getQuestionCorrectAnswer(realIdx);
 
       if (!correctAnswer) {
         showDiscussionPendingNotice();
         return;
       }
 
-      const explanation = currentRevealedExplanations[currentQuestionIdx]
-        || currentRevealedExplanations[realIdx]
-        || (currentAssignment && currentAssignment.revealed_explanation)
-        || q.explanation
-        || "";
-
+      const explanation = getQuestionExplanation(realIdx);
       const qNum = currentQuestionIdx + 1;
+
+      // Update student missed questions set
+      if (!studentAnswer || studentAnswer !== correctAnswer) {
+        studentMissedQuestions.add(realIdx);
+      } else {
+        studentMissedQuestions.delete(realIdx);
+      }
 
       const feedbackPanel = document.getElementById("discussion-feedback");
       const contentEl = document.getElementById("discussion-feedback-content");
       const statusEl = document.getElementById("discussion-feedback-status");
+      if (!feedbackPanel || !contentEl || !statusEl) return;
       contentEl.innerHTML = "";
 
       if (!studentAnswer) {
@@ -1946,7 +1830,7 @@
           </div>
           ${explanation ? `<div class="text-sm text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-800">${explanation}</div>` : ''}
         `;
-        showToast("No Answer", `Q${qNum} — correct answer was ${correctAnswer}`, "brass", 3200);
+        showToast("Time Expired", `Q${qNum} — correct answer was Option ${correctAnswer}`, "brass", 3200);
       } else if (studentAnswer === correctAnswer) {
         feedbackPanel.className = "verdict-card mt-4 p-5 rounded-2xl border border-lime-500/45 bg-lime-500/10 space-y-3 enter";
         statusEl.className = "text-xs font-bold text-lime-400";
@@ -1956,12 +1840,12 @@
             <span class="text-4xl text-lime-400 leading-none">✓</span>
             <div>
               <div class="text-xl font-black text-chalk">Correct</div>
-              <div class="text-sm text-chalk/60">You picked <span class="font-black text-lime-400">${studentAnswer}</span> — the right answer</div>
+              <div class="text-sm text-chalk/60">You picked <span class="font-black text-lime-400">Option ${studentAnswer}</span> — the right answer</div>
             </div>
           </div>
           ${explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${explanation}</div>` : ''}
         `;
-        showToast("Correct!", `Q${qNum} — you nailed it`, "lime", 3400);
+        showToast("Correct!", `Q${qNum} — you nailed it!`, "lime", 3400);
       } else {
         feedbackPanel.className = "verdict-card mt-4 p-5 rounded-2xl border border-coral-500/45 bg-coral-500/10 space-y-3 enter";
         statusEl.className = "text-xs font-bold text-coral-400";
@@ -1971,33 +1855,36 @@
             <span class="text-4xl text-coral-400 leading-none">✕</span>
             <div>
               <div class="text-xl font-black text-chalk">Incorrect</div>
-              <div class="text-sm text-chalk/60">You picked <span class="font-black text-coral-400">${studentAnswer}</span> — answer was <span class="font-black text-lime-400">${correctAnswer}</span></div>
+              <div class="text-sm text-chalk/60">You picked <span class="font-black text-coral-400">Option ${studentAnswer}</span> — correct answer is <span class="font-black text-emerald-400">Option ${correctAnswer}</span></div>
             </div>
           </div>
           ${explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${explanation}</div>` : ''}
         `;
-        showToast("Not quite", `Q${qNum} — the answer was ${correctAnswer}`, "coral", 3400);
+        showToast("Incorrect", `Q${qNum} — the correct answer was Option ${correctAnswer}`, "coral", 3400);
       }
 
-      // Highlight correct answer on the choice buttons
-      const buttons = document.querySelectorAll("#q-choices-container button");
+      // Highlight correct answer and wrong choice on the choice buttons
+      const buttons = document.querySelectorAll("#q-choices-container .choice-btn");
       buttons.forEach(btn => {
         const letter = btn.dataset.letter || btn.textContent.trim();
+        btn.disabled = true;
+        btn.style.pointerEvents = "none";
+        btn.classList.remove("choice-selected", "ring-indigo-400", "ring-2", "ring-4");
         if (letter === correctAnswer) {
-          btn.classList.remove("choice-selected", "ring-indigo-400", "ring-2", "ring-4");
+          btn.classList.remove("choice-wrong", "choice-dimmed");
           btn.classList.add("choice-correct");
           btn.style.opacity = "1";
-          btn.style.pointerEvents = "none";
           if (studentAnswer === correctAnswer) {
             burstParticles(btn);
           }
         } else if (studentAnswer && letter === studentAnswer) {
-          btn.classList.remove("choice-selected", "ring-indigo-400", "ring-2", "ring-4");
+          btn.classList.remove("choice-correct", "choice-dimmed");
           btn.classList.add("choice-wrong");
           btn.style.opacity = "1";
-          btn.style.pointerEvents = "none";
         } else {
+          btn.classList.remove("choice-correct", "choice-wrong");
           btn.classList.add("choice-dimmed");
+          btn.style.opacity = "0.45";
         }
       });
 
@@ -2115,6 +2002,10 @@
     // EVALUATION REVELATION & STRICT RECOVERY GATING HELPERS
     // ============================================================================
     function isCurrentQuestionEvaluationRevealed() {
+      const realIdx = questionOrder[currentQuestionIdx];
+      if (currentRevealedAnswers[currentQuestionIdx] || (realIdx !== undefined && currentRevealedAnswers[realIdx]) || (currentAssignment && currentAssignment.revealed_answer)) {
+        return true;
+      }
       if (quizMode === "teacher_led") {
         if (discussionActive || answerRevealed) return true;
         if (currentAssignment && currentAssignment.per_question_seconds > 0) {
@@ -2233,6 +2124,8 @@
       const choicesBox = document.getElementById("q-choices-container");
       choicesBox.innerHTML = "";
       const selected = studentAnswers[realIdx];
+      const isRevealed = isCurrentQuestionEvaluationRevealed();
+      const revealedKey = isRevealed ? getQuestionCorrectAnswer(realIdx) : null;
 
       if (q.card_image) {
         const label = document.createElement("p");
@@ -2245,13 +2138,27 @@
 
         q.choices.forEach(c => {
           const isSelected = selected === c.letter;
+          let btnCls = "";
+          let disabled = false;
+          if (isRevealed && revealedKey) {
+            disabled = true;
+            if (c.letter === revealedKey) {
+              btnCls = "choice-correct";
+            } else if (isSelected) {
+              btnCls = "choice-wrong";
+            } else {
+              btnCls = "bg-ink-700 text-chalk/40 border-ink-600 opacity-40 choice-dimmed";
+            }
+          } else if (isSelected) {
+            btnCls = "choice-selected";
+          } else {
+            btnCls = "bg-ink-700 text-chalk/80 border-ink-500 hover:border-copper-500 hover:text-copper-400";
+          }
+
           const btn = document.createElement("button");
           btn.dataset.letter = c.letter;
-          btn.className = `choice-btn pressable h-16 w-16 md:h-20 md:w-20 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl border-2 ${
-            isSelected
-              ? "choice-selected"
-              : "bg-ink-700 text-chalk/80 border-ink-500 hover:border-copper-500 hover:text-copper-400"
-          }`;
+          btn.disabled = disabled;
+          btn.className = `choice-btn pressable h-16 w-16 md:h-20 md:w-20 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl border-2 ${btnCls}`;
           btn.textContent = c.letter;
           if (isSelected) {
             const sweep = document.createElement("span");
@@ -2259,6 +2166,7 @@
             btn.appendChild(sweep);
           }
           btn.onclick = (e) => {
+            if (isRevealed) return;
             spawnRipple(e.currentTarget);
             selectChoice(c.letter);
           };
@@ -2271,14 +2179,29 @@
         choicesBox.className = "space-y-3 pt-2";
         q.choices.forEach(c => {
           const isSelected = selected === c.letter;
+          let btnCls = "";
+          let disabled = false;
+          if (isRevealed && revealedKey) {
+            disabled = true;
+            if (c.letter === revealedKey) {
+              btnCls = "choice-correct";
+            } else if (isSelected) {
+              btnCls = "choice-wrong";
+            } else {
+              btnCls = "border-ink-700 bg-ink-900/40 text-chalk/40 opacity-40 choice-dimmed";
+            }
+          } else if (isSelected) {
+            btnCls = "choice-selected";
+          } else {
+            btnCls = "border-ink-600 bg-ink-800/70 hover:border-copper-500/60 text-chalk/80 hover:text-chalk";
+          }
+
           const btn = document.createElement("button");
           btn.dataset.letter = c.letter;
-          btn.className = `choice-btn pressable w-full text-left p-5 rounded-2xl border flex items-center gap-4 ${
-            isSelected
-              ? "choice-selected"
-              : "border-ink-600 bg-ink-800/70 hover:border-copper-500/60 text-chalk/80 hover:text-chalk"
-          }`;
+          btn.disabled = disabled;
+          btn.className = `choice-btn pressable w-full text-left p-5 rounded-2xl border flex items-center gap-4 ${btnCls}`;
           btn.onclick = (e) => {
+            if (isRevealed) return;
             spawnRipple(e.currentTarget);
             selectChoice(c.letter);
           };
@@ -2311,13 +2234,18 @@
       if (isLocked) {
         const lockInfo = studentLockedAnswers[realIdx];
         const isAuto = lockInfo && lockInfo.auto;
-        const isRevealed = isCurrentQuestionEvaluationRevealed();
         const hasMissedPrior = hasPreviousIncorrectQuestion();
-        const revealedKey = currentRevealedAnswers[currentQuestionIdx] || q.correct_answer;
+        const revealedKey = getQuestionCorrectAnswer(realIdx);
         const isEvaluated = Boolean(revealedKey);
         const isCorrect = isEvaluated && (selected === revealedKey);
         const recoveryDone = !!recoveryAttemptedForQuestion[realIdx];
         const isSim = activeRecoveryChallenge ? (activeRecoveryChallenge.format === 'sim') : true;
+
+        if (isCorrect) {
+          studentMissedQuestions.delete(realIdx);
+        } else if (isRevealed) {
+          studentMissedQuestions.add(realIdx);
+        }
 
         if (!isRevealed) {
           // ==================================================================
@@ -2596,26 +2524,34 @@
 
     function autoLockCurrentQuestion() {
       const realIdx = questionOrder[currentQuestionIdx];
-      if (studentLockedAnswers[realIdx]) return;
-      studentLockedAnswers[realIdx] = { auto: true, locked_at: new Date().toISOString() };
-      syncStudentLiveAnswer(true);
-      renderCurrentQuestion();
-
-      const q = currentQuiz.questions[realIdx];
-      const isCorrect = (studentAnswers[realIdx] === q.correct_answer);
-      if (q && q.correct_answer && (!studentAnswers[realIdx] || studentAnswers[realIdx] !== q.correct_answer)) {
-        studentMissedQuestions.add(realIdx);
+      const wasLocked = !!studentLockedAnswers[realIdx];
+      if (!wasLocked) {
+        studentLockedAnswers[realIdx] = { auto: true, locked_at: new Date().toISOString() };
+        syncStudentLiveAnswer(true);
       }
 
-      let remSecs = 999;
-      if (quizMode === "teacher_led") {
-        if (currentAssignment && currentAssignment.per_question_seconds > 0) {
-          remSecs = (typeof perQRemaining === 'number') ? perQRemaining : currentAssignment.per_question_seconds;
-        } else {
-          remSecs = 999;
-        }
+      if (discussionFeedbackShownForQuestion[realIdx]) return;
+      discussionFeedbackShownForQuestion[realIdx] = true;
+
+      const q = currentQuiz.questions[realIdx];
+      const correctAns = getQuestionCorrectAnswer(realIdx);
+      const studentAns = studentAnswers[realIdx];
+      const isCorrect = Boolean(studentAns && correctAns && studentAns === correctAns);
+
+      if (!isCorrect) {
+        studentMissedQuestions.add(realIdx);
       } else {
-        remSecs = isCountDown ? remainingSeconds : 999;
+        studentMissedQuestions.delete(realIdx);
+      }
+
+      renderCurrentQuestion();
+      showDiscussionFeedback();
+
+      let remSecs = 0;
+      if (quizMode === "teacher_led") {
+        remSecs = (typeof perQRemaining === 'number') ? perQRemaining : 0;
+      } else {
+        remSecs = isCountDown ? remainingSeconds : 0;
       }
 
       // If incorrect once timer has expired, trigger recovery station (strictly question 2+ and if redemption enabled)
@@ -2631,7 +2567,8 @@
       const raw = studentAnswers[realIdx];
       const hasAnswer = raw && raw !== 'null' && raw !== 'undefined' && String(raw).trim() !== '';
       const letter = hasAnswer ? String(raw).trim().toUpperCase() : null;
-      const isCorrect = Boolean(letter && letter === q.correct_answer);
+      const correctAns = getQuestionCorrectAnswer(realIdx);
+      const isCorrect = Boolean(letter && correctAns && letter === correctAns);
 
       const totalQuestions = (currentQuiz && currentQuiz.questions) ? currentQuiz.questions.length : 10;
       const elapsed = Math.max(1, (Date.now() - questionStartTime) / 1000);
@@ -3100,6 +3037,27 @@
               currentAssignment.enable_point_redemption = (res.assignment.enable_point_redemption !== false);
             }
 
+            // Sync per_question_seconds if updated (e.g. +30s / +60s)
+            if (res.assignment.per_question_seconds && res.assignment.per_question_seconds !== currentAssignment.per_question_seconds) {
+              currentAssignment.per_question_seconds = res.assignment.per_question_seconds;
+            }
+
+            // Direct timer synchronization with instructor
+            if (typeof res.assignment.timer_remaining_seconds === 'number') {
+              const teacherRemaining = res.assignment.timer_remaining_seconds;
+              if (teacherRemaining <= 0) {
+                if (perQRemaining > 0) {
+                  perQRemaining = 0;
+                  updatePerQDisplay(0);
+                }
+              } else {
+                if (Math.abs(perQRemaining - teacherRemaining) > 1.5 || perQRemaining <= 0) {
+                  perQRemaining = teacherRemaining;
+                  updatePerQDisplay(perQRemaining);
+                }
+              }
+            }
+
             const teacherQ = res.assignment.current_question_index || 0;
 
             // 2. Sync previous question's evaluated answer from instructor FIRST
@@ -3120,6 +3078,9 @@
             // 3. Question transition check
             if (teacherQ !== currentQuestionIdx) {
               currentQuestionIdx = teacherQ;
+              perQRemaining = (typeof res.assignment.timer_remaining_seconds === 'number' && res.assignment.timer_remaining_seconds > 0)
+                ? res.assignment.timer_remaining_seconds
+                : (res.assignment.per_question_seconds || 60);
               renderCurrentQuestion();
             }
 
@@ -3155,9 +3116,20 @@
             currentAssignment.revealed_explanation = res.assignment.revealed_explanation;
             const newDiscussion = res.assignment.discussion_active === true;
             const newAnswerRevealed = res.assignment.answer_revealed === true;
+
+            // Auto-lock answer if instructor initiated discussion or revealed answer
+            if (newDiscussion || newAnswerRevealed) {
+              const currentReal = questionOrder[currentQuestionIdx];
+              if (!studentLockedAnswers[currentReal]) {
+                studentLockedAnswers[currentReal] = { auto: true, locked_at: new Date().toISOString() };
+                syncStudentLiveAnswer(true);
+              }
+            }
+
             if (newDiscussion !== discussionActive || newAnswerRevealed !== answerRevealed || (discussionActive && isNewReveal)) {
               discussionActive = newDiscussion;
               answerRevealed = newAnswerRevealed;
+              renderCurrentQuestion();
               updateDiscussionFreeze(discussionActive, answerRevealed);
             }
 
@@ -4015,9 +3987,251 @@
       window.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           closeImageModal();
+          closeFormulaSheetModal();
+          const scratch = document.getElementById("scratchpad-modal");
+          if (scratch && !scratch.classList.contains("hidden")) {
+            scratch.classList.add("hidden");
+          }
         }
       });
     }
+
+    // ============================================================================
+    // FORMULA SHEET MODAL LOGIC (KaTeX Typeset AP Physics 1 & C References)
+    // ============================================================================
+    function openFormulaSheetModal() {
+      const modal = document.getElementById("formula-sheet-modal");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+      if (window.renderMathInElement) {
+        try {
+          renderMathInElement(modal, {
+            delimiters: [
+              {left: '$$', right: '$$', display: true},
+              {left: '$', right: '$', display: false},
+              {left: '\\(', right: '\\)', display: false},
+              {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false
+          });
+        } catch (err) {
+          console.warn("KaTeX render notice:", err);
+        }
+      }
+    }
+
+    function closeFormulaSheetModal(e) {
+      if (e && e.target && e.target.id !== "formula-sheet-modal") return;
+      const modal = document.getElementById("formula-sheet-modal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function filterFormulaCat(cat) {
+      document.querySelectorAll(".cat-pill").forEach(p => {
+        const matches = cat === "all"
+          ? (p.getAttribute("onclick") && p.getAttribute("onclick").includes("'all'"))
+          : (p.getAttribute("onclick") && p.getAttribute("onclick").includes(`'${cat}'`));
+        p.className = matches
+          ? "cat-pill active px-3 py-1.5 rounded-xl bg-indigo-600 text-white transition cursor-pointer"
+          : "cat-pill px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition cursor-pointer";
+      });
+      document.querySelectorAll(".formula-card").forEach(c => {
+        if (cat === "all" || c.dataset.cat === cat) {
+          c.classList.remove("hidden");
+        } else {
+          c.classList.add("hidden");
+        }
+      });
+    }
+
+    // ============================================================================
+    // FBD / SCRATCHPAD CANVAS LOGIC (HiDPI Vector Sketchpad with Multi-touch)
+    // ============================================================================
+    let scratchCanvas = null;
+    let scratchCtx = null;
+    let isScratchDrawing = false;
+    let scratchColor = "#ffffff";
+    let scratchSize = 2;
+    let scratchShowGrid = true;
+    let scratchStrokes = [];
+
+    function toggleScratchpadModal() {
+      const modal = document.getElementById("scratchpad-modal");
+      if (!modal) return;
+      const isHidden = modal.classList.contains("hidden");
+      if (isHidden) {
+        modal.classList.remove("hidden");
+        requestAnimationFrame(() => {
+          initScratchpad();
+        });
+      } else {
+        modal.classList.add("hidden");
+      }
+    }
+
+    function closeScratchpadModal(e) {
+      if (e && e.target && e.target.id !== "scratchpad-modal") return;
+      const modal = document.getElementById("scratchpad-modal");
+      if (modal) modal.classList.add("hidden");
+    }
+
+    function initScratchpad() {
+      scratchCanvas = document.getElementById("scratchpad-canvas");
+      if (!scratchCanvas) return;
+      scratchCtx = scratchCanvas.getContext("2d");
+
+      const rect = scratchCanvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      const w = Math.round(rect.width) || 600;
+      const h = 340;
+      scratchCanvas.width = Math.round(w * dpr);
+      scratchCanvas.height = Math.round(h * dpr);
+      scratchCanvas.style.height = `${h}px`;
+      if (scratchCtx.resetTransform) {
+        scratchCtx.resetTransform();
+      } else {
+        scratchCtx.setTransform(1, 0, 0, 1, 0, 0);
+      }
+      scratchCtx.scale(dpr, dpr);
+
+      redrawScratchpad();
+
+      scratchCanvas.onpointerdown = handleScratchDown;
+      scratchCanvas.onpointermove = handleScratchMove;
+      scratchCanvas.onpointerup = handleScratchUp;
+      scratchCanvas.onpointercancel = handleScratchUp;
+    }
+
+    function handleScratchDown(e) {
+      if (!scratchCanvas) return;
+      isScratchDrawing = true;
+      try { scratchCanvas.setPointerCapture(e.pointerId); } catch (_) {}
+      const r = scratchCanvas.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      scratchStrokes.push([{ x, y, color: scratchColor, size: scratchSize }]);
+      redrawScratchpad();
+    }
+
+    function handleScratchMove(e) {
+      if (!isScratchDrawing || !scratchCanvas) return;
+      const r = scratchCanvas.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      const curStroke = scratchStrokes[scratchStrokes.length - 1];
+      if (curStroke) {
+        curStroke.push({ x, y, color: scratchColor, size: scratchSize });
+        redrawScratchpad();
+      }
+    }
+
+    function handleScratchUp(e) {
+      if (isScratchDrawing && e && e.pointerId && scratchCanvas) {
+        try { scratchCanvas.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+      isScratchDrawing = false;
+    }
+
+    function redrawScratchpad() {
+      if (!scratchCtx || !scratchCanvas) return;
+      const w = scratchCanvas.getBoundingClientRect().width || 600;
+      const h = 340;
+      scratchCtx.clearRect(0, 0, w, h);
+
+      // Draw grid if active
+      if (scratchShowGrid) {
+        scratchCtx.strokeStyle = "rgba(148, 163, 184, 0.08)";
+        scratchCtx.lineWidth = 1;
+        const step = 20;
+        for (let x = 0; x < w; x += step) {
+          scratchCtx.beginPath();
+          scratchCtx.moveTo(x, 0);
+          scratchCtx.lineTo(x, h);
+          scratchCtx.stroke();
+        }
+        for (let y = 0; y < h; y += step) {
+          scratchCtx.beginPath();
+          scratchCtx.moveTo(0, y);
+          scratchCtx.lineTo(w, y);
+          scratchCtx.stroke();
+        }
+      }
+
+      // Draw strokes
+      scratchStrokes.forEach(stroke => {
+        if (!stroke || stroke.length === 0) return;
+        const col = stroke[0].color === 'eraser' ? '#020617' : stroke[0].color;
+        scratchCtx.strokeStyle = col;
+        scratchCtx.fillStyle = col;
+        scratchCtx.lineWidth = stroke[0].size;
+        scratchCtx.lineCap = "round";
+        scratchCtx.lineJoin = "round";
+        if (stroke.length === 1) {
+          scratchCtx.beginPath();
+          scratchCtx.arc(stroke[0].x, stroke[0].y, stroke[0].size / 2, 0, Math.PI * 2);
+          scratchCtx.fill();
+        } else {
+          scratchCtx.beginPath();
+          scratchCtx.moveTo(stroke[0].x, stroke[0].y);
+          for (let i = 1; i < stroke.length; i++) {
+            scratchCtx.lineTo(stroke[i].x, stroke[i].y);
+          }
+          scratchCtx.stroke();
+        }
+      });
+    }
+
+    function setScratchColor(c, el) {
+      scratchColor = c;
+      document.querySelectorAll(".scratch-color-btn").forEach(btn => {
+        btn.classList.remove("active", "border-2", "border-cyan-400");
+      });
+      const target = el || (window.event && window.event.currentTarget);
+      if (target) {
+        target.classList.add("active", "border-2", "border-cyan-400");
+      }
+    }
+
+    function setScratchSize(s, el) {
+      scratchSize = s;
+      document.querySelectorAll(".scratch-size-btn").forEach(btn => {
+        btn.classList.remove("active", "text-slate-300");
+        btn.classList.add("text-slate-400");
+      });
+      const target = el || (window.event && window.event.currentTarget);
+      if (target) {
+        target.classList.add("active", "text-slate-300");
+        target.classList.remove("text-slate-400");
+      }
+    }
+
+    function toggleScratchGrid() {
+      scratchShowGrid = !scratchShowGrid;
+      const btn = document.getElementById("btn-scratch-grid");
+      if (btn) btn.textContent = scratchShowGrid ? "# Grid: ON" : "# Grid: OFF";
+      redrawScratchpad();
+    }
+
+    function clearScratchpad() {
+      scratchStrokes = [];
+      redrawScratchpad();
+    }
+
+    // Expose explicitly to global window object
+    window.openFormulaSheetModal = openFormulaSheetModal;
+    window.closeFormulaSheetModal = closeFormulaSheetModal;
+    window.filterFormulaCat = filterFormulaCat;
+    window.toggleScratchpadModal = toggleScratchpadModal;
+    window.closeScratchpadModal = closeScratchpadModal;
+    window.initScratchpad = initScratchpad;
+    window.redrawScratchpad = redrawScratchpad;
+    window.handleScratchDown = handleScratchDown;
+    window.handleScratchMove = handleScratchMove;
+    window.handleScratchUp = handleScratchUp;
+    window.setScratchColor = setScratchColor;
+    window.setScratchSize = setScratchSize;
+    window.toggleScratchGrid = toggleScratchGrid;
+    window.clearScratchpad = clearScratchpad;
 
     window.onload = initStudentApp;
   </script>
@@ -4055,10 +4269,10 @@
         <div class="formula-card p-4 rounded-2xl bg-slate-950/70 border border-slate-800" data-cat="constants">
           <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 block mb-2">⚡ Fundamental Constants</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-mono text-slate-300">
-            <div>Acceleration due to gravity: <strong class="text-white">g = 9.8 m/s²</strong> (9.80 m/s²)</div>
-            <div>Universal Gravitational constant: <strong class="text-white">G = 6.67 × 10⁻¹¹ N·m²/kg²</strong></div>
-            <div>Earth Radius: <strong class="text-white">R_E = 6.37 × 10⁶ m</strong></div>
-            <div>Earth Mass: <strong class="text-white">M_E = 5.97 × 10²⁴ kg</strong></div>
+            <div>Acceleration due to gravity: <strong class="text-white">\(g = 9.8\text{ m/s}^2\)</strong> (9.80 m/s²)</div>
+            <div>Universal Gravitational constant: <strong class="text-white">\(G = 6.67 \times 10^{-11}\text{ N}\cdot\text{m}^2/\text{kg}^2\)</strong></div>
+            <div>Earth Radius: <strong class="text-white">\(R_E = 6.37 \times 10^6\text{ m}\)</strong></div>
+            <div>Earth Mass: <strong class="text-white">\(M_E = 5.97 \times 10^{24}\text{ kg}\)</strong></div>
           </div>
         </div>
 
@@ -4067,13 +4281,13 @@
           <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 block mb-2">🏃 Kinematics (Constant Acceleration)</span>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-center">
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-base text-cyan-300 font-mono">v_x = v_{x0} + a_x t</span>
+              <span class="text-base text-cyan-300 font-mono">\(v_x = v_{x0} + a_x t\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-base text-cyan-300 font-mono">x = x_0 + v_{x0}t + ½ a_x t²</span>
+              <span class="text-base text-cyan-300 font-mono">\(x = x_0 + v_{x0}t + \frac{1}{2} a_x t^2\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-base text-cyan-300 font-mono">v_x² = v_{x0}² + 2a_x(x - x_0)</span>
+              <span class="text-base text-cyan-300 font-mono">\(v_x^2 = v_{x0}^2 + 2a_x(x - x_0)\)</span>
             </div>
           </div>
         </div>
@@ -4083,16 +4297,16 @@
           <span class="text-xs font-bold uppercase tracking-wider text-emerald-400 block mb-2">⚖️ Dynamics &amp; Circular Motion</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-center">
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-emerald-300 font-mono">Σ F = m a</span>
+              <span class="text-sm text-emerald-300 font-mono">\(\sum \vec{F} = m \vec{a}\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-emerald-300 font-mono">F_g = m g</span>
+              <span class="text-sm text-emerald-300 font-mono">\(F_g = m g\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-emerald-300 font-mono">F_f ≤ μ F_N</span>
+              <span class="text-sm text-emerald-300 font-mono">\(F_f \le \mu F_N\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-emerald-300 font-mono">a_c = v² / r = ω² r</span>
+              <span class="text-sm text-emerald-300 font-mono">\(a_c = \frac{v^2}{r} = \omega^2 r\)</span>
             </div>
           </div>
         </div>
@@ -4102,22 +4316,22 @@
           <span class="text-xs font-bold uppercase tracking-wider text-amber-400 block mb-2">💥 Work, Energy &amp; Momentum</span>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-amber-300 font-mono">W = F_{||} d = F d cosθ</span>
+              <span class="text-sm text-amber-300 font-mono">\(W = F_{\parallel} d = F d \cos\theta\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-amber-300 font-mono">K = ½ m v²</span>
+              <span class="text-sm text-amber-300 font-mono">\(K = \frac{1}{2} m v^2\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-amber-300 font-mono">U_g = m g h | U_s = ½ k x²</span>
+              <span class="text-sm text-amber-300 font-mono">\(U_g = m g h \quad|\quad U_s = \frac{1}{2} k x^2\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-amber-300 font-mono">P = ΔE/Δt = F · v</span>
+              <span class="text-sm text-amber-300 font-mono">\(P = \frac{\Delta E}{\Delta t} = \vec{F} \cdot \vec{v}\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-amber-300 font-mono">p = m v</span>
+              <span class="text-sm text-amber-300 font-mono">\(\vec{p} = m \vec{v}\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-amber-300 font-mono">J = Δp = F_{avg} Δt</span>
+              <span class="text-sm text-amber-300 font-mono">\(\vec{J} = \Delta \vec{p} = \vec{F}_{\text{avg}} \Delta t\)</span>
             </div>
           </div>
         </div>
@@ -4127,22 +4341,22 @@
           <span class="text-xs font-bold uppercase tracking-wider text-purple-400 block mb-2">🔄 Rotational Mechanics</span>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-purple-300 font-mono">τ = r F sinθ = I α</span>
+              <span class="text-sm text-purple-300 font-mono">\(\tau = r F \sin\theta = I \alpha\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-purple-300 font-mono">L = I ω = m v r_⊥</span>
+              <span class="text-sm text-purple-300 font-mono">\(L = I \omega = m v r_\perp\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-purple-300 font-mono">K_{rot} = ½ I ω²</span>
+              <span class="text-sm text-purple-300 font-mono">\(K_{\text{rot}} = \frac{1}{2} I \omega^2\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-purple-300 font-mono">ω = ω_0 + α t</span>
+              <span class="text-sm text-purple-300 font-mono">\(\omega = \omega_0 + \alpha t\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-purple-300 font-mono">θ = θ_0 + ω_0 t + ½ α t²</span>
+              <span class="text-sm text-purple-300 font-mono">\(\theta = \theta_0 + \omega_0 t + \frac{1}{2} \alpha t^2\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-purple-300 font-mono">v = ω r | a_t = α r</span>
+              <span class="text-sm text-purple-300 font-mono">\(v = \omega r \quad|\quad a_t = \alpha r\)</span>
             </div>
           </div>
         </div>
@@ -4152,22 +4366,22 @@
           <span class="text-xs font-bold uppercase tracking-wider text-rose-400 block mb-2">🪐 Oscillations &amp; Universal Gravitation</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 text-center">
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-rose-300 font-mono">T_s = 2π √(m/k)</span>
+              <span class="text-sm text-rose-300 font-mono">\(T_s = 2\pi \sqrt{\frac{m}{k}}\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-rose-300 font-mono">T_p = 2π √(L/g)</span>
+              <span class="text-sm text-rose-300 font-mono">\(T_p = 2\pi \sqrt{\frac{L}{g}}\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-rose-300 font-mono">F_g = G m₁m₂ / r²</span>
+              <span class="text-sm text-rose-300 font-mono">\(F_g = G \frac{m_1 m_2}{r^2}\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-rose-300 font-mono">U_g = -G m₁m₂ / r</span>
+              <span class="text-sm text-rose-300 font-mono">\(U_g = -\frac{G m_1 m_2}{r}\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-rose-300 font-mono">v_{orbit} = √(GM/r)</span>
+              <span class="text-sm text-rose-300 font-mono">\(v_{\text{orbit}} = \sqrt{\frac{GM}{r}}\)</span>
             </div>
             <div class="p-2 rounded-xl bg-slate-900 border border-slate-800">
-              <span class="text-sm text-rose-300 font-mono">T² / a³ = 4π² / (GM)</span>
+              <span class="text-sm text-rose-300 font-mono">\(\frac{T^2}{a^3} = \frac{4\pi^2}{GM}\)</span>
             </div>
           </div>
         </div>
@@ -4178,8 +4392,8 @@
   <!-- ============================================================================ -->
   <!-- MODAL: FREE-BODY DIAGRAM (FBD) / SCRATCHPAD CANVAS                          -->
   <!-- ============================================================================ -->
-  <div id="scratchpad-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 select-none">
-    <div class="bg-slate-900 border-2 border-cyan-500/50 rounded-3xl p-4 max-w-2xl w-full flex flex-col space-y-3 shadow-2xl relative overflow-hidden">
+  <div id="scratchpad-modal" class="hidden fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-3 select-none" onclick="closeScratchpadModal(event)">
+    <div class="bg-slate-900 border-2 border-cyan-500/50 rounded-3xl p-4 max-w-2xl w-full flex flex-col space-y-3 shadow-2xl relative overflow-hidden" onclick="event.stopPropagation()">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800">
         <div class="flex items-center gap-2">
           <span class="text-xl">✏️</span>
@@ -4189,10 +4403,10 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="clearScratchpad()" class="px-2.5 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/40 transition">
+          <button type="button" onclick="clearScratchpad()" class="px-2.5 py-1 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-bold border border-rose-500/40 transition">
             Clear
           </button>
-          <button onclick="toggleScratchpadModal()" class="h-8 w-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs flex items-center justify-center transition">
+          <button type="button" onclick="toggleScratchpadModal()" class="h-8 w-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-black text-xs flex items-center justify-center transition">
             ✕
           </button>
         </div>
@@ -4203,21 +4417,21 @@
         <!-- Color Palette -->
         <div class="flex items-center gap-1.5">
           <span class="text-[10px] uppercase font-bold text-slate-400 mr-1">Pen:</span>
-          <button onclick="setScratchColor('#ffffff')" class="scratch-color-btn active h-6 w-6 rounded-full bg-white border-2 border-cyan-400 shadow-sm" title="White (Chalk)"></button>
-          <button onclick="setScratchColor('#06b6d4')" class="scratch-color-btn h-6 w-6 rounded-full bg-cyan-400 border border-slate-700 shadow-sm" title="Cyan (Force / Velocity)"></button>
-          <button onclick="setScratchColor('#f59e0b')" class="scratch-color-btn h-6 w-6 rounded-full bg-amber-400 border border-slate-700 shadow-sm" title="Amber (Components / Angles)"></button>
-          <button onclick="setScratchColor('eraser')" class="scratch-color-btn h-6 w-6 rounded-full bg-slate-800 text-[10px] text-rose-300 border border-rose-500/50 flex items-center justify-center" title="Eraser">🧹</button>
+          <button type="button" onclick="setScratchColor('#ffffff', this)" class="scratch-color-btn active h-6 w-6 rounded-full bg-white border-2 border-cyan-400 shadow-sm" title="White (Chalk)"></button>
+          <button type="button" onclick="setScratchColor('#06b6d4', this)" class="scratch-color-btn h-6 w-6 rounded-full bg-cyan-400 border border-slate-700 shadow-sm" title="Cyan (Force / Velocity)"></button>
+          <button type="button" onclick="setScratchColor('#f59e0b', this)" class="scratch-color-btn h-6 w-6 rounded-full bg-amber-400 border border-slate-700 shadow-sm" title="Amber (Components / Angles)"></button>
+          <button type="button" onclick="setScratchColor('eraser', this)" class="scratch-color-btn h-6 w-6 rounded-full bg-slate-800 text-[10px] text-rose-300 border border-rose-500/50 flex items-center justify-center" title="Eraser">🧹</button>
         </div>
 
         <!-- Size Buttons -->
         <div class="flex items-center gap-1 bg-slate-900 p-0.5 rounded-xl border border-slate-800">
-          <button onclick="setScratchSize(2)" class="scratch-size-btn active px-2 py-0.5 rounded-lg text-slate-300 font-bold text-[10px]">Thin</button>
-          <button onclick="setScratchSize(4)" class="scratch-size-btn px-2 py-0.5 rounded-lg text-slate-400 font-bold text-[10px]">Med</button>
-          <button onclick="setScratchSize(8)" class="scratch-size-btn px-2 py-0.5 rounded-lg text-slate-400 font-bold text-[10px]">Thick</button>
+          <button type="button" onclick="setScratchSize(2, this)" class="scratch-size-btn active px-2 py-0.5 rounded-lg text-slate-300 font-bold text-[10px]">Thin</button>
+          <button type="button" onclick="setScratchSize(4, this)" class="scratch-size-btn px-2 py-0.5 rounded-lg text-slate-400 font-bold text-[10px]">Med</button>
+          <button type="button" onclick="setScratchSize(8, this)" class="scratch-size-btn px-2 py-0.5 rounded-lg text-slate-400 font-bold text-[10px]">Thick</button>
         </div>
 
         <!-- Grid Toggle -->
-        <button onclick="toggleScratchGrid()" id="btn-scratch-grid" class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 font-bold text-[10px] hover:text-white transition">
+        <button type="button" onclick="toggleScratchGrid()" id="btn-scratch-grid" class="px-2.5 py-1 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 font-bold text-[10px] hover:text-white transition">
           # Grid: ON
         </button>
       </div>

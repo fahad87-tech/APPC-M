@@ -2451,12 +2451,7 @@
 
     async function lcTriggerDiscussionEarly() {
       const answers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex);
-      showDiscussionPanel(answers);
-      setAssignmentTimerState(currentLiveAssignment.join_code, {
-        question_started_at: null,
-        discussion_active: true
-      });
-      if (!lcTimerPaused) lcToggleTimerPause();
+      await showDiscussionPanel(answers || [], true);
     }
 
     let teacherDockCollapsed = false;
@@ -2787,17 +2782,24 @@
           if (!lcTimerPaused) {
             lcTimerRemaining--;
             updateLcTimerDisplay();
+            // Periodically sync remaining time to students every 2 seconds
+            if (lcTimerRemaining % 2 === 0 && currentLiveAssignment) {
+              setAssignmentTimerState(currentLiveAssignment.join_code, {
+                timer_remaining_seconds: lcTimerRemaining,
+                per_question_seconds: currentLiveAssignment.per_question_seconds
+              });
+            }
             if (lcTimerRemaining <= 0) {
               clearInterval(lcTimerInterval);
               lcTimerRemaining = 0;
               updateLcTimerDisplay();
               showTeacherToast("Time Expired", "Question time is up! Student inputs locked for discussion.", "brass", 3500);
-              // Automatically transition into discussion phase — freeze student inputs, keep projector safe
+              // Automatically transition into discussion phase — reveal answer and freeze student inputs
               if (currentLiveAssignment) {
                 fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex).then(answers => {
-                  showDiscussionPanel(answers);
+                  showDiscussionPanel(answers || [], true);
                 }).catch(() => {
-                  showDiscussionPanel([]);
+                  showDiscussionPanel([], true);
                 });
               }
             }
@@ -2855,6 +2857,7 @@
         // Broadcast pause to cloud & localStorage
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
           timer_paused: true,
+          timer_remaining_seconds: (perQ > 0) ? lcTimerRemaining : 0,
           paused_remaining_seconds: (perQ > 0) ? lcTimerRemaining : 0
         });
         showTeacherToast("Session Paused", (perQ > 0) ? `Timer paused at ${lcTimerRemaining}s` : "Student interactions paused for explanation", "brass", 2500);
@@ -2868,6 +2871,7 @@
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
           timer_paused: false,
           paused_remaining_seconds: null,
+          timer_remaining_seconds: (perQ > 0) ? lcTimerRemaining : 0,
           question_started_at: newStartedAt
         });
         showTeacherToast("Session Resumed", "Timer and question pacing resumed", "lime", 2500);
@@ -2883,6 +2887,8 @@
       const newStartedAt = new Date(Date.now() - Math.max(0, perQ - lcTimerRemaining) * 1000).toISOString();
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         question_started_at: newStartedAt,
+        per_question_seconds: perQ,
+        timer_remaining_seconds: lcTimerRemaining,
         paused_remaining_seconds: lcTimerRemaining
       });
       showTeacherToast(`+${addSeconds} Seconds Added`, `New time: ${lcTimerRemaining}s remaining`, "copper", 2000);
@@ -2966,6 +2972,13 @@
       hideDiscussionPanel(true);
       renderLiveControl();
 
+      // Reset teacher timer
+      const perQ = currentLiveAssignment.per_question_seconds || 0;
+      lcTimerRemaining = perQ;
+      lcTimerPaused = false;
+      updateLcPauseUI();
+      updateLcTimerDisplay();
+
       // Single authoritative atomic server update for the newly activated question
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         current_question_index: currentLiveIndex,
@@ -2975,12 +2988,14 @@
         revealed_answer: "",
         revealed_explanation: "",
         previous_correct_answer: prevCorrectKey,
-        enable_point_redemption: currentLiveAssignment.enable_point_redemption !== false
+        enable_point_redemption: currentLiveAssignment.enable_point_redemption !== false,
+        timer_remaining_seconds: perQ,
+        per_question_seconds: perQ,
+        timer_paused: false,
+        paused_remaining_seconds: null
       });
-      if (currentLiveAssignment.per_question_seconds > 0) {
-        lcTimerRemaining = currentLiveAssignment.per_question_seconds;
-        updateLcTimerDisplay();
-      }
+
+      setupQuestionTimer();
       showTeacherToast("Next Question Loaded", `Question ${currentLiveIndex + 1} is now live with answers hidden.`, "lime", 2500);
     }
 
@@ -3382,7 +3397,8 @@
     }
 
     async function showDiscussionPanel(answers, autoReveal = true) {
-      if (!lcTimerPaused) lcToggleTimerPause();
+      lcTimerPaused = true;
+      updateLcPauseUI();
 
       // Ensure question keys & rationales are hydrated before revealing
       await ensureQuizKeysHydrated(currentLiveQuiz);
@@ -3413,7 +3429,10 @@
         discussion_active: true,
         answer_revealed: isAnswerRevealed,
         revealed_answer: isAnswerRevealed ? correctKey : "",
-        revealed_explanation: isAnswerRevealed ? explanationText : ""
+        revealed_explanation: isAnswerRevealed ? explanationText : "",
+        timer_remaining_seconds: 0,
+        timer_paused: true,
+        paused_remaining_seconds: 0
       });
 
       // Render distribution and students

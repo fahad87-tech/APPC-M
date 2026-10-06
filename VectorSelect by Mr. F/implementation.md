@@ -3152,6 +3152,75 @@ Addressed user request:
 - Mirrored `teacher.html` and `implementation.md` to `D:\APPS\VectorSelect by Mr. F\` and `D:\APPS\marker\web_app\`.
 - Committed and pushed to GitHub main repository (`fahad87-tech/APPC-M`).
 
+---
+
+## Phase 72: AP Formula Sheet & Scratchpad Restoration, Instructor-Student Timer Synchronization, and Auto-Reveal on Expiry / End & Discuss (2026-10-06)
+
+### Context & User Directives
+1. *"AP formula sheet and FBD scratchpad not working."*
+2. *"instructor time and student time is not syncing....check why."*
+3. *"also there is a glitch int he ssytem......when time expires.... the correct answer should show on the student screen if they are wrong."*
+4. *"also when i click end and discusss before the time expires it shoud do the same thing..... i do not know what is the problem"*
+
+### Root Cause Analysis
+1. **AP Formula Sheet & FBD Scratchpad**:
+   - The script declaring modal open/close handlers was mistakenly placed inside the opening `<script src="https://cdn.tailwindcss.com">` tag in the `<head>` of `index.html`. Browsers ignore inline script bodies when an external `src` attribute is present.
+2. **Timer Desynchronization**:
+   - The student portal previously derived remaining question time from client clock difference (`Date.now() - new Date(qStarted).getTime()`). Client clock drift (5–15 seconds) caused significant divergence from the teacher's clock.
+   - Teacher adjustments (+30s / +60s) updated `per_question_seconds` only on the teacher console, while the student countdown never received calibrated countdown ticks.
+3. **Correct Answer Not Showing on Expiry or "End & Discuss"**:
+   - `q.correct_answer` was stripped from `exams_bundle.js` for exam security and was not hydrated on the student client upon joining the exam runner.
+   - When time expired (`secs <= 0`), `autoLockCurrentQuestion()` returned early if the student had already manually locked in, never invoked `showDiscussionFeedback()`, and `renderCurrentQuestion()` failed to evaluate correctness because `revealedKey` was undefined.
+   - When the teacher clicked "End & Discuss", unsubmitted student answers remained unlocked, and button selectors in `showDiscussionFeedback` improperly matched utility buttons instead of `.choice-btn`.
+
+### Key Architectural Solutions Implemented
+
+#### 1. Formula Sheet & FBD Scratchpad Fix (`index.html`)
+- Cleaned `<head>` tag in `index.html` and relocated all modal methods into the primary application script.
+- Exposed `window.openFormulaSheetModal`, `window.closeFormulaSheetModal`, `window.filterFormulaCat`, `window.toggleScratchpadModal`, `window.closeScratchpadModal`, `window.initScratchpad`, `window.redrawScratchpad`, `window.handleScratchDown`, `window.handleScratchMove`, `window.handleScratchUp`, `window.setScratchColor`, `window.setScratchSize`, `window.toggleScratchGrid`, `window.clearScratchpad`.
+- Formatted all formula entries in `#formula-sheet-modal` with KaTeX `\( ... \)` syntax for crisp typography.
+
+#### 2. Authoritative Teacher-Led Timer Synchronization (`teacher.html` & `index.html`)
+- **Teacher Broadcasts (`teacher.html`)**:
+  - `setupQuestionTimer()` broadcasts `timer_remaining_seconds: lcTimerRemaining` and `per_question_seconds` every 2 seconds to PocketBase and localStorage.
+  - `lcToggleTimerPause()`, `lcResetTimer()` (+30s / +60s), and `advanceNow()` broadcast updated `timer_remaining_seconds` and `per_question_seconds`.
+  - When timer reaches 0, teacher automatically calls `showDiscussionPanel(answers || [], true)` with `autoReveal = true`.
+- **Student Synchronization (`index.html`)**:
+  - Initialized `perQRemaining` upon starting assessment runner (`startExamRunner`).
+  - In `startTeacherLedPolling()`, student synchronizes `per_question_seconds` and calibrates `perQRemaining` directly against `res.assignment.timer_remaining_seconds` if drift exceeds 1.5 seconds.
+  - Smooth countdown tick down by 0.5s every 500ms freezes automatically during discussion.
+
+#### 3. Automatic Answer Evaluation & Reveal on Expiry and End & Discuss (`index.html` & `teacher.html`)
+- **Key Hydration**:
+  - Added `hydrateQuizKeys(currentQuiz)` on student join and defined `getQuestionCorrectAnswer(realIdx)` and `getQuestionExplanation(realIdx)` accessing `window.OFFLINE_ANSWER_KEYS` fallback.
+- **Timer Expiration**:
+  - When timer hits 0 (`updatePerQDisplay(0)`), `autoLockCurrentQuestion()` executes:
+    - Auto-locks answer if not yet locked.
+    - Evaluates correctness against `getQuestionCorrectAnswer(realIdx)`.
+    - Updates `studentMissedQuestions`.
+    - Invokes `renderCurrentQuestion()` and `showDiscussionFeedback()`.
+- **"End & Discuss" Early Trigger**:
+  - In `teacher.html`, `lcTriggerDiscussionEarly()` directly executes `showDiscussionPanel(answers || [], true)`, setting `timer_remaining_seconds: 0`, `answer_revealed: true`, `revealed_answer: correctKey`.
+  - In `index.html`, `startTeacherLedPolling()` detects `newDiscussion || newAnswerRevealed`, auto-locks unsubmitted answers, updates question order, calls `renderCurrentQuestion()`, and triggers `updateDiscussionFreeze(true, true)` / `showDiscussionFeedback()`.
+- **Visual Feedback**:
+  - If student answered **incorrectly** or left the question blank:
+    - Their selected option is highlighted red (`choice-wrong`).
+    - The official correct option is highlighted green (`choice-correct`).
+    - `#discussion-feedback` presents the explanation and correct answer badge.
+    - If question 2+ and point redemption is enabled, the recovery mini-game is activated.
+  - If student answered **correctly**:
+    - Correct option is highlighted green (`choice-correct`) with particle burst effects (`burstParticles`).
+    - Full points secured message is displayed.
+
+### Verification & Mirroring
+- Validated all inline scripts in `index.html` and `teacher.html` using Node.js `vm.Script`: passed with 0 errors.
+- Mirrored all updated files (`index.html`, `teacher.html`, `implementation.md`) across all application directories:
+  - `c:\Users\fahad\Documents\GitHub\APPC-M\VectorSelect by Mr. F\`
+  - `D:\APPS\VectorSelect by Mr. F\`
+  - `D:\APPS\marker\web_app\`
+- Committed and pushed changes to GitHub repository.
+
+
 
 
 
