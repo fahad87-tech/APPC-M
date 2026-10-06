@@ -101,4 +101,36 @@ Run the SQL script [`supabase_schema.sql`](supabase_schema.sql) in your **Supaba
 - **Global CDN Delivery**: Static client configured with public credentials in `supabase_public_config.js` for worldwide classroom access on GitHub Pages.
 - **Local Developer Security**: Root `.env` parser integrated into `supabase_config.js` with `.env` protected under `.gitignore`.
 
+---
+
+## 7. Teacher Live Control Layout & Zero-Abort Discussion Pipeline
+
+### A. Static Header & Scrollable Stage Pane Layout (`teacher.html`)
+- **Viewport Optimization**: Live control modal occupies the entire viewport (`z-50 p-2 sm:p-3 overflow-hidden`) without wasting vertical screen real-estate.
+- **Permanent Static Top Anchor**: The top bar containing "Teacher-Led Live Session", Projector Mode badge, Quiz Title, the large high-contrast **CLASS JOIN CODE** (for late-arriving students), and modal close button (`✕`) is fixed (`shrink-0 border-b border-slate-800`) and **never scrolls**.
+- **Independently Scrollable Stage Body**: Everything below the top header (`#lc-runner-body`) uses `overflow-y-auto overscroll-contain flex-1 min-h-0`. When scrolling, the HUD bar slides up smoothly, giving maximum vertical space to `#lc-stage-pane`.
+- **Responsive High-Res Question Image**: `#lc-card-img` is configured with `max-w-full h-auto object-contain`, preventing any artificial down-scaling or blurry rendering so diagrams and LaTeX formulas remain razor sharp.
+- **Unrestricted Wheel & Touch Navigation**: Removed artificial `preventDefault` event listener blocks so mouse-wheel, touchpad, and touch scroll natively and seamlessly throughout the modal.
+
+### B. Non-Blocking "End & Discuss" Architecture
+- **Zero-Abort Guarantee**: In `showDiscussionPanel()`, the early `return;` on missing answer keys has been eliminated. Clicking **💬 End & Discuss** ALWAYS:
+  1. Pauses teacher timer and sets remaining seconds to 0.
+  2. Broadcasts `{ discussion_active: true, timer_remaining_seconds: 0, timer_paused: true }` to Supabase `active_assignments`.
+  3. Reveals official answer keys if available; if not yet seeded, safely marks key as pending while opening the discussion panel and rendering real-time choice distributions.
+  4. Transforms the action button to **➔ Next Question (Answers Hidden)**.
+  5. Opens `#lc-discussion-panel` and reveals the class response telemetry.
+
+### C. Student Evaluation Revelation & Feedback Sync (`index.html`)
+- **Evaluation Gate**: `isCurrentQuestionEvaluationRevealed()` returns `true` whenever:
+  1. Instructor sets `answer_revealed` or sends `revealed_answer`, OR
+  2. Instructor starts discussion (`discussionActive`), OR
+  3. Question timer has expired (`perQRemaining <= 0`), and an official key is present.
+- **Student Choice Highlighting**: Upon reveal:
+  - Correct choice highlights in bright emerald green (`.choice-correct`).
+  - Incorrect student choice highlights in coral red (`.choice-wrong`).
+  - Neutral choices are dimmed (`.choice-dimmed`).
+  - Locked banner transforms from neutral "Time Expired" to the official verdict banner with explanation.
+- **Background Answer Key Preload**: `startExamRunner()` asynchronously hydrates answer keys from Supabase via `fetchAnswerKeysForQuiz(assessment_id)` in the background so evaluation is instant when time expires or instructor initiates discussion.
+
+
 

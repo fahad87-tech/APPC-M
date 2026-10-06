@@ -724,12 +724,12 @@
     </div>
 
     <!-- MODAL 3: Teacher-Led Live Control Center (Projector-Safe with Answer Hidden & Timed Pacing) -->
-    <div id="live-control-modal" class="hidden fixed inset-0 z-40 bg-black/85 backdrop-blur-md flex flex-col items-center justify-start pt-20 sm:pt-22 pb-3 px-2 sm:px-4 overflow-hidden overscroll-none">
+    <div id="live-control-modal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex flex-col p-2 sm:p-3 overflow-hidden overscroll-none">
       <div id="lc-floating-emoji-stream" class="pointer-events-none absolute inset-0 z-30 overflow-hidden"></div>
-      <div class="quantum-card rounded-3xl p-4 sm:p-6 max-w-[98vw] xl:max-w-[1900px] w-full h-[calc(100vh-5.5rem)] max-h-[calc(100vh-5.5rem)] flex flex-col space-y-3 shadow-2xl backdrop-blur-md overflow-hidden relative z-30">
+      <div class="quantum-card rounded-2xl sm:rounded-3xl p-3 sm:p-5 max-w-[99vw] xl:max-w-[1920px] w-full h-full flex flex-col shadow-2xl backdrop-blur-md overflow-hidden relative z-30">
         
-        <!-- Header Bar with HUGE Class Joining Key for Late Students -->
-        <div class="flex flex-wrap items-center justify-between pb-3 gap-3">
+        <!-- Header Bar with HUGE Class Joining Key for Late Students (STATIC TOP - NEVER SCROLLS) -->
+        <div class="shrink-0 flex flex-wrap items-center justify-between pb-2.5 gap-2.5 border-b border-slate-800">
           <div class="flex items-center gap-3.5 min-w-0">
             <span class="h-4 w-4 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
             <div class="min-w-0">
@@ -743,7 +743,7 @@
           </div>
 
           <!-- MASSIVE Class Joining Key for Late Students -->
-          <div class="flex items-center gap-3.5 bg-gradient-to-r from-amber-500/15 via-amber-500/25 to-amber-500/15 border-2 border-amber-400/80 px-5 py-1.5 rounded-2xl shadow-2xl hover:scale-105 transition-all shrink-0 cursor-pointer" onclick="copyJoinCodeToClipboard()" title="Click to copy join code & link for late students">
+          <div class="flex items-center gap-3.5 bg-gradient-to-r from-amber-500/15 via-amber-500/25 to-amber-500/15 border-2 border-amber-400/80 px-4 py-1.5 rounded-2xl shadow-2xl hover:scale-105 transition-all shrink-0 cursor-pointer" onclick="copyJoinCodeToClipboard()" title="Click to copy join code & link for late students">
             <div class="text-right">
               <span class="text-[11px] uppercase font-black text-amber-300 tracking-wider block leading-none">Class Join Code</span>
               <span class="text-[9px] text-slate-300 font-medium leading-none">Late students enter code:</span>
@@ -789,8 +789,8 @@
           </button>
         </div>
 
-        <!-- ACTIVE RUNNER VIEW (Zero-Scroll Dual-Pane Layout + Cinema Mode) -->
-        <div id="lc-runner-body" class="flex flex-col space-y-3 flex-1 min-h-0 overflow-hidden">
+        <!-- ACTIVE RUNNER VIEW (Scrollable Area below Static Header for Maximum Question Stage Room) -->
+        <div id="lc-runner-body" class="flex flex-col space-y-3 flex-1 min-h-0 overflow-y-auto overscroll-contain pr-1 pt-2">
           
           <!-- Unified Ultra-Compact Control HUD Bar (~48px height) -->
           <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-950 px-4 py-2.5 rounded-2xl border border-slate-800 shadow-md shrink-0">
@@ -857,14 +857,14 @@
             </div>
           </div>
 
-          <!-- Dual-Pane Workspace (Zero-Scroll: Question on Left, Telemetry & Key on Right) -->
-          <div id="lc-workspace" class="flex-1 min-h-0 flex flex-col lg:flex-row gap-8 lg:gap-10 overflow-hidden pt-1">
+          <!-- Dual-Pane Workspace (Question on Left, Telemetry & Key on Right) -->
+          <div id="lc-workspace" class="flex-1 min-h-[550px] flex flex-col lg:flex-row gap-6 lg:gap-8 pt-1">
             
-            <!-- Left Stage: High-Resolution Question Display (Scrollable Question Stage with Overscroll Protection) -->
-            <div id="lc-stage-pane" class="flex-1 min-w-0 min-h-0 h-full overflow-y-auto overscroll-contain bg-slate-950/80 rounded-2xl p-2 sm:p-4 border border-slate-800 shadow-inner relative transition-all duration-300">
+            <!-- Left Stage: High-Resolution Question Display -->
+            <div id="lc-stage-pane" class="flex-1 min-w-0 min-h-0 bg-slate-950/80 rounded-2xl p-2 sm:p-4 border border-slate-800 shadow-inner relative transition-all duration-300 flex flex-col items-center justify-start overflow-y-auto overscroll-contain">
               <div class="min-h-full flex items-center justify-center w-full py-2">
                 <div id="lc-card-box" class="bg-white p-2 sm:p-4 rounded-2xl shadow-2xl flex flex-col items-center justify-center max-w-full transition-all shrink-0">
-                  <img id="lc-card-img" src="" alt="Active Question Card" class="max-w-full w-auto object-contain mx-auto block transition-transform">
+                  <img id="lc-card-img" src="" alt="Active Question Card" class="max-w-full h-auto object-contain mx-auto block transition-transform">
                 </div>
               </div>
             </div>
@@ -1747,7 +1747,8 @@
       if (quiz.questions.every(q => q && String(q.correct_answer || "").trim())) return;
 
       if (typeof fetchAnswerKeysForQuiz === 'function') {
-        const keys = await fetchAnswerKeysForQuiz(quiz.id);
+        const qid = (quiz && quiz.id) || (currentLiveAssignment && currentLiveAssignment.assessment_id);
+        const keys = await fetchAnswerKeysForQuiz(qid);
         if (keys && keys.length > 0) {
           const keyMap = {};
           keys.forEach(k => {
@@ -2465,29 +2466,8 @@
     let teacherDockCollapsed = false;
 
     function initLiveControlWheelScroll() {
-      const stage = document.getElementById("lc-stage-pane");
-      if (stage && !stage._hasWheelListener) {
-        stage._hasWheelListener = true;
-        stage.addEventListener("wheel", (e) => {
-          if (stage.scrollHeight > stage.clientHeight) {
-            stage.scrollTop += e.deltaY;
-            e.preventDefault();
-            e.stopPropagation();
-          }
-        }, { passive: false });
-      }
-
-      const modal = document.getElementById("live-control-modal");
-      if (modal && !modal._hasModalWheelHandler) {
-        modal._hasModalWheelHandler = true;
-        modal.addEventListener("wheel", (e) => {
-          const target = e.target;
-          const scrollable = target.closest('#lc-stage-pane, #lc-dock-pane, #preview-questions-list, #roster-modal, #ap-student-roster');
-          if (!scrollable) {
-            e.preventDefault();
-          }
-        }, { passive: false });
-      }
+      // Natural hardware-accelerated scrolling is active across the live-control modal.
+      // Background body scrolling is already locked via document.body.style.overflow = "hidden".
     }
 
     function toggleTeacherDockCollapse() {
@@ -3507,30 +3487,44 @@
         }
       }
 
-      if (autoReveal && !String(correctKey || "").trim()) {
-        showTeacherToast(
-          "Answer Key Unavailable",
-          "The official key was not loaded. Students remain locked until the key is available.",
-          "coral",
-          5000
-        );
-        return;
-      }
-
-      if (autoReveal) {
+      // If autoReveal requested and key is present, reveal official key; otherwise keep hidden but always open discussion!
+      if (autoReveal && String(correctKey || "").trim()) {
         isAnswerRevealed = true;
         const content = document.getElementById("lc-answer-content");
         const status = document.getElementById("lc-answer-status");
         const btn = document.getElementById("btn-toggle-reveal");
         const keyEl = document.getElementById("lc-key-text");
         const ratEl = document.getElementById("lc-rationale-text");
-        if (keyEl) keyEl.textContent = correctKey || 'Pending';
+        if (keyEl) keyEl.textContent = correctKey;
         if (ratEl) ratEl.textContent = explanationText || "Official College Board rationale.";
         if (content) content.classList.remove("hidden");
         if (status) status.textContent = "🔓 Revealed";
         if (btn) {
           btn.textContent = "🔒 Hide Key";
           btn.className = "px-3 py-1.5 rounded-xl border border-rose-500/40 bg-rose-600/10 hover:bg-rose-600/20 text-xs font-bold text-rose-300 transition";
+        }
+      } else {
+        isAnswerRevealed = false;
+        const content = document.getElementById("lc-answer-content");
+        const status = document.getElementById("lc-answer-status");
+        const btn = document.getElementById("btn-toggle-reveal");
+        const keyEl = document.getElementById("lc-key-text");
+        const ratEl = document.getElementById("lc-rationale-text");
+        if (keyEl) keyEl.textContent = correctKey || "Pending / Key Not Seeded";
+        if (ratEl) ratEl.textContent = explanationText || "Official rationale will appear once answer keys are populated in Supabase.";
+        if (content) content.classList.add("hidden");
+        if (status) status.textContent = "🔒 Hidden";
+        if (btn) {
+          btn.textContent = "👁️ Reveal Answer Key";
+          btn.className = "px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-600/10 hover:bg-indigo-600/20 text-xs font-bold text-indigo-300 transition";
+        }
+        if (autoReveal && !String(correctKey || "").trim()) {
+          showTeacherToast(
+            "Discussion Active",
+            "Class entered discussion mode. (Run supabase_seed.sql in Supabase to load official answer keys).",
+            "copper",
+            4000
+          );
         }
       }
 

@@ -294,24 +294,50 @@ async function verifyJoinCode(join_code) {
   return match ? { found: true, assignment: normalizeAssignment(match) } : { found: false };
 }
 
+const _cachedAnswerKeys = {};
+
 async function fetchAnswerKeysForQuiz(assessment_id) {
   const id = String(assessment_id || "").trim();
   if (!id) return null;
-  if (window.OFFLINE_ANSWER_KEYS && window.OFFLINE_ANSWER_KEYS[id]) {
-    return window.OFFLINE_ANSWER_KEYS[id].keys || [];
+  if (_cachedAnswerKeys[id]) return _cachedAnswerKeys[id];
+
+  if (window.OFFLINE_ANSWER_KEYS) {
+    if (window.OFFLINE_ANSWER_KEYS[id]) {
+      _cachedAnswerKeys[id] = window.OFFLINE_ANSWER_KEYS[id].keys || [];
+      return _cachedAnswerKeys[id];
+    }
+    if (window.OFFLINE_ANSWER_KEYS[id.toLowerCase()]) {
+      _cachedAnswerKeys[id] = window.OFFLINE_ANSWER_KEYS[id.toLowerCase()].keys || [];
+      return _cachedAnswerKeys[id];
+    }
   }
+
   await ensureSupabaseInitialized();
   if (!supabaseClient) return null;
-  const { data, error } = await supabaseClient
+
+  let { data, error } = await supabaseClient
     .from("answer_keys")
     .select("keys")
     .eq("assessment_id", id)
     .maybeSingle();
-  if (error) {
+
+  if (!data && id !== id.toLowerCase()) {
+    const res = await supabaseClient
+      .from("answer_keys")
+      .select("keys")
+      .eq("assessment_id", id.toLowerCase())
+      .maybeSingle();
+    data = res.data;
+  }
+
+  if (error && !data) {
     console.warn("Supabase answer-key lookup failed:", error);
     return null;
   }
-  return data && Array.isArray(data.keys) ? data.keys : null;
+
+  const result = data && Array.isArray(data.keys) ? data.keys : null;
+  if (result) _cachedAnswerKeys[id] = result;
+  return result;
 }
 
 async function submitStudentExam(submissionData) {

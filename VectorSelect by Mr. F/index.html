@@ -1436,6 +1436,33 @@
       tabSwitchCount = 0;
       fullscreenExitCount = 0;
 
+      // Preload official keys from Supabase/offline store in the background
+      if (currentQuiz && currentAssignment && !currentQuiz.questions.some(q => q.correct_answer)) {
+        hydrateQuizKeys(currentQuiz);
+        if (typeof fetchAnswerKeysForQuiz === 'function') {
+          fetchAnswerKeysForQuiz(currentAssignment.assessment_id).then(keys => {
+            if (keys && keys.length > 0 && currentQuiz) {
+              const keyMap = {};
+              keys.forEach(k => {
+                if (k.question_id) keyMap[k.question_id] = k;
+                if (k.number) keyMap[k.number] = k;
+              });
+              currentQuiz.questions.forEach((q, idx) => {
+                const k = keyMap[q.question_id] || keyMap[q.number] || keyMap[idx + 1];
+                if (k) {
+                  q.correct_answer = k.correct_answer;
+                  q.explanation = k.explanation;
+                }
+              });
+              if (isCurrentQuestionEvaluationRevealed()) {
+                renderCurrentQuestion();
+                showDiscussionFeedback();
+              }
+            }
+          }).catch(() => {});
+        }
+      }
+
       document.getElementById("active-student-display").textContent = activeStudent;
       document.getElementById("nav-subtitle").textContent = `${currentAssignment.subject} • ${currentAssignment.assessment_title}`;
 
@@ -1785,14 +1812,11 @@
       const correctAnswer = getQuestionCorrectAnswer(realIdx);
 
       // In teacher-led mode, only guard while timer is actively running and instructor has not revealed/discussed
-      if (quizMode === "teacher_led" && !discussionActive && !answerRevealed && (typeof perQRemaining === 'number' && perQRemaining > 0)) {
-        return;
-      }
-
-      if (quizMode === "teacher_led" && !answerRevealed) {
-        // A timer/discussion lock is not itself an answer reveal. Wait for the
-        // authoritative Supabase answer payload.
-        return;
+      if (quizMode === "teacher_led") {
+        const isTimeUp = (typeof perQRemaining === 'number') && perQRemaining <= 0;
+        if (!discussionActive && !answerRevealed && !isTimeUp) {
+          return;
+        }
       }
 
       if (!correctAnswer) {
@@ -2003,11 +2027,21 @@
     // ============================================================================
     function isCurrentQuestionEvaluationRevealed() {
       if (quizMode === "teacher_led") {
-        // Discussion locks input, but only the official answer payload reveals
-        // correctness. This prevents a transient discussion update from
-        // rendering a locked-but-unscored state on the student screen.
         const realIdx = questionOrder[currentQuestionIdx];
-        return Boolean(answerRevealed && getQuestionCorrectAnswer(realIdx));
+        const revealedKey = getQuestionCorrectAnswer(realIdx);
+        const isTimeUp = (typeof perQRemaining === 'number') && perQRemaining <= 0;
+        // Evaluation is revealed if:
+        // 1) Teacher has set answer_revealed or sent revealed_answer, OR
+        // 2) Teacher has initiated discussion mode (discussionActive), OR
+        // 3) Question time has fully expired (isTimeUp), AND an official key is available
+        if (revealedKey && (answerRevealed || discussionActive || isTimeUp)) {
+          return true;
+        }
+        // If discussion is active or time is up even without an official key, return true so UI shows finalized state
+        if (discussionActive || isTimeUp) {
+          return true;
+        }
+        return false;
       } else {
         if (isCountDown && remainingSeconds <= 0) return true;
         return false;
