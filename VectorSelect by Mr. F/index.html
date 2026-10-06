@@ -2008,8 +2008,9 @@
       }
       if (quizMode === "teacher_led") {
         if (discussionActive || answerRevealed) return true;
+        // In teacher-led mode, evaluation is revealed if time expired AND student had locked or timed out
         if (currentAssignment && currentAssignment.per_question_seconds > 0) {
-          if (typeof perQRemaining === 'number' && perQRemaining <= 0) return true;
+          if (typeof perQRemaining === 'number' && perQRemaining <= 0 && !!studentLockedAnswers[realIdx]) return true;
         }
         return false;
       } else {
@@ -3078,9 +3079,18 @@
             // 3. Question transition check
             if (teacherQ !== currentQuestionIdx) {
               currentQuestionIdx = teacherQ;
+              const newRealIdx = questionOrder[teacherQ];
+              discussionActive = res.assignment.discussion_active === true;
+              answerRevealed = res.assignment.answer_revealed === true;
               perQRemaining = (typeof res.assignment.timer_remaining_seconds === 'number' && res.assignment.timer_remaining_seconds > 0)
                 ? res.assignment.timer_remaining_seconds
                 : (res.assignment.per_question_seconds || 60);
+              // Clean any stale locks or reveals for this new question
+              if (!discussionActive && !answerRevealed) {
+                delete studentLockedAnswers[newRealIdx];
+                delete currentRevealedAnswers[teacherQ];
+                delete currentRevealedAnswers[newRealIdx];
+              }
               renderCurrentQuestion();
             }
 
@@ -3123,6 +3133,19 @@
               if (!studentLockedAnswers[currentReal]) {
                 studentLockedAnswers[currentReal] = { auto: true, locked_at: new Date().toISOString() };
                 syncStudentLiveAnswer(true);
+              }
+            } else {
+              // Ensure if discussion and reveal are cleared, choice buttons are fully clickable
+              const choicesBox = document.getElementById("q-choices-container");
+              if (choicesBox) {
+                const currentReal = questionOrder[currentQuestionIdx];
+                if (!studentLockedAnswers[currentReal]) {
+                  choicesBox.querySelectorAll("button.choice-btn").forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.style.pointerEvents = "auto";
+                  });
+                }
               }
             }
 

@@ -2548,8 +2548,20 @@
       if (discPrev) discPrev.disabled = currentLiveIndex === 0;
       resetLcNextButton();
 
-      // Persist to sync all students immediately
-      setAssignmentQuestionIndex(currentLiveAssignment.join_code, currentLiveIndex);
+      // Persist to sync all students immediately with timer reset and discussion cleared
+      const perQ = currentLiveAssignment.per_question_seconds || 0;
+      setAssignmentTimerState(currentLiveAssignment.join_code, {
+        current_question_index: currentLiveIndex,
+        question_started_at: new Date().toISOString(),
+        discussion_active: false,
+        answer_revealed: false,
+        revealed_answer: "",
+        revealed_explanation: "",
+        timer_remaining_seconds: perQ,
+        per_question_seconds: perQ,
+        timer_paused: false,
+        paused_remaining_seconds: null
+      });
     }
 
     let lastAllAnsweredNotifiedIdx = -1;
