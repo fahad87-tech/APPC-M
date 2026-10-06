@@ -1381,7 +1381,9 @@ $$y(t) = v_{0y} t - \\frac{1}{2}g t^2 = (${voy.toFixed(2)})(${tTransit.toFixed(3
         unit: 1,
         unitTitle: "Unit 1: Kinematics (Collegiate Lab)",
         simType: 'cannon',
-        simData: { angle, v0, photogateX, g, targetY: yTransit, targetTolerance: 0.15, isCalculus: isCalc },
+        // The canvas simulation advances in 20 ms steps, so the sensor's
+        // discrete crossing can differ slightly from the analytic y value.
+        simData: { angle, v0, photogateX, g, targetY: yTransit, targetTolerance: 0.60, isCalculus: isCalc },
         prompt,
         choices: shuffle(choices),
         explanation

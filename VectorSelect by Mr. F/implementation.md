@@ -243,4 +243,7 @@ Run the SQL script [`supabase_schema.sql`](supabase_schema.sql) in your **Supaba
 - **Per-Question Stroke Persistence**:
   - Drawings are stored per question index in `cardDrawStrokesByQuestion[realIdx]`.
   - Navigating back and forth preserves student working steps on each card.
+- **Full Parity Across Both Portals**:
+  - **Student Runner (`index.html`)**: Available on `#q-card-white-box` for personal sketching.
+  - **Teacher Live Control & Projector Stage (`teacher.html`)**: Available on `#lc-card-box` via `#btn-toggle-teacher-canvas` with full marker/eraser toolset for whole-class instruction, diagram breakdown, and vector derivations on smartboards or projectors.
 
