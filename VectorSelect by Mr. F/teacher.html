@@ -340,15 +340,15 @@
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Quiz Mode</label>
           <select id="teacher-quiz-mode" onchange="onQuizModeChange()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-base text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+            <option value="teacher_led" selected>Teacher-Led (Synchronized)</option>
             <option value="student_led">Student-Led (Self-Paced)</option>
-            <option value="teacher_led">Teacher-Led (Synchronized)</option>
           </select>
           <span class="text-xs text-slate-400 mt-1.5 block">In Teacher-Led mode, all students advance together with instructor pacing.</span>
         </div>
 
         <div>
-          <!-- Student-Led: Overall Time Limit -->
-          <div id="overall-time-box">
+          <!-- Student-Led: Overall Time Limit (Hidden by default when in Teacher-Led mode) -->
+          <div id="overall-time-box" class="hidden">
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Overall Time Limit</label>
             <select id="teacher-time-limit" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-base text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
               <option value="0">Untimed (Stopwatch)</option>
@@ -362,15 +362,15 @@
             <span class="text-xs text-slate-400 mt-1.5 block">Total exam duration for self-paced student completion.</span>
           </div>
 
-          <!-- Teacher-Led: Time Per Question ONLY (Overall time is completely hidden) -->
-          <div id="per-question-box" class="hidden">
+          <!-- Teacher-Led: Time Per Question ONLY (Visible by default: 90s) -->
+          <div id="per-question-box">
             <label class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Time Per Question</label>
             <select id="teacher-per-question" class="w-full bg-slate-950 border border-amber-500/40 rounded-xl p-3.5 text-base text-white focus:outline-none focus:ring-2 focus:ring-amber-400">
               <option value="0">Manual Pacing (Teacher clicks Next to explain)</option>
               <option value="30">30 Seconds Auto</option>
               <option value="45">45 Seconds Auto</option>
               <option value="60">60 Seconds Auto</option>
-              <option value="90">90 Seconds Auto</option>
+              <option value="90" selected>90 Seconds Auto</option>
               <option value="120">120 Seconds Auto</option>
             </select>
             <span class="text-xs text-amber-300/80 mt-1.5 block">⚡ No overall timer. Pause freely between questions to discuss and explain concepts.</span>
@@ -1225,6 +1225,13 @@
       }
       populateTeacherSubjectDropdown();
       loadAssignmentsTable();
+
+      // Ensure Teacher-Led and 90 seconds are the active defaults on portal load
+      const modeSel = document.getElementById("teacher-quiz-mode");
+      if (modeSel) modeSel.value = "teacher_led";
+      const perQSel = document.getElementById("teacher-per-question");
+      if (perQSel) perQSel.value = "90";
+      onQuizModeChange();
     }
 
     function populateTeacherSubjectDropdown() {
