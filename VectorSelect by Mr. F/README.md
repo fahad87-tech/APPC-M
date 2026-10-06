@@ -92,16 +92,17 @@ Because VectorSelect by Mr. F is a static web application with an offline bundle
 
 ---
 
-## ⚡ Optional Cloud Sync with Supabase
+## ⚡ Supabase Setup
 
 The app works instantly offline using browser `localStorage`. To sync scores and assignments across multiple student devices:
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. Run `supabase_schema.sql` in the **SQL Editor**.
-3. In `supabase_config.js`, supply your project credentials:
+3. Run the generated `data/supabase_seed.sql` in the SQL Editor to import the migrated answer keys and assignments.
+4. Put your project URL and anon/publishable key in `supabase_public_config.js`:
    ```javascript
-   const SUPABASE_CONFIG = {
-     url: "https://your-project-id.supabase.co",
-     anonKey: "your-anon-public-key"
-   };
+   window.VECTORSELECT_SUPABASE_URL = "https://your-project-id.supabase.co";
+   window.VECTORSELECT_SUPABASE_ANON_KEY = "your-anon-public-key";
    ```
+
+The browser uses Supabase for authentication, assignments, submissions, participants, live classroom state, reactions, and realtime updates. Without credentials, the app remains usable with its localStorage/offline fallback.

@@ -1,120 +1,224 @@
--- ==============================================================================
--- Wayground-Style AP Physics Assessment Platform: Supabase Database Schema
--- ==============================================================================
--- Paste this script into your Supabase Dashboard -> SQL Editor and click "Run".
+-- VectorSelect Supabase schema.
+-- Run this once in Supabase SQL Editor before publishing the frontend.
+-- Current anon policies preserve the classroom join-code workflow. For
+-- stronger security, move grading and teacher mutations behind server APIs.
 
--- 1. Create table for Active Teacher Assignments
+create extension if not exists pgcrypto;
+
 create table if not exists public.active_assignments (
-    id uuid default gen_random_uuid() primary key,
-    join_code text unique not null,              -- e.g. "849201"
-    subject text not null,                       -- e.g. "AP Physics 1: Algebra-Based"
-    unit text not null,                          -- e.g. "Unit 2"
-    assessment_id text not null,                 -- e.g. "app1_unit2_section_2.5_quiz"
-    assessment_title text not null,              -- e.g. "Section 2.5 Quiz"
-    class_period text default 'General',
-    time_limit_minutes integer default 0,        -- 0 = untimed, or 15, 30, 45, etc.
-    is_active boolean default true,              -- true = students can take it; false = closed
-    created_at timestamp with time zone default timezone('utc'::text, now()) not null
-);
-
--- 2. Create table for Student Exam Submissions
-create table if not exists public.exam_submissions (
-    id uuid default gen_random_uuid() primary key,
-    join_code text not null,                     -- links directly to active_assignments
-    student_name text not null,
-    class_period text default 'General',
-    subject text not null,
-    unit text not null,
+    id uuid primary key default gen_random_uuid(),
+    join_code text unique not null,
+    subject text not null default '',
+    unit text not null default '',
     assessment_id text not null,
-    assessment_title text not null,
-    score integer not null,
-    total_questions integer not null,
-    percentage numeric(5,2) not null,
-    time_spent_seconds integer not null,
-    answers jsonb default '{}'::jsonb,           -- record of student choices for item analysis
-    submitted_at timestamp with time zone default timezone('utc'::text, now()) not null
+    assessment_title text not null default '',
+    title text not null default '',
+    class_period text not null default 'General',
+    time_limit_minutes integer not null default 0,
+    quiz_mode text not null default 'student_led',
+    per_question_seconds integer not null default 0,
+    current_question_index integer not null default 0,
+    allow_calculator boolean not null default false,
+    show_leaderboard boolean not null default true,
+    enable_lockdown boolean not null default false,
+    randomize_questions boolean not null default false,
+    allow_student_review boolean not null default false,
+    allow_review boolean not null default false,
+    enable_point_redemption boolean not null default true,
+    is_active boolean not null default true,
+    is_started boolean not null default false,
+    started_at timestamptz,
+    timer_paused boolean not null default false,
+    is_paused boolean not null default false,
+    paused_remaining_seconds integer,
+    timer_remaining_seconds integer,
+    remaining_seconds integer not null default 0,
+    discussion_active boolean not null default false,
+    answer_revealed boolean not null default false,
+    revealed_answer text not null default '',
+    revealed_explanation text not null default '',
+    previous_correct_answer text not null default '',
+    question_started_at timestamptz,
+    created_at timestamptz not null default timezone('utc', now()),
+    updated_at timestamptz not null default timezone('utc', now())
 );
 
--- 3. Create performance indexes
-create index if not exists idx_active_assignments_code on public.active_assignments (join_code);
-create index if not exists idx_submissions_join_code on public.exam_submissions (join_code, score desc, time_spent_seconds asc);
-create index if not exists idx_submissions_assessment on public.exam_submissions (assessment_id);
+create table if not exists public.answer_keys (
+    id uuid primary key default gen_random_uuid(),
+    assessment_id text unique not null,
+    subject text not null default '',
+    unit text not null default '',
+    keys jsonb not null default '[]'::jsonb,
+    created_at timestamptz not null default timezone('utc', now()),
+    updated_at timestamptz not null default timezone('utc', now())
+);
 
--- 4. Enable Row Level Security (RLS)
-alter table public.active_assignments enable row level security;
-alter table public.exam_submissions enable row level security;
-
--- 5. Policies for active_assignments
-create policy "Allow public to read active assignments"
-    on public.active_assignments for select to anon using (true);
-
-create policy "Allow teachers to insert/update assignments"
-    on public.active_assignments for all to anon using (true) with check (true);
-
--- 6. Policies for exam_submissions
-create policy "Allow student submissions insert"
-    on public.exam_submissions for insert to anon with check (true);
-
-create policy "Allow public leaderboard reads"
-    on public.exam_submissions for select to anon using (true);
-
--- 7. Enable Realtime Publications for instant multi-device updates
-alter publication supabase_realtime add table public.active_assignments;
-alter publication supabase_realtime add table public.exam_submissions;
-
--- 8. Session participants (which students have joined this assignment)
-create table if not exists public.session_participants (
-    id uuid default gen_random_uuid() primary key,
+create table if not exists public.exam_submissions (
+    id uuid primary key default gen_random_uuid(),
+    assignment text,
     join_code text not null,
     student_name text not null,
-    joined_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    class_period text not null default 'General',
+    subject text not null default '',
+    unit text not null default '',
+    assessment_id text not null default '',
+    assessment_title text not null default '',
+    score integer not null default 0,
+    total_questions integer not null default 0,
+    percentage numeric(6,2) not null default 0,
+    score_percentage numeric(6,2) not null default 0,
+    points numeric(8,2) not null default 0,
+    speed_bonus numeric(8,2) not null default 0,
+    streak integer not null default 0,
+    max_streak integer not null default 0,
+    recoveries_completed integer not null default 0,
+    tab_switch_count integer not null default 0,
+    fullscreen_exits integer not null default 0,
+    time_spent_seconds integer not null default 0,
+    answers jsonb not null default '{}'::jsonb,
+    submitted_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.session_participants (
+    id uuid primary key default gen_random_uuid(),
+    join_code text not null,
+    student_name text not null,
+    joined_at timestamptz not null default timezone('utc', now()),
     unique (join_code, student_name)
 );
 
--- 9. Live per-question answers (reported on each selection, not just at submit)
 create table if not exists public.live_question_answers (
-    id uuid default gen_random_uuid() primary key,
+    id uuid primary key default gen_random_uuid(),
     join_code text not null,
     student_name text not null,
     question_real_index integer not null,
     selected_letter text,
-    is_correct boolean default false,
-    answered_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    is_correct boolean not null default false,
+    points numeric(8,2) not null default 0,
+    speed_bonus numeric(8,2) not null default 0,
+    streak integer not null default 0,
+    recovered_points numeric(8,2) not null default 0,
+    answered_at timestamptz not null default timezone('utc', now()),
     unique (join_code, student_name, question_real_index)
 );
 
--- 10. Performance indexes for live session queries
-create index if not exists idx_participants_code on public.session_participants (join_code);
-create index if not exists idx_live_answers_code_q on public.live_question_answers (join_code, question_real_index);
+create table if not exists public.live_reactions (
+    id uuid primary key default gen_random_uuid(),
+    join_code text not null,
+    student_name text not null default 'Student',
+    emoji text not null default '🚀',
+    timestamp bigint not null,
+    created_at timestamptz not null default timezone('utc', now())
+);
 
--- 11. Add timer-sync and discussion-pause columns to active_assignments
-alter table public.active_assignments add column if not exists question_started_at timestamp with time zone;
-alter table public.active_assignments add column if not exists discussion_active boolean default false;
+create index if not exists idx_submissions_join_code
+    on public.exam_submissions (join_code, points desc, score desc, time_spent_seconds asc);
+create index if not exists idx_submissions_assessment
+    on public.exam_submissions (assessment_id);
+create index if not exists idx_participants_code
+    on public.session_participants (join_code);
+create index if not exists idx_live_answers_code_q
+    on public.live_question_answers (join_code, question_real_index);
+create index if not exists idx_live_reactions_code_time
+    on public.live_reactions (join_code, timestamp);
 
--- 12. Enable Row Level Security on new tables
+create or replace function public.get_server_time()
+returns timestamptz
+language sql
+stable
+as $$ select now(); $$;
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+    new.updated_at = timezone('utc', now());
+    return new;
+end;
+$$;
+
+drop trigger if exists active_assignments_updated_at on public.active_assignments;
+create trigger active_assignments_updated_at
+before update on public.active_assignments
+for each row execute function public.set_updated_at();
+
+drop trigger if exists answer_keys_updated_at on public.answer_keys;
+create trigger answer_keys_updated_at
+before update on public.answer_keys
+for each row execute function public.set_updated_at();
+
+alter table public.active_assignments enable row level security;
+alter table public.answer_keys enable row level security;
+alter table public.exam_submissions enable row level security;
 alter table public.session_participants enable row level security;
 alter table public.live_question_answers enable row level security;
+alter table public.live_reactions enable row level security;
 
--- 13. Policies for session_participants (anon read/write)
-create policy "Allow public to read participants"
-    on public.session_participants for select to anon using (true);
+drop policy if exists "public can read assignments" on public.active_assignments;
+create policy "public can read assignments"
+on public.active_assignments for select to anon, authenticated using (true);
+drop policy if exists "public can create assignments" on public.active_assignments;
+create policy "public can create assignments"
+on public.active_assignments for insert to anon, authenticated with check (true);
+drop policy if exists "public can update assignments" on public.active_assignments;
+create policy "public can update assignments"
+on public.active_assignments for update to anon, authenticated using (true) with check (true);
+drop policy if exists "public can delete assignments" on public.active_assignments;
+create policy "public can delete assignments"
+on public.active_assignments for delete to anon, authenticated using (true);
 
-create policy "Allow participant upsert"
-    on public.session_participants for insert to anon with check (true);
+drop policy if exists "public can read answer keys" on public.answer_keys;
+create policy "public can read answer keys"
+on public.answer_keys for select to anon, authenticated using (true);
 
-create policy "Allow participant update"
-    on public.session_participants for update to anon using (true);
+drop policy if exists "public can write submissions" on public.exam_submissions;
+create policy "public can write submissions"
+on public.exam_submissions for insert to anon, authenticated with check (true);
+drop policy if exists "public can read submissions" on public.exam_submissions;
+create policy "public can read submissions"
+on public.exam_submissions for select to anon, authenticated using (true);
 
--- 14. Policies for live_question_answers (anon read/write)
-create policy "Allow public to read live answers"
-    on public.live_question_answers for select to anon using (true);
+drop policy if exists "public can read participants" on public.session_participants;
+create policy "public can read participants"
+on public.session_participants for select to anon, authenticated using (true);
+drop policy if exists "public can check in participants" on public.session_participants;
+create policy "public can check in participants"
+on public.session_participants for insert to anon, authenticated with check (true);
+drop policy if exists "public can update participants" on public.session_participants;
+create policy "public can update participants"
+on public.session_participants for update to anon, authenticated using (true) with check (true);
 
-create policy "Allow live answer upsert"
-    on public.live_question_answers for insert to anon with check (true);
+drop policy if exists "public can read live answers" on public.live_question_answers;
+create policy "public can read live answers"
+on public.live_question_answers for select to anon, authenticated using (true);
+drop policy if exists "public can write live answers" on public.live_question_answers;
+create policy "public can write live answers"
+on public.live_question_answers for insert to anon, authenticated with check (true);
+drop policy if exists "public can update live answers" on public.live_question_answers;
+create policy "public can update live answers"
+on public.live_question_answers for update to anon, authenticated using (true) with check (true);
 
-create policy "Allow live answer update"
-    on public.live_question_answers for update to anon using (true);
+drop policy if exists "public can read reactions" on public.live_reactions;
+create policy "public can read reactions"
+on public.live_reactions for select to anon, authenticated using (true);
+drop policy if exists "public can create reactions" on public.live_reactions;
+create policy "public can create reactions"
+on public.live_reactions for insert to anon, authenticated with check (true);
 
--- 15. Enable Realtime for new live-session tables
-alter publication supabase_realtime add table public.session_participants;
-alter publication supabase_realtime add table public.live_question_answers;
+do $$
+begin
+    if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='active_assignments') then
+        execute 'alter publication supabase_realtime add table public.active_assignments';
+    end if;
+    if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='session_participants') then
+        execute 'alter publication supabase_realtime add table public.session_participants';
+    end if;
+    if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='live_question_answers') then
+        execute 'alter publication supabase_realtime add table public.live_question_answers';
+    end if;
+    if not exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and schemaname='public' and tablename='live_reactions') then
+        execute 'alter publication supabase_realtime add table public.live_reactions';
+    end if;
+end;
+$$;

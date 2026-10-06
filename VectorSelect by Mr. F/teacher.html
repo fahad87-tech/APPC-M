@@ -32,9 +32,9 @@
       }
     };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js"></script>
-  <script src="pocketbase_public_config.js"></script>
-  <script src="pocketbase_config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase_public_config.js"></script>
+  <script src="supabase_config.js"></script>
   <!-- Offline Air-Gapped Fallback Keys (Ignored on GitHub Pages) -->
   <script src="data/answer_keys.js" onerror="/* Local air-gapped fallback only */"></script>
   <script src="data/exams_bundle.js"></script>
@@ -247,7 +247,7 @@
       <!-- Auth Mode Tabs -->
       <div class="flex rounded-xl bg-slate-950 p-1 border border-slate-800 text-xs font-bold">
         <button type="button" id="tab-passcode" onclick="setAuthTab('passcode')" class="flex-1 py-2 rounded-lg bg-indigo-600 text-white transition">Passcode</button>
-        <button type="button" id="tab-pocketbase" onclick="setAuthTab('pocketbase')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">PocketBase Login</button>
+        <button type="button" id="tab-supabase" onclick="setAuthTab('supabase')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">Supabase Login</button>
       </div>
 
       <form id="form-passcode" onsubmit="handleAuthSubmit(event)" class="space-y-4">
@@ -258,12 +258,12 @@
         </button>
       </form>
 
-      <form id="form-pocketbase" onsubmit="handlePocketBaseAuthSubmit(event)" class="space-y-3 hidden">
-        <input type="email" id="pb-auth-email" placeholder="Teacher / Admin Email" autocomplete="username" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <input type="password" id="pb-auth-password" placeholder="Password" autocomplete="current-password" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-        <div id="pb-auth-error-msg" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl py-2 px-3 font-semibold">Invalid email or password.</div>
-        <button type="submit" id="btn-pb-login" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-base shadow-xl shadow-indigo-600/25 transition">
-          Login via PocketBase
+      <form id="form-supabase" onsubmit="handleSupabaseAuthSubmit(event)" class="space-y-3 hidden">
+        <input type="email" id="supabase-auth-email" placeholder="Teacher email" autocomplete="username" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <input type="password" id="supabase-auth-password" placeholder="Password" autocomplete="current-password" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        <div id="supabase-auth-error-msg" class="hidden text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl py-2 px-3 font-semibold">Invalid email or password.</div>
+        <button type="submit" id="btn-supabase-login" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-base shadow-xl shadow-indigo-600/25 transition">
+          Login via Supabase
         </button>
       </form>
     </div>
@@ -1109,33 +1109,33 @@
     let isAnswerRevealed = false;
 
     // ============================================================================
-    // AUTH (PASSCODE & POCKETBASE)
+    // AUTH (PASSCODE & SUPABASE)
     // ============================================================================
     function setAuthTab(tab) {
       const isPass = tab === 'passcode';
       const tabPass = document.getElementById('tab-passcode');
-      const tabPb = document.getElementById('tab-pocketbase');
-      if (tabPass && tabPb) {
+      const tabSupabase = document.getElementById('tab-supabase');
+      if (tabPass && tabSupabase) {
         tabPass.className = isPass 
           ? "flex-1 py-2 rounded-lg bg-indigo-600 text-white transition" 
           : "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition";
-        tabPb.className = !isPass 
+        tabSupabase.className = !isPass 
           ? "flex-1 py-2 rounded-lg bg-indigo-600 text-white transition" 
           : "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition";
       }
       const formPass = document.getElementById('form-passcode');
-      const formPb = document.getElementById('form-pocketbase');
+      const formSupabase = document.getElementById('form-supabase');
       if (formPass) formPass.classList.toggle('hidden', !isPass);
-      if (formPb) formPb.classList.toggle('hidden', isPass);
+      if (formSupabase) formSupabase.classList.toggle('hidden', isPass);
     }
 
     function checkAuth() {
       if (isTeacherAuthenticated()) {
         document.getElementById("auth-gate").classList.add("hidden");
         initTeacherApp();
-        // Background attempt to authenticate PocketBase if available
-        if (typeof loginTeacherWithPocketBase === "function") {
-          loginTeacherWithPocketBase("739156332@qq.com", "physics2026").catch(() => {});
+        // Background session refresh when Supabase is configured.
+        if (typeof loginTeacherWithSupabase === "function" && isSupabaseConfigured()) {
+          loginTeacherWithSupabase("739156332@qq.com", "physics2026").catch(() => {});
         }
       }
     }
@@ -1153,16 +1153,18 @@
         sessionStorage.setItem("teacher_authenticated", "true");
         document.getElementById("auth-gate").classList.add("hidden");
         initTeacherApp();
-        // Background attempt to authenticate PocketBase
-        if (typeof loginTeacherWithPocketBase === "function") {
-          loginTeacherWithPocketBase("739156332@qq.com", "physics2026").catch(() => {});
+        // Background session refresh when Supabase is configured.
+        if (typeof loginTeacherWithSupabase === "function" && isSupabaseConfigured()) {
+          loginTeacherWithSupabase("739156332@qq.com", "physics2026").catch(() => {});
         }
         return;
       }
 
-      // 2. Also try PocketBase login directly in case they typed their PocketBase password
-      const pbRes = await loginTeacherWithPocketBase("739156332@qq.com", pin);
-      if (pbRes && pbRes.success) {
+      // 2. Also try Supabase login when the deployment has auth configured.
+      const supabaseRes = isSupabaseConfigured()
+        ? await loginTeacherWithSupabase("739156332@qq.com", pin)
+        : { success: false };
+      if (supabaseRes && supabaseRes.success) {
         if (errBox) errBox.classList.add("hidden");
         document.getElementById("auth-gate").classList.add("hidden");
         initTeacherApp();
@@ -1177,20 +1179,20 @@
       pinInput.focus();
     }
 
-    async function handlePocketBaseAuthSubmit(e) {
+    async function handleSupabaseAuthSubmit(e) {
       e.preventDefault();
-      const email = document.getElementById("pb-auth-email").value.trim();
-      const pass = document.getElementById("pb-auth-password").value;
-      const errBox = document.getElementById("pb-auth-error-msg");
-      const btn = document.getElementById("btn-pb-login");
+      const email = document.getElementById("supabase-auth-email").value.trim();
+      const pass = document.getElementById("supabase-auth-password").value;
+      const errBox = document.getElementById("supabase-auth-error-msg");
+      const btn = document.getElementById("btn-supabase-login");
 
       btn.disabled = true;
       btn.textContent = "Authenticating...";
       errBox.classList.add("hidden");
 
-      const res = await loginTeacherWithPocketBase(email, pass);
+      const res = await loginTeacherWithSupabase(email, pass);
       btn.disabled = false;
-      btn.textContent = "Login via PocketBase";
+      btn.textContent = "Login via Supabase";
 
       if (res.success) {
         document.getElementById("auth-gate").classList.add("hidden");
@@ -1202,7 +1204,7 @@
     }
 
     function logoutTeacher() {
-      logoutTeacherFromPocketBase();
+      logoutTeacherFromSupabase();
       location.reload();
     }
 
@@ -2362,7 +2364,7 @@
       // Set initial question timer state so students' countdowns start
       if (assignment.per_question_seconds > 0 && !assignment.question_started_at) {
         await setAssignmentTimerState(code, {
-          question_started_at: getPocketBaseNowIso(),
+          question_started_at: getServerNowIso(),
           discussion_active: false
         });
       }
@@ -2431,7 +2433,7 @@
       if (currentLiveAssignment.per_question_seconds > 0) {
         const perQ = currentLiveAssignment.per_question_seconds;
         await setAssignmentTimerState(code, {
-          question_started_at: getPocketBaseNowIso(),
+          question_started_at: getServerNowIso(),
           discussion_active: false,
           timer_remaining_seconds: perQ,
           per_question_seconds: perQ,
@@ -2783,7 +2785,7 @@
 
     async function setupQuestionTimer() {
       clearInterval(lcTimerInterval);
-      await syncPocketBaseClock();
+      await syncServerClock();
       const perQ = currentLiveAssignment.per_question_seconds || 0;
       const timerBox = document.getElementById("lc-timer-box");
       const addTimeBtn = document.getElementById("lc-btn-addtime");
@@ -2797,7 +2799,7 @@
         if (addTimeBtn) addTimeBtn.classList.remove("hidden");
         if (timerLabel) timerLabel.textContent = "Question Time:";
         if (!currentLiveAssignment.question_started_at) {
-          currentLiveAssignment.question_started_at = getPocketBaseNowIso();
+          currentLiveAssignment.question_started_at = getServerNowIso();
           await setAssignmentTimerState(currentLiveAssignment.join_code, {
             question_started_at: currentLiveAssignment.question_started_at,
             timer_remaining_seconds: perQ
@@ -2846,7 +2848,7 @@
       if (lcTimerPaused) return Math.max(0, Math.ceil(Number(lcTimerRemaining) || 0));
       const startedAt = Date.parse(currentLiveAssignment.question_started_at || "");
       if (!Number.isFinite(startedAt)) return Math.max(0, Math.ceil(Number(lcTimerRemaining) || perQ));
-      return Math.max(0, Math.ceil(perQ - ((getPocketBaseNowMs() - startedAt) / 1000)));
+      return Math.max(0, Math.ceil(perQ - ((getServerNowMs() - startedAt) / 1000)));
     }
 
     function updateLcTimerDisplay() {
@@ -2899,10 +2901,10 @@
         showTeacherToast("Session Paused", (perQ > 0) ? `Timer paused at ${lcTimerRemaining}s` : "Student interactions paused for explanation", "brass", 2500);
       } else {
         // Resume session: calculate updated started_at timestamp
-        let newStartedAt = getPocketBaseNowIso();
+        let newStartedAt = getServerNowIso();
         if (perQ > 0) {
           const elapsedSecs = Math.max(0, perQ - lcTimerRemaining);
-          newStartedAt = new Date(getPocketBaseNowMs() - (elapsedSecs * 1000)).toISOString();
+          newStartedAt = new Date(getServerNowMs() - (elapsedSecs * 1000)).toISOString();
         }
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
           timer_paused: false,
@@ -2920,7 +2922,7 @@
       updateLcTimerDisplay();
       const perQ = (currentLiveAssignment.per_question_seconds || 0) + addSeconds;
       currentLiveAssignment.per_question_seconds = perQ;
-      const newStartedAt = new Date(getPocketBaseNowMs() - Math.max(0, perQ - lcTimerRemaining) * 1000).toISOString();
+      const newStartedAt = new Date(getServerNowMs() - Math.max(0, perQ - lcTimerRemaining) * 1000).toISOString();
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         question_started_at: newStartedAt,
         per_question_seconds: perQ,
@@ -2966,7 +2968,7 @@
         // Set fresh server timestamp so students' per-question timers restart
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
           current_question_index: currentLiveIndex,
-          question_started_at: getPocketBaseNowIso(),
+          question_started_at: getServerNowIso(),
           discussion_active: false,
           answer_revealed: false,
           revealed_answer: "",
@@ -3035,7 +3037,7 @@
       // Single authoritative atomic server update for the newly activated question
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         current_question_index: currentLiveIndex,
-        question_started_at: getPocketBaseNowIso(),
+        question_started_at: getServerNowIso(),
         discussion_active: false,
         answer_revealed: false,
         revealed_answer: "",
@@ -3589,7 +3591,7 @@
       if (!skipServerUpdate && currentLiveAssignment) {
         // Unset discussion_active and reset answer_revealed on server
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
-          question_started_at: getPocketBaseNowIso(),
+          question_started_at: getServerNowIso(),
           discussion_active: false,
           answer_revealed: false,
           revealed_answer: "",

@@ -1,13 +1,20 @@
 # Offline Air-Gapped Answer Keys (Enclave)
 data/answer_keys.json
 data/answer_keys.js
+data/supabase_seed.sql
 
 # Original PDFs with Scoring Guides & Keys
 input pdf/
 
-# PocketBase Local Database & Logs
-pocketbase/pb_data/
+# Local database exports
+*.db
 *.exe
+
+# Environment & Secret files
+.env
+.env.local
+.env.*
+!.env.example
 
 # Python Cache & OS Temp
 __pycache__/

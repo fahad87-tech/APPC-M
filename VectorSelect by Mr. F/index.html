@@ -32,9 +32,9 @@
       }
     };
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js"></script>
-  <script src="pocketbase_public_config.js"></script>
-  <script src="pocketbase_config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase_public_config.js"></script>
+  <script src="supabase_config.js"></script>
   <!-- Offline Air-Gapped Fallback Keys (Ignored on GitHub Pages) -->
   <script src="data/answer_keys.js" onerror="/* Local air-gapped fallback only */"></script>
   <script src="data/exams_bundle.js"></script>
@@ -1064,6 +1064,7 @@
     let calcExpression = "";
     let quizMode = "student_led";
     let teacherLedPollInterval = null;
+    let activeAssignmentSubscription = null;
     let perQTimerInterval = null;
     let perQRemaining = 0;
     let perQFrozen = false;
@@ -1628,7 +1629,7 @@
         }
         perQFrozen = false;
 
-        // Both portals derive the display from the same PocketBase timestamp.
+        // Both portals derive the display from the same server timestamp.
         // No client-side decrement means polling latency cannot accumulate drift.
         perQRemaining = getSharedQuestionRemaining(currentAssignment);
         updatePerQDisplay(perQRemaining);
@@ -1645,7 +1646,7 @@
       if (!Number.isFinite(startedAt)) {
         return Math.max(0, Math.ceil(Number(assignment.timer_remaining_seconds) || perQRemaining || total));
       }
-      return Math.max(0, Math.ceil(total - ((getPocketBaseNowMs() - startedAt) / 1000)));
+      return Math.max(0, Math.ceil(total - ((getServerNowMs() - startedAt) / 1000)));
     }
 
     function updatePerQDisplay(secs) {
@@ -1685,7 +1686,7 @@
               : "h-2.5 w-2.5 rounded-full bg-coral-400 animate-pulse"));
       }
 
-      // Lock locally at zero. The instructor's PocketBase payload supplies the
+      // Lock locally at zero. The instructor's Supabase payload supplies the
       // official answer and explanation; do not invent a reveal on this client.
       if (secs <= 0 && (!discussionActive || !answerRevealed)) {
         autoLockCurrentQuestion();
@@ -1790,7 +1791,7 @@
 
       if (quizMode === "teacher_led" && !answerRevealed) {
         // A timer/discussion lock is not itself an answer reveal. Wait for the
-        // authoritative PocketBase answer payload.
+        // authoritative Supabase answer payload.
         return;
       }
 
@@ -3093,8 +3094,8 @@
         perQRemaining = getSharedQuestionRemaining(assignment);
         const total = Number(assignment.per_question_seconds) || 0;
         questionStartTime = total > 0
-          ? getPocketBaseNowMs() - ((total - perQRemaining) * 1000)
-          : getPocketBaseNowMs();
+          ? getServerNowMs() - ((total - perQRemaining) * 1000)
+          : getServerNowMs();
 
         updatePerQDisplay(perQRemaining);
         renderCurrentQuestion();
@@ -3125,7 +3126,7 @@
       // 6. Sync discussion and answer reveal state
       const newDiscussion = Boolean(assignment.discussion_active);
       // A non-empty official answer is authoritative. The boolean was added
-      // later than the reveal fields, so tolerate older PocketBase records.
+      // later than the reveal fields, so tolerate older Supabase records.
       const newAnswerRevealed = Boolean(
         assignment.revealed_answer
         && assignment.answer_revealed !== false
@@ -3212,9 +3213,9 @@
         try {
           const res = await verifyJoinCode(currentAssignment.join_code);
           if (res.found && res.assignment) {
-            // Subscribe to SSE if PocketBase is active and not yet subscribed
-            if (pb && res.assignment.id && activeAssignmentSubscription !== res.assignment.id) {
-              subscribeToLiveAssignment(res.assignment.id, (record) => {
+            // Subscribe to Supabase Realtime if configured.
+            if (supabaseClient && res.assignment.id && activeAssignmentSubscription !== res.assignment.id) {
+              activeAssignmentSubscription = subscribeToLiveAssignment(res.assignment.id, (record) => {
                 if (record) {
                   record.timer_remaining_seconds = (typeof record.remaining_seconds === 'number') ? record.remaining_seconds : record.timer_remaining_seconds;
                   record.timer_paused = (record.is_paused === true || record.timer_paused === true);

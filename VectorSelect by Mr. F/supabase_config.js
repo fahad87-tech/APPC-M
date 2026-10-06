@@ -1,605 +1,661 @@
-// ==============================================================================
-// Supabase Client & Realtime Assignment Sync
-// ==============================================================================
+// =============================================================================
+// Supabase client, cloud persistence, realtime sync, and local fallback
+// =============================================================================
 
 const SUPABASE_CONFIG = {
-  url: "",       // e.g. "https://your-project.supabase.co"
-  anonKey: ""    // e.g. "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  url: String(window.VECTORSELECT_SUPABASE_URL || "").trim(),
+  anonKey: String(window.VECTORSELECT_SUPABASE_ANON_KEY || "").trim()
 };
 
-const isSupabaseConfigured = () => {
-  return SUPABASE_CONFIG.url && SUPABASE_CONFIG.url.startsWith("http") && SUPABASE_CONFIG.anonKey;
-};
+const isSupabaseConfigured = () => Boolean(
+  supabaseClient || (
+    String(SUPABASE_CONFIG.url || (typeof window !== "undefined" && window.VECTORSELECT_SUPABASE_URL) || "").trim().startsWith("https://")
+    && String(SUPABASE_CONFIG.anonKey || (typeof window !== "undefined" && window.VECTORSELECT_SUPABASE_ANON_KEY) || "").trim()
+  )
+);
 
 let supabaseClient = null;
-if (typeof supabase !== 'undefined' && isSupabaseConfigured()) {
+if (typeof supabase !== "undefined" && isSupabaseConfigured()) {
   try {
     supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
-    console.log("Supabase client initialized successfully.");
-  } catch (err) {
-    console.warn("Supabase init error:", err);
+    console.log("Supabase client initialized.");
+  } catch (error) {
+    console.warn("Supabase initialization failed:", error);
   }
 }
 
-// Auto-migration: Ensure all existing local assignments strictly have boolean is_started
-try {
-  const _existing = JSON.parse(localStorage.getItem('teacher_assignments') || '[]');
-  let _modified = false;
-  _existing.forEach(a => {
-    if (a.is_started !== true) {
-      a.is_started = false;
-      _modified = true;
-    }
-  });
-  if (_modified) {
-    localStorage.setItem('teacher_assignments', JSON.stringify(_existing));
-  }
-} catch (e) {
-  // ignore in non-browser or storage restricted environments
-}
-
-// ------------------------------------------------------------------------------
-// Teacher Operations
-// ------------------------------------------------------------------------------
-
-// Creates an active assignment and stores the join code in Supabase
-async function createAssignmentOnCloud(assignmentData) {
-  // CRITICAL: Any new assignment strictly begins in the waiting lobby until the instructor clicks start
-  assignmentData.is_started = false;
-
-  if (supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient
-        .from('active_assignments')
-        .insert([assignmentData])
-        .select();
-
-      if (error) throw error;
-      return { success: true, data: data[0] };
-    } catch (err) {
-      console.error("Supabase assignment insert error:", err);
-    }
-  }
-
-  // Local Storage Fallback
-  try {
-    let assignments = JSON.parse(localStorage.getItem('teacher_assignments') || '[]');
-    // Remove duplicate code if exists
-    assignments = assignments.filter(a => a.join_code !== assignmentData.join_code);
-    assignments.unshift(assignmentData);
-    localStorage.setItem('teacher_assignments', JSON.stringify(assignments));
-    return { success: true, data: assignmentData };
-  } catch (e) {
-    return { success: false, error: e };
-  }
-}
-
-// Retrieves all assignments created by the teacher
-async function fetchTeacherAssignments() {
-  if (supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient
-        .from('active_assignments')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return (data || []).map(a => {
-        a.is_started = (a.is_started === true);
-        return a;
-      });
-    } catch (err) {
-      console.warn("Supabase load error, reading local assignments:", err);
-    }
-  }
-
-  const list = JSON.parse(localStorage.getItem('teacher_assignments') || '[]');
-  return list.map(a => {
-    a.is_started = (a.is_started === true);
-    return a;
-  });
-}
-
-// Toggles active/closed status of an assignment
-async function setAssignmentStatus(join_code, is_active) {
-  if (supabaseClient) {
-    try {
-      await supabaseClient
-        .from('active_assignments')
-        .update({ is_active })
-        .eq('join_code', join_code);
-    } catch (err) {
-      console.warn("Supabase status update error:", err);
-    }
-  }
-
-  let assignments = JSON.parse(localStorage.getItem('teacher_assignments') || '[]');
-  assignments.forEach(a => {
-    if (a.join_code === join_code) a.is_active = is_active;
-  });
-  localStorage.setItem('teacher_assignments', JSON.stringify(assignments));
-}
-
-// Updates current question index for synchronized teacher-led sessions
-async function setAssignmentQuestionIndex(join_code, current_question_index) {
-  if (supabaseClient) {
-    try {
-      await supabaseClient
-        .from('active_assignments')
-        .update({ current_question_index })
-        .eq('join_code', join_code);
-    } catch (err) {
-      console.warn("Supabase question index update error:", err);
-    }
-  }
-
-  let assignments = JSON.parse(localStorage.getItem('teacher_assignments') || '[]');
-  assignments.forEach(a => {
-    if (a.join_code === join_code) a.current_question_index = current_question_index;
-  });
-  localStorage.setItem('teacher_assignments', JSON.stringify(assignments));
-}
-
-// ------------------------------------------------------------------------------
-// Student Operations
-// ------------------------------------------------------------------------------
-
-// Verifies a join code and returns the assigned test configuration
-async function verifyJoinCode(join_code) {
-  const code = join_code.trim().toUpperCase();
-
-  if (supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient
-        .from('active_assignments')
-        .select('*')
-        .eq('join_code', code)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-      if (data) {
-        data.is_started = (data.is_started === true);
-        return { found: true, assignment: data };
+// Runtime .env loader: Allows users to put credentials in a root .env file
+let envLoadPromise = null;
+async function ensureSupabaseInitialized() {
+  if (supabaseClient) return supabaseClient;
+  if (isSupabaseConfigured()) {
+    if (typeof supabase !== "undefined" && !supabaseClient) {
+      try {
+        const u = SUPABASE_CONFIG.url || (typeof window !== "undefined" && window.VECTORSELECT_SUPABASE_URL);
+        const k = SUPABASE_CONFIG.anonKey || (typeof window !== "undefined" && window.VECTORSELECT_SUPABASE_ANON_KEY);
+        supabaseClient = supabase.createClient(u, k);
+      } catch (e) {
+        console.warn("Supabase client init error:", e);
       }
-    } catch (err) {
-      console.warn("Supabase code verification error, trying local:", err);
     }
+    return supabaseClient;
   }
 
-  // Local Storage Fallback
-  const assignments = JSON.parse(localStorage.getItem('teacher_assignments') || '[]');
-  const match = assignments.find(a => a.join_code === code);
-  if (match) {
-    // Strictly guarantee is_started is boolean true only if already started
-    match.is_started = (match.is_started === true);
-    return { found: true, assignment: match };
-  }
+  if (!envLoadPromise) {
+    envLoadPromise = (async () => {
+      if (typeof window === "undefined" || !window.fetch) return null;
+      const baseDir = (window.location && window.location.pathname)
+        ? window.location.pathname.substring(0, window.location.pathname.lastIndexOf("/") + 1)
+        : "";
+      const paths = [
+        ".env",
+        "./.env",
+        baseDir ? `${baseDir}.env` : "/.env",
+        "/.env"
+      ];
+      for (const p of paths) {
+        try {
+          const res = await fetch(p);
+          if (res.ok) {
+            const txt = await res.text();
+            if (txt.trim().startsWith("<")) continue;
+            txt.split(/\r?\n/).forEach(line => {
+              const trimmed = line.trim();
+              if (!trimmed || trimmed.startsWith("#")) return;
+              const eq = trimmed.indexOf("=");
+              if (eq === -1) return;
+              const k = trimmed.slice(0, eq).trim().toUpperCase();
+              const v = trimmed.slice(eq + 1).trim().replace(/^["']|["']$/g, "");
+              if (k === "SUPABASE_URL" || k === "VITE_SUPABASE_URL" || k === "NEXT_PUBLIC_SUPABASE_URL" || k === "VECTORSELECT_SUPABASE_URL") {
+                SUPABASE_CONFIG.url = v;
+                window.VECTORSELECT_SUPABASE_URL = v;
+              }
+              if (k === "SUPABASE_ANON_KEY" || k === "VITE_SUPABASE_ANON_KEY" || k === "NEXT_PUBLIC_SUPABASE_ANON_KEY" || k === "VECTORSELECT_SUPABASE_ANON_KEY") {
+                SUPABASE_CONFIG.anonKey = v;
+                window.VECTORSELECT_SUPABASE_ANON_KEY = v;
+              }
+            });
+            if (isSupabaseConfigured()) break;
+          }
+        } catch (_) {}
+      }
 
-  return { found: false };
+      if (isSupabaseConfigured() && typeof supabase !== "undefined" && !supabaseClient) {
+        try {
+          supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+          console.log("Supabase client successfully initialized from .env");
+        } catch (e) {
+          console.warn("Supabase initialization from .env failed:", e);
+        }
+      }
+      return supabaseClient;
+    })();
+  }
+  return envLoadPromise;
 }
 
-// Submits student test results tagged with join code
+if (typeof window !== "undefined") {
+  window.isSupabaseConfigured = isSupabaseConfigured;
+  window.ensureSupabaseInitialized = ensureSupabaseInitialized;
+  ensureSupabaseInitialized().catch(() => {});
+}
+
+let serverClockOffsetMs = 0;
+let serverClockCheckedAt = 0;
+let realtimeChannels = [];
+
+function normalizeCode(value) {
+  return String(value || "").trim().toUpperCase();
+}
+
+function localAssignments() {
+  try {
+    return JSON.parse(localStorage.getItem("teacher_assignments") || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalAssignments(assignments) {
+  localStorage.setItem("teacher_assignments", JSON.stringify(assignments));
+}
+
+function normalizeAssignment(assignment) {
+  if (!assignment) return assignment;
+  return {
+    ...assignment,
+    join_code: normalizeCode(assignment.join_code),
+    title: assignment.title || assignment.assessment_title || "Assignment",
+    assessment_title: assignment.assessment_title || assignment.title || "Assignment",
+    is_started: assignment.is_started === true,
+    timer_paused: assignment.timer_paused === true || assignment.is_paused === true,
+    timer_remaining_seconds: assignment.timer_remaining_seconds ?? assignment.remaining_seconds,
+    paused_remaining_seconds: assignment.paused_remaining_seconds ?? assignment.remaining_seconds
+  };
+}
+
+function mirrorAssignment(assignment) {
+  const normalized = normalizeAssignment(assignment);
+  const assignments = localAssignments().filter(a => normalizeCode(a.join_code) !== normalized.join_code);
+  assignments.unshift(normalized);
+  saveLocalAssignments(assignments);
+  return normalized;
+}
+
+function updateLocalAssignment(join_code, patch) {
+  const code = normalizeCode(join_code);
+  const assignments = localAssignments().map(assignment => (
+    normalizeCode(assignment.join_code) === code
+      ? normalizeAssignment({ ...assignment, ...patch })
+      : assignment
+  ));
+  saveLocalAssignments(assignments);
+}
+
+function getServerNowMs() {
+  return Date.now() + serverClockOffsetMs;
+}
+
+function getServerNowIso() {
+  return new Date(getServerNowMs()).toISOString();
+}
+
+async function syncServerClock(force = false) {
+  await ensureSupabaseInitialized();
+  if (!supabaseClient) return;
+  if (!force && Date.now() - serverClockCheckedAt < 30000) return;
+
+  const startedAt = Date.now();
+  try {
+    const { data, error } = await supabaseClient.rpc("get_server_time");
+    const finishedAt = Date.now();
+    if (!error && data) {
+      const serverMs = Date.parse(data);
+      if (Number.isFinite(serverMs)) {
+        serverClockOffsetMs = serverMs - ((startedAt + finishedAt) / 2);
+        serverClockCheckedAt = finishedAt;
+      }
+    }
+  } catch {
+    // The local clock remains a usable fallback when RPC is unavailable.
+  }
+}
+
+// Compatibility helpers for older saved browser code; these contain no
+// provider-specific behavior and can be removed after all cached pages expire.
+window.getServerNowMs = getServerNowMs;
+window.getServerNowIso = getServerNowIso;
+window.syncServerClock = syncServerClock;
+
+async function loginTeacherWithSupabase(identity, password) {
+  await ensureSupabaseInitialized();
+  if (!supabaseClient) {
+    return { success: false, error: "Supabase is not configured for this deployment." };
+  }
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email: identity,
+    password
+  });
+  if (error) return { success: false, error: error.message };
+  sessionStorage.setItem("teacher_authenticated", "true");
+  sessionStorage.setItem("teacher_email", identity);
+  return { success: true, user: data.user, session: data.session };
+}
+
+function logoutTeacherFromSupabase() {
+  if (supabaseClient) supabaseClient.auth.signOut().catch(() => {});
+  sessionStorage.removeItem("teacher_authenticated");
+  sessionStorage.removeItem("teacher_email");
+}
+
+function isTeacherAuthenticated() {
+  return sessionStorage.getItem("teacher_authenticated") === "true";
+}
+
+async function createAssignmentOnCloud(assignmentData) {
+  await ensureSupabaseInitialized();
+  const assignment = normalizeAssignment({
+    ...assignmentData,
+    is_started: false,
+    created_at: assignmentData.created_at || new Date().toISOString()
+  });
+  mirrorAssignment(assignment);
+
+  if (!supabaseClient) return { success: true, source: "localStorage", data: assignment };
+  const { data, error } = await supabaseClient
+    .from("active_assignments")
+    .insert([assignment])
+    .select()
+    .single();
+  if (error) {
+    console.warn("Supabase assignment insert failed:", error);
+    return { success: true, source: "localStorage", data: assignment, error };
+  }
+  mirrorAssignment(data);
+  return { success: true, source: "supabase", data };
+}
+
+async function fetchTeacherAssignments() {
+  await ensureSupabaseInitialized();
+  if (supabaseClient) {
+    const { data, error } = await supabaseClient
+      .from("active_assignments")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (!error && data) {
+      data.map(normalizeAssignment).forEach(mirrorAssignment);
+      return data.map(normalizeAssignment);
+    }
+    if (error) console.warn("Supabase assignments query failed:", error);
+  }
+  return localAssignments().map(normalizeAssignment);
+}
+
+async function updateAssignment(join_code, patch) {
+  await ensureSupabaseInitialized();
+  const code = normalizeCode(join_code);
+  updateLocalAssignment(code, patch);
+  if (!supabaseClient) return { success: true, source: "localStorage" };
+  const { data, error } = await supabaseClient
+    .from("active_assignments")
+    .update(patch)
+    .eq("join_code", code)
+    .select()
+    .maybeSingle();
+  if (error) {
+    console.warn("Supabase assignment update failed:", error);
+    return { success: true, source: "localStorage", error };
+  }
+  if (data) mirrorAssignment(data);
+  return { success: true, source: "supabase", data };
+}
+
+async function setAssignmentStatus(join_code, is_active) {
+  return updateAssignment(join_code, { is_active: Boolean(is_active) });
+}
+
+async function setAssignmentQuestionIndex(join_code, current_question_index) {
+  return updateAssignment(join_code, { current_question_index: Number(current_question_index) || 0 });
+}
+
+async function verifyJoinCode(join_code) {
+  await ensureSupabaseInitialized();
+  const code = normalizeCode(join_code);
+  if (supabaseClient) {
+    const { data, error } = await supabaseClient
+      .from("active_assignments")
+      .select("*")
+      .eq("join_code", code)
+      .maybeSingle();
+    if (!error && data) return { found: true, assignment: normalizeAssignment(data) };
+    if (error) console.warn("Supabase join-code lookup failed:", error);
+  }
+  const match = localAssignments().find(a => normalizeCode(a.join_code) === code);
+  return match ? { found: true, assignment: normalizeAssignment(match) } : { found: false };
+}
+
+async function fetchAnswerKeysForQuiz(assessment_id) {
+  const id = String(assessment_id || "").trim();
+  if (!id) return null;
+  if (window.OFFLINE_ANSWER_KEYS && window.OFFLINE_ANSWER_KEYS[id]) {
+    return window.OFFLINE_ANSWER_KEYS[id].keys || [];
+  }
+  await ensureSupabaseInitialized();
+  if (!supabaseClient) return null;
+  const { data, error } = await supabaseClient
+    .from("answer_keys")
+    .select("keys")
+    .eq("assessment_id", id)
+    .maybeSingle();
+  if (error) {
+    console.warn("Supabase answer-key lookup failed:", error);
+    return null;
+  }
+  return data && Array.isArray(data.keys) ? data.keys : null;
+}
+
 async function submitStudentExam(submissionData) {
+  await ensureSupabaseInitialized();
+  const record = {
+    ...submissionData,
+    join_code: normalizeCode(submissionData.join_code),
+    percentage: Number(submissionData.percentage || submissionData.score_percentage || 0),
+    score_percentage: Number(submissionData.score_percentage ?? submissionData.percentage ?? 0),
+    submitted_at: submissionData.submitted_at || new Date().toISOString()
+  };
   if (supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient
-        .from('exam_submissions')
-        .insert([submissionData]);
-
-      if (error) throw error;
-      return { success: true, source: 'supabase', data };
-    } catch (err) {
-      console.error("Supabase submission error:", err);
-    }
+    const { data, error } = await supabaseClient
+      .from("exam_submissions")
+      .insert([record])
+      .select()
+      .single();
+    if (!error) return { success: true, source: "supabase", data };
+    console.warn("Supabase submission failed:", error);
   }
-
-  // Local Storage Fallback
-  try {
-    const key = `submissions_${submissionData.join_code}`;
-    let list = JSON.parse(localStorage.getItem(key) || '[]');
-    list.push({
-      ...submissionData,
-      submitted_at: new Date().toISOString()
-    });
-    list.sort((a, b) => b.score - a.score || a.time_spent_seconds - b.time_spent_seconds);
-    localStorage.setItem(key, JSON.stringify(list));
-    return { success: true, source: 'localStorage', data: list };
-  } catch (e) {
-    return { success: false, error: e };
-  }
+  const key = `submissions_${record.join_code}`;
+  const list = JSON.parse(localStorage.getItem(key) || "[]");
+  list.push(record);
+  list.sort((a, b) => (b.points || b.score || 0) - (a.points || a.score || 0)
+    || (a.time_spent_seconds || 0) - (b.time_spent_seconds || 0));
+  localStorage.setItem(key, JSON.stringify(list));
+  return { success: true, source: "localStorage", data: record };
 }
 
-// Loads live submissions/leaderboard for a specific assignment code
 async function fetchSubmissionsByCode(join_code) {
+  await ensureSupabaseInitialized();
+  const code = normalizeCode(join_code);
   if (supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient
-        .from('exam_submissions')
-        .select('*')
-        .eq('join_code', join_code)
-        .order('score', { ascending: false })
-        .order('time_spent_seconds', { ascending: true });
-
-      if (error) throw error;
-      return data || [];
-    } catch (err) {
-      console.warn("Supabase leaderboard query error:", err);
-    }
+    const { data, error } = await supabaseClient
+      .from("exam_submissions")
+      .select("*")
+      .eq("join_code", code)
+      .order("points", { ascending: false })
+      .order("score", { ascending: false })
+      .order("time_spent_seconds", { ascending: true });
+    if (!error && data) return data;
+    if (error) console.warn("Supabase submissions query failed:", error);
   }
-
-  const key = `submissions_${join_code}`;
-  return JSON.parse(localStorage.getItem(key) || '[]');
+  return JSON.parse(localStorage.getItem(`submissions_${code}`) || "[]");
 }
 
-// ------------------------------------------------------------------------------
-// Live Session Operations (Teacher-Led Real-Time Sync)
-// ------------------------------------------------------------------------------
-
-// Check in a student to the session roster (upsert)
 async function checkInStudent(join_code, student_name) {
+  await ensureSupabaseInitialized();
+  const code = normalizeCode(join_code);
   if (supabaseClient) {
-    try {
-      await supabaseClient
-        .from('session_participants')
-        .upsert(
-          [{ join_code, student_name }],
-          { onConflict: 'join_code,student_name' }
-        );
-      return { success: true };
-    } catch (err) {
-      console.warn("Supabase check-in error:", err);
-    }
+    const { error } = await supabaseClient
+      .from("session_participants")
+      .upsert([{ join_code: code, student_name: String(student_name).trim() }],
+        { onConflict: "join_code,student_name" });
+    if (!error) return { success: true, source: "supabase" };
+    console.warn("Supabase participant check-in failed:", error);
   }
-
-  // LocalStorage fallback
-  try {
-    const key = `participants_${join_code}`;
-    let list = JSON.parse(localStorage.getItem(key) || '[]');
-    if (!list.includes(student_name)) {
-      list.push(student_name);
-      localStorage.setItem(key, JSON.stringify(list));
-    }
-    return { success: true };
-  } catch (e) {
-    return { success: false, error: e };
-  }
+  const key = `participants_${code}`;
+  const names = JSON.parse(localStorage.getItem(key) || "[]");
+  if (!names.includes(student_name)) names.push(student_name);
+  localStorage.setItem(key, JSON.stringify(names));
+  return { success: true, source: "localStorage" };
 }
 
-// Fetch all participants who have joined a given assignment
 async function fetchParticipantsByCode(join_code) {
+  await ensureSupabaseInitialized();
+  const code = normalizeCode(join_code);
   if (supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient
-        .from('session_participants')
-        .select('student_name, joined_at')
-        .eq('join_code', join_code)
-        .order('joined_at', { ascending: true });
-
-      if (error) throw error;
-      const names = (data || []).map(d => d.student_name);
+    const { data, error } = await supabaseClient
+      .from("session_participants")
+      .select("student_name, joined_at")
+      .eq("join_code", code)
+      .order("joined_at", { ascending: true });
+    if (!error && data) {
+      const names = data.map(row => row.student_name).filter(Boolean);
       return { names, count: names.length };
-    } catch (err) {
-      console.warn("Supabase participants query error:", err);
     }
+    if (error) console.warn("Supabase participant query failed:", error);
   }
-
-  // LocalStorage fallback
-  const key = `participants_${join_code}`;
-  const names = JSON.parse(localStorage.getItem(key) || '[]');
+  const names = JSON.parse(localStorage.getItem(`participants_${code}`) || "[]");
   return { names, count: names.length };
 }
 
-// Submit a live answer for the current question (upsert per student+question)
 async function submitLiveAnswer(payload) {
+  await ensureSupabaseInitialized();
+  const code = normalizeCode(payload.join_code);
+  const record = {
+    join_code: code,
+    student_name: payload.student_name,
+    question_real_index: Number(payload.question_real_index),
+    selected_letter: payload.selected_letter ?? null,
+    is_correct: Boolean(payload.is_correct),
+    points: Number(payload.points || 0),
+    speed_bonus: Number(payload.speed_bonus || 0),
+    streak: Number(payload.streak || 0),
+    recovered_points: Number(payload.recovered_points || 0),
+    answered_at: new Date().toISOString()
+  };
   if (supabaseClient) {
-    try {
-      await supabaseClient
-        .from('live_question_answers')
-        .upsert(
-          [{
-            join_code: payload.join_code,
-            student_name: payload.student_name,
-            question_real_index: payload.question_real_index,
-            selected_letter: payload.selected_letter,
-            is_correct: payload.is_correct,
-            answered_at: new Date().toISOString()
-          }],
-          { onConflict: 'join_code,student_name,question_real_index' }
-        );
-      return { success: true };
-    } catch (err) {
-      console.warn("Supabase live answer error:", err);
-    }
+    const { error } = await supabaseClient
+      .from("live_question_answers")
+      .upsert([record], { onConflict: "join_code,student_name,question_real_index" });
+    if (!error) return { success: true, source: "supabase" };
+    console.warn("Supabase live-answer write failed:", error);
   }
-
-  // LocalStorage fallback
-  try {
-    const key = `live_answers_${payload.join_code}`;
-    let list = JSON.parse(localStorage.getItem(key) || '[]');
-    list = list.filter(
-      a => !(a.student_name === payload.student_name && a.question_real_index === payload.question_real_index)
-    );
-    list.push({
-      join_code: payload.join_code,
-      student_name: payload.student_name,
-      question_real_index: payload.question_real_index,
-      selected_letter: payload.selected_letter,
-      is_correct: payload.is_correct,
-      points: payload.points !== undefined ? payload.points : (payload.is_correct ? 10 : 0),
-      speed_bonus: payload.speed_bonus || 0,
-      streak: payload.streak || 0,
-      recovered_points: payload.recovered_points || 0,
-      answered_at: new Date().toISOString()
-    });
-    localStorage.setItem(key, JSON.stringify(list));
-    return { success: true };
-  } catch (e) {
-    return { success: false, error: e };
-  }
+  const key = `live_answers_${code}`;
+  let list = JSON.parse(localStorage.getItem(key) || "[]");
+  list = list.filter(a => !(a.student_name === record.student_name
+    && Number(a.question_real_index) === record.question_real_index));
+  list.push(record);
+  localStorage.setItem(key, JSON.stringify(list));
+  return { success: true, source: "localStorage" };
 }
 
-// Fetch live answers for a specific question in an assignment
 async function fetchLiveAnswersByCode(join_code, question_real_index) {
+  await ensureSupabaseInitialized();
+  const code = normalizeCode(join_code);
+  const question = Number(question_real_index);
   if (supabaseClient) {
-    try {
-      const { data, error } = await supabaseClient
-        .from('live_question_answers')
-        .select('student_name, selected_letter, is_correct, answered_at')
-        .eq('join_code', join_code)
-        .eq('question_real_index', question_real_index);
-
-      if (error) throw error;
-      return data || [];
-    } catch (err) {
-      console.warn("Supabase live answers query error:", err);
-    }
+    const { data, error } = await supabaseClient
+      .from("live_question_answers")
+      .select("*")
+      .eq("join_code", code)
+      .eq("question_real_index", question);
+    if (!error && data) return data;
+    if (error) console.warn("Supabase live-answer query failed:", error);
   }
-
-  // LocalStorage fallback
-  const key = `live_answers_${join_code}`;
-  const list = JSON.parse(localStorage.getItem(key) || '[]');
-  return list.filter(a => a.question_real_index === question_real_index);
+  return JSON.parse(localStorage.getItem(`live_answers_${code}`) || "[]")
+    .filter(row => Number(row.question_real_index) === question);
 }
 
-// Deletes an assignment entirely (teacher-initiated cleanup)
 async function deleteAssignment(join_code) {
+  await ensureSupabaseInitialized();
+  const code = normalizeCode(join_code);
   if (supabaseClient) {
-    try {
-      const { error } = await supabaseClient
-        .from('active_assignments')
-        .delete()
-        .eq('join_code', join_code);
-      if (error) throw error;
-    } catch (err) {
-      console.warn("Supabase delete error, removing locally:", err);
-    }
+    const { error } = await supabaseClient.from("active_assignments").delete().eq("join_code", code);
+    if (error) console.warn("Supabase assignment delete failed:", error);
   }
-
-  // LocalStorage fallback (also runs alongside Supabase so the UI updates instantly)
-  try {
-    const assignments = JSON.parse(localStorage.getItem('teacher_assignments') || '[]')
-      .filter(a => a.join_code !== join_code);
-    localStorage.setItem('teacher_assignments', JSON.stringify(assignments));
-    return { success: true };
-  } catch (e) {
-    return { success: false, error: e };
-  }
+  saveLocalAssignments(localAssignments().filter(a => normalizeCode(a.join_code) !== code));
+  ["submissions", "participants", "live_answers", "reactions"].forEach(prefix => {
+    localStorage.removeItem(`${prefix}_${code}`);
+  });
+  return { success: true };
 }
 
-// Update timer sync state on the assignment row
 async function setAssignmentTimerState(join_code, state) {
-  if (supabaseClient) {
-    try {
-      const updateData = {};
-      if (state.question_started_at !== undefined) updateData.question_started_at = state.question_started_at;
-      if (state.discussion_active !== undefined) updateData.discussion_active = state.discussion_active;
-      if (state.timer_paused !== undefined) updateData.timer_paused = state.timer_paused;
-      if (state.paused_remaining_seconds !== undefined) updateData.paused_remaining_seconds = state.paused_remaining_seconds;
-      if (state.answer_revealed !== undefined) updateData.answer_revealed = state.answer_revealed;
-
-      await supabaseClient
-        .from('active_assignments')
-        .update(updateData)
-        .eq('join_code', join_code);
-    } catch (err) {
-      console.warn("Supabase timer state update error:", err);
-    }
+  const patch = {};
+  const fields = [
+    "question_started_at", "discussion_active", "timer_paused",
+    "paused_remaining_seconds", "answer_revealed", "revealed_answer",
+    "revealed_explanation", "previous_correct_answer", "current_question_index",
+    "per_question_seconds", "enable_point_redemption", "is_active", "is_started",
+    "timer_remaining_seconds", "remaining_seconds", "is_paused"
+  ];
+  fields.forEach(field => {
+    if (state[field] !== undefined) patch[field] = state[field];
+  });
+  if (patch.timer_remaining_seconds !== undefined) {
+    patch.remaining_seconds = Math.max(0, Math.round(Number(patch.timer_remaining_seconds) || 0));
   }
-
-  // LocalStorage fallback
-  try {
-    const assignments = JSON.parse(localStorage.getItem('teacher_assignments') || '[]');
-    assignments.forEach(a => {
-      if (a.join_code === join_code) {
-        if (state.question_started_at !== undefined) a.question_started_at = state.question_started_at;
-        if (state.discussion_active !== undefined) a.discussion_active = state.discussion_active;
-        if (state.timer_paused !== undefined) a.timer_paused = state.timer_paused;
-        if (state.paused_remaining_seconds !== undefined) a.paused_remaining_seconds = state.paused_remaining_seconds;
-        if (state.answer_revealed !== undefined) a.answer_revealed = state.answer_revealed;
-      }
-    });
-    localStorage.setItem('teacher_assignments', JSON.stringify(assignments));
-  } catch (e) {
-    // ignore
+  if (patch.timer_paused !== undefined) patch.is_paused = Boolean(patch.timer_paused);
+  if (patch.is_paused !== undefined) patch.timer_paused = Boolean(patch.is_paused);
+  if (patch.remaining_seconds !== undefined && patch.timer_remaining_seconds === undefined) {
+    patch.timer_remaining_seconds = patch.remaining_seconds;
   }
+  return updateAssignment(join_code, patch);
 }
 
-// Start an assignment (transition from waiting lobby to active exam)
 async function startAssignment(join_code) {
-  if (supabaseClient) {
-    try {
-      await supabaseClient
-        .from('active_assignments')
-        .update({
-          is_started: true,
-          started_at: new Date().toISOString()
-        })
-        .eq('join_code', join_code);
-    } catch (err) {
-      console.warn("Supabase startAssignment error:", err);
-    }
-  }
-
-  // LocalStorage fallback
-  try {
-    const assignments = JSON.parse(localStorage.getItem('teacher_assignments') || '[]');
-    assignments.forEach(a => {
-      if (a.join_code === join_code) {
-        a.is_started = true;
-        a.started_at = new Date().toISOString();
-      }
-    });
-    localStorage.setItem('teacher_assignments', JSON.stringify(assignments));
-    return { success: true };
-  } catch (e) {
-    return { success: false, error: e };
-  }
+  return updateAssignment(join_code, {
+    is_started: true,
+    started_at: getServerNowIso()
+  });
 }
 
-// ------------------------------------------------------------------------------
-// Live Reactions & Gamified 0-120 Leaderboard Functions
-// ------------------------------------------------------------------------------
-
-// Send a live reaction emoji from student
 async function sendLiveEmojiReaction(join_code, arg2, arg3) {
-  let emoji = arg2;
-  let student_name = arg3;
-  const commonEmojis = ['🚀', '🔥', '💡', '🤯', '👏', '⚡'];
-  if (commonEmojis.includes(arg3) || (typeof arg3 === 'string' && arg3.length <= 4 && typeof arg2 === 'string' && arg2.length > 4)) {
-    emoji = arg3;
-    student_name = arg2;
+  await ensureSupabaseInitialized();
+  let student_name = arg2;
+  let emoji = arg3;
+  const emojis = ["🚀", "🔥", "💡", "🤯", "👏", "⚡"];
+  if (emojis.includes(arg2)) {
+    emoji = arg2;
+    student_name = arg3;
   }
-  const reactionObj = {
-    join_code,
-    emoji: emoji || '🚀',
-    student_name: student_name || 'Student',
+  const record = {
+    join_code: normalizeCode(join_code),
+    student_name: student_name || "Student",
+    emoji: emoji || "🚀",
     timestamp: Date.now()
   };
-
   if (supabaseClient) {
-    try {
-      await supabaseClient
-        .from('live_reactions')
-        .insert([reactionObj]);
-    } catch (err) {
-      // ignore
-    }
+    const { error } = await supabaseClient.from("live_reactions").insert([record]);
+    if (!error) return { success: true, source: "supabase" };
+    console.warn("Supabase reaction write failed:", error);
   }
-
-  // LocalStorage fallback buffer
-  try {
-    const key = `reactions_${join_code}`;
-    let list = JSON.parse(localStorage.getItem(key) || '[]');
-    list.push(reactionObj);
-    // Keep last 40 reactions only
-    if (list.length > 40) list = list.slice(-40);
-    localStorage.setItem(key, JSON.stringify(list));
-    return { success: true };
-  } catch (e) {
-    return { success: false };
-  }
+  const key = `reactions_${record.join_code}`;
+  const list = JSON.parse(localStorage.getItem(key) || "[]");
+  list.push(record);
+  localStorage.setItem(key, JSON.stringify(list.slice(-40)));
+  return { success: true, source: "localStorage" };
 }
 
-// Fetch reactions posted within the last N milliseconds (default 3500ms)
 async function fetchRecentEmojiReactions(join_code, windowMs = 3500) {
+  await ensureSupabaseInitialized();
+  const code = normalizeCode(join_code);
   const cutoff = Date.now() - windowMs;
-
   if (supabaseClient) {
-    try {
-      const { data } = await supabaseClient
-        .from('live_reactions')
-        .select('*')
-        .eq('join_code', join_code)
-        .gte('timestamp', cutoff);
-      if (data && data.length > 0) return data;
-    } catch (err) {
-      // fallback
-    }
+    const { data, error } = await supabaseClient
+      .from("live_reactions")
+      .select("*")
+      .eq("join_code", code)
+      .gte("timestamp", cutoff)
+      .order("timestamp", { ascending: true });
+    if (!error && data) return data;
   }
-
-  // LocalStorage fallback
-  const key = `reactions_${join_code}`;
-  const list = JSON.parse(localStorage.getItem(key) || '[]');
-  return list.filter(r => r.timestamp >= cutoff);
+  return JSON.parse(localStorage.getItem(`reactions_${code}`) || "[]")
+    .filter(row => Number(row.timestamp) >= cutoff);
 }
 
-// Compute dynamic 0-120 SUPER MAX live leaderboard
 async function fetchLiveClassLeaderboard(join_code) {
-  const participants = await fetchParticipantsByCode(join_code);
-  const names = (participants && participants.names) || [];
+  const { names } = await fetchParticipantsByCode(join_code);
+  const code = normalizeCode(join_code);
+  let answers = [];
+  if (supabaseClient) {
+    const { data, error } = await supabaseClient
+      .from("live_question_answers")
+      .select("*")
+      .eq("join_code", code);
+    if (!error && data) answers = data;
+  }
+  if (!answers.length) answers = JSON.parse(localStorage.getItem(`live_answers_${code}`) || "[]");
 
-  // Fetch all live answers for this assignment
-  let allLiveAnswers = [];
-  const keyPrefix = `live_answers_${join_code}`;
-  const localList = JSON.parse(localStorage.getItem(keyPrefix) || '[]');
-  allLiveAnswers = localList;
-
-  // Group by student
   const studentMap = {};
   names.forEach(name => {
     studentMap[name] = {
-      name,
-      points: 0.0,
-      baseScore: 0.0,
-      speedBonus: 0.0,
-      streak: 0,
-      maxStreak: 0,
-      correctCount: 0,
-      incorrectCount: 0,
-      unansweredCount: 0,
-      recoveredCount: 0,
-      totalAnswered: 0,
-      recentAnswerTime: 0,
-      isSuperMax: false
+      name, points: 0, baseScore: 0, speedBonus: 0, streak: 0, maxStreak: 0,
+      correctCount: 0, incorrectCount: 0, unansweredCount: 0, recoveredCount: 0,
+      totalAnswered: 0, recentAnswerTime: 0, isSuperMax: false
     };
   });
-
-  allLiveAnswers.forEach(ans => {
-    const s = studentMap[ans.student_name];
-    if (!s) return;
-    s.totalAnswered++;
-    const pts = parseFloat(ans.points || 0);
-    s.points += pts;
-    if (ans.speed_bonus) s.speedBonus += parseFloat(ans.speed_bonus);
-    if (ans.recovered_points) s.recoveredCount++;
-
-    if (ans.is_correct) {
-      s.correctCount++;
-      s.streak = (s.streak || 0) + 1;
-      if (s.streak > s.maxStreak) s.maxStreak = s.streak;
+  answers.forEach(answer => {
+    const student = studentMap[answer.student_name];
+    if (!student) return;
+    student.totalAnswered += 1;
+    student.points += Number(answer.points || 0);
+    student.speedBonus += Number(answer.speed_bonus || 0);
+    if (Number(answer.recovered_points || 0) > 0) student.recoveredCount += 1;
+    if (answer.is_correct) {
+      student.correctCount += 1;
+      student.streak += 1;
+      student.maxStreak = Math.max(student.maxStreak, student.streak);
     } else {
-      const raw = ans.selected_letter;
-      const isBlank = !raw || raw === 'null' || raw === 'undefined' || String(raw).trim() === '';
-      if (isBlank) {
-        s.unansweredCount++;
-      } else {
-        s.incorrectCount++;
-      }
-      s.streak = 0;
+      if (String(answer.selected_letter || "").trim()) student.incorrectCount += 1;
+      else student.unansweredCount += 1;
+      student.streak = 0;
     }
   });
-
-  // Convert to sorted array
-  const leaderboard = Object.values(studentMap).map(s => {
-    // Round to 1 decimal place
-    s.points = Math.max(0, Math.min(120, Math.round(s.points * 10) / 10));
-    s.isSuperMax = s.points > 100;
-    return s;
-  });
-
-  // Sort descending by points, tie-break by maxStreak, then correctCount
-  leaderboard.sort((a, b) => {
-    if (b.points !== a.points) return b.points - a.points;
-    if (b.maxStreak !== a.maxStreak) return b.maxStreak - a.maxStreak;
-    return b.correctCount - a.correctCount;
-  });
-
-  // Assign ranks
-  leaderboard.forEach((item, index) => {
-    item.rank = index + 1;
-  });
-
+  const leaderboard = Object.values(studentMap).map(student => ({
+    ...student,
+    points: Math.max(0, Math.min(120, Math.round(student.points * 10) / 10)),
+    isSuperMax: student.points > 100
+  }));
+  leaderboard.sort((a, b) => b.points - a.points || b.maxStreak - a.maxStreak
+    || b.correctCount - a.correctCount);
+  leaderboard.forEach((student, index) => { student.rank = index + 1; });
   return leaderboard;
 }
 
+function subscribeToLiveAssignment(assignmentId, onUpdate) {
+  if (!assignmentId) return null;
+  if (!supabaseClient) {
+    let subHandle = { unsubscribe: () => {} };
+    ensureSupabaseInitialized().then(client => {
+      if (!client) return;
+      const channel = client
+        .channel(`assignment-${assignmentId}`)
+        .on("postgres_changes", {
+          event: "UPDATE",
+          schema: "public",
+          table: "active_assignments",
+          filter: `id=eq.${assignmentId}`
+        }, payload => onUpdate(normalizeAssignment(payload.new)))
+        .subscribe();
+      realtimeChannels.push(channel);
+      subHandle.unsubscribe = () => client.removeChannel(channel);
+    });
+    return subHandle;
+  }
+  const channel = supabaseClient
+    .channel(`assignment-${assignmentId}`)
+    .on("postgres_changes", {
+      event: "UPDATE",
+      schema: "public",
+      table: "active_assignments",
+      filter: `id=eq.${assignmentId}`
+    }, payload => onUpdate(normalizeAssignment(payload.new)))
+    .subscribe();
+  realtimeChannels.push(channel);
+  return channel;
+}
 
+function subscribeToLiveEvents(join_code, onEvent) {
+  if (!join_code) return null;
+  const code = normalizeCode(join_code);
+  if (!supabaseClient) {
+    let subHandle = { unsubscribe: () => {} };
+    ensureSupabaseInitialized().then(client => {
+      if (!client) return;
+      const channel = client
+        .channel(`reactions-${code}`)
+        .on("postgres_changes", {
+          event: "INSERT",
+          schema: "public",
+          table: "live_reactions",
+          filter: `join_code=eq.${code}`
+        }, payload => onEvent(payload.new))
+        .subscribe();
+      realtimeChannels.push(channel);
+      subHandle.unsubscribe = () => client.removeChannel(channel);
+    });
+    return subHandle;
+  }
+  const channel = supabaseClient
+    .channel(`reactions-${code}`)
+    .on("postgres_changes", {
+      event: "INSERT",
+      schema: "public",
+      table: "live_reactions",
+      filter: `join_code=eq.${code}`
+    }, payload => onEvent(payload.new))
+    .subscribe();
+  realtimeChannels.push(channel);
+  return channel;
+}
+
+function unsubscribeAllLiveChannels() {
+  if (!supabaseClient) return;
+  realtimeChannels.forEach(channel => supabaseClient.removeChannel(channel));
+  realtimeChannels = [];
+}
+
+try {
+  const assignments = localAssignments().map(normalizeAssignment);
+  saveLocalAssignments(assignments);
+} catch {
+  // Storage is optional in restricted browser contexts.
+}

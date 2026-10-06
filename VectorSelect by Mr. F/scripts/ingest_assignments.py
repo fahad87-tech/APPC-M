@@ -3,7 +3,7 @@ ingest_assignments.py — Ultra-Secure Hybrid Key Separation & Ingestion Pipelin
 
 1. Reads data/exams.json.
 2. Extracts official answer keys & explanations into:
-   - data/answer_keys.json (Used to seed PocketBase collection: answer_keys)
+   - data/answer_keys.json (Used to seed Supabase)
    - data/answer_keys.js   (Used ONLY for offline air-gapped classroom localhost fallback)
 3. Assigns an immutable unique question_id (e.g. app1_unit1_1_1_q1) to every question.
 4. Strips correct_answer and explanation from all questions in:
@@ -28,7 +28,7 @@ KEYS_JS_PATH = os.path.join(DATA_DIR, "answer_keys.js")
 
 def main():
     print("=" * 70)
-    print("VectorSelect — Key Ingestion & Stripping Pipeline (PocketBase Ready)")
+    print("VectorSelect — Key Ingestion & Stripping Pipeline (Supabase Ready)")
     print("=" * 70)
 
     if not os.path.exists(EXAMS_JSON_PATH):
