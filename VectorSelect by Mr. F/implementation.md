@@ -247,3 +247,13 @@ Run the SQL script [`supabase_schema.sql`](supabase_schema.sql) in your **Supaba
   - **Student Runner (`index.html`)**: Available on `#q-card-white-box` for personal sketching.
   - **Teacher Live Control & Projector Stage (`teacher.html`)**: Available on `#lc-card-box` via `#btn-toggle-teacher-canvas` with full marker/eraser toolset for whole-class instruction, diagram breakdown, and vector derivations on smartboards or projectors.
 
+---
+
+## 10. Header Branding & Attribution Single-Line Layout
+
+- **Problem**: In narrow viewports or responsive flex containers, the "by Mr. F" attribution badge lacked strict wrapping constraints, allowing "BY MR." and "F" to break across two lines awkwardly.
+- **Resolution**:
+  - In both `index.html` and `teacher.html`, the brand row container was updated to `flex flex-wrap items-center gap-2`.
+  - Added `whitespace-nowrap shrink-0` to the wordmark (`VectorSelect`), the attribution card (`by Mr. F`), and the portal badges (`Student Portal` / `Teacher Hub`).
+  - Guarantees the "by Mr. F" badge remains rendered seamlessly as an unbroken, single-line pill across all device screen widths.
+

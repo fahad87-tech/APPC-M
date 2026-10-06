@@ -256,7 +256,10 @@
         const padX = 40;
         const padY = 30;
         const maxRange = 65; // meters
-        const maxHeight = 30; // meters
+        const maxHeight = Math.max(
+          30,
+          (currentV0 * currentV0 * Math.sin(2 * currentAngle * Math.PI / 180)) / (2 * g) * 1.15
+        );
         const sx = padX + (wx / maxRange) * (hiDpi.w - padX * 2);
         const sy = (hiDpi.h - padY) - (wy / maxHeight) * (hiDpi.h - padY * 2);
         return { sx, sy };
@@ -418,6 +421,8 @@
         let triggered = false;
 
         function step() {
+          const previousT = proj.t;
+          const previousX = proj.x;
           proj.t += dt;
           proj.vy -= g * dt;
           proj.x += proj.vx * dt;
@@ -428,10 +433,12 @@
           // Detect Photogate Sensor 1 transit
           if (!triggered && proj.x >= photogateX) {
             triggered = true;
+            const gateT = proj.vx > 0 ? photogateX / proj.vx : proj.t;
+            const gateY = proj.vy + g * (proj.t - gateT);
             transitRecord = {
-              t: proj.t,
-              y: Math.max(0, proj.y),
-              vy: proj.vy
+              t: gateT,
+              y: Math.max(0, proj.y + proj.vy * (gateT - proj.t) - 0.5 * g * Math.pow(gateT - proj.t, 2)),
+              vy: gateY
             };
             updateHUD();
           }
@@ -708,12 +715,21 @@
             a = -currentMu * g;
           }
 
+          const previousX = cart.x;
+          const previousV = cart.v;
           cart.v += a * dt;
           if (cart.v < 0) cart.v = 0;
           cart.x += cart.v * dt;
 
           if (!photogateBRecord && cart.x >= 3.0 + L) {
-            photogateBRecord = { v: cart.v };
+            const gateX = 3.0 + L;
+            const distanceToGate = gateX - previousX;
+            const gateTime = a < 0
+              ? Math.max(0, (-previousV + Math.sqrt(Math.max(0, previousV * previousV + 2 * a * distanceToGate))) / a)
+              : (previousV > 0 ? distanceToGate / previousV : dt);
+            photogateBRecord = {
+              v: Math.max(0, previousV + a * Math.min(dt, gateTime))
+            };
             updateHUD();
           }
 
@@ -887,7 +903,7 @@
         // Release Incline
         const rampStartX = 40;
         const rampTopY = groundY - (currentH / 65) * 160;
-        const rampEndX = loopCenterX - loopR_px;
+        const rampEndX = loopCenterX;
 
         ctx.strokeStyle = "#cbd5e1";
         ctx.lineWidth = 3;
@@ -1050,7 +1066,7 @@
     },
 
     // --------------------------------------------------------------------------
-    // MODULE 4: DAMPED & DRIVEN HARMONIC OSCILLATOR SPECTROMETER
+    // MODULE 4: SIMPLE HARMONIC OSCILLATOR SPECTROMETER
     // --------------------------------------------------------------------------
     mountHarmonicLab: function(containerEl, labData = {}, simOptions = {}) {
       this.stop();
@@ -1076,7 +1092,7 @@
           <div class="flex flex-wrap items-center justify-between px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 text-xs font-mono">
             <div class="flex items-center gap-2">
               <span class="h-2 w-2 rounded-full bg-cyan-400 animate-pulse"></span>
-              <span class="font-bold text-slate-200">LAB STATION 4: DAMPED HARMONIC OSCILLATOR OSCILLOSCOPE</span>
+              <span class="font-bold text-slate-200">LAB STATION 4: SIMPLE HARMONIC OSCILLATOR OSCILLOSCOPE</span>
             </div>
             <div class="flex items-center gap-3 text-slate-400 text-[11px]">
               <span>Mass m = ${m.toFixed(1)} kg</span>
@@ -1433,7 +1449,7 @@
           statusText = equilibriumStatus;
         }
 
-        const statusCls = equilibriumStatus && equilibriumStatus.includes('BALANCED') ? 'text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px]' : 'text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px]';
+        const statusCls = equilibriumStatus && equilibriumStatus.includes('EQUILIBRIUM VERIFIED') ? 'text-emerald-400 font-bold px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/30 text-[10px]' : 'text-amber-400 font-bold px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/30 text-[10px]';
         telemEl.innerHTML = `
           <div class="flex items-center gap-2">
             <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold text-[10px]">TORQUE</span>
