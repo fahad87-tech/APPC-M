@@ -1116,6 +1116,9 @@
     }
 
     function getQuestionCorrectAnswer(realIdx) {
+      if (quizMode === "teacher_led" && !isCurrentQuestionEvaluationRevealed()) {
+        return ""; // Strictly DO NOT expose the correct answer key until evaluation is officially revealed!
+      }
       const q = currentQuiz && currentQuiz.questions && currentQuiz.questions[realIdx];
       let ans = "";
       if (currentRevealedAnswers[currentQuestionIdx]) ans = currentRevealedAnswers[currentQuestionIdx];
@@ -1134,6 +1137,9 @@
     }
 
     function getQuestionExplanation(realIdx) {
+      if (quizMode === "teacher_led" && !isCurrentQuestionEvaluationRevealed()) {
+        return ""; // Strictly DO NOT expose official rationale until evaluation is officially revealed!
+      }
       const q = currentQuiz && currentQuiz.questions && currentQuiz.questions[realIdx];
       let exp = "";
       if (currentRevealedExplanations[currentQuestionIdx]) exp = currentRevealedExplanations[currentQuestionIdx];
@@ -1713,9 +1719,10 @@
               : "h-2.5 w-2.5 rounded-full bg-coral-400 animate-pulse"));
       }
 
-      // Lock locally at zero. The instructor's Supabase payload supplies the
-      // official answer and explanation; do not invent a reveal on this client.
-      if (secs <= 0 && (!discussionActive || !answerRevealed)) {
+      // Lock locally at zero. Only trigger if there is an active per-question timer with a valid start time.
+      const hasTimer = Boolean(currentAssignment && Number(currentAssignment.per_question_seconds) > 0);
+      const startedAt = Date.parse(currentAssignment && currentAssignment.question_started_at || "");
+      if (hasTimer && Number.isFinite(startedAt) && (typeof secs === 'number') && secs <= 0 && (!discussionActive || !answerRevealed)) {
         autoLockCurrentQuestion();
       }
     }
@@ -2027,18 +2034,12 @@
     // ============================================================================
     function isCurrentQuestionEvaluationRevealed() {
       if (quizMode === "teacher_led") {
-        const realIdx = questionOrder[currentQuestionIdx];
-        const revealedKey = getQuestionCorrectAnswer(realIdx);
-        const isTimeUp = (typeof perQRemaining === 'number') && perQRemaining <= 0;
-        // Evaluation is revealed if:
-        // 1) Teacher has set answer_revealed or sent revealed_answer, OR
-        // 2) Teacher has initiated discussion mode (discussionActive), OR
-        // 3) Question time has fully expired (isTimeUp), AND an official key is available
-        if (revealedKey && (answerRevealed || discussionActive || isTimeUp)) {
-          return true;
-        }
-        // If discussion is active or time is up even without an official key, return true so UI shows finalized state
-        if (discussionActive || isTimeUp) {
+        const hasTimer = Boolean(currentAssignment && Number(currentAssignment.per_question_seconds) > 0);
+        const startedAt = Date.parse(currentAssignment && currentAssignment.question_started_at || "");
+        const isTimeUp = hasTimer && Number.isFinite(startedAt) && (typeof perQRemaining === 'number') && perQRemaining <= 0;
+        
+        // In teacher_led mode, strictly only reveal if instructor active discussion/reveal or timer genuinely ran down
+        if (discussionActive || answerRevealed || isTimeUp) {
           return true;
         }
         return false;
@@ -3085,7 +3086,9 @@
         currentQuestionIdx = teacherQ;
         const newRealIdx = questionOrder[teacherQ];
 
-        // Unconditionally wipe clean all locks, reveals, and explanations for this new question
+        // Unconditionally wipe clean all locks, answers, reveals, and explanations for this new question
+        delete studentAnswers[newRealIdx];
+        delete studentAnswers[teacherQ];
         delete studentLockedAnswers[newRealIdx];
         delete studentLockedAnswers[teacherQ];
         delete currentRevealedAnswers[teacherQ];
@@ -3105,38 +3108,48 @@
         if (recoveryCard) recoveryCard.classList.add("hidden");
         if (window.RecoverySims) window.RecoverySims.stop();
 
-        // Wipe answers, locks, and revealed states for the new question
-        delete studentAnswers[newRealIdx];
-        delete studentAnswers[teacherQ];
-        delete studentLockedAnswers[newRealIdx];
-        delete studentLockedAnswers[teacherQ];
-        delete currentRevealedAnswers[teacherQ];
-        delete currentRevealedAnswers[newRealIdx];
-        delete currentRevealedExplanations[teacherQ];
-        delete currentRevealedExplanations[newRealIdx];
-        delete discussionFeedbackShownForQuestion[newRealIdx];
-        delete recoveryAttemptedForQuestion[newRealIdx];
-
         discussionActive = false;
         answerRevealed = false;
 
+        currentAssignment.current_question_index = teacherQ;
+        currentAssignment.question_started_at = assignment.question_started_at;
         currentAssignment.revealed_answer = "";
         currentAssignment.revealed_explanation = "";
         currentAssignment.discussion_active = false;
         currentAssignment.answer_revealed = false;
 
-        perQRemaining = getSharedQuestionRemaining(assignment);
         const total = Number(assignment.per_question_seconds) || 0;
+        perQRemaining = total > 0 ? getSharedQuestionRemaining(assignment) : 0;
         questionStartTime = total > 0
           ? getServerNowMs() - ((total - perQRemaining) * 1000)
           : getServerNowMs();
 
         updatePerQDisplay(perQRemaining);
-        renderCurrentQuestion();
         updateDiscussionFreeze(false, false);
+        renderCurrentQuestion();
+
+        // Sync previous question's evaluated answer from instructor for redemption gating
+        if (assignment.previous_correct_answer && teacherQ > 0) {
+          const prevStep = teacherQ - 1;
+          const prevReal = questionOrder[prevStep];
+          currentRevealedAnswers[prevStep] = assignment.previous_correct_answer;
+          currentRevealedAnswers[prevReal] = assignment.previous_correct_answer;
+          const prevChoice = studentAnswers[prevReal];
+          const hasChoice = prevChoice && prevChoice !== 'null' && prevChoice !== 'undefined' && String(prevChoice).trim() !== '';
+          if (!hasChoice || String(prevChoice).trim().toUpperCase() !== String(assignment.previous_correct_answer).trim().toUpperCase()) {
+            studentMissedQuestions.add(prevReal);
+          } else {
+            studentMissedQuestions.delete(prevReal);
+          }
+        }
+
+        // Return immediately on question transition!
+        // DO NOT fall through to the discussion/reveal handler in the transition tick,
+        // which prevents stale discussion payload from the previous question from locking the new question!
+        return;
       }
 
-      // 4. Sync previous question's evaluated answer from instructor
+      // 4. Sync previous question's evaluated answer from instructor (subsequent polls)
       if (assignment.previous_correct_answer && teacherQ > 0) {
         const prevStep = teacherQ - 1;
         const prevReal = questionOrder[prevStep];

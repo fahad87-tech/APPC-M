@@ -139,6 +139,76 @@ Run the SQL script [`supabase_schema.sql`](supabase_schema.sql) in your **Supaba
 - **Default Per-Question Pacing**: 90 Seconds Auto (`per_question_seconds: 90`) is configured as the active timer default, with the per-question box prominently displayed and the student self-paced overall timer hidden.
 - **Double-Guarded Initialization**: Both HTML markup attributes (`selected`) and `initTeacherApp()` JavaScript state synchronization enforce this configuration whenever the teacher portal is opened or refreshed.
 
+---
 
+## 8. Watertight Question Transition & Unlocked Option State Architecture
 
+### A. Root Causes of Question Transition Lock Bug
+1. **Teacher Local Memory Desync**:
+   - In `advanceNow()` and `lcPrevQuestion()`, when advancing questions, `setAssignmentTimerState` was dispatched to the server, but `currentLiveAssignment.question_started_at` in the teacher's local JavaScript object was never updated.
+   - On the very next 250ms tick of `lcTimerInterval`, `getLiveQuestionRemaining()` computed `perQ - ((now - startedAt)/1000)`. Because `startedAt` was stale (from session launch minutes ago), `lcTimerRemaining` computed as `<= 0`.
+   - The timer interval immediately fired `endCurrentQuestionDiscussion()`, invoking `showDiscussionPanel(..., true)`. This immediately broadcasted `discussion_active = true`, `answer_revealed = true`, and `revealed_answer = "A"` (or the key) to Supabase within 250ms of moving questions.
+2. **Student Fall-Through Auto-Lock**:
+   - In `syncStudentWithTeacherAssignment()` (`index.html`), when `isQuestionTransition` triggered, it cleared local answers and locks, but did **not** `return`.
+   - When the immediate discussion broadcast arrived, lines 3201-3211 ran: `if (newDiscussion || newAnswerRevealed)`, immediately creating `studentLockedAnswers[currentReal] = { auto: true }` and locking the student screen on the new question.
+3. **Student Premature `isTimeUp` & Answer Key Exposure**:
+   - `isCurrentQuestionEvaluationRevealed()` previously evaluated `const isTimeUp = (typeof perQRemaining === 'number') && perQRemaining <= 0;`. In Manual Pacing or during transition before the countdown initialized, `isTimeUp` returned `true`.
+   - `getQuestionCorrectAnswer()` returned `q.correct_answer` directly. When `isTimeUp` was true, `renderCurrentQuestion()` applied `choice-correct` (bright emerald green checkmark) to the correct option and disabled all buttons (`disabled = true`), making it appear to the student as if that option was already chosen and locked!
+4. **Student Local Timer Auto-Lock at Zero**:
+   - `updatePerQDisplay(secs)` called `autoLockCurrentQuestion()` whenever `secs <= 0`. In Manual Pacing or before `question_started_at` was set, `secs` was 0, prematurely triggering auto-lock.
 
+---
+
+### B. Comprehensive Architectural Fixes
+
+#### 1. Teacher Console Synchronous Atomic Advancement (`teacher.html`)
+- **Interval Clearing**: `clearInterval(lcTimerInterval)` is called synchronously at the beginning of `advanceNow()` and `lcPrevQuestion()`, halting any prior question's timer loop immediately.
+- **Local Memory State Refresh**: `currentLiveAssignment` fields are updated synchronously before any asynchronous operations:
+  ```javascript
+  currentLiveAssignment.current_question_index = currentLiveIndex;
+  currentLiveAssignment.question_started_at = nowIso;
+  currentLiveAssignment.discussion_active = false;
+  currentLiveAssignment.answer_revealed = false;
+  currentLiveAssignment.revealed_answer = "";
+  currentLiveAssignment.revealed_explanation = "";
+  currentLiveAssignment.previous_correct_answer = prevCorrectKey;
+  currentLiveAssignment.timer_remaining_seconds = perQ;
+  currentLiveAssignment.timer_paused = false;
+  currentLiveAssignment.paused_remaining_seconds = null;
+  ```
+- **Authoritative Server Broadcast**: Writes `nowIso` and reset states to Supabase `active_assignments`.
+- **Timer Stale-Guard**: In `setupQuestionTimer()`, if `lcTimerRemaining <= 0` at startup, it is reset to `perQ` with a fresh `getServerNowIso()`, preventing any tick-0 expiration.
+
+#### 2. Student Runner Clean Question Reset & Transition Early-Return (`index.html`)
+- **Complete State Wipe on Transition**:
+  ```javascript
+  delete studentAnswers[newRealIdx];
+  delete studentAnswers[teacherQ];
+  delete studentLockedAnswers[newRealIdx];
+  delete studentLockedAnswers[teacherQ];
+  delete currentRevealedAnswers[teacherQ];
+  delete currentRevealedAnswers[newRealIdx];
+  delete currentRevealedExplanations[teacherQ];
+  delete currentRevealedExplanations[newRealIdx];
+  delete discussionFeedbackShownForQuestion[newRealIdx];
+  delete recoveryAttemptedForQuestion[newRealIdx];
+  ```
+- **Reset Discussion & Freeze States**: Sets `discussionActive = false; answerRevealed = false;` and calls `updateDiscussionFreeze(false, false);`.
+- **Fresh Choice Rendering**: Calls `renderCurrentQuestion();` with all choice buttons interactive, unlocked, and devoid of correct/wrong highlights.
+- **Immediate Early Return**: `return;` is invoked immediately after the transition handling to prevent any stale discussion payload from the prior question or network race from falling through and auto-locking the newly loaded question.
+
+#### 3. Strict Pedagogical Evaluation & Key Gating (`index.html`)
+- **Guarded Evaluation Revealer**:
+  ```javascript
+  function isCurrentQuestionEvaluationRevealed() {
+    if (quizMode === "teacher_led") {
+      const hasTimer = Boolean(currentAssignment && Number(currentAssignment.per_question_seconds) > 0);
+      const startedAt = Date.parse(currentAssignment && currentAssignment.question_started_at || "");
+      const isTimeUp = hasTimer && Number.isFinite(startedAt) && (typeof perQRemaining === 'number') && perQRemaining <= 0;
+      return (discussionActive || answerRevealed || isTimeUp);
+    }
+    return isCountDown && remainingSeconds <= 0;
+  }
+  ```
+- **Confidential Answer Key Getters**: In `getQuestionCorrectAnswer()` and `getQuestionExplanation()`, in `teacher_led` mode, if `!isCurrentQuestionEvaluationRevealed()`, they strictly return `""`, ensuring no choice can be pre-highlighted in green before official instructor reveal.
+- **Guarded Timer Local Lock**: `updatePerQDisplay(secs)` only calls `autoLockCurrentQuestion()` if `hasTimer && Number.isFinite(startedAt) && secs <= 0`.

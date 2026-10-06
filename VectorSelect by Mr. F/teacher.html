@@ -2371,8 +2371,10 @@
 
       // Set initial question timer state so students' countdowns start
       if (assignment.per_question_seconds > 0 && !assignment.question_started_at) {
+        const nowIso = getServerNowIso();
+        currentLiveAssignment.question_started_at = nowIso;
         await setAssignmentTimerState(code, {
-          question_started_at: getServerNowIso(),
+          question_started_at: nowIso,
           discussion_active: false
         });
       }
@@ -2440,8 +2442,15 @@
 
       if (currentLiveAssignment.per_question_seconds > 0) {
         const perQ = currentLiveAssignment.per_question_seconds;
+        const nowIso = getServerNowIso();
+        currentLiveAssignment.question_started_at = nowIso;
+        currentLiveAssignment.discussion_active = false;
+        currentLiveAssignment.answer_revealed = false;
+        currentLiveAssignment.revealed_answer = "";
+        currentLiveAssignment.revealed_explanation = "";
+        currentLiveAssignment.timer_remaining_seconds = perQ;
         await setAssignmentTimerState(code, {
-          question_started_at: getServerNowIso(),
+          question_started_at: nowIso,
           discussion_active: false,
           timer_remaining_seconds: perQ,
           per_question_seconds: perQ,
@@ -2773,7 +2782,7 @@
     async function setupQuestionTimer() {
       clearInterval(lcTimerInterval);
       await syncServerClock();
-      const perQ = currentLiveAssignment.per_question_seconds || 0;
+      const perQ = Number(currentLiveAssignment && currentLiveAssignment.per_question_seconds) || 0;
       const timerBox = document.getElementById("lc-timer-box");
       const addTimeBtn = document.getElementById("lc-btn-addtime");
       const timerLabel = document.getElementById("lc-timer-label");
@@ -2794,6 +2803,11 @@
         }
         lastPublishedTimerRemaining = null;
         lcTimerRemaining = getLiveQuestionRemaining();
+        if (lcTimerRemaining <= 0) {
+          // Guard against stale question_started_at triggering instant expiration
+          lcTimerRemaining = perQ;
+          currentLiveAssignment.question_started_at = getServerNowIso();
+        }
         updateLcTimerDisplay();
 
         lcTimerInterval = setInterval(() => {
@@ -2941,21 +2955,35 @@
     async function lcPrevQuestion() {
       resetLcNextButton();
       if (currentLiveIndex > 0) {
+        clearInterval(lcTimerInterval);
         currentLiveIndex--;
         lastAllAnsweredNotifiedIdx = -1;
         hideDiscussionPanel(true);
         renderLiveControl();
 
-        const perQ = currentLiveAssignment.per_question_seconds || 0;
+        const perQ = Number(currentLiveAssignment && currentLiveAssignment.per_question_seconds) || 0;
+        const nowIso = getServerNowIso();
         lcTimerRemaining = perQ;
         lcTimerPaused = false;
+        isAnswerRevealed = false;
         updateLcPauseUI();
         updateLcTimerDisplay();
+
+        // Update local assignment state immediately so all local checks read clean state
+        currentLiveAssignment.current_question_index = currentLiveIndex;
+        currentLiveAssignment.question_started_at = nowIso;
+        currentLiveAssignment.discussion_active = false;
+        currentLiveAssignment.answer_revealed = false;
+        currentLiveAssignment.revealed_answer = "";
+        currentLiveAssignment.revealed_explanation = "";
+        currentLiveAssignment.timer_remaining_seconds = perQ;
+        currentLiveAssignment.timer_paused = false;
+        currentLiveAssignment.paused_remaining_seconds = null;
 
         // Set fresh server timestamp so students' per-question timers restart
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
           current_question_index: currentLiveIndex,
-          question_started_at: getServerNowIso(),
+          question_started_at: nowIso,
           discussion_active: false,
           answer_revealed: false,
           revealed_answer: "",
@@ -2999,6 +3027,9 @@
     }
 
     async function advanceNow() {
+      // Clear previous timer interval immediately to prevent any background expiry race
+      clearInterval(lcTimerInterval);
+
       const prevIndex = currentLiveIndex;
       currentLiveIndex++;
       lastAllAnsweredNotifiedIdx = -1;
@@ -3015,16 +3046,30 @@
       renderLiveControl();
 
       // Reset teacher timer
-      const perQ = currentLiveAssignment.per_question_seconds || 0;
+      const perQ = Number(currentLiveAssignment && currentLiveAssignment.per_question_seconds) || 0;
+      const nowIso = getServerNowIso();
       lcTimerRemaining = perQ;
       lcTimerPaused = false;
+      isAnswerRevealed = false;
       updateLcPauseUI();
       updateLcTimerDisplay();
+
+      // Update local assignment state immediately so all local checks read clean state
+      currentLiveAssignment.current_question_index = currentLiveIndex;
+      currentLiveAssignment.question_started_at = nowIso;
+      currentLiveAssignment.discussion_active = false;
+      currentLiveAssignment.answer_revealed = false;
+      currentLiveAssignment.revealed_answer = "";
+      currentLiveAssignment.revealed_explanation = "";
+      currentLiveAssignment.previous_correct_answer = prevCorrectKey;
+      currentLiveAssignment.timer_remaining_seconds = perQ;
+      currentLiveAssignment.timer_paused = false;
+      currentLiveAssignment.paused_remaining_seconds = null;
 
       // Single authoritative atomic server update for the newly activated question
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         current_question_index: currentLiveIndex,
-        question_started_at: getServerNowIso(),
+        question_started_at: nowIso,
         discussion_active: false,
         answer_revealed: false,
         revealed_answer: "",
