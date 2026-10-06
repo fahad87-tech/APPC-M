@@ -17,11 +17,14 @@ VectorSelect is a high-performance web classroom assessment platform designed fo
 1. **Teacher-Led Live Pacing (`teacher_led`)**:
    - The instructor centrally controls the active question index (`current_question_index`).
    - All student clients automatically sync instantaneously via Server-Sent Events (SSE) backed by a 1-second heartbeat polling fallback.
-   - Per-question countdown timer synchronized with instructor pause/resume and time adjustment (+30s / +60s).
-   - **Pedagogical Confidentiality**: During live question answering, student choices remain neutrally locked without revealing correctness or distractor keys.
-   - **Discussion & Evaluation Phase**: When the timer expires or when the instructor clicks **End & Discuss**, the question enters discussion phase, freezing student inputs and displaying the official answer key and College Board rationales.
-   - **Clean Question State Isolation**: Advancing to the next question clears discussion and reveal states atomically, wiping all previous locks and evaluation banners, and immediately restores choice buttons (A, B, C, D) to active, clickable states.
-   - **Strict Response Deduplication**: Student live telemetry answers are strictly deduplicated by student name per question, ensuring each student accounts for exactly one entry in class response histograms, AP Classroom telemetry, and the live leaderboard.
+   - **Zero-Drift Synchronized Timer**: Teacher broadcasts `timer_remaining_seconds` every 1 second without throttling. The student countdown timer ticks down at 1000ms intervals and snaps into direct lockstep with teacher clock whenever received (eliminating 1-2s lag/drift).
+   - **Pedagogical Confidentiality**: During live question answering while time is remaining, student choices remain neutrally locked without revealing correctness or distractor keys.
+   - **Instant Evaluation & Official Key Reveal**: When the timer expires (`perQRemaining <= 0` or teacher remaining reaches 0) OR when the instructor clicks **End & Discuss** / **Reveal Key**, the student screen immediately reveals:
+     - The official correct answer highlighted in vibrant emerald green (`.choice-correct`, `opacity: 1 !important`).
+     - The student's chosen option highlighted in coral/rose red if incorrect (`.choice-wrong`, `opacity: 1 !important`).
+     - An official verdict banner displaying the result status ("✓ Correct!", "✕ Incorrect", or "⚠️ No Answer Submitted") along with the authoritative College Board rationale/explanation.
+   - **Clean Question State Isolation**: Advancing to the next question clears discussion and reveal states atomically, wiping all previous locks, choices, and evaluation banners, and immediately restores choice buttons (A, B, C, D) to active, clickable states (`pointer-events: auto`, `opacity: 1`).
+   - **Strict Response Deduplication**: Student live telemetry answers are strictly deduplicated by case-insensitive student name and numeric question index, ensuring each student accounts for exactly one entry in class response histograms, AP Classroom telemetry, and the live leaderboard.
 2. **Student-Led Self-Paced (`student_led`)**:
    - Students navigate between questions freely via sidebar navigation grid or Next/Previous buttons.
    - Overall exam timer counts down to submission.
@@ -90,9 +93,15 @@ VectorSelect is a high-performance web classroom assessment platform designed fo
 ## 4. Port Configuration & Startup
 
 - **`START POCKET.bat`**:
-  - VectorSelect PocketBase database: `http://127.0.0.1:8090`
+  - VectorSelect PocketBase database: `http://127.0.0.1:8090` (dedicated, isolated from Classroom Hub Schedule on 8095)
   - Scoring Tool PocketBase database: `http://127.0.0.1:8091`
   - Static Web Server: `http://localhost:8888`
+- **Port Allocation**:
+  - `8090`: PocketBase VectorSelect
+  - `8091`: PocketBase Scoring Tool
+  - `8092`: Lesson Planner
+  - `8095`: Classroom Hub Schedule Server (migrated from 8090 to prevent PocketBase collisions)
+  - `8888`: VectorSelect Static Web Server
 - **URLs**:
   - Student Interface: `http://localhost:8888/index.html`
   - Teacher Console: `http://localhost:8888/teacher.html`

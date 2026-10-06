@@ -53,6 +53,24 @@ Deploying PocketBase to the cloud gives students and teachers 24/7 global access
 - Deploy using the same 1-file Dockerfile above.
 - In PocketBase Admin UI (`Settings` -> `Application`), add your GitHub Pages domain (e.g. `https://fahad87-tech.github.io`) to **Allowed Origins (CORS)**.
 
+### Connect the GitHub Pages frontend
+
+GitHub Pages serves only the static frontend. Students on different computers
+must all use the same publicly reachable PocketBase HTTPS URL.
+
+1. Open `pocketbase_public_config.js` in the repository.
+2. Set:
+   ```js
+   window.VECTORSELECT_POCKETBASE_URL = "https://your-pocketbase-domain.example";
+   ```
+3. Commit and push that file with the frontend.
+4. Add the exact GitHub Pages origin to PocketBase CORS, then restart PocketBase
+   after installing the migration and hook changes.
+
+Do not use `http://127.0.0.1:8090` or `localhost` in the GitHub Pages build.
+Those addresses refer to each student's own computer. The app uses localhost
+only when opened locally for development.
+
 ---
 
 ## 3. Architecture & Security Guarantees

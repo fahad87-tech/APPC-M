@@ -33,6 +33,7 @@
     };
   </script>
   <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js"></script>
+  <script src="pocketbase_public_config.js"></script>
   <script src="pocketbase_config.js"></script>
   <!-- Offline Air-Gapped Fallback Keys (Ignored on GitHub Pages) -->
   <script src="data/answer_keys.js" onerror="/* Local air-gapped fallback only */"></script>
@@ -1103,6 +1104,7 @@
     let liveSyncInterval = null;
     let lcTimerInterval = null;
     let lcTimerRemaining = 0;
+    let lastPublishedTimerRemaining = null;
     let lcTimerPaused = false;
     let isAnswerRevealed = false;
 
@@ -1740,7 +1742,7 @@
     async function ensureQuizKeysHydrated(quiz) {
       if (!quiz || !quiz.questions) return;
       hydrateQuizKeys(quiz);
-      if (quiz.questions.some(q => q.correct_answer)) return;
+      if (quiz.questions.every(q => q && String(q.correct_answer || "").trim())) return;
 
       if (typeof fetchAnswerKeysForQuiz === 'function') {
         const keys = await fetchAnswerKeysForQuiz(quiz.id);
@@ -1752,7 +1754,7 @@
           });
           quiz.questions.forEach((q, idx) => {
             const k = keyMap[q.question_id] || keyMap[q.number] || keyMap[idx + 1];
-            if (k) {
+            if (k && (!q.correct_answer || !q.explanation)) {
               q.correct_answer = k.correct_answer;
               q.explanation = k.explanation;
             }
@@ -2359,8 +2361,8 @@
 
       // Set initial question timer state so students' countdowns start
       if (assignment.per_question_seconds > 0) {
-        setAssignmentTimerState(code, {
-          question_started_at: new Date().toISOString(),
+        await setAssignmentTimerState(code, {
+          question_started_at: getPocketBaseNowIso(),
           discussion_active: false
         });
       }
@@ -2381,7 +2383,7 @@
       }, 1500);
 
       // Setup question timer if configured
-      setupQuestionTimer();
+      await setupQuestionTimer();
     }
 
     async function updateLobbyChips(code) {
@@ -2428,8 +2430,8 @@
 
       if (currentLiveAssignment.per_question_seconds > 0) {
         const perQ = currentLiveAssignment.per_question_seconds;
-        setAssignmentTimerState(code, {
-          question_started_at: new Date().toISOString(),
+        await setAssignmentTimerState(code, {
+          question_started_at: getPocketBaseNowIso(),
           discussion_active: false,
           timer_remaining_seconds: perQ,
           per_question_seconds: perQ,
@@ -2451,12 +2453,11 @@
         }
       }, 1500);
 
-      setupQuestionTimer();
+      await setupQuestionTimer();
     }
 
     async function lcTriggerDiscussionEarly() {
-      const answers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex);
-      await showDiscussionPanel(answers || [], true);
+      await endCurrentQuestionDiscussion();
     }
 
     let teacherDockCollapsed = false;
@@ -2698,7 +2699,8 @@
         const qid = (currentLiveQuiz && currentLiveQuiz.id) || (currentLiveAssignment && currentLiveAssignment.assessment_id);
         if (window.OFFLINE_ANSWER_KEYS && qid && window.OFFLINE_ANSWER_KEYS[qid]) {
           const keys = window.OFFLINE_ANSWER_KEYS[qid].keys || [];
-          const k = keys.find(item => item.question_id === q?.question_id || item.number === (currentLiveIndex + 1));
+          const k = keys.find(item => (q && q.question_id && item.question_id === q.question_id)
+            || item.number === (currentLiveIndex + 1));
           if (k) {
             correctKey = k.correct_answer || "";
             explanationText = k.explanation || "";
@@ -2779,8 +2781,9 @@
       showTeacherToast("Point Redemption", newVal ? "Point recovery enabled for students" : "Point recovery disabled for students", newVal ? "lime" : "copper", 2000);
     }
 
-    function setupQuestionTimer() {
+    async function setupQuestionTimer() {
       clearInterval(lcTimerInterval);
+      await syncPocketBaseClock();
       const perQ = currentLiveAssignment.per_question_seconds || 0;
       const timerBox = document.getElementById("lc-timer-box");
       const addTimeBtn = document.getElementById("lc-btn-addtime");
@@ -2793,15 +2796,25 @@
       if (perQ > 0) {
         if (addTimeBtn) addTimeBtn.classList.remove("hidden");
         if (timerLabel) timerLabel.textContent = "Question Time:";
-        lcTimerRemaining = perQ;
+        if (!currentLiveAssignment.question_started_at) {
+          currentLiveAssignment.question_started_at = getPocketBaseNowIso();
+          await setAssignmentTimerState(currentLiveAssignment.join_code, {
+            question_started_at: currentLiveAssignment.question_started_at,
+            timer_remaining_seconds: perQ
+          });
+        }
+        lastPublishedTimerRemaining = null;
+        lcTimerRemaining = getLiveQuestionRemaining();
         updateLcTimerDisplay();
 
         lcTimerInterval = setInterval(() => {
           if (!lcTimerPaused) {
-            lcTimerRemaining--;
+            lcTimerRemaining = getLiveQuestionRemaining();
             updateLcTimerDisplay();
-            // Periodically sync remaining time to students every 2 seconds
-            if (lcTimerRemaining % 2 === 0 && currentLiveAssignment) {
+            // Keep the legacy integer field fresh. The shared timestamp is
+            // authoritative for both portals.
+            if (currentLiveAssignment && lcTimerRemaining !== lastPublishedTimerRemaining) {
+              lastPublishedTimerRemaining = lcTimerRemaining;
               setAssignmentTimerState(currentLiveAssignment.join_code, {
                 timer_remaining_seconds: lcTimerRemaining,
                 per_question_seconds: currentLiveAssignment.per_question_seconds
@@ -2811,24 +2824,29 @@
               clearInterval(lcTimerInterval);
               lcTimerRemaining = 0;
               updateLcTimerDisplay();
-              showTeacherToast("Time Expired", "Question time is up! Student inputs locked for discussion.", "brass", 3500);
+              showTeacherToast("Time Expired", "Question time is up! Official answer key and student results revealed.", "brass", 3500);
               // Automatically transition into discussion phase — reveal answer and freeze student inputs
               if (currentLiveAssignment) {
-                fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex).then(answers => {
-                  showDiscussionPanel(answers || [], true);
-                }).catch(() => {
-                  showDiscussionPanel([], true);
-                });
+                endCurrentQuestionDiscussion();
               }
             }
           }
-        }, 1000);
+        }, 250);
       } else {
         // Manual Pacing (Teacher controls next)
         if (addTimeBtn) addTimeBtn.classList.add("hidden");
         if (timerLabel) timerLabel.textContent = "Pacing:";
         document.getElementById("lc-timer-display").textContent = "Manual";
       }
+    }
+
+    function getLiveQuestionRemaining() {
+      const perQ = Number(currentLiveAssignment && currentLiveAssignment.per_question_seconds) || 0;
+      if (perQ <= 0) return 0;
+      if (lcTimerPaused) return Math.max(0, Math.ceil(Number(lcTimerRemaining) || 0));
+      const startedAt = Date.parse(currentLiveAssignment.question_started_at || "");
+      if (!Number.isFinite(startedAt)) return Math.max(0, Math.ceil(Number(lcTimerRemaining) || perQ));
+      return Math.max(0, Math.ceil(perQ - ((getPocketBaseNowMs() - startedAt) / 1000)));
     }
 
     function updateLcTimerDisplay() {
@@ -2881,10 +2899,10 @@
         showTeacherToast("Session Paused", (perQ > 0) ? `Timer paused at ${lcTimerRemaining}s` : "Student interactions paused for explanation", "brass", 2500);
       } else {
         // Resume session: calculate updated started_at timestamp
-        let newStartedAt = new Date().toISOString();
+        let newStartedAt = getPocketBaseNowIso();
         if (perQ > 0) {
           const elapsedSecs = Math.max(0, perQ - lcTimerRemaining);
-          newStartedAt = new Date(Date.now() - (elapsedSecs * 1000)).toISOString();
+          newStartedAt = new Date(getPocketBaseNowMs() - (elapsedSecs * 1000)).toISOString();
         }
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
           timer_paused: false,
@@ -2902,7 +2920,7 @@
       updateLcTimerDisplay();
       const perQ = (currentLiveAssignment.per_question_seconds || 0) + addSeconds;
       currentLiveAssignment.per_question_seconds = perQ;
-      const newStartedAt = new Date(Date.now() - Math.max(0, perQ - lcTimerRemaining) * 1000).toISOString();
+      const newStartedAt = new Date(getPocketBaseNowMs() - Math.max(0, perQ - lcTimerRemaining) * 1000).toISOString();
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         question_started_at: newStartedAt,
         per_question_seconds: perQ,
@@ -2931,7 +2949,7 @@
       }
     }
 
-    function lcPrevQuestion() {
+    async function lcPrevQuestion() {
       resetLcNextButton();
       if (currentLiveIndex > 0) {
         currentLiveIndex--;
@@ -2946,9 +2964,9 @@
         updateLcTimerDisplay();
 
         // Set fresh server timestamp so students' per-question timers restart
-        setAssignmentTimerState(currentLiveAssignment.join_code, {
+        await setAssignmentTimerState(currentLiveAssignment.join_code, {
           current_question_index: currentLiveIndex,
-          question_started_at: new Date().toISOString(),
+          question_started_at: getPocketBaseNowIso(),
           discussion_active: false,
           answer_revealed: false,
           revealed_answer: "",
@@ -2960,17 +2978,16 @@
           paused_remaining_seconds: null
         });
 
-        setupQuestionTimer();
+        await setupQuestionTimer();
         showTeacherToast("Previous Question Loaded", `Returned to Question ${currentLiveIndex + 1}`, "copper", 2000);
       }
     }
 
     async function lcNextQuestion() {
       resetLcNextButton();
-      const answers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex);
+      await endCurrentQuestionDiscussion();
 
       if (currentLiveIndex >= currentLiveQuiz.questions.length - 1) {
-        showDiscussionPanel(answers || [], true);
         const advBtn = document.getElementById("lc-disc-btn-advance");
         if (advBtn) {
           advBtn.innerHTML = "<span>🏁 End Assessment Session</span>";
@@ -2978,9 +2995,18 @@
         }
         return;
       }
+    }
 
-      // Automatically transition into discussion phase and auto-reveal the official answer key!
-      showDiscussionPanel(answers || [], true);
+    let currentDiscussionTransition = null;
+    async function endCurrentQuestionDiscussion() {
+      if (currentDiscussionTransition) return currentDiscussionTransition;
+      currentDiscussionTransition = (async () => {
+        const answers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex);
+        await showDiscussionPanel(answers || [], true);
+      })().finally(() => {
+        currentDiscussionTransition = null;
+      });
+      return currentDiscussionTransition;
     }
 
     async function advanceNow() {
@@ -3009,7 +3035,7 @@
       // Single authoritative atomic server update for the newly activated question
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
         current_question_index: currentLiveIndex,
-        question_started_at: new Date().toISOString(),
+        question_started_at: getPocketBaseNowIso(),
         discussion_active: false,
         answer_revealed: false,
         revealed_answer: "",
@@ -3022,7 +3048,7 @@
         paused_remaining_seconds: null
       });
 
-      setupQuestionTimer();
+      await setupQuestionTimer();
       showTeacherToast("Next Question Loaded", `Question ${currentLiveIndex + 1} is now live with answers hidden.`, "lime", 2500);
     }
 
@@ -3223,8 +3249,27 @@
       const answers = await fetchLiveAnswersByCode(code, currentLiveIndex);
 
       const names = (participants && participants.names) || [];
-      const answeredMap = {};
-      (answers || []).forEach(a => { answeredMap[a.student_name] = a; });
+      const answeredMap = new Map();
+      (answers || []).forEach(a => {
+        if (a && a.student_name) {
+          answeredMap.set(String(a.student_name).trim().toLowerCase(), a);
+        }
+      });
+
+      // Group students using a normalized Map to avoid any duplicate keys or casing differences
+      const normalizedNamesMap = new Map();
+      names.forEach(n => {
+        if (n && String(n).trim()) {
+          const k = String(n).trim().toLowerCase();
+          if (!normalizedNamesMap.has(k)) normalizedNamesMap.set(k, String(n).trim());
+        }
+      });
+      (answers || []).forEach(a => {
+        if (a && a.student_name && String(a.student_name).trim()) {
+          const k = String(a.student_name).trim().toLowerCase();
+          if (!normalizedNamesMap.has(k)) normalizedNamesMap.set(k, String(a.student_name).trim());
+        }
+      });
 
       // Build student telemetry items
       const studentItems = [];
@@ -3233,10 +3278,8 @@
       let wrongCount = 0;
       let blankCount = 0;
 
-      // Group students
-      const allNames = Array.from(new Set([...names, ...Object.keys(answeredMap)]));
-      allNames.forEach(name => {
-        const rec = answeredMap[name];
+      normalizedNamesMap.forEach((displayName, sKey) => {
+        const rec = answeredMap.get(sKey);
         const rawLetter = rec ? rec.selected_letter : null;
         const isAnswered = rawLetter && rawLetter !== 'null' && rawLetter !== 'undefined' && String(rawLetter).trim() !== '';
         const chosenLetter = isAnswered ? String(rawLetter).toUpperCase() : null;
@@ -3245,7 +3288,7 @@
           blankCount++;
           choiceCounts.BLANK++;
           studentItems.push({
-            name,
+            name: displayName,
             status: 'BLANK',
             chosen: 'None',
             isCorrect: false
@@ -3254,7 +3297,7 @@
           rightCount++;
           if (choiceCounts[chosenLetter] !== undefined) choiceCounts[chosenLetter]++;
           studentItems.push({
-            name,
+            name: displayName,
             status: 'RIGHT',
             chosen: chosenLetter,
             isCorrect: true
@@ -3263,7 +3306,7 @@
           wrongCount++;
           if (choiceCounts[chosenLetter] !== undefined) choiceCounts[chosenLetter]++;
           studentItems.push({
-            name,
+            name: displayName,
             status: 'WRONG',
             chosen: chosenLetter,
             isCorrect: false
@@ -3271,7 +3314,7 @@
         }
       });
 
-      const totalStudents = allNames.length || 1;
+      const totalStudents = normalizedNamesMap.size || 1;
       const rightPct = Math.round((rightCount / totalStudents) * 100);
       const wrongPct = Math.round((wrongCount / totalStudents) * 100);
       const blankPct = Math.round((blankCount / totalStudents) * 100);
@@ -3449,7 +3492,8 @@
         const qid = (currentLiveQuiz && currentLiveQuiz.id) || (currentLiveAssignment && currentLiveAssignment.assessment_id);
         if (window.OFFLINE_ANSWER_KEYS && qid && window.OFFLINE_ANSWER_KEYS[qid]) {
           const keys = window.OFFLINE_ANSWER_KEYS[qid].keys || [];
-          const k = keys.find(item => item.question_id === q?.question_id || item.number === (currentLiveIndex + 1));
+          const k = keys.find(item => (q && q.question_id && item.question_id === q.question_id)
+            || item.number === (currentLiveIndex + 1));
           if (k) {
             correctKey = k.correct_answer || "";
             explanationText = k.explanation || "";
@@ -3459,6 +3503,16 @@
             }
           }
         }
+      }
+
+      if (autoReveal && !String(correctKey || "").trim()) {
+        showTeacherToast(
+          "Answer Key Unavailable",
+          "The official key was not loaded. Students remain locked until the key is available.",
+          "coral",
+          5000
+        );
+        return;
       }
 
       if (autoReveal) {
@@ -3479,7 +3533,6 @@
       }
 
       await setAssignmentTimerState(currentLiveAssignment.join_code, {
-        question_started_at: currentLiveAssignment.question_started_at || null,
         discussion_active: true,
         answer_revealed: isAnswerRevealed,
         revealed_answer: isAnswerRevealed ? correctKey : "",
@@ -3488,6 +3541,10 @@
         timer_paused: true,
         paused_remaining_seconds: 0
       });
+      currentLiveAssignment.discussion_active = true;
+      currentLiveAssignment.answer_revealed = isAnswerRevealed;
+      currentLiveAssignment.revealed_answer = isAnswerRevealed ? correctKey : "";
+      currentLiveAssignment.revealed_explanation = isAnswerRevealed ? explanationText : "";
 
       // Render distribution and students
       renderDiscussionContent(answers);
@@ -3532,7 +3589,7 @@
       if (!skipServerUpdate && currentLiveAssignment) {
         // Unset discussion_active and reset answer_revealed on server
         await setAssignmentTimerState(currentLiveAssignment.join_code, {
-          question_started_at: new Date().toISOString(),
+          question_started_at: getPocketBaseNowIso(),
           discussion_active: false,
           answer_revealed: false,
           revealed_answer: "",

@@ -7,6 +7,10 @@
 // ever exposing the answer keys collection to the public client.
 // ==============================================================================
 
+routerAdd("GET", "/api/vectorselect/server-time", (c) => {
+    return c.json(200, { server_time_ms: Date.now() });
+});
+
 routerAdd("POST", "/api/score-submission", (c) => {
     const data = $apis.requestInfo(c).data;
     const cleanCode = (data.join_code || "").trim().toUpperCase();

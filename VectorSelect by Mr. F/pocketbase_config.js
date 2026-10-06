@@ -7,13 +7,52 @@
 // with automatic offline fallback to HTML5 LocalStorage and window.OFFLINE_ANSWER_KEYS.
 // ==============================================================================
 
+const isLocalVectorSelectHost = /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname)
+  || window.location.protocol === "file:";
+const configuredPocketBaseUrl = (typeof window.VECTORSELECT_POCKETBASE_URL === "string")
+  ? window.VECTORSELECT_POCKETBASE_URL.trim()
+  : "";
+const savedPocketBaseUrl = localStorage.getItem("pocketbase_url") || "";
+
 const POCKETBASE_CONFIG = {
-  // Default to localhost PocketBase (run_pocketbase.bat) or saved Cloud URL
-  url: localStorage.getItem("pocketbase_url") || "http://127.0.0.1:8090"
+  // Hosted GitHub Pages must set window.VECTORSELECT_POCKETBASE_URL to the
+  // shared public PocketBase endpoint. Localhost remains the local fallback.
+  url: configuredPocketBaseUrl
+    || savedPocketBaseUrl
+    || (isLocalVectorSelectHost ? "http://127.0.0.1:8090" : "")
 };
+
+let pocketBaseClockOffsetMs = 0;
+let pocketBaseClockCheckedAt = 0;
 
 function getPocketBaseUrl() {
   return POCKETBASE_CONFIG.url.replace(/\/+$/, "");
+}
+
+function getPocketBaseNowMs() {
+  return Date.now() + pocketBaseClockOffsetMs;
+}
+
+function getPocketBaseNowIso() {
+  return new Date(getPocketBaseNowMs()).toISOString();
+}
+
+async function syncPocketBaseClock(force = false) {
+  const serverUrl = getPocketBaseUrl();
+  if (!serverUrl || (!force && Date.now() - pocketBaseClockCheckedAt < 30000)) return;
+
+  const startedAt = Date.now();
+  try {
+    const response = await fetch(`${serverUrl}/api/vectorselect/server-time`, { cache: "no-store" });
+    const payload = await response.json();
+    const finishedAt = Date.now();
+    if (response.ok && Number.isFinite(Number(payload.server_time_ms))) {
+      pocketBaseClockOffsetMs = Number(payload.server_time_ms) - ((startedAt + finishedAt) / 2);
+      pocketBaseClockCheckedAt = finishedAt;
+    }
+  } catch (err) {
+    // Keep local clock fallback when the optional endpoint is unavailable.
+  }
 }
 
 function setPocketBaseUrl(newUrl) {
@@ -21,11 +60,16 @@ function setPocketBaseUrl(newUrl) {
   POCKETBASE_CONFIG.url = newUrl.replace(/\/+$/, "");
   localStorage.setItem("pocketbase_url", POCKETBASE_CONFIG.url);
   initPocketBaseClient();
+  syncPocketBaseClock(true);
 }
 
 let pb = null;
 
 function initPocketBaseClient() {
+  if (!getPocketBaseUrl()) {
+    pb = null;
+    return;
+  }
   if (typeof PocketBase !== "undefined") {
     try {
       pb = new PocketBase(getPocketBaseUrl());
@@ -42,6 +86,10 @@ function initPocketBaseClient() {
 
 // Auto-initialize immediately
 initPocketBaseClient();
+if (!isLocalVectorSelectHost && !POCKETBASE_CONFIG.url) {
+  console.error("[PocketBase] No public URL configured. Set window.VECTORSELECT_POCKETBASE_URL before pocketbase_config.js.");
+}
+syncPocketBaseClock();
 
 // ------------------------------------------------------------------------------
 // PocketBase Teacher Authentication
@@ -218,6 +266,7 @@ async function verifyJoinCode(join_code) {
 
   if (pb) {
     try {
+      await syncPocketBaseClock();
       const item = await pb.collection("active_assignments").getFirstListItem(`join_code = "${code}"`);
       if (item) {
         item.is_started = (item.is_started === true);
@@ -419,7 +468,7 @@ async function fetchParticipantsByCode(join_code) {
         filter: `join_code = "${code}" && event_type = "participant_join"`,
         sort: "created"
       });
-      names = [...new Set(events.map(e => e.payload && e.payload.student_name).filter(Boolean))];
+      names = events.map(e => e.payload && e.payload.student_name).filter(Boolean);
     } catch (err) {
       // Fallback to local
     }
@@ -430,7 +479,16 @@ async function fetchParticipantsByCode(join_code) {
     names = JSON.parse(localStorage.getItem(key) || "[]");
   }
 
-  return { names, count: names.length };
+  const uniqueNamesMap = new Map();
+  names.forEach(n => {
+    if (n && String(n).trim()) {
+      const k = String(n).trim().toLowerCase();
+      if (!uniqueNamesMap.has(k)) uniqueNamesMap.set(k, String(n).trim());
+    }
+  });
+  const dedupedNames = Array.from(uniqueNamesMap.values());
+
+  return { names: dedupedNames, count: dedupedNames.length };
 }
 
 // Submit live question response for real-time teacher histogram bars
@@ -454,7 +512,7 @@ async function submitLiveAnswer(payload) {
   try {
     const key = `live_answers_${code}`;
     let list = JSON.parse(localStorage.getItem(key) || "[]");
-    list = list.filter(a => !(a.student_name === payload.student_name && a.question_real_index === payload.question_real_index));
+    list = list.filter(a => !(String(a.student_name).trim().toLowerCase() === String(payload.student_name).trim().toLowerCase() && Number(a.question_real_index) === Number(payload.question_real_index)));
     list.push({ ...payload, answered_at: new Date().toISOString() });
     localStorage.setItem(key, JSON.stringify(list));
     return { success: true };
@@ -466,6 +524,7 @@ async function submitLiveAnswer(payload) {
 // Fetch live answer choices for histogram bar rendering (strictly deduplicated by student)
 async function fetchLiveAnswersByCode(join_code, question_real_index) {
   const code = String(join_code).trim().toUpperCase();
+  const qNum = Number(question_real_index);
 
   if (pb) {
     try {
@@ -476,7 +535,7 @@ async function fetchLiveAnswersByCode(join_code, question_real_index) {
       const studentMap = new Map();
       events.forEach(e => {
         const p = e.payload;
-        if (p && p.question_real_index === question_real_index && p.student_name) {
+        if (p && Number(p.question_real_index) === qNum && p.student_name) {
           const sKey = String(p.student_name).trim().toLowerCase();
           if (!studentMap.has(sKey)) {
             studentMap.set(sKey, p);
@@ -491,7 +550,7 @@ async function fetchLiveAnswersByCode(join_code, question_real_index) {
   const list = JSON.parse(localStorage.getItem(key) || "[]");
   const studentMap = new Map();
   list.slice().reverse().forEach(p => {
-    if (p && p.question_real_index === question_real_index && p.student_name) {
+    if (p && Number(p.question_real_index) === qNum && p.student_name) {
       const sKey = String(p.student_name).trim().toLowerCase();
       if (!studentMap.has(sKey)) {
         studentMap.set(sKey, p);
@@ -532,6 +591,7 @@ async function setAssignmentTimerState(join_code, state) {
 
   if (pb) {
     try {
+      await syncPocketBaseClock();
       const item = await pb.collection("active_assignments").getFirstListItem(`join_code = "${code}"`);
       if (item) {
         // Build sanitized payload strictly conforming to PocketBase active_assignments schema
@@ -542,6 +602,7 @@ async function setAssignmentTimerState(join_code, state) {
         if (state.revealed_explanation !== undefined) pbPayload.revealed_explanation = String(state.revealed_explanation || "");
         if (state.current_question_index !== undefined) pbPayload.current_question_index = Number(state.current_question_index);
         if (state.previous_correct_answer !== undefined) pbPayload.previous_correct_answer = String(state.previous_correct_answer || "");
+        if (state.question_started_at !== undefined) pbPayload.question_started_at = String(state.question_started_at || "");
         if (state.per_question_seconds !== undefined) pbPayload.per_question_seconds = Number(state.per_question_seconds);
         if (state.enable_point_redemption !== undefined) pbPayload.enable_point_redemption = Boolean(state.enable_point_redemption);
         if (state.is_active !== undefined) pbPayload.is_active = Boolean(state.is_active);
@@ -561,7 +622,18 @@ async function setAssignmentTimerState(join_code, state) {
           pbPayload.is_paused = Boolean(state.is_paused);
         }
 
-        await pb.collection("active_assignments").update(item.id, pbPayload);
+        let updatedRecord = await pb.collection("active_assignments").update(item.id, pbPayload);
+        const startsNewClockEpoch = state.question_started_at !== undefined
+          && String(state.question_started_at || "") !== String(item.question_started_at || "");
+        if (startsNewClockEpoch && state.question_started_at) {
+          // PocketBase's updated value is server time. Persist it as the
+          // authoritative start so different student computers share one clock.
+          const serverStartedAt = updatedRecord.updated || state.question_started_at;
+          updatedRecord = await pb.collection("active_assignments").update(item.id, {
+            question_started_at: serverStartedAt
+          });
+          state = { ...state, question_started_at: serverStartedAt };
+        }
       }
     } catch (err) {
       console.warn("[PocketBase] Timer state update error:", err);
@@ -573,6 +645,23 @@ async function setAssignmentTimerState(join_code, state) {
     if (a.join_code === code) Object.assign(a, state);
   });
   localStorage.setItem("teacher_assignments", JSON.stringify(assignments));
+
+  try {
+    if (typeof currentLiveAssignment !== "undefined"
+      && currentLiveAssignment
+      && currentLiveAssignment.join_code === code
+      && state.question_started_at !== undefined) {
+      currentLiveAssignment.question_started_at = state.question_started_at;
+    }
+  } catch (err) {}
+  try {
+    if (typeof currentAssignment !== "undefined"
+      && currentAssignment
+      && currentAssignment.join_code === code
+      && state.question_started_at !== undefined) {
+      currentAssignment.question_started_at = state.question_started_at;
+    }
+  } catch (err) {}
 }
 
 // Starts the assignment (students transition from waiting room to test runner)
