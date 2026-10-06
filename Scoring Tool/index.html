@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Scoring Tool</title>
+<script src="https://cdn.jsdelivr.net/npm/pocketbase@0.21.5/dist/pocketbase.umd.js"></script>
+<script src="scoring_pocketbase_config.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif}
 body{background:linear-gradient(135deg,#0f172a,#1e293b);color:#e5e7eb;min-height:100vh;font-size:1.05rem}
@@ -74,13 +76,23 @@ tbody td:first-child:active{cursor:grabbing}
 .modal-footer{display:flex;justify-content:flex-end;gap:6px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.1)}
 .toast{position:fixed;bottom:20px;right:20px;background:#1e293b;color:#fff;padding:14px 24px;border-radius:8px;font-size:1rem;z-index:200;display:none}
 .roster-note{font-size:.8rem;color:#64748b;margin-top:6px}
+.lock-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,23,.94);z-index:300}
+.lock-overlay.show{display:flex}
+.lock-modal{width:92%;max-width:400px;background:#1e293b;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:22px}
+.lock-modal h2{font-size:1.25rem;margin-bottom:4px;color:#f1f5f9}
+.lock-modal p{font-size:.9rem;color:#94a3b8;margin-bottom:14px;line-height:1.5}
+.lock-modal input{width:100%;padding:10px;margin-bottom:8px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:rgba(30,41,59,.8);color:#fff;font-size:1rem}
+.lock-modal .lock-actions{display:flex;gap:8px;margin-top:6px}
+.lock-msg{font-size:.9rem;margin-top:8px;min-height:1.2em}
+.lock-msg.err{color:#f87171}
+.lock-msg.ok{color:#86efac}
 </style>
 </head>
 <body>
 <div class="app-container">
 <header class="header">
 <div class="header-top"><div><h1>Scoring Tool</h1><p class="subtitle">Multi-Category Grading - Auto-saves all entries</p></div>
-<div style="display:flex;gap:5px"><button id="clearBtn" class="btn btn-secondary">Clear All</button><button id="reloadBtn" class="btn btn-secondary">Reload</button><button id="exportBtn" class="btn btn-secondary">Export</button></div></div>
+<div style="display:flex;gap:5px;align-items:center"><span id="syncStatus" style="font-size:.85rem;color:#fb923c">🟠 Offline Mode (Local Storage Only)</span><button id="clearBtn" class="btn btn-secondary">Clear All</button><button id="reloadBtn" class="btn btn-secondary">Reload</button><button id="exportBtn" class="btn btn-secondary">Export</button></div></div>
 <div class="tab-nav">
 <button class="tab-btn active" id="tabAp" data-tab="ap">AP Curve</button>
 <button class="tab-btn" id="tabFormula" data-tab="formula">Formula Curve</button>
@@ -92,7 +104,7 @@ tbody td:first-child:active{cursor:grabbing}
 <div class="control-group"><label>Assignment</label><input type="text" id="assignName" placeholder="Test name"></div>
 <button id="addBtn" class="btn btn-primary">Add Student</button>
 </div>
-<p class="roster-note">Student roster embedded from Classroom Hub (retained in repo). Scores auto-save to this browser.</p>
+<p class="roster-note">Student roster embedded from Classroom Hub (retained in repo). Scores auto-save to this browser and mirror to PocketBase on port 8091.</p>
 </header>
 
 <div id="tab-ap" class="tab-content active">
@@ -123,6 +135,16 @@ tbody td:first-child:active{cursor:grabbing}
 <div class="modal-header"><h2>Add Student</h2><button class="btn btn-secondary" id="closeModal">×</button></div>
 <div class="modal-body"><input type="text" id="newStudent" placeholder="Name"></div>
 <div class="modal-footer"><button class="btn btn-secondary" id="cancelModal">Cancel</button><button class="btn btn-primary" id="okModal">Add</button></div>
+</div>
+</div>
+<div id="lockOverlay" class="lock-overlay show">
+<div class="lock-modal">
+<h2>Scoring Tool — Teacher Sign In</h2>
+<p>Sign in to sync scores to the local PocketBase database on port 8091. Your work also saves to this browser either way.</p>
+<input type="email" id="lockEmail" placeholder="Email" value="739156332@qq.com">
+<input type="password" id="lockPass" placeholder="Password">
+<div class="lock-actions"><button id="lockSubmit" class="btn btn-primary" style="flex:1">Unlock</button><button id="lockSkip" class="btn btn-secondary">Offline Mode</button></div>
+<div id="lockMsg" class="lock-msg"></div>
 </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -169,31 +191,181 @@ function getClassData(){
 
 function applyLoad(){
   if(!ab.length)ab=JSON.parse(JSON.stringify(BANDS));
-  if(!Object.keys(cs).length)CATS.forEach(c=>cs[c.id]={en:true,mx:c.max,sc:c.scale});
+  if(!Object.keys(cs).length)cs={};
+  CATS.forEach(c=>{if(!cs[c.id])cs[c.id]={en:true,mx:c.max,sc:c.scale}});
 }
 
-function migAndInit(){
+function migrateScores(){
   let mig=false;
   Object.keys(savedScores).forEach(k=>{const v=savedScores[k];if(v&&typeof v==='object'&&('mcq'in v||'fib'in v||'sa'in v||'frq'in v)&&!('ap'in v)){const c={mcq:v.mcq||'',fib:v.fib||'',sa:v.sa||'',frq:v.frq||''};savedScores[k]={ap:Object.assign({},c),formula:Object.assign({},c)};mig=true}});
-  if(mig)save();
-  applyLoad();
+  if(mig)saveLocal();
+}
+
+// ── Storage layer: instant localStorage + async PocketBase (:8091) ──────────
+// The embedded roster + localStorage are always the source of truth for the
+// live UI. PocketBase is a *background mirror* that fills gaps, broadcasts
+// changes between devices over SSE, and never clobbers local edits.
+const PB_ID_KEY='scoring_tool_pb_ids_v1';
+let pbAssignmentIds={},pbRecordIds={},pbSyncTimer=null,pbLastWrite=0;
+
+function assignmentTitle(){const t=$('assignName');return (t&&t.value.trim())||'Untitled Assignment'}
+function assignmentKey(){return cls+'|'+mode+'|'+assignmentTitle()}
+
+function loadPbIds(){
+  try{const d=JSON.parse(localStorage.getItem(PB_ID_KEY)||'{}');pbAssignmentIds=d.assignments||{};pbRecordIds=d.records||{}}catch(e){}
+}
+function persistPbIds(){
+  try{localStorage.setItem(PB_ID_KEY,JSON.stringify({assignments:pbAssignmentIds,records:pbRecordIds}))}catch(e){}
+}
+
+function normalizeCats(cfg){
+  const out={};
+  CATS.forEach(c=>{const s=(cfg&&cfg[c.id])||{};out[c.id]={en:s.en!==false,mx:Number(s.mx)||c.max,sc:Number(s.sc)||c.scale}});
+  return out;
+}
+
+function pbReady(){return typeof pb!=='undefined'&&pb}
+
+// Pull any server-side config + scores this browser has never seen. Local data
+// always wins: PB only fills empty slots so offline work is never lost.
+async function hydrateFromPb(){
+  if(!pbReady()||!cls)return false;
+  let changed=false;
+  const key=assignmentKey();
+  try{
+    let aRec=null;
+    if(pbAssignmentIds[key])aRec=await pb.collection('scoring_assignments').getOne(pbAssignmentIds[key]).catch(()=>null);
+    if(!aRec){
+      const l=await pb.collection('scoring_assignments').getFullList(1,1,{
+        filter:'class_name = {:c} && mode = {:m} && title = {:t}',
+        filterParams:{c:cls,m:mode,t:assignmentTitle()},sort:'-created'
+      }).catch(()=>[]);
+      if(l&&l[0]){aRec=l[0];pbAssignmentIds[key]=aRec.id;persistPbIds()}
+    }
+    if(aRec){
+      if(aRec.categories_config){const n=normalizeCats(aRec.categories_config);if(JSON.stringify(n)!==JSON.stringify(cs)){cs=n;changed=true}}
+      if(Array.isArray(aRec.bands_config)&&aRec.bands_config.length&&JSON.stringify(aRec.bands_config)!==JSON.stringify(ab)){ab=aRec.bands_config;changed=true}
+      if(typeof aRec.max_raw==='number'&&aRec.max_raw>0&&aRec.max_raw!==mr){mr=aRec.max_raw;changed=true}
+      if(aRec.formula&&aRec.formula!==fm){fm=aRec.formula;changed=true}
+    }
+    const recs=await pb.collection('scoring_records').getFullList(500,0,{
+      filter:'class_name = {:c} && mode = {:m}',filterParams:{c:cls,m:mode},sort:'row_order'
+    }).catch(()=>[]);
+    (recs||[]).forEach(r=>{
+      pbRecordIds[key+'|'+r.student_id]=r.id;
+      const k=cls+'_'+r.student_id;
+      const mine=savedScores[k]&&savedScores[k][mode];
+      const theirs={mcq:r.mcq||'',fib:r.fib||'',sa:r.sa||'',frq:r.frq||''};
+      const empty=!mine||(!mine.mcq&&!mine.fib&&!mine.sa&&!mine.frq);
+      if(empty&&(theirs.mcq||theirs.fib||theirs.sa||theirs.frq)){
+        savedScores[k]=savedScores[k]||{};savedScores[k][mode]=theirs;changed=true;
+      }
+    });
+    persistPbIds();
+    setSyncStatus('online');
+  }catch(e){
+    setSyncStatus('offline');
+    return false;
+  }
+  return changed;
+}
+
+function collectRecords(aid){
+  const out=[];
+  st.forEach((s,i)=>{
+    const c=calc(s);
+    const r=mode==='ap'?calcAP(c.pct):evalF(fm,c);
+    const curved=(r.cv!=null)?r.cv:(r.v!=null?r.v:null);
+    out.push({
+      assignment_id:aid||'',class_name:cls,student_id:s.id,student_name:s.name,
+      mcq:String(s.mcq||''),fib:String(s.fib||''),sa:String(s.sa||''),frq:String(s.frq||''),
+      raw_score:Number(c.raw.toFixed(2)),raw_pct:Number(c.pct.toFixed(2)),
+      curved_pct:curved==null?null:Number(curved.toFixed(2)),
+      ap_score:mode==='ap'&&r.ap?r.ap:null,mode:mode,row_order:i
+    });
+  });
+  return out;
+}
+
+async function syncToPb(){
+  if(!pbReady()||!cls){setSyncStatus('offline');return}
+  const key=assignmentKey();
+  setSyncStatus('syncing');
+  try{
+    const roster=(getClassData()[cls]||[]).map(s=>({id:s.id,name:s.name}));
+    const cPayload={name:cls,period:'',academic_year:'',roster:roster,sort_order:(orders&&orders[cls])||roster.map(s=>s.id)};
+    const cList=await pb.collection('scoring_classes').getFullList(1,1,{filter:'name = {:n}',filterParams:{n:cls}}).catch(()=>[]);
+    if(cList&&cList[0])await pb.collection('scoring_classes').update(cList[0].id,cPayload).catch(()=>{});
+    else await pb.collection('scoring_classes').create(cPayload).catch(()=>{});
+
+    const aPayload={class_name:cls,title:assignmentTitle(),date:new Date().toISOString().slice(0,10),
+      mode:mode,max_raw:mr,formula:fm,categories_config:cs,bands_config:ab,linked_vectorselect_code:''};
+    let aRec=null;
+    if(pbAssignmentIds[key])aRec=await pb.collection('scoring_assignments').update(pbAssignmentIds[key],aPayload).catch(()=>null);
+    if(!aRec){
+      const l=await pb.collection('scoring_assignments').getFullList(1,1,{
+        filter:'class_name = {:c} && mode = {:m} && title = {:t}',
+        filterParams:{c:cls,m:mode,t:aPayload.title}
+      }).catch(()=>[]);
+      if(l&&l[0]){pbAssignmentIds[key]=l[0].id;aRec=await pb.collection('scoring_assignments').update(l[0].id,aPayload).catch(()=>l[0])}
+      else aRec=await pb.collection('scoring_assignments').create(aPayload).catch(()=>null);
+      if(aRec)pbAssignmentIds[key]=aRec.id;
+    }
+    const aid=aRec?aRec.id:(pbAssignmentIds[key]||'');
+
+    const rows=collectRecords(aid);
+    for(let i=0;i<rows.length;i++){
+      const r=rows[i],rk=key+'|'+r.student_id;
+      let id=pbRecordIds[rk],ok=false;
+      if(id){ok=Boolean(await pb.collection('scoring_records').update(id,r).catch(()=>null))}
+      if(!id){const c=await pb.collection('scoring_records').create(r).catch(()=>null);if(c){pbRecordIds[rk]=c.id;ok=true}}
+    }
+    pbLastWrite=Date.now();
+    persistPbIds();
+    setSyncStatus('online');
+  }catch(e){
+    console.warn('[ScoringPB] sync failed',e);
+    setSyncStatus('offline');
+  }
+}
+
+function scheduleSync(){
+  if(pbSyncTimer)clearTimeout(pbSyncTimer);
+  pbSyncTimer=setTimeout(()=>{pbSyncTimer=null;syncToPb()},800);
+}
+
+function applyRemoteRecord(r){
+  if(!r||r.class_name!==cls||r.mode!==mode)return;
+  if(Date.now()-pbLastWrite<1500)return;
+  const s=st.find(x=>x.id===r.student_id);if(!s)return;
+  const k=cls+'_'+r.student_id;
+  savedScores[k]=savedScores[k]||{};
+  savedScores[k][mode]={mcq:r.mcq||'',fib:r.fib||'',sa:r.sa||'',frq:r.frq||''};
+  saveLocal();
+  const body=$(mode==='ap'?'apBody':'formulaBody');
+  const row=body&&body.querySelector('tr[data-stid="'+r.student_id+'"]');
+  if(row){
+    CATS.forEach(cat=>{const inp=row.querySelector('input[data-cat="'+cat.id+'"]');if(inp)inp.value=savedScores[k][mode][cat.id]||''});
+  }else{
+    loadStudentScores();renderTable(true);return;
+  }
+  updateCalcRows();
+  toast('Synced update from another device');
 }
 
 function load(){
   try{const r=localStorage.getItem(KEY);if(r){const d=JSON.parse(r);cls=d.cls||'';cs=d.cs||{};ab=d.ab||[];fm=d.fm||'=RAW_PCT';mr=d.mr||100;savedScores=d.scores||{};orders=d.orders||{}}}catch(e){}
-  // Best-effort server sync (only when this file is served by Classroom Hub)
-  try{
-    fetch('/api/curve').then(r=>r.json()).then(s=>{
-      if(!s||!s.scores||!Object.keys(s.scores).length){migAndInit();render();return}
-      cls=s.cls||cls;cs=s.cs||cs;ab=s.ab||ab;fm=s.fm||fm;mr=s.mr||mr;savedScores=s.scores||{};orders=s.orders||orders;
-      save();migAndInit();render();
-    }).catch(()=>migAndInit());
-  }catch(e){migAndInit()}
+  loadPbIds();
+  applyLoad();
+  migrateScores();
+  hydrateFromPb().then(changed=>{if(changed){saveLocal();loadStudents();render()}});
 }
 
-function save(){localStorage.setItem(KEY,JSON.stringify({cls,cs,ab,fm,mr,scores:savedScores,orders}));
-  try{fetch('/api/curve',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cls,cs,ab,fm,mr,scores:savedScores,orders})}).catch(()=>{})}catch(e){}
+function saveLocal(){
+  try{localStorage.setItem(KEY,JSON.stringify({cls,cs,ab,fm,mr,scores:savedScores,orders}))}catch(e){}
 }
+
+function save(){saveLocal();scheduleSync()}
 
 function toast(m){$('toast').textContent=m;$('toast').style.display='block';setTimeout(()=>$('toast').style.display='none',2500)}
 
@@ -219,8 +391,8 @@ function loadStudents(){
     const pos={};ord.forEach((id,i)=>pos[id]=i);
     st.sort((a,b)=>{
       const pa=pos[a.id]!==undefined?pos[a.id]:9999;
-      const pb=pos[b.id]!==undefined?pos[b.id]:9999;
-      return pa-pb;
+      const pb2=pos[b.id]!==undefined?pos[b.id]:9999;
+      return pa-pb2;
     });
   }
 }
@@ -413,6 +585,7 @@ $('tabFormula').onclick=function(){
 };
 
 $('classSelector').onchange=()=>{cls=$('classSelector').value;loadStudents();render();save()};
+$('assignName').oninput=()=>{scheduleSync()};
 $('maxRaw').oninput=()=>{mr=parseFloat($('maxRaw').value)||100;save();updateCalcRows()};
 $('formulaInput').oninput=()=>{fm=$('formulaInput').value;save();updateCalcRows()};
 $('apLegend').addEventListener('input',e=>{
@@ -438,7 +611,7 @@ $('clearBtn').onclick=()=>{
   renderTable(true);
   toast('Scores cleared');
 };
-$('reloadBtn').onclick=()=>{load();loadStudents();render();toast('Reloaded')};
+$('reloadBtn').onclick=async()=>{load();loadStudents();render();await hydrateFromPb();loadStudents();render();toast('Reloaded')};
 $('exportBtn').onclick=()=>{
   const a=CATS.filter(c=>cs[c.id]&&cs[c.id].en!==false);
   let csv='#,Student,'+a.map(c=>c.id.toUpperCase()).join(',')+',Raw,Raw%,'+(mode=='ap'?'Curved%,AP':'Curved%')+'\n';
@@ -446,11 +619,41 @@ $('exportBtn').onclick=()=>{
   const blob=new Blob([csv],{type:'text/csv'});const a2=document.createElement('a');a2.href=URL.createObjectURL(blob);a2.download=(cls||'curve').replace(/[^\w]/g,'_')+'.csv';a2.click();
 };
 
-window.addEventListener('beforeunload',save);
-load();
-loadStudents();
-render();
-toast('Loaded - auto-save ON');
+window.addEventListener('beforeunload',()=>{saveLocal();try{syncToPb()}catch(e){}});
+
+function afterAuth(){
+  load();
+  loadStudents();
+  render();
+  if(pbReady()){
+    subscribeScoringRecords((action,record)=>{if(action==='update')applyRemoteRecord(record)});
+    syncToPb();
+  }
+  toast(isScoringTeacherAuthenticated()?'Synced to PocketBase (:8091)':'Offline mode - local only');
+}
+
+$('lockSubmit').onclick=async()=>{
+  const msg=$('lockMsg');msg.className='lock-msg';msg.textContent='Connecting…';
+  const email=$('lockEmail').value.trim(),pw=$('lockPass').value;
+  if(!pbReady()){msg.className='lock-msg err';msg.textContent='PocketBase not reachable on :8091. Start run_pocketbase.bat or use Offline Mode.';return}
+  const res=await loginScoringTeacher(email,pw);
+  if(res.success){$('lockOverlay').classList.remove('show');afterAuth()}
+  else{msg.className='lock-msg err';msg.textContent=res.error||'Sign-in failed'}
+};
+$('lockSkip').onclick=()=>{$('lockOverlay').classList.remove('show');afterAuth()};
+$('lockPass').onkeydown=e=>{if(e.key==='Enter')$('lockSubmit').click()};
+
+// If already trusted from a previous page load, skip the lock overlay entirely.
+if(isScoringTeacherAuthenticated()&&pbReady()){
+  $('lockOverlay').classList.remove('show');
+  load();loadStudents();render();
+  subscribeScoringRecords((action,record)=>{if(action==='update')applyRemoteRecord(record)});
+  syncToPb();
+  toast('Synced to PocketBase (:8091)');
+}else{
+  setSyncStatus('offline');
+  $('lockPass').focus();
+}
 })();
 </script>
 </body>
