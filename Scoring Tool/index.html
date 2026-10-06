@@ -86,6 +86,37 @@ tbody td:first-child:active{cursor:grabbing}
 .lock-msg{font-size:.9rem;margin-top:8px;min-height:1.2em}
 .lock-msg.err{color:#f87171}
 .lock-msg.ok{color:#86efac}
+.log-layout{display:grid;grid-template-columns:minmax(220px,280px) 1fr;gap:14px;align-items:start}
+.log-sidebar{background:rgba(15,23,42,.65);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:12px}
+.log-sidebar h2{font-size:1.2rem;color:#fb923c}
+.log-control{display:flex;flex-direction:column;gap:5px}
+.log-control label{font-size:.82rem;color:#94a3b8}
+.log-control input,.log-control select{background:rgba(30,41,59,.8);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:8px 10px;font-size:.95rem}
+.log-control-row{display:flex;gap:6px;align-items:center}
+.log-control-row input{flex:1;min-width:0}
+.log-unit{font-size:.82rem;color:#94a3b8;white-space:nowrap}
+.log-actions{display:flex;flex-direction:column;gap:7px;margin-top:auto}
+.log-main{min-width:0}
+.log-summary{display:flex;flex-wrap:wrap;gap:18px;margin:0 0 12px;padding:0 2px;color:#94a3b8}
+.log-stat{min-width:100px}
+.log-stat strong{display:block;font-size:1.45rem;color:#fca5a5}
+.log-stat span{font-size:.78rem}
+.log-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.log-card{position:relative;min-height:132px;padding:14px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;text-align:center;cursor:pointer;transition:background .2s,border-color .2s,transform .2s}
+.log-card:hover{background:rgba(255,255,255,.11);border-color:#fb7185;transform:translateY(-1px)}
+.log-card.deducted{border-color:#ef4444;background:rgba(239,68,68,.12)}
+.log-card.positive{border-color:#10b981;background:rgba(16,185,129,.12)}
+.log-card-name{font-size:1rem;font-weight:700;padding:0 18px}
+.log-card-count{min-height:1.2em;margin-top:7px;color:#fca5a5;font-size:.88rem;font-weight:700}
+.log-card-sub{margin-top:5px;color:#94a3b8;font-size:.75rem}
+.log-card-net{margin-top:6px;color:#fbbf24;font-size:.78rem;font-weight:700}
+.log-card-reset,.log-card-redeem{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:6px;cursor:pointer}
+.log-card-reset{top:6px;right:6px;width:24px;height:24px;background:rgba(255,255,255,.08);color:#94a3b8}
+.log-card-reset:hover{background:#ef4444;color:#fff}
+.log-card-redeem{right:7px;bottom:7px;width:26px;height:26px;background:rgba(16,185,129,.18);border:1px solid rgba(16,185,129,.4);color:#6ee7b7}
+.log-card-redeem:hover{background:#10b981;color:#fff}
+.log-empty{grid-column:1/-1;padding:40px 16px;text-align:center;color:#94a3b8}
+@media(max-width:760px){.log-layout{grid-template-columns:1fr}.log-sidebar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.log-sidebar h2,.log-actions{grid-column:1/-1}}
 </style>
 </head>
 <body>
@@ -96,8 +127,9 @@ tbody td:first-child:active{cursor:grabbing}
 <div class="tab-nav">
 <button class="tab-btn active" id="tabAp" data-tab="ap">AP Curve</button>
 <button class="tab-btn" id="tabFormula" data-tab="formula">Formula Curve</button>
+<button class="tab-btn" id="tabLog" data-tab="log">Log Entry</button>
 </div>
-<div class="controls-row">
+<div class="controls-row" id="scoringControls">
 <div class="control-group"><label>Class</label><select id="classSelector" class="class-select"></select></div>
 <div id="catToggles" style="display:flex;gap:4px;flex-wrap:wrap;align-items:center"></div>
 <div class="control-group"><label>Max Raw</label><input type="number" id="maxRaw" value="100"></div>
@@ -128,6 +160,20 @@ tbody td:first-child:active{cursor:grabbing}
 <div class="formula-help">Variables: RAW, RAW_PCT, MCQ, FIB, SA, FRQ, MAX_RAW | Functions: ROUND, MIN, MAX, IF, ABS, SQRT, SUM, AVG</div>
 </div>
 </div>
+
+<div id="tab-log" class="tab-content">
+<div class="log-layout">
+<aside class="log-sidebar">
+<h2>Call Log</h2>
+<div class="log-control"><label>Class</label><select id="logClassSelector" class="class-select"></select></div>
+<div class="log-control"><label>Log Date</label><input type="date" id="logDate"></div>
+<div class="log-control"><label>Per Call Deduction</label><div class="log-control-row"><input type="number" id="logDeductAmt" min="0" step="0.5" value="1"><span class="log-unit">pts</span><button id="saveLogDeduct" class="btn btn-secondary">Save</button></div></div>
+<div class="log-control"><label>Redemption</label><div class="log-control-row"><input type="number" id="logRedeemAmt" min="0" step="0.5" value="1"><span class="log-unit">pts</span><button id="saveLogRedeem" class="btn btn-secondary">Save</button></div><button id="redeemAll" class="btn btn-success">Award all students</button></div>
+<div class="log-actions"><button id="clearLogDate" class="btn btn-secondary">Clear this day</button><button id="resetLogClass" class="btn btn-secondary">Reset class totals</button><button id="exportLog" class="btn btn-secondary">Export CSV</button></div>
+</aside>
+<main class="log-main"><div id="logSummary" class="log-summary"></div><div id="logGrid" class="log-grid"></div></main>
+</div>
+</div>
 </div>
 
 <div id="addModal" class="modal-overlay">
@@ -152,7 +198,7 @@ tbody td:first-child:active{cursor:grabbing}
 <script>
 (function(){
 const KEY='scoring_tool_curve_v1';
-const ROSTER_VERSION='roster-2026-09-24-v1';
+const ROSTER_VERSION='roster-2026-10-06-v2';
 // ── Embedded roster (sourced from Classroom Hub classroom_data.json) ──
 const ROSTER={"classes":{
 "AP Physics C":[
@@ -162,11 +208,11 @@ const ROSTER={"classes":{
 "Honors Physics 1":[
 {"id":"s_o564w7jr","name":"Summer Chen"},{"id":"s_njksrho4","name":"Nicole Chen"},{"id":"s_we55dr1f","name":"Felix Gao"},{"id":"s_y55w2nkc","name":"Leo Li"},{"id":"s_5ys9pd78","name":"Kevin Lin"},{"id":"s_khh2nemx","name":"Edwin Liu"},{"id":"s_o35k8h7v","name":"Kevin Liu"},{"id":"s_nyqdtakb","name":"Amina Liu"},{"id":"s_dqm9bqlw","name":"Alan Luo"},{"id":"s_vo461e0j","name":"Bob Miao"},{"id":"s_n2pwmpx1","name":"Steven Shen"},{"id":"s_8gabywug","name":"Cris Wang"},{"id":"s_dbusjh1t","name":"Eric Wang"},{"id":"s_yy0pqzmy","name":"Codis Wang"},{"id":"s_1rwdj6oj","name":"Bruce Wang"},{"id":"s_nidktq83","name":"Henry Zhang"},{"id":"s_pzroztsu","name":"Harry Zhang"},{"id":"s_bd19es87","name":"Johnny Zhang"},{"id":"s_y0sds710","name":"Janie Zhang"},{"id":"s_xx6hemmt","name":"Alex Zhong"},{"id":"s_mfx7fpt9","name":"Jason Zhou"},{"id":"s_k4p22b88","name":"Andrew Zhou"},{"id":"s_kgqw1p4n","name":"Sandy Zhu"},{"id":"s_yole4syl","name":"Wafer Cheng"},{"id":"s_9m2cyo6y","name":"Richard Liu"}],
 "Honors Physics 2":[
-{"id":"s_gpjbky4a","name":"Oscar Cao"},{"id":"s_jjad5h2p","name":"Ray Chen"},{"id":"s_7z8geype","name":"Nicolas Chu"},{"id":"s_rpi201xv","name":"Felix Cui"},{"id":"s_9m8yw5ve","name":"Henry Cui"},{"id":"s_06twdlg9","name":"Arnold Huang"},{"id":"s_8y5sismh","name":"Sean Huang"},{"id":"s_a089hpf5","name":"Harri Kong"},{"id":"s_1q2kc5a4","name":"Jerry Li"},{"id":"s_4mykegq3","name":"One Li"},{"id":"s_1tc2gvpf","name":"Henry Liu"},{"id":"s_68nr3xoq","name":"Lydia Liu"},{"id":"s_ux32430i","name":"Mark Wang"},{"id":"s_ciw526wo","name":"Bowen Xu"},{"id":"s_x551k2km","name":"Stephen Zhang"},{"id":"s_yopm0qw4","name":"Nathan Zhao"},{"id":"s_bm1pn3u6","name":"Kevin Liu"},{"id":"s_ovcvs8m1","name":"Kelly Guo"},{"id":"s_8d635q62","name":"Owen Zhang"}]
+{"id":"s_gpjbky4a","name":"Oscar Cao"},{"id":"s_jjad5h2p","name":"Ray Chen"},{"id":"s_7z8geype","name":"Nicolas Chu"},{"id":"s_rpi201xv","name":"Felix Cui"},{"id":"s_9m8yw5ve","name":"Henry Cui"},{"id":"s_06twdlg9","name":"Arnold Huang"},{"id":"s_8y5sismh","name":"Sean Huang"},{"id":"s_a089hpf5","name":"Harri Kong"},{"id":"s_1q2kc5a4","name":"Jerry Li"},{"id":"s_4mykegq3","name":"One Li"},{"id":"s_1tc2gvpf","name":"Henry Liu"},{"id":"s_68nr3xoq","name":"Lydia Liu"},{"id":"s_ux32430i","name":"Mark Wang"},{"id":"s_ciw526wo","name":"Bowen Xu"},{"id":"s_x551k2km","name":"Stephen Zhang"},{"id":"s_yopm0qw4","name":"Nathan Zhao"},{"id":"s_bm1pn3u6","name":"Kevin Liu"},{"id":"s_ovcvs8m1","name":"Kelly Guo"},{"id":"s_8d635q62","name":"Owen Zhang"},{"id":"s_htcj6zcy","name":"Ines"},{"id":"s_66xi1i19","name":"Coco"}]
 }};
 const CATS=[{id:'mcq',color:'#3b82f6',max:40,scale:52,sc:true},{id:'fib',color:'#10b981',max:10,scale:10},{id:'sa',color:'#f59e0b',max:15,scale:15},{id:'frq',color:'#a855f7',max:48,scale:48}];
 const BANDS=[{rMin:70,rMax:100,cMin:90,cMax:100,ap:5},{rMin:54,rMax:69.9,cMin:75,cMax:89,ap:4},{rMin:40,rMax:53.9,cMin:60,cMax:74,ap:3},{rMin:25,rMax:39.9,cMin:30,cMax:59,ap:2},{rMin:0,rMax:24.9,cMin:0,cMax:29,ap:1}];
-let cls='',mode='ap',cs={},ab=[],fm='=RAW_PCT',mr=100,st=[],savedScores={},orders={},dragRow=null;
+let cls='',mode='ap',cs={},ab=[],fm='=RAW_PCT',mr=100,st=[],savedScores={},orders={},dragRow=null,logCls='',logDate='';
 const $=id=>document.getElementById(id);
 
 function getClassData(){
@@ -572,19 +618,292 @@ function renderLegend(){
   });
 }
 
+// ── Classroom Hub-compatible call log ─────────────────────────────────────
+function today(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+
+function loadHubData(){
+  let d={};
+  try{
+    const raw=localStorage.getItem('classRotatorData');
+    d=raw?JSON.parse(raw):{};
+  }catch(e){d={}}
+  if(!d||typeof d!=='object'||Array.isArray(d))d={};
+  if(!d.classes||typeof d.classes!=='object')d.classes={};
+  if(!d.callLog||typeof d.callLog!=='object')d.callLog={};
+  if(!d.callLog.classes||typeof d.callLog.classes!=='object')d.callLog.classes={};
+  if(!d.callLog.history||typeof d.callLog.history!=='object')d.callLog.history={};
+  if(!d.callLog.redeemed||typeof d.callLog.redeemed!=='object')d.callLog.redeemed={};
+  if(!d.callLog.deduct||typeof d.callLog.deduct!=='object')d.callLog.deduct={};
+  if(!d.callLog.redeemPts||typeof d.callLog.redeemPts!=='object')d.callLog.redeemPts={};
+  return d;
+}
+
+function saveHubData(d){
+  try{
+    // Keep the shared roster canonical for classes maintained by Classroom Hub.
+    d.classes=d.classes||{};
+    Object.keys(ROSTER.classes).forEach(c=>{d.classes[c]=JSON.parse(JSON.stringify(ROSTER.classes[c]))});
+    localStorage.setItem('classRotatorData',JSON.stringify(d));
+    try{window.postMessage('classRotatorData:changed','*')}catch(e){}
+  }catch(e){}
+}
+
+function getLogRoster(){
+  return getClassData()[logCls]||[];
+}
+
+function escapeLogHtml(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+function getLogDeductAmt(){
+  const d=loadHubData();
+  return d.callLog.deduct[logCls]!==undefined?(parseFloat(d.callLog.deduct[logCls])||1):1;
+}
+
+function getLogRedeemAmt(){
+  const d=loadHubData();
+  return d.callLog.redeemPts[logCls]!==undefined?(parseFloat(d.callLog.redeemPts[logCls])||1):1;
+}
+
+function getLogRedeemed(uid,dateStr){
+  const d=loadHubData();
+  const byClass=d.callLog.redeemed[logCls]||{};
+  const byDate=byClass[dateStr]||{};
+  return Math.max(0,Number(byDate[uid])||0);
+}
+
+function setLogRedeemed(uid,dateStr,val){
+  const d=loadHubData();
+  if(!d.callLog.redeemed[logCls])d.callLog.redeemed[logCls]={};
+  if(!d.callLog.redeemed[logCls][dateStr])d.callLog.redeemed[logCls][dateStr]={};
+  d.callLog.redeemed[logCls][dateStr][uid]=Math.max(0,Number(val)||0);
+  saveHubData(d);
+}
+
+function appendLogHistory(uid,dateStr,entry){
+  const d=loadHubData();
+  if(!d.callLog.history[logCls])d.callLog.history[logCls]={};
+  if(!d.callLog.history[logCls][dateStr])d.callLog.history[logCls][dateStr]={};
+  if(!Array.isArray(d.callLog.history[logCls][dateStr][uid]))d.callLog.history[logCls][dateStr][uid]=[];
+  d.callLog.history[logCls][dateStr][uid].push(entry);
+  saveHubData(d);
+}
+
+function ensureLogDate(dateStr){
+  const d=loadHubData();
+  if(!d.callLog.classes[logCls])d.callLog.classes[logCls]={};
+  if(!d.callLog.classes[logCls][dateStr])d.callLog.classes[logCls][dateStr]={};
+  saveHubData(d);
+  return d;
+}
+
+function renderLogClassSelector(){
+  const sel=$('logClassSelector');
+  if(!sel)return;
+  const names=Object.keys(getClassData());
+  sel.innerHTML='';
+  if(!names.length){
+    sel.innerHTML='<option value="">No classes</option>';
+    sel.disabled=true;
+    logCls='';
+    return;
+  }
+  sel.disabled=false;
+  names.forEach(n=>{
+    const o=document.createElement('option');
+    o.value=n;o.textContent=n;sel.appendChild(o);
+  });
+  if(!logCls||!names.includes(logCls))logCls=names.includes(cls)?cls:names[0];
+  sel.value=logCls;
+}
+
+function updateLogStats(day){
+  const summary=$('logSummary');
+  if(!summary)return;
+  if(!logCls){
+    summary.innerHTML='';
+    return;
+  }
+  const d=loadHubData();
+  const classDays=d.callLog.classes[logCls]||{};
+  let allTime=0,peak=0,peakId='';
+  Object.keys(classDays).forEach(dt=>{
+    const counts=classDays[dt]||{};
+    Object.keys(counts).forEach(uid=>{
+      const n=Number(counts[uid])||0;
+      allTime+=n;
+      if(dt===($('logDate').value||today())&&n>peak){peak=n;peakId=uid}
+    });
+  });
+  const todayCount=Object.keys(day||{}).reduce((sum,uid)=>sum+(Number(day[uid])||0),0);
+  const student=getLogRoster().find(s=>s.id===peakId);
+  const peakName=escapeLogHtml(student?student.name:(peakId||'—'));
+  const redeemed=getLogRoster().reduce((sum,s)=>sum+getLogRedeemed(s.id,$('logDate').value||today()),0);
+  const net=redeemed*getLogRedeemAmt()-todayCount*getLogDeductAmt();
+  summary.innerHTML=
+    '<div class="log-stat"><strong>'+todayCount+'</strong><span>No-answers today</span></div>'+
+    '<div class="log-stat"><strong>'+peakName+'</strong><span>Most skipped today</span></div>'+
+    '<div class="log-stat"><strong>'+allTime+'</strong><span>All-time no-answers</span></div>'+
+    '<div class="log-stat"><strong>'+((net>=0?'+':'')+net.toFixed(1))+'</strong><span>Net points today</span></div>';
+}
+
+function renderLog(){
+  const grid=$('logGrid');
+  if(!grid)return;
+  renderLogClassSelector();
+  const dateStr=$('logDate').value||today();
+  $('logDate').value=dateStr;
+  $('logDeductAmt').value=getLogDeductAmt();
+  $('logRedeemAmt').value=getLogRedeemAmt();
+  const d=loadHubData();
+  const day=(d.callLog.classes[logCls]&&d.callLog.classes[logCls][dateStr])||{};
+  const roster=getLogRoster();
+  grid.innerHTML='';
+  if(!logCls||!roster.length){
+    grid.innerHTML='<div class="log-empty">Select a class to begin logging.</div>';
+    updateLogStats(day);
+    return;
+  }
+  roster.forEach(s=>{
+    const uid=s.id||s.name;
+    const count=Number(day[uid])||0;
+    const redeemed=getLogRedeemed(uid,dateStr);
+    const net=redeemed*getLogRedeemAmt()-count*getLogDeductAmt();
+    const card=document.createElement('div');
+    card.className='log-card'+(net<0?' deducted':'')+(net>0?' positive':'');
+    const name=document.createElement('div');
+    name.className='log-card-name';name.textContent=s.name||'Student';
+    const countEl=document.createElement('div');
+    countEl.className='log-card-count';
+    countEl.textContent=count?(count+' no-answer'+(count===1?'':'s')):'';
+    const sub=document.createElement('div');
+    sub.className='log-card-sub';
+    sub.textContent=count?'-'+(count*getLogDeductAmt()).toFixed(1)+' pts':'click to log no-answer';
+    const netEl=document.createElement('div');
+    netEl.className='log-card-net';
+    netEl.textContent=(count||redeemed)?'net '+(net>=0?'+':'-')+Math.abs(net).toFixed(1):'';
+    const reset=document.createElement('button');
+    reset.type='button';reset.className='log-card-reset';reset.textContent='×';reset.title='Delete all scores today';
+    reset.onclick=e=>{
+      e.stopPropagation();
+      if(!confirm('Delete all log entries for '+(s.name||'student')+' on '+dateStr+'?'))return;
+      const nd=loadHubData();
+      if(nd.callLog.classes[logCls]&&nd.callLog.classes[logCls][dateStr])delete nd.callLog.classes[logCls][dateStr][uid];
+      if(nd.callLog.redeemed[logCls]&&nd.callLog.redeemed[logCls][dateStr])delete nd.callLog.redeemed[logCls][dateStr][uid];
+      if(nd.callLog.history[logCls]&&nd.callLog.history[logCls][dateStr])delete nd.callLog.history[logCls][dateStr][uid];
+      saveHubData(nd);renderLog();toast('Log entries deleted');
+    };
+    const redeem=document.createElement('button');
+    redeem.type='button';redeem.className='log-card-redeem';redeem.textContent='✓';redeem.title='Redeem: student answered';
+    redeem.onclick=e=>{
+      e.stopPropagation();
+      setLogRedeemed(uid,dateStr,redeemed+1);
+      appendLogHistory(uid,dateStr,{type:'answer',pts:getLogRedeemAmt(),ts:Date.now()});
+      renderLog();toast((s.name||'Student')+' answered — +'+getLogRedeemAmt()+' pts');
+    };
+    card.append(name,countEl,sub,netEl,reset,redeem);
+    card.onclick=()=>{
+      const nd=ensureLogDate(dateStr);
+      nd.callLog.classes[logCls][dateStr][uid]=(Number(nd.callLog.classes[logCls][dateStr][uid])||0)+1;
+      saveHubData(nd);
+      appendLogHistory(uid,dateStr,{type:'noanswer',pts:-getLogDeductAmt(),ts:Date.now()});
+      renderLog();toast('-'+getLogDeductAmt()+' pts for '+(s.name||'Student'));
+    };
+    grid.appendChild(card);
+  });
+  updateLogStats(day);
+}
+
+function exportLogCsv(){
+  const dateStr=$('logDate').value||today();
+  const d=loadHubData();
+  const day=(d.callLog.classes[logCls]&&d.callLog.classes[logCls][dateStr])||{};
+  const quote=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const lines=['Student,NoAnswers,NoAnswerPts,RedeemCount,RedeemPts,Net'];
+  getLogRoster().forEach(s=>{
+    const count=Number(day[s.id])||0;
+    const redeemed=getLogRedeemed(s.id,dateStr);
+    const deduct=count*getLogDeductAmt(),reward=redeemed*getLogRedeemAmt();
+    lines.push([quote(s.name),count,deduct.toFixed(1),redeemed,reward.toFixed(1),(reward-deduct).toFixed(1)].join(','));
+  });
+  const blob=new Blob([lines.join('\n')],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='call_log_'+(logCls||'class').replace(/[^\w]+/g,'_')+'_'+dateStr+'.csv';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),0);
+  toast('Log exported');
+}
+
 // Tab switching
 $('tabAp').onclick=function(){
   $('tabAp').classList.add('active');$('tabFormula').classList.remove('active');
+  $('tabLog').classList.remove('active');$('scoringControls').style.display='';
   $('tab-ap').classList.add('active');$('tab-formula').classList.remove('active');
+  $('tab-log').classList.remove('active');
   mode='ap';loadStudentScores();renderTable(true);
 };
 $('tabFormula').onclick=function(){
   $('tabFormula').classList.add('active');$('tabAp').classList.remove('active');
+  $('tabLog').classList.remove('active');$('scoringControls').style.display='';
   $('tab-formula').classList.add('active');$('tab-ap').classList.remove('active');
+  $('tab-log').classList.remove('active');
   mode='formula';loadStudentScores();renderTable(true);
+};
+$('tabLog').onclick=function(){
+  $('tabLog').classList.add('active');$('tabAp').classList.remove('active');$('tabFormula').classList.remove('active');
+  $('tab-log').classList.add('active');$('tab-ap').classList.remove('active');$('tab-formula').classList.remove('active');
+  $('scoringControls').style.display='none';
+  renderLog();
 };
 
 $('classSelector').onchange=()=>{cls=$('classSelector').value;loadStudents();render();save()};
+$('logClassSelector').onchange=()=>{logCls=$('logClassSelector').value;renderLog()};
+$('logDate').onchange=()=>renderLog();
+$('saveLogDeduct').onclick=()=>{
+  const v=parseFloat($('logDeductAmt').value);
+  if(!isNaN(v)&&v>0){
+    const d=loadHubData();d.callLog.deduct[logCls]=v;saveHubData(d);renderLog();toast('Deduction set');
+  }else toast('Enter a valid deduction');
+};
+$('saveLogRedeem').onclick=()=>{
+  const v=parseFloat($('logRedeemAmt').value);
+  if(!isNaN(v)&&v>0){
+    const d=loadHubData();d.callLog.redeemPts[logCls]=v;saveHubData(d);renderLog();toast('Redemption set');
+  }else toast('Enter a valid redemption');
+};
+$('redeemAll').onclick=()=>{
+  const dateStr=$('logDate').value||today(),roster=getLogRoster();
+  if(!roster.length){toast('No students in class');return}
+  if(!confirm('Award +'+getLogRedeemAmt()+' pts to every student in '+logCls+' for '+dateStr+'?'))return;
+  const pts=getLogRedeemAmt();
+  roster.forEach(s=>{
+    const uid=s.id||s.name;
+    setLogRedeemed(uid,dateStr,getLogRedeemed(uid,dateStr)+1);
+    appendLogHistory(uid,dateStr,{type:'answer',pts,ts:Date.now()});
+  });
+  renderLog();toast('Redeemed for all students');
+};
+$('clearLogDate').onclick=()=>{
+  const dateStr=$('logDate').value||today();
+  if(!confirm('Reset all log entries for '+logCls+' on '+dateStr+' to 0?'))return;
+  const d=loadHubData();
+  if(d.callLog.classes[logCls])delete d.callLog.classes[logCls][dateStr];
+  if(d.callLog.redeemed[logCls])delete d.callLog.redeemed[logCls][dateStr];
+  if(d.callLog.history[logCls])delete d.callLog.history[logCls][dateStr];
+  saveHubData(d);renderLog();toast('Day reset to 0');
+};
+$('resetLogClass').onclick=()=>{
+  if(!confirm('Reset all call-log history for '+logCls+'?'))return;
+  const d=loadHubData();
+  delete d.callLog.classes[logCls];delete d.callLog.redeemed[logCls];delete d.callLog.history[logCls];
+  saveHubData(d);renderLog();toast('Class reset');
+};
+$('exportLog').onclick=exportLogCsv;
 $('assignName').oninput=()=>{scheduleSync()};
 $('maxRaw').oninput=()=>{mr=parseFloat($('maxRaw').value)||100;save();updateCalcRows()};
 $('formulaInput').oninput=()=>{fm=$('formulaInput').value;save();updateCalcRows()};

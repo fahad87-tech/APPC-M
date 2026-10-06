@@ -1381,7 +1381,7 @@ $$y(t) = v_{0y} t - \\frac{1}{2}g t^2 = (${voy.toFixed(2)})(${tTransit.toFixed(3
         unit: 1,
         unitTitle: "Unit 1: Kinematics (Collegiate Lab)",
         simType: 'cannon',
-        simData: { angle, v0, photogateX, g, isCalculus: isCalc },
+        simData: { angle, v0, photogateX, g, targetY: yTransit, targetTolerance: 0.15, isCalculus: isCalc },
         prompt,
         choices: shuffle(choices),
         explanation
@@ -1434,7 +1434,7 @@ Total thermal dissipation: $W_{\\text{dissipated}} = ${(workFric).toFixed(1)}\\t
         unit: 2,
         unitTitle: "Unit 2: Work & Energy (Collegiate Lab)",
         simType: 'drift',
-        simData: { m, vA, L, mu, g, isCalculus: isCalc },
+        simData: { m, vA, L, mu, g, targetV: vB, targetTolerance: 0.15, isCalculus: isCalc },
         prompt,
         choices: shuffle(choices),
         explanation
@@ -1486,7 +1486,7 @@ $$F_N = m \\left( \\frac{v_{\\text{apex}}^2}{R} - g \\right) = ${m.toFixed(1)} \
         unit: 3,
         unitTitle: "Unit 3: Circular Motion & Energy (Collegiate Lab)",
         simType: 'coaster',
-        simData: { m, H, R, g, isCalculus: isCalc },
+        simData: { m, H, R, g, targetFn: fnApex, targetTolerance: 0.75, isCalculus: isCalc },
         prompt,
         choices: shuffle(choices),
         explanation
@@ -1538,7 +1538,7 @@ $$v_{\\max} = \\omega_0 x_0 = (${omega0.toFixed(2)})(${x0.toFixed(2)}) = ${vMax.
         unit: 4,
         unitTitle: "Unit 4: Simple Harmonic Motion (Collegiate Lab)",
         simType: 'harmonic',
-        simData: { m, k, x0, isCalculus: isCalc },
+        simData: { m, k, x0, targetEnergy: ETotal, targetVMax: vMax, energyTolerance: 0.05, velocityTolerance: 0.05, isCalculus: isCalc },
         prompt,
         choices: shuffle(choices),
         explanation
@@ -1551,10 +1551,17 @@ $$v_{\\max} = \\omega_0 x_0 = (${omega0.toFixed(2)})(${x0.toFixed(2)}) = ${vMax.
       const L = 6.0;
       const Mbeam = pickRandom([6.0, 8.0, 10.0]);
       const xFulcrum = 2.0;
-      const m1 = pickRandom([8.0, 10.0, 12.0]);
-      const m2 = pickRandom([3.0, 4.0, 5.0]);
-
-      const idealD2 = (m1 * xFulcrum - Mbeam * (L / 2 - xFulcrum)) / m2;
+      // Keep the correct counterweight position inside the apparatus range:
+      // the interactive beam slider can only place m2 up to L - xFulcrum.
+      const maxCounterweightArm = L - xFulcrum;
+      let m1;
+      let m2;
+      let idealD2;
+      do {
+        m1 = pickRandom([8.0, 10.0, 12.0]);
+        m2 = pickRandom([3.0, 4.0, 5.0]);
+        idealD2 = (m1 * xFulcrum - Mbeam * (L / 2 - xFulcrum)) / m2;
+      } while (idealD2 < 1.0 || idealD2 > maxCounterweightArm);
       const ansRounded = Math.round(idealD2 * 100) / 100;
 
       const prompt = `
@@ -1590,7 +1597,7 @@ $$d_2 = \\frac{${(m1 * xFulcrum).toFixed(1)} - ${(Mbeam * 1.0).toFixed(1)}}{${m2
         unit: 5,
         unitTitle: "Unit 5: Rotational Equilibrium (Collegiate Lab)",
         simType: 'torque',
-        simData: { L, Mbeam, xFulcrum, m1, m2, g, isCalculus: isCalc },
+        simData: { L, Mbeam, xFulcrum, m1, m2, g, targetD2: idealD2, targetTolerance: 0.20, isCalculus: isCalc },
         prompt,
         choices: shuffle(choices),
         explanation

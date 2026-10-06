@@ -754,6 +754,9 @@ async def process_all_exams():
             for f in files:
                 if not f.endswith('.pdf') or 'FRQ' in f or ' (1)' in f or 'Cover' in f or 'Mid-Term' in f:
                     continue
+                # Unit tests are intentionally excluded from this app.
+                if re.search(r'unit\s*test', f, re.IGNORECASE):
+                    continue
                 if (f.startswith('SG_') or 
                     'Answers' in f or 
                     ' A.pdf' in f or 
@@ -835,6 +838,8 @@ async def process_all_exams():
                     continue
                     
                 title = resolve_title(course_key, u_dir, f, headers)
+                if re.search(r'unit\s*test', title, re.IGNORECASE):
+                    continue
                 quiz_slug = f"{course_key}_{u_dir.replace(' ', '')}_{title.split(':')[0].replace(' ', '_').replace('.', '_')}".lower()
                 quiz_slug = re.sub(r'[^a-z0-9_]', '', quiz_slug)
                 
@@ -858,8 +863,16 @@ async def process_all_exams():
                                 break
                 elif 'Answers' in f:
                     stem = f.replace(' Answers.pdf', '.pdf').replace('Answers.pdf', '.pdf').strip()
-                    if stem in files:
-                        tb_file = stem
+                    answer_stems = {
+                        stem,
+                        stem.replace('.pdf', 's.pdf'),
+                        stem.replace('Answer.pdf', 'Answers.pdf'),
+                        stem.replace('Answers.pdf', 'Answer.pdf')
+                    }
+                    matching_stems = [candidate for candidate in files
+                                      if candidate in answer_stems]
+                    if matching_stems:
+                        tb_file = matching_stems[0]
                 elif f.endswith('A.pdf'):
                     stem = re.sub(r'\s*A\.pdf$', '.pdf', f)
                     if stem in files:
@@ -980,4 +993,3 @@ async def process_all_exams():
 
 if __name__ == "__main__":
     asyncio.run(process_all_exams())
-

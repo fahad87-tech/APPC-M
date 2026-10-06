@@ -212,3 +212,35 @@ Run the SQL script [`supabase_schema.sql`](supabase_schema.sql) in your **Supaba
   ```
 - **Confidential Answer Key Getters**: In `getQuestionCorrectAnswer()` and `getQuestionExplanation()`, in `teacher_led` mode, if `!isCurrentQuestionEvaluationRevealed()`, they strictly return `""`, ensuring no choice can be pre-highlighted in green before official instructor reveal.
 - **Guarded Timer Local Lock**: `updatePerQDisplay(secs)` only calls `autoLockCurrentQuestion()` if `hasTimer && Number.isFinite(startedAt) && secs <= 0`.
+
+---
+
+## 9. Toast Deduplication & Question Card Canvas Drawing Architecture
+
+### A. Toast Notification Deduplication
+- **Duplicate Suppression in Host**: `showToast(title, body, theme, timeout)` checks if an identical toast (`data-toast-key="${title}:::${body}"`) is already mounted in `#toast-host`. If present, the duplicate request is discarded.
+- **Single-Fire Evaluation Feedback**: `showDiscussionFeedback(realIdx, revealedKey, explanation)` checks `if (!discussionFeedbackShownForQuestion[realIdx]) { discussionFeedbackShownForQuestion[realIdx] = true; ... }` so each question's evaluation toast (e.g. "Correct: Q1 — Verified College Board key Option B") fires strictly once per discussion or timer expiry phase.
+- **Redundant Sync Call Removal**: Cleaned up `syncStudentWithTeacherAssignment()` to prevent double-invoking `showDiscussionFeedback()`.
+
+### B. Question Card Native Canvas Drawing Engine
+- **Floating Circular Activation Badge**:
+  - Located on the top-right corner of the question card (`#q-card-white-box`).
+  - Circular button (`#btn-toggle-canvas`) toggles drawing mode on/off with visual cyan glow and status indicator ("Active" / "Off").
+  - Matching `#hdr-btn-toggle-canvas` button in the top Question Header Bar.
+- **Hover Popout Tool Suite (`#q-canvas-menu`)**:
+  - **Option 1: Marker**:
+    - Preset color palette: Crimson Red (`#ef4444`), Electric Cyan (`#06b6d4`), Highlighter Yellow (`#eab308`), Lime Green (`#22c55e`), and Purple (`#a855f7`).
+    - Brush thickness pills: Thin (2px), Med (4px), Thick (8px).
+  - **Option 2: Eraser**:
+    - Eraser mode switches canvas `globalCompositeOperation` to `destination-out`, cleanly erasing annotations without modifying or degrading the underlying AP Physics question card image.
+  - **Clear Tool**: Clears current question canvas markings with one tap.
+- **Ratio-Normalized Vector Resolution (`xRatio`, `yRatio`)**:
+  - Pointer coordinates are normalized as ratios: `xRatio = (clientX - rect.left) / rect.width`, `yRatio = (clientY - rect.top) / rect.height`.
+  - When the browser window resizes, when students collapse the sidebar with **Expand Space**, or when switching zoom scales (100% / 120% / 140%), all strokes redraw with precision relative to the vector diagram.
+- **Non-Destructive Pointer Interaction**:
+  - When Drawing Mode is **Off**: `q-card-canvas` is set to `pointer-events: none;`. Clicking anywhere on the card opens the full-screen 125%+ vector inspector modal (`openImageModal`).
+  - When Drawing Mode is **Active**: `q-card-canvas` switches to `pointer-events: auto;`. `onQuestionCardClick()` ignores zoom triggers, allowing natural stylus, finger touch, or mouse annotation directly across the problem card.
+- **Per-Question Stroke Persistence**:
+  - Drawings are stored per question index in `cardDrawStrokesByQuestion[realIdx]`.
+  - Navigating back and forth preserves student working steps on each card.
+

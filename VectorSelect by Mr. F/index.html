@@ -522,6 +522,9 @@
               <span id="active-q-subinfo" class="text-base text-slate-200 font-bold">Question 1 of 10</span>
             </div>
             <div class="flex items-center gap-2.5">
+              <button onclick="toggleCardDrawingMode(event)" id="hdr-btn-toggle-canvas" class="pressable px-3 py-2 rounded-xl border border-slate-700 hover:border-cyan-500/50 bg-slate-800 text-slate-200 text-sm font-bold flex items-center gap-1.5 transition" title="Toggle Drawing Tool on Question Card">
+                <span>✏️</span> <span id="hdr-canvas-text">Draw</span>
+              </button>
               <button onclick="toggleSidebarCollapse()" id="btn-toggle-space" class="pressable px-3.5 py-2 rounded-xl border border-slate-700 hover:border-cyan-500/50 bg-slate-800 text-slate-200 text-sm font-bold flex items-center gap-2 transition" title="Toggle full-width question space">
                 <span id="btn-toggle-space-icon">⛶</span> <span id="btn-toggle-space-text">Expand Space</span>
               </button>
@@ -533,9 +536,70 @@
           <div class="quantum-line"></div>
 
           <!-- Question Card Visual Display (High Resolution & Full Width Area) -->
-          <div id="q-card-container" class="hidden bg-slate-950/80 border border-slate-800 rounded-3xl p-3 sm:p-4 md:p-5 text-center shadow-inner">
-            <div id="q-card-white-box" class="bg-white rounded-2xl p-2 sm:p-4 shadow-xl inline-block w-full overflow-hidden transition-all duration-300">
-              <img id="q-card-img" src="" alt="AP Physics Question Card" class="mx-auto max-h-[92vh] w-full object-contain cursor-zoom-in transition-transform duration-200 hover:scale-[1.01]" onclick="openImageModal(this.src)" title="Click to zoom question card (125%+ vector inspector)">
+          <div id="q-card-container" class="hidden bg-slate-950/80 border border-slate-800 rounded-3xl p-3 sm:p-4 md:p-5 text-center shadow-inner relative">
+            <div id="q-card-white-box" class="bg-white rounded-2xl p-2 sm:p-4 shadow-xl inline-block w-full overflow-hidden transition-all duration-300 relative">
+              <img id="q-card-img" src="" alt="AP Physics Question Card" class="mx-auto max-h-[92vh] w-full object-contain cursor-zoom-in transition-transform duration-200 hover:scale-[1.01]" onclick="onQuestionCardClick(event)" title="Click to zoom question card (125%+ vector inspector)">
+              <canvas id="q-card-canvas" class="absolute inset-0 pointer-events-none z-10 w-full h-full touch-none"></canvas>
+
+              <!-- Floating Canvas Annotation Badge Tool (Top-Right of Question Card) -->
+              <div id="q-canvas-tool-wrapper" class="absolute top-3 right-3 z-30 group flex flex-col items-end">
+                <!-- Small Circular Activation Button -->
+                <button type="button" id="btn-toggle-canvas" onclick="toggleCardDrawingMode(event)" class="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-cyan-300 shadow-2xl flex items-center justify-center transition-all duration-200 cursor-pointer backdrop-blur-md" title="Toggle Drawing Tool (Click to activate/deactivate)">
+                  <span id="canvas-tool-icon" class="text-base sm:text-lg">✏️</span>
+                </button>
+
+                <!-- Hover Popout Menu (Marker / Eraser / Brush / Colors) -->
+                <div id="q-canvas-menu" class="absolute right-0 top-12 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 bg-slate-900/95 border border-slate-700/80 rounded-2xl p-3 shadow-2xl space-y-2.5 min-w-[210px] text-xs backdrop-blur-md z-40 text-left">
+                  <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 px-0.5">
+                    <span class="font-extrabold text-cyan-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                      <span>✏️</span> Drawing Tools
+                    </span>
+                    <span id="canvas-status-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Off</span>
+                  </div>
+
+                  <!-- Tool Selection: Marker (Option 1) vs Eraser (Option 2) -->
+                  <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                    <button type="button" id="btn-canvas-mode-marker" onclick="setCanvasMode('marker')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition cursor-pointer">
+                      <span>✏️</span> Marker
+                    </button>
+                    <button type="button" id="btn-canvas-mode-eraser" onclick="setCanvasMode('eraser')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 text-slate-400 hover:text-white border border-transparent transition cursor-pointer">
+                      <span>🧹</span> Eraser
+                    </button>
+                  </div>
+
+                  <!-- Marker Settings (Color & Brush Size) -->
+                  <div id="canvas-marker-settings" class="space-y-2 pt-0.5">
+                    <!-- Colors -->
+                    <div class="flex items-center justify-between px-0.5">
+                      <span class="text-[10px] uppercase font-bold text-slate-400">Color:</span>
+                      <div class="flex items-center gap-1.5">
+                        <button type="button" onclick="setCanvasColor('#ef4444')" class="canvas-color-dot h-5 w-5 rounded-full bg-rose-500 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#ef4444" title="Red"></button>
+                        <button type="button" onclick="setCanvasColor('#06b6d4')" class="canvas-color-dot h-5 w-5 rounded-full bg-cyan-400 ring-2 ring-cyan-300 hover:scale-110 transition scale-110 cursor-pointer" data-color="#06b6d4" title="Cyan"></button>
+                        <button type="button" onclick="setCanvasColor('#eab308')" class="canvas-color-dot h-5 w-5 rounded-full bg-amber-400 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#eab308" title="Highlighter Yellow"></button>
+                        <button type="button" onclick="setCanvasColor('#22c55e')" class="canvas-color-dot h-5 w-5 rounded-full bg-emerald-400 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#22c55e" title="Lime Green"></button>
+                        <button type="button" onclick="setCanvasColor('#a855f7')" class="canvas-color-dot h-5 w-5 rounded-full bg-purple-400 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#a855f7" title="Purple"></button>
+                      </div>
+                    </div>
+
+                    <!-- Brush Size -->
+                    <div class="flex items-center justify-between px-0.5">
+                      <span class="text-[10px] uppercase font-bold text-slate-400">Size:</span>
+                      <div class="flex items-center gap-1">
+                        <button type="button" onclick="setCanvasBrushSize(2)" id="btn-brush-2" class="canvas-brush-btn px-2 py-0.5 rounded-lg border border-slate-800 text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer">Thin</button>
+                        <button type="button" onclick="setCanvasBrushSize(4)" id="btn-brush-4" class="canvas-brush-btn px-2 py-0.5 rounded-lg border border-cyan-500/40 bg-cyan-500/20 text-[11px] font-bold text-cyan-300 transition cursor-pointer">Med</button>
+                        <button type="button" onclick="setCanvasBrushSize(8)" id="btn-brush-8" class="canvas-brush-btn px-2 py-0.5 rounded-lg border border-slate-800 text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer">Thick</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Clear Button -->
+                  <div class="border-t border-slate-800 pt-1.5">
+                    <button type="button" onclick="clearCurrentCardCanvas()" class="w-full py-1.5 rounded-xl border border-rose-500/30 hover:border-rose-500/60 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer">
+                      <span>🗑️</span> Clear Drawing
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-300 mt-3 px-1 font-medium">
               <span class="font-mono text-slate-400 text-xs">💡 Authentic College Board Vector Render • Click image to zoom (125%+)</span>
@@ -1172,6 +1236,15 @@
       const host = document.getElementById("toast-host");
       if (!host) return;
 
+      const toastKey = `${title}:::${body || ""}`;
+      // STRICT DEDUPLICATION: Never spawn redundant duplicate toasts concurrently
+      const existing = host.querySelectorAll(".toast");
+      for (const el of existing) {
+        if (el.dataset.toastKey === toastKey) {
+          return; // Already actively displayed in the corner!
+        }
+      }
+
       const tones = {
         brass:  { ring: "border-brass-500/50",  bg: "bg-ink-700",  bar: "bg-brass-500",  text: "text-brass-400",  glyph: "◈" },
         copper: { ring: "border-copper-500/50", bg: "bg-ink-700",  bar: "bg-copper-500", text: "text-copper-400", glyph: "◆" },
@@ -1182,6 +1255,7 @@
       const t = tones[tone] || tones.brass;
 
       const toast = document.createElement("div");
+      toast.dataset.toastKey = toastKey;
       toast.className = `toast flex items-stretch gap-0 overflow-hidden rounded-xl border ${t.ring} ${t.bg} shadow-2xl backdrop-blur-md max-w-sm`;
       toast.innerHTML = `
         <div class="toast-bar ${t.bar} w-1.5 shrink-0"></div>
@@ -1270,6 +1344,7 @@
         input.classList.add("border-indigo-500", "bg-indigo-950/20");
       }
       initModalPan();
+      initQuestionCanvas();
     }
 
     // ============================================================================
@@ -1568,6 +1643,7 @@
 
       renderQuestionNavGrid();
       renderCurrentQuestion();
+      initQuestionCanvas();
     }
 
     // ============================================================================
@@ -1861,7 +1937,6 @@
           </div>
           ${explanation ? `<div class="text-sm text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-800">${explanation}</div>` : ''}
         `;
-        showToast("Time Expired", `Q${qNum} — correct answer was Option ${correctAnswer}`, "brass", 3200);
       } else if (studentAnswer === correctAnswer) {
         feedbackPanel.className = "verdict-card mt-4 p-5 rounded-2xl border border-lime-500/45 bg-lime-500/10 space-y-3 enter";
         statusEl.className = "text-xs font-bold text-lime-400";
@@ -1876,7 +1951,6 @@
           </div>
           ${explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${explanation}</div>` : ''}
         `;
-        showToast("Correct!", `Q${qNum} — you nailed it!`, "lime", 3400);
       } else {
         feedbackPanel.className = "verdict-card mt-4 p-5 rounded-2xl border border-coral-500/45 bg-coral-500/10 space-y-3 enter";
         statusEl.className = "text-xs font-bold text-coral-400";
@@ -1891,7 +1965,18 @@
           </div>
           ${explanation ? `<div class="text-sm text-chalk/70 leading-relaxed bg-ink-900/70 p-3.5 rounded-xl border border-ink-600">${explanation}</div>` : ''}
         `;
-        showToast("Incorrect", `Q${qNum} — the correct answer was Option ${correctAnswer}`, "coral", 3400);
+      }
+
+      // Show correct/incorrect verdict badge toast strictly ONCE per question
+      if (!discussionFeedbackShownForQuestion[realIdx]) {
+        discussionFeedbackShownForQuestion[realIdx] = true;
+        if (!studentAnswer) {
+          showToast("Time Expired", `Q${qNum} — correct answer was Option ${correctAnswer}`, "brass", 3200);
+        } else if (studentAnswer === correctAnswer) {
+          showToast("Correct!", `Q${qNum} — you nailed it!`, "lime", 3400);
+        } else {
+          showToast("Incorrect", `Q${qNum} — the correct answer was Option ${correctAnswer}`, "coral", 3400);
+        }
       }
 
       // Highlight correct answer and wrong choice on the choice buttons
@@ -2027,6 +2112,14 @@
         if (toggleBtnIcon) toggleBtnIcon.textContent = "⛶";
       }
       updateGridHighlights();
+      setTimeout(() => {
+        if (typeof resizeCanvasToCard === 'function') resizeCanvasToCard();
+        if (typeof redrawCardCanvas === 'function') redrawCardCanvas();
+      }, 60);
+      setTimeout(() => {
+        if (typeof resizeCanvasToCard === 'function') resizeCanvasToCard();
+        if (typeof redrawCardCanvas === 'function') redrawCardCanvas();
+      }, 320);
     }
 
     // ============================================================================
@@ -2127,6 +2220,14 @@
       if (q.card_image) {
         cardBox.classList.remove("hidden");
         cardImg.src = q.card_image;
+        cardImg.onload = () => {
+          resizeCanvasToCard();
+          redrawCardCanvas();
+        };
+        requestAnimationFrame(() => {
+          resizeCanvasToCard();
+          redrawCardCanvas();
+        });
         promptEl.classList.add("hidden");
       } else {
         cardBox.classList.add("hidden");
@@ -3221,7 +3322,6 @@
         }
         renderCurrentQuestion();
         updateDiscussionFreeze(true, true);
-        showDiscussionFeedback();
       } else {
         // Teacher is in active question answering phase
         discussionActive = false;
@@ -4002,6 +4102,10 @@
         img.style.maxHeight = "none";
         if (whiteBox) whiteBox.style.overflow = "auto";
       }
+      setTimeout(() => {
+        if (typeof resizeCanvasToCard === 'function') resizeCanvasToCard();
+        if (typeof redrawCardCanvas === 'function') redrawCardCanvas();
+      }, 50);
     }
 
     function openImageModal(src) {
@@ -4349,6 +4453,298 @@
       redrawScratchpad();
     }
 
+    // ============================================================================
+    // QUESTION CARD DRAWING & ANNOTATION ENGINE (Native Canvas Overlay)
+    // ============================================================================
+    let isCardDrawingActive = false;
+    let cardDrawMode = 'marker'; // 'marker' or 'eraser'
+    let cardDrawColor = '#06b6d4'; // default cyan
+    let cardDrawSize = 4; // default 4px
+    let isCardDrawing = false;
+    let cardCurrentStroke = null;
+    const cardDrawStrokesByQuestion = {}; // Map: realIdx -> Array of stroke objects
+
+    function getCardCanvasRealIndex() {
+      if (typeof questionOrder !== 'undefined' && questionOrder && questionOrder.length > 0 && typeof currentQuestionIdx !== 'undefined') {
+        return questionOrder[currentQuestionIdx];
+      }
+      return (typeof currentQuestionIdx !== 'undefined') ? currentQuestionIdx : 0;
+    }
+
+    function onQuestionCardClick(e) {
+      if (isCardDrawingActive) {
+        if (e && e.stopPropagation) e.stopPropagation();
+        return;
+      }
+      const card = document.getElementById("q-card-img");
+      if (card && card.src) {
+        openImageModal(card.src);
+      }
+    }
+
+    function resizeCanvasToCard() {
+      const canvas = document.getElementById("q-card-canvas");
+      const box = document.getElementById("q-card-white-box");
+      if (!canvas || !box) return;
+      const rect = box.getBoundingClientRect();
+      const w = Math.round(rect.width) || box.offsetWidth || 800;
+      const h = Math.round(rect.height) || box.offsetHeight || 600;
+      if (w <= 0 || h <= 0) return;
+
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        redrawCardCanvas();
+      }
+    }
+
+    function redrawCardCanvas() {
+      const canvas = document.getElementById("q-card-canvas");
+      if (!canvas) return;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const realIdx = getCardCanvasRealIndex();
+      const strokes = cardDrawStrokesByQuestion[realIdx] || [];
+
+      strokes.forEach(stroke => {
+        if (!stroke || !stroke.pts || stroke.pts.length === 0) return;
+        ctx.save();
+        if (stroke.mode === 'eraser') {
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.strokeStyle = 'rgba(0,0,0,1)';
+          ctx.fillStyle = 'rgba(0,0,0,1)';
+          ctx.lineWidth = (stroke.size || 4) * 4;
+        } else {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.strokeStyle = stroke.color || '#06b6d4';
+          ctx.fillStyle = stroke.color || '#06b6d4';
+          ctx.lineWidth = stroke.size || 4;
+        }
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        const pts = stroke.pts;
+        if (pts.length === 1) {
+          const px = pts[0].xRatio * canvas.width;
+          const py = pts[0].yRatio * canvas.height;
+          ctx.beginPath();
+          ctx.arc(px, py, ctx.lineWidth / 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.beginPath();
+          ctx.moveTo(pts[0].xRatio * canvas.width, pts[0].yRatio * canvas.height);
+          for (let i = 1; i < pts.length; i++) {
+            ctx.lineTo(pts[i].xRatio * canvas.width, pts[i].yRatio * canvas.height);
+          }
+          ctx.stroke();
+        }
+        ctx.restore();
+      });
+    }
+
+    function handleCardPointerDown(e) {
+      if (!isCardDrawingActive) return;
+      const canvas = document.getElementById("q-card-canvas");
+      if (!canvas) return;
+      e.preventDefault();
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+
+      isCardDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      const xRatio = Math.max(0, Math.min(1, (e.clientX - rect.left) / (rect.width || 1)));
+      const yRatio = Math.max(0, Math.min(1, (e.clientY - rect.top) / (rect.height || 1)));
+
+      const realIdx = getCardCanvasRealIndex();
+      if (!cardDrawStrokesByQuestion[realIdx]) {
+        cardDrawStrokesByQuestion[realIdx] = [];
+      }
+
+      cardCurrentStroke = {
+        mode: cardDrawMode,
+        color: cardDrawColor,
+        size: cardDrawSize,
+        pts: [{ xRatio, yRatio }]
+      };
+      cardDrawStrokesByQuestion[realIdx].push(cardCurrentStroke);
+      redrawCardCanvas();
+    }
+
+    function handleCardPointerMove(e) {
+      if (!isCardDrawing || !cardCurrentStroke) return;
+      const canvas = document.getElementById("q-card-canvas");
+      if (!canvas) return;
+      e.preventDefault();
+
+      const rect = canvas.getBoundingClientRect();
+      const xRatio = Math.max(0, Math.min(1, (e.clientX - rect.left) / (rect.width || 1)));
+      const yRatio = Math.max(0, Math.min(1, (e.clientY - rect.top) / (rect.height || 1)));
+
+      cardCurrentStroke.pts.push({ xRatio, yRatio });
+      redrawCardCanvas();
+    }
+
+    function handleCardPointerUp(e) {
+      if (!isCardDrawing) return;
+      const canvas = document.getElementById("q-card-canvas");
+      isCardDrawing = false;
+      cardCurrentStroke = null;
+      if (canvas && e) {
+        try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+      }
+      redrawCardCanvas();
+    }
+
+    function initQuestionCanvas() {
+      const canvas = document.getElementById("q-card-canvas");
+      if (!canvas) return;
+
+      canvas.removeEventListener("pointerdown", handleCardPointerDown);
+      canvas.removeEventListener("pointermove", handleCardPointerMove);
+      canvas.removeEventListener("pointerup", handleCardPointerUp);
+      canvas.removeEventListener("pointercancel", handleCardPointerUp);
+
+      canvas.addEventListener("pointerdown", handleCardPointerDown);
+      canvas.addEventListener("pointermove", handleCardPointerMove);
+      canvas.addEventListener("pointerup", handleCardPointerUp);
+      canvas.addEventListener("pointercancel", handleCardPointerUp);
+
+      window.addEventListener("resize", () => {
+        resizeCanvasToCard();
+        redrawCardCanvas();
+      });
+
+      resizeCanvasToCard();
+      redrawCardCanvas();
+      updateCardCanvasUI();
+    }
+
+    function updateCardCanvasUI() {
+      const canvas = document.getElementById("q-card-canvas");
+      const circleBtn = document.getElementById("btn-toggle-canvas");
+      const hdrBtn = document.getElementById("hdr-btn-toggle-canvas");
+      const icon = document.getElementById("canvas-tool-icon");
+      const statusPill = document.getElementById("canvas-status-pill");
+      const hdrText = document.getElementById("hdr-canvas-text");
+
+      if (canvas) {
+        if (isCardDrawingActive) {
+          canvas.classList.remove("pointer-events-none");
+          canvas.classList.add("pointer-events-auto");
+          canvas.style.cursor = cardDrawMode === 'eraser' ? 'cell' : 'crosshair';
+        } else {
+          canvas.classList.remove("pointer-events-auto");
+          canvas.classList.add("pointer-events-none");
+          canvas.style.cursor = 'default';
+        }
+      }
+
+      if (circleBtn) {
+        if (isCardDrawingActive) {
+          circleBtn.className = "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-cyan-950 border-2 border-cyan-400 text-cyan-300 shadow-2xl ring-2 ring-cyan-400/50 flex items-center justify-center transition-all duration-200 cursor-pointer backdrop-blur-md";
+        } else {
+          circleBtn.className = "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 shadow-2xl flex items-center justify-center transition-all duration-200 cursor-pointer backdrop-blur-md";
+        }
+      }
+
+      if (icon) {
+        icon.textContent = cardDrawMode === 'eraser' ? '🧹' : '✏️';
+      }
+
+      if (statusPill) {
+        if (isCardDrawingActive) {
+          statusPill.textContent = "Active";
+          statusPill.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40";
+        } else {
+          statusPill.textContent = "Off";
+          statusPill.className = "text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400";
+        }
+      }
+
+      if (hdrBtn) {
+        if (isCardDrawingActive) {
+          hdrBtn.className = "pressable px-3 py-2 rounded-xl border border-cyan-400 bg-cyan-950/70 text-cyan-300 text-sm font-bold flex items-center gap-1.5 transition";
+          if (hdrText) hdrText.textContent = "Drawing Active";
+        } else {
+          hdrBtn.className = "pressable px-3 py-2 rounded-xl border border-slate-700 hover:border-cyan-500/50 bg-slate-800 text-slate-200 text-sm font-bold flex items-center gap-1.5 transition";
+          if (hdrText) hdrText.textContent = "Draw";
+        }
+      }
+    }
+
+    function toggleCardDrawingMode(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      isCardDrawingActive = !isCardDrawingActive;
+      updateCardCanvasUI();
+      if (isCardDrawingActive) {
+        showToast("Drawing Mode Activated", "Sketch or annotate vectors directly on the question card", "copper", 2000);
+      } else {
+        showToast("Drawing Mode Deactivated", "Card click will zoom again", "slate", 1500);
+      }
+    }
+
+    function setCanvasMode(mode) {
+      cardDrawMode = mode;
+      isCardDrawingActive = true;
+
+      const btnMarker = document.getElementById("btn-canvas-mode-marker");
+      const btnEraser = document.getElementById("btn-canvas-mode-eraser");
+      const markerSettings = document.getElementById("canvas-marker-settings");
+
+      if (mode === 'marker') {
+        if (btnMarker) btnMarker.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition cursor-pointer";
+        if (btnEraser) btnEraser.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 text-slate-400 hover:text-white border border-transparent transition cursor-pointer";
+        if (markerSettings) markerSettings.classList.remove("hidden");
+      } else {
+        if (btnMarker) btnMarker.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 text-slate-400 hover:text-white border border-transparent transition cursor-pointer";
+        if (btnEraser) btnEraser.className = "px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition cursor-pointer";
+        if (markerSettings) markerSettings.classList.add("hidden");
+      }
+
+      updateCardCanvasUI();
+    }
+
+    function setCanvasColor(color) {
+      cardDrawColor = color;
+      cardDrawMode = 'marker';
+      isCardDrawingActive = true;
+      setCanvasMode('marker');
+
+      document.querySelectorAll(".canvas-color-dot").forEach(dot => {
+        if (dot.getAttribute("data-color") === color) {
+          dot.classList.add("ring-cyan-300", "scale-110");
+          dot.classList.remove("ring-transparent");
+        } else {
+          dot.classList.remove("ring-cyan-300", "scale-110");
+          dot.classList.add("ring-transparent");
+        }
+      });
+
+      updateCardCanvasUI();
+    }
+
+    function setCanvasBrushSize(size) {
+      cardDrawSize = size;
+      [2, 4, 8].forEach(s => {
+        const btn = document.getElementById(`btn-brush-${s}`);
+        if (btn) {
+          if (s === size) {
+            btn.className = "canvas-brush-btn px-2 py-0.5 rounded-lg border border-cyan-500/40 bg-cyan-500/20 text-[11px] font-bold text-cyan-300 transition cursor-pointer";
+          } else {
+            btn.className = "canvas-brush-btn px-2 py-0.5 rounded-lg border border-slate-800 text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer";
+          }
+        }
+      });
+    }
+
+    function clearCurrentCardCanvas() {
+      const realIdx = getCardCanvasRealIndex();
+      cardDrawStrokesByQuestion[realIdx] = [];
+      redrawCardCanvas();
+      showToast("Canvas Cleared", "Annotations on this card have been reset", "copper", 1500);
+    }
+
     // Expose explicitly to global window object
     window.openFormulaSheetModal = openFormulaSheetModal;
     window.closeFormulaSheetModal = closeFormulaSheetModal;
@@ -4364,6 +4760,17 @@
     window.setScratchSize = setScratchSize;
     window.toggleScratchGrid = toggleScratchGrid;
     window.clearScratchpad = clearScratchpad;
+
+    // Expose Question Canvas to window
+    window.toggleCardDrawingMode = toggleCardDrawingMode;
+    window.setCanvasMode = setCanvasMode;
+    window.setCanvasColor = setCanvasColor;
+    window.setCanvasBrushSize = setCanvasBrushSize;
+    window.clearCurrentCardCanvas = clearCurrentCardCanvas;
+    window.onQuestionCardClick = onQuestionCardClick;
+    window.initQuestionCanvas = initQuestionCanvas;
+    window.resizeCanvasToCard = resizeCanvasToCard;
+    window.redrawCardCanvas = redrawCardCanvas;
 
     window.onload = initStudentApp;
   </script>

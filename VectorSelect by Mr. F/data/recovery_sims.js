@@ -107,17 +107,32 @@
     activeSim: null,
     animFrameId: null,
     _activeObserver: null,
+    _activeResizeHandler: null,
 
     stop: function() {
       if (this.animFrameId) {
         cancelAnimationFrame(this.animFrameId);
         this.animFrameId = null;
       }
+      if (this._activeResizeHandler && typeof window !== 'undefined') {
+        window.removeEventListener("resize", this._activeResizeHandler);
+        this._activeResizeHandler = null;
+      }
       if (this._activeObserver) {
         this._activeObserver.disconnect();
         this._activeObserver = null;
       }
       this.activeSim = null;
+    },
+
+    bindResizeHandler: function(handler) {
+      if (this._activeResizeHandler && typeof window !== 'undefined') {
+        window.removeEventListener("resize", this._activeResizeHandler);
+      }
+      this._activeResizeHandler = handler;
+      if (typeof window !== 'undefined') {
+        window.addEventListener("resize", handler);
+      }
     },
 
     attachResizeObserver: function(canvas, onResize) {
@@ -140,7 +155,7 @@
     // --------------------------------------------------------------------------
     // MODULE 1: PRECISION BALLISTICS & PROJECTILE KINEMATICS LABORATORY
     // --------------------------------------------------------------------------
-    mountBallisticsLab: function(containerEl, labData = {}) {
+    mountBallisticsLab: function(containerEl, labData = {}, simOptions = {}) {
       this.stop();
       const angle = labData.angle || 53;
       const v0 = labData.v0 || 25.0;
@@ -154,6 +169,12 @@
       let proj = null;
       let trajectoryPoints = [];
       let transitRecord = null;
+
+      function reportResult(result) {
+        if (typeof simOptions.onResult === "function") {
+          simOptions.onResult(result);
+        }
+      }
 
       containerEl.innerHTML = `
         <div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl">
@@ -359,7 +380,7 @@
         hiDpi = setupHiDpiCanvas(canvas, 240);
         drawScene();
       }
-      window.addEventListener("resize", handleResize);
+      RecoverySims.bindResizeHandler(handleResize);
       RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene();
       setTimeout(handleResize, 60);
@@ -424,6 +445,27 @@
             proj.y = 0;
             drawScene();
             updateHUD();
+            if (transitRecord) {
+              const targetY = Number.isFinite(Number(labData.targetY))
+                ? Number(labData.targetY)
+                : null;
+              const tolerance = Number.isFinite(Number(labData.targetTolerance))
+                ? Number(labData.targetTolerance)
+                : 0.15;
+              const success = targetY === null || Math.abs(transitRecord.y - targetY) <= tolerance;
+              reportResult({
+                success,
+                measurement: transitRecord.y,
+                message: success
+                  ? `Photogate telemetry measured y = ${transitRecord.y.toFixed(2)} m, matching the target within ±${tolerance.toFixed(2)} m.`
+                  : `Photogate telemetry measured y = ${transitRecord.y.toFixed(2)} m. Adjust the apparatus and try again; the target is ${targetY.toFixed(1)} m.`
+              });
+            } else {
+              reportResult({
+                success: false,
+                message: "The projectile did not trigger Photogate Sensor 1. Increase the launch settings and run the test again."
+              });
+            }
           }
         }
 
@@ -444,7 +486,7 @@
     // --------------------------------------------------------------------------
     // MODULE 2: DYNAMIC FRICTION & WORK-ENERGY DISSIPATION TRACK
     // --------------------------------------------------------------------------
-    mountFrictionLab: function(containerEl, labData = {}) {
+    mountFrictionLab: function(containerEl, labData = {}, simOptions = {}) {
       this.stop();
       const m = labData.m || 2.0;
       const vA = labData.vA || 12.0;
@@ -456,6 +498,12 @@
       let isSimulating = false;
       let cart = null;
       let photogateBRecord = null;
+
+      function reportResult(result) {
+        if (typeof simOptions.onResult === "function") {
+          simOptions.onResult(result);
+        }
+      }
 
       containerEl.innerHTML = `
         <div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl">
@@ -628,7 +676,7 @@
         hiDpi = setupHiDpiCanvas(canvas, 230);
         drawScene(cart ? cart.x : 0);
       }
-      window.addEventListener("resize", handleResize);
+      RecoverySims.bindResizeHandler(handleResize);
       RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene(0);
       setTimeout(handleResize, 60);
@@ -677,6 +725,27 @@
             isSimulating = false;
             drawScene(cart.x);
             updateHUD();
+            if (photogateBRecord) {
+              const targetV = Number.isFinite(Number(labData.targetV))
+                ? Number(labData.targetV)
+                : null;
+              const tolerance = Number.isFinite(Number(labData.targetTolerance))
+                ? Number(labData.targetTolerance)
+                : 0.15;
+              const success = targetV === null || Math.abs(photogateBRecord.v - targetV) <= tolerance;
+              reportResult({
+                success,
+                measurement: photogateBRecord.v,
+                message: success
+                  ? `Photogate B measured v_B = ${photogateBRecord.v.toFixed(2)} m/s, matching the target within ±${tolerance.toFixed(2)} m/s.`
+                  : `Photogate B measured v_B = ${photogateBRecord.v.toFixed(2)} m/s. Adjust μ_k and try again; the target is ${targetV.toFixed(1)} m/s.`
+              });
+            } else {
+              reportResult({
+                success: false,
+                message: "The cart stopped before reaching Photogate B. Reduce the friction setting and run the test again."
+              });
+            }
           }
         }
         RecoverySims.animFrameId = requestAnimationFrame(step);
@@ -695,7 +764,7 @@
     // --------------------------------------------------------------------------
     // MODULE 3: CENTRIPETAL ACCELERATION & VERTICAL LOOP-THE-LOOP
     // --------------------------------------------------------------------------
-    mountCentripetalLab: function(containerEl, labData = {}) {
+    mountCentripetalLab: function(containerEl, labData = {}, simOptions = {}) {
       this.stop();
       const m = labData.m || 1.5;
       const H = labData.H || 45.0;
@@ -705,6 +774,12 @@
       let currentH = H;
       let isSimulating = false;
       let apexRecord = null;
+
+      function reportResult(result) {
+        if (typeof simOptions.onResult === "function") {
+          simOptions.onResult(result);
+        }
+      }
 
       containerEl.innerHTML = `
         <div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl">
@@ -892,7 +967,7 @@
         hiDpi = setupHiDpiCanvas(canvas, 240);
         drawScene(0);
       }
-      window.addEventListener("resize", handleResize);
+      RecoverySims.bindResizeHandler(handleResize);
       RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene(0);
       setTimeout(handleResize, 60);
@@ -926,6 +1001,11 @@
               apexRecord = { fell: true };
               isSimulating = false;
               updateHUD();
+              reportResult({
+                success: false,
+                measurement: null,
+                message: `The assembly lost contact at the apex because H = ${currentH.toFixed(1)} m is below the minimum ${minH.toFixed(1)} m. Increase H and try again.`
+              });
               return;
             } else {
               apexRecord = { v: vApex, fn: fn, fell: false };
@@ -939,6 +1019,22 @@
             isSimulating = false;
             drawScene(1.0);
             updateHUD();
+            if (apexRecord && !apexRecord.fell) {
+              const targetFn = Number.isFinite(Number(labData.targetFn))
+                ? Number(labData.targetFn)
+                : null;
+              const tolerance = Number.isFinite(Number(labData.targetTolerance))
+                ? Number(labData.targetTolerance)
+                : 0.75;
+              const success = targetFn === null || Math.abs(apexRecord.fn - targetFn) <= tolerance;
+              reportResult({
+                success,
+                measurement: apexRecord.fn,
+                message: success
+                  ? `The apex strain gauge measured F_N = ${apexRecord.fn.toFixed(2)} N, matching the target within ±${tolerance.toFixed(2)} N.`
+                  : `The apex strain gauge measured F_N = ${apexRecord.fn.toFixed(2)} N. Adjust H and try again; the target is ${targetFn.toFixed(1)} N.`
+              });
+            }
           }
         }
         RecoverySims.animFrameId = requestAnimationFrame(step);
@@ -956,7 +1052,7 @@
     // --------------------------------------------------------------------------
     // MODULE 4: DAMPED & DRIVEN HARMONIC OSCILLATOR SPECTROMETER
     // --------------------------------------------------------------------------
-    mountHarmonicLab: function(containerEl, labData = {}) {
+    mountHarmonicLab: function(containerEl, labData = {}, simOptions = {}) {
       this.stop();
       const m = labData.m || 2.5;
       const k = labData.k || 160.0;
@@ -967,6 +1063,13 @@
       let isSimulating = false;
       let simTime = 0;
       let waveHistory = [];
+      let captureRecord = null;
+
+      function reportResult(result) {
+        if (typeof simOptions.onResult === "function") {
+          simOptions.onResult(result);
+        }
+      }
 
       containerEl.innerHTML = `
         <div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl">
@@ -1150,7 +1253,7 @@
         hiDpi = setupHiDpiCanvas(canvas, 230);
         drawScene(currentX0);
       }
-      window.addEventListener("resize", handleResize);
+      RecoverySims.bindResizeHandler(handleResize);
       RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene(currentX0);
       setTimeout(handleResize, 60);
@@ -1174,6 +1277,7 @@
         isSimulating = true;
         simTime = 0;
         waveHistory = [];
+        captureRecord = null;
 
         const omega = Math.sqrt(currentK / m);
         const dt = 0.02;
@@ -1191,6 +1295,32 @@
           } else {
             isSimulating = false;
             drawScene(0);
+            const omega = Math.sqrt(currentK / m);
+            captureRecord = {
+              energy: 0.5 * currentK * currentX0 * currentX0,
+              vMax: omega * currentX0
+            };
+            const targetEnergy = Number.isFinite(Number(labData.targetEnergy))
+              ? Number(labData.targetEnergy)
+              : null;
+            const targetVMax = Number.isFinite(Number(labData.targetVMax))
+              ? Number(labData.targetVMax)
+              : null;
+            const energyTolerance = Number.isFinite(Number(labData.energyTolerance))
+              ? Number(labData.energyTolerance)
+              : 0.05;
+            const velocityTolerance = Number.isFinite(Number(labData.velocityTolerance))
+              ? Number(labData.velocityTolerance)
+              : 0.05;
+            const success = (targetEnergy === null || Math.abs(captureRecord.energy - targetEnergy) <= energyTolerance)
+              && (targetVMax === null || Math.abs(captureRecord.vMax - targetVMax) <= velocityTolerance);
+            reportResult({
+              success,
+              measurement: captureRecord,
+              message: success
+                ? `The captured waveform gives E = ${captureRecord.energy.toFixed(2)} J and v_max = ${captureRecord.vMax.toFixed(2)} m/s, matching the target.`
+                : `The captured waveform gives E = ${captureRecord.energy.toFixed(2)} J and v_max = ${captureRecord.vMax.toFixed(2)} m/s. Adjust k and x₀, then capture another waveform.`
+            });
           }
         }
         RecoverySims.animFrameId = requestAnimationFrame(step);
@@ -1201,6 +1331,7 @@
         isSimulating = false;
         simTime = 0;
         waveHistory = [];
+        captureRecord = null;
         updateHUD();
         drawScene(currentX0);
       };
@@ -1209,7 +1340,7 @@
     // --------------------------------------------------------------------------
     // MODULE 5: STATIC EQUILIBRIUM & DISTRIBUTED TORQUE BEAM
     // --------------------------------------------------------------------------
-    mountTorqueLab: function(containerEl, labData = {}) {
+    mountTorqueLab: function(containerEl, labData = {}, simOptions = {}) {
       this.stop();
       const L = labData.L || 6.0;
       const Mbeam = labData.Mbeam || 8.0;
@@ -1221,6 +1352,12 @@
       let currentM2Pos = 4.0; // distance from fulcrum on right
       let isSimulating = false;
       let equilibriumStatus = null;
+
+      function reportResult(result) {
+        if (typeof simOptions.onResult === "function") {
+          simOptions.onResult(result);
+        }
+      }
 
       containerEl.innerHTML = `
         <div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl">
@@ -1383,7 +1520,7 @@
         hiDpi = setupHiDpiCanvas(canvas, 230);
         drawScene(0);
       }
-      window.addEventListener("resize", handleResize);
+      RecoverySims.bindResizeHandler(handleResize);
       RecoverySims.attachResizeObserver(canvas, handleResize);
       drawScene(0);
       setTimeout(handleResize, 60);
@@ -1425,6 +1562,20 @@
               equilibriumStatus = `UNBALANCED: Net Torque = ${netTorque.toFixed(1)} N·m (Needed d₂ = ${idealD2.toFixed(2)}m)`;
             }
             updateHUD(netTorque);
+            const targetD2 = Number.isFinite(Number(labData.targetD2))
+              ? Number(labData.targetD2)
+              : idealD2;
+            const tolerance = Number.isFinite(Number(labData.targetTolerance))
+              ? Number(labData.targetTolerance)
+              : 0.20;
+            const success = Math.abs(currentM2Pos - targetD2) <= tolerance;
+            reportResult({
+              success,
+              measurement: currentM2Pos,
+              message: success
+                ? `The pivot sensor verified equilibrium at d₂ = ${currentM2Pos.toFixed(2)} m.`
+                : `The beam is unbalanced at d₂ = ${currentM2Pos.toFixed(2)} m. Move the counterweight toward ${targetD2.toFixed(2)} m and try again.`
+            });
           }
         }
         RecoverySims.animFrameId = requestAnimationFrame(animateTilt);
