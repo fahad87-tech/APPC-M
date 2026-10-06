@@ -2360,7 +2360,7 @@
       renderLiveControl();
 
       // Set initial question timer state so students' countdowns start
-      if (assignment.per_question_seconds > 0) {
+      if (assignment.per_question_seconds > 0 && !assignment.question_started_at) {
         await setAssignmentTimerState(code, {
           question_started_at: getPocketBaseNowIso(),
           discussion_active: false
