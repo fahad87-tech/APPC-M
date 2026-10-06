@@ -3179,12 +3179,16 @@
       clearInterval(teacherLedPollInterval);
       if (perQTimerInterval) clearInterval(perQTimerInterval);
 
+      // Hydrate answer keys from bundle/offline cache
+      hydrateQuizKeys(currentQuiz);
+
       // A remediation retry is scored locally only — it must never replace the
       // graded submission. We report the result, then restore the original state.
       if (isRemediation) {
         let retryScore = 0;
         currentQuiz.questions.forEach((q, idx) => {
-          if (studentAnswers[idx] && studentAnswers[idx] === q.correct_answer) retryScore++;
+          const correct = getQuestionCorrectAnswer(idx) || q.correct_answer;
+          if (studentAnswers[idx] && studentAnswers[idx] === correct) retryScore++;
         });
         const retryTotal = currentQuiz.questions.length;
         showToast(
@@ -3220,7 +3224,8 @@
 
       let score = 0;
       currentQuiz.questions.forEach((q, idx) => {
-        if (studentAnswers[idx] && studentAnswers[idx] === q.correct_answer) {
+        const correct = getQuestionCorrectAnswer(idx) || q.correct_answer;
+        if (studentAnswers[idx] && studentAnswers[idx] === correct) {
           score++;
         }
       });
@@ -3373,6 +3378,7 @@
     // ============================================================================
     async function showReviewView() {
       // Ensure official keys and rationales are hydrated before rendering review cards
+      hydrateQuizKeys(currentQuiz);
       if (!currentQuiz.questions.some(q => q.correct_answer) && typeof fetchAnswerKeysForQuiz === 'function' && currentAssignment) {
         try {
           const keys = await fetchAnswerKeysForQuiz(currentAssignment.assessment_id);
@@ -3401,7 +3407,8 @@
 
       currentQuiz.questions.forEach((q, idx) => {
         const studentAns = studentAnswers[idx];
-        const isCorrect = studentAns === q.correct_answer;
+        const correctAns = getQuestionCorrectAnswer(idx) || q.correct_answer;
+        const isCorrect = Boolean(studentAns && correctAns && studentAns === correctAns);
         const card = document.createElement("div");
         card.className = `bg-slate-900/90 border rounded-3xl p-6 space-y-4 shadow-xl ${
           isCorrect ? "border-emerald-500/30" : "border-rose-500/30"
@@ -3416,7 +3423,7 @@
               </span>
             </div>
             <span class="px-3.5 py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-extrabold text-sm">
-              Official Key: ${q.correct_answer || '—'}
+              Official Key: ${correctAns || '—'}
             </span>
           </div>
         `;

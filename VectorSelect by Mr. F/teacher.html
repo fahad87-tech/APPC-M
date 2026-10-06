@@ -2427,9 +2427,14 @@
       renderLiveControl();
 
       if (currentLiveAssignment.per_question_seconds > 0) {
+        const perQ = currentLiveAssignment.per_question_seconds;
         setAssignmentTimerState(code, {
           question_started_at: new Date().toISOString(),
-          discussion_active: false
+          discussion_active: false,
+          timer_remaining_seconds: perQ,
+          per_question_seconds: perQ,
+          timer_paused: false,
+          paused_remaining_seconds: null
         });
       }
 
@@ -2920,6 +2925,13 @@
         lastAllAnsweredNotifiedIdx = -1;
         hideDiscussionPanel(true);
         renderLiveControl();
+
+        const perQ = currentLiveAssignment.per_question_seconds || 0;
+        lcTimerRemaining = perQ;
+        lcTimerPaused = false;
+        updateLcPauseUI();
+        updateLcTimerDisplay();
+
         // Set fresh server timestamp so students' per-question timers restart
         setAssignmentTimerState(currentLiveAssignment.join_code, {
           current_question_index: currentLiveIndex,
@@ -2928,12 +2940,14 @@
           answer_revealed: false,
           revealed_answer: "",
           revealed_explanation: "",
-          enable_point_redemption: currentLiveAssignment.enable_point_redemption !== false
+          enable_point_redemption: currentLiveAssignment.enable_point_redemption !== false,
+          timer_remaining_seconds: perQ,
+          per_question_seconds: perQ,
+          timer_paused: false,
+          paused_remaining_seconds: null
         });
-        if (currentLiveAssignment.per_question_seconds > 0) {
-          lcTimerRemaining = currentLiveAssignment.per_question_seconds;
-          updateLcTimerDisplay();
-        }
+
+        setupQuestionTimer();
         showTeacherToast("Previous Question Loaded", `Returned to Question ${currentLiveIndex + 1}`, "copper", 2000);
       }
     }

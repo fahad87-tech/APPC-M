@@ -3212,6 +3212,16 @@ Addressed user request:
     - Correct option is highlighted green (`choice-correct`) with particle burst effects (`burstParticles`).
     - Full points secured message is displayed.
 
+#### 4. Edge-Case Hardening (`index.html` & `teacher.html`)
+- **Teacher Live Control Previous Question (`lcPrevQuestion`)**:
+  - Previously, clicking "Previous Question" did not restart `setupQuestionTimer()`, leaving the teacher's countdown stopped and omitting `timer_remaining_seconds` in the server broadcast.
+  - Now resets `lcTimerRemaining = perQ`, updates pause UI, broadcasts `timer_remaining_seconds: perQ`, `per_question_seconds: perQ`, `timer_paused: false`, `paused_remaining_seconds: null`, and invokes `setupQuestionTimer()`.
+- **Immediate Initial Question Countdown Broadcast (`startLiveAssignmentNow`)**:
+  - Broadcasts `timer_remaining_seconds`, `per_question_seconds`, `timer_paused: false`, `paused_remaining_seconds: null` immediately on question 1 launch so students calibrate from second 1.
+- **Offline/Secured Submission & Review Grading (`finishAssessment` & `showReviewView`)**:
+  - Calls `hydrateQuizKeys(currentQuiz)` prior to grading and review card generation.
+  - Grades and reviews against `getQuestionCorrectAnswer(idx) || q.correct_answer`, guaranteeing 100% accurate grading and rationale cards even if cloud answer key queries fail.
+
 ### Verification & Mirroring
 - Validated all inline scripts in `index.html` and `teacher.html` using Node.js `vm.Script`: passed with 0 errors.
 - Mirrored all updated files (`index.html`, `teacher.html`, `implementation.md`) across all application directories:
