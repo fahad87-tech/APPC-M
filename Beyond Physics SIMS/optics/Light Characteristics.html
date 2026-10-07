@@ -1570,6 +1570,7 @@
                 <button class="button primary" id="play-button" type="button">▶ Play</button>
                 <button class="button" id="reset-button" type="button">↺ Reset</button>
                 <button class="button mode-button" id="mode-button" type="button">Slits: Double</button>
+                <button class="button mode-button" id="dispersion-scale-button" type="button" style="display: none;">Dispersion: 5× (Enhanced)</button>
                 <button class="button" id="rotate-button" type="button">Bench: Upright</button>
                 <button class="button" id="self-test-button" type="button">Check the Physics</button>
               </div>
@@ -1959,13 +1960,13 @@
         labels: ["1st minimum", "Slits", "Fringe gap"]
       },
       dispersion: {
-        kicker: "Wave optics • colour splits because n depends on λ",
-        title: "Dispersion separates colours by refractive index",
-        description: "Violet has a higher index than red, so violet bends more. The seven rays are drawn at true scale, which is why the split looks tiny — that is the honest answer, and the readout beside it gives the real numbers.",
-        equation: "n₂ decreases as λ increases (normal dispersion)",
-        canvasTitle: "Dispersion study",
-        canvasSubtitle: "Seven spectral rays, drawn to the same scale as every other view",
-        labels: ["Wavelength", "n₂ at λ", "Bent angle"]
+        kicker: "Wave optics • Prism dispersion • n depends on λ",
+        title: "Dispersion separates colours through an optical prism",
+        description: "White light enters the prism and refracts at both faces. Shorter wavelengths (violet) experience a higher refractive index n₂(λ) than red and deviate more. Dispersion is exaggerated (5× default) so distinct spectral colours are clearly visible. Adjust n₂ to observe how increasing the refractive medium amplifies the angular spread Δθ between colours.",
+        equation: "n₂(violet) > n₂(red) • Δθ = θᵣₑᏧ − θᵥᵢₒₗₑₜ • δ = θᵢ + θₜ₂ − A",
+        canvasTitle: "Prism dispersion study",
+        canvasSubtitle: "Dispersive optical prism • 7 spectral rays spreading into a distinct rainbow spectrum",
+        labels: ["Wavelength λ", "n₂ at λ", "Angular spread Δθ"]
       },
       absorption: {
         kicker: "Matter and light • Beer–Lambert law",
@@ -2371,6 +2372,96 @@
             totalInternalReflection: optics.totalInternalReflection
           };
         });
+      }
+
+      getPrismBundle(exaggeration = 5.0) {
+        const theta_i = degreesToRadians(this.parameters.angleDeg);
+        const n1 = this.parameters.n1;
+        const n550 = this.parameters.n550;
+
+        const V1 = { x: 0, y: 0.065 };
+        const V2 = { x: 0, y: -0.065 };
+        const V3 = { x: 0.090, y: -0.065 };
+        const L = Math.hypot(0.090, -0.130);
+        const nIn2 = { x: -0.130 / L, y: -0.090 / L };
+
+        const SPECTRAL_NAMES = ["Violet", "Blue", "Cyan", "Green", "Yellow", "Orange", "Red"];
+
+        const rays = SPECTRAL_WAVELENGTHS.map((wavelengthNm, spectralIndex) => {
+          const wavelengthUm = wavelengthNm / 1000;
+          const baseDisp = 0.0045 * (1 / (wavelengthUm * wavelengthUm) - 1 / 0.55 ** 2);
+          const physicalIndex = Math.max(1, n550 + baseDisp);
+          const visualIndex = Math.max(1, n550 + baseDisp * exaggeration);
+
+          // Refraction at Face 1 (x = 0, normal pointing toward source (-1, 0))
+          const sin_r1 = (n1 / visualIndex) * Math.sin(theta_i);
+          if (Math.abs(sin_r1) > 1) {
+            return {
+              wavelengthNm,
+              color: SPECTRAL_COLORS[spectralIndex],
+              name: SPECTRAL_NAMES[spectralIndex],
+              index: physicalIndex,
+              visualIndex,
+              tir: true
+            };
+          }
+          const theta_r1 = Math.asin(sin_r1);
+          const vIn = { x: Math.cos(theta_r1), y: Math.sin(theta_r1) };
+
+          // Intersection with Face 2 (line from (0, 0.065) to (0.090, -0.065))
+          const denom = Math.tan(theta_r1) + 13 / 9;
+          const xExit = denom > 1e-6 ? 0.065 / denom : 0.045;
+          const yExit = Math.tan(theta_r1) * xExit;
+
+          // Refraction at Face 2 (from visualIndex to n1):
+          const dt = vIn.x * nIn2.x + vIn.y * nIn2.y;
+          const eta = visualIndex / n1;
+          const k = 1.0 - eta * eta * (1.0 - dt * dt);
+          if (k < 0) {
+            return {
+              wavelengthNm,
+              color: SPECTRAL_COLORS[spectralIndex],
+              name: SPECTRAL_NAMES[spectralIndex],
+              index: physicalIndex,
+              visualIndex,
+              xExit,
+              yExit,
+              tir: true
+            };
+          }
+          const vExit = {
+            x: eta * vIn.x - (eta * dt + Math.sqrt(k)) * nIn2.x,
+            y: eta * vIn.y - (eta * dt + Math.sqrt(k)) * nIn2.y
+          };
+          const exitAngleDeg = radiansToDegrees(Math.atan2(vExit.y, vExit.x));
+          const yScreen = yExit + (SCREEN_DISTANCE - xExit) * (vExit.y / vExit.x);
+
+          return {
+            wavelengthNm,
+            color: SPECTRAL_COLORS[spectralIndex],
+            name: SPECTRAL_NAMES[spectralIndex],
+            index: physicalIndex,
+            visualIndex,
+            xExit,
+            yExit,
+            exitAngleDeg,
+            vExit,
+            yScreen,
+            tir: false
+          };
+        });
+
+        const validRays = rays.filter((r) => !r.tir);
+        let angularSpreadDeg = 0;
+        if (validRays.length >= 2) {
+          angularSpreadDeg = Math.abs(validRays[validRays.length - 1].exitAngleDeg - validRays[0].exitAngleDeg);
+        }
+
+        return {
+          rays,
+          angularSpreadDeg,
+          prism: { V1, V2, V3 }
+        };
       }
 
       sourceY() {
@@ -3033,6 +3124,8 @@
         this.elements = elements;
         this.activeFocus = "reflection";
         this.reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        this.dispersionExaggeration = 5.0;
+        this.simulationState = null;
         this.colors = {
           background: "#0a0a1a",
           cyan: "#00e5ff",
@@ -3288,6 +3381,18 @@
         const context = this.context;
         const interfaceScreen = this.camera.worldToScreen(0, 0);
         const upright = this.camera.upright;
+
+        if (this.isFocus("dispersion")) {
+          // In Dispersion mode, ambient Medium 1 (air) covers the bench,
+          // and Medium 2 is shaped as the optical dispersing PRISM.
+          context.save();
+          context.fillStyle = "rgba(124, 77, 255, 0.035)";
+          context.fillRect(0, 0, this.camera.cssWidth, this.camera.cssHeight);
+          context.restore();
+          this.drawPrism();
+          return;
+        }
+
         const mediumOneGradient = upright
           ? context.createLinearGradient(0, 0, 0, interfaceScreen.y)
           : context.createLinearGradient(0, 0, interfaceScreen.x, 0);
@@ -3325,6 +3430,104 @@
           context.lineTo(interfaceScreen.x, this.camera.cssHeight);
         }
         context.stroke();
+        context.restore();
+      }
+
+      drawPrism() {
+        const context = this.context;
+        const bundle = this.engine.getPrismBundle(this.dispersionExaggeration);
+        const { V1, V2, V3 } = bundle.prism;
+
+        const sV1 = this.camera.worldToScreen(V1.x, V1.y);
+        const sV2 = this.camera.worldToScreen(V2.x, V2.y);
+        const sV3 = this.camera.worldToScreen(V3.x, V3.y);
+
+        context.save();
+
+        // 1. Prism glass body with translucent gradient
+        const prismGrad = context.createLinearGradient(sV2.x, sV2.y, sV3.x, sV3.y);
+        prismGrad.addColorStop(0, "rgba(0, 229, 255, 0.16)");
+        prismGrad.addColorStop(0.5, "rgba(124, 77, 255, 0.18)");
+        prismGrad.addColorStop(1, "rgba(0, 229, 255, 0.10)");
+
+        context.fillStyle = prismGrad;
+        context.beginPath();
+        context.moveTo(sV1.x, sV1.y);
+        context.lineTo(sV3.x, sV3.y);
+        context.lineTo(sV2.x, sV2.y);
+        context.closePath();
+        context.fill();
+
+        // 2. Facet / internal depth reflections
+        const innerApex = {
+          x: sV1.x * 0.72 + (sV2.x + sV3.x) * 0.14,
+          y: sV1.y * 0.72 + (sV2.y + sV3.y) * 0.14
+        };
+        context.strokeStyle = "rgba(255, 255, 255, 0.14)";
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(sV1.x, sV1.y);
+        context.lineTo(innerApex.x, innerApex.y);
+        context.lineTo(sV2.x, sV2.y);
+        context.moveTo(innerApex.x, innerApex.y);
+        context.lineTo(sV3.x, sV3.y);
+        context.stroke();
+
+        // 3. Glowing polished glass edges
+        context.strokeStyle = "rgba(0, 229, 255, 0.88)";
+        context.lineWidth = 2.5;
+        context.lineJoin = "round";
+        context.lineCap = "round";
+        context.shadowBlur = this.reducedMotion ? 4 : 16;
+        context.shadowColor = this.colors.cyan;
+        context.beginPath();
+        context.moveTo(sV1.x, sV1.y);
+        context.lineTo(sV3.x, sV3.y);
+        context.lineTo(sV2.x, sV2.y);
+        context.closePath();
+        context.stroke();
+
+        // 4. Corner vertex nodes
+        [sV1, sV2, sV3].forEach((v) => {
+          context.fillStyle = "#ffffff";
+          context.shadowBlur = 8;
+          context.shadowColor = this.colors.cyan;
+          context.beginPath();
+          context.arc(v.x, v.y, 3.2, 0, 2 * Math.PI);
+          context.fill();
+        });
+
+        // 5. Engraved prism label
+        const center = this.camera.worldToScreen((V1.x + V2.x + V3.x) / 3, (V1.y + V2.y + V3.y) / 3);
+        this.drawLabel(
+          `DISPERSING PRISM • n₂ = ${this.engine.parameters.n550.toFixed(2)}`,
+          center.x,
+          center.y,
+          {
+            color: "rgba(103, 232, 249, 0.98)",
+            border: "rgba(34, 211, 238, 0.45)",
+            font: "700 11px 'JetBrains Mono', monospace",
+            align: "center"
+          }
+        );
+
+        // 6. Face labels
+        const face1Mid = this.camera.worldToScreen(0, (V1.y + V2.y) * 0.5);
+        this.drawLabel("FACE 1 (ENTRY)", face1Mid.x - (this.camera.upright ? 0 : 54), face1Mid.y - (this.camera.upright ? 24 : 0), {
+          color: "rgba(199, 181, 255, 0.92)",
+          border: "rgba(167, 139, 250, 0.38)",
+          font: "700 9px 'JetBrains Mono', monospace",
+          align: "center"
+        });
+
+        const face2Mid = this.camera.worldToScreen((V1.x + V3.x) * 0.5, (V1.y + V3.y) * 0.5);
+        this.drawLabel("FACE 2 (EXIT)", face2Mid.x + (this.camera.upright ? 0 : 48), face2Mid.y + (this.camera.upright ? 24 : 0), {
+          color: "rgba(103, 232, 249, 0.92)",
+          border: "rgba(34, 211, 238, 0.38)",
+          font: "700 9px 'JetBrains Mono', monospace",
+          align: "center"
+        });
+
         context.restore();
       }
 
@@ -3491,63 +3694,240 @@
 
       drawSpectralRays() {
         const context = this.context;
+        context.save();
         const interfacePoint = this.camera.worldToScreen(0, 0);
-        const bundle = this.engine.getSpectralBundle();
+        const bundle = this.engine.getPrismBundle(this.dispersionExaggeration);
+
         let selectedIndex = 0;
         let selectedDistance = Number.POSITIVE_INFINITY;
-        bundle.forEach((spectralRay, spectralIndex) => {
-          const distance = Math.abs(spectralRay.wavelengthNm - this.engine.parameters.wavelengthNm);
-          if (distance < selectedDistance) {
-            selectedDistance = distance;
-            selectedIndex = spectralIndex;
+        bundle.rays.forEach((ray, idx) => {
+          const dist = Math.abs(ray.wavelengthNm - this.engine.parameters.wavelengthNm);
+          if (dist < selectedDistance) {
+            selectedDistance = dist;
+            selectedIndex = idx;
           }
         });
 
-        // Rays extend all the way across Medium 2 to the detector screen (0.370 m)
-        const rayDist = SCREEN_DISTANCE;
-        bundle.forEach((spectralRay, spectralIndex) => {
-          if (spectralRay.totalInternalReflection) {
-            return;
-          }
-          const angleRadians = degreesToRadians(spectralRay.angleDeg);
-          const rayEnd = this.camera.worldToScreen(rayDist, rayDist * Math.tan(angleRadians));
+        // 1. Draw rays inside the prism (from (0, 0) to each exit point on Face 2)
+        bundle.rays.forEach((ray, idx) => {
+          if (ray.tir && !ray.xExit) return;
+          const exitPoint = this.camera.worldToScreen(ray.xExit, ray.yExit);
+          const isSelected = idx === selectedIndex;
           this.drawLine(
             interfacePoint.x,
             interfacePoint.y,
-            rayEnd.x,
-            rayEnd.y,
-            spectralRay.color,
-            spectralIndex === selectedIndex ? 4 : 2,
-            spectralIndex === selectedIndex ? null : [4, 6],
-            spectralIndex === selectedIndex || this.isFocus("dispersion")
+            exitPoint.x,
+            exitPoint.y,
+            ray.color,
+            isSelected ? 3.5 : 2.0,
+            null,
+            isSelected
           );
         });
 
-        // Detector screen line at rayDist to show where rays land
-        const screenTop = this.camera.worldToScreen(rayDist, -0.06);
-        const screenBottom = this.camera.worldToScreen(rayDist, 0.06);
-        this.drawLine(screenTop.x, screenTop.y, screenBottom.x, screenBottom.y, "rgba(255,255,255,0.35)", 2, [3, 4]);
+        // 2. Draw Face 2 Normal line at the 550nm green exit point
+        const greenRay = bundle.rays[3] || bundle.rays[0];
+        if (!greenRay.tir && greenRay.xExit) {
+          const L = Math.hypot(0.090, -0.130);
+          const normOutWorld = { x: greenRay.xExit + (0.130 / L) * 0.024, y: greenRay.yExit + (0.090 / L) * 0.024 };
+          const normInWorld = { x: greenRay.xExit - (0.130 / L) * 0.024, y: greenRay.yExit - (0.090 / L) * 0.024 };
+          const normOutScreen = this.camera.worldToScreen(normOutWorld.x, normOutWorld.y);
+          const normInScreen = this.camera.worldToScreen(normInWorld.x, normInWorld.y);
+          this.drawLine(normInScreen.x, normInScreen.y, normOutScreen.x, normOutScreen.y, "rgba(255, 255, 255, 0.35)", 1.5, [4, 4]);
+        }
 
-        const violetEnd = this.camera.worldToScreen(rayDist, rayDist * Math.tan(degreesToRadians(bundle[0].angleDeg)));
-        const redEnd = this.camera.worldToScreen(rayDist, rayDist * Math.tan(degreesToRadians(bundle[bundle.length - 1].angleDeg)));
-        this.drawLabel(`400 nm violet • θₜ=${bundle[0].angleDeg.toFixed(2)}°`, violetEnd.x, violetEnd.y + (this.camera.upright ? 22 : -18), {
-          color: bundle[0].color,
-          border: this.hexToRgba(bundle[0].color, 0.45),
-          font: "700 11px 'JetBrains Mono', monospace",
-          align: "center"
+        // 3. Draw rays emerging from Face 2 and traveling to the detector screen (x = 0.370 m)
+        const validRays = [];
+        bundle.rays.forEach((ray, idx) => {
+          if (ray.tir) {
+            // Draw internal reflection off Face 2 if TIR
+            const exitP = this.camera.worldToScreen(ray.xExit, ray.yExit);
+            const tirEnd = this.camera.worldToScreen(ray.xExit - 0.025, ray.yExit - 0.025);
+            this.drawLine(exitP.x, exitP.y, tirEnd.x, tirEnd.y, ray.color, 2, [4, 4]);
+            return;
+          }
+          const exitPoint = this.camera.worldToScreen(ray.xExit, ray.yExit);
+          const screenPoint = this.camera.worldToScreen(SCREEN_DISTANCE, ray.yScreen);
+          const isSelected = idx === selectedIndex;
+
+          this.drawLine(
+            exitPoint.x,
+            exitPoint.y,
+            screenPoint.x,
+            screenPoint.y,
+            ray.color,
+            isSelected ? 4.2 : 2.4,
+            null,
+            isSelected || this.isFocus("dispersion")
+          );
+
+          // Direction arrow on emerging ray
+          const dx = screenPoint.x - exitPoint.x;
+          const dy = screenPoint.y - exitPoint.y;
+          const len = safeSquareRoot(dx * dx + dy * dy);
+          if (len > 35) {
+            this.drawArrow(
+              exitPoint.x + dx * 0.45,
+              exitPoint.y + dy * 0.45,
+              dx / len,
+              dy / len,
+              isSelected ? 26 : 20,
+              ray.color,
+              isSelected ? 2.5 : 2.0
+            );
+          }
+
+          validRays.push({ ...ray, screenPoint, exitPoint, isSelected });
         });
-        this.drawLabel(`700 nm red • θₜ=${bundle[bundle.length - 1].angleDeg.toFixed(2)}°`, redEnd.x, redEnd.y + (this.camera.upright ? 22 : 18), {
-          color: bundle[bundle.length - 1].color,
-          border: this.hexToRgba(bundle[bundle.length - 1].color, 0.45),
-          font: "700 11px 'JetBrains Mono', monospace",
-          align: "center"
-        });
-        this.drawLabel("DISPERSION • n₂(400 nm) > n₂(700 nm)", (violetEnd.x + redEnd.x) * 0.5, (violetEnd.y + redEnd.y) * 0.5 - 28, {
-          color: "rgba(216,180,254,0.98)",
-          border: "rgba(168,85,247,0.48)",
-          font: "700 12px 'JetBrains Mono', monospace",
-          align: "center"
-        });
+
+        // 4. Draw the detector screen plate at x = 0.370 m
+        this.drawScreen();
+
+        // 5. Draw Rainbow Spectrum Projection on the Screen!
+        if (validRays.length >= 2) {
+          const firstScreen = validRays[0].screenPoint;
+          const lastScreen = validRays[validRays.length - 1].screenPoint;
+
+          context.save();
+          const spectrumGrad = context.createLinearGradient(firstScreen.x, firstScreen.y, lastScreen.x, lastScreen.y);
+          validRays.forEach((r, idx) => {
+            spectrumGrad.addColorStop(idx / (validRays.length - 1), r.color);
+          });
+
+          // Draw bright glow ribbon on the screen plate
+          context.strokeStyle = spectrumGrad;
+          context.lineWidth = 11;
+          context.lineCap = "round";
+          context.shadowBlur = this.reducedMotion ? 5 : 18;
+          context.shadowColor = "#ffffff";
+          context.beginPath();
+          context.moveTo(firstScreen.x, firstScreen.y);
+          context.lineTo(lastScreen.x, lastScreen.y);
+          context.stroke();
+
+          // Spectrum tick marks & dots
+          validRays.forEach((r) => {
+            context.fillStyle = r.color;
+            context.shadowBlur = 8;
+            context.shadowColor = r.color;
+            context.beginPath();
+            context.arc(r.screenPoint.x, r.screenPoint.y, r.isSelected ? 4.5 : 3.0, 0, 2 * Math.PI);
+            context.fill();
+          });
+          context.restore();
+
+          // 6. Angular Spread and Wavelength Callouts
+          const violetRay = validRays[0];
+          const redRay = validRays[validRays.length - 1];
+          const upright = this.camera.upright;
+
+          // Violet callout
+          this.drawLabel(
+            `400 nm Violet • exit ${violetRay.exitAngleDeg}°`,
+            violetRay.screenPoint.x + (upright ? 22 : 12),
+            violetRay.screenPoint.y + (upright ? 24 : -18),
+            {
+              color: violetRay.color,
+              border: this.hexToRgba(violetRay.color, 0.45),
+              font: "700 11px 'JetBrains Mono', monospace",
+              align: upright ? "center" : "left"
+            }
+          );
+
+          // Red callout
+          this.drawLabel(
+            `700 nm Red • exit ${redRay.exitAngleDeg}°`,
+            redRay.screenPoint.x + (upright ? -22 : 12),
+            redRay.screenPoint.y + (upright ? 24 : 18),
+            {
+              color: redRay.color,
+              border: this.hexToRgba(redRay.color, 0.45),
+              font: "700 11px 'JetBrains Mono', monospace",
+              align: upright ? "center" : "left"
+            }
+          );
+
+          // Angular Spread Banner Callout
+          const midX = (violetRay.exitPoint.x + redRay.screenPoint.x) * 0.5;
+          const midY = (violetRay.exitPoint.y + redRay.screenPoint.y) * 0.5;
+          this.drawLabel(
+            `PRISM DISPERSION • SPREAD Δθ = ${bundle.angularSpreadDeg.toFixed(2)}°`,
+            midX,
+            midY - 26,
+            {
+              color: "rgba(216, 180, 254, 0.98)",
+              border: "rgba(168, 85, 247, 0.52)",
+              font: "700 12px 'JetBrains Mono', monospace",
+              align: "center"
+            }
+          );
+
+          // Exaggeration badge
+          const badgeText = this.dispersionExaggeration === 1
+            ? "DISPERSION: 1× TRUE PHYSICAL SCALE"
+            : `DISPERSION: ${this.dispersionExaggeration}× EXAGGERATED FOR CLARITY`;
+          this.drawLabel(
+            badgeText,
+            midX,
+            midY + 26,
+            {
+              color: this.dispersionExaggeration === 1 ? this.colors.muted : this.colors.amberChart,
+              border: this.dispersionExaggeration === 1 ? "rgba(255,255,255,0.2)" : "rgba(251,191,36,0.45)",
+              font: "650 10px 'JetBrains Mono', monospace",
+              align: "center"
+            }
+          );
+        }
+
+        // 7. Traveling light pulses when playing!
+        if (this.simulationState && this.simulationState.running && !this.reducedMotion) {
+          const speed = VISUAL_SPEED;
+          const time = this.engine.simulationTime;
+          const sourcePoint = this.camera.worldToScreen(-SOURCE_DISTANCE, this.engine.sourceY());
+
+          bundle.rays.forEach((ray, idx) => {
+            if (ray.tir) return;
+            const exitP = this.camera.worldToScreen(ray.xExit, ray.yExit);
+            const screenP = this.camera.worldToScreen(SCREEN_DISTANCE, ray.yScreen);
+
+            const d1 = Math.hypot(interfacePoint.x - sourcePoint.x, interfacePoint.y - sourcePoint.y);
+            const d2 = Math.hypot(exitP.x - interfacePoint.x, exitP.y - interfacePoint.y);
+            const d3 = Math.hypot(screenP.x - exitP.x, screenP.y - exitP.y);
+            const total = d1 + d2 + d3;
+
+            for (let wave = 0; wave < 2; wave++) {
+              const dist = ((time * speed * 350 + wave * total * 0.5) % total);
+              let px, py, pColor;
+              if (dist < d1) {
+                if (idx !== selectedIndex) continue;
+                const f = dist / d1;
+                px = sourcePoint.x + f * (interfacePoint.x - sourcePoint.x);
+                py = sourcePoint.y + f * (interfacePoint.y - sourcePoint.y);
+                pColor = "#ffffff";
+              } else if (dist < d1 + d2) {
+                const f = (dist - d1) / d2;
+                px = interfacePoint.x + f * (exitP.x - interfacePoint.x);
+                py = interfacePoint.y + f * (exitP.y - interfacePoint.y);
+                pColor = ray.color;
+              } else {
+                const f = (dist - d1 - d2) / d3;
+                px = exitP.x + f * (screenP.x - exitP.x);
+                py = exitP.y + f * (screenP.y - exitP.y);
+                pColor = ray.color;
+              }
+
+              context.save();
+              context.fillStyle = pColor;
+              context.shadowBlur = 10;
+              context.shadowColor = pColor;
+              context.beginPath();
+              context.arc(px, py, 3.5, 0, 2 * Math.PI);
+              context.fill();
+              context.restore();
+            }
+          });
+        }
+
         context.restore();
       }
 
@@ -4167,6 +4547,24 @@
         const interfacePoint = this.camera.worldToScreen(0, 0);
         const maskPoint = this.camera.worldToScreen(MASK_DISTANCE, 0);
         const screenPoint = this.camera.worldToScreen(SCREEN_DISTANCE, 0);
+
+        if (this.isFocus("dispersion")) {
+          const laneX = compact ? this.camera.cssWidth * 0.5 : this.camera.cssWidth * 0.5;
+          if (this.camera.upright) {
+            this.drawLabel("AMBIENT MEDIUM 1 • n₁ (air)", laneX, interfacePoint.y - 34, {
+              color: "rgba(199,181,255,0.98)",
+              border: "rgba(167,139,250,0.48)",
+              align: "center"
+            });
+          } else {
+            this.drawLabel("AMBIENT MEDIUM 1 • n₁", compact ? 86 : Math.max(110, interfacePoint.x - 150), compact ? 42 : Math.max(44, interfacePoint.y - 82), {
+              color: "rgba(199,181,255,0.98)",
+              border: "rgba(167,139,250,0.48)",
+              align: "center"
+            });
+          }
+          return;
+        }
         if (this.camera.upright) {
           // Upright: Medium 1 is above the interface (source side), Medium 2
           // is below it (transmitted side). Labels sit in their regions.
@@ -4277,6 +4675,19 @@
       updateReadouts() {
         const model = this.engine.model;
         const detector = this.engine.detector;
+        if (this.isFocus("dispersion")) {
+          const bundle = this.engine.getPrismBundle(this.dispersionExaggeration);
+          const selWl = this.engine.parameters.wavelengthNm;
+          let selRay = bundle.rays.find((r) => Math.abs(r.wavelengthNm - selWl) < 26) || bundle.rays[3];
+          this.elements.readAngle.textContent = selRay.tir ? "TIR on Face 2" : `exit ${selRay.exitAngleDeg}°`;
+          this.elements.readAngle.style.color = selRay.tir ? this.colors.pink : this.colors.cyan;
+          this.elements.readIndex.textContent = model.n2.toFixed(3);
+          this.elements.readReflected.textContent = `${(model.reflectedFraction * 100).toFixed(2)}%`;
+          this.elements.readCritical.textContent = `Δθ = ${bundle.angularSpreadDeg.toFixed(2)}°`;
+          this.elements.readPeak.textContent = "7-Color Rainbow";
+          this.elements.readCentroid.textContent = selRay.tir ? "—" : `${(selRay.yScreen * 1000).toFixed(1)} mm`;
+          return;
+        }
         this.elements.readAngle.textContent = model.totalInternalReflection
           ? "no refracted ray"
           : `${model.transmittedAngleDeg.toFixed(2)}°`;
@@ -4364,8 +4775,44 @@
         document.getElementById("play-button").addEventListener("click", () => this.togglePlay());
         document.getElementById("reset-button").addEventListener("click", () => this.resetSimulation());
         document.getElementById("mode-button").addEventListener("click", () => this.toggleMode());
+        const dispersionScaleBtn = document.getElementById("dispersion-scale-button");
+        if (dispersionScaleBtn) {
+          dispersionScaleBtn.addEventListener("click", () => this.toggleDispersionExaggeration());
+        }
         document.getElementById("rotate-button").addEventListener("click", () => this.toggleOrientation());
         document.getElementById("self-test-button").addEventListener("click", () => this.runSelfTests());
+      }
+
+      toggleDispersionExaggeration() {
+        const current = this.renderer.dispersionExaggeration || 5.0;
+        let next = 5.0;
+        if (Math.abs(current - 5.0) < 0.1) {
+          next = 8.0;
+        } else if (Math.abs(current - 8.0) < 0.1) {
+          next = 1.0;
+        } else {
+          next = 5.0;
+        }
+        this.renderer.dispersionExaggeration = next;
+        this.updateDispersionScaleButton();
+        this.updateFocusSummary();
+        this.renderer.draw();
+      }
+
+      updateDispersionScaleButton() {
+        const btn = document.getElementById("dispersion-scale-button");
+        if (!btn) return;
+        const current = this.renderer.dispersionExaggeration || 5.0;
+        if (Math.abs(current - 1.0) < 0.1) {
+          btn.textContent = "Dispersion: 1× (True Scale)";
+          btn.title = "True physical scale (subtle angular spread)";
+        } else if (Math.abs(current - 8.0) < 0.1) {
+          btn.textContent = "Dispersion: 8× (High Spread)";
+          btn.title = "High exaggeration for maximum color separation";
+        } else {
+          btn.textContent = "Dispersion: 5× (Enhanced)";
+          btn.title = "Standard classroom exaggeration for clear spectral visibility";
+        }
       }
 
       toggleOrientation() {
@@ -4476,6 +4923,13 @@
         config.labels.forEach((label, index) => {
           document.getElementById(`focus-metric-label-${index + 1}`).textContent = label;
         });
+
+        const dispersionScaleBtn = document.getElementById("dispersion-scale-button");
+        if (dispersionScaleBtn) {
+          dispersionScaleBtn.style.display = (nextFocus === "dispersion") ? "" : "none";
+        }
+        this.updateDispersionScaleButton();
+
         this.updateFocusSummary();
         this.renderer.draw();
       }
@@ -4489,11 +4943,16 @@
         const firstMinimumText = model.firstMinimumAvailable
           ? `${(model.firstMinimumY * 1000).toFixed(2)} mm`
           : "off screen";
+        let dispersionAngleSpread = angleText;
+        if (this.engine.getPrismBundle) {
+          const bundle = this.engine.getPrismBundle(this.renderer.dispersionExaggeration || 5.0);
+          dispersionAngleSpread = `Δθ = ${bundle.angularSpreadDeg.toFixed(2)}°`;
+        }
         const metricSets = {
           reflection: [ percent(model.interfaceReflectance), model.totalInternalReflection ? "TOTAL" : "partial", model.n1 > model.n2 ? `${model.criticalAngle.toFixed(1)}°` : "no limit" ],
           refraction: [ `${model.angleDeg.toFixed(0)}° → ${angleText}`, model.n2.toFixed(3), percent(model.interfaceTransmission) ],
           diffraction: [ firstMinimumText, model.modeCode === 1 ? "double" : "single", `${(model.nearAxisFringeSpacing * 1000).toFixed(3)} mm` ],
-          dispersion: [ `${model.wavelengthNm.toFixed(0)} nm`, model.n2.toFixed(3), angleText ],
+          dispersion: [ `${model.wavelengthNm.toFixed(0)} nm`, model.n2.toFixed(3), dispersionAngleSpread ],
           absorption: [ `${model.alpha.toFixed(0)} m⁻¹`, percent(model.absorbedFraction), percent(model.screenTransmissionFraction) ]
         };
         (metricSets[this.activeFocus] || metricSets.reflection).forEach((value, index) => {
@@ -5462,6 +5921,7 @@
     });
 
     const simulationState = { running: false, accumulator: 0, nanEventCount: 0 };
+    renderer.simulationState = simulationState;
     const dataLogger = new DataLogger(physicsEngine);
     const uiControls = new UIControls(physicsEngine, camera, renderer, simulationState);
     uiControls.dataLogger = dataLogger;

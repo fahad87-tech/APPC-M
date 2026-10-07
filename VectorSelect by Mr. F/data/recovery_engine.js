@@ -34,6 +34,58 @@
     return c.includes('appc') || c.includes('physics c') || c.includes('calc') || c.includes('mechanics');
   }
 
+  function courseMaxUnit(courseId) {
+    return isCalculusCourse(courseId) ? 7 : 8;
+  }
+
+  function normalizeUnitList(input, maxUnit) {
+    const values = Array.isArray(input) ? input : [input];
+    const units = values
+      .map(parseUnitNumber)
+      .filter(n => Number.isFinite(n) && n >= 1 && n <= maxUnit)
+      .map(n => Math.floor(n));
+    return [...new Set(units)];
+  }
+
+  function stableValue(value) {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'number') return Number.isFinite(value) ? value.toFixed(4) : '';
+    if (Array.isArray(value)) return value.map(stableValue).join(',');
+    if (typeof value === 'object') {
+      return Object.keys(value).sort().map(key => `${key}:${stableValue(value[key])}`).join('|');
+    }
+    return String(value);
+  }
+
+  function buildScenarioFingerprint(challenge) {
+    if (challenge.scenarioFingerprint) return String(challenge.scenarioFingerprint);
+    const d = challenge.simData || {};
+    const numericData = Object.keys(d).sort().filter(key => key !== 'isCalculus')
+      .map(key => `${key}=${stableValue(d[key])}`).join('|');
+    return [
+      challenge.servedUnitNum || challenge.unit || 0,
+      challenge.simType || challenge.rigorLabel || 'challenge',
+      challenge.scenarioMode || '',
+      numericData,
+      challenge.prompt || ''
+    ].join('::');
+  }
+
+  function chooseUnusedChallenge(generator, usedFingerprints, attempts = 18) {
+    let challenge = null;
+    for (let i = 0; i < attempts; i++) {
+      challenge = generator();
+      const fingerprint = buildScenarioFingerprint(challenge);
+      if (!usedFingerprints || !usedFingerprints.has(fingerprint)) {
+        challenge.scenarioFingerprint = fingerprint;
+        return challenge;
+      }
+    }
+    challenge = challenge || generator();
+    challenge.scenarioFingerprint = `${buildScenarioFingerprint(challenge)}::${Date.now()}::${Math.random()}`;
+    return challenge;
+  }
+
   // --------------------------------------------------------------------------
   // AP PHYSICS C (CALCULUS-BASED) DEEP QUESTION POOL (5 Archetypes Per Unit)
   // --------------------------------------------------------------------------
@@ -1390,8 +1442,8 @@ $$y(t) = v_{0y} t - \\frac{1}{2}g t^2 = (${voy.toFixed(2)})(${tTransit.toFixed(3
       };
     },
 
-    // Unit 2: Dynamic Friction & Work-Energy Dissipation (Air Track Apparatus)
-    2: function(isCalc) {
+    // Unit 3: Dynamic Friction & Work-Energy Dissipation (Air Track Apparatus)
+    3: function(isCalc) {
       const g = isCalc ? 9.8 : 10.0;
       const m = pickRandom([1.5, 2.0, 2.5, 3.0]);
       const vA = pickRandom([10.0, 12.0, 14.0, 15.0]);
@@ -1433,8 +1485,8 @@ $$v_B = \\sqrt{v_A^2 - 2\\mu_k g L} = \\sqrt{(${vA.toFixed(1)})^2 - 2(${mu.toFix
 Total thermal dissipation: $W_{\\text{dissipated}} = ${(workFric).toFixed(1)}\\text{ J}$.`;
 
       return {
-        unit: 2,
-        unitTitle: "Unit 2: Work & Energy (Collegiate Lab)",
+        unit: 3,
+        unitTitle: "Unit 3: Work, Energy & Power (Collegiate Lab)",
         simType: 'drift',
         simData: { m, vA, L, mu, g, targetV: vB, targetTolerance: 0.15, isCalculus: isCalc },
         prompt,
@@ -1443,8 +1495,8 @@ Total thermal dissipation: $W_{\\text{dissipated}} = ${(workFric).toFixed(1)}\\t
       };
     },
 
-    // Unit 3: Centripetal Acceleration & Vertical Loop (Apex Strain Gauge)
-    3: function(isCalc) {
+    // Optional legacy extension; excluded from normal AP routing.
+    _coaster: function(isCalc) {
       const g = isCalc ? 9.8 : 10.0;
       const m = pickRandom([1.2, 1.5, 2.0]);
       const R = pickRandom([12.0, 15.0, 16.0]);
@@ -1485,8 +1537,8 @@ $$\\Sigma F_r = F_N + mg = \\frac{m v_{\\text{apex}}^2}{R}$$
 $$F_N = m \\left( \\frac{v_{\\text{apex}}^2}{R} - g \\right) = ${m.toFixed(1)} \\left( \\frac{${vApexSq.toFixed(1)}}{${R.toFixed(1)}} - ${g.toFixed(1)} \\right) = ${ansRounded.toFixed(1)}\\text{ N}$$`;
 
       return {
-        unit: 3,
-        unitTitle: "Unit 3: Circular Motion & Energy (Collegiate Lab)",
+        unit: 99,
+        unitTitle: "Optional Extension: Circular Motion & Energy",
         simType: 'coaster',
         simData: { m, H, R, g, targetFn: fnApex, targetTolerance: 0.75, isCalculus: isCalc },
         prompt,
@@ -1495,8 +1547,8 @@ $$F_N = m \\left( \\frac{v_{\\text{apex}}^2}{R} - g \\right) = ${m.toFixed(1)} \
       };
     },
 
-    // Unit 4: Damped & Driven Harmonic Oscillator (Oscilloscope Spectrometer)
-    4: function(isCalc) {
+    // Unit 7: Damped & Driven Harmonic Oscillator (Oscilloscope Spectrometer)
+    7: function(isCalc) {
       const m = pickRandom([1.5, 2.0, 2.5, 3.0]);
       const k = pickRandom([120.0, 150.0, 160.0, 200.0, 240.0]);
       const x0 = pickRandom([0.15, 0.20, 0.25, 0.30]);
@@ -1537,8 +1589,8 @@ $$E = \\frac{1}{2} k x_0^2 = \\frac{1}{2}(${k.toFixed(1)})(${x0.toFixed(2)})^2 =
 $$v_{\\max} = \\omega_0 x_0 = (${omega0.toFixed(2)})(${x0.toFixed(2)}) = ${vMax.toFixed(2)}\\text{ m/s}$$`;
 
       return {
-        unit: 4,
-        unitTitle: "Unit 4: Simple Harmonic Motion (Collegiate Lab)",
+        unit: 7,
+        unitTitle: "Unit 7: Oscillations (Collegiate Lab)",
         simType: 'harmonic',
         simData: { m, k, x0, targetEnergy: ETotal, targetVMax: vMax, energyTolerance: 0.05, velocityTolerance: 0.05, isCalculus: isCalc },
         prompt,
@@ -1604,6 +1656,181 @@ $$d_2 = \\frac{${(m1 * xFulcrum).toFixed(1)} - ${(Mbeam * 1.0).toFixed(1)}}{${m2
         choices: shuffle(choices),
         explanation
       };
+    },
+
+    // Unit 4: One-Dimensional Momentum & Collision Analysis
+    4: function(isCalc) {
+      const m1 = pickRandom([1.0, 1.5, 2.0, 2.5]);
+      const m2 = pickRandom([2.0, 2.5, 3.0, 4.0]);
+      const u1 = pickRandom([4.0, 6.0, 8.0, 10.0]);
+      const u2 = pickRandom([-2.0, 0.0, 1.0, 2.0]);
+      const restitution = pickRandom([0.0, 0.5, 0.8, 1.0]);
+      const v1 = ((m1 - restitution * m2) * u1 + (1 + restitution) * m2 * u2) / (m1 + m2);
+      const v2 = ((m2 - restitution * m1) * u2 + (1 + restitution) * m1 * u1) / (m1 + m2);
+      const momentum = m1 * u1 + m2 * u2;
+      const ansRounded = Math.round(v1 * 100) / 100;
+
+      const prompt = `
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-rose-400 font-bold text-xs uppercase tracking-wider">
+            <span>🔬 Laboratory Investigation: One-Dimensional Momentum &amp; Collision</span>
+          </div>
+          <p class="text-slate-100 text-sm md:text-base leading-relaxed">
+            Two carts move on a nearly frictionless track. Cart 1 has mass $m_1 = ${m1.toFixed(1)}\\text{ kg}$ and initial velocity $u_1 = ${u1.toFixed(1)}\\text{ m/s}$; cart 2 has mass $m_2 = ${m2.toFixed(1)}\\text{ kg}$ and initial velocity $u_2 = ${u2.toFixed(1)}\\text{ m/s}$. The collision coefficient of restitution is $e = ${restitution.toFixed(2)}$.
+          </p>
+          <p class="text-slate-200 text-sm md:text-base font-semibold">
+            Use the collision sensor and conservation of momentum to determine cart 1's velocity $v_1$ immediately after impact.
+          </p>
+        </div>
+      `;
+      const choices = [
+        { text: `${ansRounded.toFixed(2)} m/s`, isCorrect: true },
+        { text: `${((momentum / (m1 + m2))).toFixed(2)} m/s`, isCorrect: false },
+        { text: `${(Math.round(v2 * 100) / 100).toFixed(2)} m/s`, isCorrect: false },
+        { text: `${(u1 + u2).toFixed(2)} m/s`, isCorrect: false }
+      ];
+      const explanation = `For a one-dimensional collision, momentum is conserved and the restitution condition is $v_2 - v_1 = e(u_1 - u_2)$. Solving the two equations gives
+$$v_1 = \\frac{(m_1 - e m_2)u_1 + (1+e)m_2u_2}{m_1+m_2}
+= ${ansRounded.toFixed(2)}\\text{ m/s}.$$
+The initial total momentum is $p_i = ${momentum.toFixed(2)}\\text{ kg·m/s}$, and the apparatus uses the same values to verify the measured post-impact velocity.`;
+
+      return {
+        unit: 4,
+        unitTitle: "Unit 4: Linear Momentum (Collegiate Lab)",
+        simType: 'momentum',
+        simData: { m1, m2, u1, u2, restitution, targetV1: v1, targetTolerance: 0.12, isCalculus: isCalc },
+        prompt,
+        choices: shuffle(choices),
+        explanation
+      };
+    },
+
+    // Optional legacy extension; excluded from normal AP routing.
+    _orbit: function(isCalc) {
+      const mu = pickRandom([3.986e14, 4.282e13, 1.327e20]);
+      const scale = mu > 1e19 ? 1e11 : (mu > 1e14 ? 1e7 : 1e6);
+      const radius = Math.round(pickRandom([0.70, 0.80, 0.90, 1.00, 1.10]) * scale / 10000) * 10000;
+      const radiusMin = Math.round(radius * 0.94 / 10000) * 10000;
+      const radiusMax = Math.round(radius * 1.18 / 10000) * 10000;
+      const orbitalPeriod = 2 * Math.PI * Math.sqrt(Math.pow(radius, 3) / mu);
+      const ansRounded = Math.round(orbitalPeriod * 100) / 100;
+      const bodyName = mu > 1e19 ? "the Sun" : (mu > 1e14 ? "Earth" : "Mars");
+
+      const prompt = `
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider">
+            <span>🔬 Laboratory Investigation: Orbital Period &amp; Gravity</span>
+          </div>
+          <p class="text-slate-100 text-sm md:text-base leading-relaxed">
+            A satellite follows a circular orbit around ${bodyName}. The central body's gravitational parameter is $\\mu = ${mu.toExponential(3)}\\text{ m}^3\\text{/s}^2$, and the orbital radius is $r = ${(radius / 1e6).toFixed(2)}\\text{ million m}$.
+          </p>
+          <p class="text-slate-200 text-sm md:text-base font-semibold">
+            Use the orbital-period sensor and Kepler's law to determine the time $T$ for one complete orbit.
+          </p>
+        </div>
+      `;
+      const choices = [
+        { text: `${ansRounded.toFixed(2)} s`, isCorrect: true },
+        { text: `${(ansRounded * 2).toFixed(2)} s`, isCorrect: false },
+        { text: `${(2 * Math.PI * Math.sqrt(radius / mu)).toFixed(2)} s`, isCorrect: false },
+        { text: `${(2 * Math.PI * Math.sqrt(Math.pow(radius, 2) / mu)).toFixed(2)} s`, isCorrect: false }
+      ];
+      const explanation = `For a circular orbit, gravity supplies the centripetal acceleration:
+$$\\frac{\\mu}{r^2} = \\frac{4\\pi^2r}{T^2}
+\\quad\\Longrightarrow\\quad
+T = 2\\pi\\sqrt{\\frac{r^3}{\\mu}} = ${ansRounded.toFixed(2)}\\text{ s}.$$
+The orbital apparatus accelerates the visual clock while preserving this period relationship, allowing the complete orbit to be measured in a practical lab session.`;
+
+      return {
+        unit: 99,
+        unitTitle: "Optional Extension: Gravitation & Orbits",
+        simType: 'orbit',
+        simData: { mu, radius, radiusMin, radiusMax, targetPeriod: orbitalPeriod, targetTolerance: Math.max(0.15, orbitalPeriod * 0.01), isCalculus: isCalc },
+        prompt,
+        choices: shuffle(choices),
+        explanation
+      };
+    },
+
+    // Unit 2: Force and Translational Dynamics (force sensor and incline cart)
+    2: function(isCalc) {
+      const g = isCalc ? 9.8 : 10.0;
+      const m = pickRandom([1.5, 2.0, 2.5, 3.0]);
+      const theta = pickRandom([0, 15, 20, 30]);
+      const applied = pickRandom([8, 10, 12, 14, 16]);
+      const mu = theta === 0 ? pickRandom([0.10, 0.15, 0.20]) : pickRandom([0.08, 0.12, 0.16]);
+      const rad = theta * Math.PI / 180;
+      const friction = mu * m * g * Math.cos(rad);
+      const downslope = m * g * Math.sin(rad);
+      const net = applied - downslope - friction;
+      const acceleration = net / m;
+      const ans = Math.round(acceleration * 100) / 100;
+      const mode = theta === 0 ? 'horizontal_force_balance' : 'incline_force_balance';
+      const prompt = `<div class="space-y-2"><div class="text-amber-400 font-bold text-xs uppercase tracking-wider">Laboratory Investigation: Newton's Second Law</div><p class="text-slate-100 text-sm md:text-base">A cart of mass $m = ${m.toFixed(1)}\\text{ kg}$ is pulled up a ${theta}° track by a force sensor reading $F = ${applied.toFixed(1)}\\text{ N}$. The kinetic friction coefficient is $\\mu_k = ${mu.toFixed(2)}$ and $g = ${g.toFixed(1)}\\text{ m/s}^2$.</p><p class="text-slate-200 text-sm md:text-base font-semibold">What acceleration should the motion sensor measure?</p></div>`;
+      const choices = [
+        { text: `${ans.toFixed(2)} m/s²`, isCorrect: true },
+        { text: `${(applied / m).toFixed(2)} m/s²`, isCorrect: false },
+        { text: `${((applied + downslope - friction) / m).toFixed(2)} m/s²`, isCorrect: false },
+        { text: `${((applied - friction) / m).toFixed(2)} m/s²`, isCorrect: false }
+      ];
+      return {
+        unit: 2, unitTitle: "Unit 2: Force and Translational Dynamics (Laboratory)",
+        simType: 'force', scenarioMode: mode,
+        simData: { m, theta, applied, mu, g, targetAcceleration: acceleration, targetTolerance: 0.12, isCalculus: isCalc },
+        prompt, choices: shuffle(choices),
+        explanation: `Resolve forces along the track: $F_{net}=F-mg\\sin\\theta-\\mu_kmg\\cos\\theta$. Thus $a=F_{net}/m=${ans.toFixed(2)}\\text{ m/s}^2$.`
+      };
+    },
+
+    // Unit 6: Energy and Momentum of Rotating Systems (rolling cart)
+    6: function(isCalc) {
+      const g = isCalc ? 9.8 : 10.0;
+      const mass = pickRandom([1.0, 1.5, 2.0]);
+      const radius = pickRandom([0.10, 0.15, 0.20]);
+      const height = pickRandom([0.40, 0.60, 0.80, 1.00]);
+      const inertiaFactor = pickRandom([0.5, 1.0]);
+      const v = Math.sqrt((2 * g * height) / (1 + inertiaFactor));
+      const omega = v / radius;
+      const ans = Math.round(omega * 100) / 100;
+      const body = inertiaFactor === 0.5 ? 'solid cylinder' : 'hoop';
+      const prompt = `<div class="space-y-2"><div class="text-violet-400 font-bold text-xs uppercase tracking-wider">Laboratory Investigation: Rolling Rotation</div><p class="text-slate-100 text-sm md:text-base">A ${body} of mass $m=${mass.toFixed(1)}\\text{ kg}$ and radius $R=${radius.toFixed(2)}\\text{ m}$ rolls without slipping from rest through a vertical drop of $h=${height.toFixed(2)}\\text{ m}$.</p><p class="text-slate-200 text-sm md:text-base font-semibold">What angular speed $\\omega$ should the rotational sensor measure at the bottom?</p></div>`;
+      const choices = [
+        { text: `${ans.toFixed(2)} rad/s`, isCorrect: true },
+        { text: `${(Math.sqrt(2 * g * height) / radius).toFixed(2)} rad/s`, isCorrect: false },
+        { text: `${(Math.sqrt(g * height) / radius).toFixed(2)} rad/s`, isCorrect: false },
+        { text: `${(v * radius).toFixed(2)} rad/s`, isCorrect: false }
+      ];
+      return {
+        unit: 6, unitTitle: "Unit 6: Energy and Momentum of Rotating Systems (Laboratory)",
+        simType: 'rolling', scenarioMode: body.replace(' ', '_'),
+        simData: { mass, radius, height, inertiaFactor, g, targetOmega: omega, targetTolerance: 0.12, isCalculus: isCalc },
+        prompt, choices: shuffle(choices),
+        explanation: `Energy gives $mgh=\\frac12mv^2+\\frac12(I/R^2)v^2=\\frac12m(1+${inertiaFactor})v^2$. With $\\omega=v/R$, the result is $\\omega=${ans.toFixed(2)}\\text{ rad/s}$.`
+      };
+    },
+
+    // Unit 8: Fluids (AP Physics 1 only)
+    8: function(isCalc) {
+      const rho = pickRandom([900, 1000, 1200]);
+      const area1 = pickRandom([0.020, 0.025, 0.030]);
+      const area2 = area1 / 2;
+      const speed1 = pickRandom([1.5, 2.0, 2.5]);
+      const speed2 = speed1 * area1 / area2;
+      const ans = Math.round(speed2 * 100) / 100;
+      const prompt = `<div class="space-y-2"><div class="text-sky-400 font-bold text-xs uppercase tracking-wider">Laboratory Investigation: Fluid Continuity</div><p class="text-slate-100 text-sm md:text-base">A steady incompressible fluid of density $\\rho=${rho}\\text{ kg/m}^3$ flows through a tube. The cross-sectional area changes from $A_1=${area1.toFixed(3)}\\text{ m}^2$ to $A_2=${area2.toFixed(3)}\\text{ m}^2$, where the measured speed is $v_1=${speed1.toFixed(1)}\\text{ m/s}$.</p><p class="text-slate-200 text-sm md:text-base font-semibold">What speed $v_2$ should the downstream flow sensor measure?</p></div>`;
+      const choices = [
+        { text: `${ans.toFixed(2)} m/s`, isCorrect: true },
+        { text: `${(speed1 / 2).toFixed(2)} m/s`, isCorrect: false },
+        { text: `${(speed1 * 2 + 1).toFixed(2)} m/s`, isCorrect: false },
+        { text: `${(speed1 * area2 / area1).toFixed(2)} m/s`, isCorrect: false }
+      ];
+      return {
+        unit: 8, unitTitle: "Unit 8: Fluids (AP Physics 1 Laboratory)",
+        simType: 'fluids', scenarioMode: 'continuity_constriction',
+        simData: { rho, area1, area2, speed1, targetSpeed: speed2, targetTolerance: 0.08, isCalculus: isCalc },
+        prompt, choices: shuffle(choices),
+        explanation: `For steady incompressible flow, $A_1v_1=A_2v_2$. Therefore $v_2=(${area1.toFixed(3)}/${area2.toFixed(3)})(${speed1.toFixed(1)})=${ans.toFixed(2)}\\text{ m/s}$.`
+      };
     }
   };
 
@@ -1611,30 +1838,30 @@ $$d_2 = \\frac{${(m1 * xFulcrum).toFixed(1)} - ${(Mbeam * 1.0).toFixed(1)}}{${m2
   // PUBLIC API: CUMULATIVE SPIRAL INTERLEAVING GENERATOR
   // --------------------------------------------------------------------------
   window.RecoveryEngine = {
-    generateChallenge: function(courseId, currentUnitInput, forceFormat) {
-      const currentUnitNum = parseUnitNumber(currentUnitInput);
+    generateChallenge: function(courseId, currentUnitInput, forceFormat, options = {}) {
+      const maxUnit = courseMaxUnit(courseId);
+      const currentUnitNum = Math.max(1, Math.min(maxUnit, parseUnitNumber(currentUnitInput)));
       const isCalc = isCalculusCourse(courseId);
-
-      let selectedUnit = currentUnitNum;
-      let isSpiralReview = false;
-
-      if (currentUnitNum > 1 && Math.random() < 0.40) {
-        selectedUnit = randInt(1, currentUnitNum - 1);
-        isSpiralReview = true;
-      }
-
-      selectedUnit = Math.max(1, Math.min(5, selectedUnit || 1));
+      let coveredUnits = normalizeUnitList(options.coveredUnits, maxUnit);
+      if (!coveredUnits.length) coveredUnits = [currentUnitNum];
+      const availableUnits = coveredUnits.filter(unit => (isCalc || unit !== 8) && LAB_SIMULATION_GENERATORS[unit]);
+      const eligibleUnits = availableUnits.length ? availableUnits : [Math.min(currentUnitNum, maxUnit)];
+      const selectedUnit = pickRandom(eligibleUnits);
+      const isSpiralReview = selectedUnit !== currentUnitNum;
+      const usedFingerprints = options.usedScenarioFingerprints instanceof Set
+        ? options.usedScenarioFingerprints
+        : new Set(Array.isArray(options.usedScenarioFingerprints) ? options.usedScenarioFingerprints : []);
 
       const format = forceFormat || 'sim';
       let challenge;
       if (format === 'sim') {
         const labGenerator = LAB_SIMULATION_GENERATORS[selectedUnit] || LAB_SIMULATION_GENERATORS[1];
-        challenge = labGenerator(isCalc);
+        challenge = chooseUnusedChallenge(() => labGenerator(isCalc), usedFingerprints);
         challenge.format = 'sim';
       } else {
         const pool = isCalc ? APPC_GENERATORS : APP1_GENERATORS;
         const gen = pool[selectedUnit] || pool[1];
-        challenge = gen();
+        challenge = chooseUnusedChallenge(gen, usedFingerprints);
         challenge.format = 'mcq';
       }
 
@@ -1642,7 +1869,9 @@ $$d_2 = \\frac{${(m1 * xFulcrum).toFixed(1)} - ${(Mbeam * 1.0).toFixed(1)}}{${m2
       challenge.isCalculus = isCalc;
       challenge.activeUnitNum = currentUnitNum;
       challenge.servedUnitNum = selectedUnit;
+      challenge.coveredUnits = eligibleUnits;
       challenge.pointsRecovery = 3.5;
+      challenge.scenarioFingerprint = buildScenarioFingerprint(challenge);
 
       return challenge;
     }

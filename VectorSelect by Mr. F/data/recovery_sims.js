@@ -152,6 +152,174 @@
       }
     },
 
+    mountForceLab: function(containerEl, labData = {}, simOptions = {}) {
+      this.stop();
+      const m = Number(labData.m) || 2;
+      const theta = Number(labData.theta) || 0;
+      const applied = Number(labData.applied) || 10;
+      const mu = Number(labData.mu) || 0.15;
+      const g = Number(labData.g) || 9.8;
+      const target = Number(labData.targetAcceleration);
+      const rad = theta * Math.PI / 180;
+      const friction = mu * m * g * Math.cos(rad);
+      const acceleration = (applied - m * g * Math.sin(rad) - friction) / m;
+      containerEl.innerHTML = `<div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl"><div class="px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 text-xs font-mono font-bold text-amber-300">LAB STATION 2: FORCE SENSOR &amp; CART DYNAMICS</div><div id="force-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-amber-300">FORCE SENSOR: STANDBY</div><canvas id="force-canvas" class="w-full block bg-slate-950" height="220"></canvas><div class="p-3.5 bg-slate-900/80 text-xs space-y-3"><div class="grid grid-cols-2 gap-2 text-slate-300"><span>Mass: ${m.toFixed(1)} kg</span><span>Track: ${theta}°</span><span>Applied: ${applied.toFixed(1)} N</span><span>Friction: ${friction.toFixed(2)} N</span></div><button id="btn-run-force" class="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-black cursor-pointer">Run Motion Sensor</button></div></div>`;
+      const canvas = document.getElementById("force-canvas");
+      const telem = document.getElementById("force-telem");
+      const run = document.getElementById("btn-run-force");
+      let hiDpi = setupHiDpiCanvas(canvas, 220);
+      let progress = 0;
+      const draw = () => {
+        const { ctx, w, h } = hiDpi;
+        ctx.clearRect(0, 0, w, h); drawGrid(ctx, w, h, 28);
+        const startX = 64;
+        const maxRun = w - startX - 44;
+        const rise = Math.min(h * 0.38, maxRun * Math.tan(rad));
+        const endX = startX + (Math.abs(Math.tan(rad)) > 0.01 ? rise / Math.tan(rad) : maxRun);
+        const baseY = h * 0.76, slope = endX > startX ? rise / (endX - startX) : 0;
+        const pathLengthPx = Math.hypot(endX - startX, slope * (endX - startX));
+        const distancePx = progress * pathLengthPx;
+        const x = startX + (pathLengthPx ? distancePx * (endX - startX) / pathLengthPx : 0);
+        const surfaceY = baseY - slope * (x - startX);
+        const tangent = { x: 1 / Math.sqrt(1 + slope * slope), y: -slope / Math.sqrt(1 + slope * slope) };
+        const normal = { x: slope / Math.sqrt(1 + slope * slope), y: 1 / Math.sqrt(1 + slope * slope) };
+        const cartX = x, cartY = surfaceY - 14;
+        ctx.strokeStyle = "#64748b"; ctx.lineWidth = 3; ctx.beginPath();
+        ctx.moveTo(startX, baseY); ctx.lineTo(endX, baseY - rise); ctx.stroke();
+        ctx.fillStyle = "#f59e0b";
+        ctx.save(); ctx.translate(cartX, cartY); ctx.rotate(-rad); ctx.fillRect(-18, -12, 36, 24); ctx.restore();
+        drawVector(ctx, cartX, cartY, cartX + tangent.x * 55, cartY + tangent.y * 55, "#ef4444", "F");
+        drawVector(ctx, cartX, cartY, cartX + normal.x * 48, cartY + normal.y * 48, "#38bdf8", "N");
+        drawVector(ctx, cartX, cartY, cartX, cartY + 52, "#a78bfa", "mg");
+      };
+      const resize = () => { hiDpi = setupHiDpiCanvas(canvas, 220); draw(); };
+      this.bindResizeHandler(resize); this.attachResizeObserver(canvas, resize); resize();
+      run.onclick = () => {
+        run.disabled = true; progress = 0;
+        const motionAcceleration = Math.max(0, acceleration);
+        const travelDistanceM = 4.0;
+        const finalSpeed = Math.sqrt(2 * motionAcceleration * travelDistanceM);
+        const duration = finalSpeed > 0 ? (2 * travelDistanceM / finalSpeed) * 1000 : 1100;
+        const start = performance.now();
+        const step = now => {
+          const elapsed = Math.min(duration, now - start) / 1000;
+          const distance = Math.min(travelDistanceM, 0.5 * motionAcceleration * elapsed * elapsed);
+          progress = motionAcceleration > 0
+            ? distance / travelDistanceM
+            : Math.min(1, elapsed / 1.1);
+          draw();
+          if (progress < 1) this.animFrameId = requestAnimationFrame(step);
+          else {
+            run.disabled = false;
+            const measured = acceleration;
+            const tolerance = Number.isFinite(Number(labData.targetTolerance)) ? Number(labData.targetTolerance) : 0.12;
+            const success = !Number.isFinite(target) || Math.abs(measured - target) <= tolerance;
+            telem.innerHTML = `<span class="${success ? "text-emerald-400" : "text-amber-400"} font-bold">a = ${measured.toFixed(2)} m/s² · ${success ? "MATCH" : "CHECK NET FORCE"}</span>`;
+            if (typeof simOptions.onResult === "function") simOptions.onResult({ success, measurement: measured, message: success ? "The motion sensor agrees with the net-force model." : "Recheck the force balance and run the apparatus again." });
+          }
+        };
+        this.animFrameId = requestAnimationFrame(step);
+      };
+    },
+
+    mountRollingLab: function(containerEl, labData = {}, simOptions = {}) {
+      this.stop();
+      const radius = Number(labData.radius) || 0.15;
+      const height = Number(labData.height) || 0.6;
+      const g = Number(labData.g) || 9.8;
+      const factor = Number(labData.inertiaFactor) || 0.5;
+      const target = Number(labData.targetOmega);
+      const omega = Math.sqrt(2 * g * height / (1 + factor)) / radius;
+      containerEl.innerHTML = `<div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl"><div class="px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 text-xs font-mono font-bold text-violet-300">LAB STATION 6: ROLLING ENERGY &amp; ANGULAR SPEED</div><div id="rolling-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-violet-300">ROTATION SENSOR: STANDBY</div><canvas id="rolling-canvas" class="w-full block bg-slate-950" height="220"></canvas><div class="p-3.5 bg-slate-900/80 text-xs space-y-3"><div class="text-slate-300">Drop: ${height.toFixed(2)} m · Radius: ${radius.toFixed(2)} m · $I/(mR^2)$ = ${factor.toFixed(1)}</div><button id="btn-run-rolling" class="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-black cursor-pointer">Release Rolling Body</button></div></div>`;
+      const canvas = document.getElementById("rolling-canvas");
+      const telem = document.getElementById("rolling-telem");
+      const run = document.getElementById("btn-run-rolling");
+      let hiDpi = setupHiDpiCanvas(canvas, 220);
+      let progress = 0;
+      const pathLengthM = Math.hypot(1.0, height / 4.0);
+      const draw = () => {
+        const { ctx, w, h } = hiDpi;
+        ctx.clearRect(0, 0, w, h); drawGrid(ctx, w, h, 28);
+        const highX = 48, lowX = w - 52, highY = h * 0.28, lowY = h * 0.72;
+        const x = highX + progress * (lowX - highX);
+        const y = highY + progress * (lowY - highY);
+        const pathLengthPx = Math.hypot(lowX - highX, lowY - highY);
+        const distancePx = progress * pathLengthPx;
+        ctx.strokeStyle = "#64748b"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(highX, highY + 20); ctx.lineTo(lowX, lowY + 20); ctx.stroke();
+        ctx.strokeStyle = "#a78bfa"; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(24, highY); ctx.lineTo(24, lowY); ctx.stroke(); ctx.setLineDash([]);
+        drawVector(ctx, 24, highY, 24, lowY, "#c4b5fd", `Δh = ${height.toFixed(2)} m`);
+        ctx.fillStyle = "#a78bfa"; ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
+        ctx.save(); ctx.translate(x, y); ctx.rotate((progress * pathLengthM) / radius); ctx.strokeStyle = "#e2e8f0"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-14, 0); ctx.lineTo(14, 0); ctx.stroke(); ctx.restore();
+      };
+      const resize = () => { hiDpi = setupHiDpiCanvas(canvas, 220); draw(); };
+      this.bindResizeHandler(resize); this.attachResizeObserver(canvas, resize); resize();
+      run.onclick = () => {
+        run.disabled = true;
+        const acceleration = g * (height / 4.0) / pathLengthM / (1 + factor);
+        const finalSpeed = Math.sqrt(2 * acceleration * pathLengthM);
+        const duration = finalSpeed > 0 ? (2 * pathLengthM / finalSpeed) * 1000 : 1200;
+        const start = performance.now();
+        const step = now => {
+          const elapsed = Math.min(duration, now - start) / 1000;
+          const distance = Math.min(pathLengthM, 0.5 * acceleration * elapsed * elapsed);
+          progress = pathLengthM > 0 ? distance / pathLengthM : 1;
+          draw();
+          if (progress < 1) this.animFrameId = requestAnimationFrame(step); else {
+          run.disabled = false;
+          const tolerance = Number(labData.targetTolerance) || 0.12; const success = !Number.isFinite(target) || Math.abs(omega - target) <= tolerance;
+          telem.innerHTML = `<span class="${success ? "text-emerald-400" : "text-amber-400"} font-bold">ω = ${omega.toFixed(2)} rad/s · ${success ? "MATCH" : "CHECK ENERGY SPLIT"}</span>`;
+          if (typeof simOptions.onResult === "function") simOptions.onResult({ success, measurement: omega, message: success ? "The rotation sensor agrees with conservation of energy." : "Recheck translational and rotational kinetic energy." });
+        }};
+        this.animFrameId = requestAnimationFrame(step);
+      };
+    },
+
+    mountFluidsLab: function(containerEl, labData = {}, simOptions = {}) {
+      this.stop();
+      const area1 = Number(labData.area1) || 0.02, area2 = Number(labData.area2) || 0.01;
+      const speed1 = Number(labData.speed1) || 2, target = Number(labData.targetSpeed);
+      const speed2 = speed1 * area1 / area2;
+      containerEl.innerHTML = `<div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl"><div class="px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 text-xs font-mono font-bold text-sky-300">LAB STATION 8: CONTINUITY FLOW SENSOR</div><div id="fluids-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-sky-300">FLOW SENSOR: STANDBY</div><canvas id="fluids-canvas" class="w-full block bg-slate-950" height="220"></canvas><div class="p-3.5 bg-slate-900/80 text-xs space-y-3"><div class="text-slate-300">A₁ = ${area1.toFixed(3)} m² · A₂ = ${area2.toFixed(3)} m² · v₁ = ${speed1.toFixed(1)} m/s</div><button id="btn-run-fluids" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-black cursor-pointer">Measure Downstream Speed</button></div></div>`;
+      const canvas = document.getElementById("fluids-canvas"), telem = document.getElementById("fluids-telem"), run = document.getElementById("btn-run-fluids");
+      let hiDpi = setupHiDpiCanvas(canvas, 220), progress = 0;
+      const draw = () => {
+        const {ctx,w,h}=hiDpi;
+        ctx.clearRect(0,0,w,h); drawGrid(ctx,w,h,28);
+        const neckStart = w * 0.45, neckEnd = w * 0.55;
+        ctx.fillStyle="#38bdf8"; ctx.beginPath();
+        ctx.moveTo(20,h*.42); ctx.lineTo(neckStart,h*.42); ctx.lineTo(neckEnd,h*.54);
+        ctx.lineTo(w-20,h*.54); ctx.lineTo(w-20,h*.72); ctx.lineTo(neckEnd,h*.72);
+        ctx.lineTo(neckStart,h*.58); ctx.lineTo(20,h*.58); ctx.closePath(); ctx.fill();
+
+        const pathWide = neckStart - 25;
+        const pathNarrow = neckEnd - neckStart;
+        const pathExit = w - 20 - neckEnd;
+        const timeWide = pathWide / speed1;
+        const timeNarrow = pathNarrow / ((speed1 + speed2) / 2);
+        const timeExit = pathExit / speed2;
+        const totalTime = timeWide + timeNarrow + timeExit;
+        const t = progress * totalTime;
+        let x = 25, y = h * 0.50, localSpeed = speed1;
+        if (t <= timeWide) {
+          x = 25 + t * speed1;
+        } else if (t <= timeWide + timeNarrow) {
+          const q = (t - timeWide) / timeNarrow;
+          x = neckStart + q * pathNarrow;
+          y = h * (0.46 + q * 0.04);
+          localSpeed = speed1 + q * (speed2 - speed1);
+        } else {
+          x = neckEnd + (t - timeWide - timeNarrow) * speed2;
+          localSpeed = speed2;
+        }
+        ctx.fillStyle="#e0f2fe"; ctx.beginPath(); ctx.arc(x,y,6,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle="#bae6fd"; ctx.font="bold 10px monospace"; ctx.textAlign="center";
+        ctx.fillText(`v = ${localSpeed.toFixed(1)} m/s`, x, y - 14);
+      };
+      const resize=()=>{hiDpi=setupHiDpiCanvas(canvas,220);draw();}; this.bindResizeHandler(resize); this.attachResizeObserver(canvas,resize); resize();
+      run.onclick=()=>{run.disabled=true;const start=performance.now();const step=now=>{progress=Math.min(1,(now-start)/1000);draw();if(progress<1)this.animFrameId=requestAnimationFrame(step);else{run.disabled=false;const success=!Number.isFinite(target)||Math.abs(speed2-target)<=0.08;telem.innerHTML=`<span class="${success?"text-emerald-400":"text-amber-400"} font-bold">v₂ = ${speed2.toFixed(2)} m/s · ${success?"MATCH":"CHECK CONTINUITY"}</span>`;if(typeof simOptions.onResult==="function")simOptions.onResult({success,measurement:speed2,message:success?"The flow sensor agrees with A₁v₁ = A₂v₂.":"Recheck the continuity equation."});}};this.animFrameId=requestAnimationFrame(step);};
+    },
+
     // --------------------------------------------------------------------------
     // MODULE 1: PRECISION BALLISTICS & PROJECTILE KINEMATICS LABORATORY
     // --------------------------------------------------------------------------
@@ -421,8 +589,6 @@
         let triggered = false;
 
         function step() {
-          const previousT = proj.t;
-          const previousX = proj.x;
           proj.t += dt;
           proj.vy -= g * dt;
           proj.x += proj.vx * dt;
@@ -942,6 +1108,7 @@
         // Moving Cart
         let cartX = rampStartX;
         let cartY = rampTopY;
+        let cartDetached = false;
 
         if (progress > 0) {
           if (progress < 0.35) {
@@ -951,8 +1118,21 @@
           } else if (progress < 0.85) {
             const loopT = (progress - 0.35) / 0.50;
             const loopAngle = Math.PI / 2 - loopT * 2 * Math.PI;
-            cartX = loopCenterX + loopR_px * Math.cos(loopAngle);
-            cartY = loopCenterY + loopR_px * Math.sin(loopAngle);
+            if (currentH < 2.5 * R && loopT >= 0.72) {
+              cartDetached = true;
+              const releaseAngle = Math.PI / 2 - 0.72 * 2 * Math.PI;
+              const releaseX = loopCenterX + loopR_px * Math.cos(releaseAngle);
+              const releaseY = loopCenterY + loopR_px * Math.sin(releaseAngle);
+              const tangentX = Math.sin(releaseAngle);
+              const tangentY = -Math.cos(releaseAngle);
+              const releaseSpeed = Math.sqrt(Math.max(0, 2 * g * (currentH - 2 * R))) * 2.2;
+              const dt = (loopT - 0.72) * 2.2;
+              cartX = releaseX + tangentX * releaseSpeed * dt;
+              cartY = releaseY + tangentY * releaseSpeed * dt + 0.5 * 0.10 * g * dt * dt;
+            } else {
+              cartX = loopCenterX + loopR_px * Math.cos(loopAngle);
+              cartY = loopCenterY + loopR_px * Math.sin(loopAngle);
+            }
           } else {
             const exitT = (progress - 0.85) / 0.15;
             cartX = loopCenterX + loopR_px + exitT * (w - loopCenterX - loopR_px);
@@ -967,6 +1147,15 @@
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 1.5;
         ctx.stroke();
+        if (cartDetached) {
+          ctx.strokeStyle = "#fb7185";
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(cartX - 14, cartY - 14);
+          ctx.lineTo(cartX + 14, cartY + 14);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
 
         // Draw Force Vectors at Apex if reached
         if (progress >= 0.58 && progress <= 0.62) {
@@ -1604,6 +1793,192 @@
         updateHUD();
         drawScene(0);
       };
+    },
+
+    // --------------------------------------------------------------------------
+    // MODULE 6: ONE-DIMENSIONAL COLLISION & MOMENTUM TRACK
+    // --------------------------------------------------------------------------
+    mountMomentumLab: function(containerEl, labData = {}, simOptions = {}) {
+      this.stop();
+      const m1 = labData.m1 || 2.0;
+      const m2 = labData.m2 || 3.0;
+      const u1 = labData.u1 || 8.0;
+      const u2 = labData.u2 || 0.0;
+      const restitution = labData.restitution === undefined ? 1 : labData.restitution;
+      let isSimulating = false;
+      let collisionRecord = null;
+      let cart1 = { x: 1.5, v: u1 };
+      let cart2 = { x: 8.5, v: u2 };
+
+      const reportResult = (result) => {
+        if (typeof simOptions.onResult === "function") simOptions.onResult(result);
+      };
+
+      containerEl.innerHTML = `
+        <div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl">
+          <div class="flex flex-wrap items-center justify-between px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 text-xs font-mono">
+            <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-rose-400 animate-pulse"></span><span class="font-bold text-slate-200">LAB STATION 6: MOMENTUM &amp; COLLISION TRACK</span></div>
+            <div class="text-slate-400 text-[11px]">m₁ = ${m1.toFixed(1)} kg · m₂ = ${m2.toFixed(1)} kg · e = ${restitution.toFixed(2)}</div>
+          </div>
+          <div id="momentum-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-rose-300 flex flex-wrap justify-between gap-2">
+            <span>P_TOTAL = ${(m1 * u1 + m2 * u2).toFixed(2)} kg·m/s</span><span id="momentum-status">COLLISION SENSOR: STANDBY</span>
+          </div>
+          <canvas id="momentum-canvas" class="w-full block bg-slate-950" height="220"></canvas>
+          <div class="p-3.5 bg-slate-900/80 border-t border-slate-800 text-xs">
+            <div class="flex items-center gap-3">
+              <button id="btn-run-momentum" class="pressable flex-1 py-2.5 rounded-xl bg-gradient-to-r from-rose-600 to-orange-600 text-white font-black cursor-pointer">▶ Run Collision</button>
+              <button id="btn-reset-momentum" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold border border-slate-700 cursor-pointer">↺ Reset</button>
+            </div>
+          </div>
+        </div>`;
+
+      const canvas = document.getElementById("momentum-canvas");
+      const telem = document.getElementById("momentum-telem");
+      const runBtn = document.getElementById("btn-run-momentum");
+      const resetBtn = document.getElementById("btn-reset-momentum");
+      let hiDpi = setupHiDpiCanvas(canvas, 220);
+
+      function drawScene() {
+        const { ctx, w, h } = hiDpi;
+        ctx.clearRect(0, 0, w, h);
+        drawGrid(ctx, w, h, 25);
+        const pad = 40;
+        const trackY = h - 60;
+        const scale = (w - pad * 2) / 12;
+        ctx.strokeStyle = "#64748b"; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(pad, trackY); ctx.lineTo(w - pad, trackY); ctx.stroke();
+        for (let x = 0; x <= 12; x += 2) {
+          const px = pad + x * scale;
+          ctx.fillStyle = "#64748b"; ctx.font = "9px monospace"; ctx.textAlign = "center";
+          ctx.fillText(`${x}m`, px, trackY + 18);
+        }
+        const drawCart = (cart, color, label, mass) => {
+          const px = pad + cart.x * scale;
+          ctx.fillStyle = color; ctx.fillRect(px - 22, trackY - 28, 44, 24);
+          ctx.fillStyle = "#fff"; ctx.font = "bold 10px monospace"; ctx.textAlign = "center";
+          ctx.fillText(`${label} ${mass}kg`, px, trackY - 12);
+          drawVector(ctx, px, trackY - 35, px + cart.v * 4, trackY - 35, color, `v=${cart.v.toFixed(1)}`);
+        };
+        drawCart(cart1, "#fb7185", "m₁", m1);
+        drawCart(cart2, "#38bdf8", "m₂", m2);
+      }
+      function resize() { hiDpi = setupHiDpiCanvas(canvas, 220); drawScene(); }
+      RecoverySims.bindResizeHandler(resize); RecoverySims.attachResizeObserver(canvas, resize); resize();
+
+      runBtn.onclick = () => {
+        if (isSimulating) return;
+        isSimulating = true; collisionRecord = null;
+        cart1 = { x: 1.5, v: u1 }; cart2 = { x: 8.5, v: u2 };
+        let collided = false; const dt = 0.02;
+        function step() {
+          cart1.x += cart1.v * dt; cart2.x += cart2.v * dt;
+          if (!collided && cart1.x >= cart2.x - 0.8) {
+            collided = true;
+            const contactCenter = (cart1.x + cart2.x) / 2;
+            cart1.x = contactCenter - 0.4;
+            cart2.x = contactCenter + 0.4;
+            const v1 = ((m1 - restitution * m2) * u1 + (1 + restitution) * m2 * u2) / (m1 + m2);
+            const v2 = ((m2 - restitution * m1) * u2 + (1 + restitution) * m1 * u1) / (m1 + m2);
+            cart1.v = v1; cart2.v = v2;
+            collisionRecord = { v1, v2 };
+            const target = Number.isFinite(Number(labData.targetV1)) ? Number(labData.targetV1) : null;
+            const tolerance = Number.isFinite(Number(labData.targetTolerance)) ? Number(labData.targetTolerance) : 0.05;
+            const success = target === null || Math.abs(v1 - target) <= tolerance;
+            reportResult({
+              success,
+              measurement: v1,
+              message: success
+                ? `Collision sensor measured v₁ = ${v1.toFixed(2)} m/s, matching the elastic-collision prediction.`
+                : `Collision sensor measured v₁ = ${v1.toFixed(2)} m/s. Check the masses and initial velocities, then try again.`
+            });
+          }
+          drawScene();
+          if (!collided || (cart1.x < 11 && cart2.x < 11)) {
+            RecoverySims.animFrameId = requestAnimationFrame(step);
+          } else {
+            isSimulating = false;
+            telem.innerHTML = `<span>P_TOTAL = ${(m1 * u1 + m2 * u2).toFixed(2)} kg·m/s</span><span class="text-emerald-400 font-bold">POST-COLLISION: v₁ = ${cart1.v.toFixed(2)} m/s · v₂ = ${cart2.v.toFixed(2)} m/s</span>`;
+          }
+        }
+        RecoverySims.animFrameId = requestAnimationFrame(step);
+      };
+      resetBtn.onclick = () => { RecoverySims.stop(); isSimulating = false; cart1 = { x: 1.5, v: u1 }; cart2 = { x: 8.5, v: u2 }; collisionRecord = null; drawScene(); };
+    },
+
+    // --------------------------------------------------------------------------
+    // MODULE 7: ORBITAL PERIOD & GRAVITATIONAL DYNAMICS
+    // --------------------------------------------------------------------------
+    mountOrbitLab: function(containerEl, labData = {}, simOptions = {}) {
+      this.stop();
+      const mu = labData.mu || 3.986e14;
+      const radius = labData.radius || 7.0e6;
+      const radiusMin = labData.radiusMin || 6.6e6;
+      const radiusMax = labData.radiusMax || 8.4e6;
+      let currentRadius = radius;
+      let isSimulating = false;
+      let measuredPeriod = null;
+      let phase = 0;
+
+      const reportResult = (result) => {
+        if (typeof simOptions.onResult === "function") simOptions.onResult(result);
+      };
+      containerEl.innerHTML = `
+        <div class="rounded-2xl border border-slate-800 bg-slate-950/95 overflow-hidden shadow-2xl">
+          <div class="flex flex-wrap items-center justify-between px-4 py-2.5 bg-slate-900/90 border-b border-slate-800 text-xs font-mono">
+            <div class="flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-indigo-400 animate-pulse"></span><span class="font-bold text-slate-200">LAB STATION 7: ORBITAL PERIOD &amp; GRAVITY</span></div>
+            <div class="text-slate-400 text-[11px]">μ = ${(mu / 1e14).toFixed(3)} × 10¹⁴ m³/s²</div>
+          </div>
+          <div id="orbit-telem" class="px-4 py-2 bg-slate-900/95 border-b border-slate-800 font-mono text-[11px] text-indigo-300 flex flex-wrap justify-between gap-2"><span>R = ${(currentRadius / 1e6).toFixed(2)} Mm</span><span id="orbit-status">ORBIT SENSOR: STANDBY</span></div>
+          <canvas id="orbit-canvas" class="w-full block bg-slate-950" height="230"></canvas>
+          <div class="p-3.5 bg-slate-900/80 border-t border-slate-800 text-xs space-y-3">
+            <div class="flex justify-between text-slate-300"><span>Orbital Radius</span><span id="orbit-radius-label" class="font-mono text-indigo-300 font-bold">${(currentRadius / 1e6).toFixed(2)} Mm</span></div>
+            <input id="orbit-radius-slider" type="range" min="${radiusMin}" max="${radiusMax}" step="10000" value="${currentRadius}" class="w-full accent-indigo-400 cursor-pointer">
+            <div class="flex items-center gap-3"><button id="btn-run-orbit" class="pressable flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 text-white font-black cursor-pointer">▶ Measure One Orbit</button><button id="btn-reset-orbit" class="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-bold border border-slate-700 cursor-pointer">↺ Reset</button></div>
+          </div>
+        </div>`;
+
+      const canvas = document.getElementById("orbit-canvas");
+      const slider = document.getElementById("orbit-radius-slider");
+      const label = document.getElementById("orbit-radius-label");
+      const telem = document.getElementById("orbit-telem");
+      const runBtn = document.getElementById("btn-run-orbit");
+      const resetBtn = document.getElementById("btn-reset-orbit");
+      let hiDpi = setupHiDpiCanvas(canvas, 230);
+      function period() { return 2 * Math.PI * Math.sqrt(Math.pow(currentRadius, 3) / mu); }
+      function drawScene() {
+        const { ctx, w, h } = hiDpi;
+        ctx.clearRect(0, 0, w, h); drawGrid(ctx, w, h, 25);
+        const cx = w * 0.5, cy = h * 0.52, orbitPx = Math.min(w, h) * 0.30;
+        ctx.strokeStyle = "#475569"; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(cx, cy, orbitPx, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = "#fbbf24"; ctx.beginPath(); ctx.arc(cx, cy, 18, 0, Math.PI * 2); ctx.fill();
+        const sx = cx + orbitPx * Math.cos(phase), sy = cy + orbitPx * Math.sin(phase);
+        ctx.fillStyle = "#818cf8"; ctx.beginPath(); ctx.arc(sx, sy, 7, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "#cbd5e1"; ctx.font = "bold 10px monospace"; ctx.textAlign = "center"; ctx.fillText("CENTRAL BODY", cx, cy + 34);
+      }
+      function resize() { hiDpi = setupHiDpiCanvas(canvas, 230); drawScene(); }
+      RecoverySims.bindResizeHandler(resize); RecoverySims.attachResizeObserver(canvas, resize); resize();
+      slider.oninput = (e) => { if (isSimulating) return; currentRadius = Number(e.target.value); label.textContent = `${(currentRadius / 1e6).toFixed(2)} Mm`; telem.firstElementChild.textContent = `R = ${(currentRadius / 1e6).toFixed(2)} Mm`; };
+      runBtn.onclick = () => {
+        if (isSimulating) return;
+        isSimulating = true; phase = 0; measuredPeriod = 0;
+        const expected = period(); const start = performance.now();
+        function step(now) {
+          measuredPeriod = (now - start) / 1000;
+          phase = (measuredPeriod / expected) * Math.PI * 2;
+          drawScene();
+          if (measuredPeriod < expected) RecoverySims.animFrameId = requestAnimationFrame(step);
+          else {
+            isSimulating = false; measuredPeriod = expected;
+            const target = Number.isFinite(Number(labData.targetPeriod)) ? Number(labData.targetPeriod) : null;
+            const tolerance = Number.isFinite(Number(labData.targetTolerance)) ? Number(labData.targetTolerance) : 0.05;
+            const success = target === null || Math.abs(measuredPeriod - target) <= tolerance;
+            telem.innerHTML = `<span>R = ${(currentRadius / 1e6).toFixed(2)} Mm</span><span class="${success ? "text-emerald-400" : "text-amber-400"} font-bold">T = ${measuredPeriod.toFixed(2)} s</span>`;
+            reportResult({ success, measurement: measuredPeriod, message: success ? `The orbit sensor measured T = ${measuredPeriod.toFixed(2)} s, matching Kepler's prediction.` : `The orbit sensor measured T = ${measuredPeriod.toFixed(2)} s. Adjust the radius and try again.` });
+          }
+        }
+        RecoverySims.animFrameId = requestAnimationFrame(step);
+      };
+      resetBtn.onclick = () => { RecoverySims.stop(); isSimulating = false; phase = 0; measuredPeriod = null; label.textContent = `${(currentRadius / 1e6).toFixed(2)} Mm`; telem.innerHTML = `<span>R = ${(currentRadius / 1e6).toFixed(2)} Mm</span><span>ORBIT SENSOR: STANDBY</span>`; drawScene(); };
     },
 
     // Backwards compatibility wrappers

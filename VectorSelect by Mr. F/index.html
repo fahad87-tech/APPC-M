@@ -1147,6 +1147,7 @@
     let activeRecoveryChallenge = null;
     let recoveryAttemptedForQuestion = {};
     let recoveryChallengesByQuestion = {};
+    let recoveryScenarioFingerprints = new Set();
     let questionPointsBreakdown = {};
     let lastRenderedQuestionIdx = -1;
     let studentMissedQuestions = new Set();
@@ -1158,6 +1159,33 @@
         return false;
       }
       return true;
+    }
+
+    function recoveryBlueprintUnits() {
+      const maxUnit = String((currentAssignment && currentAssignment.subject) || "").toLowerCase().includes("mechanics")
+        || String((currentAssignment && currentAssignment.subject) || "").toLowerCase().includes("physics c")
+        ? 7 : 8;
+      const raw = currentAssignment && currentAssignment.covered_units;
+      const values = Array.isArray(raw) && raw.length ? raw : [currentAssignment && currentAssignment.unit];
+      const units = values.map(value => {
+        const match = String(value || "").match(/(\d+)/);
+        return match ? Number(match[1]) : 0;
+      }).filter(unit => unit >= 1 && unit <= maxUnit);
+      return [...new Set(units.length ? units : [1])];
+    }
+
+    function recoveryScenarioHistoryKey() {
+      return currentAssignment && currentAssignment.join_code && activeStudent
+        ? `recovery_scenarios_${currentAssignment.join_code}_${activeStudent}`
+        : "";
+    }
+
+    function saveRecoveryScenarioHistory() {
+      const key = recoveryScenarioHistoryKey();
+      if (!key) return;
+      try {
+        localStorage.setItem(key, JSON.stringify([...recoveryScenarioFingerprints].slice(-200)));
+      } catch (e) {}
     }
 
     function hydrateQuizKeys(quiz) {
@@ -1503,6 +1531,14 @@
       }
 
       recoveryChallengesByQuestion = {};
+      recoveryScenarioFingerprints = new Set();
+      const scenarioHistoryKey = recoveryScenarioHistoryKey();
+      if (scenarioHistoryKey) {
+        try {
+          const savedScenarios = JSON.parse(localStorage.getItem(scenarioHistoryKey) || "[]");
+          if (Array.isArray(savedScenarios)) recoveryScenarioFingerprints = new Set(savedScenarios);
+        } catch (e) {}
+      }
       questionPointsBreakdown = {};
       studentMissedQuestions = new Set();
       currentRevealedAnswers = {};
@@ -2787,7 +2823,17 @@
           || 1;
         // 50/50 split between interactive lab simulation and analytical theory scenario
         const preferredFormat = (Math.random() < 0.5) ? 'sim' : 'mcq';
-        recoveryChallengesByQuestion[realIdx] = window.RecoveryEngine.generateChallenge(course, unit, preferredFormat);
+        activeRecoveryChallenge = window.RecoveryEngine.generateChallenge(course, unit, preferredFormat, {
+          coveredUnits: recoveryBlueprintUnits(),
+          usedScenarioFingerprints: recoveryScenarioFingerprints,
+          studentId: activeStudent,
+          assignmentId: currentAssignment && currentAssignment.assessment_id
+        });
+        recoveryChallengesByQuestion[realIdx] = activeRecoveryChallenge;
+        if (activeRecoveryChallenge.scenarioFingerprint) {
+          recoveryScenarioFingerprints.add(activeRecoveryChallenge.scenarioFingerprint);
+          saveRecoveryScenarioHistory();
+        }
       }
       activeRecoveryChallenge = recoveryChallengesByQuestion[realIdx];
 
@@ -2866,6 +2912,16 @@
             window.RecoverySims.mountHarmonicLab(simCont, simData, simOptions);
           } else if (simType === 'torque') {
             window.RecoverySims.mountTorqueLab(simCont, simData, simOptions);
+          } else if (simType === 'momentum') {
+            window.RecoverySims.mountMomentumLab(simCont, simData, simOptions);
+          } else if (simType === 'force') {
+            window.RecoverySims.mountForceLab(simCont, simData, simOptions);
+          } else if (simType === 'rolling') {
+            window.RecoverySims.mountRollingLab(simCont, simData, simOptions);
+          } else if (simType === 'fluids') {
+            window.RecoverySims.mountFluidsLab(simCont, simData, simOptions);
+          } else if (simType === 'orbit') {
+            window.RecoverySims.mountOrbitLab(simCont, simData, simOptions);
           } else {
             window.RecoverySims.mountBallisticsLab(simCont, simData, simOptions);
           }
@@ -2922,8 +2978,17 @@
         || 1;
       
       if (window.RecoveryEngine) {
-        activeRecoveryChallenge = window.RecoveryEngine.generateChallenge(course, unit, targetFormat);
+        activeRecoveryChallenge = window.RecoveryEngine.generateChallenge(course, unit, targetFormat, {
+          coveredUnits: recoveryBlueprintUnits(),
+          usedScenarioFingerprints: recoveryScenarioFingerprints,
+          studentId: activeStudent,
+          assignmentId: currentAssignment && currentAssignment.assessment_id
+        });
         recoveryChallengesByQuestion[realIdx] = activeRecoveryChallenge;
+        if (activeRecoveryChallenge.scenarioFingerprint) {
+          recoveryScenarioFingerprints.add(activeRecoveryChallenge.scenarioFingerprint);
+          saveRecoveryScenarioHistory();
+        }
       } else {
         activeRecoveryChallenge.format = targetFormat;
       }
