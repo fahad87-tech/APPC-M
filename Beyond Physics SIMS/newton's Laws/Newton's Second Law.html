@@ -1,1775 +1,1398 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Newton's Second Law: Dynamics & Kinematics</title>
-    <script>
-    const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
-    document.documentElement.classList.add("password-locked");
-
-    async function pbkdf2Verify(password, storedHash, salt, iterations) {
-       const enc = new TextEncoder();
-       const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
-       const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
-       const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
-       return hex === storedHash;
-     }
-
-    function requestPassword(title, message) {
-      return new Promise(resolve => {
-        const existingGate = document.getElementById("password-gate");
-        if (existingGate) existingGate.remove();
-        const gate = document.createElement("div");
-        gate.id = "password-gate";
-        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
-        document.body.appendChild(gate);
-        const input = document.getElementById("password-gate-input");
-        const finish = value => { gate.remove(); resolve(value); };
-        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
-        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
-        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
-        window.requestAnimationFrame(() => input.focus());
-      });
-    }
-
-    async function verifyPageAccess() {
-      const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
-      if (userInput === null) { window.location.href = "../index.html"; return; }
-      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
-        document.documentElement.classList.remove("password-locked");
-      } else {
-        alert("Incorrect password. Access denied.");
-        window.location.href = "../index.html";
-      }
-    }
-
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
-    } else {
-      verifyPageAccess();
-    }
-  </script>
-  <style id="password-gate-styles">
-    html.password-locked body { overflow: hidden; }
-    html.password-locked body > * { visibility: hidden; }
-    html.password-locked body > #password-gate { visibility: visible; }
-    #password-gate {
-      position: fixed;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(5, 9, 18, 0.88);
-      padding: 24px;
-      z-index: 9999;
-    }
-    html.password-locked #password-gate { display: flex; visibility: visible; }
-    #password-gate-card {
-      width: min(100%, 420px);
-      background: #101625;
-      border: 1px solid rgba(100,181,246,0.28);
-      border-radius: 18px;
-      padding: 24px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-      color: #e7edf7;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
-    #password-gate-input {
-      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35);
-      background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px;
-      box-sizing: border-box;
-    }
-    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
-    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
-    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
-    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
-    #password-gate-submit { background: #64b5f6; color: #08101c; }
-  </style>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
-    <script src="https://unpkg.com/docx@7.8.2/build/index.js" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" defer></script>
-
-    <style>
-        :root {
-            --bg-color: #1a1a2e;
-            --panel-bg: rgba(22, 28, 45, 0.92);
-            --border-color: rgba(0, 180, 216, 0.15);
-            --accent: #00b4d8;
-            --accent-hover: #0096c7;
-            --danger: #ff6b6b;
-            --success: #6bff8e;
-            --highlight: #ffd93d;
-            --text-primary: #e0e0e0;
-            --text-secondary: #999999;
-            --text-muted: #666666;
-            --font-stack: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            
-            --panel-width-left: 320px;
-            --panel-width-right: 320px;
-            --top-bar-height: 44px;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-primary);
-            font-family: var(--font-stack);
-            font-size: 14px;
-            line-height: 1.5;
-            overflow: hidden;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- TOP TAB BAR --- */
-        .tab-bar {
-            height: var(--top-bar-height);
-            background: var(--panel-bg);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            z-index: 100;
-            flex-shrink: 0;
-            gap: 15px;
-        }
-
-        .tab-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 12px;
-            font-weight: bold;
-            font-family: var(--font-stack);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            padding: 10px 5px;
-            border-bottom: 2px solid transparent;
-            transition: color 0.3s, border-bottom 0.3s;
-        }
-
-        .tab-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .tab-btn.active {
-            color: var(--accent);
-            border-bottom: 2px solid var(--accent);
-        }
-
-        /* --- MAIN WORKSPACE --- */
-        .workspace {
-            position: relative;
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* --- CANVAS --- */
-        canvas#simCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-        }
-
-        /* --- PANELS --- */
-        .panel {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            background: var(--panel-bg);
-            backdrop-filter: blur(12px);
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            transition: transform 0.3s ease;
-        }
-
-        .panel-left {
-            left: 0;
-            width: var(--panel-width-left);
-            border-right: 1px solid var(--border-color);
-        }
-
-        .panel-right {
-            right: 0;
-            width: var(--panel-width-right);
-            border-left: 1px solid var(--border-color);
-        }
-
-        .panel-header {
-            padding: 18px 20px 10px 20px;
-            font-size: 13px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--accent);
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            flex-shrink: 0;
-        }
-
-        .panel-content {
-            padding: 18px 20px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        /* Resizers */
-        .resizer {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 10px;
-            cursor: ew-resize;
-            z-index: 60;
-        }
-        .resizer-left { right: -5px; }
-        .resizer-right { left: -5px; }
-
-        /* --- UI ELEMENTS --- */
-        fieldset {
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px 12px;
-            margin-bottom: 15px;
-        }
-
-        legend {
-            font-size: 11px;
-            color: var(--text-secondary);
-            padding: 0 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .control-group {
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .control-group:last-child {
-            margin-bottom: 0;
-        }
-
-        .control-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .control-label {
-            font-size: 11px;
-            color: var(--text-primary);
-        }
-
-        .control-val {
-            font-size: 11px;
-            font-family: monospace;
-            color: var(--accent);
-            background: rgba(0, 180, 216, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        /* Value Flash Animation */
-        @keyframes flashValue {
-            0% { background: var(--accent); color: #fff; }
-            100% { background: rgba(0, 180, 216, 0.1); color: var(--accent); }
-        }
-        .flash {
-            animation: flashValue 0.4s ease-out;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-
-        input[type="range"]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: #333;
-            border-radius: 2px;
-            cursor: pointer;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 16px;
-            width: 16px;
-            border-radius: 50%;
-            background: var(--accent);
-            margin-top: -6px;
-            cursor: pointer;
-            border: none;
-            transition: transform 0.1s, box-shadow 0.1s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 8px rgba(0, 180, 216, 0.6);
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        button.action-btn {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 8px 0;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: var(--font-stack);
-            font-size: 12px;
-            transition: all 0.2s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-        }
-
-        button.action-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: scale(1.02);
-            box-shadow: 0 0 10px rgba(0, 180, 216, 0.2);
-        }
-
-        button.action-btn.active {
-            background: var(--accent);
-            color: #111;
-            border-color: var(--accent);
-        }
-
-        /* Toggles */
-        .toggle-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            margin-bottom: 8px;
-        }
-        
-        .toggle-row input[type="checkbox"] {
-            accent-color: var(--accent);
-            cursor: pointer;
-            width: 14px;
-            height: 14px;
-        }
-
-        /* --- RIGHT PANEL SPECIFICS --- */
-        .right-sub-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 5px;
-        }
-
-        .right-tab {
-            font-size: 11px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            text-transform: uppercase;
-        }
-        .right-tab.active {
-            color: var(--accent);
-            font-weight: bold;
-        }
-
-        .telemetry-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1px;
-            background: var(--border-color);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-
-        .telemetry-cell {
-            background: var(--panel-bg);
-            padding: 9px 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .telemetry-label {
-            font-size: 10px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-
-        .telemetry-value {
-            font-size: 12px;
-            font-family: monospace;
-            color: var(--text-primary);
-        }
-
-        .derived-info {
-            background: rgba(0, 180, 216, 0.05);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 12px 14px;
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .derived-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-        }
-        .derived-row span:last-child {
-            font-family: monospace;
-            color: var(--accent);
-        }
-
-        .chart-container {
-            background: rgba(15, 20, 40, 0.6);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 10px;
-            margin-bottom: 15px;
-            height: 180px;
-            position: relative;
-        }
-
-        .chart-container canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        /* --- GUIDED EXPLORATION --- */
-        #guidedExploration {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--accent);
-            border-radius: 8px;
-            padding: 20px;
-            width: 450px;
-            max-width: 90%;
-            z-index: 200;
-            display: none;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .exploration-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .exploration-title {
-            font-size: 14px;
-            font-weight: bold;
-            color: var(--accent);
-            text-transform: uppercase;
-        }
-
-        .exploration-question {
-            font-size: 14px;
-            margin-bottom: 15px;
-            color: var(--text-primary);
-        }
-
-        .exploration-textarea {
-            width: 100%;
-            height: 80px;
-            background: rgba(0,0,0,0.2);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            color: var(--text-primary);
-            padding: 10px;
-            font-family: var(--font-stack);
-            resize: none;
-            margin-bottom: 10px;
-        }
-
-        .exploration-textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .exploration-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-dots {
-            display: flex;
-            gap: 6px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #444;
-            cursor: pointer;
-        }
-
-        .dot.active {
-            background: var(--accent);
-        }
-
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 11px;
-            border-radius: 4px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 18px;
-        }
-        .close-btn:hover { color: var(--danger); }
-
-        details.hint {
-            margin-bottom: 10px;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        details.hint summary { cursor: pointer; color: var(--highlight); }
-
-        /* HUD */
-        #hud {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.5);
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 12px;
-            color: rgba(255,255,255,0.7);
-            z-index: 20;
-            pointer-events: none;
-        }
-
-        /* Utility */
-        .hidden { display: none !important; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newton's Second Law: Dynamics & Kinematics</title>
+<script>
+const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+document.documentElement.classList.add("password-locked");
+async function pbkdf2Verify(password, storedHash, salt, iterations) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+  const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+  return hex === storedHash;
+}
+function requestPassword(title, message) {
+  return new Promise(resolve => {
+    const existingGate = document.getElementById("password-gate");
+    if (existingGate) existingGate.remove();
+    const gate = document.createElement("div");
+    gate.id = "password-gate";
+    gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+    document.body.appendChild(gate);
+    const input = document.getElementById("password-gate-input");
+    const finish = value => { gate.remove(); resolve(value); };
+    document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+    document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+    input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+    window.requestAnimationFrame(() => input.focus());
+  });
+}
+async function verifyPageAccess() {
+  const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+  if (userInput === null) { window.location.href = "../index.html"; return; }
+  if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+    document.documentElement.classList.remove("password-locked");
+  } else {
+    alert("Incorrect password. Access denied.");
+    window.location.href = "../index.html";
+  }
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+} else {
+  verifyPageAccess();
+}
+</script>
+<style id="password-gate-styles">
+html.password-locked body { overflow: hidden; }
+html.password-locked body > * { visibility: hidden; }
+html.password-locked body > #password-gate { visibility: visible; }
+#password-gate { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(5, 9, 18, 0.88); padding: 24px; z-index: 9999; }
+html.password-locked #password-gate { display: flex; visibility: visible; }
+#password-gate-card { width: min(100%, 420px); background: #101625; border: 1px solid rgba(100,181,246,0.28); border-radius: 18px; padding: 24px; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45); color: #e7edf7; font-family: 'Segoe UI', Arial, sans-serif; }
+#password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+#password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+#password-gate-input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35); background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px; box-sizing: border-box; }
+#password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+#password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+.password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+#password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+#password-gate-submit { background: #64b5f6; color: #08101c; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+<script src="https://unpkg.com/docx@7.8.2/build/index.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" defer></script>
+<style>
+:root {
+  --bg: #080b14;
+  --panel-bg: rgba(12, 17, 30, 0.94);
+  --border: rgba(0, 212, 240, 0.18);
+  --accent: #00d4f0;
+  --accent-2: #ff6b35;
+  --success: #4df0a0;
+  --highlight: #ffe066;
+  --danger: #ff5c5c;
+  --text: #e8ecf4;
+  --text-2: #9aa3b8;
+  --text-3: #6a7388;
+  --font: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --panel-width: 310px;
+  --top-bar-height: 46px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.5; overflow: hidden; width: 100vw; height: 100vh; display: flex; flex-direction: column; }
+.tab-bar { height: var(--top-bar-height); background: var(--panel-bg); backdrop-filter: blur(14px); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 18px; z-index: 100; flex-shrink: 0; gap: 14px; }
+.brand { font-weight: 700; color: var(--accent); margin-right: 12px; letter-spacing: 0.8px; font-size: 13px; text-transform: uppercase; }
+.tab-btn { background: none; border: none; color: var(--text-2); font-size: 11.5px; font-weight: 700; font-family: var(--font); text-transform: uppercase; letter-spacing: 0.6px; cursor: pointer; padding: 10px 4px; border-bottom: 2px solid transparent; transition: color 0.3s, border-bottom 0.3s; }
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.workspace { position: relative; flex: 1; display: flex; overflow: hidden; }
+canvas#simCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
+.panel { position: absolute; top: 0; bottom: 0; background: var(--panel-bg); backdrop-filter: blur(14px); z-index: 50; display: flex; flex-direction: column; transition: transform 0.3s ease; }
+.panel-left { left: 0; width: var(--panel-width); border-right: 1px solid var(--border); }
+.panel-right { right: 0; width: var(--panel-width); border-left: 1px solid var(--border); }
+.panel-header { padding: 14px 16px 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--accent); border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+.panel-content { padding: 12px 16px; overflow-y: auto; flex: 1; }
+.resizer { position: absolute; top: 0; bottom: 0; width: 10px; cursor: ew-resize; z-index: 60; }
+.resizer-left { right: -5px; }
+.resizer-right { left: -5px; }
+fieldset { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+legend { font-size: 10px; color: var(--text-2); padding: 0 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+.control-group { margin-bottom: 12px; display: flex; flex-direction: column; gap: 5px; }
+.control-group:last-child { margin-bottom: 0; }
+.control-header { display: flex; justify-content: space-between; align-items: center; }
+.control-label { font-size: 11px; color: var(--text); }
+.control-val { font-size: 11px; font-family: monospace; color: var(--accent); background: rgba(0, 212, 240, 0.08); padding: 2px 6px; border-radius: 4px; }
+@keyframes flashValue { 0% { background: var(--accent); color: #fff; } 100% { background: rgba(0, 212, 240, 0.08); color: var(--accent); } }
+.flash { animation: flashValue 0.35s ease-out; }
+input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; }
+input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 4px; background: #222; border-radius: 2px; cursor: pointer; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; height: 14px; width: 14px; border-radius: 50%; background: var(--accent); margin-top: -5px; cursor: pointer; border: none; transition: transform 0.1s, box-shadow 0.1s; }
+input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); box-shadow: 0 0 8px rgba(0, 212, 240, 0.5); }
+.btn-row { display: flex; gap: 6px; margin-bottom: 12px; }
+button.action-btn { flex: 1; background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--text); padding: 7px 0; border-radius: 6px; cursor: pointer; font-family: var(--font); font-size: 12px; transition: all 0.2s; display: flex; justify-content: center; align-items: center; gap: 5px; }
+button.action-btn:hover { background: rgba(255,255,255,0.09); transform: scale(1.02); box-shadow: 0 0 8px rgba(0, 212, 240, 0.15); }
+button.action-btn.active { background: var(--accent); color: #08101c; border-color: var(--accent); }
+.toggle-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 6px; }
+.toggle-row input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; width: 14px; height: 14px; }
+.right-sub-tabs { display: flex; gap: 8px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px; }
+.right-tab { font-size: 10.5px; color: var(--text-2); cursor: pointer; text-transform: uppercase; }
+.right-tab.active { color: var(--accent); font-weight: 700; }
+.telemetry-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+.telemetry-cell { background: var(--panel-bg); padding: 7px 10px; display: flex; flex-direction: column; gap: 3px; }
+.telemetry-label { font-size: 9.5px; color: var(--text-2); text-transform: uppercase; }
+.telemetry-value { font-size: 11.5px; font-family: monospace; color: var(--text); }
+.derived-info { background: rgba(0, 212, 240, 0.04); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 6px; }
+.derived-row { display: flex; justify-content: space-between; font-size: 11.5px; }
+.derived-row span:last-child { font-family: monospace; color: var(--accent); }
+.chart-container { background: rgba(8, 12, 22, 0.7); border: 1px solid var(--border); border-radius: 8px; padding: 8px; margin-bottom: 10px; height: 160px; position: relative; }
+.chart-container canvas { width: 100% !important; height: 100% !important; }
+#guidedExploration { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--panel-bg); backdrop-filter: blur(16px); border: 1px solid var(--accent); border-radius: 10px; padding: 18px; width: 440px; max-width: 92%; z-index: 200; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+.exploration-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.exploration-title { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; }
+.exploration-question { font-size: 13px; margin-bottom: 12px; color: var(--text); }
+.exploration-textarea { width: 100%; height: 70px; background: rgba(0,0,0,0.25); border: 1px solid var(--border); border-radius: 6px; color: var(--text); padding: 8px; font-family: var(--font); resize: none; margin-bottom: 8px; }
+.exploration-textarea:focus { outline: none; border-color: var(--accent); }
+.exploration-footer { display: flex; justify-content: space-between; align-items: center; }
+.nav-dots { display: flex; gap: 5px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #444; cursor: pointer; }
+.dot.active { background: var(--accent); }
+.btn-sm { padding: 4px 10px; font-size: 11px; border-radius: 5px; }
+.close-btn { background: none; border: none; color: var(--text-2); cursor: pointer; font-size: 16px; }
+.close-btn:hover { color: var(--danger); }
+details.hint { margin-bottom: 8px; font-size: 11.5px; color: var(--text-2); }
+details.hint summary { cursor: pointer; color: var(--highlight); }
+#hud { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.55); padding: 4px 10px; border-radius: 5px; font-family: monospace; font-size: 11px; color: rgba(255,255,255,0.7); z-index: 20; pointer-events: none; }
+.scene-tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+.scene-tab { flex: 1; padding: 7px 0; text-align: center; font-size: 11px; font-weight: 700; border: 1px solid var(--border); border-radius: 6px; background: rgba(255,255,255,0.03); color: var(--text-2); cursor: pointer; text-transform: uppercase; letter-spacing: 0.4px; transition: all 0.2s; font-family: var(--font); }
+.scene-tab.active { background: rgba(0, 212, 240, 0.12); color: var(--accent); border-color: rgba(0, 212, 240, 0.3); }
+.scene-tab:hover { background: rgba(255,255,255,0.06); }
+.hidden { display: none !important; }
+.scene-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.badge-flat { background: rgba(0, 212, 240, 0.12); color: #00d4f0; }
+.badge-ramp { background: rgba(255, 107, 53, 0.12); color: #ff6b35; }
+.badge-spring { background: rgba(77, 240, 160, 0.12); color: #4df0a0; }
+</style>
 </head>
 <body>
-
-    <div class="tab-bar">
-        <div style="font-weight: bold; color: var(--accent); margin-right: 20px; letter-spacing: 1px;">NEWTON'S SECOND LAW</div>
-        <button class="tab-btn active" onclick="ui.switchMainTab('simulation')">Simulation</button>
-        <button class="tab-btn" onclick="ui.toggleExploration()">Guided Exploration</button>
+<div class="tab-bar">
+  <div class="brand">Newton's 2nd Law</div>
+  <button class="tab-btn active" onclick="ui.switchMainTab('simulation')">Simulation</button>
+  <button class="tab-btn" onclick="ui.toggleExploration()">Guided Exploration</button>
+</div>
+<div class="workspace">
+  <canvas id="simCanvas"></canvas>
+  <div id="hud">Zoom: 1.00x</div>
+  <div class="panel panel-left" id="panelLeft">
+    <div class="resizer resizer-left" id="resizerLeft"></div>
+    <div class="panel-header">Controls</div>
+    <div class="panel-content">
+      <div class="btn-row">
+        <button class="action-btn" id="btnPlay" onclick="ui.togglePlay()">▶ Play</button>
+        <button class="action-btn" id="btnReset" onclick="ui.resetSimulation()">⟲ Reset</button>
+      </div>
+      <fieldset>
+        <legend>Time Scale</legend>
+        <div class="btn-row" style="margin-bottom:0">
+          <button class="action-btn btn-sm" id="spd025" onclick="ui.setSpeed(0.25)">0.25x</button>
+          <button class="action-btn btn-sm" id="spd05" onclick="ui.setSpeed(0.5)">0.5x</button>
+          <button class="action-btn btn-sm active" id="spd1" onclick="ui.setSpeed(1)">1x</button>
+          <button class="action-btn btn-sm" id="spd2" onclick="ui.setSpeed(2)">2x</button>
+        </div>
+      </fieldset>
+      <div class="scene-tabs">
+        <button class="scene-tab active" data-scene="flat" onclick="ui.setScene('flat')">Flat</button>
+        <button class="scene-tab" data-scene="ramp" onclick="ui.setScene('ramp')">Ramp</button>
+        <button class="scene-tab" data-scene="spring" onclick="ui.setScene('spring')">Spring</button>
+      </div>
+      <fieldset>
+        <legend id="sceneLegend">Flat Ground</legend>
+        <div class="control-group scene-flat scene-ramp">
+          <div class="control-header">
+            <span class="control-label" id="labelFapp">Applied Force (N)</span>
+            <span class="control-val" id="valFapp">0.0</span>
+          </div>
+          <input type="range" id="sliderFapp" min="-150" max="150" step="1" value="0">
+        </div>
+        <div class="control-group scene-ramp hidden">
+          <div class="control-header">
+            <span class="control-label">Ramp Angle (degrees)</span>
+            <span class="control-val" id="valTheta">30</span>
+          </div>
+          <input type="range" id="sliderTheta" min="5" max="80" step="1" value="30">
+        </div>
+        <div class="control-group scene-spring hidden">
+          <div class="control-header">
+            <span class="control-label">Spring Constant k (N/m)</span>
+            <span class="control-val" id="valK">180</span>
+          </div>
+          <input type="range" id="sliderK" min="20" max="600" step="5" value="180">
+        </div>
+        <div class="control-group scene-spring hidden">
+          <div class="control-header">
+            <span class="control-label">Initial Displacement (m)</span>
+            <span class="control-val" id="valDisp">-1.50</span>
+          </div>
+          <input type="range" id="sliderDisp" min="-3" max="0" step="0.05" value="-1.5">
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Object & Surface</legend>
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Mass (kg)</span>
+            <span class="control-val" id="valMass">10.0</span>
+          </div>
+          <input type="range" id="sliderMass" min="1" max="50" step="1" value="10">
+        </div>
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Static Friction (mu_s)</span>
+            <span class="control-val" id="valMus">0.40</span>
+          </div>
+          <input type="range" id="sliderMus" min="0" max="1" step="0.05" value="0.4">
+        </div>
+        <div class="control-group">
+          <div class="control-header">
+            <span class="control-label">Kinetic Friction (mu_k)</span>
+            <span class="control-val" id="valMuk">0.30</span>
+          </div>
+          <input type="range" id="sliderMuk" min="0" max="1" step="0.05" value="0.3">
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Visualization</legend>
+        <div class="toggle-row"><label>Show Vectors</label><input type="checkbox" id="toggleVectors" checked></div>
+        <div class="toggle-row"><label>Show Labels</label><input type="checkbox" id="toggleLabels" checked></div>
+        <div class="toggle-row"><label>Show Trails</label><input type="checkbox" id="toggleTrails" checked></div>
+        <div class="toggle-row"><label>Grid & Ground</label><input type="checkbox" id="toggleGround" checked></div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="action-btn btn-sm" onclick="camera.resetView()">Center View</button>
+        </div>
+      </fieldset>
     </div>
-
-    <div class="workspace">
-        <canvas id="simCanvas"></canvas>
-        <div id="hud">Zoom: 1.00×</div>
-
-        <div class="panel panel-left" id="panelLeft">
-            <div class="resizer resizer-left" id="resizerLeft"></div>
-            <div class="panel-header">Controls</div>
-            <div class="panel-content">
-                
-                <div class="btn-row">
-                    <button class="action-btn" id="btnPlay" onclick="ui.togglePlay()">▶ Play</button>
-                    <button class="action-btn" id="btnReset" onclick="ui.resetSimulation()">⟲ Reset</button>
-                </div>
-
-                <fieldset>
-                    <legend>Time Scale</legend>
-                    <div class="btn-row" style="margin-bottom: 0;">
-                        <button class="action-btn btn-sm" id="spd025" onclick="ui.setSpeed(0.25)">0.25×</button>
-                        <button class="action-btn btn-sm" id="spd05" onclick="ui.setSpeed(0.5)">0.5×</button>
-                        <button class="action-btn btn-sm active" id="spd1" onclick="ui.setSpeed(1)">1×</button>
-                        <button class="action-btn btn-sm" id="spd2" onclick="ui.setSpeed(2)">2×</button>
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Physical Parameters</legend>
-                    
-                    <div class="control-group">
-                        <div class="control-header">
-                            <span class="control-label">Applied Force (N)</span>
-                            <span class="control-val" id="valFapp">0.0</span>
-                        </div>
-                        <input type="range" id="sliderFapp" min="-100" max="100" step="1" value="0">
-                    </div>
-
-                    <div class="control-group">
-                        <div class="control-header">
-                            <span class="control-label">Mass (kg)</span>
-                            <span class="control-val" id="valMass">10.0</span>
-                        </div>
-                        <input type="range" id="sliderMass" min="1" max="50" step="1" value="10">
-                    </div>
-
-                    <div class="control-group">
-                        <div class="control-header">
-                            <span class="control-label">Static Friction (μs)</span>
-                            <span class="control-val" id="valMus">0.40</span>
-                        </div>
-                        <input type="range" id="sliderMus" min="0" max="1.0" step="0.05" value="0.40">
-                    </div>
-
-                    <div class="control-group">
-                        <div class="control-header">
-                            <span class="control-label">Kinetic Friction (μk)</span>
-                            <span class="control-val" id="valMuk">0.30</span>
-                        </div>
-                        <input type="range" id="sliderMuk" min="0" max="1.0" step="0.05" value="0.30">
-                    </div>
-                </fieldset>
-
-                <fieldset>
-                    <legend>Visualization</legend>
-                    <div class="toggle-row">
-                        <label>Show Vectors</label>
-                        <input type="checkbox" id="toggleVectors" checked>
-                    </div>
-                    <div class="toggle-row">
-                        <label>Show Labels</label>
-                        <input type="checkbox" id="toggleLabels" checked>
-                    </div>
-                    <div class="toggle-row">
-                        <label>Show Trails</label>
-                        <input type="checkbox" id="toggleTrails" checked>
-                    </div>
-                    <div class="btn-row" style="margin-top: 10px;">
-                        <button class="action-btn btn-sm" onclick="camera.resetView()">Center View</button>
-                    </div>
-                </fieldset>
-            </div>
+  </div>
+  <div class="panel panel-right" id="panelRight">
+    <div class="resizer resizer-right" id="resizerRight"></div>
+    <div class="panel-header">Data & Analysis</div>
+    <div class="panel-content">
+      <div class="right-sub-tabs">
+        <div class="right-tab active" id="tabTelemetryBtn" onclick="ui.switchRightTab('telemetry')">Telemetry</div>
+        <div class="right-tab" id="tabChartsBtn" onclick="ui.switchRightTab('charts')">Charts</div>
+      </div>
+      <div id="viewTelemetry">
+        <div id="sceneBadge" class="scene-badge badge-flat">Flat Ground</div>
+        <div class="derived-info">
+          <div class="derived-row"><span id="derLabel1">Normal Force</span><span id="derVal1">0.00 N</span></div>
+          <div class="derived-row"><span id="derLabel2">Max Static Friction</span><span id="derVal2">0.00 N</span></div>
+          <div class="derived-row"><span id="derLabel3">Kinetic Friction</span><span id="derVal3">0.00 N</span></div>
+          <div class="derived-row"><span id="derLabel4">Driving Force</span><span id="derVal4">0.00 N</span></div>
         </div>
-
-        <div class="panel panel-right" id="panelRight">
-            <div class="resizer resizer-right" id="resizerRight"></div>
-            <div class="panel-header">Data & Analysis</div>
-            <div class="panel-content">
-                
-                <div class="right-sub-tabs">
-                    <div class="right-tab active" id="tabTelemetryBtn" onclick="ui.switchRightTab('telemetry')">Telemetry</div>
-                    <div class="right-tab" id="tabChartsBtn" onclick="ui.switchRightTab('charts')">Charts</div>
-                </div>
-
-                <div id="viewTelemetry">
-                    <div class="derived-info">
-                        <div class="derived-row">
-                            <span>Normal Force (Fn)</span>
-                            <span id="derFn">98.10 N</span>
-                        </div>
-                        <div class="derived-row">
-                            <span>Max Static Friction (fs)</span>
-                            <span id="derFs">39.24 N</span>
-                        </div>
-                        <div class="derived-row">
-                            <span>Kinetic Friction (fk)</span>
-                            <span id="derFk">29.43 N</span>
-                        </div>
-                    </div>
-
-                    <div class="telemetry-grid">
-                        <div class="telemetry-cell">
-                            <span class="telemetry-label">Time</span>
-                            <span class="telemetry-value" id="telTime">0.00 s</span>
-                        </div>
-                        <div class="telemetry-cell">
-                            <span class="telemetry-label">Position</span>
-                            <span class="telemetry-value" id="telPos">0.00 m</span>
-                        </div>
-                        <div class="telemetry-cell">
-                            <span class="telemetry-label">Velocity</span>
-                            <span class="telemetry-value" id="telVel">0.00 m/s</span>
-                        </div>
-                        <div class="telemetry-cell">
-                            <span class="telemetry-label">Acceleration</span>
-                            <span class="telemetry-value" id="telAcc">0.00 m/s²</span>
-                        </div>
-                        <div class="telemetry-cell">
-                            <span class="telemetry-label">Applied Force</span>
-                            <span class="telemetry-value" id="telFapp">0.00 N</span>
-                        </div>
-                        <div class="telemetry-cell">
-                            <span class="telemetry-label">Friction Force</span>
-                            <span class="telemetry-value" id="telFric">0.00 N</span>
-                        </div>
-                        <div class="telemetry-cell" style="grid-column: 1 / -1; background: rgba(0, 180, 216, 0.1);">
-                            <span class="telemetry-label">Net Force</span>
-                            <span class="telemetry-value" id="telFnet" style="color: var(--accent); font-weight: bold; font-size: 14px;">0.00 N</span>
-                        </div>
-                    </div>
-
-                    <div class="btn-row">
-                        <button class="action-btn" onclick="exportManager.exportCSV()">Export CSV</button>
-                    </div>
-                </div>
-
-                <div id="viewCharts" class="hidden">
-                    <div class="chart-container">
-                        <canvas id="accelChart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="velChart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="posChart"></canvas>
-                    </div>
-                </div>
-
-            </div>
+        <div class="telemetry-grid">
+          <div class="telemetry-cell"><span class="telemetry-label">Time</span><span class="telemetry-value" id="telTime">0.00 s</span></div>
+          <div class="telemetry-cell"><span class="telemetry-label" id="telPosLabel">Position</span><span class="telemetry-value" id="telPos">0.00 m</span></div>
+          <div class="telemetry-cell"><span class="telemetry-label">Velocity</span><span class="telemetry-value" id="telVel">0.00 m/s</span></div>
+          <div class="telemetry-cell"><span class="telemetry-label">Acceleration</span><span class="telemetry-value" id="telAcc">0.00 m/s2</span></div>
+          <div class="telemetry-cell"><span class="telemetry-label" id="telDriveLabel">Applied Force</span><span class="telemetry-value" id="telDrive">0.00 N</span></div>
+          <div class="telemetry-cell"><span class="telemetry-label">Friction Force</span><span class="telemetry-value" id="telFric">0.00 N</span></div>
+          <div class="telemetry-cell" style="grid-column: 1 / -1; background: rgba(0, 212, 240, 0.08);">
+            <span class="telemetry-label">Net Force</span>
+            <span class="telemetry-value" id="telFnet" style="color: var(--accent); font-weight: bold; font-size: 14px;">0.00 N</span>
+          </div>
         </div>
+        <div class="btn-row"><button class="action-btn" onclick="exportManager.exportCSV()">Export CSV</button></div>
+      </div>
+      <div id="viewCharts" class="hidden">
+        <div class="chart-container"><canvas id="accelChart"></canvas></div>
+        <div class="chart-container"><canvas id="velChart"></canvas></div>
+        <div class="chart-container"><canvas id="posChart"></canvas></div>
+      </div>
     </div>
-
-    <div id="guidedExploration">
-        <div class="exploration-header">
-            <span class="exploration-title">Guided Exploration</span>
-            <button class="close-btn" onclick="ui.toggleExploration()">×</button>
-        </div>
-        
-        <div class="exploration-question" id="expQuestion">Question text goes here.</div>
-        <details class="hint">
-            <summary>Need a hint?</summary>
-            <div id="expHint" style="margin-top: 5px;">Hint goes here.</div>
-        </details>
-        
-        <textarea class="exploration-textarea" id="expAnswer" placeholder="Type your observations here..."></textarea>
-        
-        <div class="exploration-footer">
-            <button class="action-btn btn-sm" style="flex:0; padding:5px 10px;" onclick="exploration.prev()">◀</button>
-            <div class="nav-dots" id="expDots"></div>
-            <button class="action-btn btn-sm" style="flex:0; padding:5px 10px;" onclick="exploration.next()">▶</button>
-        </div>
-        <div class="btn-row" style="margin-top: 15px; margin-bottom: 0;">
-            <button class="action-btn btn-sm" onclick="exportManager.exportDOCX()">Export Report (.docx)</button>
-            <button class="action-btn btn-sm" onclick="exploration.clearSaved()">Clear Saved</button>
-        </div>
+  </div>
+</div>
+<div id="guidedExploration">
+  <div class="exploration-header">
+    <span class="exploration-title">Guided Exploration</span>
+    <button class="close-btn" onclick="ui.toggleExploration()">×</button>
+  </div>
+  <div class="exploration-question" id="expQuestion"></div>
+  <details class="hint"><summary>Need a hint?</summary><div id="expHint" style="margin-top:5px"></div></details>
+  <textarea class="exploration-textarea" id="expAnswer" placeholder="Type your observations here..."></textarea>
+  <div class="exploration-footer">
+    <div class="nav-dots" id="expDots"></div>
+    <div class="btn-row" style="margin:0; flex:0 0 auto;">
+      <button class="action-btn btn-sm" onclick="exploration.prev()">◀</button>
+      <button class="action-btn btn-sm" onclick="exploration.next()">▶</button>
     </div>
-
-    <script>
-        // ==========================================
-        // 1. Simulation Engine
-        // ==========================================
-        class SimulationEngine {
-            constructor() {
-                this.time = 0;
-                this.running = false;
-                this.dt = 0;
-                this.subSteps = 10;
-                this.speedMultiplier = 1;
-                this.gravity = 9.81;
-
-                this.entities = [{
-                    m: 10,
-                    F_app: 0,
-                    mu_s: 0.4,
-                    mu_k: 0.3,
-                    x: 0,
-                    v: 0,
-                    a: 0,
-                    F_net: 0,
-                    f_fric: 0
-                }];
-            }
-
-            setup() {
-                this.time = 0;
-                let e = this.entities[0];
-                e.x = 0;
-                e.v = 0;
-                e.a = 0;
-                e.F_net = 0;
-                e.f_fric = 0;
-                this.calculateDerived(e);
-            }
-
-            liveUpdate(key, value) {
-                let e = this.entities[0];
-                if (key === 'mu_k' && value > e.mu_s) {
-                    value = e.mu_s; // Enforce mu_k <= mu_s
-                    document.getElementById('sliderMuk').value = value;
-                    ui.flashValue('valMuk', value.toFixed(2));
-                }
-                if (key === 'mu_s' && value < e.mu_k) {
-                    e.mu_k = value; // Lower mu_k automatically
-                    document.getElementById('sliderMuk').value = value;
-                    ui.flashValue('valMuk', value.toFixed(2));
-                }
-
-                e[key] = value;
-                this.calculateDerived(e);
-            }
-
-            calculateDerived(e) {
-                // Determine forces even if paused, for UI updates
-                let F_N = e.m * this.gravity;
-                let f_s_max = e.mu_s * F_N;
-                let f_k = e.mu_k * F_N;
-                
-                // Static computation for UI accuracy when paused
-                if (!this.running || (this.running && e.v === 0)) {
-                    if (Math.abs(e.F_app) <= f_s_max && e.v === 0) {
-                        e.f_fric = -e.F_app;
-                        e.F_net = 0;
-                        e.a = 0;
-                    } else if (e.v === 0) {
-                        e.f_fric = -Math.sign(e.F_app) * f_k;
-                        e.F_net = e.F_app + e.f_fric;
-                        e.a = e.F_net / e.m;
-                    }
-                }
-            }
-
-            step(dt) {
-                if (!this.running) return;
-
-                // Clamp dt to prevent explosions on tab inactive
-                let safeDt = Math.min(dt, 0.05) * this.speedMultiplier;
-                let dtSub = safeDt / this.subSteps;
-                let e = this.entities[0];
-
-                let F_N = e.m * this.gravity;
-                let f_s_max = e.mu_s * F_N;
-                let f_k = e.mu_k * F_N;
-
-                for (let i = 0; i < this.subSteps; i++) {
-                    let F_net = 0;
-                    let f_fric = 0;
-                    const v_thresh = 0.0001;
-
-                    if (Math.abs(e.v) < v_thresh) {
-                        // Effectively stationary
-                        e.v = 0;
-                        if (Math.abs(e.F_app) <= f_s_max) {
-                            f_fric = -e.F_app;
-                            F_net = 0;
-                        } else {
-                            f_fric = -Math.sign(e.F_app) * f_k;
-                            F_net = e.F_app + f_fric;
-                        }
-                    } else {
-                        // Moving
-                        f_fric = -Math.sign(e.v) * f_k;
-                        F_net = e.F_app + f_fric;
-
-                        let a_test = F_net / e.m;
-                        let v_next = e.v + a_test * dtSub;
-
-                        // Check zero crossing
-                        if (e.v * v_next <= 0) {
-                            // Hit or crossed zero
-                            if (Math.abs(e.F_app) <= f_s_max) {
-                                // Sticks
-                                e.v = 0;
-                                F_net = 0;
-                                f_fric = -e.F_app;
-                                a_test = 0;
-                            }
-                        }
-                    }
-
-                    e.f_fric = f_fric;
-                    e.F_net = F_net;
-                    e.a = F_net / e.m;
-
-                    // Safety NaN check
-                    if (isNaN(e.a) || !isFinite(e.a)) {
-                        e.a = 0; e.v = 0;
-                        console.warn("Numerical instability caught.");
-                    }
-
-                    e.v += e.a * dtSub;
-                    e.x += e.v * dtSub;
-                }
-
-                this.time += safeDt;
-            }
-
-            getState() {
-                return {
-                    time: this.time,
-                    entity: this.entities[0]
-                };
-            }
+  </div>
+  <div class="btn-row" style="margin-top:12px; margin-bottom:0;">
+    <button class="action-btn btn-sm" onclick="exportManager.exportDOCX()">Export Report (.docx)</button>
+    <button class="action-btn btn-sm" onclick="exploration.clearSaved()">Clear Saved</button>
+  </div>
+</div>
+<script>
+/* ============================================
+   SIMULATION ENGINE
+   Scenarios: flat ground, ramp, spring on flat ground
+   ============================================ */
+class SimulationEngine {
+  constructor() {
+    this.time = 0;
+    this.running = false;
+    this.speedMultiplier = 1;
+    this.gravity = 9.81;
+    this.subSteps = 12;
+    this.scene = "flat";
+    this.rampLength = 16;
+    this.wallX = -3.4;
+    this.springMin = 0.35;
+    this.springDamping = 0.6;
+    this.entity = {
+      m: 10, F_app: 0, mu_s: 0.4, mu_k: 0.3,
+      x: 0, v: 0, a: 0, F_net: 0, f_fric: 0,
+      theta: 0, k: 180, xEq: -0.6, x0: -1.0, phase: "flat"
+    };
+  }
+  get sceneLabel() {
+    return { flat: "Flat Ground", ramp: "Ramp", spring: "Spring on Flat Ground" }[this.scene];
+  }
+  blockHalfWidth(e) {
+    return Math.max(1.8, Math.min(3.6, Math.sqrt(e.m) * 0.6)) / 2;
+  }
+  springLeftLimit() {
+    return this.wallX + this.blockHalfWidth(this.entity) + this.springMin;
+  }
+  setup() {
+    this.time = 0;
+    const e = this.entity;
+    e.v = 0; e.a = 0; e.F_net = 0; e.f_fric = 0;
+    if (this.scene === "flat") {
+      e.x = 0; e.theta = 0; e.F_app = 0; e.phase = "flat";
+    } else if (this.scene === "ramp") {
+      e.theta = Math.PI / 6; e.x = this.rampLength * 0.62; e.F_app = 0; e.phase = "ramp";
+    } else {
+      e.theta = 0; e.F_app = 0; e.k = 180; e.xEq = -0.6; e.x0 = -1.0; e.phase = "flat";
+      e.x = Math.max(this.springLeftLimit(), e.xEq + e.x0);
+    }
+  }
+  setScene(scene) {
+    this.scene = scene;
+    this.running = false;
+    this.setup();
+  }
+  resetMotion() {
+    const e = this.entity;
+    this.time = 0; this.running = false;
+    e.v = 0; e.a = 0; e.F_net = 0; e.f_fric = 0;
+    if (this.scene === "ramp") { e.x = this.rampLength * 0.62; e.phase = "ramp"; }
+    if (this.scene === "spring") e.x = Math.max(this.springLeftLimit(), e.xEq + e.x0);
+  }
+  computeForces(e) {
+    const g = this.gravity;
+    const theta = (this.scene === "ramp" && e.phase !== "flat") ? (e.theta || 0) : 0;
+    const FN = e.m * g * Math.cos(theta);
+    const fsMax = e.mu_s * FN;
+    const fk = e.mu_k * FN;
+    let Fdrive = 0;
+    let gravityParallel = 0;
+    let springForce = 0;
+    if (this.scene === "flat") {
+      Fdrive = e.F_app;
+    } else if (this.scene === "ramp") {
+      gravityParallel = -e.m * g * Math.sin(theta);
+      Fdrive = e.F_app + gravityParallel;
+    } else {
+      springForce = -e.k * (e.x - e.xEq);
+      Fdrive = springForce;
+    }
+    const vThresh = 1e-4;
+    let friction = 0;
+    let net = 0;
+    if (Math.abs(e.v) < vThresh) {
+      if (Math.abs(Fdrive) <= fsMax) {
+        friction = -Fdrive;
+        net = 0;
+      } else {
+        friction = -Math.sign(Fdrive) * fk;
+        net = Fdrive + friction;
+      }
+    } else {
+      friction = -Math.sign(e.v) * fk;
+      net = Fdrive + friction;
+    }
+    return { FN, fsMax, fk, Fdrive, gravityParallel, springForce, friction, net, theta };
+  }
+  liveUpdate(key, value) {
+    const e = this.entity;
+    if (key === "mu_k" && value > e.mu_s) {
+      value = e.mu_s;
+      document.getElementById("sliderMuk").value = value;
+      ui.flashValue("valMuk", value.toFixed(2));
+    }
+    if (key === "mu_s" && value < e.mu_k) {
+      e.mu_k = value;
+      document.getElementById("sliderMuk").value = value;
+      ui.flashValue("valMuk", value.toFixed(2));
+    }
+    if (key === "theta") {
+      e.theta = value;
+      this.resetMotion();
+    } else if (key === "x0") {
+      e.x0 = value;
+      e.x = Math.max(this.springLeftLimit(), e.xEq + value);
+      this.resetMotion();
+    } else {
+      e[key] = value;
+    }
+  }
+  step(dt) {
+    if (!this.running) return;
+    const safeDt = Math.min(dt, 0.05) * this.speedMultiplier;
+    const dtSub = safeDt / this.subSteps;
+    const e = this.entity;
+    for (let i = 0; i < this.subSteps; i++) {
+      const forces = this.computeForces(e);
+      e.f_fric = forces.friction;
+      e.F_net = forces.net;
+      e.a = forces.net / e.m;
+      if (!isFinite(e.a) || isNaN(e.a)) { e.a = 0; e.v = 0; }
+      e.v += e.a * dtSub;
+      e.x += e.v * dtSub;
+      const hw = this.blockHalfWidth(e);
+      const limL = this.springLeftLimit();
+      if (this.scene === "ramp") {
+        if (e.phase === "ramp") {
+          if (e.x > this.rampLength) { e.x = this.rampLength; if (e.v > 0) e.v = 0; }
+          if (e.x <= 0 && e.v < 0) {
+            e.phase = "flat";
+            e.x = hw;
+            e.v = Math.abs(e.v);
+          }
+        } else {
+          if (e.x <= hw && e.v < 0) {
+            e.phase = "ramp";
+            e.x = 0.02;
+            e.v = Math.abs(e.v);
+          } else if (e.x < hw) {
+            e.x = hw;
+            if (e.v < 0) e.v = 0;
+          }
         }
-
-        // ==========================================
-        // 2. Camera
-        // ==========================================
-        class Camera {
-            constructor(canvas) {
-                this.canvas = canvas;
-                this.offsetX = canvas.width / 2;
-                this.offsetY = canvas.height / 2 + 50;
-                this.zoom = 20; // pixels per meter
-                
-                this.isDragging = false;
-                this.lastMouse = {x: 0, y: 0};
-
-                this.bindEvents();
-                this.updateHUD();
-            }
-
-            worldToScreen(wx, wy) {
-                return {
-                    x: this.offsetX + wx * this.zoom,
-                    y: this.offsetY - wy * this.zoom // Y up in physics
-                };
-            }
-
-            screenToWorld(sx, sy) {
-                return {
-                    x: (sx - this.offsetX) / this.zoom,
-                    y: (this.offsetY - sy) / this.zoom
-                };
-            }
-
-            zoomBy(factor, centerS) {
-                let centerW = this.screenToWorld(centerS.x, centerS.y);
-                this.zoom *= factor;
-                this.zoom = Math.max(2, Math.min(this.zoom, 100));
-                
-                // Adjust offset to zoom into mouse
-                this.offsetX = centerS.x - centerW.x * this.zoom;
-                this.offsetY = centerS.y + centerW.y * this.zoom;
-                
-                this.updateHUD();
-            }
-
-            pan(dx, dy) {
-                this.offsetX += dx;
-                this.offsetY += dy;
-            }
-
-            resetView() {
-                this.zoom = 20;
-                this.offsetX = this.canvas.width / 2;
-                this.offsetY = this.canvas.height / 2 + 50;
-                this.updateHUD();
-            }
-
-            updateHUD() {
-                let hud = document.getElementById('hud');
-                if(hud) hud.innerText = `Zoom: ${(this.zoom/20).toFixed(2)}×`;
-            }
-
-            bindEvents() {
-                this.canvas.addEventListener('wheel', (e) => {
-                    e.preventDefault();
-                    let zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-                    let rect = this.canvas.getBoundingClientRect();
-                    this.zoomBy(zoomFactor, {
-                        x: e.clientX - rect.left, 
-                        y: e.clientY - rect.top
-                    });
-                }, {passive: false});
-
-                this.canvas.addEventListener('mousedown', (e) => {
-                    if (e.shiftKey || e.button === 1 || e.button === 0) {
-                        this.isDragging = true;
-                        this.lastMouse = {x: e.clientX, y: e.clientY};
-                    }
-                });
-
-                window.addEventListener('mouseup', () => {
-                    this.isDragging = false;
-                });
-
-                window.addEventListener('mousemove', (e) => {
-                    if (this.isDragging) {
-                        this.pan(e.clientX - this.lastMouse.x, e.clientY - this.lastMouse.y);
-                        this.lastMouse = {x: e.clientX, y: e.clientY};
-                    }
-                });
-            }
-        }
-
-        // ==========================================
-        // 3. Renderer
-        // ==========================================
-        class Renderer {
-            constructor(canvas, camera, engine) {
-                this.canvas = canvas;
-                this.ctx = canvas.getContext('2d');
-                this.camera = camera;
-                this.engine = engine;
-                
-                this.trailBuffer = [];
-                this.trailMax = 300;
-                this.trailTimer = 0;
-            }
-
-            resize() {
-                let rect = this.canvas.parentElement.getBoundingClientRect();
-                this.canvas.width = rect.width;
-                this.canvas.height = rect.height;
-                this.camera.resetView();
-            }
-
-            clear() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                
-                // Draw background grid
-                this.ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-                this.ctx.lineWidth = 1;
-                this.ctx.beginPath();
-                
-                // Vertical lines
-                let startW = this.camera.screenToWorld(0, 0);
-                let endW = this.camera.screenToWorld(this.canvas.width, this.canvas.height);
-                
-                let step = 1;
-                if (this.camera.zoom < 10) step = 5;
-                if (this.camera.zoom < 3) step = 10;
-                
-                let firstX = Math.floor(startW.x / step) * step;
-                for (let x = firstX; x <= endW.x; x += step) {
-                    let sx = this.camera.worldToScreen(x, 0).x;
-                    this.ctx.moveTo(sx, 0);
-                    this.ctx.lineTo(sx, this.canvas.height);
-                }
-                
-                // Horizontal lines
-                let firstY = Math.floor(endW.y / step) * step;
-                for (let y = firstY; y <= startW.y; y += step) {
-                    let sy = this.camera.worldToScreen(0, y).y;
-                    this.ctx.moveTo(0, sy);
-                    this.ctx.lineTo(this.canvas.width, sy);
-                }
-                this.ctx.stroke();
-            }
-
-            drawTrack() {
-                let yS = this.camera.worldToScreen(0, 0).y;
-                
-                // Ground line
-                this.ctx.strokeStyle = '#444';
-                this.ctx.lineWidth = 4;
-                this.ctx.beginPath();
-                this.ctx.moveTo(0, yS);
-                this.ctx.lineTo(this.canvas.width, yS);
-                this.ctx.stroke();
-
-                // Hash marks
-                let startW = this.camera.screenToWorld(0, 0);
-                let endW = this.camera.screenToWorld(this.canvas.width, 0);
-                let step = 5;
-                let firstX = Math.floor(startW.x / step) * step;
-                
-                this.ctx.fillStyle = '#666';
-                this.ctx.font = '10px monospace';
-                this.ctx.textAlign = 'center';
-                
-                for (let x = firstX; x <= endW.x; x += step) {
-                    let sx = this.camera.worldToScreen(x, 0).x;
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(sx, yS);
-                    this.ctx.lineTo(sx, yS + 8);
-                    this.ctx.stroke();
-                    this.ctx.fillText(x + 'm', sx, yS + 20);
-                }
-            }
-
-            drawEntities(state, showLabels, showTrails) {
-                let e = state.entity;
-                let size = Math.max(1.5, Math.min(3, Math.sqrt(e.m) * 0.5)); // size based on mass
-                
-                // Trail logic
-                if (showTrails && this.engine.running) {
-                    this.trailTimer++;
-                    if (this.trailTimer > 3) { // sample every 3 frames
-                        this.trailBuffer.push({x: e.x, y: size/2});
-                        if(this.trailBuffer.length > this.trailMax) this.trailBuffer.shift();
-                        this.trailTimer = 0;
-                    }
-                } else if (!this.engine.running && this.engine.time === 0) {
-                    this.trailBuffer = [];
-                }
-
-                if (showTrails && this.trailBuffer.length > 1) {
-                    this.ctx.beginPath();
-                    this.ctx.strokeStyle = 'rgba(0, 180, 216, 0.4)';
-                    this.ctx.lineWidth = 2;
-                    for (let i=0; i<this.trailBuffer.length; i++) {
-                        let pt = this.camera.worldToScreen(this.trailBuffer[i].x, this.trailBuffer[i].y);
-                        if (i===0) this.ctx.moveTo(pt.x, pt.y);
-                        else this.ctx.lineTo(pt.x, pt.y);
-                    }
-                    this.ctx.stroke();
-                }
-
-                // Block
-                let posS = this.camera.worldToScreen(e.x, size/2);
-                let wS = size * this.camera.zoom;
-                let hS = size * this.camera.zoom;
-
-                let grad = this.ctx.createLinearGradient(posS.x - wS/2, posS.y - hS/2, posS.x - wS/2, posS.y + hS/2);
-                grad.addColorStop(0, '#555');
-                grad.addColorStop(1, '#222');
-
-                this.ctx.fillStyle = grad;
-                this.ctx.strokeStyle = '#00b4d8';
-                this.ctx.lineWidth = 2;
-                
-                this.ctx.beginPath();
-                this.ctx.roundRect(posS.x - wS/2, posS.y - hS/2, wS, hS, 4);
-                this.ctx.fill();
-                this.ctx.stroke();
-
-                if (showLabels) {
-                    this.ctx.fillStyle = '#fff';
-                    this.ctx.font = '12px system-ui';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.fillText(`${e.m.toFixed(1)} kg`, posS.x, posS.y - hS/2 - 10);
-                }
-            }
-
-            drawVectors(state) {
-                let e = state.entity;
-                let size = Math.max(1.5, Math.min(3, Math.sqrt(e.m) * 0.5));
-                let centerS = this.camera.worldToScreen(e.x, size/2);
-
-                const drawArrow = (mag, color, label, yOffset) => {
-                    if (Math.abs(mag) < 0.1) return;
-                    let length = Math.sign(mag) * Math.max(20, Math.min(100, Math.abs(mag) * 2));
-                    
-                    this.ctx.strokeStyle = color;
-                    this.ctx.fillStyle = color;
-                    this.ctx.lineWidth = 3;
-
-                    let startX = centerS.x;
-                    let startY = centerS.y + yOffset;
-                    let endX = centerS.x + length;
-
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(startX, startY);
-                    this.ctx.lineTo(endX, startY);
-                    this.ctx.stroke();
-
-                    // Arrowhead
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(endX, startY);
-                    this.ctx.lineTo(endX - Math.sign(mag)*10, startY - 5);
-                    this.ctx.lineTo(endX - Math.sign(mag)*10, startY + 5);
-                    this.ctx.fill();
-
-                    if(document.getElementById('toggleLabels').checked) {
-                        this.ctx.font = '11px sans-serif';
-                        this.ctx.textAlign = 'center';
-                        this.ctx.fillText(`${label}: ${Math.abs(mag).toFixed(1)} N`, centerS.x + length/2, startY - 8);
-                    }
-                };
-
-                // Offset vectors slightly so they don't completely overlap
-                drawArrow(e.F_app, '#00b4d8', 'F_app', -15);
-                drawArrow(e.f_fric, '#ffd93d', 'f_fric', 15);
-                drawArrow(e.F_net, '#6bff8e', 'F_net', 0);
-            }
-
-            render() {
-                this.clear();
-                this.drawTrack();
-                
-                let state = this.engine.getState();
-                let showTrails = document.getElementById('toggleTrails').checked;
-                let showLabels = document.getElementById('toggleLabels').checked;
-                let showVectors = document.getElementById('toggleVectors').checked;
-
-                this.drawEntities(state, showLabels, showTrails);
-                if (showVectors) this.drawVectors(state);
-            }
-        }
-
-        // ==========================================
-        // 4. UI Controls
-        // ==========================================
-        class UIControls {
-            constructor(engine, dataLogger) {
-                this.engine = engine;
-                this.dataLogger = dataLogger;
-                this.setupBindings();
-                this.setupResizers();
-            }
-
-            setupBindings() {
-                const bindSlider = (id, key, valId) => {
-                    const el = document.getElementById(id);
-                    el.addEventListener('input', (e) => {
-                        let val = parseFloat(e.target.value);
-                        this.engine.liveUpdate(key, val);
-                        this.flashValue(valId, val.toFixed(key==='m'||key==='F_app'?1:2));
-                    });
-                };
-
-                bindSlider('sliderFapp', 'F_app', 'valFapp');
-                bindSlider('sliderMass', 'm', 'valMass');
-                bindSlider('sliderMus', 'mu_s', 'valMus');
-                bindSlider('sliderMuk', 'mu_k', 'valMuk');
-            }
-
-            flashValue(id, value) {
-                let el = document.getElementById(id);
-                el.innerText = value;
-                el.classList.remove('flash');
-                void el.offsetWidth; // trigger reflow
-                el.classList.add('flash');
-            }
-
-            togglePlay() {
-                this.engine.running = !this.engine.running;
-                let btn = document.getElementById('btnPlay');
-                if (this.engine.running) {
-                    btn.innerHTML = '⏸ Pause';
-                    btn.classList.add('active');
-                } else {
-                    btn.innerHTML = '▶ Play';
-                    btn.classList.remove('active');
-                }
-            }
-
-            resetSimulation() {
-                this.engine.running = false;
-                document.getElementById('btnPlay').innerHTML = '▶ Play';
-                document.getElementById('btnPlay').classList.remove('active');
-                this.engine.setup();
-                this.dataLogger.reset();
-                if(window.renderer) {
-                    window.renderer.trailBuffer = [];
-                    window.renderer.trailTimer = 0;
-                    window.camera.resetView();
-                }
-            }
-
-            setSpeed(mult) {
-                this.engine.speedMultiplier = mult;
-                ['spd025', 'spd05', 'spd1', 'spd2'].forEach(id => {
-                    document.getElementById(id).classList.remove('active');
-                });
-                let map = {0.25:'spd025', 0.5:'spd05', 1:'spd1', 2:'spd2'};
-                document.getElementById(map[mult]).classList.add('active');
-            }
-
-            switchMainTab(tab) {
-                let btns = document.querySelectorAll('.tab-bar .tab-btn');
-                btns.forEach(b => b.classList.remove('active'));
-                
-                if (tab === 'simulation') {
-                    btns[0].classList.add('active');
-                    document.getElementById('guidedExploration').style.display = 'none';
-                }
-            }
-
-            toggleExploration() {
-                let exp = document.getElementById('guidedExploration');
-                if (exp.style.display === 'block') {
-                    exp.style.display = 'none';
-                    this.switchMainTab('simulation');
-                } else {
-                    exp.style.display = 'block';
-                    let btns = document.querySelectorAll('.tab-bar .tab-btn');
-                    btns.forEach(b => b.classList.remove('active'));
-                    btns[1].classList.add('active');
-                }
-            }
-
-            switchRightTab(tab) {
-                document.getElementById('tabTelemetryBtn').classList.remove('active');
-                document.getElementById('tabChartsBtn').classList.remove('active');
-                document.getElementById('viewTelemetry').classList.add('hidden');
-                document.getElementById('viewCharts').classList.add('hidden');
-
-                if(tab === 'telemetry') {
-                    document.getElementById('tabTelemetryBtn').classList.add('active');
-                    document.getElementById('viewTelemetry').classList.remove('hidden');
-                } else {
-                    document.getElementById('tabChartsBtn').classList.add('active');
-                    document.getElementById('viewCharts').classList.remove('hidden');
-                    // Resize charts explicitly
-                    this.dataLogger.resizeCharts();
-                }
-            }
-
-            updateTelemetry() {
-                let s = this.engine.getState();
-                let e = s.entity;
-
-                const fmt = (val, dec) => val.toFixed(dec);
-
-                // Derived
-                document.getElementById('derFn').innerText = fmt(e.m * 9.81, 2) + ' N';
-                document.getElementById('derFs').innerText = fmt(e.mu_s * e.m * 9.81, 2) + ' N';
-                document.getElementById('derFk').innerText = fmt(e.mu_k * e.m * 9.81, 2) + ' N';
-
-                // Realtime
-                document.getElementById('telTime').innerText = fmt(s.time, 2) + ' s';
-                document.getElementById('telPos').innerText = fmt(e.x, 2) + ' m';
-                document.getElementById('telVel').innerText = fmt(e.v, 2) + ' m/s';
-                document.getElementById('telAcc').innerText = fmt(e.a, 2) + ' m/s²';
-                document.getElementById('telFapp').innerText = fmt(e.F_app, 1) + ' N';
-                document.getElementById('telFric').innerText = fmt(e.f_fric, 1) + ' N';
-                document.getElementById('telFnet').innerText = fmt(e.F_net, 1) + ' N';
-            }
-
-            setupResizers() {
-                let dragging = null;
-                const panelLeft = document.getElementById('panelLeft');
-                const panelRight = document.getElementById('panelRight');
-                
-                document.getElementById('resizerLeft').addEventListener('mousedown', () => dragging = 'left');
-                document.getElementById('resizerRight').addEventListener('mousedown', () => dragging = 'right');
-
-                window.addEventListener('mousemove', (e) => {
-                    if (!dragging) return;
-                    if (dragging === 'left') {
-                        let w = Math.max(200, Math.min(400, e.clientX));
-                        panelLeft.style.width = w + 'px';
-                        document.documentElement.style.setProperty('--panel-width-left', w + 'px');
-                    } else if (dragging === 'right') {
-                        let w = Math.max(200, Math.min(400, window.innerWidth - e.clientX));
-                        panelRight.style.width = w + 'px';
-                        document.documentElement.style.setProperty('--panel-width-right', w + 'px');
-                    }
-                    if(window.renderer) window.renderer.resize();
-                });
-
-                window.addEventListener('mouseup', () => dragging = null);
-            }
-        }
-
-        // ==========================================
-        // 5. Data Logger & Charts
-        // ==========================================
-        class DataLogger {
-            constructor() {
-                this.historyMax = 5000;
-                this.frameCount = 0;
-                
-                this.data = {
-                    t: [],
-                    a: [],
-                    v: [],
-                    x: []
-                };
-
-                Chart.defaults.color = '#ccc';
-                Chart.defaults.font.family = 'system-ui';
-                
-                this.accelChart = this.createChart('accelChart', 'Acceleration (m/s²)', '#ffd93d');
-                this.velChart = this.createChart('velChart', 'Velocity (m/s)', '#00b4d8');
-                this.posChart = this.createChart('posChart', 'Position (m)', '#6bff8e');
-            }
-
-            createChart(id, label, color) {
-                let ctx = document.getElementById(id).getContext('2d');
-                return new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: label,
-                            data: [],
-                            borderColor: color,
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            tension: 0.1,
-                            fill: true,
-                            backgroundColor: color + '20'
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: false,
-                        scales: {
-                            x: {
-                                type: 'linear',
-                                min: 0,
-                                title: { display: true, text: 'Time (s)', font: { size: 11, weight: 'bold' } },
-                                grid: { color: 'rgba(255,255,255,0.05)' },
-                                ticks: { font: { size: 10 } }
-                            },
-                            y: {
-                                beginAtZero: false,
-                                grid: { color: 'rgba(255,255,255,0.05)' },
-                                ticks: { font: { size: 10 } }
-                            }
-                        },
-                        plugins: {
-                            legend: { labels: { font: { size: 11 } } }
-                        }
-                    }
-                });
-            }
-
-            log(state) {
-                this.frameCount++;
-                if (this.frameCount % 4 !== 0) return; // Sample frequency
-
-                let t = state.time;
-                let e = state.entity;
-
-                this.data.t.push(t);
-                this.data.a.push({x: t, y: e.a});
-                this.data.v.push({x: t, y: e.v});
-                this.data.x.push({x: t, y: e.x});
-
-                // Soft cap downsample
-                if (this.data.t.length > this.historyMax) {
-                    this.downsample();
-                }
-
-                this.updateCharts();
-            }
-
-            downsample() {
-                const keep = (arr) => arr.filter((_, i) => i % 2 === 0);
-                this.data.t = keep(this.data.t);
-                this.data.a = keep(this.data.a);
-                this.data.v = keep(this.data.v);
-                this.data.x = keep(this.data.x);
-            }
-
-            updateCharts() {
-                if (document.getElementById('viewCharts').classList.contains('hidden')) return;
-
-                let maxT = this.data.t.length > 0 ? this.data.t[this.data.t.length - 1] : 10;
-                let minT = 0;
-
-                const update = (chart, dataArr) => {
-                    chart.data.datasets[0].data = dataArr;
-                    chart.options.scales.x.max = Math.max(10, maxT);
-                    chart.update('none');
-                };
-
-                update(this.accelChart, this.data.a);
-                update(this.velChart, this.data.v);
-                update(this.posChart, this.data.x);
-            }
-
-            reset() {
-                this.data = { t: [], a: [], v: [], x: [] };
-                this.frameCount = 0;
-                this.updateCharts();
-                
-                [this.accelChart, this.velChart, this.posChart].forEach(c => {
-                    c.options.scales.x.max = 10;
-                    c.update('none');
-                });
-            }
-
-            resizeCharts() {
-                [this.accelChart, this.velChart, this.posChart].forEach(c => c.resize());
-            }
-        }
-
-        // ==========================================
-        // 6. Export Manager
-        // ==========================================
-        class ExportManager {
-            constructor(dataLogger, exploration) {
-                this.logger = dataLogger;
-                this.exploration = exploration;
-            }
-
-            exportCSV() {
-                let data = this.logger.data;
-                if (data.t.length === 0) {
-                    alert("No data to export. Run the simulation first.");
-                    return;
-                }
-
-                let csv = "Time(s),Position(m),Velocity(m/s),Acceleration(m/s2)\n";
-                for (let i = 0; i < data.t.length; i++) {
-                    csv += `${data.t[i].toFixed(3)},${data.x[i].y.toFixed(3)},${data.v[i].y.toFixed(3)},${data.a[i].y.toFixed(3)}\n`;
-                }
-
-                let blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-                saveAs(blob, "newtons_law_data.csv");
-            }
-
-            async exportDOCX() {
-                if (!window.docx) {
-                    alert("DOCX library not loaded yet.");
-                    return;
-                }
-
-                let name = prompt("Enter your name for the report:");
-                if (!name) name = "Student";
-
-                const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } = docx;
-
-                let children = [
-                    new Paragraph({
-                        text: "Newton's Second Law — Export Report",
-                        heading: HeadingLevel.HEADING_1,
-                        spacing: { after: 200 }
-                    }),
-                    new Paragraph({
-                        children: [new TextRun({ text: `Name: ${name}`, bold: true })],
-                        spacing: { after: 100 }
-                    }),
-                    new Paragraph({
-                        children: [new TextRun({ text: `Date: ${new Date().toISOString().split('T')[0]}` })],
-                        spacing: { after: 300 }
-                    }),
-                    new Paragraph({
-                        text: "Guided Exploration Answers",
-                        heading: HeadingLevel.HEADING_2,
-                        spacing: { before: 200, after: 200 }
-                    })
-                ];
-
-                // Exploration Questions
-                this.exploration.questions.forEach((q, idx) => {
-                    let ans = localStorage.getItem(`exp_ans_${idx}`) || "No answer provided.";
-                    children.push(new Paragraph({
-                        children: [new TextRun({ text: `Q${idx+1}: ${q.q}`, bold: true })]
-                    }));
-                    children.push(new Paragraph({
-                        text: ans,
-                        spacing: { after: 200 }
-                    }));
-                });
-
-                // Data Table (Sampled 50 rows)
-                children.push(new Paragraph({
-                    text: "Telemetry Data Snapshot (Sampled)",
-                    heading: HeadingLevel.HEADING_2,
-                    spacing: { before: 300, after: 200 }
-                }));
-
-                let data = this.logger.data;
-                if (data.t.length > 0) {
-                    let rows = [
-                        new TableRow({
-                            children: [
-                                new TableCell({ children: [new Paragraph({ text: "Time (s)", bold: true })] }),
-                                new TableCell({ children: [new Paragraph({ text: "Pos (m)", bold: true })] }),
-                                new TableCell({ children: [new Paragraph({ text: "Vel (m/s)", bold: true })] }),
-                                new TableCell({ children: [new Paragraph({ text: "Acc (m/s²)", bold: true })] })
-                            ]
-                        })
-                    ];
-
-                    let step = Math.max(1, Math.floor(data.t.length / 50));
-                    for (let i = 0; i < data.t.length; i += step) {
-                        rows.push(new TableRow({
-                            children: [
-                                new TableCell({ children: [new Paragraph(data.t[i].toFixed(2))] }),
-                                new TableCell({ children: [new Paragraph(data.x[i].y.toFixed(2))] }),
-                                new TableCell({ children: [new Paragraph(data.v[i].y.toFixed(2))] }),
-                                new TableCell({ children: [new Paragraph(data.a[i].y.toFixed(2))] })
-                            ]
-                        }));
-                    }
-
-                    children.push(new Table({
-                        width: { size: 100, type: WidthType.PERCENTAGE },
-                        rows: rows
-                    }));
-                } else {
-                    children.push(new Paragraph("No data recorded."));
-                }
-
-                const doc = new Document({
-                    sections: [{
-                        properties: {},
-                        children: children
-                    }]
-                });
-
-                const blob = await Packer.toBlob(doc);
-                saveAs(blob, "Newtons_Law_Report.docx");
-            }
-        }
-
-        // ==========================================
-        // 7. Guided Exploration
-        // ==========================================
-        class GuidedExploration {
-            constructor() {
-                this.questions = [
-                    {
-                        q: "With default settings (Mass 10kg, μs 0.4), calculate the maximum static friction. Then apply a force of 30 N. Does the block move? Why or why not?",
-                        hint: "Max static friction = μs * Normal Force. Normal Force = mass * 9.81."
-                    },
-                    {
-                        q: "Slowly increase the applied force. At exactly what force does the block begin to move? What happens to the friction force immediately after?",
-                        hint: "Watch the Telemetry panel for Friction Force dropping from static to kinetic once movement starts."
-                    },
-                    {
-                        q: "Once the block is moving, reduce the applied force to 0 N. Observe the velocity and acceleration graphs. What happens to the block and why?",
-                        hint: "Look at the Net Force. Without an applied force, what is the only force acting in the horizontal direction?"
-                    },
-                    {
-                        q: "Reset. Set the mass to 20 kg. Find the new threshold force required for movement. How does doubling the mass affect the required force?",
-                        hint: "Friction depends on Normal Force, which is directly proportional to mass."
-                    },
-                    {
-                        q: "Set both friction coefficients to 0. Apply 50 N to a 10 kg block, note the acceleration. Then try 50 N on a 50 kg block. How does this demonstrate Newton's Second Law?",
-                        hint: "Newton's Second Law states F = ma, or a = F/m."
-                    },
-                    {
-                        q: "With friction at 0, apply a 10 N force. Compare the shape of the Position vs Time graph to the Velocity vs Time graph.",
-                        hint: "Constant acceleration leads to a linearly increasing velocity and a quadratically increasing position (a parabola)."
-                    },
-                    {
-                        q: "Set Kinetic Friction to 0.3. Apply a constant force of 30 N (just barely above the kinetic friction threshold). What happens to the velocity over a long period?",
-                        hint: "Calculate Net Force. Is it positive, negative, or zero? How does Net Force relate to changes in velocity?"
-                    }
-                ];
-                
-                this.currentIdx = 0;
-                this.initUI();
-            }
-
-            initUI() {
-                let dotsContainer = document.getElementById('expDots');
-                dotsContainer.innerHTML = '';
-                this.questions.forEach((_, i) => {
-                    let dot = document.createElement('div');
-                    dot.className = 'dot' + (i === 0 ? ' active' : '');
-                    dot.onclick = () => this.goTo(i);
-                    dotsContainer.appendChild(dot);
-                });
-
-                document.getElementById('expAnswer').addEventListener('input', (e) => {
-                    localStorage.setItem(`exp_ans_${this.currentIdx}`, e.target.value);
-                });
-
-                this.render();
-            }
-
-            render() {
-                let q = this.questions[this.currentIdx];
-                document.getElementById('expQuestion').innerText = `${this.currentIdx + 1}. ${q.q}`;
-                document.getElementById('expHint').innerText = q.hint;
-                document.querySelector('details.hint').removeAttribute('open');
-                
-                let savedAns = localStorage.getItem(`exp_ans_${this.currentIdx}`) || '';
-                document.getElementById('expAnswer').value = savedAns;
-
-                let dots = document.querySelectorAll('.dot');
-                dots.forEach((d, i) => {
-                    d.className = 'dot' + (i === this.currentIdx ? ' active' : '');
-                });
-            }
-
-            next() {
-                if (this.currentIdx < this.questions.length - 1) {
-                    this.currentIdx++;
-                    this.render();
-                }
-            }
-
-            prev() {
-                if (this.currentIdx > 0) {
-                    this.currentIdx--;
-                    this.render();
-                }
-            }
-
-            goTo(idx) {
-                this.currentIdx = idx;
-                this.render();
-            }
-
-            clearSaved() {
-                if(confirm("Clear all saved answers?")) {
-                    for(let i=0; i<this.questions.length; i++) {
-                        localStorage.removeItem(`exp_ans_${i}`);
-                    }
-                    this.render();
-                }
-            }
-        }
-
-        // ==========================================
-        // MAIN LOOP & INITIALIZATION
-        // ==========================================
-        // FIXED: Added an event listener so the setup logic waits until 
-        // the deferred scripts (like Chart.js) have actually loaded.
-        window.addEventListener('DOMContentLoaded', () => {
-            const engine = new SimulationEngine();
-            const dataLogger = new DataLogger();
-            const ui = new UIControls(engine, dataLogger);
-            const exploration = new GuidedExploration();
-            const exportManager = new ExportManager(dataLogger, exploration);
-            
-            const canvas = document.getElementById('simCanvas');
-            const camera = new Camera(canvas);
-            const renderer = new Renderer(canvas, camera, engine);
-
-            // Expose globally for UI HTML handlers
-            window.engine = engine;
-            window.ui = ui;
-            window.camera = camera;
-            window.renderer = renderer;
-            window.exportManager = exportManager;
-            window.exploration = exploration;
-
-            engine.setup();
-            renderer.resize();
-            window.addEventListener('resize', () => {
-                clearTimeout(window.resizeTimer);
-                window.resizeTimer = setTimeout(() => renderer.resize(), 200);
-            });
-
-            let lastTime = performance.now();
-
-            function loop(timestamp) {
-                let dt = (timestamp - lastTime) / 1000;
-                lastTime = timestamp;
-
-                engine.step(dt);
-                
-                if (engine.running) {
-                    dataLogger.log(engine.getState());
-                }
-
-                ui.updateTelemetry();
-                renderer.render();
-
-                requestAnimationFrame(loop);
-            }
-
-            requestAnimationFrame(loop);
-        });
-    </script>
+      } else {
+        if (e.x < limL) { e.x = limL; if (e.v < 0) e.v = 0; }
+      }
+      if (this.scene === "spring" && e.x <= limL + 1e-3) {
+        e.v *= (1 - this.springDamping * dtSub);
+      }
+    }
+    this.time += safeDt;
+  }
+  getState() { return { time: this.time, entity: this.entity }; }
+}
+
+/* ============================================
+   CAMERA
+   ============================================ */
+class Camera {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.offsetX = canvas.width / 2;
+    this.offsetY = canvas.height / 2 + 60;
+    this.zoom = 28;
+    this.isDragging = false;
+    this.lastMouse = { x: 0, y: 0 };
+    this.bindEvents();
+    this.updateHUD();
+  }
+  worldToScreen(wx, wy) {
+    return { x: this.offsetX + wx * this.zoom, y: this.offsetY - wy * this.zoom };
+  }
+  screenToWorld(sx, sy) {
+    return { x: (sx - this.offsetX) / this.zoom, y: (this.offsetY - sy) / this.zoom };
+  }
+  zoomBy(factor, cx, cy) {
+    const w = this.screenToWorld(cx, cy);
+    this.zoom = Math.max(2, Math.min(120, this.zoom * factor));
+    this.offsetX = cx - w.x * this.zoom;
+    this.offsetY = cy + w.y * this.zoom;
+    this.updateHUD();
+  }
+  pan(dx, dy) { this.offsetX += dx; this.offsetY += dy; }
+  resetView() {
+    this.zoom = engine.scene === "ramp" ? 22 : 28;
+    this.offsetX = this.canvas.width / 2;
+    this.offsetY = this.canvas.height / 2 + 60;
+    this.updateHUD();
+  }
+  updateHUD() {
+    const hud = document.getElementById("hud");
+    if (hud) hud.innerText = "Zoom: " + (this.zoom / 28).toFixed(2) + "x | " + engine.sceneLabel;
+  }
+  bindEvents() {
+    this.canvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const rect = this.canvas.getBoundingClientRect();
+      this.zoomBy(e.deltaY < 0 ? 1.12 : 1 / 1.12, e.clientX - rect.left, e.clientY - rect.top);
+    }, { passive: false });
+    this.canvas.addEventListener("mousedown", (e) => {
+      if (e.shiftKey || e.button === 1 || e.button === 0) {
+        this.isDragging = true;
+        this.lastMouse = { x: e.clientX, y: e.clientY };
+      }
+    });
+    window.addEventListener("mouseup", () => { this.isDragging = false; });
+    window.addEventListener("mousemove", (e) => {
+      if (!this.isDragging) return;
+      this.pan(e.clientX - this.lastMouse.x, e.clientY - this.lastMouse.y);
+      this.lastMouse = { x: e.clientX, y: e.clientY };
+    });
+  }
+}
+
+/* ============================================
+   RENDERER
+   ============================================ */
+class Renderer {
+  constructor(canvas, camera, engine) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.camera = camera;
+    this.engine = engine;
+    this.trail = [];
+    this.trailMax = 700;
+    this.trailTimer = 0;
+    this.stars = [];
+    for (let i = 0; i < 140; i++) {
+      this.stars.push({ x: Math.random(), y: Math.random(), s: Math.random() * 1.3 + 0.3, b: Math.random() });
+    }
+  }
+  resize() {
+    const rect = this.canvas.parentElement.getBoundingClientRect();
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+    this.camera.resetView();
+  }
+  clear() {
+    const c = this.ctx;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    c.clearRect(0, 0, w, h);
+    const bg = c.createLinearGradient(0, 0, 0, h);
+    bg.addColorStop(0, "#070a12");
+    bg.addColorStop(1, "#101728");
+    c.fillStyle = bg;
+    c.fillRect(0, 0, w, h);
+    const t = performance.now() / 1000;
+    for (const s of this.stars) {
+      const alpha = 0.12 + 0.12 * Math.sin(t * 1.1 + s.b * 10);
+      c.fillStyle = "rgba(170,195,235," + alpha.toFixed(3) + ")";
+      c.beginPath();
+      c.arc(s.x * w, s.y * h, s.s, 0, Math.PI * 2);
+      c.fill();
+    }
+  }
+  drawGround() {
+    if (!document.getElementById("toggleGround").checked) return;
+    const c = this.ctx;
+    const cam = this.camera;
+    const w = this.canvas.width;
+    const yS = cam.worldToScreen(0, 0).y;
+    const grad = c.createLinearGradient(0, yS - 40, 0, yS + 24);
+    grad.addColorStop(0, "#1a2235");
+    grad.addColorStop(1, "#0f1420");
+    c.fillStyle = grad;
+    c.fillRect(0, yS, w, 24);
+    c.strokeStyle = "rgba(0, 212, 240, 0.28)";
+    c.lineWidth = 2;
+    c.beginPath();
+    c.moveTo(0, yS);
+    c.lineTo(w, yS);
+    c.stroke();
+    c.strokeStyle = "rgba(255,255,255,0.07)";
+    c.lineWidth = 1;
+    c.beginPath();
+    for (let x = -60; x <= 60; x++) {
+      const sx = cam.worldToScreen(x, 0).x;
+      if (sx < -20 || sx > w + 20) continue;
+      c.moveTo(sx, yS);
+      c.lineTo(sx, yS + (x % 5 === 0 ? 9 : 5));
+    }
+    c.stroke();
+    c.fillStyle = "rgba(255,255,255,0.22)";
+    c.font = "9px monospace";
+    c.textAlign = "center";
+    for (let x = -60; x <= 60; x += 5) {
+      const sx = cam.worldToScreen(x, 0).x;
+      if (sx < -20 || sx > w + 20) continue;
+      c.fillText(x + "m", sx, yS + 18);
+    }
+  }
+  drawRamp() {
+    const c = this.ctx;
+    const cam = this.camera;
+    const e = this.engine.entity;
+    const theta = e.theta || 0;
+    const L = this.engine.rampLength;
+    const bottom = cam.worldToScreen(0, 0);
+    const topWorld = { x: -L * Math.cos(theta), y: L * Math.sin(theta) };
+    const top = cam.worldToScreen(topWorld.x, topWorld.y);
+    const topProjection = cam.worldToScreen(topWorld.x, 0);
+    const grad = c.createLinearGradient(top.x, top.y, bottom.x, bottom.y);
+    grad.addColorStop(0, "#2a3550");
+    grad.addColorStop(1, "#151b2b");
+    c.fillStyle = grad;
+    c.beginPath();
+    c.moveTo(bottom.x, bottom.y);
+    c.lineTo(top.x, top.y);
+    c.lineTo(topProjection.x, topProjection.y);
+    c.closePath();
+    c.fill();
+    c.strokeStyle = "rgba(0, 212, 240, 0.45)";
+    c.lineWidth = 2.5;
+    c.beginPath();
+    c.moveTo(top.x, top.y);
+    c.lineTo(bottom.x, bottom.y);
+    c.stroke();
+    c.strokeStyle = "rgba(255,255,255,0.08)";
+    c.lineWidth = 1;
+    for (let i = 1; i < 8; i++) {
+      const t = i / 8;
+      const sx = top.x + (bottom.x - top.x) * t;
+      const sy = top.y + (bottom.y - top.y) * t;
+      c.beginPath();
+      c.moveTo(sx, sy);
+      c.lineTo(sx + 10, sy + 3);
+      c.stroke();
+    }
+    const arcRadius = 44;
+    c.strokeStyle = "rgba(255, 107, 53, 0.8)";
+    c.lineWidth = 1.5;
+    c.beginPath();
+    c.arc(bottom.x, bottom.y, arcRadius, Math.PI, Math.PI + theta);
+    c.stroke();
+    // arc endpoint ticks: horizontal ground line and incline edge
+    c.beginPath();
+    c.moveTo(bottom.x - arcRadius, bottom.y);
+    c.lineTo(bottom.x - arcRadius, bottom.y - 5);
+    const tickX = bottom.x + arcRadius * Math.cos(Math.PI + theta);
+    const tickY = bottom.y + arcRadius * Math.sin(Math.PI + theta);
+    c.moveTo(tickX, tickY);
+    c.lineTo(tickX + Math.sin(theta) * 5, tickY - Math.cos(theta) * 5);
+    c.stroke();
+    c.fillStyle = "rgba(255, 107, 53, 0.95)";
+    c.font = "bold 12px monospace";
+    c.textAlign = "center";
+    const labelAngle = Math.PI + theta / 2;
+    const lx = bottom.x + (arcRadius + 26) * Math.cos(labelAngle);
+    const ly = bottom.y + (arcRadius + 26) * Math.sin(labelAngle);
+    c.fillText((theta * 180 / Math.PI).toFixed(0) + "°", lx, ly + 4);
+    c.fillStyle = "rgba(255,255,255,0.35)";
+    c.font = "10px monospace";
+    c.fillText("ramp", (top.x + bottom.x) / 2, (top.y + bottom.y) / 2 - 12);
+  }
+  drawSpringWallAndCoil() {
+    const c = this.ctx;
+    const cam = this.camera;
+    const e = this.engine.entity;
+    const groundY = cam.worldToScreen(0, 0).y;
+    const wallXWorld = this.engine.wallX;
+    const wallX = cam.worldToScreen(wallXWorld, 0).x;
+    const blockLeftX = cam.worldToScreen(e.x - this.blockWidth(e) / 2, 0).x;
+    const springY = groundY - 18;
+    c.fillStyle = "#151b2b";
+    c.strokeStyle = "rgba(255,255,255,0.2)";
+    c.lineWidth = 1.5;
+    c.beginPath();
+    c.rect(wallX - 10, springY - 60, 14, 120);
+    c.fill();
+    c.stroke();
+    c.fillStyle = "rgba(255,255,255,0.35)";
+    c.font = "9px monospace";
+    c.textAlign = "center";
+    c.fillText("wall", wallX - 3, springY - 68);
+    const startX = wallX + 5;
+    const endX = Math.max(startX + 8, blockLeftX - 3);
+    const span = endX - startX;
+    const coils = Math.max(3, Math.min(9, Math.floor(span / 20)));
+    const amp = Math.min(10, Math.max(4, span / 12));
+    c.strokeStyle = "#ff6b35";
+    c.lineWidth = 2.5;
+    c.lineJoin = "round";
+    c.beginPath();
+    const steps = Math.max(24, coils * 16);
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const x = startX + (endX - startX) * t;
+      const envelope = Math.min(1, Math.min(t * 8, (1 - t) * 8));
+      const y = springY + Math.sin(t * coils * Math.PI * 2) * amp * envelope;
+      if (i === 0) c.moveTo(x, y);
+      else c.lineTo(x, y);
+    }
+    c.stroke();
+    c.strokeStyle = "rgba(255, 107, 53, 0.8)";
+    c.lineWidth = 1.5;
+    c.beginPath();
+    c.moveTo(endX, springY);
+    c.lineTo(blockLeftX, springY);
+    c.stroke();
+    const eqX = cam.worldToScreen(e.xEq, 0).x;
+    c.strokeStyle = "rgba(77, 240, 160, 0.5)";
+    c.setLineDash([4, 4]);
+    c.beginPath();
+    c.moveTo(eqX, groundY - 70);
+    c.lineTo(eqX, groundY + 6);
+    c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = "rgba(77, 240, 160, 0.8)";
+    c.font = "9px monospace";
+    c.textAlign = "center";
+    c.fillText("equilibrium", eqX, groundY - 76);
+  }
+  blockWidth(e) {
+    return Math.max(1.8, Math.min(3.6, Math.sqrt(e.m) * 0.6));
+  }
+  blockCenter(e) {
+    const size = this.blockWidth(e);
+    const halfH = size * 0.34;
+    if (this.engine.scene === "ramp" && e.phase !== "flat") {
+      const theta = e.theta || 0;
+      const surfX = -e.x * Math.cos(theta);
+      const surfY = e.x * Math.sin(theta);
+      const nx = Math.sin(theta);
+      const ny = Math.cos(theta);
+      return { x: surfX + nx * halfH, y: surfY + ny * halfH, rot: -theta, size, halfH, t: { x: -Math.cos(theta), y: Math.sin(theta) }, n: { x: nx, y: ny } };
+    }
+    return { x: e.x, y: halfH, rot: 0, size, halfH, t: { x: 1, y: 0 }, n: { x: 0, y: 1 } };
+  }
+  drawBlock() {
+    const c = this.ctx;
+    const cam = this.camera;
+    const e = this.engine.entity;
+    const info = this.blockCenter(e);
+    const halfH = info.halfH;
+    const hw = info.size / 2;
+    const t = info.t;
+    const n = info.n;
+    const corners = [
+      { x: info.x - t.x * hw + n.x * halfH, y: info.y - t.y * hw + n.y * halfH },
+      { x: info.x + t.x * hw + n.x * halfH, y: info.y + t.y * hw + n.y * halfH },
+      { x: info.x + t.x * hw - n.x * halfH, y: info.y + t.y * hw - n.y * halfH },
+      { x: info.x - t.x * hw - n.x * halfH, y: info.y - t.y * hw - n.y * halfH }
+    ];
+    const pts = corners.map(p => cam.worldToScreen(p.x, p.y));
+    const body = c.createLinearGradient(pts[0].x, pts[0].y, pts[3].x, pts[3].y);
+    body.addColorStop(0, "#52627f");
+    body.addColorStop(0.5, "#2b3652");
+    body.addColorStop(1, "#141a29");
+    c.fillStyle = body;
+    c.beginPath();
+    c.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < 4; i++) c.lineTo(pts[i].x, pts[i].y);
+    c.closePath();
+    c.fill();
+    c.strokeStyle = "rgba(0, 212, 240, 0.55)";
+    c.lineWidth = 1.5;
+    c.stroke();
+    c.strokeStyle = "rgba(255,255,255,0.18)";
+    c.lineWidth = 1;
+    c.beginPath();
+    c.moveTo(pts[0].x, pts[0].y);
+    c.lineTo(pts[1].x, pts[1].y);
+    c.stroke();
+    const cS = cam.worldToScreen(info.x, info.y);
+    if (document.getElementById("toggleLabels").checked) {
+      c.fillStyle = "#fff";
+      c.font = "bold 11px system-ui";
+      c.textAlign = "center";
+      c.fillText(e.m.toFixed(0) + " kg", cS.x, cS.y - halfH * cam.zoom - 6);
+      if (this.engine.scene === "spring") {
+        c.fillStyle = "rgba(255,255,255,0.55)";
+        c.font = "10px monospace";
+        c.fillText("x = " + e.x.toFixed(2) + " m", cS.x, cS.y + halfH * cam.zoom + 14);
+      }
+    }
+  }
+  drawArrowWorld(x, y, vx, vy, color, label) {
+    const c = this.ctx;
+    const cam = this.camera;
+    const start = cam.worldToScreen(x, y);
+    const end = cam.worldToScreen(x + vx, y + vy);
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const len = Math.hypot(dx, dy);
+    if (len < 9) return;
+    const ux = dx / len;
+    const uy = dy / len;
+    const head = Math.min(18, Math.max(11, len * 0.28));
+    const headW = head * 0.5;
+    c.save();
+    c.lineCap = "round";
+    c.shadowColor = color;
+    c.shadowBlur = 10;
+    c.strokeStyle = color;
+    c.fillStyle = color;
+    c.lineWidth = 3.5;
+    c.beginPath();
+    c.moveTo(start.x, start.y);
+    c.lineTo(end.x - ux * head * 0.85, end.y - uy * head * 0.85);
+    c.stroke();
+    c.beginPath();
+    c.moveTo(end.x, end.y);
+    c.lineTo(end.x - ux * head - uy * headW, end.y - uy * head + ux * headW);
+    c.lineTo(end.x - ux * head + uy * headW, end.y - uy * head - ux * headW);
+    c.closePath();
+    c.fill();
+    c.restore();
+    if (document.getElementById("toggleLabels").checked && label) {
+      c.font = "bold 11.5px system-ui, sans-serif";
+      c.textAlign = "center";
+      c.textBaseline = "middle";
+      const lx = end.x + ux * 16;
+      const ly = end.y + uy * 16;
+      const tw = c.measureText(label).width;
+      const padX = 6, padY = 4;
+      const rw = tw + padX * 2;
+      const rh = 15 + padY * 2;
+      const rx = lx - rw / 2;
+      const ry = ly - rh / 2;
+      c.fillStyle = "rgba(8, 12, 22, 0.85)";
+      c.strokeStyle = color;
+      c.lineWidth = 1;
+      c.beginPath();
+      if (c.roundRect) {
+        c.roundRect(rx, ry, rw, rh, 5);
+      } else {
+        c.rect(rx, ry, rw, rh);
+      }
+      c.fill();
+      c.stroke();
+      c.fillStyle = color;
+      c.fillText(label, lx, ly);
+    }
+  }
+  drawVectors() {
+    if (!document.getElementById("toggleVectors").checked) return;
+    const e = this.engine.entity;
+    const info = this.blockCenter(e);
+    const scale = 0.028;
+    const maxLen = 6.0;
+    const clamp = (v) => Math.max(-maxLen, Math.min(maxLen, v * scale));
+    const n = info.n;
+    const t = info.t;
+    const off = (d) => ({ x: info.x + n.x * d, y: info.y + n.y * d });
+    if (this.engine.scene === "flat") {
+      const a = off(0.85), b = off(-0.85), d = off(1.9);
+      this.drawArrowWorld(a.x, a.y, clamp(e.F_app), 0, "#00d4f0", "F_app " + e.F_app.toFixed(0) + " N");
+      this.drawArrowWorld(b.x, b.y, clamp(e.f_fric), 0, "#ffe066", "f " + e.f_fric.toFixed(0) + " N");
+      this.drawArrowWorld(d.x, d.y, clamp(e.F_net), 0, "#4df0a0", "F_net " + e.F_net.toFixed(0) + " N");
+    } else if (this.engine.scene === "ramp") {
+      if (e.phase === "flat") {
+        const a = off(1.05), b = off(-1.05), d = off(2.25);
+        this.drawArrowWorld(a.x, a.y, clamp(e.f_fric), 0, "#ffe066", "f " + e.f_fric.toFixed(0) + " N");
+        this.drawArrowWorld(d.x, d.y, clamp(e.F_net), 0, "#4df0a0", "F_net " + e.F_net.toFixed(0) + " N");
+      } else {
+        const theta = e.theta || 0;
+        const FgPar = -e.m * 9.81 * Math.sin(theta);
+        const FN = e.m * 9.81 * Math.cos(theta);
+        const A = off(2.35), B = off(1.62), C = off(0.89), D = off(0.16);
+        this.drawArrowWorld(A.x, A.y, t.x * clamp(e.F_app), t.y * clamp(e.F_app), "#00d4f0", "F_app " + e.F_app.toFixed(0) + " N");
+        this.drawArrowWorld(B.x, B.y, t.x * clamp(FgPar), t.y * clamp(FgPar), "#ff6b35", "mg sin0 " + Math.abs(FgPar).toFixed(0) + " N");
+        this.drawArrowWorld(C.x, C.y, t.x * clamp(e.f_fric), t.y * clamp(e.f_fric), "#ffe066", "f " + e.f_fric.toFixed(0) + " N");
+        this.drawArrowWorld(D.x, D.y, t.x * clamp(e.F_net), t.y * clamp(e.F_net), "#4df0a0", "F_net " + e.F_net.toFixed(0) + " N");
+        const fb = { x: info.x - n.x * (info.halfH - 0.05), y: info.y - n.y * (info.halfH - 0.05) };
+        this.drawArrowWorld(fb.x, fb.y, n.x * clamp(FN) * 0.5, n.y * clamp(FN) * 0.5, "#a78bfa", "F_N " + FN.toFixed(0) + " N");
+      }
+    } else {
+      const Fs = -e.k * (e.x - e.xEq);
+      const a = off(0.85), b = off(-0.85), d = off(1.9);
+      this.drawArrowWorld(a.x, a.y, clamp(Fs), 0, "#ff6b35", "F_spring " + Fs.toFixed(0) + " N");
+      this.drawArrowWorld(b.x, b.y, clamp(e.f_fric), 0, "#ffe066", "f " + e.f_fric.toFixed(0) + " N");
+      this.drawArrowWorld(d.x, d.y, clamp(e.F_net), 0, "#4df0a0", "F_net " + e.F_net.toFixed(0) + " N");
+    }
+  }
+  drawTrail() {
+    const c = this.ctx;
+    const cam = this.camera;
+    const e = this.engine.entity;
+    const show = document.getElementById("toggleTrails").checked;
+    if (show && this.engine.running) {
+      this.trailTimer++;
+      if (this.trailTimer > 2) {
+        const info = this.blockCenter(e);
+        this.trail.push({ x: info.x, y: info.y });
+        if (this.trail.length > this.trailMax) this.trail.shift();
+        this.trailTimer = 0;
+      }
+    } else if (!this.engine.running && this.engine.time === 0) {
+      this.trail = [];
+    }
+    if (this.trail.length > 1) {
+      c.beginPath();
+      c.strokeStyle = "rgba(0, 212, 240, 0.28)";
+      c.lineWidth = 1.5;
+      for (let i = 0; i < this.trail.length; i++) {
+        const p = cam.worldToScreen(this.trail[i].x, this.trail[i].y);
+        if (i === 0) c.moveTo(p.x, p.y);
+        else c.lineTo(p.x, p.y);
+      }
+      c.stroke();
+    }
+  }
+  drawSceneTitle() {
+    const c = this.ctx;
+    const labels = { flat: "FLAT GROUND", ramp: "RAMP", spring: "SPRING ON FLAT GROUND" };
+    const colors = { flat: "#00d4f0", ramp: "#ff6b35", spring: "#4df0a0" };
+    c.fillStyle = colors[this.engine.scene];
+    c.font = "bold 13px system-ui";
+    c.textAlign = "left";
+    c.fillText(labels[this.engine.scene], 22, 30);
+    c.fillStyle = "rgba(255,255,255,0.45)";
+    c.font = "11px monospace";
+    c.fillText("F_net = m a", 22, 48);
+  }
+  render() {
+    this.clear();
+    this.drawGround();
+    if (this.engine.scene === "ramp") this.drawRamp();
+    if (this.engine.scene === "spring") this.drawSpringWallAndCoil();
+    this.drawTrail();
+    this.drawBlock();
+    this.drawVectors();
+    this.drawSceneTitle();
+  }
+}
+
+/* ============================================
+   DATA LOGGER
+   ============================================ */
+class DataLogger {
+  constructor() {
+    this.historyMax = 5000;
+    this.frameCount = 0;
+    this.data = { t: [], a: [], v: [], x: [] };
+    if (typeof Chart === "undefined") {
+      this.accelChart = null; this.velChart = null; this.posChart = null;
+      return;
+    }
+    Chart.defaults.color = "#ccc";
+    Chart.defaults.font.family = "system-ui";
+    this.accelChart = this.createChart("accelChart", "Acceleration (m/s2)", "#ffe066");
+    this.velChart = this.createChart("velChart", "Velocity (m/s)", "#00d4f0");
+    this.posChart = this.createChart("posChart", "Position (m)", "#4df0a0");
+  }
+  createChart(id, label, color) {
+    const ctx = document.getElementById(id).getContext("2d");
+    return new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: [],
+        datasets: [{ label, data: [], borderColor: color, borderWidth: 2, pointRadius: 0, tension: 0.1, fill: true, backgroundColor: color + "20" }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: false,
+        scales: {
+          x: { type: "linear", min: 0, title: { display: true, text: "Time (s)", font: { size: 11, weight: "bold" } }, grid: { color: "rgba(255,255,255,0.05)" }, ticks: { font: { size: 10 } } },
+          y: { beginAtZero: false, grid: { color: "rgba(255,255,255,0.05)" }, ticks: { font: { size: 10 } } }
+        },
+        plugins: { legend: { labels: { font: { size: 11 } } } }
+      }
+    });
+  }
+  log(state) {
+    this.frameCount++;
+    if (this.frameCount % 4 !== 0) return;
+    const t = state.time;
+    const e = state.entity;
+    this.data.t.push(t);
+    this.data.a.push({ x: t, y: e.a });
+    this.data.v.push({ x: t, y: e.v });
+    this.data.x.push({ x: t, y: e.x });
+    if (this.data.t.length > this.historyMax) this.downsample();
+    this.updateCharts();
+  }
+  downsample() {
+    const keep = (arr) => arr.filter((_, i) => i % 2 === 0);
+    this.data.t = keep(this.data.t);
+    this.data.a = keep(this.data.a);
+    this.data.v = keep(this.data.v);
+    this.data.x = keep(this.data.x);
+  }
+  updateCharts() {
+    if (!this.accelChart) return;
+    if (document.getElementById("viewCharts").classList.contains("hidden")) return;
+    const maxT = this.data.t.length > 0 ? this.data.t[this.data.t.length - 1] : 10;
+    const update = (chart, data) => {
+      chart.data.datasets[0].data = data;
+      chart.options.scales.x.max = Math.max(10, maxT);
+      chart.update("none");
+    };
+    update(this.accelChart, this.data.a);
+    update(this.velChart, this.data.v);
+    update(this.posChart, this.data.x);
+  }
+  reset() {
+    this.data = { t: [], a: [], v: [], x: [] };
+    this.frameCount = 0;
+    if (!this.accelChart) return;
+    [this.accelChart, this.velChart, this.posChart].forEach(c => {
+      c.data.datasets[0].data = [];
+      c.options.scales.x.max = 10;
+      c.update("none");
+    });
+  }
+  resizeCharts() {
+    if (!this.accelChart) return;
+    [this.accelChart, this.velChart, this.posChart].forEach(c => c.resize());
+  }
+}
+
+/* ============================================
+   UI CONTROLS
+   ============================================ */
+class UIControls {
+  constructor(engine, dataLogger) {
+    this.engine = engine;
+    this.dataLogger = dataLogger;
+    this.setupBindings();
+    this.setupResizers();
+    this.syncSceneUI();
+  }
+  setupBindings() {
+    const bind = (id, key, valId, decimals) => {
+      const el = document.getElementById(id);
+      el.addEventListener("input", (e) => {
+        const val = parseFloat(e.target.value);
+        this.engine.liveUpdate(key, val);
+        this.flashValue(valId, val.toFixed(decimals));
+      });
+    };
+    bind("sliderFapp", "F_app", "valFapp", 1);
+    bind("sliderMass", "m", "valMass", 1);
+    bind("sliderMus", "mu_s", "valMus", 2);
+    bind("sliderMuk", "mu_k", "valMuk", 2);
+    bind("sliderTheta", "theta", "valTheta", 0);
+    bind("sliderK", "k", "valK", 0);
+    document.getElementById("sliderDisp").addEventListener("input", (e) => {
+      const val = parseFloat(e.target.value);
+      this.engine.liveUpdate("x0", val);
+      this.flashValue("valDisp", val.toFixed(2));
+      this.dataLogger.reset();
+      renderer.trail = [];
+    });
+  }
+  flashValue(id, value) {
+    const el = document.getElementById(id);
+    el.innerText = value;
+    el.classList.remove("flash");
+    void el.offsetWidth;
+    el.classList.add("flash");
+  }
+  togglePlay() {
+    this.engine.running = !this.engine.running;
+    const btn = document.getElementById("btnPlay");
+    if (this.engine.running) {
+      btn.innerHTML = "⏸ Pause";
+      btn.classList.add("active");
+    } else {
+      btn.innerHTML = "▶ Play";
+      btn.classList.remove("active");
+    }
+  }
+  resetSimulation() {
+    this.engine.running = false;
+    document.getElementById("btnPlay").innerHTML = "▶ Play";
+    document.getElementById("btnPlay").classList.remove("active");
+    this.engine.setup();
+    this.dataLogger.reset();
+    renderer.trail = [];
+    renderer.trailTimer = 0;
+    this.syncSceneUI();
+    camera.resetView();
+  }
+  setSpeed(mult) {
+    this.engine.speedMultiplier = mult;
+    ["spd025", "spd05", "spd1", "spd2"].forEach(id => document.getElementById(id).classList.remove("active"));
+    const map = { 0.25: "spd025", 0.5: "spd05", 1: "spd1", 2: "spd2" };
+    document.getElementById(map[mult]).classList.add("active");
+  }
+  setScene(scene) {
+    this.engine.setScene(scene);
+    this.dataLogger.reset();
+    renderer.trail = [];
+    renderer.trailTimer = 0;
+    this.syncSceneUI();
+    camera.resetView();
+  }
+  syncSceneUI() {
+    const e = this.engine.entity;
+    const scene = this.engine.scene;
+    document.querySelectorAll(".scene-tab").forEach(t => t.classList.toggle("active", t.dataset.scene === scene));
+    document.querySelectorAll(".scene-flat").forEach(el => el.classList.toggle("hidden", scene !== "flat"));
+    document.querySelectorAll(".scene-ramp").forEach(el => el.classList.toggle("hidden", scene !== "ramp"));
+    document.querySelectorAll(".scene-spring").forEach(el => el.classList.toggle("hidden", scene !== "spring"));
+    const legend = document.getElementById("sceneLegend");
+    const badge = document.getElementById("sceneBadge");
+    if (scene === "flat") {
+      legend.innerText = "Flat Ground";
+      badge.className = "scene-badge badge-flat";
+      badge.innerText = "Flat Ground";
+      document.getElementById("labelFapp").innerText = "Applied Force (N)";
+      document.getElementById("telPosLabel").innerText = "Position";
+      document.getElementById("telDriveLabel").innerText = "Applied Force";
+      document.getElementById("derLabel4").innerText = "Driving Force";
+    } else if (scene === "ramp") {
+      legend.innerText = "Ramp";
+      badge.className = "scene-badge badge-ramp";
+      badge.innerText = "Ramp";
+      document.getElementById("labelFapp").innerText = "Applied Force Along Ramp (N)";
+      document.getElementById("telPosLabel").innerText = "Position Along Ramp";
+      document.getElementById("telDriveLabel").innerText = "Applied Force";
+      document.getElementById("derLabel4").innerText = "Gravity Along Ramp";
+    } else {
+      legend.innerText = "Spring on Flat Ground";
+      badge.className = "scene-badge badge-spring";
+      badge.innerText = "Spring on Flat Ground";
+      document.getElementById("telPosLabel").innerText = "Position";
+      document.getElementById("telDriveLabel").innerText = "Spring Force";
+      document.getElementById("derLabel4").innerText = "Spring Force";
+    }
+    document.getElementById("sliderFapp").value = e.F_app;
+    document.getElementById("valFapp").innerText = e.F_app.toFixed(1);
+    document.getElementById("sliderTheta").value = (e.theta * 180 / Math.PI).toFixed(0);
+    document.getElementById("valTheta").innerText = (e.theta * 180 / Math.PI).toFixed(0);
+    document.getElementById("sliderK").value = e.k;
+    document.getElementById("valK").innerText = e.k.toFixed(0);
+    document.getElementById("sliderDisp").value = e.x0.toFixed(2);
+    document.getElementById("valDisp").innerText = e.x0.toFixed(2);
+  }
+  switchMainTab(tab) {
+    const btns = document.querySelectorAll(".tab-bar .tab-btn");
+    btns.forEach(b => b.classList.remove("active"));
+    if (tab === "simulation") {
+      btns[0].classList.add("active");
+      document.getElementById("guidedExploration").style.display = "none";
+    }
+  }
+  toggleExploration() {
+    const exp = document.getElementById("guidedExploration");
+    if (exp.style.display === "block") {
+      exp.style.display = "none";
+      this.switchMainTab("simulation");
+    } else {
+      exp.style.display = "block";
+      const btns = document.querySelectorAll(".tab-bar .tab-btn");
+      btns.forEach(b => b.classList.remove("active"));
+      btns[1].classList.add("active");
+    }
+  }
+  switchRightTab(tab) {
+    document.getElementById("tabTelemetryBtn").classList.remove("active");
+    document.getElementById("tabChartsBtn").classList.remove("active");
+    document.getElementById("viewTelemetry").classList.add("hidden");
+    document.getElementById("viewCharts").classList.add("hidden");
+    if (tab === "telemetry") {
+      document.getElementById("tabTelemetryBtn").classList.add("active");
+      document.getElementById("viewTelemetry").classList.remove("hidden");
+    } else {
+      document.getElementById("tabChartsBtn").classList.add("active");
+      document.getElementById("viewCharts").classList.remove("hidden");
+      this.dataLogger.resizeCharts();
+    }
+  }
+  updateTelemetry() {
+    const state = this.engine.getState();
+    const e = state.entity;
+    const forces = this.engine.computeForces(e);
+    const fmt = (v, d) => (isFinite(v) ? v : 0).toFixed(d);
+    document.getElementById("telTime").innerText = fmt(state.time, 2) + " s";
+    document.getElementById("telPos").innerText = fmt(e.x, 2) + " m";
+    document.getElementById("telVel").innerText = fmt(e.v, 2) + " m/s";
+    document.getElementById("telAcc").innerText = fmt(e.a, 2) + " m/s2";
+    document.getElementById("telFric").innerText = fmt(e.f_fric, 1) + " N";
+    document.getElementById("telFnet").innerText = fmt(e.F_net, 1) + " N";
+    document.getElementById("derVal1").innerText = fmt(forces.FN, 2) + " N";
+    document.getElementById("derVal2").innerText = fmt(forces.fsMax, 2) + " N";
+    document.getElementById("derVal3").innerText = fmt(forces.fk, 2) + " N";
+    if (this.engine.scene === "flat") {
+      document.getElementById("telDrive").innerText = fmt(e.F_app, 1) + " N";
+      document.getElementById("derVal4").innerText = fmt(forces.Fdrive, 2) + " N";
+    } else if (this.engine.scene === "ramp") {
+      document.getElementById("telDrive").innerText = fmt(e.F_app, 1) + " N";
+      document.getElementById("derVal4").innerText = fmt(forces.gravityParallel, 2) + " N";
+    } else {
+      document.getElementById("telDrive").innerText = fmt(forces.springForce, 1) + " N";
+      document.getElementById("derVal4").innerText = fmt(forces.springForce, 2) + " N";
+    }
+  }
+  setupResizers() {
+    let dragging = null;
+    const panelLeft = document.getElementById("panelLeft");
+    const panelRight = document.getElementById("panelRight");
+    document.getElementById("resizerLeft").addEventListener("mousedown", () => dragging = "left");
+    document.getElementById("resizerRight").addEventListener("mousedown", () => dragging = "right");
+    window.addEventListener("mousemove", (e) => {
+      if (!dragging) return;
+      if (dragging === "left") {
+        const w = Math.max(220, Math.min(420, e.clientX));
+        panelLeft.style.width = w + "px";
+        document.documentElement.style.setProperty("--panel-width", w + "px");
+      } else {
+        const w = Math.max(220, Math.min(420, window.innerWidth - e.clientX));
+        panelRight.style.width = w + "px";
+        document.documentElement.style.setProperty("--panel-width", w + "px");
+      }
+      renderer.resize();
+    });
+    window.addEventListener("mouseup", () => dragging = null);
+  }
+}
+
+/* ============================================
+   EXPORT MANAGER
+   ============================================ */
+class ExportManager {
+  constructor(dataLogger, exploration) {
+    this.logger = dataLogger;
+    this.exploration = exploration;
+  }
+  exportCSV() {
+    const data = this.logger.data;
+    if (!data.t.length) { alert("No data to export. Run the simulation first."); return; }
+    let csv = "Time(s),Position(m),Velocity(m/s),Acceleration(m/s2)\n";
+    for (let i = 0; i < data.t.length; i++) {
+      csv += data.t[i].toFixed(3) + "," + data.x[i].y.toFixed(3) + "," + data.v[i].y.toFixed(3) + "," + data.a[i].y.toFixed(3) + "\n";
+    }
+    saveAs(new Blob([csv], { type: "text/csv;charset=utf-8" }), "newtons_second_law_data.csv");
+  }
+  async exportDOCX() {
+    if (!window.docx) { alert("DOCX library not loaded yet."); return; }
+    let name = prompt("Enter your name for the report:");
+    if (!name) name = "Student";
+    const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType } = docx;
+    const children = [
+      new Paragraph({ text: "Newton's Second Law - Export Report", heading: HeadingLevel.HEADING_1, spacing: { after: 200 } }),
+      new Paragraph({ children: [new TextRun({ text: "Name: " + name, bold: true })], spacing: { after: 100 } }),
+      new Paragraph({ children: [new TextRun({ text: "Date: " + new Date().toISOString().split("T")[0] })], spacing: { after: 300 } }),
+      new Paragraph({ children: [new TextRun({ text: "Scenario: " + this.engineSceneLabel(), bold: true })], spacing: { after: 200 } }),
+      new Paragraph({ text: "Guided Exploration Answers", heading: HeadingLevel.HEADING_2, spacing: { before: 200, after: 200 } })
+    ];
+    this.exploration.questions.forEach((q, idx) => {
+      const ans = localStorage.getItem("exp_ans_" + idx) || "No answer provided.";
+      children.push(new Paragraph({ children: [new TextRun({ text: "Q" + (idx + 1) + ": " + q.q, bold: true })] }));
+      children.push(new Paragraph({ text: ans, spacing: { after: 200 } }));
+    });
+    children.push(new Paragraph({ text: "Telemetry Data Snapshot (Sampled)", heading: HeadingLevel.HEADING_2, spacing: { before: 300, after: 200 } }));
+    const data = this.logger.data;
+    if (data.t.length > 0) {
+      const rows = [
+        new TableRow({ children: [
+          new TableCell({ children: [new Paragraph({ text: "Time (s)", bold: true })] }),
+          new TableCell({ children: [new Paragraph({ text: "Pos (m)", bold: true })] }),
+          new TableCell({ children: [new Paragraph({ text: "Vel (m/s)", bold: true })] }),
+          new TableCell({ children: [new Paragraph({ text: "Acc (m/s2)", bold: true })] })
+        ] })
+      ];
+      const step = Math.max(1, Math.floor(data.t.length / 50));
+      for (let i = 0; i < data.t.length; i += step) {
+        rows.push(new TableRow({ children: [
+          new TableCell({ children: [new Paragraph(data.t[i].toFixed(2))] }),
+          new TableCell({ children: [new Paragraph(data.x[i].y.toFixed(2))] }),
+          new TableCell({ children: [new Paragraph(data.v[i].y.toFixed(2))] }),
+          new TableCell({ children: [new Paragraph(data.a[i].y.toFixed(2))] })
+        ] }));
+      }
+      children.push(new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows }));
+    } else {
+      children.push(new Paragraph("No data recorded."));
+    }
+    const doc = new Document({ sections: [{ properties: {}, children }] });
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, "Newtons_Second_Law_Report.docx");
+  }
+  engineSceneLabel() {
+    return window.engine ? window.engine.sceneLabel : "Simulation";
+  }
+}
+
+/* ============================================
+   GUIDED EXPLORATION
+   ============================================ */
+class GuidedExploration {
+  constructor() {
+    this.questions = [
+      { q: "Flat Ground: With mass 10 kg and mu_s = 0.4, calculate the maximum static friction. Then apply 30 N. Does the block move? Why?", hint: "Max static friction = mu_s x Normal Force. Normal Force = m x g." },
+      { q: "Flat Ground: Slowly increase applied force. At what force does the block begin to move? What happens to the friction force right after it starts moving?", hint: "Watch the telemetry. Friction drops from static to kinetic once motion begins." },
+      { q: "Flat Ground: While the block is moving, reduce applied force to 0 N. Observe the velocity and acceleration graphs. What happens and why?", hint: "The only horizontal force is kinetic friction, so the block decelerates." },
+      { q: "Flat Ground: Reset and set mass to 20 kg. Find the new threshold force. How does doubling mass affect the required force?", hint: "Friction depends on normal force, which is proportional to mass." },
+      { q: "Flat Ground: Set both friction coefficients to 0. Apply 50 N to a 10 kg block and note the acceleration. Then try 50 N on a 50 kg block. How does this demonstrate F = ma?", hint: "a = F / m. Same force, larger mass, smaller acceleration." },
+      { q: "Flat Ground: With friction at 0, apply 10 N. Compare the shape of the Position vs Time graph to the Velocity vs Time graph.", hint: "Constant acceleration gives a linearly increasing velocity and a parabolic position curve." },
+      { q: "Ramp: Set the angle to 30 degrees and friction to 0. Describe the block's motion. Which force component causes it?", hint: "The component of gravity along the ramp is mg sin(theta)." },
+      { q: "Ramp: With friction on, find the angle at which the block just begins to slide when no applied force is used. How does this angle relate to mu_s?", hint: "At the threshold, mg sin(theta) = mu_s mg cos(theta), so tan(theta) = mu_s." },
+      { q: "Spring: Pull the block to -1.5 m and release. Describe the relationship between the spring force and the block's position. Is the force constant?", hint: "Hooke's law: F_spring = -k x. The force grows linearly with displacement." },
+      { q: "Spring: Turn on friction and release the block. Does it return to its original displacement? Explain using energy or work.", hint: "Kinetic friction removes mechanical energy, so the block stops short of its starting point." }
+    ];
+    this.currentIdx = 0;
+    this.initUI();
+  }
+  initUI() {
+    const dotsContainer = document.getElementById("expDots");
+    dotsContainer.innerHTML = "";
+    this.questions.forEach((_, i) => {
+      const dot = document.createElement("div");
+      dot.className = "dot" + (i === 0 ? " active" : "");
+      dot.onclick = () => this.goTo(i);
+      dotsContainer.appendChild(dot);
+    });
+    document.getElementById("expAnswer").addEventListener("input", (e) => {
+      localStorage.setItem("exp_ans_" + this.currentIdx, e.target.value);
+    });
+    this.render();
+  }
+  render() {
+    const q = this.questions[this.currentIdx];
+    document.getElementById("expQuestion").innerText = (this.currentIdx + 1) + ". " + q.q;
+    document.getElementById("expHint").innerText = q.hint;
+    document.querySelector("details.hint").removeAttribute("open");
+    document.getElementById("expAnswer").value = localStorage.getItem("exp_ans_" + this.currentIdx) || "";
+    document.querySelectorAll(".dot").forEach((d, i) => {
+      d.className = "dot" + (i === this.currentIdx ? " active" : "");
+    });
+  }
+  next() { if (this.currentIdx < this.questions.length - 1) { this.currentIdx++; this.render(); } }
+  prev() { if (this.currentIdx > 0) { this.currentIdx--; this.render(); } }
+  goTo(idx) { this.currentIdx = idx; this.render(); }
+  clearSaved() {
+    if (confirm("Clear all saved answers?")) {
+      for (let i = 0; i < this.questions.length; i++) localStorage.removeItem("exp_ans_" + i);
+      this.render();
+    }
+  }
+}
+
+/* ============================================
+   BOOT
+   ============================================ */
+let engine, dataLogger, ui, exploration, exportManager, camera, renderer;
+
+window.addEventListener("DOMContentLoaded", () => {
+  engine = new SimulationEngine();
+  dataLogger = new DataLogger();
+  exploration = new GuidedExploration();
+  exportManager = new ExportManager(dataLogger, exploration);
+  const canvas = document.getElementById("simCanvas");
+  camera = new Camera(canvas);
+  renderer = new Renderer(canvas, camera, engine);
+  ui = new UIControls(engine, dataLogger);
+  window.engine = engine;
+  window.ui = ui;
+  window.camera = camera;
+  window.renderer = renderer;
+  window.exportManager = exportManager;
+  window.exploration = exploration;
+  engine.setup();
+  renderer.resize();
+  ui.syncSceneUI();
+  window.addEventListener("resize", () => {
+    clearTimeout(window._resizeTimer);
+    window._resizeTimer = setTimeout(() => renderer.resize(), 200);
+  });
+  let lastTime = performance.now();
+  function loop(timestamp) {
+    const dt = (timestamp - lastTime) / 1000;
+    lastTime = timestamp;
+    engine.step(dt);
+    if (engine.running) dataLogger.log(engine.getState());
+    ui.updateTelemetry();
+    renderer.render();
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+});
+</script>
 </body>
 </html>
