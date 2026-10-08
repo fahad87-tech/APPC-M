@@ -1425,6 +1425,14 @@
         errBox.classList.remove("hidden");
         return;
       }
+      // Every device must use the same Supabase clock when interpreting the
+      // teacher's shared question_started_at timestamp.
+      const clockSync = await syncServerClock(true);
+      if (!clockSync || clockSync.success !== true) {
+        errBox.textContent = "Could not synchronize the classroom clock. Please check the internet connection and try again.";
+        errBox.classList.remove("hidden");
+        return;
+      }
 
       // Locate the quiz in the database
       let foundQuiz = null;
@@ -3321,9 +3329,16 @@
         currentAssignment.revealed_explanation = "";
         currentAssignment.discussion_active = false;
         currentAssignment.answer_revealed = false;
+        currentAssignment.timer_paused = assignment.timer_paused === true;
+        currentAssignment.paused_remaining_seconds = assignment.paused_remaining_seconds;
 
         const total = Number(assignment.per_question_seconds) || 0;
-        perQRemaining = total > 0 ? getSharedQuestionRemaining(assignment) : 0;
+        timerPaused = currentAssignment.timer_paused;
+        perQRemaining = total > 0
+          ? (timerPaused
+            ? Math.max(0, Math.ceil(Number(assignment.paused_remaining_seconds) || total))
+            : getSharedQuestionRemaining(assignment))
+          : 0;
         questionStartTime = total > 0
           ? getServerNowMs() - ((total - perQRemaining) * 1000)
           : getServerNowMs();
@@ -3457,9 +3472,12 @@
       }
     }
 
+    let teacherLedPollInFlight = false;
     function startTeacherLedPolling() {
       clearInterval(teacherLedPollInterval);
       teacherLedPollInterval = setInterval(async () => {
+        if (teacherLedPollInFlight) return;
+        teacherLedPollInFlight = true;
         try {
           const res = await verifyJoinCode(currentAssignment.join_code);
           if (res.found && res.assignment) {
@@ -3479,8 +3497,10 @@
           }
         } catch (e) {
           console.warn("[Student Sync] Polling tick error:", e);
+        } finally {
+          teacherLedPollInFlight = false;
         }
-      }, 1000);
+      }, 500);
     }
 
     // ============================================================================
@@ -3638,24 +3658,43 @@
     // LEADERBOARD
     // ============================================================================
     async function showLeaderboardView() {
+      const tbody = document.getElementById("leaderboard-tbody");
+      const podium = document.getElementById("leaderboard-podium");
+      const statsEl = document.getElementById("leaderboard-stats");
       document.getElementById("view-result").classList.add("hidden");
       document.getElementById("view-leaderboard").classList.remove("hidden");
       document.getElementById("leaderboard-assessment-name").textContent = `${currentAssignment.assessment_title} • Join Code: ${currentAssignment.join_code}`;
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">Loading class leaderboard...</td></tr>`;
+      }
+      try {
+        const list = await fetchSubmissionsByCode(currentAssignment.join_code);
+        renderStudentLeaderboard(list || [], tbody, podium, statsEl);
+      } catch (error) {
+        console.error("Student leaderboard failed:", error);
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-rose-400">Leaderboard could not be loaded. Please try again.</td></tr>`;
+        }
+        if (podium) podium.classList.add("hidden");
+        if (statsEl) statsEl.classList.add("hidden");
+        showToast("Leaderboard unavailable", error?.message || "Could not read submitted scores.", "coral", 5000);
+      }
+    }
 
-      const list = await fetchSubmissionsByCode(currentAssignment.join_code);
-      const tbody = document.getElementById("leaderboard-tbody");
+    function renderStudentLeaderboard(list, tbody, podium, statsEl) {
+      if (!tbody) return;
       tbody.innerHTML = "";
 
       if (!list || list.length === 0) {
         tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-500 text-sm">No student attempts recorded yet.</td></tr>`;
-        document.getElementById("leaderboard-podium").classList.add("hidden");
-        document.getElementById("leaderboard-stats").classList.add("hidden");
+        if (podium) podium.classList.add("hidden");
+        if (statsEl) statsEl.classList.add("hidden");
         return;
       }
 
       if (list.length >= 3) {
-        const podium = document.getElementById("leaderboard-podium");
-        podium.classList.remove("hidden");
+        if (podium) podium.classList.remove("hidden");
+        if (!podium) return;
         podium.innerHTML = "";
         const medals = ["🥇", "🥈", "🥉"];
         const podiumColors = [
@@ -3678,7 +3717,7 @@
           podium.appendChild(div);
         });
       } else {
-        document.getElementById("leaderboard-podium").classList.add("hidden");
+        if (podium) podium.classList.add("hidden");
       }
 
       list.forEach((sub, idx) => {
@@ -3689,24 +3728,28 @@
         else if (idx === 1) rankBadge = "🥈 2nd";
         else if (idx === 2) rankBadge = "🥉 3rd";
 
-        const tm = String(Math.floor(sub.time_spent_seconds / 60)).padStart(2, '0');
-        const ts = String(sub.time_spent_seconds % 60).padStart(2, '0');
+        const timeSpent = Math.max(0, Number(sub.time_spent_seconds) || 0);
+        const score = Number(sub.score) || 0;
+        const totalQuestions = Number(sub.total_questions) || 0;
+        const percentage = Number(sub.percentage ?? sub.score_percentage) || 0;
+        const tm = String(Math.floor(timeSpent / 60)).padStart(2, '0');
+        const ts = String(Math.floor(timeSpent % 60)).padStart(2, '0');
 
         tr.innerHTML = `
           <td class="py-4 px-4 text-center font-bold text-base ${idx < 3 ? 'text-amber-400' : 'text-slate-500'}">${rankBadge}</td>
           <td class="py-4 px-4 font-bold text-white text-base">${sub.student_name}</td>
           <td class="py-4 px-4 text-xs text-slate-400 font-semibold">${sub.class_period || 'General'}</td>
-          <td class="py-4 px-4 text-center font-bold text-indigo-400 text-base">${sub.score} / ${sub.total_questions}</td>
-          <td class="py-4 px-4 text-center font-black text-emerald-400 text-base">${sub.percentage}%</td>
+          <td class="py-4 px-4 text-center font-bold text-indigo-400 text-base">${score} / ${totalQuestions}</td>
+          <td class="py-4 px-4 text-center font-black text-emerald-400 text-base">${percentage}%</td>
           <td class="py-4 px-4 text-right font-mono text-slate-300 text-sm font-semibold">${tm}:${ts}</td>
         `;
         tbody.appendChild(tr);
       });
 
-      const statsEl = document.getElementById("leaderboard-stats");
+      if (!statsEl) return;
       statsEl.classList.remove("hidden");
-      const avgPct = (list.reduce((s, x) => s + x.percentage, 0) / list.length).toFixed(1);
-      const avgTimeSec = Math.round(list.reduce((s, x) => s + x.time_spent_seconds, 0) / list.length);
+      const avgPct = (list.reduce((s, x) => s + (Number(x.percentage ?? x.score_percentage) || 0), 0) / list.length).toFixed(1);
+      const avgTimeSec = Math.round(list.reduce((s, x) => s + (Number(x.time_spent_seconds) || 0), 0) / list.length);
       const am = String(Math.floor(avgTimeSec / 60)).padStart(2, '0');
       const as2 = String(avgTimeSec % 60).padStart(2, '0');
       document.getElementById("lb-class-avg").textContent = `${avgPct}%`;

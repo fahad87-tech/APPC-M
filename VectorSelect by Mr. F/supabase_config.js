@@ -198,8 +198,12 @@ function getServerNowIso() {
 
 async function syncServerClock(force = false) {
   await ensureSupabaseInitialized();
-  if (!supabaseClient) return;
-  if (!force && Date.now() - serverClockCheckedAt < 30000) return;
+  if (!supabaseClient) {
+    return { success: false, offsetMs: serverClockOffsetMs, error: { message: "Supabase is unavailable." } };
+  }
+  if (!force && Date.now() - serverClockCheckedAt < 30000) {
+    return { success: true, offsetMs: serverClockOffsetMs, cached: true };
+  }
 
   const startedAt = Date.now();
   try {
@@ -210,10 +214,12 @@ async function syncServerClock(force = false) {
       if (Number.isFinite(serverMs)) {
         serverClockOffsetMs = serverMs - ((startedAt + finishedAt) / 2);
         serverClockCheckedAt = finishedAt;
+        return { success: true, offsetMs: serverClockOffsetMs, cached: false };
       }
     }
-  } catch {
-    // The local clock remains a usable fallback when RPC is unavailable.
+    return { success: false, offsetMs: serverClockOffsetMs, error: error || { message: "Invalid server time response." } };
+  } catch (error) {
+    return { success: false, offsetMs: serverClockOffsetMs, error: { message: error?.message || "Could not synchronize with the Supabase clock." } };
   }
 }
 
@@ -444,7 +450,10 @@ async function fetchSubmissionsByCode(join_code) {
       .order("score", { ascending: false })
       .order("time_spent_seconds", { ascending: true });
     if (!error && data) return data;
-    if (error) console.warn("Supabase submissions query failed:", error);
+    if (error) {
+      console.warn("Supabase submissions query failed:", error);
+      throw error;
+    }
   }
   return JSON.parse(localStorage.getItem(`submissions_${code}`) || "[]");
 }
@@ -621,6 +630,7 @@ async function fetchRecentEmojiReactions(join_code, windowMs = 3500) {
 }
 
 async function fetchLiveClassLeaderboard(join_code) {
+  await ensureSupabaseInitialized();
   const { names } = await fetchParticipantsByCode(join_code);
   const code = normalizeCode(join_code);
   let answers = [];
@@ -629,7 +639,11 @@ async function fetchLiveClassLeaderboard(join_code) {
       .from("live_question_answers")
       .select("*")
       .eq("join_code", code);
-    if (!error && data) answers = data;
+    if (error) {
+      console.warn("Supabase live leaderboard query failed:", error);
+      throw error;
+    }
+    if (data) answers = data;
   }
   if (!answers.length) answers = JSON.parse(localStorage.getItem(`live_answers_${code}`) || "[]");
 

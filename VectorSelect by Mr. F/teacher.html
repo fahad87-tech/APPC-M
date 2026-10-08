@@ -2430,10 +2430,15 @@
       if (assignment.per_question_seconds > 0 && !assignment.question_started_at) {
         const nowIso = getServerNowIso();
         currentLiveAssignment.question_started_at = nowIso;
-        await setAssignmentTimerState(code, {
+        const initialTimerResult = await setAssignmentTimerState(code, {
           question_started_at: nowIso,
           discussion_active: false
         });
+        if (!initialTimerResult || initialTimerResult.success !== true || initialTimerResult.source !== "supabase") {
+          currentLiveAssignment.question_started_at = null;
+          showTeacherToast("Timer not synchronized", initialTimerResult?.error?.message || "Students may not share the same timer.", "coral", 5000);
+          return;
+        }
       }
 
       // Show progress tracker
@@ -2503,6 +2508,11 @@
 
       if (currentLiveAssignment.per_question_seconds > 0) {
         const perQ = currentLiveAssignment.per_question_seconds;
+        const clockSync = await syncServerClock(true);
+        if (!clockSync || clockSync.success !== true) {
+          showTeacherToast("Clock synchronization failed", "The live timer was not started. Check the internet connection and try again.", "coral", 5000);
+          return;
+        }
         const nowIso = getServerNowIso();
         currentLiveAssignment.question_started_at = nowIso;
         currentLiveAssignment.discussion_active = false;
@@ -2876,7 +2886,11 @@
 
     async function setupQuestionTimer() {
       clearInterval(lcTimerInterval);
-      await syncServerClock();
+      const clockSync = await syncServerClock();
+      if (!clockSync || clockSync.success !== true) {
+        showTeacherToast("Clock synchronization failed", "The live timer could not be synchronized with students.", "coral", 5000);
+        return;
+      }
       const perQ = Number(currentLiveAssignment && currentLiveAssignment.per_question_seconds) || 0;
       const timerBox = document.getElementById("lc-timer-box");
       const addTimeBtn = document.getElementById("lc-btn-addtime");
@@ -2891,10 +2905,15 @@
         if (timerLabel) timerLabel.textContent = "Question Time:";
         if (!currentLiveAssignment.question_started_at) {
           currentLiveAssignment.question_started_at = getServerNowIso();
-          await setAssignmentTimerState(currentLiveAssignment.join_code, {
+          const initialTimerResult = await setAssignmentTimerState(currentLiveAssignment.join_code, {
             question_started_at: currentLiveAssignment.question_started_at,
             timer_remaining_seconds: perQ
           });
+          if (!initialTimerResult || initialTimerResult.success !== true || initialTimerResult.source !== "supabase") {
+            currentLiveAssignment.question_started_at = null;
+            showTeacherToast("Timer not synchronized", initialTimerResult?.error?.message || "Students may not share the same timer.", "coral", 5000);
+            return;
+          }
         }
         lastPublishedTimerRemaining = null;
         lcTimerRemaining = getLiveQuestionRemaining();
@@ -3142,6 +3161,7 @@
       clearInterval(lcTimerInterval);
 
       const prevIndex = currentLiveIndex;
+      const previousAssignmentState = { ...currentLiveAssignment };
       currentLiveIndex++;
       lastAllAnsweredNotifiedIdx = -1;
 
@@ -3158,6 +3178,15 @@
 
       // Reset teacher timer
       const perQ = Number(currentLiveAssignment && currentLiveAssignment.per_question_seconds) || 0;
+      const clockSync = await syncServerClock(true);
+      if (!clockSync || clockSync.success !== true) {
+        currentLiveIndex = prevIndex;
+        Object.assign(currentLiveAssignment, previousAssignmentState);
+        renderLiveControl();
+        showTeacherToast("Clock synchronization failed", "Students remain on the previous question.", "coral", 5000);
+        await setupQuestionTimer();
+        return;
+      }
       const nowIso = getServerNowIso();
       lcTimerRemaining = perQ;
       lcTimerPaused = false;
@@ -3194,7 +3223,9 @@
       });
       if (!result || result.success !== true || result.source !== "supabase") {
         currentLiveIndex = prevIndex;
-        currentLiveAssignment.current_question_index = prevIndex;
+        Object.assign(currentLiveAssignment, previousAssignmentState);
+        hideDiscussionPanel(false);
+        renderLiveControl();
         showTeacherToast("Next question not synchronized", result?.error?.message || "Students remain on the previous question.", "coral", 5000);
         await setupQuestionTimer();
         return;
@@ -3860,7 +3891,10 @@
     // LIVE LEADERBOARD (0-120 SUPER MAX Standings & Podium)
     // ============================================================================
     async function openLiveLeaderboardModal() {
-      if (!currentLiveAssignment) return;
+      if (!currentLiveAssignment) {
+        showTeacherToast("No Live Session", "Open the waiting lobby or live control center first.", "copper", 3000);
+        return;
+      }
       isLeaderboardModalOpen = true;
       document.getElementById("live-leaderboard-modal").classList.remove("hidden");
       await refreshLiveLeaderboard(currentLiveAssignment.join_code);
@@ -3924,12 +3958,24 @@
       if (modal) modal.classList.add("hidden");
     }
 
+    let liveLeaderboardRefreshInFlight = false;
     async function refreshLiveLeaderboard(code) {
       if (!code) return;
+      if (liveLeaderboardRefreshInFlight) return;
+      liveLeaderboardRefreshInFlight = true;
       try {
         const standings = await fetchLiveClassLeaderboard(code);
         renderLeaderboardPodiumAndTable(standings);
-      } catch (e) {}
+      } catch (e) {
+        console.error("Live leaderboard failed:", e);
+        showTeacherToast("Leaderboard unavailable", e?.message || "Could not load live student scores.", "coral", 5000);
+        const tbody = document.getElementById("live-leaderboard-tbody");
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-rose-400">Leaderboard could not be loaded. Please retry.</td></tr>`;
+        }
+      } finally {
+        liveLeaderboardRefreshInFlight = false;
+      }
     }
 
     function renderLeaderboardPodiumAndTable(standings) {
