@@ -1416,8 +1416,15 @@
       quizMode = currentAssignment.quiz_mode || "student_led";
       lockdownEnabled = currentAssignment.enable_lockdown || false;
 
-      // Check in to the live session roster (teacher can see who's joined)
-      checkInStudent(code, name);
+      // Check in to the live session roster (teacher can see who's joined).
+      // Do not let a local-only fallback create a false sense that the
+      // teacher can see this student across devices.
+      const checkInResult = await checkInStudent(code, name);
+      if (!checkInResult || checkInResult.success !== true || checkInResult.source !== "supabase") {
+        errBox.textContent = `Could not join the shared classroom roster: ${checkInResult?.error?.message || "Supabase did not confirm your check-in."}`;
+        errBox.classList.remove("hidden");
+        return;
+      }
 
       // Locate the quiz in the database
       let foundQuiz = null;
@@ -2787,6 +2794,12 @@
         speed_bonus: qResult.speedBonus || 0,
         streak: studentCurrentStreak,
         recovered_points: qResult.recovered_points || 0
+      }).then(result => {
+        if (!result || result.success !== true || result.source !== "supabase") {
+          reportCloudSyncFailure("live-answer", result?.error?.message || "Your answer was not synced to the teacher.");
+        }
+      }).catch(error => {
+        reportCloudSyncFailure("live-answer", error?.message || "Your answer was not synced to the teacher.");
       });
     }
 
@@ -3200,7 +3213,13 @@
     // ============================================================================
     function triggerStudentEmoji(emoji) {
       if (!currentAssignment || !activeStudent) return;
-      sendLiveEmojiReaction(currentAssignment.join_code, emoji, activeStudent);
+      sendLiveEmojiReaction(currentAssignment.join_code, emoji, activeStudent).then(result => {
+        if (!result || result.success !== true || result.source !== "supabase") {
+          reportCloudSyncFailure("reaction", result?.error?.message || "Your reaction was not broadcast.");
+        }
+      }).catch(error => {
+        reportCloudSyncFailure("reaction", error?.message || "Your reaction was not broadcast.");
+      });
       spawnFloatingEmoji(emoji);
       showToast("Reaction Sent", `${emoji} broadcast to live stream`, "plum", 1400);
     }
@@ -3592,6 +3611,19 @@
         tab_switch_count: tabSwitchCount,
         fullscreen_exits: fullscreenExitCount
       });
+
+      if (!subResult || subResult.success !== true || subResult.source !== "supabase") {
+        document.getElementById("view-result").classList.add("hidden");
+        document.getElementById("view-exam-runner").classList.remove("hidden");
+        document.getElementById("test-status-bar").classList.remove("hidden");
+        showToast(
+          "Submission not saved",
+          subResult?.error?.message || "Your result was not submitted. Check the internet connection and try again.",
+          "coral",
+          6000
+        );
+        return;
+      }
 
       // Synchronize verified server score if atomic hook returned authoritative grading
       if (subResult && subResult.data && typeof subResult.data.score === 'number') {

@@ -15,6 +15,21 @@ const isSupabaseConfigured = () => Boolean(
 );
 
 let supabaseClient = null;
+const _cloudSyncWarningAt = {};
+
+function reportCloudSyncFailure(surface, message) {
+  const key = String(surface || "cloud");
+  const now = Date.now();
+  if (now - (_cloudSyncWarningAt[key] || 0) < 10000) return;
+  _cloudSyncWarningAt[key] = now;
+  const text = message || "Cloud synchronization failed. Check the internet connection and try again.";
+  console.warn(`[Cloud Sync] ${key}:`, text);
+  if (typeof window !== "undefined") {
+    if (typeof window.showToast === "function") window.showToast("Cloud sync problem", text, "coral", 5000);
+    else if (typeof window.showTeacherToast === "function") window.showTeacherToast("Cloud sync problem", text, "coral", 5000);
+  }
+}
+
 if (typeof supabase !== "undefined" && isSupabaseConfigured()) {
   try {
     supabaseClient = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
@@ -242,7 +257,14 @@ async function createAssignmentOnCloud(assignmentData) {
   });
   mirrorAssignment(assignment);
 
-  if (!supabaseClient) return { success: true, source: "localStorage", data: assignment };
+  if (!supabaseClient) {
+    return {
+      success: false,
+      source: "localStorage",
+      data: assignment,
+      error: { message: "Supabase is unavailable. This assignment cannot be shared across devices." }
+    };
+  }
   const { data, error } = await supabaseClient
     .from("active_assignments")
     .insert([assignmentForCloud(assignment)])
@@ -250,6 +272,7 @@ async function createAssignmentOnCloud(assignmentData) {
     .single();
   if (error) {
     console.warn("Supabase assignment insert failed:", error);
+    reportCloudSyncFailure("assignment", error.message || "The assignment could not be saved to Supabase.");
     return { success: false, source: "localStorage", data: assignment, error };
   }
   mirrorAssignment(data);
@@ -282,19 +305,31 @@ async function updateAssignment(join_code, patch) {
   await ensureSupabaseInitialized();
   const code = normalizeCode(join_code);
   updateLocalAssignment(code, patch);
-  if (!supabaseClient) return { success: true, source: "localStorage" };
-  const { data, error } = await supabaseClient
-    .from("active_assignments")
-    .update(patch)
-    .eq("join_code", code)
-    .select()
-    .maybeSingle();
-  if (error) {
-    console.warn("Supabase assignment update failed:", error);
-    return { success: true, source: "localStorage", error };
+  if (!supabaseClient) {
+    return {
+      success: false,
+      source: "localStorage",
+      error: { message: "Supabase is unavailable. Live assignment changes cannot reach students." }
+    };
   }
-  if (data) mirrorAssignment(data);
-  return { success: true, source: "supabase", data };
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data, error } = await supabaseClient
+      .from("active_assignments")
+      .update(patch)
+      .eq("join_code", code)
+      .select()
+      .maybeSingle();
+    if (!error) {
+      if (data) mirrorAssignment(data);
+      return { success: true, source: "supabase", data };
+    }
+    lastError = error;
+    if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+  }
+  console.warn("Supabase assignment update failed after retries:", lastError);
+  reportCloudSyncFailure("assignment", lastError?.message || "Live assignment changes could not reach Supabase.");
+  return { success: false, source: "localStorage", error: lastError };
 }
 
 async function setAssignmentStatus(join_code, is_active) {
@@ -376,22 +411,25 @@ async function submitStudentExam(submissionData) {
     score_percentage: Number(submissionData.score_percentage ?? submissionData.percentage ?? 0),
     submitted_at: submissionData.submitted_at || new Date().toISOString()
   };
-  if (supabaseClient) {
+  if (!supabaseClient) {
+    const error = { message: "Supabase is unavailable. Your result was not submitted." };
+    reportCloudSyncFailure("submission", error.message);
+    return { success: false, source: "localStorage", error };
+  }
+  let lastError = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
     const { data, error } = await supabaseClient
       .from("exam_submissions")
       .insert([record])
       .select()
       .single();
     if (!error) return { success: true, source: "supabase", data };
-    console.warn("Supabase submission failed:", error);
+    lastError = error;
+    if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
   }
-  const key = `submissions_${record.join_code}`;
-  const list = JSON.parse(localStorage.getItem(key) || "[]");
-  list.push(record);
-  list.sort((a, b) => (b.points || b.score || 0) - (a.points || a.score || 0)
-    || (a.time_spent_seconds || 0) - (b.time_spent_seconds || 0));
-  localStorage.setItem(key, JSON.stringify(list));
-  return { success: true, source: "localStorage", data: record };
+  console.warn("Supabase submission failed after retries:", lastError);
+  reportCloudSyncFailure("submission", lastError?.message || "Your result was not submitted.");
+  return { success: false, source: "supabase", error: lastError };
 }
 
 async function fetchSubmissionsByCode(join_code) {
@@ -414,19 +452,19 @@ async function fetchSubmissionsByCode(join_code) {
 async function checkInStudent(join_code, student_name) {
   await ensureSupabaseInitialized();
   const code = normalizeCode(join_code);
-  if (supabaseClient) {
-    const { error } = await supabaseClient
-      .from("session_participants")
-      .upsert([{ join_code: code, student_name: String(student_name).trim() }],
-        { onConflict: "join_code,student_name" });
-    if (!error) return { success: true, source: "supabase" };
-    console.warn("Supabase participant check-in failed:", error);
+  if (!supabaseClient) {
+    const error = { message: "Supabase is unavailable. The teacher cannot see this check-in." };
+    reportCloudSyncFailure("check-in", error.message);
+    return { success: false, source: "localStorage", error };
   }
-  const key = `participants_${code}`;
-  const names = JSON.parse(localStorage.getItem(key) || "[]");
-  if (!names.includes(student_name)) names.push(student_name);
-  localStorage.setItem(key, JSON.stringify(names));
-  return { success: true, source: "localStorage" };
+  const { error } = await supabaseClient
+    .from("session_participants")
+    .upsert([{ join_code: code, student_name: String(student_name).trim() }],
+      { onConflict: "join_code,student_name" });
+  if (!error) return { success: true, source: "supabase" };
+  console.warn("Supabase participant check-in failed:", error);
+  reportCloudSyncFailure("check-in", error.message || "The teacher cannot see this check-in.");
+  return { success: false, source: "supabase", error };
 }
 
 async function fetchParticipantsByCode(join_code) {
@@ -463,20 +501,18 @@ async function submitLiveAnswer(payload) {
     recovered_points: Number(payload.recovered_points || 0),
     answered_at: new Date().toISOString()
   };
-  if (supabaseClient) {
-    const { error } = await supabaseClient
-      .from("live_question_answers")
-      .upsert([record], { onConflict: "join_code,student_name,question_real_index" });
-    if (!error) return { success: true, source: "supabase" };
-    console.warn("Supabase live-answer write failed:", error);
+  if (!supabaseClient) {
+    const error = { message: "Supabase is unavailable. Your live answer was not synced to the teacher." };
+    reportCloudSyncFailure("live-answer", error.message);
+    return { success: false, source: "localStorage", error };
   }
-  const key = `live_answers_${code}`;
-  let list = JSON.parse(localStorage.getItem(key) || "[]");
-  list = list.filter(a => !(a.student_name === record.student_name
-    && Number(a.question_real_index) === record.question_real_index));
-  list.push(record);
-  localStorage.setItem(key, JSON.stringify(list));
-  return { success: true, source: "localStorage" };
+  const { error } = await supabaseClient
+    .from("live_question_answers")
+    .upsert([record], { onConflict: "join_code,student_name,question_real_index" });
+  if (!error) return { success: true, source: "supabase" };
+  console.warn("Supabase live-answer write failed:", error);
+  reportCloudSyncFailure("live-answer", error.message || "Your live answer was not synced to the teacher.");
+  return { success: false, source: "supabase", error };
 }
 
 async function fetchLiveAnswersByCode(join_code, question_real_index) {
@@ -555,16 +591,16 @@ async function sendLiveEmojiReaction(join_code, arg2, arg3) {
     emoji: emoji || "🚀",
     timestamp: Date.now()
   };
-  if (supabaseClient) {
-    const { error } = await supabaseClient.from("live_reactions").insert([record]);
-    if (!error) return { success: true, source: "supabase" };
-    console.warn("Supabase reaction write failed:", error);
+  if (!supabaseClient) {
+    const error = { message: "Supabase is unavailable. Your reaction was not broadcast." };
+    reportCloudSyncFailure("reaction", error.message);
+    return { success: false, source: "localStorage", error };
   }
-  const key = `reactions_${record.join_code}`;
-  const list = JSON.parse(localStorage.getItem(key) || "[]");
-  list.push(record);
-  localStorage.setItem(key, JSON.stringify(list.slice(-40)));
-  return { success: true, source: "localStorage" };
+  const { error } = await supabaseClient.from("live_reactions").insert([record]);
+  if (!error) return { success: true, source: "supabase" };
+  console.warn("Supabase reaction write failed:", error);
+  reportCloudSyncFailure("reaction", error.message || "Your reaction was not broadcast.");
+  return { success: false, source: "supabase", error };
 }
 
 async function fetchRecentEmojiReactions(join_code, windowMs = 3500) {

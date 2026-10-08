@@ -2477,7 +2477,11 @@
 
     async function startLiveAssignmentNow() {
       const code = currentLiveAssignment.join_code;
-      await startAssignment(code);
+      const startResult = await startAssignment(code);
+      if (!startResult || startResult.success !== true || startResult.source !== "supabase") {
+        alert(`The assignment could not be started for all students: ${startResult?.error?.message || "Supabase did not confirm the update."}`);
+        return;
+      }
       currentLiveAssignment.is_started = true;
 
       // Update table
@@ -2506,7 +2510,7 @@
         currentLiveAssignment.revealed_answer = "";
         currentLiveAssignment.revealed_explanation = "";
         currentLiveAssignment.timer_remaining_seconds = perQ;
-        await setAssignmentTimerState(code, {
+        const timerResult = await setAssignmentTimerState(code, {
           question_started_at: nowIso,
           discussion_active: false,
           timer_remaining_seconds: perQ,
@@ -2514,6 +2518,12 @@
           timer_paused: false,
           paused_remaining_seconds: null
         });
+        if (!timerResult || timerResult.success !== true || timerResult.source !== "supabase") {
+          await setAssignmentStatus(code, false);
+          currentLiveAssignment.is_started = false;
+          alert(`The first question timer could not be synchronized: ${timerResult?.error?.message || "Supabase did not confirm the update."}`);
+          return;
+        }
       }
 
       document.getElementById("lc-progress-strip").classList.remove("hidden");
@@ -2816,11 +2826,15 @@
 
       // Synchronize answer reveal state to cloud & students
       if (currentLiveAssignment) {
-        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+        const result = await setAssignmentTimerState(currentLiveAssignment.join_code, {
           answer_revealed: isAnswerRevealed,
           revealed_answer: isAnswerRevealed ? correctKey : "",
           revealed_explanation: isAnswerRevealed ? explanationText : ""
         });
+        if (!result || result.success !== true || result.source !== "supabase") {
+          showTeacherToast("Reveal not synchronized", result?.error?.message || "Students may not have received this answer-key change.", "coral", 4500);
+          return;
+        }
 
         // Re-render student dots and discussion panel with updated reveal state
         const participants = await fetchParticipantsByCode(currentLiveAssignment.join_code);
@@ -2849,9 +2863,14 @@
           : "pressable px-3 py-1.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-400 font-bold text-xs transition flex items-center gap-1.5 shadow-md";
       }
 
-      await setAssignmentTimerState(currentLiveAssignment.join_code, {
+      const result = await setAssignmentTimerState(currentLiveAssignment.join_code, {
         enable_point_redemption: newVal
       });
+      if (!result || result.success !== true || result.source !== "supabase") {
+        currentLiveAssignment.enable_point_redemption = currentVal;
+        showTeacherToast("Redemption change not synchronized", result?.error?.message || "Students may not have received this setting.", "coral", 4500);
+        return;
+      }
       showTeacherToast("Point Redemption", newVal ? "Point recovery enabled for students" : "Point recovery disabled for students", newVal ? "lime" : "copper", 2000);
     }
 
@@ -2970,11 +2989,17 @@
 
       if (lcTimerPaused) {
         // Broadcast pause to cloud & localStorage
-        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+        const result = await setAssignmentTimerState(currentLiveAssignment.join_code, {
           timer_paused: true,
           timer_remaining_seconds: (perQ > 0) ? lcTimerRemaining : 0,
           paused_remaining_seconds: (perQ > 0) ? lcTimerRemaining : 0
         });
+        if (!result || result.success !== true || result.source !== "supabase") {
+          lcTimerPaused = false;
+          updateLcPauseUI();
+          showTeacherToast("Pause not synchronized", result?.error?.message || "Students may still be answering.", "coral", 4500);
+          return;
+        }
         showTeacherToast("Session Paused", (perQ > 0) ? `Timer paused at ${lcTimerRemaining}s` : "Student interactions paused for explanation", "brass", 2500);
       } else {
         // Resume session: calculate updated started_at timestamp
@@ -2983,12 +3008,18 @@
           const elapsedSecs = Math.max(0, perQ - lcTimerRemaining);
           newStartedAt = new Date(getServerNowMs() - (elapsedSecs * 1000)).toISOString();
         }
-        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+        const result = await setAssignmentTimerState(currentLiveAssignment.join_code, {
           timer_paused: false,
           paused_remaining_seconds: null,
           timer_remaining_seconds: (perQ > 0) ? lcTimerRemaining : 0,
           question_started_at: newStartedAt
         });
+        if (!result || result.success !== true || result.source !== "supabase") {
+          lcTimerPaused = true;
+          updateLcPauseUI();
+          showTeacherToast("Resume not synchronized", result?.error?.message || "Students may still be paused.", "coral", 4500);
+          return;
+        }
         showTeacherToast("Session Resumed", "Timer and question pacing resumed", "lime", 2500);
       }
     }
@@ -3000,12 +3031,16 @@
       const perQ = (currentLiveAssignment.per_question_seconds || 0) + addSeconds;
       currentLiveAssignment.per_question_seconds = perQ;
       const newStartedAt = new Date(getServerNowMs() - Math.max(0, perQ - lcTimerRemaining) * 1000).toISOString();
-      await setAssignmentTimerState(currentLiveAssignment.join_code, {
+      const result = await setAssignmentTimerState(currentLiveAssignment.join_code, {
         question_started_at: newStartedAt,
         per_question_seconds: perQ,
         timer_remaining_seconds: lcTimerRemaining,
         paused_remaining_seconds: lcTimerRemaining
       });
+      if (!result || result.success !== true || result.source !== "supabase") {
+        showTeacherToast("Time change not synchronized", result?.error?.message || "Students may still see the previous timer.", "coral", 4500);
+        return;
+      }
       showTeacherToast(`+${addSeconds} Seconds Added`, `New time: ${lcTimerRemaining}s remaining`, "copper", 2000);
     }
 
@@ -3143,7 +3178,7 @@
       currentLiveAssignment.paused_remaining_seconds = null;
 
       // Single authoritative atomic server update for the newly activated question
-      await setAssignmentTimerState(currentLiveAssignment.join_code, {
+      const result = await setAssignmentTimerState(currentLiveAssignment.join_code, {
         current_question_index: currentLiveIndex,
         question_started_at: nowIso,
         discussion_active: false,
@@ -3157,6 +3192,13 @@
         timer_paused: false,
         paused_remaining_seconds: null
       });
+      if (!result || result.success !== true || result.source !== "supabase") {
+        currentLiveIndex = prevIndex;
+        currentLiveAssignment.current_question_index = prevIndex;
+        showTeacherToast("Next question not synchronized", result?.error?.message || "Students remain on the previous question.", "coral", 5000);
+        await setupQuestionTimer();
+        return;
+      }
 
       await setupQuestionTimer();
       showTeacherToast("Next Question Loaded", `Question ${currentLiveIndex + 1} is now live with answers hidden.`, "lime", 2500);
@@ -3730,11 +3772,16 @@
       if (confirm("End this live session? This will close the assessment for all students.")) {
         clearInterval(lcTimerInterval);
         // Clear timer state
-        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+        const timerResult = await setAssignmentTimerState(currentLiveAssignment.join_code, {
           question_started_at: null,
           discussion_active: false
         });
-        await setAssignmentStatus(currentLiveAssignment.join_code, false);
+        const statusResult = await setAssignmentStatus(currentLiveAssignment.join_code, false);
+        if (!timerResult || timerResult.success !== true || timerResult.source !== "supabase"
+          || !statusResult || statusResult.success !== true || statusResult.source !== "supabase") {
+          showTeacherToast("Session end not synchronized", "Students may still see the session as active. Please retry.", "coral", 5000);
+          return;
+        }
         closeLiveControlModal();
         loadAssignmentsTable();
       }
