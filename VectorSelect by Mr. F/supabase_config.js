@@ -142,6 +142,27 @@ function mirrorAssignment(assignment) {
   return normalized;
 }
 
+// Keep browser-side assignment metadata even when an older Supabase schema
+// does not yet contain the newer scope fields.
+const CLOUD_ASSIGNMENT_COLUMNS = new Set([
+  "id", "join_code", "subject", "unit", "assessment_id", "assessment_title",
+  "title", "class_period", "time_limit_minutes", "quiz_mode",
+  "per_question_seconds", "current_question_index", "allow_calculator",
+  "show_leaderboard", "enable_lockdown", "randomize_questions",
+  "allow_student_review", "allow_review", "enable_point_redemption",
+  "is_active", "is_started", "started_at", "timer_paused", "is_paused",
+  "paused_remaining_seconds", "timer_remaining_seconds", "remaining_seconds",
+  "discussion_active", "answer_revealed", "revealed_answer",
+  "revealed_explanation", "previous_correct_answer", "question_started_at",
+  "created_at", "updated_at"
+]);
+
+function assignmentForCloud(assignment) {
+  return Object.fromEntries(
+    Object.entries(assignment || {}).filter(([key]) => CLOUD_ASSIGNMENT_COLUMNS.has(key))
+  );
+}
+
 function updateLocalAssignment(join_code, patch) {
   const code = normalizeCode(join_code);
   const assignments = localAssignments().map(assignment => (
@@ -224,12 +245,12 @@ async function createAssignmentOnCloud(assignmentData) {
   if (!supabaseClient) return { success: true, source: "localStorage", data: assignment };
   const { data, error } = await supabaseClient
     .from("active_assignments")
-    .insert([assignment])
+    .insert([assignmentForCloud(assignment)])
     .select()
     .single();
   if (error) {
     console.warn("Supabase assignment insert failed:", error);
-    return { success: true, source: "localStorage", data: assignment, error };
+    return { success: false, source: "localStorage", data: assignment, error };
   }
   mirrorAssignment(data);
   return { success: true, source: "supabase", data };

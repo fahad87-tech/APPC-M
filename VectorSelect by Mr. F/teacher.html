@@ -1481,7 +1481,11 @@
       activeAssignments = activeAssignments.filter(a => a.join_code !== code);
       activeAssignments.unshift(assignmentData);
 
-      await createAssignmentOnCloud(assignmentData);
+      const cloudResult = await createAssignmentOnCloud(assignmentData);
+      if (!cloudResult || cloudResult.success !== true) {
+        alert(`Assignment could not be dispatched to the cloud: ${cloudResult?.error?.message || "Unknown database error"}`);
+        return;
+      }
 
       document.getElementById("banner-title").textContent = `${currentSelectedQuiz.subject} • ${currentSelectedQuiz.title}`;
       document.getElementById("banner-code").textContent = code;
@@ -2348,8 +2352,8 @@
       if (!assignment) {
         // Fallback 2: Check active join code lookup
         const res = await verifyJoinCode(code);
-        if (res && res.success && res.data) {
-          assignment = res.data;
+        if (res && res.found && res.assignment) {
+          assignment = res.assignment;
           if (!activeAssignments.some(a => a.join_code === code)) {
             activeAssignments.unshift(assignment);
           }
