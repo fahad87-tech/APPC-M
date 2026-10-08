@@ -264,8 +264,14 @@ async function fetchTeacherAssignments() {
       .select("*")
       .order("created_at", { ascending: false });
     if (!error && data) {
-      data.map(normalizeAssignment).forEach(mirrorAssignment);
-      return data.map(normalizeAssignment);
+      const cloudAssignments = data.map(normalizeAssignment);
+      cloudAssignments.forEach(mirrorAssignment);
+
+      // A dispatch can exist in localStorage while an older deployment,
+      // delayed replication, or a transient write failure leaves the cloud
+      // query empty. Do not erase the visible assignment in that case.
+      if (cloudAssignments.length > 0) return cloudAssignments;
+      return localAssignments().map(normalizeAssignment);
     }
     if (error) console.warn("Supabase assignments query failed:", error);
   }
