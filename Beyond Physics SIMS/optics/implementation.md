@@ -117,3 +117,38 @@ When on the **Dispersion** tab, the 3 metric cards update live as sliders move:
    - Formative assessment 5E student worksheet generator (`exportAssessmentDocx()`) remains fully functional.
 4. **Camera Controls**:
    - All pan, scroll-to-zoom, and "Bench: Upright" vs "Bench: Sideways" orientation toggles transform prism coordinates seamlessly through `camera.worldToScreen()`.
+
+
+---
+
+## 5. Standalone Prism Light Dispersion Simulator (`PRISM.html`)
+
+### 5.1 Objectives & Overview
+`PRISM.html` provides a lightweight, focused, single-file simulation dedicated specifically to triangular prism ray tracing, dispersion, and Total Internal Reflection (TIR).
+
+### 5.2 Mathematical Formulation
+1. **Geometry & Vertex Definition**:
+   - The triangular prism vertices are computed dynamically using the apex angle $A$ and scale $S = 260\text{ px}$:
+     $$r_{\text{poly}} = \frac{S}{2 \sin(A/2)}$$
+     $$V_{\text{top}} = (c_x, c_y - r_{\text{poly}} \cos(A/2))$$
+     $$V_{\text{left}} = \left(c_x - \frac{S}{2}, c_y + r_{\text{poly}} \sin(A/2)\right)$$
+     $$V_{\text{right}} = \left(c_x + \frac{S}{2}, c_y + r_{\text{poly}} \sin(A/2)\right)$$
+2. **First Refraction (Entry Face)**:
+   - For incident angle $\theta_1$ and refractive index $n$:
+     $$\theta_2 = \arcsin\left(\frac{\sin\theta_1}{n}\right)$$
+3. **Internal Angle of Incidence**:
+   - At the second face:
+     $$\theta_3 = A - \theta_2$$
+   - Critical angle for total internal reflection:
+     $$\theta_c = \arcsin\left(\frac{1}{n}\right)$$
+4. **Exit Angle or TIR Condition**:
+   - If $\theta_3 > \theta_c$: The ray undergoes **Total Internal Reflection** ($r_{\text{status}} = \text{TIR (Trapped)}$), reflecting internally at angle $\theta_{\text{refl}} = \theta_3$.
+   - If $\theta_3 \le \theta_c$: The ray refracts out into air ($r_{\text{status}} = \text{Refracted Out}$) at exit angle:
+     $$\theta_4 = \arcsin\left(n \sin\theta_3\right)$$
+5. **Dispersion Tracking**:
+   - Red light ($n_{\text{red}} \approx 1.52$) and Violet light ($n_{\text{vio}} \approx 1.55$) are traced concurrently, showing angular divergence upon exit and differences in critical angle thresholds.
+
+### 5.3 UI & Dashboard Integration
+- Configured sliders for Incidence Angle ($\theta_1 \in [10^\circ, 80^\circ]$), Apex Angle ($A \in [30^\circ, 80^\circ]$), $n_{\text{red}}$, and $n_{\text{vio}}$.
+- Real-time numerical display for $\theta_2, \theta_3, \theta_c, \theta_4$, and TIR status.
+- Added corresponding interactive card to the Optics category in `Beyond Physics SIMS/index.html`.

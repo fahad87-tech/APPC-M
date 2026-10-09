@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prism Light Dispersion Simulator</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #121214; color: #e1e1e6; margin: 20px; }
+        .container { max-width: 900px; margin: auto; padding: 20px; background: #1a1a1e; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        h2 { color: #fff; margin-top: 0; }
+        .controls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+        .control-group { background: #26262b; padding: 12px; border-radius: 8px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
+        input[type="range"] { width: 100%; }
+        .value-display { font-weight: normal; color: #4fc3f7; float: right; }
+        .toggles { display: flex; flex-wrap: wrap; gap: 15px; background: #26262b; padding: 12px; border-radius: 8px; margin-bottom: 20px; }
+        .toggle-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        canvas { background: #0b0b0c; border: 1px solid #333; display: block; border-radius: 8px; margin-bottom: 20px; width: 100%; height: auto; }
+        .math-output { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; background: #26262b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px; }
+        .math-card { border-left: 3px solid #4fc3f7; padding-left: 10px; }
+        .math-card.violet { border-left-color: #b388ff; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Prism Light Dispersion Simulator</h2>
+    <div class="controls">
+        <div class="control-group">
+            <label>Incidence Angle (θ1): <span id="v_inc" class="value-display">40.0°</span></label>
+            <input type="range" id="inc" min="10" max="80" step="0.5" value="40">
+        </div>
+        <div class="control-group">
+            <label>Apex Angle (A): <span id="v_apex" class="value-display">60.0°</span></label>
+            <input type="range" id="apex" min="30" max="80" step="0.5" value="60">
+        </div>
+        <div class="control-group">
+            <label>n (Red): <span id="v_nred" class="value-display">1.52</span></label>
+            <input type="range" id="nred" min="1.1" max="1.9" step="0.01" value="1.52">
+        </div>
+        <div class="control-group">
+            <label>n (Violet): <span id="v_nvio" class="value-display">1.55</span></label>
+            <input type="range" id="nvio" min="1.1" max="1.9" step="0.01" value="1.55">
+        </div>
+    </div>
+    
+    <div class="toggles">
+        <label class="toggle-item"><input type="checkbox" id="show_red" checked> Show Red Ray</label>
+        <label class="toggle-item"><input type="checkbox" id="show_vio" checked> Show Violet Ray</label>
+        <label class="toggle-item"><input type="checkbox" id="show_angles" checked> Show Angles</label>
+        <label class="toggle-item"><input type="checkbox" id="show_labels" checked> Show Labels</label>
+    </div>
+
+    <canvas id="prismCanvas" width="800" height="450"></canvas>
+
+    <div class="math-output">
+        <div class="math-card">
+            <strong style="color:#ff5252">RED LIGHT METRICS:</strong><br><br>
+            θ2 (First Refraction): <span id="m_r_t2">-</span>°<br>
+            θ3 (Internal Incidence): <span id="m_r_t3">-</span>°<br>
+            θc (Critical Angle): <span id="m_r_tc">-</span>°<br>
+            Status: <span id="m_r_status">-</span><br>
+            θ4 (Exit Angle): <span id="m_r_t4">-</span>°
+        </div>
+        <div class="math-card violet">
+            <strong style="color:#e040fb">VIOLET LIGHT METRICS:</strong><br><br>
+            θ2 (First Refraction): <span id="m_v_t2">-</span>°<br>
+            θ3 (Internal Incidence): <span id="m_v_t3">-</span>°<br>
+            θc (Critical Angle): <span id="m_v_tc">-</span>°<br>
+            Status: <span id="m_v_status">-</span><br>
+            θ4 (Exit Angle): <span id="m_v_t4">-</span>°
+        </div>
+    </div>
+</div>
+
+<script>
+const canvas = document.getElementById('prismCanvas');
+const ctx = canvas.getContext('2d');
+
+function update() {
+    const theta1 = parseFloat(document.getElementById('inc').value) * Math.PI / 180;
+    const A = parseFloat(document.getElementById('apex').value) * Math.PI / 180;
+    const nRed = parseFloat(document.getElementById('nred').value);
+    const nVio = parseFloat(document.getElementById('nvio').value);
+    
+    document.getElementById('v_inc').innerText = document.getElementById('inc').value + '°';
+    document.getElementById('v_apex').innerText = document.getElementById('apex').value + '°';
+    document.getElementById('v_nred').innerText = nRed.toFixed(2);
+    document.getElementById('v_nvio').innerText = nVio.toFixed(2);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const scale = 260;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2 + 30;
+    
+    const r_poly = scale / (2 * Math.sin(A/2));
+    const topX = cx;
+    const topY = cy - r_poly * Math.cos(A/2);
+    const leftX = cx - scale / 2;
+    const leftY = cy + r_poly * Math.sin(A/2);
+    const rightX = cx + scale / 2;
+    const rightY = cy + r_poly * Math.sin(A/2);
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.fillStyle = 'rgba(255,255,255,0.03)';
+    ctx.beginPath();
+    ctx.moveTo(topX, topY);
+    ctx.lineTo(leftX, leftY);
+    ctx.lineTo(rightX, rightY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    if(document.getElementById('show_labels').checked) {
+        ctx.fillStyle = '#fff';
+        ctx.font = '14px Arial';
+        ctx.fillText('A = ' + document.getElementById('apex').value + '°', topX - 25, topY - 15);
+    }
+
+    const hitPct = 0.5;
+    const entryX = topX * (1 - hitPct) + leftX * hitPct;
+    const entryY = topY * (1 - hitPct) + leftY * hitPct;
+    
+    const face1Angle = Math.atan2(leftY - topY, leftX - topX);
+    const norm1Angle = face1Angle + Math.PI / 2;
+
+    if (document.getElementById('show_angles').checked) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(entryX - Math.cos(norm1Angle)*60, entryY - Math.sin(norm1Angle)*60);
+        ctx.lineTo(entryX + Math.cos(norm1Angle)*60, entryY + Math.sin(norm1Angle)*60);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    const rayStartLen = 150;
+    const inRayAngle = norm1Angle - theta1;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(entryX - Math.cos(inRayAngle)*rayStartLen, entryY - Math.sin(inRayAngle)*rayStartLen);
+    ctx.lineTo(entryX, entryY);
+    ctx.stroke();
+
+    function processRay(n, color, toggleId, mPrefix) {
+        if (!document.getElementById(toggleId).checked) return;
+
+        const sinT2 = Math.sin(theta1) / n;
+        if(sinT2 > 1) return;
+        const theta2 = Math.asin(sinT2);
+        const theta3 = A - theta2;
+        const thetaC = Math.asin(1 / n);
+
+        document.getElementById(mPrefix + '_t2').innerText = (theta2 * 180 / Math.PI).toFixed(1);
+        document.getElementById(mPrefix + '_t3').innerText = (theta3 * 180 / Math.PI).toFixed(1);
+        document.getElementById(mPrefix + '_tc').innerText = (thetaC * 180 / Math.PI).toFixed(1);
+
+        const intRayAngle = norm1Angle - Math.PI + theta2;
+        
+        const x3 = topX, y3 = topY, x4 = rightX, y4 = rightY;
+        const denominator = (entryX - (entryX + Math.cos(intRayAngle))) * (y3 - y4) - (entryY - (entryY + Math.sin(intRayAngle))) * (x3 - x4);
+        if (denominator === 0) return;
+        
+        const t = ((entryX - x3) * (y3 - y4) - (entryY - y3) * (x3 - x4)) / denominator;
+        const exitX = entryX + t * Math.cos(intRayAngle);
+        const exitY = entryY + t * Math.sin(intRayAngle);
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(entryX, entryY);
+        ctx.lineTo(exitX, exitY);
+        ctx.stroke();
+
+        const face2Angle = Math.atan2(rightY - topY, rightX - topX);
+        const norm2Angle = face2Angle - Math.PI / 2;
+
+        if (document.getElementById('show_angles').checked) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(exitX - Math.cos(norm2Angle)*60, exitY - Math.sin(norm2Angle)*60);
+            ctx.lineTo(exitX + Math.cos(norm2Angle)*60, exitY + Math.sin(norm2Angle)*60);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        if (theta3 > thetaC) {
+            document.getElementById(mPrefix + '_status').innerText = 'TIR (Trapped)';
+            document.getElementById(mPrefix + '_status').style.color = '#ff5252';
+            document.getElementById(mPrefix + '_t4').innerText = 'N/A';
+            
+            const refAngle = norm2Angle + Math.PI - theta3;
+            ctx.beginPath();
+            ctx.moveTo(exitX, exitY);
+            ctx.lineTo(exitX + Math.cos(refAngle)*100, exitY + Math.sin(refAngle)*100);
+            ctx.stroke();
+        } else {
+            document.getElementById(mPrefix + '_status').innerText = 'Refracted Out';
+            document.getElementById(mPrefix + '_status').style.color = '#69f0ae';
+            const theta4 = Math.asin(n * Math.sin(theta3));
+            document.getElementById(mPrefix + '_t4').innerText = (theta4 * 180 / Math.PI).toFixed(1);
+
+            const outRayAngle = norm2Angle + theta4;
+            ctx.beginPath();
+            ctx.moveTo(exitX, exitY);
+            ctx.lineTo(exitX + Math.cos(outRayAngle)*150, exitY + Math.sin(outRayAngle)*150);
+            ctx.stroke();
+        }
+    }
+
+    processRay(nRed, '#ff5252', 'show_red', 'm_r');
+    processRay(nVio, '#e040fb', 'show_vio', 'm_v');
+}
+
+document.querySelectorAll('input').forEach(el => el.addEventListener('input', update));
+window.onload = update;
+</script>
+</body>
+</html>
