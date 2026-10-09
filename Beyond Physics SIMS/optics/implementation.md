@@ -159,6 +159,12 @@ When on the **Dispersion** tab, the 3 metric cards update live as sliders move:
   - Embedded guided Question mode button (`#questionBtn`) loading challenge scenarios.
   - Interactive prediction inputs for sequence notes, critical angle guesses, and TIR notes.
   - Live metric telemetry displaying exit angles, angular spread ($\Delta\theta$), and critical threshold margins.
+- **Security & Access Control Gate**:
+  - Implemented PBKDF2 SHA-256 cryptographic password gate (`SIM_AUTH`, 100,000 iterations) protecting student access.
+  - Password key matches suite standard (`beyondphysics`).
+  - On cancellation or incorrect input, redirects cleanly to `../index.html`.
+  - Integrated `pageshow` listener to handle bfcache back-navigation security.
 - **Dashboard Integration**:
-  - Linked directly via the Optics category in `Beyond Physics SIMS/index.html`.
+  - Linked directly via the Optics category in `Beyond Physics SIMS/index.html` with `Simulation 🔒` badge.
+
 
