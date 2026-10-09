@@ -148,7 +148,17 @@ When on the **Dispersion** tab, the 3 metric cards update live as sliders move:
 5. **Dispersion Tracking**:
    - Red light ($n_{\text{red}} \approx 1.52$) and Violet light ($n_{\text{vio}} \approx 1.55$) are traced concurrently, showing angular divergence upon exit and differences in critical angle thresholds.
 
-### 5.3 UI & Dashboard Integration
-- Configured sliders for Incidence Angle ($\theta_1 \in [10^\circ, 80^\circ]$), Apex Angle ($A \in [30^\circ, 80^\circ]$), $n_{\text{red}}$, and $n_{\text{vio}}$.
-- Real-time numerical display for $\theta_2, \theta_3, \theta_c, \theta_4$, and TIR status.
-- Added corresponding interactive card to the Optics category in `Beyond Physics SIMS/index.html`.
+### 5.3 UI & Interactive Laboratory Enhancements
+- **Dynamic Spectral Controls**: Sliders for Incidence Angle ($\theta_1 \in [10^\circ, 80^\circ]$), Apex Angle ($A \in [30^\circ, 80^\circ]$), and wavelength-dependent refractive indices ($n_{\text{red}}, n_{\text{violet}}$).
+- **Interactive Toggles**:
+  - Show Incident Beam, First Face, Second Face rays independently.
+  - Show Normal lines & Angles ($\theta_1, \theta_2, \theta_3, \theta_4$).
+  - Animated Photon Wave Packets along ray trajectories via `requestAnimationFrame`.
+  - Student Measurement Overlay & Labels.
+- **Inquiry & Formative Workspace**:
+  - Embedded guided Question mode button (`#questionBtn`) loading challenge scenarios.
+  - Interactive prediction inputs for sequence notes, critical angle guesses, and TIR notes.
+  - Live metric telemetry displaying exit angles, angular spread ($\Delta\theta$), and critical threshold margins.
+- **Dashboard Integration**:
+  - Linked directly via the Optics category in `Beyond Physics SIMS/index.html`.
+

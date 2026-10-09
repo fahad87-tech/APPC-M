@@ -118,3 +118,8 @@ node_modules/
 3. **Repository Cleanliness**:
    - Configured `.gitignore` to prevent tracking `node_modules/`.
    - Staged and committed changes strictly within `Beyond Physics SIMS` and pushed to GitHub `origin/main`.
+4. **Enhanced Prism Dispersion Lab (`optics/PRISM.html` update)**:
+   - Added multi-ray spectral tracing, real-time photon packet propagation animation using `requestAnimationFrame`, and detailed angle/normal line visual overlays.
+   - Integrated inquiry questions preset mode and student prediction workspace for reflection/refraction hypotheses.
+   - Synchronized metrics readout: $\theta_1$, $\theta_2$, $\theta_3$, $\theta_4$, critical angle thresholding ($\theta_c$), and exit angular spread ($\Delta\theta$).
+

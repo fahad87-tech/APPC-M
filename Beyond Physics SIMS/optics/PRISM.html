@@ -1,221 +1,569 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Prism Light Dispersion Simulator</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #121214; color: #e1e1e6; margin: 20px; }
-        .container { max-width: 900px; margin: auto; padding: 20px; background: #1a1a1e; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        h2 { color: #fff; margin-top: 0; }
-        .controls { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
-        .control-group { background: #26262b; padding: 12px; border-radius: 8px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 14px; }
-        input[type="range"] { width: 100%; }
-        .value-display { font-weight: normal; color: #4fc3f7; float: right; }
-        .toggles { display: flex; flex-wrap: wrap; gap: 15px; background: #26262b; padding: 12px; border-radius: 8px; margin-bottom: 20px; }
-        .toggle-item { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        canvas { background: #0b0b0c; border: 1px solid #333; display: block; border-radius: 8px; margin-bottom: 20px; width: 100%; height: auto; }
-        .math-output { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; background: #26262b; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 13px; }
-        .math-card { border-left: 3px solid #4fc3f7; padding-left: 10px; }
-        .math-card.violet { border-left-color: #b388ff; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prism Lab | White Light Investigation</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(13, 27, 46, 0.9);
+      --line: rgba(168, 205, 238, 0.16);
+      --text: #edf7ff;
+      --muted: #9fb6ca;
+      --cyan: #65e6ff;
+      --gold: #ffd166;
+      --violet: #c084fc;
+      --green: #67e8a5;
+      --shadow: 0 22px 70px rgba(0, 0, 0, 0.36);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 8%, rgba(101, 230, 255, 0.12), transparent 25rem),
+        radial-gradient(circle at 90% 0%, rgba(192, 132, 252, 0.11), transparent 27rem),
+        linear-gradient(145deg, #07111f 0%, #0b1b2e 48%, #07111f 100%);
+    }
+    button, input, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .app-shell { width: min(1500px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 44px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .brand-mark {
+      width: 43px; height: 43px; display: grid; place-items: center; color: #07111f;
+      font-weight: 900; background: linear-gradient(135deg, var(--cyan), #d6f8ff);
+      clip-path: polygon(50% 0, 100% 86%, 0 86%); filter: drop-shadow(0 0 16px rgba(101, 230, 255, 0.35));
+    }
+    .eyebrow { margin: 0 0 3px; color: var(--cyan); font-size: 11px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 0; font-size: clamp(22px, 3vw, 34px); letter-spacing: -0.03em; }
+    h2 { margin-bottom: 5px; font-size: 18px; }
+    h3 { margin-bottom: 7px; font-size: 14px; }
+    .top-actions { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; justify-content: flex-end; }
+    .button {
+      min-height: 37px; border: 1px solid var(--line); border-radius: 9px; padding: 8px 12px;
+      color: var(--text); background: rgba(255, 255, 255, 0.04);
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+    .button:hover { transform: translateY(-1px); border-color: rgba(101, 230, 255, 0.6); background: rgba(101, 230, 255, 0.1); }
+    .button.primary { color: #06101d; border-color: transparent; background: var(--cyan); font-weight: 800; }
+    .button.primary:hover { background: #a2f1ff; }
+    .intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: end; margin-bottom: 18px; }
+    .intro-copy { max-width: 780px; color: var(--muted); line-height: 1.55; }
+    .setup-badge {
+      border: 1px solid rgba(255, 209, 102, 0.35); border-radius: 999px; padding: 9px 14px;
+      color: var(--gold); background: rgba(255, 209, 102, 0.08); font-size: 12px; font-weight: 800; white-space: nowrap;
+    }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.62fr) minmax(340px, 0.78fr); gap: 18px; align-items: start; }
+    .panel {
+      border: 1px solid var(--line); border-radius: 14px;
+      background: linear-gradient(145deg, rgba(16, 36, 59, 0.94), rgba(7, 18, 31, 0.94));
+      box-shadow: var(--shadow);
+    }
+    .stage-panel { overflow: hidden; }
+    .stage-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 17px 18px 14px; border-bottom: 1px solid var(--line); }
+    .stage-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .live-pill { display: inline-flex; align-items: center; gap: 7px; color: var(--green); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
+    .live-pill::before { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 14px var(--green); content: ""; }
+    .canvas-wrap {
+      position: relative; padding: 12px;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px), #06101c;
+      background-size: 34px 34px;
+    }
+    canvas { display: block; width: 100%; height: auto; border-radius: 9px; background: linear-gradient(145deg, rgba(14, 31, 51, 0.98), rgba(5, 13, 23, 0.98)); }
+    .stage-footer { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 11px 12px 13px; border-top: 1px solid var(--line); }
+    .stage-chip { min-height: 46px; border: 1px solid var(--line); border-radius: 9px; padding: 8px 10px; color: var(--muted); background: rgba(255, 255, 255, 0.025); font-size: 11px; }
+    .stage-chip strong { display: block; margin-bottom: 3px; color: var(--text); font-size: 12px; }
+    .control-stack { display: grid; gap: 18px; }
+    .control-panel { padding: 17px; }
+    .panel-title { display: flex; align-items: start; justify-content: space-between; gap: 12px; margin-bottom: 15px; }
+    .panel-title p { margin: 3px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .control-grid { display: grid; gap: 13px; }
+    .control { display: grid; gap: 7px; }
+    .control label { display: flex; justify-content: space-between; gap: 12px; color: #c6d8e8; font-size: 12px; font-weight: 700; }
+    .value { color: var(--cyan); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    input[type="range"] { width: 100%; accent-color: var(--cyan); cursor: pointer; }
+    .range-hint { display: flex; justify-content: space-between; color: #66829a; font-size: 10px; }
+    .toggle-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+    .toggle {
+      display: flex; align-items: center; gap: 8px; min-height: 35px; border: 1px solid var(--line);
+      border-radius: 8px; padding: 7px 8px; color: #bdd0e0; background: rgba(255, 255, 255, 0.025);
+      font-size: 11px; cursor: pointer; user-select: none;
+    }
+    .toggle:hover { border-color: rgba(101, 230, 255, 0.42); }
+    .toggle input { width: 14px; height: 14px; margin: 0; accent-color: var(--cyan); }
+    .swatch { width: 9px; height: 9px; flex: 0 0 auto; border-radius: 50%; box-shadow: 0 0 9px currentColor; }
+    .red { color: #ff4d5f; } .orange { color: #ff9f43; } .yellow { color: #ffe066; } .green { color: #65e6a1; }
+    .blue { color: #58b8ff; } .indigo { color: #7f8cff; } .violet { color: #d28cff; }
+    .readout-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .readout { min-height: 78px; border: 1px solid var(--line); border-radius: 9px; padding: 10px; background: rgba(2, 9, 17, 0.42); }
+    .readout small { display: block; margin-bottom: 6px; color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .readout strong { display: block; min-height: 25px; color: var(--cyan); font-size: 19px; font-variant-numeric: tabular-nums; }
+    .readout span { color: #7f9ab0; font-size: 10px; }
+    .challenge { display: grid; gap: 10px; }
+    .challenge-card { border-left: 3px solid var(--cyan); border-radius: 0 9px 9px 0; padding: 11px 12px; background: rgba(101, 230, 255, 0.055); }
+    .challenge-card:nth-child(2) { border-left-color: var(--gold); background: rgba(255, 209, 102, 0.055); }
+    .challenge-card:nth-child(3) { border-left-color: var(--violet); background: rgba(192, 132, 252, 0.055); }
+    .challenge-card p { margin: 0; color: #c0d0df; font-size: 12px; line-height: 1.45; }
+    .answer-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 9px; }
+    .answer-row input, .notes {
+      width: 100%; border: 1px solid var(--line); border-radius: 7px; padding: 8px 9px; outline: none;
+      color: var(--text); background: rgba(0, 0, 0, 0.2); font-size: 12px;
+    }
+    .answer-row input:focus, .notes:focus { border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(101, 230, 255, 0.1); }
+    .notes { min-height: 65px; margin-top: 9px; resize: vertical; }
+    .micro-note { margin: 9px 0 0; color: #7892a8; font-size: 10px; line-height: 1.4; }
+    .footer-note { margin-top: 18px; color: #6f899e; font-size: 11px; text-align: center; }
+    .hidden { display: none !important; }
+    @media (max-width: 1040px) {
+      .workspace { grid-template-columns: 1fr; }
+      .control-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+      .control-panel.challenge-panel { grid-column: 1 / -1; }
+    }
+    @media (max-width: 700px) {
+      .app-shell { width: min(100% - 20px, 1500px); padding-top: 16px; }
+      .topbar, .intro { grid-template-columns: 1fr; display: grid; }
+      .top-actions { justify-content: flex-start; }
+      .setup-badge { justify-self: start; }
+      .control-stack { grid-template-columns: 1fr; }
+      .stage-footer { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <h2>Prism Light Dispersion Simulator</h2>
-    <div class="controls">
-        <div class="control-group">
-            <label>Incidence Angle (θ1): <span id="v_inc" class="value-display">40.0°</span></label>
-            <input type="range" id="inc" min="10" max="80" step="0.5" value="40">
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">P</div>
+        <div>
+          <p class="eyebrow">Optics investigation studio</p>
+          <h1>Prism Lab</h1>
         </div>
-        <div class="control-group">
-            <label>Apex Angle (A): <span id="v_apex" class="value-display">60.0°</span></label>
-            <input type="range" id="apex" min="30" max="80" step="0.5" value="60">
+      </div>
+      <div class="top-actions">
+        <button class="button" id="resetBtn" type="button">Reset setup</button>
+        <button class="button primary" id="questionBtn" type="button">Load question setup</button>
+      </div>
+    </header>
+
+    <section class="intro">
+      <div>
+        <p class="eyebrow">White light / two interfaces / student mode</p>
+        <p class="intro-copy">
+          Explore how every colour takes its own path through a triangular glass prism.
+          Change one variable at a time, hide and reveal parts of the diagram, then record your own reasoning in the investigation panel.
+        </p>
+      </div>
+      <div class="setup-badge">Answers stay hidden until you ask for live readings</div>
+    </section>
+
+    <section class="workspace">
+      <section class="panel stage-panel">
+        <div class="stage-head">
+          <div>
+            <h2>Live ray bench</h2>
+            <p>Drag the controls, then inspect the first face and second face separately.</p>
+          </div>
+          <div class="live-pill">simulation live</div>
         </div>
-        <div class="control-group">
-            <label>n (Red): <span id="v_nred" class="value-display">1.52</span></label>
-            <input type="range" id="nred" min="1.1" max="1.9" step="0.01" value="1.52">
+        <div class="canvas-wrap">
+          <canvas id="prismCanvas" width="1080" height="620" aria-label="Interactive triangular prism ray diagram"></canvas>
         </div>
-        <div class="control-group">
-            <label>n (Violet): <span id="v_nvio" class="value-display">1.55</span></label>
-            <input type="range" id="nvio" min="1.1" max="1.9" step="0.01" value="1.55">
+        <div class="stage-footer">
+          <div class="stage-chip"><strong>Event 01</strong><span>Air to glass boundary</span></div>
+          <div class="stage-chip"><strong>Event 02</strong><span>Colour-dependent paths</span></div>
+          <div class="stage-chip"><strong>Event 03</strong><span>Glass to air boundary</span></div>
         </div>
-    </div>
-    
-    <div class="toggles">
-        <label class="toggle-item"><input type="checkbox" id="show_red" checked> Show Red Ray</label>
-        <label class="toggle-item"><input type="checkbox" id="show_vio" checked> Show Violet Ray</label>
-        <label class="toggle-item"><input type="checkbox" id="show_angles" checked> Show Angles</label>
-        <label class="toggle-item"><input type="checkbox" id="show_labels" checked> Show Labels</label>
-    </div>
+      </section>
 
-    <canvas id="prismCanvas" width="800" height="450"></canvas>
+      <aside class="control-stack">
+        <section class="panel control-panel">
+          <div class="panel-title"><div><h2>Build the setup</h2><p>Use the sliders to recreate the prompt or explore beyond it.</p></div></div>
+          <div class="control-grid">
+            <div class="control"><label for="inc"><span>Incidence angle</span><span class="value" id="incValue">40.0 deg</span></label><input id="inc" type="range" min="0" max="80" step="0.5" value="40"><div class="range-hint"><span>0 deg</span><span>80 deg</span></div></div>
+            <div class="control"><label for="apex"><span>Prism apex angle</span><span class="value" id="apexValue">60.0 deg</span></label><input id="apex" type="range" min="30" max="80" step="0.5" value="60"><div class="range-hint"><span>30 deg</span><span>80 deg</span></div></div>
+            <div class="control"><label for="nred"><span>Glass index, red</span><span class="value" id="nredValue">1.52</span></label><input id="nred" type="range" min="1.10" max="1.90" step="0.01" value="1.52"><div class="range-hint"><span>1.10</span><span>1.90</span></div></div>
+            <div class="control"><label for="nvio"><span>Glass index, violet</span><span class="value" id="nvioValue">1.55</span></label><input id="nvio" type="range" min="1.10" max="1.90" step="0.01" value="1.55"><div class="range-hint"><span>1.10</span><span>1.90</span></div></div>
+          </div>
+        </section>
 
-    <div class="math-output">
-        <div class="math-card">
-            <strong style="color:#ff5252">RED LIGHT METRICS:</strong><br><br>
-            θ2 (First Refraction): <span id="m_r_t2">-</span>°<br>
-            θ3 (Internal Incidence): <span id="m_r_t3">-</span>°<br>
-            θc (Critical Angle): <span id="m_r_tc">-</span>°<br>
-            Status: <span id="m_r_status">-</span><br>
-            θ4 (Exit Angle): <span id="m_r_t4">-</span>°
-        </div>
-        <div class="math-card violet">
-            <strong style="color:#e040fb">VIOLET LIGHT METRICS:</strong><br><br>
-            θ2 (First Refraction): <span id="m_v_t2">-</span>°<br>
-            θ3 (Internal Incidence): <span id="m_v_t3">-</span>°<br>
-            θc (Critical Angle): <span id="m_v_tc">-</span>°<br>
-            Status: <span id="m_v_status">-</span><br>
-            θ4 (Exit Angle): <span id="m_v_t4">-</span>°
-        </div>
-    </div>
-</div>
+        <section class="panel control-panel">
+          <div class="panel-title"><div><h2>Show / hide the physics</h2><p>Turn on only the layer you are investigating.</p></div></div>
+          <div class="toggle-grid">
+            <label class="toggle"><input id="showBeam" type="checkbox" checked><span>White-light beam</span></label>
+            <label class="toggle"><input id="showRed" type="checkbox" checked><span class="swatch red"></span><span>Red</span></label>
+            <label class="toggle"><input id="showOrange" type="checkbox" checked><span class="swatch orange"></span><span>Orange</span></label>
+            <label class="toggle"><input id="showYellow" type="checkbox" checked><span class="swatch yellow"></span><span>Yellow</span></label>
+            <label class="toggle"><input id="showGreen" type="checkbox" checked><span class="swatch green"></span><span>Green</span></label>
+            <label class="toggle"><input id="showBlue" type="checkbox" checked><span class="swatch blue"></span><span>Blue</span></label>
+            <label class="toggle"><input id="showIndigo" type="checkbox" checked><span class="swatch indigo"></span><span>Indigo</span></label>
+            <label class="toggle"><input id="showViolet" type="checkbox" checked><span class="swatch violet"></span><span>Violet</span></label>
+            <label class="toggle"><input id="showFirstFace" type="checkbox" checked><span>First face</span></label>
+            <label class="toggle"><input id="showSecondFace" type="checkbox" checked><span>Second face</span></label>
+            <label class="toggle"><input id="showAngles" type="checkbox" checked><span>Normals + angles</span></label>
+            <label class="toggle"><input id="showLabels" type="checkbox" checked><span>Scene labels</span></label>
+            <label class="toggle"><input id="showMotion" type="checkbox" checked><span>Light packets</span></label>
+            <label class="toggle"><input id="showMeasurements" type="checkbox"><span>Live measurements</span></label>
+          </div>
+        </section>
 
-<script>
-const canvas = document.getElementById('prismCanvas');
-const ctx = canvas.getContext('2d');
+        <section class="panel control-panel">
+          <div class="panel-title"><div><h2>Measurement window</h2><p>Optional readings for checking your own work.</p></div></div>
+          <div id="measurementLock" class="micro-note">Live readings are hidden. Make a prediction first, then enable the measurement toggle.</div>
+          <div id="readouts" class="readout-grid hidden">
+            <div class="readout"><small>Red / first-face angle</small><strong id="redFirst">--</strong><span>inside the glass</span></div>
+            <div class="readout"><small>Violet / first-face angle</small><strong id="violetFirst">--</strong><span>inside the glass</span></div>
+            <div class="readout"><small>Red / second-face event</small><strong id="redSecond">--</strong><span id="redSecondNote">boundary result</span></div>
+            <div class="readout"><small>Violet / second-face event</small><strong id="violetSecond">--</strong><span id="violetSecondNote">boundary result</span></div>
+            <div class="readout"><small>Colour spread</small><strong id="spread">--</strong><span>exit-angle separation</span></div>
+            <div class="readout"><small>Critical-angle check</small><strong id="critical">--</strong><span>compare at face two</span></div>
+          </div>
+        </section>
 
-function update() {
-    const theta1 = parseFloat(document.getElementById('inc').value) * Math.PI / 180;
-    const A = parseFloat(document.getElementById('apex').value) * Math.PI / 180;
-    const nRed = parseFloat(document.getElementById('nred').value);
-    const nVio = parseFloat(document.getElementById('nvio').value);
-    
-    document.getElementById('v_inc').innerText = document.getElementById('inc').value + '°';
-    document.getElementById('v_apex').innerText = document.getElementById('apex').value + '°';
-    document.getElementById('v_nred').innerText = nRed.toFixed(2);
-    document.getElementById('v_nvio').innerText = nVio.toFixed(2);
+        <section class="panel control-panel challenge-panel">
+          <div class="panel-title"><div><h2>Student investigation</h2><p>Write your reasoning here. The simulator will not fill in the answers.</p></div></div>
+          <div class="challenge">
+            <div class="challenge-card">
+              <h3>Part A / phenomenon sequence</h3>
+              <p>Describe what happens at the beam, the first face, inside the glass, and the second face. Name the expert group or topic you would ask about each part.</p>
+              <textarea class="notes" id="sequenceNotes" placeholder="Your sequence and expert groups..."></textarea>
+            </div>
+            <div class="challenge-card">
+              <h3>Part B / first-face angles</h3>
+              <p>Predict the red and violet refracted angles before turning on live measurements.</p>
+              <div class="answer-row"><input id="redGuess" type="text" placeholder="Red: ___ deg"><input id="violetGuess" type="text" placeholder="Violet: ___ deg"></div>
+            </div>
+            <div class="challenge-card">
+              <h3>Part C / second-face reasoning</h3>
+              <p>Decide what each colour does at the second face and explain how the two colours separate.</p>
+              <textarea class="notes" id="tirNotes" placeholder="Your TIR and dispersion reasoning..."></textarea>
+            </div>
+          </div>
+          <p class="micro-note">Tip: hide all colours except red and violet to compare the two paths cleanly.</p>
+        </section>
+      </aside>
+    </section>
+    <p class="footer-note">Prism Lab is an exploratory model. Angles are measured from the normal at each face.</p>
+  </main>
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  <script>
+    const canvas = document.getElementById("prismCanvas");
+    const ctx = canvas.getContext("2d");
+    const questionValues = { inc: 40, apex: 60, nred: 1.52, nvio: 1.55 };
+    const colors = [
+      { key: "red", lambda: 700, hex: "#ff4d5f", toggle: "showRed" },
+      { key: "orange", lambda: 620, hex: "#ff9f43", toggle: "showOrange" },
+      { key: "yellow", lambda: 570, hex: "#ffe066", toggle: "showYellow" },
+      { key: "green", lambda: 520, hex: "#65e6a1", toggle: "showGreen" },
+      { key: "blue", lambda: 470, hex: "#58b8ff", toggle: "showBlue" },
+      { key: "indigo", lambda: 430, hex: "#7f8cff", toggle: "showIndigo" },
+      { key: "violet", lambda: 400, hex: "#d28cff", toggle: "showViolet" }
+    ];
+    const $ = (id) => document.getElementById(id);
+    const rad = (value) => value * Math.PI / 180;
+    const deg = (value) => value * 180 / Math.PI;
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    const vec = (x, y) => ({ x, y });
+    const add = (a, b) => vec(a.x + b.x, a.y + b.y);
+    const sub = (a, b) => vec(a.x - b.x, a.y - b.y);
+    const mul = (a, s) => vec(a.x * s, a.y * s);
+    const length = (a) => Math.hypot(a.x, a.y);
+    const unit = (a) => { const d = length(a) || 1; return vec(a.x / d, a.y / d); };
+    const rotate = (a, angle) => vec(a.x * Math.cos(angle) - a.y * Math.sin(angle), a.x * Math.sin(angle) + a.y * Math.cos(angle));
+    const dot = (a, b) => a.x * b.x + a.y * b.y;
+    const lerp = (a, b, t) => add(a, mul(sub(b, a), t));
+    const fmt = (value, digits = 1) => Number.isFinite(value) ? value.toFixed(digits) : "--";
 
-    const scale = 260;
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2 + 30;
-    
-    const r_poly = scale / (2 * Math.sin(A/2));
-    const topX = cx;
-    const topY = cy - r_poly * Math.cos(A/2);
-    const leftX = cx - scale / 2;
-    const leftY = cy + r_poly * Math.sin(A/2);
-    const rightX = cx + scale / 2;
-    const rightY = cy + r_poly * Math.sin(A/2);
-
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
-    ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    ctx.beginPath();
-    ctx.moveTo(topX, topY);
-    ctx.lineTo(leftX, leftY);
-    ctx.lineTo(rightX, rightY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    if(document.getElementById('show_labels').checked) {
-        ctx.fillStyle = '#fff';
-        ctx.font = '14px Arial';
-        ctx.fillText('A = ' + document.getElementById('apex').value + '°', topX - 25, topY - 15);
+    function rayIntersection(origin, direction, a, b) {
+      const edge = sub(b, a);
+      const cross = (u, v) => u.x * v.y - u.y * v.x;
+      const denominator = cross(direction, edge);
+      if (Math.abs(denominator) < 1e-8) return null;
+      const delta = sub(a, origin);
+      const t = cross(delta, edge) / denominator;
+      const u = cross(delta, direction) / denominator;
+      if (t < 0 || u < 0 || u > 1) return null;
+      return add(origin, mul(direction, t));
     }
 
-    const hitPct = 0.5;
-    const entryX = topX * (1 - hitPct) + leftX * hitPct;
-    const entryY = topY * (1 - hitPct) + leftY * hitPct;
-    
-    const face1Angle = Math.atan2(leftY - topY, leftX - topX);
-    const norm1Angle = face1Angle + Math.PI / 2;
-
-    if (document.getElementById('show_angles').checked) {
-        ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(entryX - Math.cos(norm1Angle)*60, entryY - Math.sin(norm1Angle)*60);
-        ctx.lineTo(entryX + Math.cos(norm1Angle)*60, entryY + Math.sin(norm1Angle)*60);
-        ctx.stroke();
-        ctx.setLineDash([]);
+    function getSettings() {
+      return { inc: Number($("inc").value), apex: Number($("apex").value), nred: Number($("nred").value), nvio: Number($("nvio").value) };
     }
 
-    const rayStartLen = 150;
-    const inRayAngle = norm1Angle - theta1;
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(entryX - Math.cos(inRayAngle)*rayStartLen, entryY - Math.sin(inRayAngle)*rayStartLen);
-    ctx.lineTo(entryX, entryY);
-    ctx.stroke();
+    function getPhysics(settings, color) {
+      const n = settings.nred + (settings.nvio - settings.nred) * ((700 - color.lambda) / 300);
+      const first = Math.asin(clamp(Math.sin(rad(settings.inc)) / n, -1, 1));
+      const internal = rad(settings.apex) - first;
+      const critical = Math.asin(clamp(1 / n, -1, 1));
+      const tir = internal > critical;
+      const exit = tir ? null : Math.asin(clamp(n * Math.sin(internal), -1, 1));
+      return { n, first, internal, critical, tir, exit };
+    }
 
-    function processRay(n, color, toggleId, mPrefix) {
-        if (!document.getElementById(toggleId).checked) return;
+    function geometry(settings) {
+      const half = rad(settings.apex) / 2;
+      const side = 430;
+      const top = vec(540, 74);
+      const bottomY = top.y + side * Math.cos(half);
+      const left = vec(540 - side * Math.sin(half), bottomY);
+      const right = vec(540 + side * Math.sin(half), bottomY);
+      const entry = lerp(top, left, 0.46);
+      const face1Tangent = unit(sub(left, top));
+      const face2Tangent = unit(sub(right, top));
+      const inward1 = unit(vec(face1Tangent.y, -face1Tangent.x));
+      const inward2 = unit(vec(-face2Tangent.y, face2Tangent.x));
+      return { top, left, right, entry, inward1, inward2, outward2: mul(inward2, -1) };
+    }
 
-        const sinT2 = Math.sin(theta1) / n;
-        if(sinT2 > 1) return;
-        const theta2 = Math.asin(sinT2);
-        const theta3 = A - theta2;
-        const thetaC = Math.asin(1 / n);
+    function updateValues(settings) {
+      $("incValue").textContent = `${fmt(settings.inc)} deg`;
+      $("apexValue").textContent = `${fmt(settings.apex)} deg`;
+      $("nredValue").textContent = settings.nred.toFixed(2);
+      $("nvioValue").textContent = settings.nvio.toFixed(2);
+    }
 
-        document.getElementById(mPrefix + '_t2').innerText = (theta2 * 180 / Math.PI).toFixed(1);
-        document.getElementById(mPrefix + '_t3').innerText = (theta3 * 180 / Math.PI).toFixed(1);
-        document.getElementById(mPrefix + '_tc').innerText = (thetaC * 180 / Math.PI).toFixed(1);
+    function line(a, b, color, width = 2, alpha = 1, dash = []) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dash);
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+      ctx.restore();
+    }
 
-        const intRayAngle = norm1Angle - Math.PI + theta2;
-        
-        const x3 = topX, y3 = topY, x4 = rightX, y4 = rightY;
-        const denominator = (entryX - (entryX + Math.cos(intRayAngle))) * (y3 - y4) - (entryY - (entryY + Math.sin(intRayAngle))) * (x3 - x4);
-        if (denominator === 0) return;
-        
-        const t = ((entryX - x3) * (y3 - y4) - (entryY - y3) * (x3 - x4)) / denominator;
-        const exitX = entryX + t * Math.cos(intRayAngle);
-        const exitY = entryY + t * Math.sin(intRayAngle);
+    function text(value, x, y, size, color, weight = "600", align = "left") {
+      ctx.save();
+      ctx.font = `${weight} ${size}px Inter, system-ui, sans-serif`;
+      ctx.textAlign = align;
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = color;
+      ctx.fillText(value, x, y);
+      ctx.restore();
+    }
 
-        ctx.strokeStyle = color;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(entryX, entryY);
-        ctx.lineTo(exitX, exitY);
-        ctx.stroke();
+    function tag(value, x, y, color) {
+      ctx.save();
+      ctx.font = "800 11px Inter, system-ui, sans-serif";
+      const width = ctx.measureText(value).width + 18;
+      ctx.beginPath();
+      ctx.roundRect(x, y - 13, width, 26, 13);
+      ctx.fillStyle = "rgba(5, 14, 25, 0.88)";
+      ctx.fill();
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.8;
+      ctx.stroke();
+      text(value, x + 9, y, 11, color, "800");
+      ctx.restore();
+    }
 
-        const face2Angle = Math.atan2(rightY - topY, rightX - topX);
-        const norm2Angle = face2Angle - Math.PI / 2;
+    function packet(point, color, radius = 4) {
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 17;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
 
-        if (document.getElementById('show_angles').checked) {
-            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(exitX - Math.cos(norm2Angle)*60, exitY - Math.sin(norm2Angle)*60);
-            ctx.lineTo(exitX + Math.cos(norm2Angle)*60, exitY + Math.sin(norm2Angle)*60);
-            ctx.stroke();
-            ctx.setLineDash([]);
-        }
+    function arc(center, start, end, radius, color) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.8;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, radius, start, end, start > end);
+      ctx.stroke();
+      ctx.restore();
+    }
 
-        if (theta3 > thetaC) {
-            document.getElementById(mPrefix + '_status').innerText = 'TIR (Trapped)';
-            document.getElementById(mPrefix + '_status').style.color = '#ff5252';
-            document.getElementById(mPrefix + '_t4').innerText = 'N/A';
-            
-            const refAngle = norm2Angle + Math.PI - theta3;
-            ctx.beginPath();
-            ctx.moveTo(exitX, exitY);
-            ctx.lineTo(exitX + Math.cos(refAngle)*100, exitY + Math.sin(refAngle)*100);
-            ctx.stroke();
+    function arrow(a, b, color) {
+      line(a, b, color, 1.5, 0.9);
+      const direction = unit(sub(b, a));
+      const left = add(b, rotate(mul(direction, -11), rad(25)));
+      const right = add(b, rotate(mul(direction, -11), -rad(25)));
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(b.x, b.y);
+      ctx.lineTo(left.x, left.y);
+      ctx.lineTo(right.x, right.y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function updateReadouts(redData, violetData) {
+      const visible = $("showMeasurements").checked;
+      $("measurementLock").classList.toggle("hidden", visible);
+      $("readouts").classList.toggle("hidden", !visible);
+      if (!visible) return;
+      if (redData) {
+        $("redFirst").textContent = `${fmt(deg(redData.physics.first))} deg`;
+        $("redSecond").textContent = redData.physics.tir ? "TIR" : `${fmt(deg(redData.physics.exit))} deg`;
+        $("redSecondNote").textContent = redData.physics.tir ? "internally reflected" : "exit angle";
+      } else {
+        $("redFirst").textContent = "hidden";
+        $("redSecond").textContent = "hidden";
+      }
+      if (violetData) {
+        $("violetFirst").textContent = `${fmt(deg(violetData.physics.first))} deg`;
+        $("violetSecond").textContent = violetData.physics.tir ? "TIR" : `${fmt(deg(violetData.physics.exit))} deg`;
+        $("violetSecondNote").textContent = violetData.physics.tir ? "internally reflected" : "exit angle";
+      } else {
+        $("violetFirst").textContent = "hidden";
+        $("violetSecond").textContent = "hidden";
+      }
+      if (redData && violetData && !redData.physics.tir && !violetData.physics.tir) {
+        $("spread").textContent = `${fmt(Math.abs(deg(violetData.physics.exit - redData.physics.exit)))} deg`;
+      } else {
+        $("spread").textContent = "mixed";
+      }
+      const criticalValues = [redData, violetData].filter(Boolean).map((item) => deg(item.physics.critical));
+      $("critical").textContent = criticalValues.length ? `${fmt(Math.min(...criticalValues))} deg min` : "hidden";
+    }
+
+    function draw() {
+      const settings = getSettings();
+      const geo = geometry(settings);
+      const showAngles = $("showAngles").checked;
+      const showLabels = $("showLabels").checked;
+      const showMotion = $("showMotion").checked;
+      const showMeasurements = $("showMeasurements").checked;
+      const now = performance.now() / 1000;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const glow = ctx.createRadialGradient(520, 270, 15, 520, 270, 470);
+      glow.addColorStop(0, "rgba(101, 230, 255, 0.075)");
+      glow.addColorStop(1, "rgba(101, 230, 255, 0)");
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const glass = ctx.createLinearGradient(geo.left.x, geo.left.y, geo.right.x, geo.top.y);
+      glass.addColorStop(0, "rgba(101, 230, 255, 0.18)");
+      glass.addColorStop(0.52, "rgba(170, 211, 255, 0.075)");
+      glass.addColorStop(1, "rgba(192, 132, 252, 0.19)");
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(geo.top.x, geo.top.y);
+      ctx.lineTo(geo.left.x, geo.left.y);
+      ctx.lineTo(geo.right.x, geo.right.y);
+      ctx.closePath();
+      ctx.fillStyle = glass;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(205, 239, 255, 0.75)";
+      ctx.lineWidth = 2;
+      ctx.shadowColor = "rgba(101, 230, 255, 0.28)";
+      ctx.shadowBlur = 22;
+      ctx.stroke();
+      ctx.restore();
+      line(geo.top, geo.left, "rgba(218, 246, 255, 0.62)", 1);
+      line(geo.top, geo.right, "rgba(218, 246, 255, 0.62)", 1);
+      line(geo.left, geo.right, "rgba(218, 246, 255, 0.35)", 1);
+
+      if (showLabels) {
+        tag(`A = ${fmt(settings.apex)} deg`, geo.top.x - 50, geo.top.y - 25, "#ffd166");
+        tag("GLASS PRISM", 492, 307, "rgba(205, 239, 255, 0.85)");
+        text("air", 122, 257, 12, "#7892a8", "700");
+        text("air", 863, 257, 12, "#7892a8", "700");
+      }
+
+      const incidentDirection = rotate(geo.inward1, -rad(settings.inc));
+      const source = add(geo.entry, mul(incidentDirection, -270));
+      if ($("showBeam").checked) {
+        const beam = ctx.createLinearGradient(source.x, source.y, geo.entry.x, geo.entry.y);
+        beam.addColorStop(0, "rgba(255, 255, 255, 0)");
+        beam.addColorStop(0.65, "rgba(255, 255, 255, 0.18)");
+        beam.addColorStop(1, "rgba(255, 255, 255, 0.9)");
+        line(source, geo.entry, beam, 11, 0.16);
+        line(source, geo.entry, "#f9fdff", 2.5, 0.84);
+        arrow(add(geo.entry, mul(incidentDirection, -65)), geo.entry, "#f9fdff");
+      }
+      if (showAngles) {
+        const normalEnd = add(geo.entry, mul(geo.inward1, 88));
+        line(add(geo.entry, mul(geo.inward1, -50)), normalEnd, "#9fd8eb", 1, 0.45, [6, 6]);
+        arc(geo.entry, Math.atan2(geo.inward1.y, geo.inward1.x), Math.atan2(incidentDirection.y, incidentDirection.x), 46, "#65e6ff");
+        if (showLabels) text("i1", geo.entry.x - 58, geo.entry.y - 29, 12, "#65e6ff", "800");
+      }
+
+      let redData = null;
+      let violetData = null;
+      colors.forEach((color) => {
+        if (!$(`${color.toggle}`).checked) return;
+        const physics = getPhysics(settings, color);
+        const firstDirection = rotate(geo.inward1, -physics.first);
+        const exitPoint = rayIntersection(geo.entry, firstDirection, geo.top, geo.right);
+        if (!exitPoint) return;
+        let outsideEnd = null;
+        let reflectedEnd = null;
+        let secondDirection = null;
+        if (physics.tir) {
+          const reflected = sub(firstDirection, mul(geo.outward2, 2 * dot(firstDirection, geo.outward2)));
+          reflectedEnd = rayIntersection(exitPoint, reflected, geo.left, geo.right);
         } else {
-            document.getElementById(mPrefix + '_status').innerText = 'Refracted Out';
-            document.getElementById(mPrefix + '_status').style.color = '#69f0ae';
-            const theta4 = Math.asin(n * Math.sin(theta3));
-            document.getElementById(mPrefix + '_t4').innerText = (theta4 * 180 / Math.PI).toFixed(1);
-
-            const outRayAngle = norm2Angle + theta4;
-            ctx.beginPath();
-            ctx.moveTo(exitX, exitY);
-            ctx.lineTo(exitX + Math.cos(outRayAngle)*150, exitY + Math.sin(outRayAngle)*150);
-            ctx.stroke();
+          secondDirection = rotate(geo.outward2, physics.exit);
+          outsideEnd = add(exitPoint, mul(secondDirection, 180));
         }
+        const path = { color, physics, firstDirection, exitPoint, outsideEnd, reflectedEnd, secondDirection };
+        if (color.key === "red") redData = path;
+        if (color.key === "violet") violetData = path;
+        const emphasized = color.key === "red" || color.key === "violet";
+        if ($("showFirstFace").checked) line(geo.entry, exitPoint, color.hex, emphasized ? 3.2 : 2.1, emphasized ? 1 : 0.78);
+        if ($("showSecondFace").checked && (outsideEnd || reflectedEnd)) line(exitPoint, outsideEnd || reflectedEnd, color.hex, emphasized ? 3.2 : 2.1, emphasized ? 1 : 0.78);
+        if (showMotion) {
+          const segments = [];
+          if ($("showFirstFace").checked) segments.push([geo.entry, exitPoint]);
+          if ($("showSecondFace").checked && (outsideEnd || reflectedEnd)) segments.push([exitPoint, outsideEnd || reflectedEnd]);
+          segments.forEach((segment, index) => {
+            const phase = (now * 0.23 + color.lambda * 0.0007 + index * 0.38) % 1;
+            packet(lerp(segment[0], segment[1], phase), color.hex, emphasized ? 4 : 3);
+          });
+        }
+        if (showAngles && emphasized) {
+          const normalEnd = add(exitPoint, mul(geo.outward2, 73));
+          line(add(exitPoint, mul(geo.outward2, -36)), normalEnd, "#b4d9eb", 1, 0.36, [6, 6]);
+          arc(exitPoint, Math.atan2(geo.outward2.y, geo.outward2.x), Math.atan2(firstDirection.y, firstDirection.x), 38, color.hex);
+          if (showLabels) text("i2", exitPoint.x + 27, exitPoint.y - 28, 11, color.hex, "800");
+          if (!physics.tir && secondDirection) arc(exitPoint, Math.atan2(geo.outward2.y, geo.outward2.x), Math.atan2(secondDirection.y, secondDirection.x), 52, color.hex);
+        }
+      });
+
+      if (showLabels && $("showSecondFace").checked) {
+        tag("second face", geo.right.x + 21, geo.right.y - 210, "#ffd166");
+        tag("first face", geo.left.x - 110, geo.left.y - 210, "#65e6ff");
+      }
+      if (showLabels && showMeasurements && redData && violetData) {
+        tag(redData.physics.tir ? "red: internally reflected" : "red: refracted out", 58, 530, redData.color.hex);
+        tag(violetData.physics.tir ? "violet: internally reflected" : "violet: refracted out", 58, 565, violetData.color.hex);
+      }
+      updateReadouts(redData, violetData);
+      updateValues(settings);
+      requestAnimationFrame(draw);
     }
 
-    processRay(nRed, '#ff5252', 'show_red', 'm_r');
-    processRay(nVio, '#e040fb', 'show_vio', 'm_v');
-}
-
-document.querySelectorAll('input').forEach(el => el.addEventListener('input', update));
-window.onload = update;
-</script>
+    function setQuestionValues() {
+      Object.entries(questionValues).forEach(([id, value]) => { $(id).value = value; });
+    }
+    function resetWorkspace() {
+      setQuestionValues();
+      ["sequenceNotes", "redGuess", "violetGuess", "tirNotes"].forEach((id) => { $(id).value = ""; });
+      $("showMeasurements").checked = false;
+    }
+    $("questionBtn").addEventListener("click", setQuestionValues);
+    $("resetBtn").addEventListener("click", resetWorkspace);
+    draw();
+  </script>
 </body>
 </html>
