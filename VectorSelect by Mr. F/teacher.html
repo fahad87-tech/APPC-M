@@ -940,7 +940,7 @@
 
                 <!-- Question Progress Strip -->
                 <div id="lc-progress-strip" class="hidden bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2.5 shadow-md">
-                  <div class="flex items-center justify-between text-xs font-bold uppercase tracking-wider">
+                  <div class="flex items-center justify-between text-sm font-bold uppercase tracking-wider">
                     <span class="text-slate-400">Class Progress</span>
                     <span id="lc-progress-text" class="text-emerald-400 font-mono">0 / 0 answered</span>
                   </div>
@@ -951,35 +951,35 @@
 
                   <!-- Live Choice Breakdown (A, B, C, D) -->
                   <div id="lc-distractor-box" class="pt-2 border-t border-slate-800 space-y-1.5">
-                    <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                    <div class="flex items-center justify-between text-sm font-bold uppercase tracking-wider text-slate-400">
                       <span>Live Choices</span>
                       <span id="lc-distractor-summary" class="font-mono text-cyan-300">0 locked</span>
                     </div>
                     <div class="grid grid-cols-4 gap-1.5 text-center font-mono">
                       <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5">
-                        <div class="text-[10px] font-bold text-slate-400">A</div>
-                        <div id="lc-dist-a-val" class="text-xs font-black text-white">0%</div>
+                        <div class="text-xs font-bold text-slate-400">A</div>
+                        <div id="lc-dist-a-val" class="text-sm font-black text-white">0%</div>
                         <div class="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
                           <div id="lc-dist-a-bar" class="h-full bg-blue-500 transition-all duration-300" style="width:0%"></div>
                         </div>
                       </div>
                       <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5">
-                        <div class="text-[10px] font-bold text-slate-400">B</div>
-                        <div id="lc-dist-b-val" class="text-xs font-black text-white">0%</div>
+                        <div class="text-xs font-bold text-slate-400">B</div>
+                        <div id="lc-dist-b-val" class="text-sm font-black text-white">0%</div>
                         <div class="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
                           <div id="lc-dist-b-bar" class="h-full bg-emerald-500 transition-all duration-300" style="width:0%"></div>
                         </div>
                       </div>
                       <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5">
-                        <div class="text-[10px] font-bold text-slate-400">C</div>
-                        <div id="lc-dist-c-val" class="text-xs font-black text-white">0%</div>
+                        <div class="text-xs font-bold text-slate-400">C</div>
+                        <div id="lc-dist-c-val" class="text-sm font-black text-white">0%</div>
                         <div class="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
                           <div id="lc-dist-c-bar" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div>
                         </div>
                       </div>
                       <div class="bg-slate-900 border border-slate-800 rounded-lg p-1.5">
-                        <div class="text-[10px] font-bold text-slate-400">D</div>
-                        <div id="lc-dist-d-val" class="text-xs font-black text-white">0%</div>
+                        <div class="text-xs font-bold text-slate-400">D</div>
+                        <div id="lc-dist-d-val" class="text-sm font-black text-white">0%</div>
                         <div class="h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
                           <div id="lc-dist-d-bar" class="h-full bg-purple-500 transition-all duration-300" style="width:0%"></div>
                         </div>
@@ -996,8 +996,8 @@
                 <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-md">
                   <div class="flex items-center justify-between">
                     <div>
-                      <span class="text-xs uppercase font-extrabold text-slate-400 block">Instructor Key</span>
-                      <span id="lc-answer-status" class="text-[11px] text-slate-500 italic">🔒 Hidden on Projector</span>
+                    <span class="text-sm uppercase font-extrabold text-slate-400 block">Instructor Key</span>
+                      <span id="lc-answer-status" class="text-xs text-slate-500 italic">🔒 Hidden on Projector</span>
                     </div>
                     <button onclick="toggleTeacherAnswerReveal()" id="btn-toggle-reveal" class="px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-600/10 hover:bg-indigo-600/20 text-xs font-bold text-indigo-300 transition">
                       👁️ Reveal Key
@@ -1007,23 +1007,23 @@
                   <!-- Hidden Answer Content -->
                   <div id="lc-answer-content" class="hidden pt-3 border-t border-slate-800 space-y-2">
                     <div class="flex items-center gap-3">
-                      <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Correct:</span>
+                      <span class="text-sm font-bold uppercase tracking-wider text-emerald-400">Correct:</span>
                       <span id="lc-key-text" class="text-xl font-black text-white px-3 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 font-mono"></span>
                     </div>
-                    <div class="text-xs text-slate-300 leading-relaxed font-sans bg-slate-900 p-3 rounded-xl border border-slate-800 max-h-48 overflow-y-auto" id="lc-rationale-text"></div>
+                    <div class="text-sm text-slate-300 leading-relaxed font-sans bg-slate-900 p-3 rounded-xl border border-slate-800 max-h-48 overflow-y-auto" id="lc-rationale-text"></div>
                   </div>
                 </div>
 
                 <!-- Wayground-Style Discussion Panel (In Side Dock) -->
                 <div id="lc-discussion-panel" class="hidden bg-slate-950 border border-indigo-500/40 rounded-2xl p-4 space-y-3 shadow-md">
                   <div class="flex items-center justify-between gap-1">
-                    <span class="text-xs font-black uppercase tracking-wider text-indigo-400">Class Response</span>
-                    <button onclick="openApClassroomModal()" id="lc-discussion-stats-btn" class="pressable px-2.5 py-1 rounded-lg bg-indigo-950/80 border border-indigo-500/40 hover:border-indigo-400 text-[11px] font-black text-indigo-300 hover:text-white transition flex items-center gap-1.5 shadow-sm group cursor-pointer" title="Click to view AP Classroom Right/Wrong student breakdown">
+                    <span class="text-sm font-black uppercase tracking-wider text-indigo-400">Class Response</span>
+                    <button onclick="openApClassroomModal()" id="lc-discussion-stats-btn" class="pressable px-2.5 py-1 rounded-lg bg-indigo-950/80 border border-indigo-500/40 hover:border-indigo-400 text-xs font-black text-indigo-300 hover:text-white transition flex items-center gap-1.5 shadow-sm group cursor-pointer" title="Click to view AP Classroom Right/Wrong student breakdown">
                       <span id="lc-discussion-stats">0/0 correct</span>
-                      <span class="text-[10px] text-cyan-400 font-bold underline group-hover:text-cyan-300">📊 AP Breakdown</span>
+                      <span class="text-xs text-cyan-400 font-bold underline group-hover:text-cyan-300">📊 AP Breakdown</span>
                     </button>
                   </div>
-                  <label class="flex items-center gap-2 cursor-pointer text-[11px] text-slate-300 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg hover:border-slate-700">
+                  <label class="flex items-center gap-2 cursor-pointer text-xs text-slate-300 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded-lg hover:border-slate-700">
                     <input type="checkbox" id="lc-anonymize-toggle" onchange="toggleAnonymizeDiscussion()" class="rounded border-slate-700 bg-slate-950 text-indigo-600 focus:ring-0 text-xs">
                     <span>👁️ Hide Names</span>
                   </label>
@@ -1157,6 +1157,77 @@
     let lastPublishedTimerRemaining = null;
     let lcTimerPaused = false;
     let isAnswerRevealed = false;
+    // Teacher-only UI state must be keyed by question. The answer rows are
+    // already persisted per question in Supabase; this cache keeps navigation
+    // from making discussion/reveal state appear to belong to another question.
+    const liveQuestionUiState = {};
+
+    function getLiveQuestionUiState(index = currentLiveIndex) {
+      if (!liveQuestionUiState[index]) {
+        liveQuestionUiState[index] = {
+          discussionActive: false,
+          answerRevealed: false,
+          revealedAnswer: "",
+          revealedExplanation: "",
+          questionStartedAt: null,
+          timerRemaining: null,
+          timerPaused: false
+        };
+      }
+      return liveQuestionUiState[index];
+    }
+
+    function saveCurrentLiveQuestionState() {
+      if (!currentLiveQuiz || !currentLiveQuiz.questions[currentLiveIndex]) return;
+      const state = getLiveQuestionUiState();
+      state.discussionActive = Boolean(currentLiveAssignment?.discussion_active);
+      state.answerRevealed = Boolean(isAnswerRevealed);
+      state.revealedAnswer = state.answerRevealed
+        ? (currentLiveAssignment?.revealed_answer || currentLiveQuiz.questions[currentLiveIndex].correct_answer || "")
+        : "";
+      state.revealedExplanation = state.answerRevealed
+        ? (currentLiveAssignment?.revealed_explanation || currentLiveQuiz.questions[currentLiveIndex].explanation || "")
+        : "";
+      state.questionStartedAt = currentLiveAssignment?.question_started_at || state.questionStartedAt;
+      state.timerRemaining = Number.isFinite(Number(lcTimerRemaining)) ? lcTimerRemaining : state.timerRemaining;
+      state.timerPaused = Boolean(lcTimerPaused);
+    }
+
+    function applyLiveAnswerKeyUi(state) {
+      isAnswerRevealed = Boolean(state?.answerRevealed);
+      const content = document.getElementById("lc-answer-content");
+      const status = document.getElementById("lc-answer-status");
+      const btn = document.getElementById("btn-toggle-reveal");
+      const keyEl = document.getElementById("lc-key-text");
+      const ratEl = document.getElementById("lc-rationale-text");
+      const q = currentLiveQuiz?.questions?.[currentLiveIndex];
+      const answer = state?.revealedAnswer || q?.correct_answer || "Pending";
+      const explanation = state?.revealedExplanation || q?.explanation || "No rationale recorded.";
+
+      if (keyEl) keyEl.textContent = answer;
+      if (ratEl) ratEl.textContent = explanation;
+      if (content) content.classList.toggle("hidden", !isAnswerRevealed);
+      if (status) status.textContent = isAnswerRevealed ? "🔓 Revealed" : "🔒 Hidden (Click reveal when ready to discuss)";
+      if (btn) {
+        btn.textContent = isAnswerRevealed ? "🔒 Hide Key" : "👁️ Reveal Key";
+        btn.className = isAnswerRevealed
+          ? "px-3 py-1.5 rounded-xl border border-emerald-500/40 bg-emerald-600/20 text-xs font-bold text-emerald-300 transition"
+          : "px-3 py-1.5 rounded-xl border border-indigo-500/40 bg-indigo-600/10 hover:bg-indigo-600/20 text-xs font-bold text-indigo-300 transition";
+      }
+    }
+
+    function resetLiveQuestionUiState(index) {
+      liveQuestionUiState[index] = {
+        discussionActive: false,
+        answerRevealed: false,
+        revealedAnswer: "",
+        revealedExplanation: "",
+        questionStartedAt: null,
+        timerRemaining: null,
+        timerPaused: false
+      };
+      return liveQuestionUiState[index];
+    }
 
     // ============================================================================
     // AUTH (PASSCODE & SUPABASE)
@@ -2377,7 +2448,16 @@
       await ensureQuizKeysHydrated(currentLiveQuiz);
 
       currentLiveIndex = assignment.current_question_index || 0;
-      isAnswerRevealed = false;
+      Object.keys(liveQuestionUiState).forEach(key => delete liveQuestionUiState[key]);
+      const initialUiState = getLiveQuestionUiState(currentLiveIndex);
+      initialUiState.discussionActive = Boolean(assignment.discussion_active);
+      initialUiState.answerRevealed = Boolean(assignment.answer_revealed);
+      initialUiState.revealedAnswer = assignment.revealed_answer || "";
+      initialUiState.revealedExplanation = assignment.revealed_explanation || "";
+      initialUiState.questionStartedAt = assignment.question_started_at || null;
+      initialUiState.timerRemaining = assignment.timer_remaining_seconds;
+      initialUiState.timerPaused = Boolean(assignment.timer_paused);
+      isAnswerRevealed = initialUiState.answerRevealed;
       lcTimerPaused = false;
 
       document.getElementById("lc-quiz-title").textContent = assignment.assessment_title || assignment.title || (currentLiveQuiz ? `${currentLiveQuiz.subject} • ${currentLiveQuiz.title}` : 'Live Assessment');
@@ -2632,11 +2712,7 @@
       document.getElementById("lc-key-text").textContent = q.correct_answer || 'Pending';
       document.getElementById("lc-rationale-text").textContent = q.explanation || "No rationale recorded.";
 
-      // Re-hide answer key when moving questions (projector protection)
-      isAnswerRevealed = false;
-      document.getElementById("lc-answer-content").classList.add("hidden");
-      document.getElementById("lc-answer-status").textContent = "🔒 Hidden (Click reveal when ready to discuss)";
-      document.getElementById("btn-toggle-reveal").textContent = "👁️ Reveal Answer Key";
+      applyLiveAnswerKeyUi(getLiveQuestionUiState());
 
       document.getElementById("lc-btn-prev").disabled = currentLiveIndex === 0;
       const discPrev = document.getElementById("lc-disc-btn-prev");
@@ -2807,6 +2883,10 @@
       }
 
       isAnswerRevealed = !isAnswerRevealed;
+      const liveState = getLiveQuestionUiState();
+      liveState.answerRevealed = isAnswerRevealed;
+      liveState.revealedAnswer = isAnswerRevealed ? correctKey : "";
+      liveState.revealedExplanation = isAnswerRevealed ? explanationText : "";
       const content = document.getElementById("lc-answer-content");
       const status = document.getElementById("lc-answer-status");
       const btn = document.getElementById("btn-toggle-reveal");
@@ -3085,9 +3165,13 @@
     async function lcPrevQuestion() {
       resetLcNextButton();
       if (currentLiveIndex > 0) {
+        saveCurrentLiveQuestionState();
+        const previousIndex = currentLiveIndex;
+        const previousAssignmentState = { ...currentLiveAssignment };
         clearInterval(lcTimerInterval);
         currentLiveIndex--;
         lastAllAnsweredNotifiedIdx = -1;
+        const previousUiState = getLiveQuestionUiState(currentLiveIndex);
         hideDiscussionPanel(true);
         renderLiveControl();
 
@@ -3095,7 +3179,10 @@
         const nowIso = getServerNowIso();
         lcTimerRemaining = perQ;
         lcTimerPaused = false;
-        isAnswerRevealed = false;
+        previousUiState.questionStartedAt = nowIso;
+        previousUiState.timerRemaining = perQ;
+        previousUiState.timerPaused = false;
+        applyLiveAnswerKeyUi(previousUiState);
         updateLcPauseUI();
         updateLcTimerDisplay();
 
@@ -3111,7 +3198,7 @@
         currentLiveAssignment.paused_remaining_seconds = null;
 
         // Set fresh server timestamp so students' per-question timers restart
-        await setAssignmentTimerState(currentLiveAssignment.join_code, {
+        const result = await setAssignmentTimerState(currentLiveAssignment.join_code, {
           current_question_index: currentLiveIndex,
           question_started_at: nowIso,
           discussion_active: false,
@@ -3124,7 +3211,21 @@
           timer_paused: false,
           paused_remaining_seconds: null
         });
+        if (!result || result.success !== true || result.source !== "supabase") {
+          currentLiveIndex = previousIndex;
+          Object.assign(currentLiveAssignment, previousAssignmentState);
+          renderLiveControl();
+          showTeacherToast("Previous question not synchronized", result?.error?.message || "Students remain on the current question.", "coral", 5000);
+          await setupQuestionTimer();
+          return;
+        }
 
+        const participants = await fetchParticipantsByCode(currentLiveAssignment.join_code);
+        const answers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, currentLiveIndex);
+        renderLiveProgress(participants, answers);
+        if (previousUiState.discussionActive) {
+          await showDiscussionPanel(answers || [], false);
+        }
         await setupQuestionTimer();
         showTeacherToast("Previous Question Loaded", `Returned to Question ${currentLiveIndex + 1}`, "copper", 2000);
       }
@@ -3161,6 +3262,7 @@
       clearInterval(lcTimerInterval);
 
       const prevIndex = currentLiveIndex;
+      saveCurrentLiveQuestionState();
       const previousAssignmentState = { ...currentLiveAssignment };
       currentLiveIndex++;
       lastAllAnsweredNotifiedIdx = -1;
@@ -3184,12 +3286,18 @@
         Object.assign(currentLiveAssignment, previousAssignmentState);
         renderLiveControl();
         showTeacherToast("Clock synchronization failed", "Students remain on the previous question.", "coral", 5000);
+        const rollbackState = getLiveQuestionUiState(prevIndex);
+        if (rollbackState.discussionActive) {
+          const rollbackAnswers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, prevIndex);
+          await showDiscussionPanel(rollbackAnswers || [], false);
+        }
         await setupQuestionTimer();
         return;
       }
       const nowIso = getServerNowIso();
       lcTimerRemaining = perQ;
       lcTimerPaused = false;
+      resetLiveQuestionUiState(currentLiveIndex);
       isAnswerRevealed = false;
       updateLcPauseUI();
       updateLcTimerDisplay();
@@ -3224,8 +3332,13 @@
       if (!result || result.success !== true || result.source !== "supabase") {
         currentLiveIndex = prevIndex;
         Object.assign(currentLiveAssignment, previousAssignmentState);
-        hideDiscussionPanel(false);
+        hideDiscussionPanel(true);
         renderLiveControl();
+        const rollbackState = getLiveQuestionUiState(prevIndex);
+        if (rollbackState.discussionActive) {
+          const rollbackAnswers = await fetchLiveAnswersByCode(currentLiveAssignment.join_code, prevIndex);
+          await showDiscussionPanel(rollbackAnswers || [], false);
+        }
         showTeacherToast("Next question not synchronized", result?.error?.message || "Students remain on the previous question.", "coral", 5000);
         await setupQuestionTimer();
         return;
@@ -3688,9 +3801,16 @@
         }
       }
 
-      // If autoReveal requested and key is present, reveal official key; otherwise keep hidden but always open discussion!
-      if (autoReveal && String(correctKey || "").trim()) {
+      // A normal discussion reveals the key. A revisit restores the question's
+      // own saved reveal state instead of inheriting the state of another one.
+      const savedState = getLiveQuestionUiState();
+      const shouldReveal = (autoReveal && String(correctKey || "").trim())
+        || (!autoReveal && savedState.answerRevealed);
+      if (shouldReveal) {
         isAnswerRevealed = true;
+        savedState.answerRevealed = true;
+        savedState.revealedAnswer = correctKey;
+        savedState.revealedExplanation = explanationText;
         const content = document.getElementById("lc-answer-content");
         const status = document.getElementById("lc-answer-status");
         const btn = document.getElementById("btn-toggle-reveal");
@@ -3706,6 +3826,9 @@
         }
       } else {
         isAnswerRevealed = false;
+        savedState.answerRevealed = false;
+        savedState.revealedAnswer = "";
+        savedState.revealedExplanation = "";
         const content = document.getElementById("lc-answer-content");
         const status = document.getElementById("lc-answer-status");
         const btn = document.getElementById("btn-toggle-reveal");
@@ -3742,6 +3865,10 @@
       currentLiveAssignment.answer_revealed = isAnswerRevealed;
       currentLiveAssignment.revealed_answer = isAnswerRevealed ? correctKey : "";
       currentLiveAssignment.revealed_explanation = isAnswerRevealed ? explanationText : "";
+      savedState.discussionActive = true;
+      savedState.answerRevealed = isAnswerRevealed;
+      savedState.revealedAnswer = isAnswerRevealed ? correctKey : "";
+      savedState.revealedExplanation = isAnswerRevealed ? explanationText : "";
 
       // Render distribution and students
       renderDiscussionContent(answers);
@@ -3767,6 +3894,13 @@
     }
 
     async function hideDiscussionPanel(skipServerUpdate = false) {
+      if (!skipServerUpdate) {
+        const state = getLiveQuestionUiState();
+        state.discussionActive = false;
+        state.answerRevealed = false;
+        state.revealedAnswer = "";
+        state.revealedExplanation = "";
+      }
       document.getElementById("lc-discussion-panel").classList.add("hidden");
       document.getElementById("lc-btn-prev").classList.remove("hidden");
       resetLcNextButton();
