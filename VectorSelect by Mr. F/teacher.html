@@ -612,6 +612,9 @@
             <p id="roster-meta" class="text-sm text-slate-400"></p>
           </div>
           <div class="flex items-center gap-3">
+            <button onclick="downloadExcel()" class="pressable px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-600 border border-emerald-500/40 text-xs font-bold text-emerald-100 transition flex items-center gap-1.5" title="Open this score report in Microsoft Excel">
+              <span>📊</span> Export Excel
+            </button>
             <button onclick="downloadCSV()" class="pressable px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-bold text-slate-200 transition flex items-center gap-1.5">
               <span>📥</span> Export CSV
             </button>
@@ -2347,6 +2350,102 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    }
+
+    function downloadExcel() {
+      if (!currentRosterSubmissions || currentRosterSubmissions.length === 0) {
+        alert("No submissions available to export.");
+        return;
+      }
+
+      const assignment = currentRosterAssignment || {};
+      const escapeHtml = value => String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+      const safeFilePart = value => String(value || "assignment")
+        .trim()
+        .replace(/[^a-zA-Z0-9]+/g, "_")
+        .replace(/^_+|_+$/g, "")
+        .slice(0, 80) || "assignment";
+      const formatDate = value => {
+        if (!value) return "";
+        const date = new Date(value);
+        return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+      };
+
+      const rows = currentRosterSubmissions.map((sub, idx) => {
+        const score = Number(sub.score) || 0;
+        const total = Number(sub.total_questions) || 0;
+        const percentage = Number(sub.percentage ?? sub.score_percentage ?? (total ? (score / total) * 100 : 0));
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>${escapeHtml(sub.student_name || "Unnamed Student")}</td>
+            <td>${escapeHtml(sub.class_period || assignment.class_period || "General")}</td>
+            <td>${score}</td>
+            <td>${total}</td>
+            <td>${percentage}%</td>
+            <td>${Number(sub.time_spent_seconds) || 0}</td>
+            <td>${Number(sub.tab_switch_count) || 0}</td>
+            <td>${escapeHtml(formatDate(sub.submitted_at))}</td>
+          </tr>`;
+      }).join("");
+
+      const assignmentName = assignment.assessment_title || assignment.title || "Assignment";
+      const reportHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${escapeHtml(assignmentName)} - Student Scores</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #172033; }
+    h1 { font-size: 20px; margin-bottom: 4px; }
+    .meta { color: #4b5563; margin-bottom: 18px; }
+    table { border-collapse: collapse; width: 100%; }
+    th { background: #1f4e78; color: white; font-weight: bold; }
+    th, td { border: 1px solid #b8c2cc; padding: 7px 9px; text-align: left; }
+    td:nth-child(1), td:nth-child(4), td:nth-child(5), td:nth-child(6), td:nth-child(7), td:nth-child(8) { text-align: center; }
+  </style>
+</head>
+<body>
+  <h1>${escapeHtml(assignmentName)} - Student Scores</h1>
+  <div class="meta">
+    Join Code: ${escapeHtml(assignment.join_code || "")}
+    &nbsp;|&nbsp; Class: ${escapeHtml(assignment.class_period || "General")}
+    &nbsp;|&nbsp; Exported: ${escapeHtml(new Date().toLocaleString())}
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Rank</th>
+        <th>Student Name</th>
+        <th>Class Period</th>
+        <th>Score</th>
+        <th>Total Questions</th>
+        <th>Accuracy %</th>
+        <th>Time (seconds)</th>
+        <th>Tab Switches</th>
+        <th>Submitted At</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+</body>
+</html>`;
+
+      const blob = new Blob([reportHtml], { type: "application/vnd.ms-excel;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `VectorSelect_${safeFilePart(assignmentName)}_Student_Scores.xls`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showTeacherToast("Excel report exported", `${currentRosterSubmissions.length} student scores written`, "lime", 3000);
     }
 
     // ============================================================================
