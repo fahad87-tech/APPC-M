@@ -1058,9 +1058,10 @@
   ];
 
   class MazeBattleArena {
-    constructor(canvas, isPreview = false) {
+    constructor(canvas, isPreview = false, loadout = null) {
       this.canvas = canvas;
       this.isPreview = isPreview;
+      this.loadout = loadout;
       this.animId = null;
       this.time = 0;
       this.shake = 0;
@@ -1254,6 +1255,28 @@
         bot.y = bSpawn.y;
         bot.invulnerableTimer = 120;
       });
+
+      // Apply Academic Performance Loadout (Shields, Ammo, Powerups earned from correct answers)
+      if (this.loadout) {
+        if (this.loadout.health !== undefined) {
+          this.player.health = this.loadout.health;
+          this.player.maxHealth = Math.max(this.player.maxHealth, this.loadout.health);
+        }
+        if (this.loadout.shield !== undefined) this.player.shield = this.loadout.shield;
+        if (this.loadout.ammo !== undefined) {
+          this.player.ammo = this.loadout.ammo;
+          this.player.maxAmmo = Math.max(this.player.maxAmmo, this.loadout.ammo);
+        }
+        if (this.loadout.powerup) {
+          this.player.powerup = this.loadout.powerup;
+          this.player.powerupTimer = this.loadout.powerupTimer || 360;
+        }
+        if (this.loadout.bonusText) {
+          setTimeout(() => {
+            this.floatingTexts.emit(this.player.x, this.player.y - 25, this.loadout.bonusText, '#fbbf24', 13);
+          }, 300);
+        }
+      }
 
       const loop = () => {
         this.update();
@@ -2438,8 +2461,8 @@
       return arena;
     },
 
-    createMazeBattleGame(canvas) {
-      const arena = new MazeBattleArena(canvas, false);
+    createMazeBattleGame(canvas, loadout = null) {
+      const arena = new MazeBattleArena(canvas, false, loadout);
       arena.start();
       return arena;
     }

@@ -663,8 +663,8 @@
 
           <input type="hidden" id="teacher-game-mode" value="wayarena">
 
-          <!-- Mini-Game Parameters: Master Clock Duration & Questions per burst -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/70 border border-slate-800 rounded-2xl p-4">
+          <!-- Mini-Game Parameters: Master Clock Duration, Questions per burst & Action Duration -->
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-950/70 border border-slate-800 rounded-2xl p-4">
             <div>
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Master Game Duration</label>
               <select id="teacher-game-duration" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-400">
@@ -676,18 +676,30 @@
                 <option value="20">20 Minutes</option>
                 <option value="30">30 Minutes</option>
               </select>
-              <span class="text-[11px] text-slate-400 mt-1 block">Students play bursts until overall clock finishes at 0:00.</span>
+              <span class="text-[11px] text-slate-400 mt-1 block">Master quiz countdown clock.</span>
             </div>
 
             <div>
-              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Questions Per Mini-Game Burst</label>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Questions Per Burst</label>
               <div class="grid grid-cols-3 gap-2">
                 <button type="button" onclick="setTeacherQuestionsPerRound(3)" id="btn-tq-3" class="py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300 hover:border-slate-700 transition">3 Qs</button>
                 <button type="button" onclick="setTeacherQuestionsPerRound(4)" id="btn-tq-4" class="py-2.5 rounded-xl border-2 border-cyan-400 bg-cyan-950/40 text-xs font-black text-cyan-200 shadow-sm transition">4 Qs</button>
                 <button type="button" onclick="setTeacherQuestionsPerRound(6)" id="btn-tq-6" class="py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300 hover:border-slate-700 transition">6 Qs</button>
               </div>
               <input type="hidden" id="teacher-questions-per-round" value="4">
-              <span class="text-[11px] text-cyan-300/80 mt-1 block" id="teacher-round-hint">4 questions solved unlocks each 25s neon maze combat burst.</span>
+              <span class="text-[11px] text-cyan-300/80 mt-1 block" id="teacher-round-hint">4 questions solved unlocks arena action phase.</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Action Phase Playtime</label>
+              <select id="teacher-action-duration" onchange="onTeacherActionDurationChange()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                <option value="15">15 Seconds (Quick Burst)</option>
+                <option value="20" selected>20 Seconds (Standard - Recommended)</option>
+                <option value="30">30 Seconds (Extended Battle)</option>
+                <option value="45">45 Seconds (Long Skirmish)</option>
+                <option value="60">60 Seconds (Full 1-Min Duel)</option>
+              </select>
+              <span class="text-[11px] text-slate-400 mt-1 block">How long students play mini-game per round.</span>
             </div>
           </div>
 
@@ -1065,18 +1077,30 @@
                 <span class="px-3 py-1 rounded-lg bg-slate-800 text-xs font-bold text-slate-300">Select a class</span>
               </div>
 
-              <!-- Game Duration Dropdown (The User's Core Question!) -->
-              <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Game duration</label>
-                <select id="studio-game-duration" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
-                  <option value="3">3 minutes</option>
-                  <option value="5" selected>5 minutes</option>
-                  <option value="7">7 minutes</option>
-                  <option value="10">10 minutes</option>
-                  <option value="15">15 minutes</option>
-                  <option value="20">20 minutes</option>
-                  <option value="30">30 minutes</option>
-                </select>
+              <!-- Game Duration & Action Burst Dropdowns -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Master Clock</label>
+                  <select id="studio-game-duration" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                    <option value="3">3 minutes</option>
+                    <option value="5" selected>5 minutes</option>
+                    <option value="7">7 minutes</option>
+                    <option value="10">10 minutes</option>
+                    <option value="15">15 minutes</option>
+                    <option value="20">20 minutes</option>
+                    <option value="30">30 minutes</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-1.5">Action Burst Time</label>
+                  <select id="studio-action-duration" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                    <option value="15">15 seconds</option>
+                    <option value="20" selected>20 seconds</option>
+                    <option value="30">30 seconds</option>
+                    <option value="45">45 seconds</option>
+                    <option value="60">60 seconds</option>
+                  </select>
+                </div>
               </div>
 
               <!-- Questions per round (Segmented Switch) -->
@@ -2327,15 +2351,18 @@
 
     async function handleStartGamifiedSession() {
       const durationSelect = document.getElementById("studio-game-duration");
+      const actionSelect = document.getElementById("studio-action-duration");
       const durationMins = parseInt(durationSelect ? durationSelect.value : "5", 10) || 5;
+      const actionSecs = parseInt(actionSelect ? actionSelect.value : "20", 10) || 20;
       const accommodations = document.getElementById("studio-accommodations") ? document.getElementById("studio-accommodations").checked : true;
 
       closeGameStudioModal();
 
       await handleCreateAssignment({
         quiz_mode: "student_led",
-        game_mode: studioSelectedGame || "tug_of_war",
+        game_mode: studioSelectedGame || "wayarena",
         game_duration_minutes: durationMins,
+        action_phase_seconds: actionSecs,
         time_limit_minutes: durationMins,
         questions_per_round: studioQuestionsPerRound || 4,
         show_answer_timing: studioShowAnswerMode || "immediate",
@@ -2412,15 +2439,23 @@
       updateTeacherRoundHint(gameId, n);
     }
 
+    function onTeacherActionDurationChange() {
+      const gameId = document.getElementById("teacher-game-mode")?.value || "wayarena";
+      const qRound = parseInt(document.getElementById("teacher-questions-per-round")?.value || "4", 10);
+      updateTeacherRoundHint(gameId, qRound);
+    }
+
     function updateTeacherRoundHint(gameId, n) {
       const hint = document.getElementById("teacher-round-hint");
       if (!hint) return;
+      const durationEl = document.getElementById("teacher-action-duration") || document.getElementById("studio-action-duration");
+      const secs = durationEl ? (parseInt(durationEl.value, 10) || 20) : 20;
       if (gameId === "wayarena") {
-        hint.textContent = `${n} questions solved unlocks each 25s neon maze combat burst.`;
+        hint.textContent = `${n} questions solved unlocks each ${secs}s neon maze combat burst.`;
       } else if (gameId === "tug_of_war") {
-        hint.textContent = `${n} questions solved unlocks each 15s beach tug of war pull.`;
+        hint.textContent = `${n} questions solved unlocks each ${secs}s beach tug of war pull.`;
       } else if (gameId === "mastery_peak") {
-        hint.textContent = `${n} questions solved unlocks each 15s alpine summit ascent sprint.`;
+        hint.textContent = `${n} questions solved unlocks each ${secs}s alpine summit ascent sprint.`;
       } else {
         hint.textContent = `Continuous student-paced exam session (no mini-games).`;
       }
@@ -2448,12 +2483,16 @@
       const gameModeEl = document.getElementById("teacher-game-mode");
       const durationEl = document.getElementById("teacher-game-duration") || document.getElementById("teacher-time-limit");
       const qRoundEl = document.getElementById("teacher-questions-per-round");
+      const actionDurationEl = document.getElementById("teacher-action-duration") || document.getElementById("studio-action-duration");
 
       const gameMode = customOverrides.game_mode || (isTeacherLed ? "classic" : (gameModeEl ? gameModeEl.value : (selectedActivityMode || "wayarena")));
       const gameDurationMins = customOverrides.game_duration_minutes !== undefined 
         ? customOverrides.game_duration_minutes 
         : (isTeacherLed ? 0 : (parseInt(durationEl ? durationEl.value : "5", 10) || 5));
       const qPerRound = customOverrides.questions_per_round || (parseInt(qRoundEl ? qRoundEl.value : "4", 10) || 4);
+      const actionPhaseSecs = customOverrides.action_phase_seconds !== undefined
+        ? customOverrides.action_phase_seconds
+        : (actionDurationEl ? (parseInt(actionDurationEl.value, 10) || 20) : 20);
       const timeLimit = isTeacherLed ? 0 : gameDurationMins;
       const perQuestionSecs = isTeacherLed ? (parseInt(document.getElementById("teacher-per-question").value, 10) || 0) : 0;
 
@@ -2482,6 +2521,7 @@
         quiz_mode: quizMode,
         game_mode: gameMode,
         game_duration_minutes: gameDurationMins,
+        action_phase_seconds: actionPhaseSecs,
         questions_per_round: qPerRound,
         show_answer_timing: showAnswerTiming,
         student_accommodations: studentAccomm,
@@ -2514,7 +2554,7 @@
 
       const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + "/index.html";
       const directUrl = (gameMode && gameMode !== "classic") 
-        ? `${baseUrl}?join=${code}&game=${encodeURIComponent(gameMode)}&mins=${gameDurationMins}&qround=${qPerRound}`
+        ? `${baseUrl}?join=${code}&game=${encodeURIComponent(gameMode)}&mins=${gameDurationMins}&qround=${qPerRound}&action_secs=${actionPhaseSecs}`
         : `${baseUrl}?join=${code}`;
       document.getElementById("banner-url").value = directUrl;
 

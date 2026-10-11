@@ -743,3 +743,154 @@ graph TD
    ```
    This provides frictionless wall sliding around corners.
 4. **Soft-Body Separation**: In multiplayer educational games, never use rigid hard-body collisions between friendly players; use soft-spring repulsion to prevent trolling, griefing, and accidental bottlenecks.
+
+## 15. Student-Paced Gamified Pacing: Teacher Playtime Control, Strict Arena Gating, Per-Question Perk Popups & Academic Loadout Wiring
+
+### A. Problem Statement & Pedagogical Core
+In gamified student-paced sessions (Wayarena, Tug of War, Mastery Peak), gameplay bursts must be earned through verified physics problem-solving. Previous limitations included:
+1. **Uncontrolled Arena Duration**: The action phase timer was hardcoded to 25s/15s rather than configurable by the instructor.
+2. **Early Arena Access Leak**: The manual "🎮 Arena" button was visible and openable before students answered the required number of questions.
+3. **Missing Perk Feedback**: When students solved a question correctly, they received no immediate visible feedback about what combat/gameplay perk they had unlocked for the upcoming arena burst.
+4. **Disconnected Academic Performance**: Mini-games started with identical baseline loadouts regardless of whether a student scored 100% or 0% during the question sprint.
+
+---
+
+### B. Architecture & Data Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Teacher as Teacher Portal
+    actor Student as Student Client
+    participant Engine as Gamified Engine (index.html)
+    participant Arena as 60fps Game Arena (game_arena.js)
+
+    Teacher->>Engine: Configure Action Playtime (15s, 20s, 30s, 45s, 60s) & Qs/Burst (3, 4, 6)
+    Note over Student,Engine: Round Sprint Starts (e.g. 4 Questions Required)
+    Student->>Engine: Answers Question Correctly
+    Engine->>Student: Displays High-Energy Perk Popup (+2 Plasma Ammo, Shield, Speed Dash)
+    Engine->>Engine: Stores Perk in Round Loadout & Increments gamifiedRoundCorrectCount
+    Note over Engine: Arena Button remains strictly HIDDEN & DISABLED
+    Student->>Engine: Completes Minimum Required Questions (4/4 Qs Answered)
+    Engine->>Student: Unhides & Glows "⚡ ENTER ARENA NOW!"
+    Engine->>Arena: Launches Action Phase with Teacher Playtime & Earned Academic Loadout
+    Note over Arena: Plays for exact configured seconds (e.g. 20s)
+    Arena->>Engine: Timer Reaches 0s -> exitMiniGameActionPhase()
+    Engine->>Engine: Resets Round Counters (0 Qs, 0 Perks) & Re-hides Arena Button
+    Engine->>Student: Advances to Next Question Sprint for Round N+1
+```
+
+---
+
+### C. Technical Implementation Details
+
+#### 1. Teacher-Configured Playtime Duration (`teacher.html`)
+- **UI Selector Added**:
+  - `#teacher-action-duration` in Wizard Step 3 grid.
+  - `#studio-action-duration` in Game Studio Modal.
+  - Options: `15s (Quick Burst)`, `20s (Standard - Recommended)`, `30s (Extended Battle)`, `45s (Long Skirmish)`, `60s (Full 1-Min Duel)`.
+- **Dynamic Wizard Hint**:
+  ```javascript
+  function updateTeacherRoundHint(gameId, n) {
+    const hint = document.getElementById("teacher-round-hint");
+    if (!hint) return;
+    const durationEl = document.getElementById("teacher-action-duration") || document.getElementById("studio-action-duration");
+    const secs = durationEl ? (parseInt(durationEl.value, 10) || 20) : 20;
+    if (gameId === "wayarena") {
+      hint.textContent = `${n} questions solved unlocks each ${secs}s neon maze combat burst.`;
+    } ...
+  }
+  ```
+- **Assignment Dispatch & URL Serialization**:
+  - `assignmentData.action_phase_seconds` stored in Supabase payload.
+  - Serialized into student direct join link: `&action_secs=${actionPhaseSecs}`.
+
+#### 2. Strict Arena Gating (`index.html`)
+- **Hidden by Default**:
+  `#btn-manual-arena-open` starts with `class="hidden ..."` and `disabled`.
+- **Visual Gating in `updateGamifiedRoundHUD()`**:
+  ```javascript
+  const arenaBtn = document.getElementById("btn-manual-arena-open");
+  if (arenaBtn) {
+    if (gamifiedRoundQuestionsAnswered >= gamifiedQuestionsPerRound) {
+      arenaBtn.classList.remove("hidden");
+      arenaBtn.disabled = false;
+      arenaBtn.innerHTML = `<span>⚡ ENTER ARENA NOW!</span>`;
+      arenaBtn.className = "pressable px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black text-xs shadow-lg shadow-cyan-500/30 transition flex items-center gap-1.5 animate-pulse cursor-pointer";
+    } else {
+      arenaBtn.classList.add("hidden");
+      arenaBtn.disabled = true;
+    }
+  }
+  ```
+- **Functional Gate in `triggerMiniGameActionPhase(isManual)`**:
+  ```javascript
+  if (gamifiedRoundQuestionsAnswered < gamifiedQuestionsPerRound) {
+    showToast("Arena Gated", `Solve ${gamifiedQuestionsPerRound - gamifiedRoundQuestionsAnswered} more questions to unlock the arena!`, "copper", 2000);
+    return;
+  }
+  ```
+
+#### 3. Celebratory Per-Question Perk Popups (`#gamified-perk-popup`)
+- Created a centered quantum card overlay with glassmorphism backdrop glow that auto-fades after 1.9s (or instantly closes upon click).
+- Perk mappings tailored specifically for each game mode:
+  - **Wayarena**:
+    - Q1: `🔋 +2 Plasma Ammo` (Extra blaster rounds loaded into magazine)
+    - Q2: `🛡️ Kinetic Energy Shield` (+30 Shield absorption against enemy lasers)
+    - Q3: `⚡ Quantum Boots (+20% Speed)` (Dash quickly through arena corridors)
+    - Q4: `💥 3-Way Spread Blaster` (Fires triple plasma bolts simultaneously)
+    - Q5+: `⭐ Golden Overdrive` (Supercharged damage & speed boost)
+  - **Tug of War**:
+    - Q1: `💪 +0.25x Pull Momentum` (Increases team pull power)
+    - Q2: `👟 High-Grip Cleats` (+20% traction against opposing bots)
+    - Q3: `🔥 Adrenaline Surge` (x1.5 tap multiplier during rope pulls)
+    - Q4: `⚓ Mega Anchor Stance` (Heavy resistance against enemy pulls)
+    - Q5+: `🏆 Champion Titan Pull` (Maximum pulling torque unlocked)
+  - **Mastery Peak**:
+    - Q1: `🧗 +150m Altitude Boost` (Instant height advantage at start)
+    - Q2: `🫁 Oxygen Respirator` (+25% tapping stamina against wind gusts)
+    - Q3: `⛏️ Ice Pick Grapple` (Secure footing past slippery crevasses)
+    - Q4: `🦅 Thermal Jet Glider` (Double climb velocity during summit sprint)
+    - Q5+: `🏔️ Peak Conqueror Aegis` (Immunity to icy blizzards)
+
+#### 4. Instant Question Scoring & Evaluation Reveal
+- When a student selects an option in student-led gamified mode (`selectChoice(letter)`):
+  - Answer is immediately stored in `studentLockedAnswers` and `gamifiedScoredQuestions`.
+  - `isCurrentQuestionEvaluationRevealed()` returns `true` for scored questions, applying `choice-correct` (emerald glow) or `choice-wrong` (crimson red) badges immediately.
+  - Options become disabled to prevent answer manipulation or perk farming.
+  - `onStudentAnswerLockedInGamified(isRight)` triggers the unlock popup and sound effects.
+
+#### 5. Academic Loadout Injection into `game_arena.js`
+- Student accuracy in the question sprint directly determines their avatar stats:
+  ```javascript
+  const loadout = {
+    healthBonus: gamifiedRoundCorrectCount * 15,
+    shield: gamifiedRoundCorrectCount >= 2 ? 30 : 0,
+    ammo: 10 + (gamifiedRoundCorrectCount * 3),
+    threeWay: gamifiedRoundCorrectCount >= 3,
+    speedBoost: gamifiedRoundCorrectCount >= 4 ? 0.20 : 0,
+    bonusText: `${gamifiedRoundCorrectCount}/${gamifiedQuestionsPerRound} Correct! Loadout: +${gamifiedRoundCorrectCount * 3} Ammo${gamifiedRoundCorrectCount >= 2 ? ' + Shield' : ''}${gamifiedRoundCorrectCount >= 3 ? ' + 3-Way' : ''}`
+  };
+  ```
+- Passed into `window.GameArena.createMazeBattleGame(canvas, loadout)`.
+- Action timer is initialized strictly to `gamifiedActionPhaseSecs`:
+  ```javascript
+  let actionRemaining = gamifiedActionPhaseSecs || (gamifiedGameMode === "wayarena" ? 25 : 15);
+  ```
+
+#### 6. Clean Round Transitions & Counter Resets
+- In `exitMiniGameActionPhase()`:
+  - `gamifiedRoundQuestionsAnswered = 0`
+  - `gamifiedRoundCorrectCount = 0`
+  - `gamifiedCurrentRound++`
+  - `updateGamifiedRoundHUD()` (instantly resets progress bar to 0% and hides `#btn-manual-arena-open`)
+  - Calls `nextQuestion()` to start the next question sprint.
+
+---
+
+### D. Replication Checklist for Other IDEs
+1. **Gating State Verification**: Ensure the action trigger button is conditionally rendered or toggled via CSS class (`hidden`), with defensive server/state guards so API calls cannot force early execution.
+2. **Pedagogical Perk Mapping**: Define an explicit JSON map linking academic correct answers to in-game mechanics so students immediately associate intellectual diligence with gameplay power.
+3. **Decoupled Round Reset**: Always reset both answered count and correct count in the phase exit handler to ensure loadouts are recalculated cleanly per round sprint.
+4. **URL Query Compatibility**: Parse both database attributes and URL search parameters (`action_secs`, `mins`, `qround`, `game`) to ensure direct link joins preserve teacher settings across devices.
+
