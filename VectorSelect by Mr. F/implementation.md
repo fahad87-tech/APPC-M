@@ -894,3 +894,215 @@ sequenceDiagram
 3. **Decoupled Round Reset**: Always reset both answered count and correct count in the phase exit handler to ensure loadouts are recalculated cleanly per round sprint.
 4. **URL Query Compatibility**: Parse both database attributes and URL search parameters (`action_secs`, `mins`, `qround`, `game`) to ensure direct link joins preserve teacher settings across devices.
 
+
+## 16. Teacher Portal Live Progress Monitor Deck, Wayarena Multiplayer Bot Cap & Tug of War Multi-Round Episodic Architecture
+
+### A. Problem Statement & Root Cause Analysis
+
+1. **Teacher Portal "Monitor Live Student Progress" Inaction**:
+   - In `teacher.html` (line 2589), when creating a student-led session in `handleCreateAssignment()`, the primary action button (`#btn-lobby-live-action`) executed:
+     ```javascript
+     primaryBtn.onclick = () => {
+       document.getElementById("active-assignments-container").scrollIntoView({ behavior: 'smooth' });
+     };
+     ```
+     This merely scrolled the page down to the table instead of launching the live monitor control deck or activating real-time telemetry polling.
+   - In `loadAssignmentsTable()` (line 2792), the table row rendering logic checked `if (quiz_mode === 'teacher_led')`, omitting the `📊 Monitor Progress` action button for all `student_led` sessions.
+   - In `startLiveAssignmentNow()` (line 3705), starting a student-led session immediately called `closeLiveControlModal()`, instantly dismissing the teacher's overview screen and leaving the teacher with no way to watch student sprint progress in real time.
+
+2. **Wayarena Bot Overcrowding in Multiplayer Classrooms**:
+   - When 5 to 20 students joined a Wayarena session, the engine was still spawning 4 autonomous AI bots into the arena. This congested corridors and distracted human players from competing against one another.
+   - Requirement: When player headcount exceeds 5 (`playerCount > 5`), the arena must strictly spawn **zero AI bots** (`this.bots = []`).
+
+3. **Tug of War Gameplay Triviality & Missing Episodic Continuity**:
+   - In previous builds, tapping anywhere pulled the rope by 1.5, while the initial burst pulled by 17 units. Outside of preview mode, the opponent bot possessed zero AI counter-pull logic. A student could drag the rope completely to `-100` within 3 to 4 taps before the timer expired.
+   - Every round reset the rope position back to `0`, discarding all prior progress and destroying the sense of sustained athletic/intellectual struggle across the exam.
+   - Requirement:
+     - The opponent bot must actively counter-pull and trigger dramatic **Special Powers** (`⚡ TITAN RAGE SURGE!`, `🌪️ SANDSTORM COUNTER-PULL!`, `⚓ MEGA ANCHOR STAMPEDE!`).
+     - Pull progress must be capped by **Round Checkpoints** (Round 1: ~28%, Round 2: ~56%, Round 3: ~85%). The student must **not be able to win** in early rounds; ultimate victory is earned only in the final round after solving all questions and stacking perks.
+     - The rope position must pause and persist across rounds (`persistentTugOfWarRopePos`), resuming seamlessly in Round 2 from where Round 1 paused.
+
+---
+
+### B. Architecture & Data Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor T as Teacher Portal
+    actor S as Student Client
+    participant Poller as Live Sync Interval (1.5s)
+    participant Arena as TugOfWarArena (60fps)
+
+    Note over T: Teacher launches Student-Paced Session
+    T->>T: openLiveControl(joinCode) reveals #live-control-modal
+    T->>Poller: Starts telemetry poller (syncParticipants & progress bars)
+    
+    Note over S: Round 1 Question Sprint (4 Qs)
+    S->>Arena: Launches Round 1 Action Phase (initialRopePosition = 0)
+    Note over Arena: Checkpoint Cap = -28.3%. Opponent fires TITAN RAGE!
+    Arena-->>S: Round 1 Ends. Rope pauses at -25.4%
+    S->>S: Stores persistentTugOfWarRopePos = -25.4%
+    
+    Note over S: Round 2 Question Sprint (4 Qs)
+    S->>Arena: Launches Round 2 Action Phase (initialRopePosition = -25.4%)
+    Note over Arena: Checkpoint Cap = -56.6%. Opponent fires SANDSTORM COUNTER-PULL!
+    Arena-->>S: Round 2 Ends. Rope pauses at -52.1%
+    S->>S: Stores persistentTugOfWarRopePos = -52.1%
+    
+    Note over S: Final Round Question Sprint (Solved all questions)
+    S->>Arena: Launches Final Round (isFinalRound = true, No Checkpoint Cap)
+    S->>Arena: Pulls rope past -90% clinch threshold
+    Arena-->>S: 🏆 FINAL VICTORY! Student Team Wins the Match!
+    Poller-->>T: Real-time telemetry updates: S completed 100% with victory
+```
+
+---
+
+### C. Technical Implementation Details
+
+#### 1. Teacher Portal Live Progress Monitor Deck (`teacher.html`)
+
+- **Primary Action Handler**:
+  In `handleCreateAssignment()`:
+  ```javascript
+  primaryBtn.textContent = "📊 Monitor Live Student Progress";
+  primaryBtn.className = "pressable px-6 py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-950 font-black text-sm shadow-xl shadow-cyan-500/25 transition flex items-center justify-center gap-2 cursor-pointer";
+  primaryBtn.onclick = () => {
+    openLiveControl(code);
+  };
+  ```
+- **Active Assignments Table Monitor Button**:
+  In `loadAssignmentsTable()`:
+  ```javascript
+  const isStudentLed = (a.quiz_mode === "student_led" || a.quiz_mode === "gamified");
+  const actionBtn = isTeacherLed ?
+    `<button onclick="openLiveControl('${a.join_code}')" class="px-3 py-1.5 rounded-lg bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/40 font-bold text-xs transition">📽️ Control Live</button>` :
+    `<button onclick="openLiveControl('${a.join_code}')" class="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/40 font-bold text-xs transition">📊 Monitor Progress</button>`;
+  ```
+- **Non-Dismissing Live Runner**:
+  In `startLiveAssignmentNow()`:
+  ```javascript
+  if (isStudentPaced) {
+    // Keep modal open, transition into live runner body
+    lobbyBody.classList.add("hidden");
+    runnerBody.classList.remove("hidden");
+    headerBadge.textContent = "STUDENT-PACED TELEMETRY";
+    headerBadge.className = "text-[10px] font-black px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800 tracking-wider";
+    
+    // Start continuous 1.5s live sync poller
+    if (liveSyncInterval) clearInterval(liveSyncInterval);
+    liveSyncInterval = setInterval(syncLiveAssignmentState, 1500);
+    syncLiveAssignmentState();
+  }
+  ```
+
+#### 2. Wayarena Multiplayer Bot Cap (`data/game_arena.js`)
+
+In `MazeBattleArena.start()`:
+```javascript
+const effectivePlayerCount = (this.loadout && this.loadout.playerCount) ? this.loadout.playerCount : 1;
+
+if (effectivePlayerCount > 5) {
+  // STRICT RULE: If human player count > 5, spawn ZERO AI bots to prevent corridor crowding
+  this.bots = [];
+} else {
+  // Scale bots proportionally: maximum 5 combatants total on the field
+  const botsToSpawn = Math.max(1, 5 - effectivePlayerCount);
+  this.bots = botProfiles.slice(0, botsToSpawn).map((p, i) => {
+    const coords = this.getSpawnCoordinates(i + 1);
+    return {
+      id: `bot_${i}`,
+      name: p.name,
+      x: coords.x,
+      y: coords.y,
+      vx: 0, vy: 0,
+      radius: 13,
+      health: 80,
+      maxHealth: 80,
+      color: p.color,
+      isBot: true,
+      decisionTimer: Math.floor(Math.random() * 30),
+      aimAngle: Math.random() * Math.PI * 2,
+      kills: 0,
+      speed: 2.1
+    };
+  });
+}
+```
+
+In `index.html`:
+- Participant counter in `updateLobbyParticipants()` stores `lastKnownConnectedStudents = parts.count || 1`.
+- In `triggerMiniGameActionPhase()`, `playerCount: lastKnownConnectedStudents` is injected directly into `loadout` and passed into `createMazeBattleGame(canvas, loadout)`.
+
+#### 3. Tug of War Multi-Round Episodic Engine (`data/game_arena.js` & `index.html`)
+
+- **Configurable Options & State Persistence**:
+  `TugOfWarArena` constructor accepts an options object:
+  ```javascript
+  constructor(canvas, options = {}) {
+    this.initialRopePos = typeof options.initialRopePosition === 'number' ? options.initialRopePosition : 0;
+    this.ropePosition = this.initialRopePos;
+    this.targetRopePosition = this.initialRopePos;
+    this.currentRound = options.currentRound || 1;
+    this.totalRounds = options.totalRounds || 3;
+    this.isFinalRound = options.isFinalRound || false;
+    this.powerMultiplier = options.powerMultiplier || 1.0;
+    this.correctCount = options.correctCount || 0;
+    
+    // Checkpoint cap: student cannot win until the final round!
+    this.maxProgressThisRound = this.isFinalRound ? -100 : -1 * Math.min(85, Math.max(25, (this.currentRound / this.totalRounds) * 85));
+  }
+  ```
+- **Round Checkpoint Gate**:
+  In `pullLeft(amount)`:
+  ```javascript
+  pullLeft(amount = 1.6) {
+    if (this.ropePosition <= this.maxProgressThisRound && !this.isFinalRound) {
+      this.targetRopePosition = this.maxProgressThisRound;
+      this.showOpponentWarning(`⚓ ROUND ${this.currentRound} CHECKPOINT REACHED! OPPONENT ANCHORS DOWN!`);
+      return;
+    }
+    const scaledPull = amount * Math.min(2.0, Math.max(0.7, this.powerMultiplier));
+    this.targetRopePosition = Math.max(this.maxProgressThisRound, this.targetRopePosition - scaledPull);
+  }
+  ```
+- **Opponent Bot Active AI Counter-Tension**:
+  In `update()` loop:
+  ```javascript
+  // Continuous gentle baseline tension
+  this.targetRopePosition += 0.04;
+  
+  // Opponent Special Powers Trigger (every 3–5 seconds)
+  this.opponentPowerTimer++;
+  if (this.opponentPowerTimer >= this.nextOpponentPowerInterval) {
+    this.opponentPowerTimer = 0;
+    this.nextOpponentPowerInterval = 180 + Math.floor(Math.random() * 120);
+    this.triggerOpponentSpecialPower();
+  }
+  ```
+- **Opponent Special Power Arsenal**:
+  1. `⚡ TITAN RAGE SURGE!`: Opponent pulls with +8.0 force, fiery aura sparks.
+  2. `🌪️ SANDSTORM COUNTER-PULL!`: Opponent pulls with +9.5 force, disorienting dust particles.
+  3. `⚓ MEGA ANCHOR STAMPEDE!`: Opponent anchors hard and violently heaves rope by +11.5 force.
+  - Accompanied by a floating on-screen warning banner, opponent avatar rage pulse, and arcade thud sound effects.
+- **Rope Persistence in `index.html`**:
+  ```javascript
+  // On exiting action phase:
+  if (gamifiedGameMode === "tug_of_war" && studentArenaInstance) {
+    persistentTugOfWarRopePos = studentArenaInstance.ropePosition || 0;
+    totalGamifiedRopePull += Math.max(0, Math.round(Math.abs(studentArenaInstance.ropePosition || 0)));
+  }
+  
+  // On starting a new exam:
+  persistentTugOfWarRopePos = 0;
+  ```
+
+---
+
+### D. Replication Checklist for Other IDEs
+
+1. **Modal Body Transition**: When switching from classroom lobby to student telemetry, keep the root modal container open and swap inner body containers (`lobbyBody.classList.add('hidden')`, `runnerBody.classList.remove('hidden')`) to preserve poller state without screen flickers.
+2. **Participant Headcount Reflection**: Never hardcode multiplayer entity counts; pass dynamic lobby count into game constructors so arenas can adjust bot populations dynamically.
+3. **Multi-Round Rope Persistence**: In episodic minigames, store game progress (`ropePosition`, `altitude`, `inventory`) in outer module-scoped variables (`persistentTugOfWarRopePos`) between action phase modal closes.
+4. **Episodic Progression Caps**: To prevent students from finishing a minigame in Round 1, calculate proportional progress caps (`currentRound / totalRounds`) that lock further advancement until subsequent question rounds are completed.

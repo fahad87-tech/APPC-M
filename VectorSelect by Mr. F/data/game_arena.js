@@ -522,20 +522,33 @@
   // Game 1: TUG OF WAR (Beach Arena with Catenary Rope & Click Barrels)
   // ----------------------------------------------------------------------------
   class TugOfWarArena {
-    constructor(canvas, isPreview = false) {
+    constructor(canvas, isPreview = false, options = {}) {
       this.canvas = canvas;
       this.isPreview = isPreview;
+      this.options = options || {};
       this.animId = null;
       this.time = 0;
-      this.ropePosition = 0; // -100 (left wins) to +100 (right wins)
-      this.targetRopePosition = 0;
-      this.pullPowerLeft = 0;
-      this.pullPowerRight = 0;
+      
+      // Persistent rope position: -100 (player/left wins) to +100 (bot/right wins)
+      this.ropePosition = (this.options.initialRopePosition !== undefined) ? this.options.initialRopePosition : 0;
+      this.targetRopePosition = this.ropePosition;
+      this.currentRound = this.options.currentRound || 1;
+      this.totalRounds = this.options.totalRounds || 3;
+      this.isFinalRound = Boolean(this.options.isFinalRound);
+      this.powerMultiplier = this.options.powerMultiplier || 1.0;
+      this.correctCount = this.options.correctCount || 0;
+
       this.barrelLeftBounce = 1;
       this.barrelRightBounce = 1;
-      this.leftStreak = 0;
-      this.rightStreak = 0;
       this.particles = new ParticleEmitter();
+
+      // Opponent AI Special Power states
+      this.specialPowerTimer = 0;
+      this.specialPowerCooldown = 180 + Math.floor(Math.random() * 120); // triggers every 3-5s
+      this.specialPowerName = "";
+      this.specialPowerColor = "#ef4444";
+      this.statusBannerText = "";
+      this.statusBannerTimer = 0;
 
       this.onClick = this.onClick.bind(this);
       if (!this.isPreview) {
@@ -545,33 +558,34 @@
     }
 
     onClick(e) {
-      const rect = this.canvas.getBoundingClientRect();
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      const x = clientX - rect.left;
-      const y = clientY - rect.top;
-      const w = rect.width;
-      const h = rect.height;
-
-      // Left Click Barrel bounds
-      const leftBarrelX = w * 0.22;
-      const leftBarrelY = h * 0.26;
-      const distL = Math.hypot(x - leftBarrelX, y - leftBarrelY);
-
-      // Right Click Barrel bounds
-      const rightBarrelX = w * 0.78;
-      const rightBarrelY = h * 0.26;
-      const distR = Math.hypot(x - rightBarrelX, y - rightBarrelY);
-
-      if (distL < 45 || x < w * 0.5) {
-        this.pullLeft(1.5);
-      } else {
-        this.pullRight(1.5);
-      }
+      // In student action phase, tapping anywhere on screen pulls left for the student's team!
+      this.pullLeft(1.6);
     }
 
-    pullLeft(amount = 2.0) {
-      this.targetRopePosition = Math.max(-100, this.targetRopePosition - amount);
+    pullLeft(amount = 1.8) {
+      // Scale pull power based on student's earned multiplier & question sprint accuracy
+      const mult = Math.max(1.0, this.powerMultiplier);
+      const accBonus = 1.0 + (this.correctCount * 0.12);
+      const force = amount * mult * accBonus;
+
+      let nextPos = this.targetRopePosition - force;
+
+      // Checkpoint cap: student CANNOT win the entire match in early rounds!
+      if (!this.isFinalRound) {
+        const roundFraction = Math.min(1.0, this.currentRound / Math.max(1, this.totalRounds));
+        const maxProgressThisRound = -1 * Math.min(85, Math.round(roundFraction * 85));
+
+        if (nextPos <= maxProgressThisRound) {
+          nextPos = maxProgressThisRound;
+          this.statusBannerText = `📍 ROUND ${this.currentRound} CHECKPOINT REACHED! Opponent Digs In!`;
+          this.statusBannerTimer = 50;
+        }
+      } else {
+        // Final round allows pulling past -90 to clinch grand victory!
+        nextPos = Math.max(-100, nextPos);
+      }
+
+      this.targetRopePosition = nextPos;
       this.barrelLeftBounce = 1.35;
       const rect = this.canvas.getBoundingClientRect();
       this.particles.emit(rect.width * 0.32, rect.height * 0.76, 8, 'dust');
@@ -584,6 +598,26 @@
       const rect = this.canvas.getBoundingClientRect();
       this.particles.emit(rect.width * 0.68, rect.height * 0.76, 8, 'dust');
       SoundFX.tug();
+    }
+
+    triggerOpponentSpecialPower() {
+      const powers = [
+        { name: "⚡ TITAN RAGE SURGE!", pull: 8.0, color: '#f97316' },
+        { name: "🌪️ SANDSTORM COUNTER-PULL!", pull: 9.5, color: '#eab308' },
+        { name: "⚓ MEGA ANCHOR STAMPEDE!", pull: 11.5, color: '#ef4444' }
+      ];
+      const p = powers[Math.floor(Math.random() * powers.length)];
+      this.specialPowerName = p.name;
+      this.specialPowerColor = p.color;
+      this.specialPowerTimer = 70; // 1.2s visual surge
+      this.barrelRightBounce = 1.45;
+
+      // Pull rope right towards opponent!
+      this.targetRopePosition = Math.min(65, this.targetRopePosition + p.pull);
+
+      const rect = this.canvas.getBoundingClientRect();
+      this.particles.emit(rect.width * 0.68, rect.height * 0.76, 16, 'dust');
+      SoundFX.wrong();
     }
 
     start() {
@@ -614,12 +648,24 @@
       // In preview mode: gentle auto-pulling simulation
       if (this.isPreview) {
         this.targetRopePosition = Math.sin(this.time * 1.5) * 22;
-        if (Math.sin(this.time * 3) > 0.95) {
-          this.barrelLeftBounce = 1.25;
+        if (Math.sin(this.time * 3) > 0.95) this.barrelLeftBounce = 1.25;
+        if (Math.cos(this.time * 3) > 0.95) this.barrelRightBounce = 1.25;
+      } else {
+        // Active gameplay opponent AI counter-pulls & special powers
+        if (this.ropePosition < 0) {
+          // Opponent exerts continuous resistance so rope doesn't sit idle
+          this.targetRopePosition += 0.04;
         }
-        if (Math.cos(this.time * 3) > 0.95) {
-          this.barrelRightBounce = 1.25;
+
+        // Special power cooldown countdown
+        this.specialPowerCooldown--;
+        if (this.specialPowerCooldown <= 0) {
+          this.specialPowerCooldown = 180 + Math.floor(Math.random() * 140);
+          this.triggerOpponentSpecialPower();
         }
+
+        if (this.specialPowerTimer > 0) this.specialPowerTimer--;
+        if (this.statusBannerTimer > 0) this.statusBannerTimer--;
       }
 
       this.barrelLeftBounce += (1 - this.barrelLeftBounce) * 0.14;
@@ -699,8 +745,8 @@
       ctx.setLineDash([]);
 
       // 4. Wooden Click Barrels
-      this.drawWoodenBarrel(ctx, w * 0.22, h * 0.28, this.barrelLeftBounce, 'Click!');
-      this.drawWoodenBarrel(ctx, w * 0.78, h * 0.28, this.barrelRightBounce, 'Click!');
+      this.drawWoodenBarrel(ctx, w * 0.22, h * 0.28, this.barrelLeftBounce, 'PULL!');
+      this.drawWoodenBarrel(ctx, w * 0.78, h * 0.28, this.barrelRightBounce, this.specialPowerTimer > 0 ? 'RAGE!' : 'BOT');
 
       // 5. Rope & Cute Physicist Avatars
       const ropeShiftX = (this.ropePosition / 100) * (w * 0.16);
@@ -722,9 +768,23 @@
       // Right Team (Opponent / Bot)
       const rightAvatarX = (w * 0.68) + ropeShiftX;
       const rightStraining = this.ropePosition < 10;
+      
+      // Opponent glowing aura during special power surge
+      if (this.specialPowerTimer > 0) {
+        ctx.save();
+        ctx.strokeStyle = this.specialPowerColor || '#ef4444';
+        ctx.lineWidth = 5;
+        ctx.shadowColor = this.specialPowerColor || '#ef4444';
+        ctx.shadowBlur = 18;
+        ctx.beginPath();
+        ctx.arc(rightAvatarX, groundY - 22, 38, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+
       drawChibiAvatar(ctx, rightAvatarX, groundY, Math.min(1.0, w / 550), {
-        helmetColor: '#06b6d4', // Cyan Helmet
-        bodyColor: '#10b981',
+        helmetColor: this.specialPowerTimer > 0 ? '#ef4444' : '#06b6d4',
+        bodyColor: this.specialPowerTimer > 0 ? '#dc2626' : '#10b981',
         pantsColor: '#0f172a',
         tilt: 0.18 - (Math.sin(this.time * 6) * 0.04),
         pulling: true,
@@ -740,7 +800,6 @@
       const ropeMidY = groundY - 14 + ropeSag;
 
       ctx.save();
-      // Outer rope shadow
       ctx.strokeStyle = '#78350f';
       ctx.lineWidth = 7;
       ctx.beginPath();
@@ -748,7 +807,6 @@
       ctx.quadraticCurveTo(ropeMidX, ropeMidY, ropeEndX, groundY - 14);
       ctx.stroke();
 
-      // Rope texture / highlights
       ctx.strokeStyle = '#d97706';
       ctx.lineWidth = 4;
       ctx.stroke();
@@ -759,7 +817,6 @@
       ctx.arc(ropeMidX, ropeMidY, 7, 0, Math.PI * 2);
       ctx.fill();
 
-      // Hanging ribbon tails
       ctx.lineWidth = 3;
       ctx.strokeStyle = '#dc2626';
       ctx.beginPath();
@@ -773,7 +830,28 @@
       // 6. Particles
       this.particles.updateAndDraw(ctx);
 
-      // 7. Victory / Pull Indicator Pill
+      // 7. Special Power & Status Banners
+      if (this.specialPowerTimer > 0) {
+        ctx.save();
+        ctx.font = '900 14px "Inter", "Segoe UI", sans-serif';
+        ctx.fillStyle = this.specialPowerColor || '#ef4444';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0,0,0,0.85)';
+        ctx.shadowBlur = 6;
+        ctx.fillText(`⚠️ OPPONENT SPECIAL POWER: ${this.specialPowerName} ⚠️`, w * 0.5, h * 0.17);
+        ctx.restore();
+      } else if (this.statusBannerTimer > 0) {
+        ctx.save();
+        ctx.font = '900 13px "Inter", "Segoe UI", sans-serif';
+        ctx.fillStyle = '#38bdf8';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'rgba(0,0,0,0.85)';
+        ctx.shadowBlur = 6;
+        ctx.fillText(this.statusBannerText, w * 0.5, h * 0.17);
+        ctx.restore();
+      }
+
+      // 8. Victory / Pull Indicator Pill
       this.drawTugPill(ctx, w, h);
     }
 
@@ -789,18 +867,16 @@
       ctx.restore();
     }
 
-    drawWoodenBarrel(ctx, x, y, bounce = 1, text = 'Click!') {
+    drawWoodenBarrel(ctx, x, y, bounce = 1, text = 'PULL!') {
       ctx.save();
       ctx.translate(x, y);
       ctx.scale(bounce, bounce);
 
-      // Wooden barrel background
       ctx.fillStyle = '#b45309';
       ctx.beginPath();
       ctx.arc(0, 0, 36, 0, Math.PI * 2);
       ctx.fill();
 
-      // Wood plank rings
       ctx.strokeStyle = '#78350f';
       ctx.lineWidth = 4;
       ctx.stroke();
@@ -811,7 +887,6 @@
       ctx.arc(0, 0, 28, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Text Badge
       ctx.font = '900 13px "Inter", "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
@@ -824,19 +899,19 @@
     }
 
     drawTugPill(ctx, w, h) {
-      const pillW = Math.min(220, w * 0.45);
+      const pillW = Math.min(260, w * 0.55);
       const pillH = 22;
       const pillX = (w - pillW) / 2;
-      const pillY = 12;
+      const pillY = 10;
 
       ctx.save();
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
       ctx.beginPath();
       ctx.roundRect(pillX, pillY, pillW, pillH, 11);
       ctx.fill();
 
       // Tug balance bar
-      const fillPercent = ((this.ropePosition + 100) / 200);
+      const fillPercent = Math.max(0, Math.min(1, (this.ropePosition + 100) / 200));
       const fillW = (pillW - 8) * fillPercent;
 
       const barGrad = ctx.createLinearGradient(pillX + 4, 0, pillX + pillW - 4, 0);
@@ -851,6 +926,26 @@
       // Center marker
       ctx.fillStyle = '#f8fafc';
       ctx.fillRect(w * 0.5 - 1, pillY + 2, 2, pillH - 4);
+
+      // Target checkpoint marker for intermediate rounds
+      if (!this.isFinalRound) {
+        const roundFraction = Math.min(1.0, this.currentRound / Math.max(1, this.totalRounds));
+        const maxProgressThisRound = Math.min(85, Math.round(roundFraction * 85));
+        const checkPct = (100 - maxProgressThisRound) / 200;
+        const checkX = pillX + 4 + (pillW - 8) * checkPct;
+        ctx.fillStyle = '#fde047';
+        ctx.fillRect(checkX - 1.5, pillY + 1, 3, pillH - 2);
+      }
+
+      // Round subtitle info
+      ctx.font = '800 11px "Inter", "Segoe UI", sans-serif';
+      ctx.fillStyle = '#f8fafc';
+      ctx.textAlign = 'center';
+      const roundLabel = this.isFinalRound 
+        ? '🏆 FINAL ROUND — PULL TO CLINCH VICTORY!' 
+        : `Round ${this.currentRound} of ${this.totalRounds} • Checkpoint Goal`;
+      ctx.fillText(roundLabel, w * 0.5, pillY + pillH + 13);
+
       ctx.restore();
     }
   }
@@ -1100,13 +1195,21 @@
         muzzleFlash: 0
       };
 
-      // 4 AI Opponents distributed across distinct Quadrants
-      this.bots = [
+      // Player count evaluation: if player count > 5, DO NOT add any bots!
+      const effectivePlayerCount = (this.loadout && this.loadout.playerCount !== undefined) ? this.loadout.playerCount : 1;
+      const botPool = [
         { id: 1, name: 'NewtonBot', characterType: 'newton', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI, radius: 10, speed: 1.85, health: 3, maxHealth: 3, shield: 0, invulnerableTimer: 120, phaseRipple: 0, helmetColor: '#06b6d4', coatColor: '#dc2626', shootCooldown: 60, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
         { id: 2, name: 'GalileoBot', characterType: 'galileo', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI / 2, radius: 10, speed: 1.75, health: 3, maxHealth: 3, shield: 0, invulnerableTimer: 120, phaseRipple: 0, helmetColor: '#f59e0b', coatColor: '#4f46e5', shootCooldown: 80, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
         { id: 3, name: 'KeplerBot', characterType: 'kepler', x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, radius: 10, speed: 1.95, health: 3, maxHealth: 3, shield: 0, invulnerableTimer: 120, phaseRipple: 0, helmetColor: '#10b981', coatColor: '#059669', shootCooldown: 70, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
         { id: 4, name: 'CurieBot', characterType: 'curie', x: 0, y: 0, vx: 0, vy: 0, angle: 0, radius: 10, speed: 1.8, health: 3, maxHealth: 3, shield: 0, invulnerableTimer: 120, phaseRipple: 0, helmetColor: '#ec4899', coatColor: '#9333ea', shootCooldown: 75, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 }
       ];
+
+      if (effectivePlayerCount > 5) {
+        this.bots = []; // Strictly zero bots if player number is above 5!
+      } else {
+        const neededBots = Math.max(0, 5 - effectivePlayerCount);
+        this.bots = botPool.slice(0, neededBots);
+      }
 
       // 5 Strategic Powerup Supply Crates in the 4 Outposts & Central Plaza
       this.powerups = [
@@ -2449,8 +2552,8 @@
       return arena;
     },
 
-    createTugOfWarGame(canvas) {
-      const arena = new TugOfWarArena(canvas, false);
+    createTugOfWarGame(canvas, options = {}) {
+      const arena = new TugOfWarArena(canvas, false, options);
       arena.start();
       return arena;
     },

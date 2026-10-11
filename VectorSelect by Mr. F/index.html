@@ -1702,6 +1702,9 @@
 
     async function updateLobbyParticipants() {
       const parts = await fetchParticipantsByCode(currentAssignment.join_code);
+      if (parts && parts.count) {
+        lastKnownConnectedStudents = parts.count;
+      }
       const countEl = document.getElementById("lobby-student-count");
       const listEl = document.getElementById("lobby-students-list");
       if (countEl) countEl.textContent = `${parts.count} Joined`;
@@ -1730,6 +1733,8 @@
     let gamifiedCurrentRound = 1;
     let gamifiedPullMultiplier = 1.0;
     let gamifiedEndTime = 0;
+    let persistentTugOfWarRopePos = 0;
+    let lastKnownConnectedStudents = 1;
     let studentArenaInstance = null;
     let arenaActionTimerInterval = null;
     let perkPopupTimeout = null;
@@ -1934,6 +1939,7 @@
         ammo: 10 + (gamifiedRoundCorrectCount * 3),
         threeWay: gamifiedRoundCorrectCount >= 3,
         speedBoost: gamifiedRoundCorrectCount >= 4 ? 0.20 : 0,
+        playerCount: lastKnownConnectedStudents || 1,
         bonusText: `${gamifiedRoundCorrectCount}/${gamifiedQuestionsPerRound} Correct! Loadout: +${gamifiedRoundCorrectCount * 3} Ammo${gamifiedRoundCorrectCount >= 2 ? ' + Shield' : ''}${gamifiedRoundCorrectCount >= 3 ? ' + 3-Way' : ''}`
       };
 
@@ -1946,9 +1952,18 @@
         } else if (gamifiedGameMode === "wayarena") {
           studentArenaInstance = window.GameArena.createMazeBattleGame(canvas, loadout);
         } else {
-          studentArenaInstance = window.GameArena.createTugOfWarGame(canvas);
-          const pullForce = (gamifiedPullMultiplier * 5) + (gamifiedRoundCorrectCount * 3);
-          studentArenaInstance.pullLeft(pullForce);
+          const totalQCount = (currentQuiz && currentQuiz.questions) ? currentQuiz.questions.length : 10;
+          const totalRoundsEstimate = Math.max(gamifiedCurrentRound, Math.ceil(totalQCount / Math.max(1, gamifiedQuestionsPerRound)));
+          const isFinalRound = (currentQuestionIdx >= totalQCount - 1) || (gamifiedCurrentRound >= totalRoundsEstimate);
+          studentArenaInstance = window.GameArena.createTugOfWarGame(canvas, {
+            initialRopePosition: persistentTugOfWarRopePos,
+            currentRound: gamifiedCurrentRound,
+            totalRounds: totalRoundsEstimate,
+            isFinalRound: isFinalRound,
+            powerMultiplier: gamifiedPullMultiplier,
+            correctCount: gamifiedRoundCorrectCount
+          });
+          studentArenaInstance.pullLeft(2.0 + (gamifiedRoundCorrectCount * 0.8));
         }
       }
 
@@ -1987,7 +2002,8 @@
         if (gamifiedGameMode === "wayarena" && studentArenaInstance.player) {
           totalGamifiedKills += (studentArenaInstance.player.kills || 0);
         } else if (gamifiedGameMode === "tug_of_war") {
-          totalGamifiedRopePull += Math.max(0, Math.round(studentArenaInstance.pullPowerLeft || 0));
+          persistentTugOfWarRopePos = studentArenaInstance.ropePosition || 0;
+          totalGamifiedRopePull += Math.max(0, Math.round(Math.abs(studentArenaInstance.ropePosition || 0)));
         } else if (gamifiedGameMode === "mastery_peak") {
           totalGamifiedAltitude = Math.max(totalGamifiedAltitude, Math.round((studentArenaInstance.progress || 0) * 4200));
         }
@@ -2024,6 +2040,7 @@
       totalGamifiedRounds = 0;
       totalGamifiedRopePull = 0;
       totalGamifiedAltitude = 0;
+      persistentTugOfWarRopePos = 0;
       if (window.RecoverySims) window.RecoverySims.stop();
 
       // Restore any recovery attempts completed in this session

@@ -2585,10 +2585,7 @@
           primaryBtn.onclick = () => openLiveControl(code);
         } else {
           primaryBtn.innerHTML = `<span>📊</span> Monitor Live Student Progress`;
-          primaryBtn.onclick = () => {
-            const tableSection = document.getElementById("active-assignments-container") || document.querySelector("section.space-y-6");
-            if (tableSection) tableSection.scrollIntoView({ behavior: 'smooth' });
-          };
+          primaryBtn.onclick = () => openLiveControl(code);
         }
       }
 
@@ -2789,6 +2786,13 @@
             actionBtns = `
               <button onclick="openLiveControl('${a.join_code}')" class="pressable px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-xs md:text-sm font-bold text-white transition shadow-md border border-violet-400/40 flex items-center gap-1.5">
                 <span>🎮</span> Live Control
+              </button>
+              ${actionBtns}
+            `;
+          } else {
+            actionBtns = `
+              <button onclick="openLiveControl('${a.join_code}')" class="pressable px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-xs md:text-sm font-bold text-white transition shadow-md border border-cyan-400/40 flex items-center gap-1.5">
+                <span>📊</span> Monitor Progress
               </button>
               ${actionBtns}
             `;
@@ -3698,8 +3702,26 @@
       loadAssignmentsTable();
 
       if (currentLiveAssignment.quiz_mode === "student_led") {
-        closeLiveControlModal();
-        showTeacherToast("Assessment Launched", `All students in ${code} have been released to begin!`, "lime", 4000);
+        document.body.style.overflow = "hidden";
+        document.getElementById("lc-lobby-body").classList.add("hidden");
+        document.getElementById("lc-runner-body").classList.remove("hidden");
+        setLcLayoutMode('split');
+        initLiveControlWheelScroll();
+        renderLiveControl();
+        document.getElementById("lc-progress-strip").classList.remove("hidden");
+
+        clearInterval(liveSyncInterval);
+        liveSyncInterval = setInterval(async () => {
+          const participants = await fetchParticipantsByCode(code);
+          const answers = await fetchLiveAnswersByCode(code, currentLiveIndex);
+          renderLiveProgress(participants, answers);
+          pollLiveReactions(code);
+          if (isLeaderboardModalOpen) {
+            refreshLiveLeaderboard(code);
+          }
+        }, 1500);
+
+        showTeacherToast("Assessment Active", `All students in ${code} have been released to begin! Monitoring live progress...`, "lime", 4000);
         return;
       }
 
