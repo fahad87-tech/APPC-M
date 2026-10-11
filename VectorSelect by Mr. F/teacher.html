@@ -1009,18 +1009,18 @@
                 </div>
               </div>
 
-              <!-- Card 3: CODE BUSTERS -->
-              <div onclick="selectStudioGame('code_busters')" id="card-game-code_busters" class="studio-game-card cursor-pointer rounded-2xl p-4 border border-slate-800 bg-slate-900/80 hover:border-indigo-500 transition-all flex flex-col justify-between h-56 relative overflow-hidden group">
+              <!-- Card 3: CLASSIC EXAM -->
+              <div onclick="selectStudioGame('classic')" id="card-game-classic" class="studio-game-card cursor-pointer rounded-2xl p-4 border border-slate-800 bg-slate-900/80 hover:border-indigo-500 transition-all flex flex-col justify-between h-56 relative overflow-hidden group">
                 <div class="h-28 rounded-xl bg-gradient-to-br from-indigo-900/40 via-purple-900/30 to-slate-950 flex items-center justify-center border border-indigo-500/30">
-                  <span class="font-black text-xl tracking-wider text-indigo-300 drop-shadow-md">CODE BUSTERS</span>
+                  <span class="font-black text-xl tracking-wider text-indigo-300 drop-shadow-md">CLASSIC EXAM</span>
                 </div>
                 <div class="space-y-1.5 mt-2">
                   <div class="flex gap-1.5 flex-wrap">
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">Strategy</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">Puzzle</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">Competitive</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">Continuous</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">College Board</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">Zero Mini-Games</span>
                   </div>
-                  <p class="text-xs text-slate-400 leading-snug">Hack vaults and steal gems! Answer questions to earn, guess PINs to steal.</p>
+                  <p class="text-xs text-slate-400 leading-snug">Pure AP assessment sprint. Timed or untimed with in-depth College Board rationales upon submission.</p>
                 </div>
               </div>
 
@@ -2276,7 +2276,7 @@
 
     function selectStudioGame(gameId) {
       studioSelectedGame = gameId;
-      const games = ["wayarena", "tug_of_war", "code_busters", "mastery_peak"];
+      const games = ["wayarena", "tug_of_war", "mastery_peak", "classic"];
       games.forEach(g => {
         const card = document.getElementById("card-game-" + g);
         if (!card) return;
@@ -2303,8 +2303,22 @@
           studioPreviewArena = window.GameArena.createMasteryPeakPreview(canvas);
         } else if (gameId === "wayarena") {
           studioPreviewArena = window.GameArena.createMazeBattlePreview(canvas);
-        } else {
+        } else if (gameId === "tug_of_war") {
           studioPreviewArena = window.GameArena.createTugOfWarPreview(canvas);
+        } else {
+          // Classic Exam Preview
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.fillStyle = '#0f172a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#818cf8';
+            ctx.font = 'bold 15px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText('📝 CLASSIC AP EXAM', canvas.width / 2, canvas.height / 2 - 8);
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = '11px system-ui';
+            ctx.fillText('Pure Student-Paced Assessment (Zero Mini-Games)', canvas.width / 2, canvas.height / 2 + 14);
+          }
         }
       }
     }
@@ -2341,11 +2355,13 @@
 
     function showGameRulesModal() {
       if (studioSelectedGame === "wayarena") {
-        alert("⚡ WAYARENA — VECTOR MAZE BATTLE RULES\n\n1. Solve Questions: Students solve batches of questions to charge laser ammo and shields.\n2. Enter the Maze: Unlocks 25s combat bursts inside the top-down neon sci-fi maze!\n3. Blast Opponents: Navigate with WASD/Arrows or Virtual D-Pad, aim vector lasers, and press Space/Tap Fire to eliminate bot classmates & rivals.\n4. Power-Ups: Snag Quantum Dash (⚡ speed boost), Kinetic Shield (🛡️ barrier), Triple Blast (💥 3-way laser), and Graviton EMP (💣 area blast).\n5. Final Podium: Total knockouts and AP Physics accuracy crown the session champions!");
+        alert("⚡ WAYARENA — VECTOR MAZE BATTLE RULES\n\n1. Solve Questions: Students solve batches of questions to charge laser ammo and shields.\n2. Enter the Maze: Unlocks combat bursts inside the top-down neon sci-fi maze!\n3. Blast Opponents: Navigate with WASD/Arrows or Virtual D-Pad, aim lasers, and press Space/Tap Fire to eliminate rivals.\n4. Power-Ups: Snag Quantum Dash (⚡ speed), Kinetic Shield (🛡️ barrier), Triple Blast (💥 3-way), and Graviton EMP (💣 area blast).\n5. Bot Scaling: Zero bots spawned if over 5 human students are connected.");
       } else if (studioSelectedGame === "mastery_peak") {
-        alert("⛰️ MASTERY PEAK — GAME RULES\n\n1. Solve Questions: Students answer AP Physics questions to ascend the peak.\n2. Overcome Hazards: Missed concepts trigger quick mastery repetitions.\n3. Summit Flag: Reach 4,200m altitude and plant your school flag at the summit!\n4. Time Limit: Game finishes when the Game Duration clock expires.");
+        alert("⛰️ MASTERY PEAK — ALPINE ASCENT RULES\n\n1. Solve Questions: Students solve batches of questions to earn altitude surges and climbing perks (Oxygen, Ice Picks, Jet Gliders).\n2. Tap to Climb: Rapid-tap anywhere on screen to hike up the 4,200m alpine trail!\n3. Overcome Blizzards: Battle through howling Arctic Gales, White-Out Freezes, and Avalanches that push climbers back.\n4. Round Checkpoints: Camps 1 & 2 cap early rounds; conquer the 4,200m summit flag in the final round!\n5. Bot Scaling: Competes against rival bots (scaled down to 0 bots if >5 students are connected).");
+      } else if (studioSelectedGame === "classic") {
+        alert("📝 CLASSIC AP EXAM RULES\n\n1. Pure Assessment: Continuous student-paced AP assessment with zero mini-games.\n2. AP Clock: Students solve at their own speed with active exam timer.\n3. Frictionless: Free answer choice navigation without lock buttons.\n4. Comprehensive Review: Detailed College Board scoring rationales upon submission.");
       } else {
-        alert("⚔️ TUG OF WAR — GAME RULES\n\n1. Solve Questions: Students solve batches of questions (e.g. 4 Qs per round).\n2. Earn Pull Power: Correct answers and fast streaks build up massive Tug Momentum!\n3. Mini-Game Action: Enter the 15s beach arena to pull the opposing team over the center chalk line!\n4. Time Limit: Match finishes when the overall Game Duration clock expires.");
+        alert("⚔️ TUG OF WAR — GAME RULES\n\n1. Solve Questions: Students solve batches of questions (e.g. 4 Qs per round).\n2. Earn Pull Power: Correct answers and fast streaks build up massive Tug Momentum!\n3. Mini-Game Action: Enter the beach arena to pull the opposing team over the center chalk line!\n4. Opponent Powers: Opponent bot unleashes Titan Rage, Sandstorms, and Mega Anchors!\n5. Checkpoint Caps: Early rounds anchor progress; clinch victory in the final round!");
       }
     }
 

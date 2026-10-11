@@ -954,21 +954,81 @@
   // Game 2: MASTERY PEAK (Mountain Ascent & Altitude Progression)
   // ----------------------------------------------------------------------------
   class MasteryPeakArena {
-    constructor(canvas, isPreview = false) {
+    constructor(canvas, isPreview = false, options = {}) {
       this.canvas = canvas;
       this.isPreview = isPreview;
+      this.options = options || {};
       this.animId = null;
       this.time = 0;
-      this.progress = 0.35; // 0.0 to 1.0 (Summit)
-      this.targetProgress = 0.35;
+
+      // Altitude progression: 0.0 to 1.0 (representing 0m to 4,200m)
+      this.initialProgress = (typeof this.options.initialProgress === 'number') ? Math.max(0, Math.min(1.0, this.options.initialProgress)) : 0.0;
+      this.progress = this.initialProgress;
+      this.targetProgress = this.initialProgress;
+      this.currentRound = this.options.currentRound || 1;
+      this.totalRounds = this.options.totalRounds || 3;
+      this.isFinalRound = Boolean(this.options.isFinalRound);
+      this.powerMultiplier = this.options.powerMultiplier || 1.0;
+      this.correctCount = this.options.correctCount || 0;
+      this.loadout = this.options.loadout || {};
+
+      this.particles = new ParticleEmitter();
+      this.climberBounce = 1;
+      this.shake = 0;
+
+      // 50 Snow particles
       this.snowParticles = [];
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 50; i++) {
         this.snowParticles.push({
-          x: Math.random() * 600,
-          y: Math.random() * 400,
-          speed: Math.random() * 1.5 + 0.8,
-          size: Math.random() * 2.5 + 1.2
+          x: Math.random() * 800,
+          y: Math.random() * 500,
+          speed: Math.random() * 1.8 + 0.8,
+          size: Math.random() * 2.8 + 1.0,
+          drift: Math.random() * 1.5 - 0.75
         });
+      }
+
+      // Dynamic Arctic Hazard states (Blizzards & Gale Winds)
+      this.hazardTimer = 0;
+      this.hazardCooldown = 180 + Math.floor(Math.random() * 120); // every 3-5s
+      this.activeHazardName = "";
+      this.activeHazardColor = "#38bdf8";
+      this.activeHazardDuration = 0;
+      this.statusBannerText = "";
+      this.statusBannerTimer = 0;
+
+      // Summit victory celebration flag
+      this.hasReachedSummit = (this.progress >= 0.98);
+      this.celebrationTimer = 0;
+
+      // Multiplayer scaling / rival bots
+      const effectivePlayerCount = (this.options && this.options.playerCount) ? this.options.playerCount : 1;
+      if (effectivePlayerCount > 5) {
+        // STRICT RULE: If human players > 5, spawn ZERO AI bots
+        this.rivals = [];
+      } else {
+        // Spawn up to 3 rival AI bots pacing along the mountain trail
+        const botCount = Math.max(1, 4 - effectivePlayerCount);
+        const botRoster = [
+          { name: "Yeti Scout", helmet: "#f59e0b", body: "#d97706", progressOffset: -0.04, climbSpeed: 0.0004 },
+          { name: "Glacier Bot", helmet: "#a855f7", body: "#7c3aed", progressOffset: -0.07, climbSpeed: 0.0003 },
+          { name: "Alpine AI", helmet: "#10b981", body: "#059669", progressOffset: 0.02, climbSpeed: 0.0005 }
+        ];
+        this.rivals = botRoster.slice(0, botCount).map((b) => ({
+          name: b.name,
+          helmet: b.helmet,
+          body: b.body,
+          progress: Math.max(0, this.initialProgress + b.progressOffset),
+          targetProgress: Math.max(0, this.initialProgress + b.progressOffset),
+          climbSpeed: b.climbSpeed,
+          decisionTimer: Math.floor(Math.random() * 30)
+        }));
+      }
+
+      this.onClick = this.onClick.bind(this);
+      if (!this.isPreview) {
+        this.canvas.addEventListener('click', this.onClick);
+        this.canvas.addEventListener('touchstart', this.onClick, { passive: true });
       }
     }
 
@@ -986,33 +1046,192 @@
         cancelAnimationFrame(this.animId);
         this.animId = null;
       }
+      this.canvas.removeEventListener('click', this.onClick);
+      this.canvas.removeEventListener('touchstart', this.onClick);
     }
 
-    setProgress(val) {
-      this.targetProgress = Math.max(0, Math.min(1.0, val));
+    onClick(e) {
+      if (this.hasReachedSummit && this.isFinalRound) return;
+      this.climb(0.015);
+    }
+
+    climb(step = 0.015) {
+      // Scale climb force based on streak multiplier and question sprint accuracy
+      const mult = Math.max(1.0, this.powerMultiplier);
+      const accBonus = 1.0 + (this.correctCount * 0.1);
+      const perkBoost = (this.loadout && this.loadout.threeWay) ? 1.25 : 1.0;
+      const force = step * mult * accBonus * perkBoost;
+
+      let nextProgress = this.targetProgress + force;
+
+      // Checkpoint cap: student CANNOT reach summit in early rounds!
+      if (!this.isFinalRound) {
+        const roundFraction = Math.min(1.0, this.currentRound / Math.max(1, this.totalRounds));
+        const maxProgressThisRound = Math.min(0.88, Math.max(0.28, roundFraction * 0.88));
+
+        if (nextProgress >= maxProgressThisRound) {
+          nextProgress = maxProgressThisRound;
+          this.statusBannerText = `⛺ CAMP ${this.currentRound} CHECKPOINT REACHED! Rest for next sprint!`;
+          this.statusBannerTimer = 55;
+        }
+      } else {
+        // Final round allows conquering summit at 1.0 (4,200m)
+        if (nextProgress >= 0.98) {
+          nextProgress = 1.0;
+          if (!this.hasReachedSummit) {
+            this.hasReachedSummit = true;
+            this.celebrationTimer = 180;
+            SoundFX.victory();
+          }
+        }
+      }
+
+      this.targetProgress = nextProgress;
+      this.climberBounce = 1.35;
+
+      // Ice chink particle burst at climber location
+      const { w, h } = setupHiDpi(this.canvas);
+      const coords = this.getTrailCoords(this.progress, w, h);
+      this.particles.emit(coords.x, coords.y - 12, 6, 'dust');
+      SoundFX.click();
+    }
+
+    triggerArcticHazard() {
+      const hazards = [
+        { name: "🌪️ ARCTIC GALE PULLBACK!", push: 0.035, color: '#38bdf8', shake: 3 },
+        { name: "❄️ WHITE-OUT FREEZE SURGE!", push: 0.048, color: '#06b6d4', shake: 5 },
+        { name: "🏔️ AVALANCHE ROCKFALL!", push: 0.065, color: '#f43f5e', shake: 8 }
+      ];
+      const h = hazards[Math.floor(Math.random() * hazards.length)];
+      this.activeHazardName = h.name;
+      this.activeHazardColor = h.color;
+      this.activeHazardDuration = 70; // ~1.2s visual flash
+      this.shake = h.shake;
+
+      // Resistance perk reduces hazard pushback
+      const aegisShield = (this.loadout && this.loadout.shield > 0) ? 0.5 : 1.0;
+      const netPush = h.push * aegisShield;
+
+      // Push climber slightly back down trail (cannot drop below initialProgress of current round)
+      this.targetProgress = Math.max(this.initialProgress, this.targetProgress - netPush);
+
+      const { w, h: canvasH } = setupHiDpi(this.canvas);
+      const coords = this.getTrailCoords(this.progress, w, canvasH);
+      this.particles.emit(coords.x, coords.y, 14, 'splash');
+      SoundFX.wrong();
+    }
+
+    getTrailCoords(progress, w, h) {
+      const pt0 = { x: w * 0.16, y: h * 0.88 }; // Basecamp (0m)
+      const pt1 = { x: w * 0.35, y: h * 0.68 }; // Camp 1 (1,400m)
+      const pt2 = { x: w * 0.65, y: h * 0.46 }; // Camp 2 (2,800m)
+      const pt3 = { x: w * 0.50, y: h * 0.20 }; // Summit (4,200m)
+
+      const p = Math.max(0, Math.min(1.0, progress));
+      if (p < 0.33) {
+        const t = p / 0.33;
+        return {
+          x: pt0.x + (pt1.x - pt0.x) * t,
+          y: pt0.y + (pt1.y - pt0.y) * t
+        };
+      } else if (p < 0.66) {
+        const t = (p - 0.33) / 0.33;
+        return {
+          x: pt1.x + (pt2.x - pt1.x) * t,
+          y: pt1.y + (pt2.y - pt1.y) * t
+        };
+      } else {
+        const t = (p - 0.66) / 0.34;
+        return {
+          x: pt2.x + (pt3.x - pt2.x) * t,
+          y: pt2.y + (pt3.y - pt2.y) * t
+        };
+      }
     }
 
     render() {
       const { ctx, w, h } = setupHiDpi(this.canvas);
-      this.time += 0.02;
+      this.time += 0.025;
 
-      this.progress += (this.targetProgress - this.progress) * 0.08;
-      if (this.isPreview) {
-        this.targetProgress = 0.4 + Math.sin(this.time * 0.8) * 0.25;
+      // Smooth progress interpolation
+      this.progress += (this.targetProgress - this.progress) * 0.10;
+
+      // Gentle natural altitude drag (headwinds)
+      if (!this.isPreview && !this.hasReachedSummit) {
+        this.targetProgress = Math.max(this.initialProgress, this.targetProgress - 0.00025);
       }
 
-      // 1. Alpine Sky Gradient (Teal/Emerald Mountain Vibe)
+      // Preview mode: gentle auto-climb demonstration
+      if (this.isPreview) {
+        this.targetProgress = 0.35 + Math.sin(this.time * 0.8) * 0.22;
+      }
+
+      // Hazard timer tick (in live match only)
+      if (!this.isPreview && !this.hasReachedSummit) {
+        this.hazardTimer++;
+        if (this.hazardTimer >= this.hazardCooldown) {
+          this.hazardTimer = 0;
+          this.hazardCooldown = 180 + Math.floor(Math.random() * 120);
+          this.triggerArcticHazard();
+        }
+      }
+
+      // Decay hazard duration & screen shake
+      if (this.activeHazardDuration > 0) this.activeHazardDuration--;
+      if (this.statusBannerTimer > 0) this.statusBannerTimer--;
+      if (this.climberBounce > 1.0) this.climberBounce -= 0.04;
+      if (this.shake > 0) this.shake *= 0.85;
+
+      ctx.save();
+      if (this.shake > 0.4) {
+        ctx.translate((Math.random() - 0.5) * this.shake, (Math.random() - 0.5) * this.shake);
+      }
+
+      // 1. Alpine Sky Gradient (shifts with altitude: Bright Teal -> Mountain Twilight -> Cosmic Navy)
       const skyGrad = ctx.createLinearGradient(0, 0, 0, h);
-      skyGrad.addColorStop(0, '#0284c7');
-      skyGrad.addColorStop(0.5, '#0d9488');
-      skyGrad.addColorStop(1, '#115e59');
+      if (this.progress < 0.4) {
+        skyGrad.addColorStop(0, '#0284c7');
+        skyGrad.addColorStop(0.5, '#0d9488');
+        skyGrad.addColorStop(1, '#115e59');
+      } else if (this.progress < 0.75) {
+        skyGrad.addColorStop(0, '#0369a1');
+        skyGrad.addColorStop(0.5, '#0f766e');
+        skyGrad.addColorStop(1, '#1e1b4b');
+      } else {
+        skyGrad.addColorStop(0, '#0f172a');
+        skyGrad.addColorStop(0.4, '#1e1b4b');
+        skyGrad.addColorStop(1, '#020617');
+      }
       ctx.fillStyle = skyGrad;
       ctx.fillRect(0, 0, w, h);
 
-      // 2. Snow Mountain Silhouette
-      const peakX = w * 0.5;
-      const peakY = h * 0.18;
+      // Twinkling stars at high altitudes (>2,800m)
+      if (this.progress > 0.6) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        for (let i = 0; i < 20; i++) {
+          const sx = (i * 47) % w;
+          const sy = (i * 29) % (h * 0.4);
+          const sAlpha = 0.3 + 0.7 * Math.abs(Math.sin(this.time * 2 + i));
+          ctx.globalAlpha = sAlpha;
+          ctx.fillRect(sx, sy, 1.8, 1.8);
+        }
+        ctx.globalAlpha = 1.0;
+      }
 
+      // 2. Mountain Ridge & Peaks
+      const peakX = w * 0.5;
+      const peakY = h * 0.20;
+
+      // Distant mountain silhouette (Dark teal)
+      ctx.fillStyle = '#042f2e';
+      ctx.beginPath();
+      ctx.moveTo(w * 0.1, h);
+      ctx.lineTo(w * 0.38, h * 0.35);
+      ctx.lineTo(w * 0.85, h);
+      ctx.closePath();
+      ctx.fill();
+
+      // Foreground mountain pyramid
       ctx.fillStyle = '#0f766e';
       ctx.beginPath();
       ctx.moveTo(w * 0.05, h);
@@ -1022,42 +1241,49 @@
       ctx.fill();
 
       // Snowy Summit Cap
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = '#f8fafc';
       ctx.beginPath();
       ctx.moveTo(peakX, peakY);
-      ctx.lineTo(peakX + (w * 0.12), peakY + (h * 0.22));
-      ctx.lineTo(peakX + (w * 0.04), peakY + (h * 0.18));
+      ctx.lineTo(peakX + (w * 0.14), peakY + (h * 0.22));
+      ctx.lineTo(peakX + (w * 0.05), peakY + (h * 0.18));
       ctx.lineTo(peakX - (w * 0.02), peakY + (h * 0.24));
-      ctx.lineTo(peakX - (w * 0.12), peakY + (h * 0.22));
+      ctx.lineTo(peakX - (w * 0.14), peakY + (h * 0.22));
       ctx.closePath();
       ctx.fill();
 
-      // Red Summit Flag
+      // Summit Flag (Pulsing Gold / Red)
       ctx.strokeStyle = '#cbd5e1';
       ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.moveTo(peakX, peakY);
-      ctx.lineTo(peakX, peakY - 24);
+      ctx.lineTo(peakX, peakY - 26);
       ctx.stroke();
 
-      ctx.fillStyle = '#ef4444';
+      const flagColor = this.hasReachedSummit ? '#f59e0b' : '#ef4444';
+      ctx.fillStyle = flagColor;
       ctx.beginPath();
-      ctx.moveTo(peakX, peakY - 24);
-      ctx.lineTo(peakX + 18 + Math.sin(this.time * 6) * 3, peakY - 17);
-      ctx.lineTo(peakX, peakY - 10);
+      ctx.moveTo(peakX, peakY - 26);
+      ctx.lineTo(peakX + 20 + Math.sin(this.time * 6) * 3, peakY - 18);
+      ctx.lineTo(peakX, peakY - 11);
       ctx.closePath();
       ctx.fill();
 
+      if (this.hasReachedSummit) {
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('⭐', peakX + 10, peakY - 18);
+      }
+
       // 3. Winding Climbing Path
+      const pt0 = { x: w * 0.16, y: h * 0.88 }; // Basecamp
+      const pt1 = { x: w * 0.35, y: h * 0.68 }; // Camp 1 Alpha
+      const pt2 = { x: w * 0.65, y: h * 0.46 }; // Camp 2 Beta
+      const pt3 = { x: peakX, y: peakY + 4 };   // Summit
+
       ctx.strokeStyle = 'rgba(254, 240, 138, 0.65)';
       ctx.lineWidth = 3;
       ctx.setLineDash([5, 4]);
-
-      const pt0 = { x: w * 0.18, y: h * 0.88 };
-      const pt1 = { x: w * 0.35, y: h * 0.68 };
-      const pt2 = { x: w * 0.62, y: h * 0.48 };
-      const pt3 = { x: peakX, y: peakY + 8 };
-
       ctx.beginPath();
       ctx.moveTo(pt0.x, pt0.y);
       ctx.lineTo(pt1.x, pt1.y);
@@ -1066,64 +1292,204 @@
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Waypoint flags / beacons
-      [pt0, pt1, pt2].forEach((pt, idx) => {
-        ctx.fillStyle = '#f59e0b';
+      // Waypoint Camps (Basecamp, Camp 1 1,400m, Camp 2 2,800m, Summit 4,200m)
+      const waypoints = [
+        { pt: pt0, name: "Basecamp", alt: "0m", passed: this.progress >= 0.05 },
+        { pt: pt1, name: "Camp 1", alt: "1,400m", passed: this.progress >= 0.33 },
+        { pt: pt2, name: "Camp 2", alt: "2,800m", passed: this.progress >= 0.66 }
+      ];
+
+      waypoints.forEach((wp) => {
+        ctx.fillStyle = wp.passed ? '#10b981' : '#f59e0b';
         ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 5, 0, Math.PI * 2);
+        ctx.arc(wp.pt.x, wp.pt.y, 6, 0, Math.PI * 2);
         ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = wp.passed ? '#6ee7b7' : '#fde68a';
+        ctx.font = 'bold 9px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${wp.name} (${wp.alt})`, wp.pt.x, wp.pt.y + 14);
       });
 
-      // 4. Climber Avatar along path
-      let climberX = pt0.x;
-      let climberY = pt0.y;
+      // 4. Rival Climber Bots (Multple climbers on trail)
+      if (this.rivals && this.rivals.length > 0) {
+        this.rivals.forEach((bot) => {
+          bot.decisionTimer++;
+          if (bot.decisionTimer >= 35) {
+            bot.decisionTimer = 0;
+            // Rival climbs gently up to checkpoint
+            const roundCap = this.isFinalRound ? 0.95 : Math.min(0.85, (this.currentRound / this.totalRounds) * 0.85);
+            bot.targetProgress = Math.min(roundCap, bot.targetProgress + bot.climbSpeed * 12);
+          }
+          bot.progress += (bot.targetProgress - bot.progress) * 0.08;
 
-      if (this.progress < 0.33) {
-        const t = this.progress / 0.33;
-        climberX = pt0.x + (pt1.x - pt0.x) * t;
-        climberY = pt0.y + (pt1.y - pt0.y) * t;
-      } else if (this.progress < 0.66) {
-        const t = (this.progress - 0.33) / 0.33;
-        climberX = pt1.x + (pt2.x - pt1.x) * t;
-        climberY = pt1.y + (pt2.y - pt1.y) * t;
-      } else {
-        const t = (this.progress - 0.66) / 0.34;
-        climberX = pt2.x + (pt3.x - pt2.x) * t;
-        climberY = pt2.y + (pt3.y - pt2.y) * t;
+          const bCoords = this.getTrailCoords(bot.progress, w, h);
+          drawChibiAvatar(ctx, bCoords.x, bCoords.y - 12, Math.min(0.75, w / 650), {
+            helmetColor: bot.helmet,
+            bodyColor: bot.body,
+            tilt: Math.sin(this.time * 4) * 0.06,
+            pulling: false,
+            expression: 'happy'
+          });
+
+          // Bot name tag
+          ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+          ctx.beginPath();
+          ctx.roundRect(bCoords.x - 24, bCoords.y - 32, 48, 12, 6);
+          ctx.fill();
+          ctx.fillStyle = '#cbd5e1';
+          ctx.font = 'bold 8px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText(bot.name, bCoords.x, bCoords.y - 23);
+        });
       }
 
-      drawChibiAvatar(ctx, climberX, climberY - 14, Math.min(0.85, w / 600), {
+      // 5. Player Climber Avatar
+      const pCoords = this.getTrailCoords(this.progress, w, h);
+      const climberScale = Math.min(0.92, w / 580) * this.climberBounce;
+
+      drawChibiAvatar(ctx, pCoords.x, pCoords.y - 14, climberScale, {
         helmetColor: '#0ea5e9',
         bodyColor: '#e11d48',
-        tilt: Math.sin(this.time * 6) * 0.08,
+        tilt: Math.sin(this.time * 6) * 0.09,
         pulling: false,
-        expression: 'happy'
+        expression: this.hasReachedSummit ? 'happy' : (this.activeHazardDuration > 0 ? 'strain' : 'happy')
       });
 
-      // 5. Alpine Snow Particles
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      // Player floating indicator
+      ctx.fillStyle = 'rgba(14, 165, 233, 0.9)';
+      ctx.beginPath();
+      ctx.roundRect(pCoords.x - 28, pCoords.y - 40, 56, 14, 7);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 9px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('YOU 🧗', pCoords.x, pCoords.y - 30);
+
+      // 6. Particle Emitters (Ice chinks & Snow)
+      this.particles.updateAndDraw(ctx);
+
+      // Alpine Snow Storm
+      const isBlizzard = this.activeHazardDuration > 0;
+      ctx.fillStyle = isBlizzard ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.75)';
       this.snowParticles.forEach(p => {
-        p.y += p.speed;
-        p.x += Math.sin(this.time + p.y * 0.05) * 0.5;
+        p.y += isBlizzard ? p.speed * 2.5 : p.speed;
+        p.x += isBlizzard ? (p.drift - 4.5) : p.drift;
         if (p.y > h) {
           p.y = 0;
           p.x = Math.random() * w;
         }
+        if (p.x < 0) p.x = w;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, isBlizzard ? p.size * 1.4 : p.size, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // 6. Altimeter HUD Banner
-      ctx.save();
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+      // 7. Hazard Frost Screen Border & Alert
+      if (this.activeHazardDuration > 0) {
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
+        ctx.lineWidth = 10;
+        ctx.strokeRect(0, 0, w, h);
+
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        ctx.beginPath();
+        ctx.roundRect(w * 0.15, h * 0.42, w * 0.7, 36, 18);
+        ctx.fill();
+        ctx.strokeStyle = this.activeHazardColor;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.fillStyle = this.activeHazardColor;
+        ctx.font = 'black 13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(this.activeHazardName, w * 0.5, h * 0.42 + 23);
+      }
+
+      // Checkpoint status banner
+      if (this.statusBannerTimer > 0 && this.activeHazardDuration === 0) {
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.92)';
+        ctx.beginPath();
+        ctx.roundRect(w * 0.12, h * 0.42, w * 0.76, 34, 17);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 12px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(this.statusBannerText, w * 0.5, h * 0.42 + 21);
+      }
+
+      // 8. HUD Badges & Altimeter
+      // Altimeter (Top Left)
+      const currentAltMeters = Math.min(4200, Math.round(this.progress * 4200));
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
       ctx.beginPath();
-      ctx.roundRect(14, 12, 140, 24, 12);
+      ctx.roundRect(14, 12, 175, 30, 15);
       ctx.fill();
+      ctx.strokeStyle = '#0d9488';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
 
       ctx.fillStyle = '#5eead4';
-      ctx.font = 'bold 11px monospace';
-      ctx.fillText(`⛰️ ALT: ${Math.round(this.progress * 4200)}m`, 24, 28);
+      ctx.font = 'bold 12px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(`⛰️ ALT: ${currentAltMeters}m / 4,200m`, 24, 31);
+
+      // Checkpoint badge (Top Right)
+      const roundCapMeters = this.isFinalRound ? 4200 : Math.round(Math.min(0.88, (this.currentRound / this.totalRounds) * 0.88) * 4200);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.beginPath();
+      ctx.roundRect(w - 185, 12, 171, 30, 15);
+      ctx.fill();
+      ctx.strokeStyle = this.isFinalRound ? '#f59e0b' : '#38bdf8';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = this.isFinalRound ? '#fbbf24' : '#7dd3fc';
+      ctx.font = 'bold 11px system-ui';
+      ctx.textAlign = 'center';
+      ctx.fillText(this.isFinalRound ? '🏁 FINAL SUMMIT DASH!' : `📍 Round ${this.currentRound} Cap: ${roundCapMeters}m`, w - 100, 31);
+
+      // Trail Standing Leaderboard (Top Center)
+      let isLeading = true;
+      if (this.rivals && this.rivals.length > 0) {
+        isLeading = this.rivals.every(r => this.progress >= r.progress);
+      }
+      ctx.fillStyle = isLeading ? 'rgba(16, 185, 129, 0.8)' : 'rgba(245, 158, 11, 0.8)';
+      ctx.beginPath();
+      ctx.roundRect(w * 0.5 - 65, 14, 130, 22, 11);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(isLeading ? '🏆 1ST PLACE (Lead!)' : '🏃 2ND PLACE (Chasing)', w * 0.5, 29);
+
+      // Bottom tap hint banner
+      if (!this.isPreview && !this.hasReachedSummit) {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.65)';
+        ctx.beginPath();
+        ctx.roundRect(w * 0.5 - 130, h - 36, 260, 26, 13);
+        ctx.fill();
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 11px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('👆 Tap screen rapidly to push past wind gusts!', w * 0.5, h - 19);
+      } else if (this.hasReachedSummit) {
+        ctx.fillStyle = 'rgba(245, 158, 11, 0.95)';
+        ctx.beginPath();
+        ctx.roundRect(w * 0.5 - 150, h - 42, 300, 32, 16);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'black 13px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('🏆 SUMMIT CONQUERED! 4,200m PEAK WON!', w * 0.5, h - 22);
+      }
+
       ctx.restore();
     }
   }
@@ -2558,8 +2924,8 @@
       return arena;
     },
 
-    createMasteryPeakGame(canvas) {
-      const arena = new MasteryPeakArena(canvas, false);
+    createMasteryPeakGame(canvas, options = {}) {
+      const arena = new MasteryPeakArena(canvas, false, options);
       arena.start();
       return arena;
     },

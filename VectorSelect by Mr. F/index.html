@@ -1734,6 +1734,7 @@
     let gamifiedPullMultiplier = 1.0;
     let gamifiedEndTime = 0;
     let persistentTugOfWarRopePos = 0;
+    let persistentMasteryPeakProgress = 0;
     let lastKnownConnectedStudents = 1;
     let studentArenaInstance = null;
     let arenaActionTimerInterval = null;
@@ -1944,17 +1945,28 @@
       };
 
       if (window.GameArena && canvas) {
+        const totalQCount = (currentQuiz && currentQuiz.questions) ? currentQuiz.questions.length : 10;
+        const totalRoundsEstimate = Math.max(gamifiedCurrentRound, Math.ceil(totalQCount / Math.max(1, gamifiedQuestionsPerRound)));
+        const isFinalRound = (currentQuestionIdx >= totalQCount - 1) || (gamifiedCurrentRound >= totalRoundsEstimate);
+
         if (gamifiedGameMode === "mastery_peak") {
-          studentArenaInstance = window.GameArena.createMasteryPeakGame(canvas);
-          if (studentArenaInstance) {
-            studentArenaInstance.progress = Math.min(0.85, (studentArenaInstance.progress || 0) + (gamifiedRoundCorrectCount * 0.06));
+          studentArenaInstance = window.GameArena.createMasteryPeakGame(canvas, {
+            initialProgress: persistentMasteryPeakProgress,
+            currentRound: gamifiedCurrentRound,
+            totalRounds: totalRoundsEstimate,
+            isFinalRound: isFinalRound,
+            powerMultiplier: gamifiedPullMultiplier,
+            correctCount: gamifiedRoundCorrectCount,
+            playerCount: lastKnownConnectedStudents || 1,
+            loadout: loadout
+          });
+          // Initial altitude boost from question sprint accuracy
+          if (studentArenaInstance && gamifiedRoundCorrectCount > 0) {
+            studentArenaInstance.climb(gamifiedRoundCorrectCount * 0.015);
           }
         } else if (gamifiedGameMode === "wayarena") {
           studentArenaInstance = window.GameArena.createMazeBattleGame(canvas, loadout);
         } else {
-          const totalQCount = (currentQuiz && currentQuiz.questions) ? currentQuiz.questions.length : 10;
-          const totalRoundsEstimate = Math.max(gamifiedCurrentRound, Math.ceil(totalQCount / Math.max(1, gamifiedQuestionsPerRound)));
-          const isFinalRound = (currentQuestionIdx >= totalQCount - 1) || (gamifiedCurrentRound >= totalRoundsEstimate);
           studentArenaInstance = window.GameArena.createTugOfWarGame(canvas, {
             initialRopePosition: persistentTugOfWarRopePos,
             currentRound: gamifiedCurrentRound,
@@ -2005,7 +2017,8 @@
           persistentTugOfWarRopePos = studentArenaInstance.ropePosition || 0;
           totalGamifiedRopePull += Math.max(0, Math.round(Math.abs(studentArenaInstance.ropePosition || 0)));
         } else if (gamifiedGameMode === "mastery_peak") {
-          totalGamifiedAltitude = Math.max(totalGamifiedAltitude, Math.round((studentArenaInstance.progress || 0) * 4200));
+          persistentMasteryPeakProgress = studentArenaInstance.progress || 0;
+          totalGamifiedAltitude = Math.max(totalGamifiedAltitude, Math.round(persistentMasteryPeakProgress * 4200));
         }
         studentArenaInstance.stop();
         studentArenaInstance = null;
@@ -2041,6 +2054,7 @@
       totalGamifiedRopePull = 0;
       totalGamifiedAltitude = 0;
       persistentTugOfWarRopePos = 0;
+      persistentMasteryPeakProgress = 0;
       if (window.RecoverySims) window.RecoverySims.stop();
 
       // Restore any recovery attempts completed in this session

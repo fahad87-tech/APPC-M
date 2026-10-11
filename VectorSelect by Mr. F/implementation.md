@@ -1106,3 +1106,144 @@ In `index.html`:
 2. **Participant Headcount Reflection**: Never hardcode multiplayer entity counts; pass dynamic lobby count into game constructors so arenas can adjust bot populations dynamically.
 3. **Multi-Round Rope Persistence**: In episodic minigames, store game progress (`ropePosition`, `altitude`, `inventory`) in outer module-scoped variables (`persistentTugOfWarRopePos`) between action phase modal closes.
 4. **Episodic Progression Caps**: To prevent students from finishing a minigame in Round 1, calculate proportional progress caps (`currentRound / totalRounds`) that lock further advancement until subsequent question rounds are completed.
+
+## 17. Mastery Peak AAA Interactive Summit Engine, Multi-Round Altitude Persistence, Arctic Hazards & 3-Game Ecosystem Harmonization
+
+### A. Problem Statement & Root Cause Analysis
+
+1. **Mastery Peak Non-Interactivity**:
+   - In previous builds, `MasteryPeakArena` was purely passive: it possessed zero click, pointer, or touch event listeners. While the student UI prompted *"Tap screen rapidly to ascend past wind gusts!"*, tapping had zero effect on the climber sprite.
+   - Initial progress hardcoded `progress = 0.35` (1,470m) every round, disregarding all prior climbs and resetting progress when the action phase closed.
+   - The climber was completely alone with zero rival climber bots or classmate representation.
+   - There was zero resistance: no headwind drift, blizzards, or avalanches resisting the climb.
+   - There were no round checkpoint altitude caps; progress was decoupled from the overall question sprint structure.
+
+2. **Phantom `code_busters` Discrepancy in Teacher Game Studio**:
+   - In `teacher.html` (lines 1013–1025), the Game Studio modal listed a legacy mock card for `CODE BUSTERS` ("Hack vaults and steal gems!").
+   - However, `CodeBustersArena` was never written in `data/game_arena.js`, and Step 3 of the teacher wizard had already replaced it with `classic` ("Classic Exam"). Selecting `code_busters` in the studio resulted in broken previews or fallbacks to Tug of War.
+
+---
+
+### B. Architecture & Data Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor S as Student Client
+    participant Engine as index.html Engine
+    participant Peak as MasteryPeakArena (60fps)
+
+    Note over S,Engine: Question Sprint 1 (4 Qs Solved Correctly)
+    Engine->>Peak: Launch Round 1 (initialProgress = 0, isFinalRound = false)
+    Note over Peak: Checkpoint Cap = 1,400m (33% Summit). Rival Bots active.
+    S->>Peak: Rapid taps (climb force scaled by streak & accuracy)
+    Note over Peak: Arctic Gale strikes (-3.5% pushback + screen shake)
+    Peak-->>S: Climber reaches Camp 1 Alpha (1,400m). Camp 1 flag turns Green!
+    Note over Peak: Round 1 Ends. Altitude pauses at 1,380m
+    Peak->>Engine: Stores persistentMasteryPeakProgress = 0.328 (1,380m)
+
+    Note over S,Engine: Question Sprint 2 (4 Qs Solved Correctly)
+    Engine->>Peak: Launch Round 2 (initialProgress = 0.328, isFinalRound = false)
+    Note over Peak: Checkpoint Cap = 2,800m (66% Summit). Resumes from 1,380m!
+    S->>Peak: Rapid taps with Thermal Glider perk boost
+    Note over Peak: White-Out Freeze strikes (-4.8% pushback + frost border)
+    Peak-->>S: Climber reaches Camp 2 Beta (2,800m). Camp 2 flag turns Green!
+    Peak->>Engine: Stores persistentMasteryPeakProgress = 0.655 (2,750m)
+
+    Note over S,Engine: Final Round Sprint (All Exam Qs Answered)
+    Engine->>Peak: Launch Final Round (initialProgress = 0.655, isFinalRound = true)
+    Note over Peak: NO Checkpoint Cap! Summit unlocked at 4,200m!
+    S->>Peak: Pushes past 4,000m into starry cosmic navy sky
+    Peak-->>S: 🏆 Reaches 4,200m Summit! Gold flag plants, confetti explosion & fanfare!
+```
+
+---
+
+### C. Technical Implementation Details
+
+#### 1. Interactive Climbing Engine & Mechanics (`data/game_arena.js`)
+
+- **Interactive Pointer & Touch Listeners**:
+  ```javascript
+  this.onClick = this.onClick.bind(this);
+  if (!this.isPreview) {
+    this.canvas.addEventListener('click', this.onClick);
+    this.canvas.addEventListener('touchstart', this.onClick, { passive: true });
+  }
+  ```
+- **Climbing Propulsion (`climb(step)`)**:
+  - Base step is scaled by the student's active streak multiplier (`powerMultiplier`), question accuracy (`correctCount`), and earned perks (`thermalJetGlider` / `speedBoost`):
+    ```javascript
+    const mult = Math.max(1.0, this.powerMultiplier);
+    const accBonus = 1.0 + (this.correctCount * 0.1);
+    const perkBoost = (this.loadout && this.loadout.threeWay) ? 1.25 : 1.0;
+    const force = step * mult * accBonus * perkBoost;
+    ```
+  - Emits ice chink dust particles at climber trail coordinates and plays climbing audio synthesis (`SoundFX.click()`).
+- **Round Checkpoint Altitude Caps**:
+  - In non-final rounds:
+    ```javascript
+    const roundFraction = Math.min(1.0, this.currentRound / Math.max(1, this.totalRounds));
+    const maxProgressThisRound = Math.min(0.88, Math.max(0.28, roundFraction * 0.88));
+    if (nextProgress >= maxProgressThisRound) {
+      nextProgress = maxProgressThisRound;
+      this.statusBannerText = `⛺ CAMP ${this.currentRound} CHECKPOINT REACHED! Rest for next sprint!`;
+      this.statusBannerTimer = 55;
+    }
+    ```
+  - In the final round, students can push past 0.98 to 1.0 (4,200m), triggering `SoundFX.victory()`, golden flag illumination, and celebratory summit banners.
+
+#### 2. Dynamic Arctic Hazards (Gales, White-Outs & Avalanches)
+
+- Natural high-altitude headwind drift constantly pulls target progress slightly downward:
+  ```javascript
+  this.targetProgress = Math.max(this.initialProgress, this.targetProgress - 0.00025);
+  ```
+- Dynamic Arctic Hazards trigger every 3 to 5 seconds:
+  1. `🌪️ ARCTIC GALE PULLBACK!` (-3.5% altitude pushback, gale-force snow drift).
+  2. `❄️ WHITE-OUT FREEZE SURGE!` (-4.8% altitude pushback, frost screen-border vignette).
+  3. `🏔️ AVALANCHE ROCKFALL!` (-6.5% altitude pushback, camera shake translation `this.shake = 8`, splash debris).
+- Students who earned the `Peak Conqueror Aegis` / `Kinetic Shield` perk take 50% reduced hazard pushback (`netPush = h.push * 0.5`).
+
+#### 3. Multiplayer Bot Scaling (>5 Players = 0 Bots)
+
+- Applied strictly in `MasteryPeakArena`:
+  ```javascript
+  const effectivePlayerCount = (this.options && this.options.playerCount) ? this.options.playerCount : 1;
+  if (effectivePlayerCount > 5) {
+    this.rivals = []; // STRICT RULE: Zero AI bots in rooms with >5 students
+  } else {
+    const botCount = Math.max(1, 4 - effectivePlayerCount);
+    // Spawns Yeti Scout, Glacier Bot, Alpine AI pacing along the trail
+  }
+  ```
+- Trail Standing Leaderboard HUD displays real-time placement (`🏆 1ST PLACE (Lead!)` vs `🏃 2ND PLACE (Chasing)`).
+
+#### 4. Multi-Round State Persistence (`index.html`)
+
+- Outer module-scoped variable: `let persistentMasteryPeakProgress = 0;`.
+- In `triggerMiniGameActionPhase()`:
+  - Passes `initialProgress: persistentMasteryPeakProgress` into `createMasteryPeakGame`.
+  - Applies initial sprint accuracy surge: `studentArenaInstance.climb(gamifiedRoundCorrectCount * 0.015)`.
+- In `exitMiniGameActionPhase()`:
+  - `persistentMasteryPeakProgress = studentArenaInstance.progress || 0;`
+  - `totalGamifiedAltitude = Math.round(persistentMasteryPeakProgress * 4200);`
+- In `startExamRunner()`: resets `persistentMasteryPeakProgress = 0;`.
+
+#### 5. 3-Game Ecosystem Harmonization (`teacher.html`)
+
+- Replaced legacy mock card `card-game-code_busters` in the Game Studio modal with `card-game-classic` ("Classic Exam").
+- Both the **Teacher Step 3 Wizard** and the **Game Studio Modal** are now 100% synchronized with the 3 core mini-games + Classic Exam:
+  1. ⚡ **Wayarena Battle** (`wayarena`): 2.5D Chibi sci-fi vector maze shooter.
+  2. ⚔️ **Tug of War** (`tug_of_war`): Beach rope duel with opponent Titan Powers.
+  3. ⛰️ **Mastery Peak** (`mastery_peak`): 4,200m alpine summit ascent with blizzards & camp checkpoints.
+  4. 📝 **Classic AP Exam** (`classic`): Pure assessment mode with College Board timers & rationale reviews.
+
+---
+
+### D. Replication Checklist for Other IDEs
+
+1. **Trail Coordinate Interpolation**: Pre-calculate piecewise linear segments for mountain trails `[(0, 0.88), (0.35, 0.68), (0.65, 0.46), (0.50, 0.20)]` so avatars move smoothly across non-linear 2D heights.
+2. **Dynamic Sky Gradient Shift**: Transition canvas background gradients based on elevation percentage (Teal valley -> Twilight ridge -> Cosmic navy with twinkling stars).
+3. **Passive Touch Handling**: Always pass `{ passive: true }` to `touchstart` event listeners on mobile devices to prevent browser scroll lag during rapid clicking.
+4. **Episodic Minimum Floor**: When hazard pushback occurs, ensure `Math.max(this.initialProgress, this.targetProgress - netPush)` so students never lose progress earned in prior completed question rounds.
