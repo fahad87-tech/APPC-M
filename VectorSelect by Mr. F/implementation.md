@@ -480,3 +480,145 @@ When replicating in another environment:
 
 
 
+
+---
+
+## 13. Teacher Portal 3-Step Guided Wizard & Student-Paced Frictionless Review Architecture
+
+### A. Architectural Overview & Design Motivation
+The Teacher Portal (`teacher.html`) was redesigned from a cluttered vertical control stack into a modern, focused **3-Step Guided Wizard** inspired by top gamified learning platforms (Wayground, Kahoot, Blooket). The interface provides clear visual separation, eliminates decision fatigue, and introduces high-contrast, color-coded interactive tiles.
+
+Crucially, **1-click startup speed** is preserved via the **"⚡ Quick Launch"** option on Step 1.
+
+Additionally, in `index.html`, the artificial `[ 🔒 Lock In Answer ]` gate has been removed for **Student-Paced** assignments, enabling smooth and agile question solving. When the exam timer ends (or submission occurs), the assignment automatically locks, enabling students to review all questions with correct (green) and incorrect (red) feedback and official College Board scoring rationales.
+
+```mermaid
+flowchart TD
+  subgraph TeacherPortal["Teacher Portal (teacher.html)"]
+    W1["Step 1: Quiz & Features<br/>(Course, Unit, AP Quiz + Toggles)"]
+    W1 -->|"Next &rarr;"| W2["Step 2: Pacing Mode<br/>(Teacher-Led vs Student-Led)"]
+    W2 -->|"Student-Led"| W3A["Step 3A: Mini-Game & Duration<br/>(Wayarena, Tug of War, Mastery Peak, Classic)"]
+    W2 -->|"Teacher-Led"| W3B["Step 3B: Projector Confirmation<br/>(Synchronized 90s Interval)"]
+    W3A --> Lobby["Dedicated Live Class Lobby<br/>(6-Digit Code, QR Code, Direct URL)"]
+    W3B --> Lobby
+    W1 -.->|"⚡ Quick Launch"| Lobby
+  end
+
+  subgraph StudentRunner["Student Runner (index.html)"]
+    SActive["Student-Paced Active Sprint<br/>(Click A/B/C/D freely - NO Lock Button)"]
+    SActive -->|"Timer at 0:00 or Submit"| SLocked["Auto-Locked Exam State<br/>(Read-Only Choices)"]
+    SLocked --> SReview["Full Review Mode<br/>(&#10003; Green / &#10007; Red + College Board Rationales)"]
+  end
+```
+
+---
+
+### B. Teacher Portal 3-Step Guided Dispatcher (`teacher.html`)
+
+1. **Stepper Header Navigation**:
+   - Element: `#wizard-stepper-pills` with `.step-pill` components.
+   - Tabs:
+     - `1. Quiz & Features` (`#step-tab-1`): Active on initial load.
+     - `2. Pacing Mode` (`#step-tab-2`): Enabled once assessment is chosen.
+     - `3. Game & Launch` (`#step-tab-3`): Final configuration deck.
+   - Helper function: `goToWizardStep(stepNumber)` validates required selections and smoothly toggles step containers with `.enter` CSS animations.
+
+2. **Step 1: Assessment Selection & Integrity Features (`#wizard-step-1`)**:
+   - **Cascading Selectors**:
+     - `#teacher-select-subject` (Course) $\rightarrow$ `#teacher-select-unit` (Unit) $\rightarrow$ `#teacher-select-assessment` (Quiz).
+   - **Live Assessment Summary Card** (`#selected-quiz-summary-card`):
+     - Displays course badge, unit badge, assessment title, question count (`15 MCQs • AP Rigor`), and `#btn-preview-quiz` ("👁️ Preview Questions").
+   - **Pedagogical & Integrity Toggles**:
+     - `🧮 Allow Calculator` (`#opt-calc`, default ON).
+     - `🏆 Show Leaderboard` (`#opt-leaderboard`, default ON).
+     - `🔒 Lockdown Mode` (`#opt-lockdown`, default OFF).
+     - `🔀 Shuffle Questions` (`#opt-randomize`, default OFF).
+     - `📋 Allow Students to Review Answers & Explanations` (`#opt-review`, default ON).
+     - `🎮 Enable Point Redemption & Physics Sims` (`#opt-point-redemption`, default ON).
+   - **Footer Controls**:
+     - Left: `⚡ Quick Launch (Default Settings)` button (`quickLaunchAssignment()`). Dispatches immediately with 1 click using default settings.
+     - Right: `Next: Choose Pacing Mode →` button (`#btn-step1-next`, enabled once quiz is chosen).
+
+3. **Step 2: Pacing Mode Selection (`#wizard-step-2`)**:
+   Two large, Wayground-inspired high-contrast interactive cards:
+   - **Teacher-Led (Synchronized Projector)** (`#pacing-card-teacher`):
+     - *Styling*: Deep Royal Purple / Indigo border & gradient (`border-2 border-purple-500 bg-purple-950/40`).
+     - *Badge*: `📽️ PROJECTOR MODE`.
+     - *Description*: All students advance together in lockstep with instructor pacing.
+     - *Built-in Preset*: `#teacher-per-question` dropdown (Manual / 30s / 45s / 60s / 90s Recommended / 120s).
+   - **Student-Led (Self-Paced & Gamified)** (`#pacing-card-student`):
+     - *Styling*: Vibrant Cyan / Emerald border & gradient (`border-2 border-cyan-400 bg-cyan-950/40`).
+     - *Badge*: `🎮 MINI-GAMES & SPRINT`.
+     - *Description*: Students solve questions independently at their own speed with mini-game bursts.
+     - *Built-in Preset*: `#teacher-time-limit` dropdown (Untimed / 5m / 10m / 15m / 20m / 30m / 45m / 60m).
+
+4. **Step 3: Mini-Game Setup & Confirmation (`#wizard-step-3`)**:
+   - **Student-Led Branch (`#step3-student-games-panel`)**:
+     - 4 Vibrant Wayground Mini-Game Tiles:
+       1. ⚡ **Wayarena Battle** (`#tg-card-wayarena`): Amber/Orange neon laser shootout with chibi battlers, bots & powerups.
+       2. ⚔️ **Tug of War** (`#tg-card-tug_of_war`): Electric cyan beach rope pull powered by question accuracy.
+       3. ⛰️ **Mastery Peak** (`#tg-card-mastery_peak`): Mint/Emerald alpine ascent with snow particles & concept remediation.
+       4. 📝 **Classic AP Exam** (`#tg-card-classic`): Slate/Indigo continuous assessment with zero mini-games.
+     - Parameters: `#teacher-game-duration` (Master Clock) and `#teacher-questions-per-round` (3 Qs, 4 Qs, 6 Qs).
+     - Launch button: **"🚀 Launch Student-Led Session"** (`handleCreateAssignment()`).
+   - **Teacher-Led Branch (`#step3-teacher-summary-panel`)**:
+     - Displays assessment summary, per-question interval, and active integrity rules.
+     - Launch button: **"🚀 Launch Teacher Projector Lobby"** (`handleCreateAssignment()`).
+
+5. **Dedicated Class Lobby Screen (`#wizard-lobby-container`)**:
+   Immediately upon clicking Launch, the card smoothly transitions into the waiting lobby:
+   - **Giant Join Code**: `#banner-code` in emissive gold plasma font (`text-5xl sm:text-6xl md:text-7xl font-black font-mono`).
+   - **Auto-Generated QR Code**: `#banner-qr-code` dynamically hydrated via `api.qrserver.com` SVG/PNG ready for instant scanning by mobile/tablet cameras.
+   - **Direct URL**: One-click "📋 Copy Direct Link" button (`copyShareUrl()`).
+   - **Live Student Counter**: Green pulsing dot with live participant counter (`#lobby-student-count`).
+   - **Mode-Specific Primary Action**:
+     - Teacher-Led: `🚀 Enter Projector Control Deck (Start Class)` $\rightarrow$ opens `#live-control-modal`.
+     - Student-Led: `📊 Monitor Live Student Progress` $\rightarrow$ scrolls to active assignments table.
+   - **"↻ New Dispatch"** button (`resetWizard()`) to reset the stepper for another class.
+
+---
+
+### C. Student-Paced Frictionless Answering & Auto-Locked Review (`index.html`)
+
+1. **Removal of the Forced Lock-In Gate**:
+   - In `renderCurrentQuestion()`:
+     - When `quizMode === "student_led"` and the test is active (`!isExamLocked && !isExamSubmitted`):
+       - No `#q-lock-status-box` with `[ 🔒 Lock In Answer ]` is rendered.
+       - Students click choice buttons (A, B, C, D) directly.
+       - Clicking another choice immediately updates `studentAnswers[realIdx]` and active highlights (`choice-selected`).
+       - If a prior question was missed and point redemption is enabled, the recovery lab is accessible directly without requiring a manual lock button.
+   - In `selectChoice(letter)`:
+     - `if (quizMode === "teacher_led" && studentLockedAnswers[realIdx]) return;`
+     - In `student_led` mode, students can switch answers freely anytime before submission or timer expiration.
+
+2. **Auto-Lock on Time Expiration & Submission**:
+   - When the countdown reaches `0:00` in `setInterval`:
+     ```javascript
+     isExamLocked = true;
+     isExamSubmitted = true;
+     clearInterval(timerInterval);
+     finishAssessment();
+     ```
+   - In `finishAssessment()`:
+     - Sets `isExamLocked = true` and `isExamSubmitted = true`.
+     - In student-paced mode, `allowReview` is automatically set to `true`, revealing `#btn-review-answers`.
+
+3. **Comprehensive Review Mode**:
+   - In `#view-review`:
+     - Renders every question card with student choice, official answer key, and College Board scoring rationale.
+   - In the interactive question runner (`#view-exam-runner`):
+     - When `isExamLocked || isExamSubmitted`:
+       - All choice buttons are disabled.
+       - Correct answer choice is highlighted in green (`choice-correct`).
+       - If student selected an incorrect choice, it is highlighted in red (`choice-wrong`).
+       - Official College Board Scoring Rationale card is rendered directly below the choices.
+       - Navigation buttons ("← Previous Question", "Next Question →", and grid buttons) remain active so students can step through all questions.
+       - In `updateGridHighlights()`, navigation buttons for correct questions are tinted green (`bg-emerald-950 text-emerald-300 border-emerald-500`), while incorrect questions are tinted red (`bg-rose-950 text-rose-300 border-rose-500`), providing an immediate visual map of exam results.
+
+---
+
+### D. Replication Checklist for Other IDEs
+1. **DOM ID Compatibility**: Ensure all legacy selectors (`teacher-select-subject`, `teacher-select-unit`, `teacher-select-assessment`, `teacher-quiz-mode`, `banner-code`, `banner-url`, `opt-calc`) exist in your markup so database dispatches and event handlers continue to operate without null pointer exceptions.
+2. **QR Code Generation**: Use a clean URL-encoded QR endpoint (`api.qrserver.com` or local SVG generator) populated during assignment creation.
+3. **Decoupled Lock Gate**: Ensure `studentLockedAnswers` is checked only when `quizMode === "teacher_led"`, while `student_led` relies on `isExamLocked` / `isExamSubmitted`.
+4. **Scoring Rationales**: Hydrate `q.explanation` before rendering review cards to ensure zero-key leakage during the exam and full explanatory access in review mode.

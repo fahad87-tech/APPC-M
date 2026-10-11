@@ -168,6 +168,57 @@
     }
     .enter { animation: fade-slide 0.34s cubic-bezier(0.34, 1.2, 0.64, 1); }
 
+    /* Stepper Wizard Styles */
+    .step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #94a3b8;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(51, 65, 85, 0.8);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+    }
+    .step-pill:hover {
+      color: #f8fafc;
+      border-color: rgba(56, 189, 248, 0.5);
+      background: rgba(30, 41, 59, 0.8);
+    }
+    .step-pill.active {
+      color: #00f2fe;
+      background: rgba(0, 242, 254, 0.12);
+      border-color: rgba(0, 242, 254, 0.7);
+      box-shadow: 0 0 16px rgba(0, 242, 254, 0.25);
+    }
+    .step-pill.completed {
+      color: #00f5a0;
+      border-color: rgba(0, 245, 160, 0.5);
+      background: rgba(0, 245, 160, 0.08);
+    }
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.1);
+      font-size: 0.7rem;
+      font-weight: 900;
+    }
+    .step-pill.active .step-num {
+      background: #00f2fe;
+      color: #050811;
+    }
+    .step-pill.completed .step-num {
+      background: #00f5a0;
+      color: #050811;
+    }
+
     @keyframes bar-grow {
       0%   { width: 0%; }
       100% { width: var(--target, 0%); }
@@ -299,334 +350,465 @@
   <!-- Main Dashboard Container (Expanded width to eliminate black borders and maximize viewing area) -->
   <main class="flex-1 max-w-[1850px] w-full mx-auto p-4 md:p-6 lg:p-8 space-y-8">
 
-    <!-- Section 1: Create New Assignment Card -->
-    <section class="quantum-card rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl">
-      <div class="flex items-center justify-between pb-3">
+    <!-- Section 1: Create New Assignment Card (Wayground-Inspired 3-Step Guided Wizard) -->
+    <section class="quantum-card rounded-3xl p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden" id="wizard-dispatcher-container">
+      
+      <!-- Stepper Navigation Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-800 gap-4">
         <div>
-          <div class="inline-flex items-center gap-2 px-3 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold uppercase tracking-wider">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-black uppercase tracking-wider">
             Assignment Dispatcher
           </div>
-          <h2 class="text-2xl font-black text-white mt-1">Assign an Assessment to Students</h2>
-        </div>
-        <span class="text-sm text-slate-400 hidden sm:inline font-medium">Students only see the test you assign</span>
-      </div>
-      <div class="quantum-line"></div>
-
-      <!-- Cascading Selectors -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">1. Course</label>
-          <select id="teacher-select-subject" onchange="onTeacherSubjectChange()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-base font-bold text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
-            <option value="">-- Choose Course --</option>
-          </select>
+          <h2 class="text-2xl font-black text-white mt-1">Guided Assessment Dispatcher</h2>
         </div>
 
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">2. Unit</label>
-          <select id="teacher-select-unit" onchange="onTeacherUnitChange()" disabled class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 text-base font-semibold text-slate-300 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-            <option value="">-- Select Unit --</option>
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">3. Assessment</label>
-          <select id="teacher-select-assessment" onchange="onTeacherAssessmentChange()" disabled class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 text-base font-semibold text-slate-300 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-400">
-            <option value="">-- Select Quiz --</option>
-          </select>
+        <!-- Stepper Indicator Pills -->
+        <div class="flex items-center gap-1.5 sm:gap-2 self-start sm:self-auto" id="wizard-stepper-pills">
+          <button type="button" onclick="goToWizardStep(1)" id="step-tab-1" class="step-pill active pressable">
+            <span class="step-num">1</span> <span class="hidden sm:inline">Quiz &amp; Features</span>
+          </button>
+          <span class="text-slate-600 text-xs font-bold select-none">&rarr;</span>
+          <button type="button" onclick="goToWizardStep(2)" id="step-tab-2" class="step-pill pressable">
+            <span class="step-num">2</span> <span class="hidden sm:inline">Pacing Mode</span>
+          </button>
+          <span class="text-slate-600 text-xs font-bold select-none">&rarr;</span>
+          <button type="button" onclick="goToWizardStep(3)" id="step-tab-3" class="step-pill pressable">
+            <span class="step-num">3</span> <span class="hidden sm:inline">Game &amp; Launch</span>
+          </button>
         </div>
       </div>
 
-      <!-- Activity Mode Cards Hub (Classic, Mastery Peak, Playground, Test Mode, Team Mode) -->
-      <div class="space-y-3 pt-2">
+      <!-- Hidden quiz mode keeper to support legacy selectors -->
+      <input type="hidden" id="teacher-quiz-mode" value="student_led">
+      <div id="quiz-mode-description" class="hidden"></div>
+      <div id="overall-time-box" class="hidden"></div>
+      <div id="per-question-box" class="hidden"></div>
+      <div id="student-gamified-controls-box" class="hidden"></div>
+
+      <!-- WIZARD STEP 1: SELECT ASSESSMENT & CORE INTEGRITY FEATURES -->
+      <div id="wizard-step-1" class="space-y-6 enter">
         <div class="flex items-center justify-between">
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Activity Mode</label>
-          <button type="button" onclick="openGameStudio()" id="btn-open-game-studio-header" class="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1.5 transition">
-            <span>🎮 Game Studio (Duration &amp; Rounds) &rarr;</span>
-          </button>
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <!-- Card 1: Classic (Purple) -->
-          <div onclick="selectActivityMode('classic')" id="mode-card-classic" class="cursor-pointer rounded-2xl p-4 border-2 border-purple-500/80 bg-gradient-to-br from-purple-950/60 to-slate-900/90 shadow-lg shadow-purple-900/20 hover:border-purple-400 transition-all flex flex-col justify-between h-36 relative overflow-hidden group">
-            <div class="flex items-center justify-between">
-              <span class="font-black text-lg text-white">Classic</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Synchronized</span>
-            </div>
-            <p class="text-xs text-slate-300 leading-snug">All students solve questions together in step with live teacher discussion.</p>
-            <div class="flex items-center gap-1.5 text-[10px] text-purple-300 font-bold">
-              <span>🔘 Synchronized Pacing</span>
-            </div>
-          </div>
-
-          <!-- Card 2: Mastery Peak (Teal) -->
-          <div onclick="selectActivityMode('mastery_peak')" id="mode-card-mastery_peak" class="cursor-pointer rounded-2xl p-4 border border-teal-500/30 bg-gradient-to-br from-teal-950/40 to-slate-900/90 hover:border-teal-400 transition-all flex flex-col justify-between h-36 relative overflow-hidden group">
-            <div class="flex items-center justify-between">
-              <span class="font-black text-lg text-teal-300">Mastery Peak</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30">Self-Paced</span>
-            </div>
-            <p class="text-xs text-slate-300 leading-snug">Students repeat questions to achieve mastery, having fun with mountain climbing and minigames.</p>
-            <div class="flex items-center gap-1.5 text-[10px] text-teal-300 font-bold">
-              <span>⛰️ Alpine Ascent</span>
-            </div>
-          </div>
-
-          <!-- Card 3: Playground / Arcade (Orange / Warm Amber) -->
-          <div onclick="selectActivityMode('playground')" id="mode-card-playground" class="cursor-pointer rounded-2xl p-4 border border-amber-500/30 bg-gradient-to-br from-amber-950/40 to-slate-900/90 hover:border-amber-400 transition-all flex flex-col justify-between h-36 relative overflow-hidden group">
-            <div class="flex items-center justify-between">
-              <span class="font-black text-lg text-amber-300">Playground</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Arcade &amp; Duel</span>
-            </div>
-            <p class="text-xs text-slate-300 leading-snug">Wayarena maze battle &amp; Tug of War bursts powered by student question accuracy.</p>
-            <div class="flex items-center gap-1.5 text-[10px] text-amber-300 font-bold">
-              <span>⚡ Wayarena • Tug of War</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- Card 4: Test Mode (Navy) -->
-          <div onclick="selectActivityMode('test_mode')" id="mode-card-test_mode" class="cursor-pointer rounded-2xl p-3.5 border border-slate-800 bg-gradient-to-r from-blue-950/50 to-slate-900/90 hover:border-blue-500/50 transition-all flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl">📝</span>
-              <div>
-                <span class="font-black text-sm text-slate-200 block">Test Mode</span>
-                <span class="text-[11px] text-slate-400">Formal assessment, countdown exam clock, lockdown ready</span>
-              </div>
-            </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/30">Mock Exam</span>
-          </div>
-
-          <!-- Card 5: Team Mode (Burgundy / Magenta) -->
-          <div onclick="selectActivityMode('team_mode')" id="mode-card-team_mode" class="cursor-pointer rounded-2xl p-3.5 border border-slate-800 bg-gradient-to-r from-pink-950/50 to-slate-900/90 hover:border-pink-500/50 transition-all flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <span class="text-2xl">🛡️</span>
-              <div>
-                <span class="font-black text-sm text-slate-200 block">Team Mode</span>
-                <span class="text-[11px] text-slate-400">Class cooperative face-off with live team pull scoreboard</span>
-              </div>
-            </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-pink-500/10 text-pink-300 border border-pink-500/30">Co-Op</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Assignment Parameters (Target Class Period removed; dynamic mode switcher) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
-        <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Quiz Mode</label>
-          <select id="teacher-quiz-mode" onchange="onQuizModeChange()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-base text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
-            <option value="teacher_led" selected>Teacher-Led (Synchronized)</option>
-            <option value="student_led">Student-Led (Self-Paced)</option>
-          </select>
-          <span class="text-xs text-slate-400 mt-1.5 block" id="quiz-mode-description">In Teacher-Led mode, all students advance together with instructor pacing.</span>
-        </div>
-
-        <div>
-          <!-- Student-Led: Overall Time Limit (Hidden by default when in Teacher-Led mode) -->
-          <div id="overall-time-box" class="hidden">
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Overall Time Limit</label>
-            <select id="teacher-time-limit" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-base text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
-              <option value="0">Untimed (Stopwatch)</option>
-              <option value="10">10 Minutes</option>
-              <option value="15" selected>15 Minutes</option>
-              <option value="20">20 Minutes</option>
-              <option value="30">30 Minutes</option>
-              <option value="45">45 Minutes</option>
-              <option value="60">60 Minutes</option>
-            </select>
-            <span class="text-xs text-slate-400 mt-1.5 block">Total exam duration for self-paced student completion.</span>
-          </div>
-
-          <!-- Teacher-Led: Time Per Question ONLY (Visible by default: 90s) -->
-          <div id="per-question-box">
-            <label class="block text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">Time Per Question</label>
-            <select id="teacher-per-question" class="w-full bg-slate-950 border border-amber-500/40 rounded-xl p-3.5 text-base text-white focus:outline-none focus:ring-2 focus:ring-amber-400">
-              <option value="0">Manual Pacing (Teacher clicks Next to explain)</option>
-              <option value="30">30 Seconds Auto</option>
-              <option value="45">45 Seconds Auto</option>
-              <option value="60">60 Seconds Auto</option>
-              <option value="90" selected>90 Seconds Auto</option>
-              <option value="120">120 Seconds Auto</option>
-            </select>
-            <span class="text-xs text-amber-300/80 mt-1.5 block">⚡ No overall timer. Pause freely between questions to discuss and explain concepts.</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Student-Led Gamified Activity & Mini-Game Controls (Visible when Student-Led is active) -->
-      <div id="student-gamified-controls-box" class="hidden rounded-2xl p-5 bg-gradient-to-br from-purple-950/40 via-slate-950 to-cyan-950/40 border border-purple-500/35 space-y-4 shadow-xl">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-purple-500/20 pb-3">
           <div class="flex items-center gap-2.5">
-            <span class="text-2xl">🎮</span>
+            <span class="flex items-center justify-center w-7 h-7 rounded-xl bg-cyan-500/20 text-cyan-300 font-black text-xs border border-cyan-500/30">1</span>
+            <h3 class="text-lg font-black text-white">Select Quiz &amp; Integrity Controls</h3>
+          </div>
+          <span class="text-xs text-slate-400 hidden sm:inline font-medium">Select course, unit, and assessment</span>
+        </div>
+
+        <!-- Cascading Selectors: Course -> Unit -> Assessment -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">1. Course</label>
+            <select id="teacher-select-subject" onchange="onTeacherSubjectChange()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3.5 text-base font-bold text-white focus:outline-none focus:ring-2 focus:ring-cyan-400 transition">
+              <option value="">-- Choose Course --</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">2. Unit</label>
+            <select id="teacher-select-unit" onchange="onTeacherUnitChange()" disabled class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 text-base font-semibold text-slate-300 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition">
+              <option value="">-- Select Unit --</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">3. Assessment</label>
+            <select id="teacher-select-assessment" onchange="onTeacherAssessmentChange()" disabled class="w-full bg-slate-950/50 border border-slate-800 rounded-xl p-3.5 text-base font-semibold text-slate-300 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-cyan-400 transition">
+              <option value="">-- Select Quiz --</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Selected Assessment Live Info Banner -->
+        <div id="selected-quiz-summary-card" class="hidden p-4 rounded-2xl bg-cyan-950/30 border border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">🎯</span>
             <div>
-              <h4 class="font-black text-white text-base tracking-wide flex items-center gap-2">
-                Gamified Activity Mode &amp; Mini-Game
-                <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Student-Paced</span>
-              </h4>
-              <p class="text-xs text-slate-400">Select the mini-game students unlock between AP Physics question sprints.</p>
+              <div class="flex items-center gap-2">
+                <span id="selected-quiz-course-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">AP Physics</span>
+                <span id="selected-quiz-unit-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">Unit 1</span>
+              </div>
+              <h4 id="selected-quiz-title" class="font-black text-white text-base mt-0.5">Assessment Title</h4>
+              <span id="selected-quiz-qcount" class="text-xs text-slate-400 font-semibold">15 Questions • AP Rigor</span>
             </div>
           </div>
-          <button type="button" onclick="openGameStudio(document.getElementById('teacher-game-mode').value)" class="pressable px-4 py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/40 text-purple-200 text-xs font-bold transition flex items-center gap-2 shadow-md shrink-0">
-            <span>✨</span> Open Game Studio (Live 60fps Preview &amp; Rules) &rarr;
+          <button type="button" onclick="openQuizPreviewModal()" id="btn-preview-quiz" disabled class="pressable px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-extrabold text-xs transition disabled:opacity-40 disabled:pointer-events-none flex items-center gap-1.5 self-start sm:self-center">
+            <span>👁️</span> Preview Questions
           </button>
         </div>
 
-        <!-- Game Mode Interactive Grid Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <!-- Card 1: Wayarena (Selected by default) -->
-          <div onclick="setTeacherGameMode('wayarena')" id="tg-card-wayarena" class="cursor-pointer rounded-xl p-3.5 border-2 border-amber-400 bg-amber-950/25 transition-all flex flex-col justify-between space-y-2 group shadow-lg shadow-amber-500/10">
-            <div class="flex items-center justify-between">
-              <span class="text-xl">⚡</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Combat</span>
-            </div>
-            <div>
-              <span class="font-black text-sm text-amber-300 block">Wayarena Battle</span>
-              <span class="text-[11px] text-slate-300 leading-tight block mt-0.5">Vector laser shootout in a sci-fi maze with AI bots &amp; 4 powerups.</span>
-            </div>
+        <!-- Integrity & Pedagogical Toggles -->
+        <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 md:p-5 space-y-3">
+          <div class="flex items-center justify-between">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">Integrity &amp; Assessment Controls</label>
+            <span class="text-[11px] text-slate-500">Fine-tune classroom rules</span>
           </div>
-
-          <!-- Card 2: Tug of War -->
-          <div onclick="setTeacherGameMode('tug_of_war')" id="tg-card-tug_of_war" class="cursor-pointer rounded-xl p-3.5 border border-slate-800 bg-slate-900/80 hover:border-cyan-400/50 transition-all flex flex-col justify-between space-y-2 group">
-            <div class="flex items-center justify-between">
-              <span class="text-xl">⚔️</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Duel</span>
-            </div>
-            <div>
-              <span class="font-black text-sm text-cyan-300 block">Tug of War</span>
-              <span class="text-[11px] text-slate-300 leading-tight block mt-0.5">High-energy beach rope pull powered by question accuracy.</span>
-            </div>
-          </div>
-
-          <!-- Card 3: Mastery Peak -->
-          <div onclick="setTeacherGameMode('mastery_peak')" id="tg-card-mastery_peak" class="cursor-pointer rounded-xl p-3.5 border border-slate-800 bg-slate-900/80 hover:border-emerald-400/50 transition-all flex flex-col justify-between space-y-2 group">
-            <div class="flex items-center justify-between">
-              <span class="text-xl">⛰️</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Ascent</span>
-            </div>
-            <div>
-              <span class="font-black text-sm text-emerald-300 block">Mastery Peak</span>
-              <span class="text-[11px] text-slate-300 leading-tight block mt-0.5">Climb 4,200m alpine summit; repeat missed concepts.</span>
-            </div>
-          </div>
-
-          <!-- Card 4: Classic Exam (No Game) -->
-          <div onclick="setTeacherGameMode('classic')" id="tg-card-classic" class="cursor-pointer rounded-xl p-3.5 border border-slate-800 bg-slate-900/80 hover:border-blue-400/50 transition-all flex flex-col justify-between space-y-2 group">
-            <div class="flex items-center justify-between">
-              <span class="text-xl">📝</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">Exam Only</span>
-            </div>
-            <div>
-              <span class="font-black text-sm text-slate-200 block">Classic Exam</span>
-              <span class="text-[11px] text-slate-400 leading-tight block mt-0.5">Standard student-paced AP assessment with zero mini-games.</span>
-            </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm">
+            <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700 transition">
+              <input type="checkbox" id="opt-calc" checked class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+              <span class="font-bold text-slate-200">🧮 Allow Calculator</span>
+            </label>
+            <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700 transition">
+              <input type="checkbox" id="opt-leaderboard" checked class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+              <span class="font-bold text-slate-200">🏆 Show Leaderboard</span>
+            </label>
+            <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700 transition">
+              <input type="checkbox" id="opt-lockdown" class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+              <span class="font-bold text-slate-200">🔒 Lockdown Mode</span>
+            </label>
+            <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700 transition">
+              <input type="checkbox" id="opt-randomize" class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+              <div>
+                <span class="font-bold text-slate-200">🔀 Shuffle Questions</span>
+                <span class="text-[10px] text-slate-400 block font-normal leading-tight">(Randomizes question order across students)</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-cyan-500/30 p-3 rounded-xl hover:border-cyan-500 transition col-span-1 sm:col-span-2">
+              <input type="checkbox" id="opt-review" checked class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
+              <div>
+                <span class="font-bold text-cyan-300">📋 Allow Students to Review Answers &amp; Explanations</span>
+                <span class="text-[10px] text-slate-400 block font-normal leading-tight">(Students inspect right/wrong answers and College Board rationales after time ends)</span>
+              </div>
+            </label>
+            <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-emerald-500/40 p-3 rounded-xl hover:border-emerald-500 transition col-span-1 sm:col-span-2 lg:col-span-3">
+              <input type="checkbox" id="opt-point-redemption" checked class="rounded border-slate-700 bg-slate-950 text-emerald-400 focus:ring-0">
+              <div>
+                <span class="font-bold text-emerald-300">🎮 Enable Point Redemption &amp; Interactive Physics Sims</span>
+                <span class="text-[10px] text-slate-400 block font-normal leading-tight">(Students who miss a question recover points via interactive simulations and analytical theory)</span>
+              </div>
+            </label>
           </div>
         </div>
 
-        <input type="hidden" id="teacher-game-mode" value="wayarena">
+        <!-- Step 1 Footer Controls -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+          <button type="button" onclick="quickLaunchAssignment()" id="btn-step1-quick-launch" class="pressable px-6 py-3.5 rounded-xl border border-amber-500/40 bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 font-extrabold text-sm transition flex items-center justify-center gap-2">
+            <span>⚡ Quick Launch (Default Settings)</span>
+          </button>
 
-        <!-- Sub-Settings: Game Duration & Questions Per Round -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Game Duration (Master Clock)</label>
-            <select id="teacher-game-duration" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-400">
-              <option value="3">3 Minutes (Fast Sprint)</option>
-              <option value="5" selected>5 Minutes (Standard Session)</option>
-              <option value="7">7 Minutes</option>
-              <option value="10">10 Minutes</option>
-              <option value="15">15 Minutes</option>
-              <option value="20">20 Minutes</option>
-              <option value="30">30 Minutes</option>
-            </select>
-            <span class="text-[11px] text-slate-400 mt-1 block">Students play bursts until overall clock finishes at 0:00.</span>
-          </div>
-
-          <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Questions Per Mini-Game Burst</label>
-            <div class="grid grid-cols-3 gap-2">
-              <button type="button" onclick="setTeacherQuestionsPerRound(3)" id="btn-tq-3" class="py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300 hover:border-slate-700">3 Qs</button>
-              <button type="button" onclick="setTeacherQuestionsPerRound(4)" id="btn-tq-4" class="py-2.5 rounded-xl border-2 border-cyan-400 bg-cyan-950/40 text-xs font-black text-cyan-200 shadow-sm">4 Qs</button>
-              <button type="button" onclick="setTeacherQuestionsPerRound(6)" id="btn-tq-6" class="py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300 hover:border-slate-700">6 Qs</button>
-            </div>
-            <input type="hidden" id="teacher-questions-per-round" value="4">
-            <span class="text-[11px] text-cyan-300/80 mt-1 block" id="teacher-round-hint">4 questions solved unlocks each 25s neon maze combat burst.</span>
-          </div>
+          <button type="button" onclick="goToWizardStep(2)" id="btn-step1-next" disabled class="pressable px-8 py-3.5 rounded-xl btn-aurora font-black text-sm shadow-xl transition disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2">
+            <span>Next: Choose Pacing Mode &rarr;</span>
+          </button>
         </div>
       </div>
 
-      <!-- Integrity & Pedagogical Toggles -->
-      <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 md:p-5">
-        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Integrity & Assessment Controls</label>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 text-sm">
-          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700">
-            <input type="checkbox" id="opt-calc" checked class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
-            <span class="font-bold text-slate-200">🧮 Allow Calculator</span>
-          </label>
-          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700">
-            <input type="checkbox" id="opt-leaderboard" checked class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
-            <span class="font-bold text-slate-200">🏆 Show Leaderboard</span>
-          </label>
-          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700">
-            <input type="checkbox" id="opt-lockdown" class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
-            <span class="font-bold text-slate-200">🔒 Lockdown Mode</span>
-          </label>
-          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-slate-800 p-3 rounded-xl hover:border-slate-700">
-            <input type="checkbox" id="opt-randomize" class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
-            <div>
-              <span class="font-bold text-slate-200">🔀 Shuffle Questions</span>
-              <span class="text-[10px] text-slate-400 block font-normal leading-tight">(Randomizes question order across students)</span>
+      <!-- WIZARD STEP 2: CHOOSE PACING MODE -->
+      <div id="wizard-step-2" class="space-y-6 hidden enter">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="flex items-center justify-center w-7 h-7 rounded-xl bg-purple-500/20 text-purple-300 font-black text-xs border border-purple-500/30">2</span>
+            <h3 class="text-lg font-black text-white">Choose Assessment Pacing</h3>
+          </div>
+          <span class="text-xs text-slate-400 hidden sm:inline font-medium">Synchronized projector vs. independent sprint</span>
+        </div>
+
+        <!-- Two Large Wayground-Style Pacing Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Card A: Teacher-Led (Synchronized) -->
+          <div onclick="selectWizardPacing('teacher_led')" id="pacing-card-teacher" class="cursor-pointer rounded-2xl p-6 border-2 border-slate-800 bg-slate-900/60 hover:border-purple-400 transition-all flex flex-col justify-between space-y-4 group">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl p-3 rounded-2xl bg-purple-500/15 border border-purple-500/30 text-purple-300">📽️</span>
+                <div>
+                  <h4 class="font-black text-lg text-white group-hover:text-purple-300 transition">Teacher-Led</h4>
+                  <span class="text-xs text-purple-400 font-bold uppercase tracking-wider">Synchronized Class Projector</span>
+                </div>
+              </div>
+              <span class="pacing-check-badge w-6 h-6 rounded-full border border-slate-700 flex items-center justify-center text-xs font-black text-slate-600">✓</span>
             </div>
-          </label>
-          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-cyan-500/30 p-3 rounded-xl hover:border-cyan-500 col-span-1 sm:col-span-2">
-            <input type="checkbox" id="opt-review" class="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-0">
-            <span class="font-bold text-cyan-300">📋 Allow Students to Review Answers &amp; Explanations After Submission</span>
-          </label>
-          <label class="flex items-center gap-2.5 cursor-pointer bg-slate-900 border border-emerald-500/40 p-3 rounded-xl hover:border-emerald-500 col-span-1 sm:col-span-2 lg:col-span-3">
-            <input type="checkbox" id="opt-point-redemption" checked class="rounded border-slate-700 bg-slate-950 text-emerald-400 focus:ring-0">
-            <div>
-              <span class="font-bold text-emerald-300">🎮 Enable Point Redemption &amp; Interactive Physics Sims</span>
-              <span class="text-[10px] text-slate-400 block font-normal leading-tight">(When enabled, students who miss a question can recover points from Question 2 onward via 50/50 split of simulations &amp; analytical theory)</span>
+            
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Instructor paces questions on the classroom projector. All students advance in lockstep. Pause freely to explain concepts and review College Board rationales.
+            </p>
+
+            <div class="pt-3 border-t border-slate-800/80 space-y-2">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-purple-300">Time Per Question</label>
+              <select id="teacher-per-question" class="w-full bg-slate-950 border border-purple-500/40 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-400">
+                <option value="0">Manual Pacing (Teacher clicks Next to explain)</option>
+                <option value="30">30 Seconds Auto</option>
+                <option value="45">45 Seconds Auto</option>
+                <option value="60">60 Seconds Auto</option>
+                <option value="90" selected>90 Seconds Auto (Recommended)</option>
+                <option value="120">120 Seconds Auto</option>
+              </select>
+              <span class="text-[11px] text-purple-300/80 block">⚡ Pause freely between questions for class discussion.</span>
             </div>
-          </label>
+          </div>
+
+          <!-- Card B: Student-Led (Self-Paced & Gamified) -->
+          <div onclick="selectWizardPacing('student_led')" id="pacing-card-student" class="cursor-pointer rounded-2xl p-6 border-2 border-cyan-400 bg-cyan-950/30 shadow-lg shadow-cyan-500/10 transition-all flex flex-col justify-between space-y-4 group">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl p-3 rounded-2xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-300">🎮</span>
+                <div>
+                  <h4 class="font-black text-lg text-white group-hover:text-cyan-300 transition">Student-Led</h4>
+                  <span class="text-xs text-cyan-400 font-bold uppercase tracking-wider">Independent Sprint &amp; Mini-Games</span>
+                </div>
+              </div>
+              <span class="pacing-check-badge w-6 h-6 rounded-full bg-cyan-500 border border-cyan-400 flex items-center justify-center text-xs font-black text-slate-950">✓</span>
+            </div>
+
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Students solve questions independently at their own speed. High-energy physics mini-games (Wayarena, Tug of War, Mastery Peak) unlock between question bursts.
+            </p>
+
+            <div class="pt-3 border-t border-slate-800/80 space-y-2">
+              <label class="block text-[11px] font-bold uppercase tracking-wider text-cyan-300">Overall Exam Duration</label>
+              <select id="teacher-time-limit" class="w-full bg-slate-950 border border-cyan-500/40 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                <option value="0">Untimed (Stopwatch)</option>
+                <option value="5">5 Minutes (Fast Sprint)</option>
+                <option value="10">10 Minutes</option>
+                <option value="15" selected>15 Minutes (Standard)</option>
+                <option value="20">20 Minutes</option>
+                <option value="30">30 Minutes</option>
+                <option value="45">45 Minutes</option>
+                <option value="60">60 Minutes</option>
+              </select>
+              <span class="text-[11px] text-cyan-300/80 block">🎮 Time ends locks questions and opens full student review.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 Footer Navigation -->
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+          <button type="button" onclick="goToWizardStep(1)" class="pressable px-6 py-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm transition">
+            &larr; Back to Quiz
+          </button>
+          <button type="button" onclick="goToWizardStep(3)" id="btn-step2-next" class="pressable px-8 py-3.5 rounded-xl btn-aurora font-black text-sm shadow-xl transition flex items-center justify-center gap-2">
+            <span>Next: Game &amp; Launch &rarr;</span>
+          </button>
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex flex-wrap justify-end gap-3 pt-2">
-        <button onclick="openGameStudio()" id="btn-open-game-studio" disabled class="pressable px-6 py-3.5 rounded-xl border border-amber-500/40 bg-amber-950/40 hover:bg-amber-900/50 text-amber-300 font-extrabold text-sm transition disabled:opacity-40 disabled:pointer-events-none flex items-center gap-2">
-          🎮 Game Studio (Duration &amp; Rounds)
-        </button>
-        <button onclick="openQuizPreviewModal()" id="btn-preview-quiz" disabled class="pressable px-6 py-3.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 font-extrabold text-sm transition disabled:opacity-40 disabled:pointer-events-none">
-          👁️ Preview Quiz Questions
-        </button>
-        <button onclick="handleCreateAssignment()" id="btn-create-assign" disabled class="pressable px-8 py-3.5 rounded-xl btn-aurora font-black text-base shadow-xl transition disabled:opacity-40 disabled:pointer-events-none">
-          Generate Join Code &amp; Assign &rarr;
-        </button>
+      <!-- WIZARD STEP 3: GAME SETUP (STUDENT-LED) OR CONFIRMATION (TEACHER-LED) -->
+      <div id="wizard-step-3" class="space-y-6 hidden enter">
+        
+        <!-- Sub-panel 3A: Student-Led Gamified Games -->
+        <div id="step3-student-games-panel" class="space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+            <div class="flex items-center gap-2.5">
+              <span class="flex items-center justify-center w-7 h-7 rounded-xl bg-amber-500/20 text-amber-300 font-black text-xs border border-amber-500/30">3</span>
+              <div>
+                <h3 class="text-lg font-black text-white">Choose Mini-Game &amp; Sprint Settings</h3>
+                <p class="text-xs text-slate-400">Select the game students unlock between question bursts.</p>
+              </div>
+            </div>
+            <button type="button" onclick="openGameStudio()" id="btn-open-game-studio" class="pressable px-4 py-2 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 border border-purple-400/40 text-purple-200 text-xs font-bold transition flex items-center gap-2 shadow-md shrink-0">
+              <span>✨</span> Open Game Studio (Live 60fps Preview) &rarr;
+            </button>
+          </div>
+
+          <!-- 4 Wayground-Style Vibrant Game Tiles -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- Game 1: Wayarena (Amber) -->
+            <div onclick="setTeacherGameMode('wayarena')" id="tg-card-wayarena" class="cursor-pointer rounded-2xl p-4 border-2 border-amber-400 bg-gradient-to-br from-amber-950/40 via-slate-900 to-amber-900/30 shadow-lg shadow-amber-500/10 transition-all flex flex-col justify-between space-y-3 group">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">⚡</span>
+                <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">LASER COMBAT</span>
+              </div>
+              <div>
+                <span class="font-black text-base text-amber-300 block">Wayarena Battle</span>
+                <span class="text-xs text-slate-300 leading-snug block mt-1">2.5D Chibi battlers, bots, laser sights &amp; 4 powerup drops.</span>
+              </div>
+              <div class="text-[10px] font-bold text-amber-400/90 pt-1">
+                <span>🎮 WASD Move + Mouse Aim</span>
+              </div>
+            </div>
+
+            <!-- Game 2: Tug of War (Cyan) -->
+            <div onclick="setTeacherGameMode('tug_of_war')" id="tg-card-tug_of_war" class="cursor-pointer rounded-2xl p-4 border border-slate-800 bg-slate-900/80 hover:border-cyan-400/50 transition-all flex flex-col justify-between space-y-3 group">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">⚔️</span>
+                <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">BEACH ROPE DUEL</span>
+              </div>
+              <div>
+                <span class="font-black text-base text-cyan-300 block">Tug of War</span>
+                <span class="text-xs text-slate-300 leading-snug block mt-1">High-energy beach rope pull powered by student accuracy.</span>
+              </div>
+              <div class="text-[10px] font-bold text-cyan-400/90 pt-1">
+                <span>🌊 Catenary Rope Physics</span>
+              </div>
+            </div>
+
+            <!-- Game 3: Mastery Peak (Emerald) -->
+            <div onclick="setTeacherGameMode('mastery_peak')" id="tg-card-mastery_peak" class="cursor-pointer rounded-2xl p-4 border border-slate-800 bg-slate-900/80 hover:border-emerald-400/50 transition-all flex flex-col justify-between space-y-3 group">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">⛰️</span>
+                <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">ALPINE ASCENT</span>
+              </div>
+              <div>
+                <span class="font-black text-base text-emerald-300 block">Mastery Peak</span>
+                <span class="text-xs text-slate-300 leading-snug block mt-1">Climb 4,200m summit; repeat and master missed concepts.</span>
+              </div>
+              <div class="text-[10px] font-bold text-emerald-400/90 pt-1">
+                <span>❄️ Falling Snow Remediation</span>
+              </div>
+            </div>
+
+            <!-- Game 4: Classic AP Exam (Slate / Indigo) -->
+            <div onclick="setTeacherGameMode('classic')" id="tg-card-classic" class="cursor-pointer rounded-2xl p-4 border border-slate-800 bg-slate-900/80 hover:border-indigo-400/50 transition-all flex flex-col justify-between space-y-3 group">
+              <div class="flex items-center justify-between">
+                <span class="text-2xl">📝</span>
+                <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">EXAM ONLY</span>
+              </div>
+              <div>
+                <span class="font-black text-base text-slate-200 block">Classic Exam</span>
+                <span class="text-xs text-slate-400 leading-snug block mt-1">Continuous student-paced AP assessment with zero mini-games.</span>
+              </div>
+              <div class="text-[10px] font-bold text-slate-400 pt-1">
+                <span>⏱️ AP Clock &amp; Rationale Review</span>
+              </div>
+            </div>
+          </div>
+
+          <input type="hidden" id="teacher-game-mode" value="wayarena">
+
+          <!-- Mini-Game Parameters: Master Clock Duration & Questions per burst -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/70 border border-slate-800 rounded-2xl p-4">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Master Game Duration</label>
+              <select id="teacher-game-duration" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-400">
+                <option value="3">3 Minutes (Fast Sprint)</option>
+                <option value="5" selected>5 Minutes (Standard Session)</option>
+                <option value="7">7 Minutes</option>
+                <option value="10">10 Minutes</option>
+                <option value="15">15 Minutes</option>
+                <option value="20">20 Minutes</option>
+                <option value="30">30 Minutes</option>
+              </select>
+              <span class="text-[11px] text-slate-400 mt-1 block">Students play bursts until overall clock finishes at 0:00.</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">Questions Per Mini-Game Burst</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="setTeacherQuestionsPerRound(3)" id="btn-tq-3" class="py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300 hover:border-slate-700 transition">3 Qs</button>
+                <button type="button" onclick="setTeacherQuestionsPerRound(4)" id="btn-tq-4" class="py-2.5 rounded-xl border-2 border-cyan-400 bg-cyan-950/40 text-xs font-black text-cyan-200 shadow-sm transition">4 Qs</button>
+                <button type="button" onclick="setTeacherQuestionsPerRound(6)" id="btn-tq-6" class="py-2.5 rounded-xl border border-slate-800 bg-slate-900 text-xs font-bold text-slate-300 hover:border-slate-700 transition">6 Qs</button>
+              </div>
+              <input type="hidden" id="teacher-questions-per-round" value="4">
+              <span class="text-[11px] text-cyan-300/80 mt-1 block" id="teacher-round-hint">4 questions solved unlocks each 25s neon maze combat burst.</span>
+            </div>
+          </div>
+
+          <!-- Student-Led Launch Trigger -->
+          <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+            <button type="button" onclick="goToWizardStep(2)" class="pressable px-6 py-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm transition">
+              &larr; Back to Pacing
+            </button>
+            <button type="button" onclick="handleCreateAssignment()" id="btn-launch-student-session" class="pressable px-8 py-3.5 rounded-xl btn-aurora font-black text-base shadow-xl transition flex items-center justify-center gap-2">
+              <span>🚀 Launch Student-Led Session</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub-panel 3B: Teacher-Led Confirmation Summary -->
+        <div id="step3-teacher-summary-panel" class="space-y-6 hidden">
+          <div class="flex items-center gap-2.5 border-b border-slate-800 pb-3">
+            <span class="flex items-center justify-center w-7 h-7 rounded-xl bg-purple-500/20 text-purple-300 font-black text-xs border border-purple-500/30">3</span>
+            <div>
+              <h3 class="text-lg font-black text-white">Confirm Synchronized Class Session</h3>
+              <p class="text-xs text-slate-400">Review parameters before opening the projector lobby.</p>
+            </div>
+          </div>
+
+          <!-- Summary Confirmation Card -->
+          <div class="p-6 rounded-2xl bg-gradient-to-br from-purple-950/50 via-slate-950 to-slate-900 border border-purple-500/35 space-y-4 shadow-xl">
+            <div class="flex items-center gap-3">
+              <span class="text-3xl">📽️</span>
+              <div>
+                <h4 id="t-conf-quiz-title" class="font-black text-white text-lg">Quiz Title</h4>
+                <p id="t-conf-quiz-sub" class="text-xs text-purple-300 font-semibold">AP Physics • Unit 1 • 15 MCQs</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 text-xs">
+              <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span class="text-slate-400 block font-semibold">Pacing Mode</span>
+                <span class="text-white font-bold text-sm">Teacher-Led Synchronized</span>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span class="text-slate-400 block font-semibold">Per-Question Interval</span>
+                <span id="t-conf-perq" class="text-amber-300 font-bold text-sm">90 Seconds Auto</span>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <span class="text-slate-400 block font-semibold">Projector Deck</span>
+                <span class="text-cyan-300 font-bold text-sm">Live Control Ready</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Teacher-Led Launch Trigger -->
+          <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
+            <button type="button" onclick="goToWizardStep(2)" class="pressable px-6 py-3 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm transition">
+              &larr; Back to Pacing
+            </button>
+            <button type="button" onclick="handleCreateAssignment()" id="btn-launch-teacher-session" class="pressable px-8 py-3.5 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:from-purple-500 hover:to-cyan-400 text-white font-black text-base shadow-xl transition flex items-center justify-center gap-2">
+              <span>🚀 Launch Teacher Projector Lobby</span>
+            </button>
+          </div>
+        </div>
+
       </div>
 
-      <!-- Generated Join Code Banner -->
-      <div id="new-code-banner" class="hidden p-6 md:p-8 rounded-3xl quantum-card shadow-2xl space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <!-- Hidden anchor button to satisfy any legacy reference to btn-create-assign -->
+      <button id="btn-create-assign" onclick="handleCreateAssignment()" class="hidden" disabled></button>
+
+      <!-- DEDICATED CLASS LOBBY SCREEN (Wayground / Kahoot Inspired) -->
+      <div id="wizard-lobby-container" class="hidden p-6 md:p-8 rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950/40 border border-cyan-500/40 shadow-2xl space-y-6 enter">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
           <div>
-            <span class="text-xs font-black uppercase tracking-wider text-cyan-400">Assignment Dispatched!</span>
-            <h3 id="banner-title" class="text-2xl font-black text-white mt-1"></h3>
-            <p class="text-base text-slate-300">Share this code or direct URL with your students:</p>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-black uppercase tracking-wider">
+              <span>●</span> Session Active &amp; Dispatched
+            </div>
+            <h3 id="banner-title" class="text-2xl md:text-3xl font-black text-white mt-1.5">Assignment Active</h3>
+            <p class="text-sm text-slate-300 mt-1">Students can join instantly using the 6-digit code or QR code below:</p>
           </div>
-          <div class="text-center sm:text-right bg-slate-950/80 px-6 py-3.5 rounded-2xl border border-amber-500/40 shadow-inner">
-            <span class="text-xs uppercase font-extrabold text-slate-400 block tracking-wider">Student Join Code</span>
-            <span id="banner-code" class="text-5xl font-black plasma-code tracking-wider font-mono"></span>
+
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 px-4 py-2 rounded-2xl bg-slate-950/80 border border-slate-800 shadow-inner">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span id="lobby-student-count" class="text-xs font-black text-emerald-300">0 Students Connected</span>
+            </div>
+            <button type="button" onclick="resetWizard()" class="pressable px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 transition" title="Start another quiz">
+              ↻ New Dispatch
+            </button>
           </div>
         </div>
 
+        <!-- Join Code & QR Code Display Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <!-- Join Code Mega Tile (7 cols) -->
+          <div class="md:col-span-7 bg-slate-950/90 border-2 border-amber-500/50 rounded-3xl p-6 md:p-8 text-center space-y-3 shadow-2xl shadow-amber-500/10 relative overflow-hidden">
+            <span class="text-xs uppercase font-extrabold text-amber-400 tracking-widest block">Student Join Code</span>
+            <div id="banner-code" class="text-5xl sm:text-6xl md:text-7xl font-black plasma-code tracking-widest font-mono select-all">------</div>
+            <p class="text-xs text-slate-400">Tell students to navigate to the portal and enter this 6-digit code</p>
+          </div>
+
+          <!-- QR Code Tile (5 cols) -->
+          <div class="md:col-span-5 bg-slate-950/90 border border-slate-800 rounded-3xl p-6 flex flex-col items-center justify-center text-center space-y-3 shadow-xl">
+            <div class="bg-white p-2.5 rounded-2xl shadow-xl border border-slate-200">
+              <img id="banner-qr-code" src="" alt="Scan to Join" class="w-36 h-36 block object-contain">
+            </div>
+            <span class="text-xs font-bold text-slate-300">Scan with Phone or Tablet Camera</span>
+          </div>
+        </div>
+
+        <!-- Direct URL Share Bar -->
         <div class="flex flex-col sm:flex-row gap-3 pt-2">
-          <input type="text" id="banner-url" readonly class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-base text-cyan-200 font-mono focus:outline-none">
-          <button onclick="copyShareUrl()" class="pressable px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-base border border-slate-700 shadow-md transition flex items-center justify-center gap-2">
+          <input type="text" id="banner-url" readonly class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-sm md:text-base text-cyan-200 font-mono focus:outline-none">
+          <button type="button" onclick="copyShareUrl()" class="pressable px-6 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm border border-slate-700 shadow-md transition flex items-center justify-center gap-2">
             📋 Copy Direct Link
           </button>
-          <button onclick="openLiveControl(document.getElementById('banner-code').textContent.trim())" class="pressable px-7 py-3.5 rounded-xl btn-aurora font-black text-base shadow-xl transition flex items-center justify-center gap-2">
+          <button type="button" id="btn-lobby-primary-action" onclick="openLiveControl(document.getElementById('banner-code').textContent.trim())" class="pressable px-7 py-3.5 rounded-xl btn-aurora font-black text-base shadow-xl transition flex items-center justify-center gap-2">
             <span>🚀</span> Open Waiting Lobby &amp; Track Students
           </button>
         </div>
+
       </div>
+
     </section>
 
     <!-- Section 2: Active Assignments List -->
@@ -1829,22 +2011,157 @@
       assessSel.disabled = false;
     }
 
+    // ============================================================================
+    // 3-STEP GUIDED DISPATCHER WIZARD LOGIC
+    // ============================================================================
+    let currentWizardStep = 1;
+    let currentPacingMode = "student_led";
+
+    function goToWizardStep(step) {
+      if (step === 2 || step === 3) {
+        if (!currentSelectedQuiz) {
+          alert("Please select a Course, Unit, and Assessment in Step 1 first!");
+          return;
+        }
+      }
+
+      currentWizardStep = step;
+
+      // Toggle step views
+      const s1 = document.getElementById("wizard-step-1");
+      const s2 = document.getElementById("wizard-step-2");
+      const s3 = document.getElementById("wizard-step-3");
+      const lobby = document.getElementById("wizard-lobby-container");
+
+      if (lobby) lobby.classList.add("hidden");
+      if (s1) s1.classList.toggle("hidden", step !== 1);
+      if (s2) s2.classList.toggle("hidden", step !== 2);
+      if (s3) s3.classList.toggle("hidden", step !== 3);
+
+      // Update breadcrumb navigation pills
+      [1, 2, 3].forEach(num => {
+        const tab = document.getElementById("step-tab-" + num);
+        if (!tab) return;
+        if (num === step) {
+          tab.className = "step-pill active pressable";
+        } else if (num < step) {
+          tab.className = "step-pill completed pressable";
+        } else {
+          tab.className = "step-pill pressable";
+        }
+      });
+
+      // Sub-panel configuration for Step 3
+      if (step === 3) {
+        const studentPanel = document.getElementById("step3-student-games-panel");
+        const teacherPanel = document.getElementById("step3-teacher-summary-panel");
+        const isTeacher = currentPacingMode === "teacher_led";
+
+        if (studentPanel) studentPanel.classList.toggle("hidden", isTeacher);
+        if (teacherPanel) {
+          teacherPanel.classList.toggle("hidden", !isTeacher);
+          if (isTeacher && currentSelectedQuiz) {
+            const titleEl = document.getElementById("t-conf-quiz-title");
+            const subEl = document.getElementById("t-conf-quiz-sub");
+            const perQEl = document.getElementById("t-conf-perq");
+            if (titleEl) titleEl.textContent = currentSelectedQuiz.title;
+            if (subEl) subEl.textContent = `${currentSelectedQuiz.subject} • ${currentSelectedQuiz.unit} • ${currentSelectedQuiz.question_count} MCQs`;
+            const perQVal = document.getElementById("teacher-per-question")?.value || "90";
+            if (perQEl) perQEl.textContent = perQVal === "0" ? "Manual Pacing (Instructor Controlled)" : `${perQVal} Seconds Auto`;
+          }
+        }
+      }
+    }
+
+    function selectWizardPacing(mode) {
+      currentPacingMode = mode;
+      const modeInput = document.getElementById("teacher-quiz-mode");
+      if (modeInput) modeInput.value = mode;
+
+      const cardTeacher = document.getElementById("pacing-card-teacher");
+      const cardStudent = document.getElementById("pacing-card-student");
+
+      if (cardTeacher && cardStudent) {
+        if (mode === "teacher_led") {
+          cardTeacher.className = "cursor-pointer rounded-2xl p-6 border-2 border-purple-500 bg-purple-950/40 shadow-lg shadow-purple-500/10 transition-all flex flex-col justify-between space-y-4 group";
+          cardStudent.className = "cursor-pointer rounded-2xl p-6 border-2 border-slate-800 bg-slate-900/60 hover:border-cyan-400 transition-all flex flex-col justify-between space-y-4 group";
+          
+          const badgeT = cardTeacher.querySelector(".pacing-check-badge");
+          if (badgeT) badgeT.className = "pacing-check-badge w-6 h-6 rounded-full bg-purple-500 border border-purple-400 flex items-center justify-center text-xs font-black text-white";
+          const badgeS = cardStudent.querySelector(".pacing-check-badge");
+          if (badgeS) badgeS.className = "pacing-check-badge w-6 h-6 rounded-full border border-slate-700 flex items-center justify-center text-xs font-black text-slate-600";
+        } else {
+          cardStudent.className = "cursor-pointer rounded-2xl p-6 border-2 border-cyan-400 bg-cyan-950/40 shadow-lg shadow-cyan-500/10 transition-all flex flex-col justify-between space-y-4 group";
+          cardTeacher.className = "cursor-pointer rounded-2xl p-6 border-2 border-slate-800 bg-slate-900/60 hover:border-purple-400 transition-all flex flex-col justify-between space-y-4 group";
+
+          const badgeS = cardStudent.querySelector(".pacing-check-badge");
+          if (badgeS) badgeS.className = "pacing-check-badge w-6 h-6 rounded-full bg-cyan-500 border border-cyan-400 flex items-center justify-center text-xs font-black text-slate-950";
+          const badgeT = cardTeacher.querySelector(".pacing-check-badge");
+          if (badgeT) badgeT.className = "pacing-check-badge w-6 h-6 rounded-full border border-slate-700 flex items-center justify-center text-xs font-black text-slate-600";
+        }
+      }
+
+      onQuizModeChange();
+    }
+
+    function quickLaunchAssignment() {
+      if (!currentSelectedQuiz) {
+        const assessSel = document.getElementById("teacher-select-assessment");
+        if (assessSel) {
+          assessSel.classList.add("ring-4", "ring-rose-500");
+          setTimeout(() => assessSel.classList.remove("ring-4", "ring-rose-500"), 1600);
+        }
+        alert("Please choose a Course, Unit, and Quiz first before launching!");
+        return;
+      }
+      handleCreateAssignment();
+    }
+
+    function resetWizard() {
+      const lobby = document.getElementById("wizard-lobby-container");
+      if (lobby) lobby.classList.add("hidden");
+      goToWizardStep(1);
+    }
+
     function onTeacherAssessmentChange() {
       const subjKey = document.getElementById("teacher-select-subject").value;
       const unitKey = document.getElementById("teacher-select-unit").value;
       const assessId = document.getElementById("teacher-select-assessment").value;
 
+      const btnCreate = document.getElementById("btn-create-assign");
+      const btnPreview = document.getElementById("btn-preview-quiz");
+      const studioBtn = document.getElementById("btn-open-game-studio");
+      const btnStep1Next = document.getElementById("btn-step1-next");
+      const summaryCard = document.getElementById("selected-quiz-summary-card");
+
       if (!assessId) {
-        document.getElementById("btn-create-assign").disabled = true;
-        document.getElementById("btn-preview-quiz").disabled = true;
+        if (btnCreate) btnCreate.disabled = true;
+        if (btnPreview) btnPreview.disabled = true;
+        if (studioBtn) studioBtn.disabled = true;
+        if (btnStep1Next) btnStep1Next.disabled = true;
+        if (summaryCard) summaryCard.classList.add("hidden");
         return;
       }
 
       currentSelectedQuiz = EXAM_DB.subjects[subjKey].units[unitKey].assessments.find(x => x.id === assessId);
-      document.getElementById("btn-create-assign").disabled = false;
-      document.getElementById("btn-preview-quiz").disabled = false;
-      const studioBtn = document.getElementById("btn-open-game-studio");
+      if (btnCreate) btnCreate.disabled = false;
+      if (btnPreview) btnPreview.disabled = false;
       if (studioBtn) studioBtn.disabled = false;
+      if (btnStep1Next) btnStep1Next.disabled = false;
+
+      // Update Step 1 Summary Banner
+      if (summaryCard && currentSelectedQuiz) {
+        summaryCard.classList.remove("hidden");
+        const cBadge = document.getElementById("selected-quiz-course-badge");
+        const uBadge = document.getElementById("selected-quiz-unit-badge");
+        const titleEl = document.getElementById("selected-quiz-title");
+        const qCountEl = document.getElementById("selected-quiz-qcount");
+
+        if (cBadge) cBadge.textContent = currentSelectedQuiz.subject;
+        if (uBadge) uBadge.textContent = currentSelectedQuiz.unit;
+        if (titleEl) titleEl.textContent = currentSelectedQuiz.title;
+        if (qCountEl) qCountEl.textContent = `${currentSelectedQuiz.question_count} MCQs • AP Rigor`;
+      }
     }
 
     let selectedActivityMode = "classic";
@@ -2200,7 +2517,43 @@
         ? `${baseUrl}?join=${code}&game=${encodeURIComponent(gameMode)}&mins=${gameDurationMins}&qround=${qPerRound}`
         : `${baseUrl}?join=${code}`;
       document.getElementById("banner-url").value = directUrl;
-      document.getElementById("new-code-banner").classList.remove("hidden");
+
+      // Hydrate QR Code Image
+      const qrImg = document.getElementById("banner-qr-code");
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=8&data=${encodeURIComponent(directUrl)}`;
+      }
+
+      // Transition from Wizard Steps into Dedicated Class Lobby
+      const s1 = document.getElementById("wizard-step-1");
+      const s2 = document.getElementById("wizard-step-2");
+      const s3 = document.getElementById("wizard-step-3");
+      const lobby = document.getElementById("wizard-lobby-container");
+      const oldBanner = document.getElementById("new-code-banner");
+
+      if (s1) s1.classList.add("hidden");
+      if (s2) s2.classList.add("hidden");
+      if (s3) s3.classList.add("hidden");
+      if (lobby) lobby.classList.remove("hidden");
+      if (oldBanner) oldBanner.classList.remove("hidden");
+
+      // Update lobby primary button action & text based on mode
+      const primaryBtn = document.getElementById("btn-lobby-primary-action");
+      if (primaryBtn) {
+        if (isTeacherLed) {
+          primaryBtn.innerHTML = `<span>🚀</span> Enter Projector Control Deck (Start Class)`;
+          primaryBtn.onclick = () => openLiveControl(code);
+        } else {
+          primaryBtn.innerHTML = `<span>📊</span> Monitor Live Student Progress`;
+          primaryBtn.onclick = () => {
+            const tableSection = document.getElementById("active-assignments-container") || document.querySelector("section.space-y-6");
+            if (tableSection) tableSection.scrollIntoView({ behavior: 'smooth' });
+          };
+        }
+      }
+
+      const lobbyCount = document.getElementById("lobby-student-count");
+      if (lobbyCount) lobbyCount.textContent = "0 Students Connected";
 
       await loadAssignmentsTable();
     }
