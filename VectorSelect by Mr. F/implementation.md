@@ -393,4 +393,90 @@ To replicate this gamified architecture in another IDE (VS Code, Cursor, WebStor
 5. **Student Portal**: Add `#gamified-arcade-hud`, `#gamified-arena-modal`, `#gamified-results-podium`, and the round progress handlers to `index.html`.
 6. **Zero Dependencies**: Requires zero build steps (`npm`, `webpack`, `vite` not required) — runs purely in vanilla JavaScript, Web Audio API, and HTML5 Canvas on any static server or web platform.
 
+---
+
+## 12. 2.5D Chibi Physics Battlers & Mouse-Aim Ballistics System (Wayarena Engine Upgrade)
+
+### A. Context & Architectural Rationale
+In earlier builds, top-down maze combat rendered abstract 2D circular discs with colored slice arcs, and the canvas overlay mistakenly displayed a static barrel-tapping prompt from Tug of War. This caused confusion regarding game mechanics and character identities.
+
+To deliver an engaging, intuitive classroom experience comparable to Brawl Stars, Gimkit, and Blooket, the Wayarena engine in `data/game_arena.js` was upgraded to a **2.5D Procedural Chibi Battlers & Mouse-Aim Ballistics System**.
+
+---
+
+### B. Procedural 2.5D Chibi Battlers (`drawBattleAvatar`)
+Every combatant is rendered purely via mathematical Canvas 2D vector primitives—ensuring zero external sprite sheet downloads, instant offline startup, and crisp rendering on Retina / Hi-DPI displays.
+
+1. **Depth & Grounding**:
+   - Translucent black elliptical drop shadow beneath feet (`rgba(0, 0, 0, 0.45)`).
+2. **Animated Locomotion**:
+   - Alternating running boots with dynamic stride oscillation: `legOffset = isMoving ? Math.sin(walkCycle) * 4 : 0`.
+   - Boot base with character-themed sole accents.
+3. **Armored Torso & Reactor Core**:
+   - Dark battle armor chassis with colored chestplate.
+   - Center glowing reactor core pulsing at `Math.sin(time * 6)`.
+4. **Vector Plasma Blaster Rifle & Muzzle Flash**:
+   - Dual-tone carbine body with neon energy heatsink and extended muzzle.
+   - Gloved hands gripping foregrip and trigger stock.
+   - Blaster rotates continuously around the character center to track aiming `angle`.
+   - Dynamic muzzle flash burst flares on discharge for 4 frames.
+5. **Cute Chibi Head & Anime Expression**:
+   - Warm skin tone (`#fed7aa`) with soft rosy blushing cheeks.
+   - Large anime eyes with colored irises, pupils, and white specular highlights.
+   - Angled eyebrows conveying battle focus.
+   - Cheerful determined battle smile.
+6. **Distinct Historical Scientist Personas**:
+   - **Player ("You")**: Spiky hero anime hair with neon cyan streak, plus a cyber holographic monocle visor over the right eye with HUD reticle.
+   - **NewtonBot**: Powdered white baroque curls cascading around his head, paired with a golden apple chest emblem.
+   - **GalileoBot**: Brunette wavy scientist hair, professor beard, and brass celestial stargazing goggles on forehead.
+   - **KeplerBot**: Emerald astronaut dome helmet with an orbiting planetary ring antenna and orbiting gold planetoid.
+7. **Kinetic Shield Bubble**:
+   - 3D translucent cyan spherical bubble with glowing neon rim and rotating orbital nodes.
+8. **Overhead Status Display**:
+   - Multi-segment health bar (green $\rightarrow$ yellow $\rightarrow$ red gradient).
+   - High-contrast player name badge (`YOU [P1]`, `NewtonBot [AI]`, etc.).
+   - Active powerup indicator tag (`⚡ SPEED`, `💥 3-WAY`, `💣 EMP`).
+
+---
+
+### C. Decoupled Movement & Precision Mouse-Aiming
+The player's input model was decoupled from directional movement:
+- **Desktop (Mouse & Keyboard)**:
+  - **Movement**: `W, A, S, D` and Arrow Keys smoothly steer the character through corridors with continuous wall collision checking.
+  - **Aiming**: Moving the mouse over the canvas calculates the exact angle towards the cursor.
+  - **Targeting Laser Sight**: A high-tech dotted neon guide line projects from the blaster muzzle directly to the crosshair reticle at the cursor position.
+  - **Firing**: Left-clicking anywhere on the canvas or pressing Spacebar fires directly along the targeting beam.
+- **Mobile & Touch**:
+  - Touch-dragging moves and steers the player.
+  - Dedicated on-screen **FIRE ⚡** button fires lasers without interrupting movement.
+- **Dynamic Overlay Instructions**:
+  - `#arena-overlay-hint` in `index.html` dynamically displays:
+    - *Wayarena*: `"🎯 WASD: Move • Mouse: Aim • Click / Space: BLAST bots & grab powerups!"`
+    - *Tug of War*: `"👆 Tap wooden barrels or screen rapidly to pull the rope!"`
+    - *Mastery Peak*: `"👆 Tap screen rapidly to climb the icy summit!"`
+
+---
+
+### D. Floating Combat Text & Juiced Visual Feedback
+1. **`FloatingTextEmitter`**:
+   - Hits: `💥 -1 HP` floating upward and fading.
+   - Shield blocks: `🛡️ BLOCKED!` in bright cyan.
+   - Knockouts: `👑 ELIMINATED! +150 PTS` in gold.
+   - Respawns: `🔄 RESPAWNING...` with temporary immunity shield.
+   - Powerup pickup: Floating banner announcing `⚡ SPEED BOOST!`, `🛡️ KINETIC SHIELD!`, `💥 3-WAY BLASTER!`, `💣 GRAVITON EMP BLAST!`.
+2. **Camera Impact Shake**:
+   - Hits and knockouts trigger subtle 2D canvas translation shake (`this.shake = 8`), adding punchy arcade weight.
+3. **Powerup Supply Crates**:
+   - Floating 3D supply crates with rotating orbital plasma rings and clear floating badges (`[ ⚡ SPEED ]`, `[ 🛡️ SHIELD ]`, `[ 💥 3-WAY ]`, `[ 💣 EMP ]`).
+
+---
+
+### E. Replication Checklist for Other IDEs
+When replicating in another environment:
+1. Ensure `FloatingTextEmitter` is initialized in your game loop.
+2. Bind both `pointermove` and `pointerdown` with `e.pointerType` checks to distinguish touch drag from desktop mouse aim.
+3. Set line dash `[4, 4]` on canvas context for the targeting laser sight.
+4. Scale all avatars proportionally using `cellW` and `cellH` from `setupHiDpi(canvas)`.
+
+
 

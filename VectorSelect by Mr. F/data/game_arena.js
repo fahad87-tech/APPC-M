@@ -475,6 +475,50 @@
   }
 
   // ----------------------------------------------------------------------------
+  // Floating Combat & Reward Text Emitter (Juicy arcade damage and buff feedback)
+  // ----------------------------------------------------------------------------
+  class FloatingTextEmitter {
+    constructor() {
+      this.items = [];
+    }
+    emit(x, y, text, color = '#ffffff', size = 12) {
+      this.items.push({
+        x,
+        y,
+        text,
+        color,
+        size,
+        life: 55,
+        vy: -1.1
+      });
+    }
+    updateAndDraw(ctx) {
+      for (let i = this.items.length - 1; i >= 0; i--) {
+        const item = this.items[i];
+        item.y += item.vy;
+        item.life--;
+
+        if (item.life <= 0) {
+          this.items.splice(i, 1);
+          continue;
+        }
+
+        const alpha = Math.min(1, item.life / 20);
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.font = `900 ${item.size}px monospace, system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 4;
+        ctx.fillStyle = item.color;
+        ctx.fillText(item.text, item.x, item.y);
+        ctx.restore();
+      }
+    }
+  }
+
+  // ----------------------------------------------------------------------------
   // Game 1: TUG OF WAR (Beach Arena with Catenary Rope & Click Barrels)
   // ----------------------------------------------------------------------------
   class TugOfWarArena {
@@ -1012,7 +1056,9 @@
       this.isPreview = isPreview;
       this.animId = null;
       this.time = 0;
+      this.shake = 0;
       this.particles = new ParticleEmitter();
+      this.floatingTexts = new FloatingTextEmitter();
       this.lasers = [];
       this.killFeed = [];
       this.cols = MAZE_MAP[0].length;
@@ -1024,7 +1070,7 @@
         vx: 0, vy: 0,
         angle: 0,
         radius: 12,
-        speed: 2.5,
+        speed: 2.6,
         health: 3,
         maxHealth: 3,
         shield: 1,
@@ -1036,14 +1082,19 @@
         powerupTimer: 0,
         respawnTimer: 0,
         helmetColor: '#8b5cf6',
-        name: 'You'
+        coatColor: '#4f46e5',
+        characterType: 'player',
+        name: 'You',
+        walkCycle: 0,
+        isMoving: false,
+        muzzleFlash: 0
       };
 
-      // 3 AI Opponents
+      // 3 AI Opponents with distinct Chibi Personas
       this.bots = [
-        { id: 1, name: 'NewtonBot', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI, radius: 12, speed: 1.8, health: 3, shield: 0, helmetColor: '#06b6d4', shootCooldown: 60, respawnTimer: 0 },
-        { id: 2, name: 'GalileoBot', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI / 2, radius: 12, speed: 1.7, health: 3, shield: 0, helmetColor: '#f43f5e', shootCooldown: 80, respawnTimer: 0 },
-        { id: 3, name: 'KeplerBot', x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, radius: 12, speed: 1.9, health: 3, shield: 0, helmetColor: '#10b981', shootCooldown: 70, respawnTimer: 0 }
+        { id: 1, name: 'NewtonBot', characterType: 'newton', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI, radius: 12, speed: 1.8, health: 3, maxHealth: 3, shield: 0, helmetColor: '#06b6d4', coatColor: '#dc2626', shootCooldown: 60, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
+        { id: 2, name: 'GalileoBot', characterType: 'galileo', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI / 2, radius: 12, speed: 1.7, health: 3, maxHealth: 3, shield: 0, helmetColor: '#f59e0b', coatColor: '#4f46e5', shootCooldown: 80, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
+        { id: 3, name: 'KeplerBot', characterType: 'kepler', x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, radius: 12, speed: 1.9, health: 3, maxHealth: 3, shield: 0, helmetColor: '#10b981', coatColor: '#059669', shootCooldown: 70, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 }
       ];
 
       // 4 Powerup Spawn Locations in the maze
@@ -1054,28 +1105,31 @@
         { gridX: 7, gridY: 1, type: 'emp', name: 'Graviton EMP 💣', color: '#a855f7', active: true, respawnTimer: 0 }
       ];
 
-      // Key states
+      // Key & Mouse states
       this.keys = {};
       this.touchMove = { active: false, x: 0, y: 0 };
+      this.mousePos = { x: 0, y: 0, active: false };
 
       this.onKeyDown = this.onKeyDown.bind(this);
       this.onKeyUp = this.onKeyUp.bind(this);
       this.onPointerDown = this.onPointerDown.bind(this);
       this.onPointerMove = this.onPointerMove.bind(this);
       this.onPointerUp = this.onPointerUp.bind(this);
+      this.onPointerLeave = this.onPointerLeave.bind(this);
 
       if (!this.isPreview) {
         window.addEventListener('keydown', this.onKeyDown);
         window.addEventListener('keyup', this.onKeyUp);
         this.canvas.addEventListener('pointerdown', this.onPointerDown);
-        window.addEventListener('pointermove', this.onPointerMove);
+        this.canvas.addEventListener('pointermove', this.onPointerMove);
         window.addEventListener('pointerup', this.onPointerUp);
+        this.canvas.addEventListener('pointerleave', this.onPointerLeave);
       }
     }
 
     onKeyDown(e) {
       this.keys[e.key.toLowerCase()] = true;
-      if (e.key === ' ' || e.code === 'Space') {
+      if (e.key === ' ' || e.code === 'Space' || e.code === 'KeyE') {
         e.preventDefault();
         this.firePlayerLaser();
       }
@@ -1089,6 +1143,9 @@
       const rect = this.canvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
+      this.mousePos.x = x;
+      this.mousePos.y = y;
+      this.mousePos.active = true;
 
       // Virtual Shoot Button (Bottom Right)
       const fireBtnX = rect.width - 55;
@@ -1098,35 +1155,58 @@
         return;
       }
 
-      // Virtual D-Pad / Move click
-      this.touchMove.active = true;
-      this.touchMove.x = x;
-      this.touchMove.y = y;
-
-      // If clicked elsewhere, aim & fire towards that location
-      const dx = x - (this.player.x);
-      const dy = y - (this.player.y);
-      this.player.angle = Math.atan2(dy, dx);
-      this.firePlayerLaser();
+      if (e.pointerType === 'touch') {
+        // Touch Drag Movement
+        this.touchMove.active = true;
+        this.touchMove.x = x;
+        this.touchMove.y = y;
+        const dx = x - this.player.x;
+        const dy = y - this.player.y;
+        this.player.angle = Math.atan2(dy, dx);
+      } else {
+        // Desktop Click-to-shoot towards cursor
+        const dx = x - this.player.x;
+        const dy = y - this.player.y;
+        this.player.angle = Math.atan2(dy, dx);
+        this.firePlayerLaser();
+      }
     }
 
     onPointerMove(e) {
-      if (!this.touchMove.active) return;
       const rect = this.canvas.getBoundingClientRect();
-      this.touchMove.x = e.clientX - rect.left;
-      this.touchMove.y = e.clientY - rect.top;
-      const dx = this.touchMove.x - this.player.x;
-      const dy = this.touchMove.y - this.player.y;
-      this.player.angle = Math.atan2(dy, dx);
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      this.mousePos.x = x;
+      this.mousePos.y = y;
+      this.mousePos.active = true;
+
+      if (e.pointerType !== 'touch') {
+        // Desktop: aim player's weapon towards cursor
+        const dx = x - this.player.x;
+        const dy = y - this.player.y;
+        this.player.angle = Math.atan2(dy, dx);
+      } else if (this.touchMove.active) {
+        this.touchMove.x = x;
+        this.touchMove.y = y;
+        const dx = this.touchMove.x - this.player.x;
+        const dy = this.touchMove.y - this.player.y;
+        this.player.angle = Math.atan2(dy, dx);
+      }
     }
 
-    onPointerUp() {
+    onPointerUp(e) {
+      if (e.pointerType === 'touch') {
+        this.touchMove.active = false;
+      }
+    }
+
+    onPointerLeave() {
+      this.mousePos.active = false;
       this.touchMove.active = false;
     }
 
     start() {
       if (this.animId) cancelAnimationFrame(this.animId);
-      // Initialize starting positions
       const rect = this.canvas.getBoundingClientRect();
       const w = Math.max(280, rect.width || 600);
       const h = Math.max(160, rect.height || 360);
@@ -1156,8 +1236,9 @@
       window.removeEventListener('keydown', this.onKeyDown);
       window.removeEventListener('keyup', this.onKeyUp);
       this.canvas.removeEventListener('pointerdown', this.onPointerDown);
-      window.removeEventListener('pointermove', this.onPointerMove);
+      this.canvas.removeEventListener('pointermove', this.onPointerMove);
       window.removeEventListener('pointerup', this.onPointerUp);
+      this.canvas.removeEventListener('pointerleave', this.onPointerLeave);
     }
 
     isWall(x, y, radius = 8) {
@@ -1190,6 +1271,7 @@
         return;
       }
       this.player.ammo--;
+      this.player.muzzleFlash = 4;
       SoundFX.laser();
 
       const speed = 7.5;
@@ -1197,8 +1279,8 @@
         [-0.22, 0, 0.22].forEach(offset => {
           const a = this.player.angle + offset;
           this.lasers.push({
-            x: this.player.x + Math.cos(a) * 14,
-            y: this.player.y + Math.sin(a) * 14,
+            x: this.player.x + Math.cos(a) * 16,
+            y: this.player.y + Math.sin(a) * 16,
             vx: Math.cos(a) * speed,
             vy: Math.sin(a) * speed,
             owner: 'player',
@@ -1209,8 +1291,8 @@
         });
       } else {
         this.lasers.push({
-          x: this.player.x + Math.cos(this.player.angle) * 14,
-          y: this.player.y + Math.sin(this.player.angle) * 14,
+          x: this.player.x + Math.cos(this.player.angle) * 16,
+          y: this.player.y + Math.sin(this.player.angle) * 16,
           vx: Math.cos(this.player.angle) * speed,
           vy: Math.sin(this.player.angle) * speed,
           owner: 'player',
@@ -1224,9 +1306,10 @@
     fireBotLaser(bot) {
       if (bot.respawnTimer > 0) return;
       const speed = 6.0;
+      bot.muzzleFlash = 4;
       this.lasers.push({
-        x: bot.x + Math.cos(bot.angle) * 14,
-        y: bot.y + Math.sin(bot.angle) * 14,
+        x: bot.x + Math.cos(bot.angle) * 16,
+        y: bot.y + Math.sin(bot.angle) * 16,
         vx: Math.cos(bot.angle) * speed,
         vy: Math.sin(bot.angle) * speed,
         owner: bot.id,
@@ -1258,7 +1341,7 @@
         let moveY = 0;
 
         if (this.isPreview) {
-          // In Preview Mode: gentle autonomous roaming
+          // Preview Mode: Gentle autonomous wandering
           moveX = Math.cos(this.time * 2);
           moveY = Math.sin(this.time * 1.5);
           this.player.angle = Math.atan2(moveY, moveX);
@@ -1278,20 +1361,28 @@
             }
           }
 
-          if (moveX !== 0 || moveY !== 0) {
+          // If no mouse active on desktop, angle with movement
+          if (!this.mousePos.active && (moveX !== 0 || moveY !== 0)) {
             this.player.angle = Math.atan2(moveY, moveX);
           }
         }
 
         const len = Math.hypot(moveX, moveY);
         if (len > 0) {
+          this.player.isMoving = true;
+          this.player.walkCycle = (this.player.walkCycle || 0) + 0.25;
           const spd = this.player.speed * (this.player.powerup === 'speed' ? 1.7 : 1.0);
           const nextX = this.player.x + (moveX / len) * spd;
           const nextY = this.player.y + (moveY / len) * spd;
 
           if (!this.isWall(nextX, this.player.y, this.player.radius)) this.player.x = nextX;
           if (!this.isWall(this.player.x, nextY, this.player.radius)) this.player.y = nextY;
+        } else {
+          this.player.isMoving = false;
         }
+
+        // Muzzle flash decay
+        if (this.player.muzzleFlash > 0) this.player.muzzleFlash--;
 
         // Ammo Recharge
         this.player.rechargeTimer++;
@@ -1330,11 +1421,17 @@
 
         const blen = Math.hypot(bdx, bdy);
         if (blen > 0) {
+          bot.isMoving = true;
+          bot.walkCycle = (bot.walkCycle || 0) + 0.22;
           const nextBX = bot.x + (bdx / blen) * bot.speed;
           const nextBY = bot.y + (bdy / blen) * bot.speed;
           if (!this.isWall(nextBX, bot.y, bot.radius)) bot.x = nextBX;
           if (!this.isWall(bot.x, nextBY, bot.radius)) bot.y = nextBY;
+        } else {
+          bot.isMoving = false;
         }
+
+        if (bot.muzzleFlash > 0) bot.muzzleFlash--;
 
         // Shoot at player or others
         bot.shootCooldown--;
@@ -1361,7 +1458,7 @@
           pw.respawnTimer = 400;
           this.applyPowerup(this.player, pw.type);
           SoundFX.powerupCollect();
-          this.particles.emit(pwX, pwY, 12, 'sparkle');
+          this.particles.emit(pwX, pwY, 14, 'sparkle');
         }
 
         // Bot collision
@@ -1403,7 +1500,7 @@
 
         // Hit Player?
         if (l.owner !== 'player' && this.player.respawnTimer <= 0) {
-          if (Math.hypot(this.player.x - l.x, this.player.y - l.y) < this.player.radius + 3) {
+          if (Math.hypot(this.player.x - l.x, this.player.y - l.y) < this.player.radius + 4) {
             this.lasers.splice(i, 1);
             this.hitEntity(this.player, 'player');
             continue;
@@ -1413,7 +1510,7 @@
         // Hit Bots?
         for (const bot of this.bots) {
           if (l.owner !== bot.id && bot.respawnTimer <= 0) {
-            if (Math.hypot(bot.x - l.x, bot.y - l.y) < bot.radius + 3) {
+            if (Math.hypot(bot.x - l.x, bot.y - l.y) < bot.radius + 4) {
               this.lasers.splice(i, 1);
               this.hitEntity(bot, 'bot', l.owner);
               break;
@@ -1433,15 +1530,19 @@
       if (type === 'speed') {
         entity.powerup = 'speed';
         entity.powerupTimer = 320;
+        this.floatingTexts.emit(entity.x, entity.y - 18, '⚡ SPEED BOOST!', '#eab308', 12);
       } else if (type === 'shield') {
         entity.shield = Math.min(2, entity.shield + 1);
+        this.floatingTexts.emit(entity.x, entity.y - 18, '🛡️ KINETIC SHIELD!', '#00f2fe', 12);
       } else if (type === 'triple') {
         entity.powerup = 'triple';
         entity.powerupTimer = 320;
+        this.floatingTexts.emit(entity.x, entity.y - 18, '💥 3-WAY BLASTER!', '#ec4899', 12);
       } else if (type === 'emp') {
-        // Graviton Shockwave: damages all enemies in radius
         SoundFX.explosion();
         this.particles.emit(entity.x, entity.y, 25, 'sparkle');
+        this.floatingTexts.emit(entity.x, entity.y - 18, '💣 GRAVITON EMP BLAST!', '#a855f7', 13);
+        this.shake = 10;
         this.bots.forEach(bot => {
           if (Math.hypot(bot.x - entity.x, bot.y - entity.y) < 130) {
             this.hitEntity(bot, 'bot', 'player');
@@ -1455,17 +1556,20 @@
         entity.shield--;
         SoundFX.hit();
         this.particles.emit(entity.x, entity.y, 10, 'sparkle');
+        this.floatingTexts.emit(entity.x, entity.y - 16, '🛡️ BLOCKED!', '#00f2fe', 11);
         return;
       }
 
       entity.health--;
       SoundFX.hit();
       this.particles.emit(entity.x, entity.y, 12, 'sparkle');
+      this.floatingTexts.emit(entity.x, entity.y - 16, '-1 HP 💥', '#ef4444', 12);
 
       if (entity.health <= 0) {
         // KNOCKOUT / KILL!
         SoundFX.explosion();
         this.particles.emit(entity.x, entity.y, 30, 'sparkle');
+        this.shake = 8;
         entity.respawnTimer = 180; // 3 seconds
         entity.health = entity.maxHealth || 3;
 
@@ -1478,6 +1582,7 @@
           entity.y = cellH * 2.5;
           entity.shield = 1;
           this.addKillFeed(`💀 You were tagged! Respawning...`);
+          this.floatingTexts.emit(entity.x, entity.y - 20, '🔄 RESPAWNING...', '#f87171', 12);
         } else {
           // Bot died
           entity.x = cellW * 12.5;
@@ -1485,6 +1590,7 @@
           if (attackerId === 'player') {
             this.player.kills++;
             this.addKillFeed(`💥 You blasted ${entity.name}! (+150 PTS)`);
+            this.floatingTexts.emit(this.player.x, this.player.y - 20, '👑 ELIMINATED! +150 PTS', '#fbbf24', 13);
             SoundFX.victory();
           } else {
             this.addKillFeed(`⚡ ${entity.name} was tagged!`);
@@ -1497,6 +1603,14 @@
       const { ctx, w, h } = setupHiDpi(this.canvas);
       const cellW = w / this.cols;
       const cellH = h / this.rows;
+
+      ctx.save();
+      // Screen Shake
+      if (this.shake > 0) {
+        ctx.translate((Math.random() - 0.5) * this.shake, (Math.random() - 0.5) * this.shake);
+        this.shake *= 0.85;
+        if (this.shake < 0.5) this.shake = 0;
+      }
 
       // 1. Cyber Sci-Fi Maze Background
       ctx.fillStyle = '#050811';
@@ -1537,33 +1651,55 @@
         }
       }
 
-      // 3. Render Floating Powerups
+      // 3. Render Floating Supply Crates / Powerups with Badges
       this.powerups.forEach(pw => {
         if (!pw.active) return;
         const pwX = pw.gridX * cellW + cellW * 0.5;
-        const pwY = pw.gridY * cellH + cellH * 0.5 + Math.sin(this.time * 5) * 3;
+        const pwY = pw.gridY * cellH + cellH * 0.5 + Math.sin(this.time * 4) * 3;
 
         ctx.save();
-        // Glow Halo
+        // Ground glow ring
+        ctx.fillStyle = pw.color;
+        ctx.globalAlpha = 0.25;
+        ctx.beginPath();
+        ctx.ellipse(pwX, pwY + 12, 14, 5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1.0;
+
+        // Floating Supply Crate Box
         ctx.shadowColor = pw.color;
-        ctx.shadowBlur = 10;
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeStyle = pw.color;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(pwX - 11, pwY - 11, 22, 22, 5);
+        ctx.fill();
+        ctx.stroke();
+
+        // Inner Power Core
         ctx.fillStyle = pw.color;
         ctx.beginPath();
-        ctx.arc(pwX, pwY, 10, 0, Math.PI * 2);
+        ctx.arc(pwX, pwY, 5, 0, Math.PI * 2);
         ctx.fill();
 
-        // White Center Core
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(pwX, pwY, 4.5, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Rotating Orbit Ring
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        // Rotating Orbital Plasma Ring
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.ellipse(pwX, pwY, 14, 6, this.time * 4, 0, Math.PI * 2);
+        ctx.ellipse(pwX, pwY, 15, 6, this.time * 3, 0, Math.PI * 2);
         ctx.stroke();
+
+        // Floating Banner Label above Crate
+        ctx.font = 'bold 8px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+        ctx.shadowBlur = 3;
+        const label = pw.type === 'speed' ? '⚡ SPEED' :
+                      pw.type === 'shield' ? '🛡️ SHIELD' :
+                      pw.type === 'triple' ? '💥 3-WAY' : '💣 EMP';
+        ctx.fillText(label, pwX, pwY - 16);
         ctx.restore();
       });
 
@@ -1589,76 +1725,355 @@
       // 5. Render Bots
       this.bots.forEach(bot => {
         if (bot.respawnTimer > 0) return;
-        this.drawBattleAvatar(ctx, bot.x, bot.y, bot.angle, bot.helmetColor, bot.name, bot.health, bot.shield);
+        this.drawBattleAvatar(ctx, bot, false);
       });
 
       // 6. Render Player
       if (this.player.respawnTimer <= 0) {
-        this.drawBattleAvatar(ctx, this.player.x, this.player.y, this.player.angle, this.player.helmetColor, this.player.name, this.player.health, this.player.shield, true);
+        this.drawBattleAvatar(ctx, this.player, true);
+
+        // Player Laser Targeting Sights & Crosshair (Desktop mouse aim)
+        if (!this.isPreview && this.mousePos.active) {
+          ctx.save();
+          ctx.setLineDash([4, 4]);
+          ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(this.player.x + Math.cos(this.player.angle) * 16, this.player.y + Math.sin(this.player.angle) * 16);
+          ctx.lineTo(this.mousePos.x, this.mousePos.y);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Crosshair Reticle
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.arc(this.mousePos.x, this.mousePos.y, 8, 0, Math.PI * 2);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(this.mousePos.x - 12, this.mousePos.y); ctx.lineTo(this.mousePos.x - 3, this.mousePos.y);
+          ctx.moveTo(this.mousePos.x + 3, this.mousePos.y);  ctx.lineTo(this.mousePos.x + 12, this.mousePos.y);
+          ctx.moveTo(this.mousePos.x, this.mousePos.y - 12); ctx.lineTo(this.mousePos.x, this.mousePos.y - 3);
+          ctx.moveTo(this.mousePos.x, this.mousePos.y + 3);  ctx.lineTo(this.mousePos.x, this.mousePos.y + 12);
+          ctx.stroke();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(this.mousePos.x, this.mousePos.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
       }
 
       // 7. Render Particles
       this.particles.updateAndDraw(ctx);
 
-      // 8. Render HUD (Hearts, Ammo, Kills, Kill Feed)
+      // 8. Render Floating Combat & Status Text
+      this.floatingTexts.updateAndDraw(ctx);
+
+      // Restore camera shake
+      ctx.restore();
+
+      // 9. Render HUD (Hearts, Ammo, Kills, Kill Feed)
       this.drawBattleHUD(ctx, w, h);
 
-      // 9. Virtual Touch Controls (Non-preview mode)
+      // 10. Virtual Touch Controls (Non-preview mode)
       if (!this.isPreview) {
         this.drawVirtualControls(ctx, w, h);
       }
     }
 
-    drawBattleAvatar(ctx, x, y, angle, helmetColor, name, health, shield, isPlayer = false) {
+    drawBattleAvatar(ctx, entity, isPlayer = false) {
+      const {
+        x, y, angle, name, health, maxHealth = 3, shield,
+        characterType, helmetColor, coatColor,
+        walkCycle = 0, isMoving = false, muzzleFlash = 0
+      } = entity;
+
       ctx.save();
       ctx.translate(x, y);
 
-      // Health Bar above head
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
-      ctx.fillRect(-14, -22, 28, 4);
-      ctx.fillStyle = health > 1 ? '#10b981' : '#ef4444';
-      ctx.fillRect(-14, -22, (health / 3) * 28, 4);
-
-      // Shield Bubble Ring
-      if (shield > 0) {
-        ctx.strokeStyle = '#00f2fe';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.arc(0, 0, 18, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
-      // Body circle (Top-Down Astronaut)
-      ctx.fillStyle = '#f8fafc';
+      // 1. Soft Drop Shadow on the floor
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
       ctx.beginPath();
-      ctx.arc(0, 0, 12, 0, Math.PI * 2);
+      ctx.ellipse(0, 11, 14, 6, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Colored Helmet Arc
-      ctx.fillStyle = helmetColor;
-      ctx.beginPath();
-      ctx.arc(0, 0, 12, angle - Math.PI * 0.7, angle + Math.PI * 0.7);
-      ctx.fill();
-
-      // Visor Glass
+      // 2. Animated Running Legs / Boots
+      const legOffset = isMoving ? Math.sin(walkCycle) * 4 : 0;
+      // Left boot
       ctx.fillStyle = '#0f172a';
       ctx.beginPath();
-      ctx.arc(Math.cos(angle) * 4, Math.sin(angle) * 4, 6.5, 0, Math.PI * 2);
+      ctx.roundRect(-8, 6 + legOffset, 6, 9, 3);
+      ctx.fill();
+      ctx.fillStyle = helmetColor;
+      ctx.fillRect(-8, 12 + legOffset, 6, 3); // Sole/accent
+
+      // Right boot
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.roundRect(2, 6 - legOffset, 6, 9, 3);
+      ctx.fill();
+      ctx.fillStyle = helmetColor;
+      ctx.fillRect(2, 12 - legOffset, 6, 3); // Sole/accent
+
+      // 3. Torso / Armored Battle Suit
+      const bodyBaseColor = coatColor || helmetColor;
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.roundRect(-10, -4, 20, 14, 5);
       ctx.fill();
 
-      // Blaster Nozzle
-      ctx.strokeStyle = '#64748b';
-      ctx.lineWidth = 4;
+      // Armor Chestplate
+      ctx.fillStyle = bodyBaseColor;
       ctx.beginPath();
-      ctx.moveTo(Math.cos(angle) * 8, Math.sin(angle) * 8);
-      ctx.lineTo(Math.cos(angle) * 17, Math.sin(angle) * 17);
+      ctx.roundRect(-8, -2, 16, 9, 3);
+      ctx.fill();
+
+      // Glowing Chest Reactor Core (Pulse with time)
+      ctx.fillStyle = isPlayer ? '#38bdf8' : helmetColor;
+      ctx.beginPath();
+      ctx.arc(0, 2, 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 2, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. Arms & Vector Plasma Blaster Rifle (Rotated towards aiming angle)
+      ctx.save();
+      ctx.rotate(angle);
+
+      // Blaster Rifle Body
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.roundRect(6, 4, 15, 6, 2);
+      ctx.fill();
+
+      // Blaster Barrel & Neon Energy Conduit
+      ctx.fillStyle = isPlayer ? '#38bdf8' : helmetColor;
+      ctx.fillRect(10, 5, 8, 2);
+      ctx.fillStyle = '#64748b';
+      ctx.fillRect(18, 5, 7, 4);
+
+      // Hands gripping the rifle
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.arc(8, 4, 3, 0, Math.PI * 2);
+      ctx.arc(15, 6, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Muzzle Flash Particle Burst when firing
+      if (muzzleFlash > 0) {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(26, 7, 5 + muzzleFlash, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = isPlayer ? '#38bdf8' : '#f59e0b';
+        ctx.beginPath();
+        ctx.arc(26, 7, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // 5. Cute Chibi Head & Distinct Face
+      // Head Base
+      ctx.fillStyle = '#fed7aa'; // Cute warm skin tone
+      ctx.beginPath();
+      ctx.arc(0, -9, 13, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Cheerful Rosy Blush Cheeks
+      ctx.fillStyle = 'rgba(244, 63, 94, 0.45)';
+      ctx.beginPath();
+      ctx.ellipse(-8, -6, 2.8, 1.6, 0, 0, Math.PI * 2);
+      ctx.ellipse(8, -6, 2.8, 1.6, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Big Anime Eyes with white highlights
+      const eyeLookX = Math.cos(angle) * 1.5;
+      const eyeLookY = Math.sin(angle) * 1.0;
+
+      // Eye Sclera / Base
+      ctx.fillStyle = '#0f172a';
+      ctx.beginPath();
+      ctx.arc(-5 + eyeLookX, -10 + eyeLookY, 3, 0, Math.PI * 2);
+      ctx.arc(5 + eyeLookX, -10 + eyeLookY, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Colored Iris
+      ctx.fillStyle = isPlayer ? '#0284c7' : helmetColor;
+      ctx.beginPath();
+      ctx.arc(-5 + eyeLookX, -9.5 + eyeLookY, 2, 0, Math.PI * 2);
+      ctx.arc(5 + eyeLookX, -9.5 + eyeLookY, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Sparkling White Eye Highlights
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-6 + eyeLookX, -11 + eyeLookY, 1.2, 0, Math.PI * 2);
+      ctx.arc(4 + eyeLookX, -11 + eyeLookY, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Determined Angled Eyebrows
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-8, -14); ctx.lineTo(-2, -13);
+      ctx.moveTo(8, -14);  ctx.lineTo(2, -13);
       ctx.stroke();
 
-      // Username Tag
+      // Determined Battle Smile / Mouth
+      ctx.beginPath();
+      ctx.arc(0, -5, 2.5, 0.1, Math.PI - 0.1);
+      ctx.stroke();
+
+      // 6. Distinct Persona Hair / Hats / Visors
+      if (characterType === 'player' || isPlayer) {
+        // Player: Spiky Hero Anime Hair + Cyber Monocle Visor
+        ctx.fillStyle = '#4f46e5';
+        ctx.beginPath();
+        ctx.moveTo(-13, -13);
+        ctx.lineTo(-16, -21);
+        ctx.lineTo(-8, -19);
+        ctx.lineTo(-3, -24);
+        ctx.lineTo(3, -20);
+        ctx.lineTo(10, -23);
+        ctx.lineTo(13, -15);
+        ctx.lineTo(13, -9);
+        ctx.lineTo(10, -14);
+        ctx.lineTo(-10, -14);
+        ctx.closePath();
+        ctx.fill();
+
+        // Cyan Neon Streak
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath();
+        ctx.moveTo(-4, -22); ctx.lineTo(1, -16); ctx.lineTo(-5, -16); ctx.closePath();
+        ctx.fill();
+
+        // Cyber Holographic Visor Monocle over Right Eye
+        ctx.strokeStyle = '#00f2fe';
+        ctx.lineWidth = 1.6;
+        ctx.fillStyle = 'rgba(0, 242, 254, 0.35)';
+        ctx.beginPath();
+        ctx.roundRect(2, -13, 8, 7, 2);
+        ctx.fill();
+        ctx.stroke();
+
+      } else if (characterType === 'newton') {
+        // Newton: Luxurious Powdered White Baroque Curls + Apple Pin
+        ctx.fillStyle = '#f1f5f9';
+        // Left curls
+        ctx.beginPath(); ctx.arc(-13, -11, 4.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(-12, -6, 4.5, 0, Math.PI * 2); ctx.fill();
+        // Right curls
+        ctx.beginPath(); ctx.arc(13, -11, 4.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(12, -6, 4.5, 0, Math.PI * 2); ctx.fill();
+        // Top curls
+        ctx.beginPath(); ctx.arc(-5, -20, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(5, -20, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, -21, 5, 0, Math.PI * 2); ctx.fill();
+
+        // Golden Apple Emblem
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath(); ctx.arc(0, -1, 3, 0, Math.PI * 2); ctx.fill();
+
+      } else if (characterType === 'galileo') {
+        // Galileo: Brown Wavy Hair + Distinguished Beard + Brass Goggles
+        ctx.fillStyle = '#78350f';
+        ctx.beginPath();
+        ctx.arc(0, -15, 12, Math.PI, Math.PI * 2);
+        ctx.fill();
+        // Beard
+        ctx.beginPath();
+        ctx.arc(0, -4, 6, 0, Math.PI);
+        ctx.fill();
+
+        // Brass Celestial Goggles on Forehead
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth = 2;
+        ctx.fillStyle = 'rgba(217, 119, 6, 0.4)';
+        ctx.beginPath();
+        ctx.arc(-5, -16, 3.5, 0, Math.PI * 2);
+        ctx.arc(5, -16, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+      } else if (characterType === 'kepler') {
+        // Kepler: Emerald Astronaut Dome with Orbiting Ring
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.25)';
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(0, -9, 14, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Orbiting Planetary Ring Antenna
+        ctx.strokeStyle = '#6ee7b7';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.ellipse(0, -19, 11, 4, Math.sin(this.time * 3) * 0.3, 0, Math.PI * 2);
+        ctx.stroke();
+        // Orbiting planet dot
+        const orbX = Math.cos(this.time * 4) * 11;
+        const orbY = -19 + Math.sin(this.time * 4) * 4;
+        ctx.fillStyle = '#fbbf24';
+        ctx.beginPath(); ctx.arc(orbX, orbY, 2, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // 7. Kinetic Shield Bubble (if active)
+      if (shield > 0) {
+        ctx.save();
+        const shieldPulse = Math.sin(this.time * 6) * 1.5;
+        ctx.strokeStyle = '#00f2fe';
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = '#00f2fe';
+        ctx.shadowBlur = 12;
+        ctx.fillStyle = 'rgba(0, 242, 254, 0.18)';
+        ctx.beginPath();
+        ctx.arc(0, 0, 21 + shieldPulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Mini shield orbit nodes
+        const nodeAngle = this.time * 4;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(Math.cos(nodeAngle) * (21 + shieldPulse), Math.sin(nodeAngle) * (21 + shieldPulse), 2.5, 0, Math.PI * 2);
+        ctx.arc(Math.cos(nodeAngle + Math.PI) * (21 + shieldPulse), Math.sin(nodeAngle + Math.PI) * (21 + shieldPulse), 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 8. Sleek Multi-Segment Overhead Health Bar
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.beginPath();
+      ctx.roundRect(-15, -28, 30, 5, 2.5);
+      ctx.fill();
+
+      const healthPct = Math.max(0, health / maxHealth);
+      ctx.fillStyle = healthPct > 0.5 ? '#10b981' : healthPct > 0.25 ? '#f59e0b' : '#ef4444';
+      ctx.beginPath();
+      ctx.roundRect(-14, -27, 28 * healthPct, 3, 1.5);
+      ctx.fill();
+
+      // 9. Floating Name Badge
       ctx.font = 'bold 9px monospace';
       ctx.fillStyle = isPlayer ? '#38bdf8' : '#e2e8f0';
       ctx.textAlign = 'center';
-      ctx.fillText(name, 0, -25);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 3;
+      ctx.fillText(name, 0, -32);
+
+      // 10. Active Powerup Badge (if any)
+      if (entity.powerup) {
+        ctx.font = 'bold 8px monospace';
+        ctx.fillStyle = entity.powerup === 'speed' ? '#eab308' : entity.powerup === 'triple' ? '#ec4899' : '#a855f7';
+        ctx.fillText(entity.powerup.toUpperCase(), 0, -42);
+      }
 
       ctx.restore();
     }
@@ -1684,7 +2099,7 @@
       // Kills Badge (Center Top)
       ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
       ctx.beginPath();
-      ctx.roundRect(w * 0.5 - 55, 10, 110, 26, 8);
+      ctx.roundRect(w * 0.5 - 65, 10, 130, 26, 8);
       ctx.fill();
       ctx.fillStyle = '#f59e0b';
       ctx.font = 'bold 11px monospace';
@@ -1696,13 +2111,26 @@
       this.killFeed.forEach((item, idx) => {
         ctx.fillStyle = `rgba(15, 23, 42, ${Math.min(1, item.timer / 40)})`;
         ctx.beginPath();
-        ctx.roundRect(w - 220, 10 + idx * 24, 210, 20, 6);
+        ctx.roundRect(w - 230, 10 + idx * 24, 220, 20, 6);
         ctx.fill();
 
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 10px monospace';
         ctx.fillText(item.text, w - 16, 24 + idx * 24);
       });
+
+      // Bottom Objective Banner
+      if (!this.isPreview) {
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
+        ctx.beginPath();
+        ctx.roundRect(w * 0.5 - 160, h - 28, 320, 22, 6);
+        ctx.fill();
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 9px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('🎯 WASD: Move • Mouse: Aim & Click • Space: Fire', w * 0.5, h - 17);
+      }
 
       ctx.restore();
     }
@@ -1712,7 +2140,7 @@
       // Virtual Fire Button (Bottom Right)
       const fireX = w - 45;
       const fireY = h - 45;
-      ctx.fillStyle = 'rgba(236, 72, 153, 0.65)';
+      ctx.fillStyle = 'rgba(236, 72, 153, 0.75)';
       ctx.beginPath();
       ctx.arc(fireX, fireY, 26, 0, Math.PI * 2);
       ctx.fill();
@@ -1726,8 +2154,8 @@
       ctx.textBaseline = 'middle';
       ctx.fillText('FIRE ⚡', fireX, fireY);
 
-      // D-Pad Hint on Bottom Left
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.5)';
+      // D-Pad / Touch Hint on Bottom Left
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
       ctx.beginPath();
       ctx.roundRect(14, h - 34, 130, 22, 6);
       ctx.fill();
@@ -1735,7 +2163,7 @@
       ctx.font = 'bold 9px monospace';
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.fillText('⌨️ WASD/Touch Move', 20, h - 23);
+      ctx.fillText('⌨️ WASD / Touch', 20, h - 23);
       ctx.restore();
     }
   }

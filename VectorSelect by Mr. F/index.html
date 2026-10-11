@@ -1123,7 +1123,7 @@
       <div class="relative bg-slate-950 flex items-center justify-center overflow-hidden">
         <canvas id="student-arena-canvas" class="w-full h-80 sm:h-96 block cursor-pointer"></canvas>
         <div class="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-xs font-bold text-white pointer-events-none">
-          👆 Tap wooden barrels or screen rapidly to pull!
+          <span id="arena-overlay-hint">👆 Tap wooden barrels or screen rapidly to pull!</span>
         </div>
       </div>
 
@@ -1771,16 +1771,20 @@
       const multEl = document.getElementById("arena-multiplier-val");
       const timerBadge = document.getElementById("arena-action-timer");
       const canvas = document.getElementById("student-arena-canvas");
+      const hintEl = document.getElementById("arena-overlay-hint");
 
       if (gamifiedGameMode === "mastery_peak") {
         if (titleEl) titleEl.textContent = "⛰️ MASTERY PEAK — SUMMIT RUN!";
         if (subEl) subEl.textContent = "Tap screen rapidly to ascend past wind gusts!";
+        if (hintEl) hintEl.textContent = "👆 Tap screen rapidly to climb the icy summit!";
       } else if (gamifiedGameMode === "wayarena") {
-        if (titleEl) titleEl.textContent = "⚡ WAYARENA — VECTOR MAZE BATTLE!";
-        if (subEl) subEl.textContent = "WASD/Arrow keys or Touch to move, Space/Tap to BLAST opponents & grab powerups!";
+        if (titleEl) titleEl.textContent = "⚡ WAYARENA — SCI-FI VECTOR BATTLE!";
+        if (subEl) subEl.textContent = "WASD / Arrows to move • Mouse to aim • Left-Click / Space to BLAST opponents!";
+        if (hintEl) hintEl.textContent = "🎯 WASD: Move • Mouse: Aim • Click / Space: BLAST bots & grab powerups!";
       } else {
         if (titleEl) titleEl.textContent = "⚔️ TUG OF WAR — ACTION PHASE!";
         if (subEl) subEl.textContent = "Click wooden barrels or screen rapidly to pull the rope!";
+        if (hintEl) hintEl.textContent = "👆 Tap wooden barrels or screen rapidly to pull the rope!";
       }
 
       if (multEl) multEl.textContent = `x${gamifiedPullMultiplier} Power Multiplier Active`;

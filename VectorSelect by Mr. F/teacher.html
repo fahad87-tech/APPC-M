@@ -376,9 +376,9 @@
               <span class="font-black text-lg text-amber-300">Playground</span>
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Arcade &amp; Duel</span>
             </div>
-            <p class="text-xs text-slate-300 leading-snug">Tug of War &amp; arcade action rounds powered by student question accuracy.</p>
+            <p class="text-xs text-slate-300 leading-snug">Wayarena maze battle &amp; Tug of War bursts powered by student question accuracy.</p>
             <div class="flex items-center gap-1.5 text-[10px] text-amber-300 font-bold">
-              <span>🎮 Tug of War • Custom Mins</span>
+              <span>⚡ Wayarena • Tug of War</span>
             </div>
           </div>
         </div>
@@ -1853,7 +1853,7 @@
     let studioShowAnswerMode = "immediate";
     let studioPreviewArena = null;
 
-    function selectActivityMode(mode) {
+    function highlightActivityModeCard(mode) {
       selectedActivityMode = mode;
       const cards = ["classic", "mastery_peak", "playground", "test_mode", "team_mode"];
       cards.forEach(c => {
@@ -1867,6 +1867,10 @@
           el.style.borderColor = "";
         }
       });
+    }
+
+    function selectActivityMode(mode) {
+      highlightActivityModeCard(mode);
 
       const modeSel = document.getElementById("teacher-quiz-mode");
       const modeDesc = document.getElementById("quiz-mode-description");
@@ -2034,6 +2038,7 @@
         if (overallTimeBox) overallTimeBox.classList.add("hidden");
         if (gamifiedBox) gamifiedBox.classList.add("hidden");
         if (modeDesc) modeDesc.textContent = "In Teacher-Led mode, all students advance together with instructor pacing.";
+        highlightActivityModeCard("classic");
       } else {
         if (perQBox) perQBox.classList.add("hidden");
         if (overallTimeBox) overallTimeBox.classList.add("hidden");
@@ -2048,6 +2053,11 @@
       const input = document.getElementById("teacher-game-mode");
       if (input) input.value = gameId;
       studioSelectedGame = gameId;
+
+      if (gameId === "wayarena") highlightActivityModeCard("playground");
+      else if (gameId === "tug_of_war") highlightActivityModeCard("team_mode");
+      else if (gameId === "mastery_peak") highlightActivityModeCard("mastery_peak");
+      else if (gameId === "classic") highlightActivityModeCard("test_mode");
 
       const games = ["wayarena", "tug_of_war", "mastery_peak", "classic"];
       games.forEach(g => {
