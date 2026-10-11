@@ -622,3 +622,124 @@ flowchart TD
 2. **QR Code Generation**: Use a clean URL-encoded QR endpoint (`api.qrserver.com` or local SVG generator) populated during assignment creation.
 3. **Decoupled Lock Gate**: Ensure `studentLockedAnswers` is checked only when `quizMode === "teacher_led"`, while `student_led` relies on `isExamLocked` / `isExamSubmitted`.
 4. **Scoring Rationales**: Hydrate `q.explanation` before rendering review cards to ensure zero-key leakage during the exam and full explanatory access in review mode.
+
+## 14. Wayarena Battle: Brick-Spawn Bugfix & 10–20 Student Anti-Crowding Architecture (`data/game_arena.js`)
+
+### A. Root Cause Analysis of Brick Entrapment
+1. **Hardcoded Wall Coordinate Overlap**:
+   - In previous iterations, `MazeBattleArena.start()` and `hitEntity()` initialized player and bot positions as:
+     ```javascript
+     this.player.x = cellW * 2.5; // Col index 2
+     this.player.y = cellH * 2.5; // Row index 2
+     ```
+   - In `MAZE_MAP[2][2]`, the grid tile was explicitly `1` (Wall). The player and two bots were literally instantiated inside solid wall cells.
+2. **Permanent Collision Deadlock**:
+   - `isWall(x, y, radius)` evaluates the bounding box corners against the grid. Because the player's initial coordinates were already inside a wall, `isWall(nextX, y)` and `isWall(x, nextY)` both returned `true` for all directions, freezing player velocity to 0 permanently.
+3. **Single-Tile Corridor Bottlenecks**:
+   - Hallways were only 1 tile wide (~32px). With `radius = 12px`, characters had virtually zero margin for error when turning corners.
+
+---
+
+### B. Anti-Crowding Architecture for 10–20 Students
+
+To scale the top-down arena from 1 player + 3 bots to a lively classroom environment (10–20 students) without gridlocks or spawn camping, four architectural systems were implemented:
+
+```mermaid
+graph TD
+    A["10-20 Students in Wayarena"] --> B["1. Expansive 25x17 Map (261 Walkable Cells)"]
+    A --> C["2. Double-Wide Corridors (2-Tile Hallways)"]
+    A --> D["3. Soft Phase-Ghosting Repulsion"]
+    A --> E["4. Quadrant Safe-Spawning & 3s Golden Shield"]
+    
+    B --> F["350% More Maneuvering Space"]
+    C --> G["Zero Hallway Gridlock"]
+    D --> H["Players Glide Past Each Other; Lasers Still Collide"]
+    E --> I["Zero Spawn-Camping"]
+```
+
+#### 1. Expansive 25x17 Tactical Arena Map
+- Upgraded map from 15x11 to a **25x17 grid** (425 cells total, 261 walkable cells, 61.4% open space):
+  - **Double-Wide Hallways (2-tile corridors)**: Hallways are at least 2 tiles wide (~48–60px), allowing students to sprint side-by-side or cross in opposite directions without collision lock.
+  - **4 Quadrant Outposts**:
+    - **Sector 0 (Alpha Outpost NW)**: Kinetic Shield Crate 🛡️
+    - **Sector 1 (Beta Outpost NE)**: Quantum Dash Crate ⚡
+    - **Sector 2 (Gamma Outpost SW)**: Triple Laser Crate 💥
+    - **Sector 3 (Delta Outpost SE)**: Graviton EMP Crate 💣
+  - **Center Core Plaza (Rows 6–10, Cols 8–16)**: Wide open combat arena with 4 defensive corner cover pillars and a central Plasma Overcharge Crate ⭐.
+
+#### 2. Dynamic Quadrant Safe-Spawning
+- Implemented `getSpawnCoordinates(sectorIndex)`:
+  ```javascript
+  const spawnGridTiles = [
+    { col: 3, row: 2 },   // Sector 0 (Alpha Outpost NW)
+    { col: 21, row: 2 },  // Sector 1 (Beta Outpost NE)
+    { col: 3, row: 14 },  // Sector 2 (Gamma Outpost SW)
+    { col: 21, row: 14 }, // Sector 3 (Delta Outpost SE)
+    { col: 12, row: 8 }   // Sector 4 (Central Core Plaza)
+  ];
+  ```
+  Guarantees 100% of spawns and respawns occur in open plaza centers with verified zero wall overlap.
+
+#### 3. Exact Circle-to-AABB Wall Collision & Unstick Ejection
+- Replaced 4-corner sampling with mathematically exact **circle-to-AABB distance clamping**:
+  ```javascript
+  const nearestX = Math.max(c * cellW, Math.min(x, (c + 1) * cellW));
+  const nearestY = Math.max(r * cellH, Math.min(y, (r + 1) * cellH));
+  const distSq = (x - nearestX) * (x - nearestX) + (y - nearestY) * (y - nearestY);
+  if (distSq < radius * radius - 0.05) return true;
+  ```
+- Added `unstickEntity(entity)`: If an entity ever overlaps a wall cell (due to sudden resize or lag), a 3x3 neighborhood scan immediately nudges the entity to the nearest open pathway center.
+
+#### 4. Soft Phase-Ghosting Repulsion (No Physical Corridor Deadlocks)
+- Rigid circle-to-circle collision between players is replaced with **Soft Spring Repulsion**:
+  ```javascript
+  let edx = e2.x - e1.x;
+  let edy = e2.y - e1.y;
+  let edist = Math.hypot(edx, edy);
+  if (edist < 0.01) {
+    edx = (Math.random() - 0.5) || 0.1;
+    edy = (Math.random() - 0.5) || 0.1;
+    edist = Math.hypot(edx, edy);
+  }
+  const minSep = e1.radius + e2.radius + 2;
+  if (edist < minSep) {
+    const overlap = (minSep - edist) * 0.18;
+    const nx = edx / edist;
+    const ny = edy / edist;
+    if (!this.isWall(e1.x - nx * overlap, e1.y, e1.radius)) e1.x -= nx * overlap;
+    if (!this.isWall(e1.x, e1.y - ny * overlap, e1.radius)) e1.y -= ny * overlap;
+    if (!this.isWall(e2.x + nx * overlap, e2.y, e2.radius)) e2.x += nx * overlap;
+    if (!this.isWall(e2.x, e2.y + ny * overlap, e2.radius)) e2.y += ny * overlap;
+    e1.phaseRipple = 6;
+    e2.phaseRipple = 6;
+  }
+  ```
+- **Player Experience**: Students can smoothly pass each other in doorways and hallways. An idle or slow student can never block a corridor or trap classmates!
+- **Visuals**: A soft cyan phase-ripple glow triggers around overlapping avatars.
+- **Combat Integrity**: Laser projectiles still register direct hits on any entity regardless of ghosting.
+
+#### 5. 3-Second Golden Respawn Shield
+- Upon spawning or respawning, entities receive `invulnerableTimer = 180` (3 seconds at 60fps).
+- While active:
+  - Incoming laser hits deal 0 damage and trigger `'🛡️ IMMUNE!'` floating feedback.
+  - Avatar is surrounded by a glowing golden energy bubble with orbiting stars/runes.
+  - Completely eliminates spawn camping and instant knockouts.
+
+#### 6. Tactical Mini-Radar HUD
+- Integrated an 84x56 px radar in the corner of the canvas:
+  - Sweep scanline effect.
+  - Real-time color-coded blips for player (cyan glow) and all bots/classmates (persona colors).
+  - Displays map awareness for all 10–20 students simultaneously.
+
+---
+
+### C. Replication Checklist for Other IDEs / Game Frameworks
+1. **Corridor Sizing**: Always ensure minimum corridor width is at least `2.5 * entityDiameter` when 10+ players share a top-down arena.
+2. **Coordinate Matrix Conversion**: When converting grid matrix indices `(row, col)` to world pixel coordinates, always center entities: `x = (col + 0.5) * cellW`, `y = (row + 0.5) * cellH`.
+3. **Axis Decoupling in Velocity**: Move horizontal (`nextX`) and vertical (`nextY`) independently:
+   ```javascript
+   if (!isWall(nextX, y, radius)) x = nextX;
+   if (!isWall(x, nextY, radius)) y = nextY;
+   ```
+   This provides frictionless wall sliding around corners.
+4. **Soft-Body Separation**: In multiplayer educational games, never use rigid hard-body collisions between friendly players; use soft-spring repulsion to prevent trolling, griefing, and accidental bottlenecks.

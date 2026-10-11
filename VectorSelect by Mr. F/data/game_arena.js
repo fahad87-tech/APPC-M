@@ -1037,17 +1037,24 @@
   // Game 3: WAYARENA — VECTOR MAZE BATTLE (Top-down PvP / Bot Battle & Powerups)
   // ----------------------------------------------------------------------------
   const MAZE_MAP = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1],
-    [1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1],
-    [1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1],
-    [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1],
-    [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    // 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], // 0 Top Wall
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1], // 1 Alpha Outpost (NW) & Beta Outpost (NE)
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1], // 2
+    [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1], // 3 Double-wide connector
+    [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1], // 4
+    [1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1], // 5
+    [1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1], // 6 Tactical Pillars
+    [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1], // 7 Central Core Plaza
+    [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1], // 8 Central Core Arena
+    [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1], // 9 Central Core Plaza
+    [1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1], // 10 Tactical Pillars
+    [1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1], // 11
+    [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1], // 12 Double-wide connector
+    [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1], // 13
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1], // 14 Gamma Outpost (SW) & Delta Outpost (SE)
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1], // 15
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]  // 16 Bottom Wall
   ];
 
   class MazeBattleArena {
@@ -1064,13 +1071,13 @@
       this.cols = MAZE_MAP[0].length;
       this.rows = MAZE_MAP.length;
 
-      // Player Setup
+      // Player Setup (Spawns in Sector 0: Alpha Outpost NW)
       this.player = {
         x: 0, y: 0,
         vx: 0, vy: 0,
         angle: 0,
-        radius: 12,
-        speed: 2.6,
+        radius: 10,
+        speed: 2.7,
         health: 3,
         maxHealth: 3,
         shield: 1,
@@ -1081,6 +1088,8 @@
         powerup: null,
         powerupTimer: 0,
         respawnTimer: 0,
+        invulnerableTimer: 180, // 3-second golden respawn shield bubble
+        phaseRipple: 0,
         helmetColor: '#8b5cf6',
         coatColor: '#4f46e5',
         characterType: 'player',
@@ -1090,20 +1099,45 @@
         muzzleFlash: 0
       };
 
-      // 3 AI Opponents with distinct Chibi Personas
+      // 4 AI Opponents distributed across distinct Quadrants
       this.bots = [
-        { id: 1, name: 'NewtonBot', characterType: 'newton', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI, radius: 12, speed: 1.8, health: 3, maxHealth: 3, shield: 0, helmetColor: '#06b6d4', coatColor: '#dc2626', shootCooldown: 60, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
-        { id: 2, name: 'GalileoBot', characterType: 'galileo', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI / 2, radius: 12, speed: 1.7, health: 3, maxHealth: 3, shield: 0, helmetColor: '#f59e0b', coatColor: '#4f46e5', shootCooldown: 80, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
-        { id: 3, name: 'KeplerBot', characterType: 'kepler', x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, radius: 12, speed: 1.9, health: 3, maxHealth: 3, shield: 0, helmetColor: '#10b981', coatColor: '#059669', shootCooldown: 70, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 }
+        { id: 1, name: 'NewtonBot', characterType: 'newton', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI, radius: 10, speed: 1.85, health: 3, maxHealth: 3, shield: 0, invulnerableTimer: 120, phaseRipple: 0, helmetColor: '#06b6d4', coatColor: '#dc2626', shootCooldown: 60, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
+        { id: 2, name: 'GalileoBot', characterType: 'galileo', x: 0, y: 0, vx: 0, vy: 0, angle: Math.PI / 2, radius: 10, speed: 1.75, health: 3, maxHealth: 3, shield: 0, invulnerableTimer: 120, phaseRipple: 0, helmetColor: '#f59e0b', coatColor: '#4f46e5', shootCooldown: 80, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
+        { id: 3, name: 'KeplerBot', characterType: 'kepler', x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, radius: 10, speed: 1.95, health: 3, maxHealth: 3, shield: 0, invulnerableTimer: 120, phaseRipple: 0, helmetColor: '#10b981', coatColor: '#059669', shootCooldown: 70, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 },
+        { id: 4, name: 'CurieBot', characterType: 'curie', x: 0, y: 0, vx: 0, vy: 0, angle: 0, radius: 10, speed: 1.8, health: 3, maxHealth: 3, shield: 0, invulnerableTimer: 120, phaseRipple: 0, helmetColor: '#ec4899', coatColor: '#9333ea', shootCooldown: 75, respawnTimer: 0, walkCycle: 0, isMoving: false, muzzleFlash: 0 }
       ];
 
-      // 4 Powerup Spawn Locations in the maze
+      // 5 Strategic Powerup Supply Crates in the 4 Outposts & Central Plaza
       this.powerups = [
-        { gridX: 7, gridY: 5, type: 'triple', name: 'Triple Laser 💥', color: '#ec4899', active: true, respawnTimer: 0 },
-        { gridX: 3, gridY: 4, type: 'speed', name: 'Quantum Dash ⚡', color: '#eab308', active: true, respawnTimer: 0 },
-        { gridX: 11, gridY: 4, type: 'shield', name: 'Kinetic Shield 🛡️', color: '#00f2fe', active: true, respawnTimer: 0 },
-        { gridX: 7, gridY: 1, type: 'emp', name: 'Graviton EMP 💣', color: '#a855f7', active: true, respawnTimer: 0 }
+        { gridX: 3, gridY: 2, type: 'shield', name: 'Kinetic Shield 🛡️', color: '#00f2fe', active: true, respawnTimer: 0 },
+        { gridX: 21, gridY: 2, type: 'speed', name: 'Quantum Dash ⚡', color: '#eab308', active: true, respawnTimer: 0 },
+        { gridX: 3, gridY: 14, type: 'triple', name: 'Triple Laser 💥', color: '#ec4899', active: true, respawnTimer: 0 },
+        { gridX: 21, gridY: 14, type: 'emp', name: 'Graviton EMP 💣', color: '#a855f7', active: true, respawnTimer: 0 },
+        { gridX: 12, gridY: 8, type: 'triple', name: 'Plasma Overcharge ⭐', color: '#38bdf8', active: true, respawnTimer: 0 }
       ];
+
+      // Dynamic Quadrant Spawn Locator (Guarantees open corridor center with 0% wall overlap)
+      this.getSpawnCoordinates = (sectorIndex) => {
+        const rect = this.canvas.getBoundingClientRect();
+        const w = Math.max(280, rect.width || 600);
+        const h = Math.max(160, rect.height || 360);
+        const cellW = w / this.cols;
+        const cellH = h / this.rows;
+
+        // 5 Safe Open Plaza Spawn Locations (guaranteed 0% wall overlap)
+        const spawnGridTiles = [
+          { col: 3, row: 2 },   // Sector 0 (Alpha Outpost NW)
+          { col: 21, row: 2 },  // Sector 1 (Beta Outpost NE)
+          { col: 3, row: 14 },  // Sector 2 (Gamma Outpost SW)
+          { col: 21, row: 14 }, // Sector 3 (Delta Outpost SE)
+          { col: 12, row: 8 }   // Sector 4 (Central Core Plaza)
+        ];
+        const t = spawnGridTiles[sectorIndex % spawnGridTiles.length];
+        return {
+          x: (t.col + 0.5) * cellW,
+          y: (t.row + 0.5) * cellH
+        };
+      };
 
       // Key & Mouse states
       this.keys = {};
@@ -1207,18 +1241,19 @@
 
     start() {
       if (this.animId) cancelAnimationFrame(this.animId);
-      const rect = this.canvas.getBoundingClientRect();
-      const w = Math.max(280, rect.width || 600);
-      const h = Math.max(160, rect.height || 360);
-      const cellW = w / this.cols;
-      const cellH = h / this.rows;
 
-      this.player.x = cellW * 2.5;
-      this.player.y = cellH * 2.5;
+      // Safe Spawning: Player in NW Sector Alpha, Bots in other sectors
+      const pSpawn = this.getSpawnCoordinates(0);
+      this.player.x = pSpawn.x;
+      this.player.y = pSpawn.y;
+      this.player.invulnerableTimer = 180; // 3s respawn shield
 
-      this.bots[0].x = cellW * 12.5; this.bots[0].y = cellH * 8.5;
-      this.bots[1].x = cellW * 12.5; this.bots[1].y = cellH * 2.5;
-      this.bots[2].x = cellW * 2.5;  this.bots[2].y = cellH * 8.5;
+      this.bots.forEach((bot, idx) => {
+        const bSpawn = this.getSpawnCoordinates(idx + 1);
+        bot.x = bSpawn.x;
+        bot.y = bSpawn.y;
+        bot.invulnerableTimer = 120;
+      });
 
       const loop = () => {
         this.update();
@@ -1241,6 +1276,7 @@
       this.canvas.removeEventListener('pointerleave', this.onPointerLeave);
     }
 
+    // Exact Circle-to-AABB Wall Collision
     isWall(x, y, radius = 8) {
       const rect = this.canvas.getBoundingClientRect();
       const w = Math.max(280, rect.width || 600);
@@ -1248,20 +1284,53 @@
       const cellW = w / this.cols;
       const cellH = h / this.rows;
 
-      const checkPts = [
-        { x: x - radius, y: y - radius },
-        { x: x + radius, y: y - radius },
-        { x: x - radius, y: y + radius },
-        { x: x + radius, y: y + radius }
-      ];
+      // Arena boundary collision
+      if (x - radius < cellW || x + radius > w - cellW || y - radius < cellH || y + radius > h - cellH) {
+        return true;
+      }
 
-      for (const pt of checkPts) {
-        const c = Math.floor(pt.x / cellW);
-        const r = Math.floor(pt.y / cellH);
-        if (c < 0 || c >= this.cols || r < 0 || r >= this.rows) return true;
-        if (MAZE_MAP[r][c] === 1) return true;
+      const minC = Math.max(0, Math.floor((x - radius) / cellW));
+      const maxC = Math.min(this.cols - 1, Math.floor((x + radius) / cellW));
+      const minR = Math.max(0, Math.floor((y - radius) / cellH));
+      const maxR = Math.min(this.rows - 1, Math.floor((y + radius) / cellH));
+
+      for (let r = minR; r <= maxR; r++) {
+        for (let c = minC; c <= maxC; c++) {
+          if (MAZE_MAP[r][c] === 1) {
+            // Find closest point on wall tile AABB
+            const nearestX = Math.max(c * cellW, Math.min(x, (c + 1) * cellW));
+            const nearestY = Math.max(r * cellH, Math.min(y, (r + 1) * cellH));
+            const distSq = (x - nearestX) * (x - nearestX) + (y - nearestY) * (y - nearestY);
+            if (distSq < radius * radius - 0.05) return true;
+          }
+        }
       }
       return false;
+    }
+
+    // Anti-Stuck Ejection Mechanism (Guarantees entity is never trapped in a brick)
+    unstickEntity(entity) {
+      if (!this.isWall(entity.x, entity.y, entity.radius * 0.6)) return;
+      const rect = this.canvas.getBoundingClientRect();
+      const w = Math.max(280, rect.width || 600);
+      const h = Math.max(160, rect.height || 360);
+      const cellW = w / this.cols;
+      const cellH = h / this.rows;
+
+      const c = Math.floor(entity.x / cellW);
+      const r = Math.floor(entity.y / cellH);
+
+      // Search immediate 3x3 neighborhood for nearest open pathway
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 1 && nr < this.rows - 1 && nc >= 1 && nc < this.cols - 1 && MAZE_MAP[nr][nc] === 0) {
+            entity.x = (nc + 0.5) * cellW;
+            entity.y = (nr + 0.5) * cellH;
+            return;
+          }
+        }
+      }
     }
 
     firePlayerLaser() {
@@ -1333,7 +1402,19 @@
       const cellW = w / this.cols;
       const cellH = h / this.rows;
 
+      // Dynamic collision radius scaled to corridor cell size (prevents snagging)
+      const dynamicRadius = Math.max(6, Math.min(cellW, cellH) * 0.35);
+      this.player.radius = dynamicRadius;
+      this.bots.forEach(b => b.radius = dynamicRadius);
+
+      // Unstick safety checks
+      this.unstickEntity(this.player);
+      this.bots.forEach(b => this.unstickEntity(b));
+
       // 1. Player Movement & Controls
+      if (this.player.invulnerableTimer > 0) this.player.invulnerableTimer--;
+      if (this.player.phaseRipple > 0) this.player.phaseRipple--;
+
       if (this.player.respawnTimer > 0) {
         this.player.respawnTimer--;
       } else {
@@ -1341,7 +1422,7 @@
         let moveY = 0;
 
         if (this.isPreview) {
-          // Preview Mode: Gentle autonomous wandering
+          // Preview Mode: Gentle autonomous patrol
           moveX = Math.cos(this.time * 2);
           moveY = Math.sin(this.time * 1.5);
           this.player.angle = Math.atan2(moveY, moveX);
@@ -1361,7 +1442,7 @@
             }
           }
 
-          // If no mouse active on desktop, angle with movement
+          // Desktop mouse aim
           if (!this.mousePos.active && (moveX !== 0 || moveY !== 0)) {
             this.player.angle = Math.atan2(moveY, moveX);
           }
@@ -1375,6 +1456,7 @@
           const nextX = this.player.x + (moveX / len) * spd;
           const nextY = this.player.y + (moveY / len) * spd;
 
+          // Smooth Independent Axis Sliding
           if (!this.isWall(nextX, this.player.y, this.player.radius)) this.player.x = nextX;
           if (!this.isWall(this.player.x, nextY, this.player.radius)) this.player.y = nextY;
         } else {
@@ -1400,6 +1482,9 @@
 
       // 2. Bots Movement & AI Patrol
       this.bots.forEach(bot => {
+        if (bot.invulnerableTimer > 0) bot.invulnerableTimer--;
+        if (bot.phaseRipple > 0) bot.phaseRipple--;
+
         if (bot.respawnTimer > 0) {
           bot.respawnTimer--;
           return;
@@ -1410,9 +1495,9 @@
         let targetX = this.player.x;
         let targetY = this.player.y;
 
-        if (distToPlayer > 180 || this.isPreview) {
-          targetX = bot.x + Math.cos(this.time * 2 + bot.id) * 40;
-          targetY = bot.y + Math.sin(this.time * 1.8 + bot.id) * 40;
+        if (distToPlayer > 220 || this.isPreview) {
+          targetX = bot.x + Math.cos(this.time * 2 + bot.id) * 50;
+          targetY = bot.y + Math.sin(this.time * 1.8 + bot.id) * 50;
         }
 
         const bdx = targetX - bot.x;
@@ -1433,15 +1518,51 @@
 
         if (bot.muzzleFlash > 0) bot.muzzleFlash--;
 
-        // Shoot at player or others
+        // Shoot at player
         bot.shootCooldown--;
-        if (bot.shootCooldown <= 0 && distToPlayer < 240) {
+        if (bot.shootCooldown <= 0 && distToPlayer < 240 && this.player.respawnTimer <= 0) {
           this.fireBotLaser(bot);
           bot.shootCooldown = Math.floor(Math.random() * 50 + 60);
         }
       });
 
-      // 3. Powerups Pickup & Respawns
+      // 3. Soft Phase-Ghosting Repulsion (Prevents hallway deadlocks for 10-20 students)
+      const allEntities = [this.player, ...this.bots];
+      for (let i = 0; i < allEntities.length; i++) {
+        const e1 = allEntities[i];
+        if (e1.respawnTimer > 0) continue;
+
+        for (let j = i + 1; j < allEntities.length; j++) {
+          const e2 = allEntities[j];
+          if (e2.respawnTimer > 0) continue;
+
+          let edx = e2.x - e1.x;
+          let edy = e2.y - e1.y;
+          let edist = Math.hypot(edx, edy);
+          if (edist < 0.01) {
+            edx = (Math.random() - 0.5) || 0.1;
+            edy = (Math.random() - 0.5) || 0.1;
+            edist = Math.hypot(edx, edy);
+          }
+          const minSep = e1.radius + e2.radius + 2;
+
+          if (edist < minSep) {
+            const overlap = (minSep - edist) * 0.18; // Soft spring push
+            const nx = edx / edist;
+            const ny = edy / edist;
+
+            if (!this.isWall(e1.x - nx * overlap, e1.y, e1.radius)) e1.x -= nx * overlap;
+            if (!this.isWall(e1.x, e1.y - ny * overlap, e1.radius)) e1.y -= ny * overlap;
+            if (!this.isWall(e2.x + nx * overlap, e2.y, e2.radius)) e2.x += nx * overlap;
+            if (!this.isWall(e2.x, e2.y + ny * overlap, e2.radius)) e2.y += ny * overlap;
+
+            e1.phaseRipple = 6;
+            e2.phaseRipple = 6;
+          }
+        }
+      }
+
+      // 4. Powerups Pickup & Respawns
       this.powerups.forEach(pw => {
         if (!pw.active) {
           pw.respawnTimer--;
@@ -1472,7 +1593,7 @@
         });
       });
 
-      // 4. Laser Simulation & Collisions
+      // 5. Laser Simulation & Collisions
       for (let i = this.lasers.length - 1; i >= 0; i--) {
         const l = this.lasers[i];
         l.x += l.vx;
@@ -1519,7 +1640,7 @@
         }
       }
 
-      // 5. Kill feed decay
+      // 6. Kill feed decay
       for (let i = this.killFeed.length - 1; i >= 0; i--) {
         this.killFeed[i].timer--;
         if (this.killFeed[i].timer <= 0) this.killFeed.splice(i, 1);
@@ -1544,7 +1665,7 @@
         this.floatingTexts.emit(entity.x, entity.y - 18, '💣 GRAVITON EMP BLAST!', '#a855f7', 13);
         this.shake = 10;
         this.bots.forEach(bot => {
-          if (Math.hypot(bot.x - entity.x, bot.y - entity.y) < 130) {
+          if (Math.hypot(bot.x - entity.x, bot.y - entity.y) < 140) {
             this.hitEntity(bot, 'bot', 'player');
           }
         });
@@ -1552,6 +1673,12 @@
     }
 
     hitEntity(entity, type, attackerId = null) {
+      // 3-Second Golden Respawn Shield (Immunity to spawn camping)
+      if (entity.invulnerableTimer > 0) {
+        this.floatingTexts.emit(entity.x, entity.y - 16, '🛡️ IMMUNE!', '#fbbf24', 11);
+        return;
+      }
+
       if (entity.shield > 0) {
         entity.shield--;
         SoundFX.hit();
@@ -1573,20 +1700,22 @@
         entity.respawnTimer = 180; // 3 seconds
         entity.health = entity.maxHealth || 3;
 
-        const rect = this.canvas.getBoundingClientRect();
-        const cellW = (rect.width || 600) / this.cols;
-        const cellH = (rect.height || 360) / this.rows;
-
         if (type === 'player') {
-          entity.x = cellW * 2.5;
-          entity.y = cellH * 2.5;
+          // Dynamic quadrant respawn
+          const pSpawn = this.getSpawnCoordinates(Math.floor(Math.random() * 4));
+          entity.x = pSpawn.x;
+          entity.y = pSpawn.y;
           entity.shield = 1;
+          entity.invulnerableTimer = 180; // 3s Golden Shield
           this.addKillFeed(`💀 You were tagged! Respawning...`);
           this.floatingTexts.emit(entity.x, entity.y - 20, '🔄 RESPAWNING...', '#f87171', 12);
         } else {
-          // Bot died
-          entity.x = cellW * 12.5;
-          entity.y = cellH * 8.5;
+          // Bot died - Respawn in balanced quadrant
+          const bSpawn = this.getSpawnCoordinates((entity.id + Math.floor(Math.random() * 3)) % 4);
+          entity.x = bSpawn.x;
+          entity.y = bSpawn.y;
+          entity.invulnerableTimer = 120;
+
           if (attackerId === 'player') {
             this.player.kills++;
             this.addKillFeed(`💥 You blasted ${entity.name}! (+150 PTS)`);
@@ -1788,11 +1917,25 @@
       const {
         x, y, angle, name, health, maxHealth = 3, shield,
         characterType, helmetColor, coatColor,
-        walkCycle = 0, isMoving = false, muzzleFlash = 0
+        walkCycle = 0, isMoving = false, muzzleFlash = 0,
+        invulnerableTimer = 0, phaseRipple = 0
       } = entity;
 
       ctx.save();
       ctx.translate(x, y);
+
+      // Phase Ripple Glow (when gliding past other students)
+      if (phaseRipple > 0) {
+        ctx.save();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 1.5;
+        ctx.shadowColor = '#00f2fe';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(0, 0, (entity.radius || 10) + 4, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
 
       // 1. Soft Drop Shadow on the floor
       ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
@@ -2022,6 +2165,20 @@
         const orbY = -19 + Math.sin(this.time * 4) * 4;
         ctx.fillStyle = '#fbbf24';
         ctx.beginPath(); ctx.arc(orbX, orbY, 2, 0, Math.PI * 2); ctx.fill();
+
+      } else if (characterType === 'curie') {
+        // Curie: Violet Chic Bob Hair & Radium Tiara
+        ctx.fillStyle = '#a855f7';
+        ctx.beginPath(); ctx.arc(0, -14, 12, Math.PI, Math.PI * 2); ctx.fill();
+        ctx.fillRect(-12, -14, 4, 9);
+        ctx.fillRect(8, -14, 4, 9);
+
+        // Radium Glowing Atom Tiara
+        ctx.strokeStyle = '#ec4899';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.ellipse(0, -19, 8, 3, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#38bdf8';
+        ctx.beginPath(); ctx.arc(0, -19, 2, 0, Math.PI * 2); ctx.fill();
       }
 
       // 7. Kinetic Shield Bubble (if active)
@@ -2048,7 +2205,31 @@
         ctx.restore();
       }
 
-      // 8. Sleek Multi-Segment Overhead Health Bar
+      // 8. Golden Respawn Invulnerability Shield Bubble (3s)
+      if (invulnerableTimer > 0) {
+        ctx.save();
+        const pulse = Math.sin(this.time * 8) * 2;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 2.4;
+        ctx.shadowColor = '#f59e0b';
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = 'rgba(251, 191, 36, 0.18)';
+        ctx.beginPath();
+        ctx.arc(0, 0, 22 + pulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Orbiting golden runes/stars
+        const rAngle = this.time * 5;
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(Math.cos(rAngle) * 22, Math.sin(rAngle) * 22, 2.2, 0, Math.PI * 2);
+        ctx.arc(Math.cos(rAngle + Math.PI) * 22, Math.sin(rAngle + Math.PI) * 22, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 9. Sleek Multi-Segment Overhead Health Bar
       ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
       ctx.beginPath();
       ctx.roundRect(-15, -28, 30, 5, 2.5);
@@ -2060,7 +2241,7 @@
       ctx.roundRect(-14, -27, 28 * healthPct, 3, 1.5);
       ctx.fill();
 
-      // 9. Floating Name Badge
+      // 10. Floating Name Badge
       ctx.font = 'bold 9px monospace';
       ctx.fillStyle = isPlayer ? '#38bdf8' : '#e2e8f0';
       ctx.textAlign = 'center';
@@ -2068,7 +2249,7 @@
       ctx.shadowBlur = 3;
       ctx.fillText(name, 0, -32);
 
-      // 10. Active Powerup Badge (if any)
+      // Active Powerup Badge (if any)
       if (entity.powerup) {
         ctx.font = 'bold 8px monospace';
         ctx.fillStyle = entity.powerup === 'speed' ? '#eab308' : entity.powerup === 'triple' ? '#ec4899' : '#a855f7';
@@ -2118,6 +2299,59 @@
         ctx.font = 'bold 10px monospace';
         ctx.fillText(item.text, w - 16, 24 + idx * 24);
       });
+
+      // Tactical Mini-Radar HUD (Displays live blips for all 10-20 players/bots)
+      const radarW = 84;
+      const radarH = 56;
+      const radarX = w - radarW - 12;
+      const radarY = h - radarH - 52;
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.roundRect(radarX, radarY, radarW, radarH, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      // Radar scanline sweep
+      const sweepY = radarY + (Math.sin(this.time * 2.5) * 0.5 + 0.5) * radarH;
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.2)';
+      ctx.beginPath();
+      ctx.moveTo(radarX, sweepY); ctx.lineTo(radarX + radarW, sweepY);
+      ctx.stroke();
+
+      // Center Core Outline
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.3)';
+      ctx.strokeRect(radarX + radarW * 0.35, radarY + radarH * 0.32, radarW * 0.3, radarH * 0.36);
+
+      const scaleX = radarW / w;
+      const scaleY = radarH / h;
+
+      // Bot blips (Color-coded)
+      this.bots.forEach(b => {
+        if (b.respawnTimer > 0) return;
+        ctx.fillStyle = b.helmetColor || '#ef4444';
+        ctx.beginPath();
+        ctx.arc(radarX + b.x * scaleX, radarY + b.y * scaleY, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Player blip (Glowing Pulsing Cyan)
+      if (this.player.respawnTimer <= 0) {
+        ctx.fillStyle = '#38bdf8';
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 5;
+        ctx.beginPath();
+        ctx.arc(radarX + this.player.x * scaleX, radarY + this.player.y * scaleY, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.font = 'bold 7px monospace';
+      ctx.fillStyle = '#94a3b8';
+      ctx.textAlign = 'left';
+      ctx.fillText('📡 RADAR', radarX + 4, radarY + 9);
 
       // Bottom Objective Banner
       if (!this.isPreview) {
