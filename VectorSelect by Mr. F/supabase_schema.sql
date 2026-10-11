@@ -25,6 +25,11 @@ create table if not exists public.active_assignments (
     allow_student_review boolean not null default false,
     allow_review boolean not null default false,
     enable_point_redemption boolean not null default true,
+    game_mode text not null default 'classic',
+    game_duration_minutes integer not null default 5,
+    questions_per_round integer not null default 4,
+    show_answer_timing text not null default 'immediate',
+    student_accommodations boolean not null default true,
     is_active boolean not null default true,
     is_started boolean not null default false,
     started_at timestamptz,
@@ -222,3 +227,11 @@ begin
     end if;
 end;
 $$;
+
+-- Ensure gamified columns exist on pre-existing active_assignments tables
+alter table public.active_assignments add column if not exists game_mode text not null default 'classic';
+alter table public.active_assignments add column if not exists game_duration_minutes integer not null default 5;
+alter table public.active_assignments add column if not exists questions_per_round integer not null default 4;
+alter table public.active_assignments add column if not exists show_answer_timing text not null default 'immediate';
+alter table public.active_assignments add column if not exists student_accommodations boolean not null default true;
+

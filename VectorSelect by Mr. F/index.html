@@ -41,6 +41,7 @@
   <script src="data/concepts.js"></script>
   <script src="data/recovery_engine.js"></script>
   <script src="data/recovery_sims.js"></script>
+  <script src="data/game_arena.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -513,6 +514,45 @@
       
       <!-- Left Column: Main Question Area (Expands from 9 columns to 12 when sidebar collapses) -->
       <div id="runner-main-col" class="xl:col-span-9 lg:col-span-8 space-y-6 transition-all duration-300">
+        
+        <!-- Gamified Arcade HUD (Visible when game_mode !== 'classic') -->
+        <div id="gamified-arcade-hud" class="hidden p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-purple-950/80 via-slate-900/90 to-cyan-950/80 border border-purple-500/35 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="h-12 w-12 rounded-2xl bg-gradient-to-br from-amber-500 to-purple-600 flex items-center justify-center text-2xl shadow-lg" id="gamified-hud-icon">
+              ⚔️
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span id="gamified-hud-game-name" class="font-black text-white text-base tracking-wide">TUG OF WAR ARENA</span>
+                <span id="gamified-hud-round-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 uppercase">Round 1</span>
+              </div>
+              <p id="gamified-hud-status" class="text-xs text-slate-300">Answer questions correctly to charge your team's pull momentum!</p>
+            </div>
+          </div>
+
+          <!-- Center: Round Progress Bar -->
+          <div class="flex-1 max-w-xs w-full px-2">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-300 mb-1">
+              <span id="gamified-round-progress-label">Round Progress</span>
+              <span id="gamified-round-progress-val" class="text-cyan-400">0 / 4 Qs</span>
+            </div>
+            <div class="w-full h-3 rounded-full bg-slate-950 border border-slate-800 overflow-hidden p-0.5">
+              <div id="gamified-round-progress-bar" class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-purple-500 transition-all duration-300 w-0"></div>
+            </div>
+          </div>
+
+          <!-- Right: Game Duration Countdown & Energy -->
+          <div class="flex items-center gap-3">
+            <div class="bg-slate-950/90 px-4 py-2 rounded-2xl border border-amber-500/40 text-center">
+              <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Game Clock</span>
+              <span id="gamified-timer-display" class="font-mono text-2xl font-black text-amber-400 tracking-wider">05:00</span>
+            </div>
+            <button type="button" onclick="triggerMiniGameActionPhase(true)" id="btn-manual-arena-open" class="pressable px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-black text-xs shadow-lg transition flex items-center gap-1.5">
+              <span>🎮 Arena</span>
+            </button>
+          </div>
+        </div>
+
         <div class="quantum-card rounded-3xl p-5 md:p-7 shadow-2xl space-y-6">
           
           <!-- Question Header Bar -->
@@ -801,6 +841,80 @@
           <p class="text-base text-slate-400 mt-2">Well done, <span id="res-student-name" class="font-bold text-white"></span>! Your score has been recorded.</p>
         </div>
 
+        <!-- Gamified Victory Podium Card (Visible only in gamified sessions) -->
+        <div id="gamified-results-podium" class="hidden rounded-2xl p-6 bg-gradient-to-br from-purple-950/90 via-slate-900 to-indigo-950/90 border border-purple-500/40 shadow-2xl space-y-5 text-left relative overflow-hidden">
+          <div class="absolute -right-8 -top-8 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none"></div>
+          
+          <!-- Banner -->
+          <div class="flex items-center justify-between gap-3 border-b border-purple-500/20 pb-4">
+            <div class="flex items-center gap-3">
+              <span id="podium-game-icon" class="text-3xl filter drop-shadow">⚡</span>
+              <div>
+                <span id="podium-badge-title" class="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">WAYARENA CHAMPION</span>
+                <h3 id="podium-main-title" class="text-xl font-black text-white mt-0.5">Victory Podium</h3>
+              </div>
+            </div>
+            <div id="podium-rank-badge" class="px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs">
+              🥇 1ST PLACE
+            </div>
+          </div>
+
+          <!-- Mini 3D-Style Podium Standings -->
+          <div class="grid grid-cols-3 gap-2 sm:gap-3 items-end pt-4 pb-2">
+            <!-- 2nd Place -->
+            <div class="flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-xs font-bold text-cyan-300 mb-1">
+                🥈
+              </div>
+              <span id="podium-second-name" class="text-[11px] font-bold text-slate-300 truncate max-w-full text-center">NewtonBot</span>
+              <span id="podium-second-stat" class="text-[10px] text-slate-400">2 Kills</span>
+              <div class="w-full h-16 rounded-t-xl bg-gradient-to-t from-slate-800 to-slate-700/80 border-t-2 border-cyan-400/60 mt-1 flex items-center justify-center text-xs font-black text-slate-300">
+                2nd
+              </div>
+            </div>
+
+            <!-- 1st Place (Player) -->
+            <div class="flex flex-col items-center -mt-3">
+              <div class="w-11 h-11 rounded-full bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center text-base font-black text-amber-300 mb-1 shadow-lg shadow-amber-500/20 animate-pulse">
+                👑
+              </div>
+              <span id="podium-first-name" class="text-xs font-extrabold text-amber-300 truncate max-w-full text-center">You</span>
+              <span id="podium-first-stat" class="text-[10px] font-bold text-amber-400">4 Kills</span>
+              <div class="w-full h-24 rounded-t-xl bg-gradient-to-t from-amber-950/80 to-amber-600/40 border-t-2 border-amber-400 mt-1 flex items-center justify-center text-sm font-black text-amber-200 shadow-lg shadow-amber-500/10">
+                1st
+              </div>
+            </div>
+
+            <!-- 3rd Place -->
+            <div class="flex flex-col items-center">
+              <div class="w-9 h-9 rounded-full bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-xs font-bold text-rose-300 mb-1">
+                🥉
+              </div>
+              <span id="podium-third-name" class="text-[11px] font-bold text-slate-300 truncate max-w-full text-center">GalileoBot</span>
+              <span id="podium-third-stat" class="text-[10px] text-slate-400">1 Kill</span>
+              <div class="w-full h-12 rounded-t-xl bg-gradient-to-t from-slate-800 to-slate-700/60 border-t-2 border-rose-400/60 mt-1 flex items-center justify-center text-xs font-black text-slate-400">
+                3rd
+              </div>
+            </div>
+          </div>
+
+          <!-- Combat / Game Arena Stats Metrics Row -->
+          <div class="grid grid-cols-3 gap-2.5 bg-slate-950/70 border border-purple-500/20 rounded-xl p-3 text-center">
+            <div>
+              <span class="text-[10px] font-bold uppercase text-slate-400 block" id="podium-metric-1-lbl">Knockouts</span>
+              <span class="text-base sm:text-lg font-black text-cyan-300 mt-0.5 block" id="podium-metric-1-val">0</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase text-slate-400 block" id="podium-metric-2-lbl">Rounds Cleared</span>
+              <span class="text-base sm:text-lg font-black text-purple-300 mt-0.5 block" id="podium-metric-2-val">0</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold uppercase text-slate-400 block" id="podium-metric-3-lbl">Arcade Rank</span>
+              <span class="text-xs sm:text-sm font-black text-amber-400 mt-0.5 block truncate" id="podium-metric-3-val">Marksman</span>
+            </div>
+          </div>
+        </div>
+
         <!-- Big Score Display -->
         <div class="grid grid-cols-3 gap-4 bg-slate-950/80 border border-slate-800 rounded-2xl p-6 shadow-inner">
           <div>
@@ -984,7 +1098,48 @@
     </button>
   </div>
 
-  </main>
+  <!-- Gamified Mini-Game Action Phase Modal (Full screen 60fps Arena) -->
+  <div id="gamified-arena-modal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 md:p-6 overflow-hidden">
+    <div class="bg-slate-900 border border-purple-500/40 rounded-3xl max-w-4xl w-full flex flex-col shadow-2xl overflow-hidden relative">
+      
+      <!-- Header Banner -->
+      <div class="px-6 py-3.5 bg-slate-950/90 border-b border-slate-800 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl animate-bounce">⚡</span>
+          <div>
+            <h3 id="arena-modal-title" class="text-lg font-black text-white tracking-wide">TUG OF WAR — ACTION PHASE!</h3>
+            <p id="arena-modal-sub" class="text-xs text-slate-400">Click wooden barrels or screen rapidly to pull the rope! Accuracy multiplier active!</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="px-3.5 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono font-black text-sm" id="arena-action-timer">
+            ⏱️ 15s
+          </div>
+          <button type="button" onclick="exitMiniGameActionPhase()" class="h-8 w-8 rounded-full bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold">✕</button>
+        </div>
+      </div>
+
+      <!-- Canvas Game Arena Body -->
+      <div class="relative bg-slate-950 flex items-center justify-center overflow-hidden">
+        <canvas id="student-arena-canvas" class="w-full h-80 sm:h-96 block cursor-pointer"></canvas>
+        <div class="absolute bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-xs font-bold text-white pointer-events-none">
+          👆 Tap wooden barrels or screen rapidly to pull!
+        </div>
+      </div>
+
+      <!-- Footer Bar -->
+      <div class="px-6 py-3 bg-slate-950/90 border-t border-slate-800 flex items-center justify-between text-xs text-slate-300">
+        <div class="flex items-center gap-2">
+          <span>🔥 Quiz Power Bonus:</span>
+          <span id="arena-multiplier-val" class="font-bold text-cyan-400">x1.5 Multiplier Active</span>
+        </div>
+        <button type="button" onclick="exitMiniGameActionPhase()" class="px-5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition">
+          Continue Questions &rarr;
+        </button>
+      </div>
+
+    </div>
+  </div>
 
   <!-- High-Resolution Vector Zoom Modal (Interactive 120%+ Zoom & Pan Inspector) -->
   <div id="image-modal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-xl flex flex-col select-none overflow-hidden" onclick="closeImageModal()">
@@ -1416,6 +1571,21 @@
       quizMode = currentAssignment.quiz_mode || "student_led";
       lockdownEnabled = currentAssignment.enable_lockdown || false;
 
+      // Hydrate gamified overrides from URL parameters if present
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlGame = urlParams.get('game');
+      const urlMins = parseInt(urlParams.get('mins'), 10);
+      const urlQRound = parseInt(urlParams.get('qround'), 10);
+      if (urlGame && (!currentAssignment.game_mode || currentAssignment.game_mode === 'classic')) {
+        currentAssignment.game_mode = urlGame;
+      }
+      if (urlMins && (!currentAssignment.game_duration_minutes || currentAssignment.game_duration_minutes === 5)) {
+        currentAssignment.game_duration_minutes = urlMins;
+      }
+      if (urlQRound && (!currentAssignment.questions_per_round || currentAssignment.questions_per_round === 4)) {
+        currentAssignment.questions_per_round = urlQRound;
+      }
+
       // Check in to the live session roster (teacher can see who's joined).
       // Do not let a local-only fallback create a false sense that the
       // teacher can see this student across devices.
@@ -1523,6 +1693,171 @@
     }
 
     // ============================================================================
+    // GAMIFIED STUDENT PACING ENGINE (TUG OF WAR / MASTERY PEAK)
+    // ============================================================================
+    let isGamifiedSession = false;
+    let gamifiedGameMode = "tug_of_war";
+    let gamifiedDurationMins = 5;
+    let gamifiedQuestionsPerRound = 4;
+    let gamifiedRoundQuestionsAnswered = 0;
+    let gamifiedCurrentRound = 1;
+    let gamifiedPullMultiplier = 1.0;
+    let gamifiedEndTime = 0;
+    let studentArenaInstance = null;
+    let arenaActionTimerInterval = null;
+    let totalGamifiedKills = 0;
+    let totalGamifiedRounds = 0;
+    let totalGamifiedRopePull = 0;
+    let totalGamifiedAltitude = 0;
+
+    function updateGamifiedRoundHUD() {
+      const pBar = document.getElementById("gamified-round-progress-bar");
+      const pVal = document.getElementById("gamified-round-progress-val");
+      const pLabel = document.getElementById("gamified-round-progress-label");
+      const roundPill = document.getElementById("gamified-hud-round-pill");
+
+      if (roundPill) roundPill.textContent = `Round ${gamifiedCurrentRound}`;
+      if (pLabel) pLabel.textContent = `Round ${gamifiedCurrentRound} Progress`;
+      if (pVal) pVal.textContent = `${gamifiedRoundQuestionsAnswered} / ${gamifiedQuestionsPerRound} Qs`;
+
+      const pct = Math.min(100, Math.round((gamifiedRoundQuestionsAnswered / gamifiedQuestionsPerRound) * 100));
+      if (pBar) pBar.style.width = `${pct}%`;
+    }
+
+    function updateGamifiedTimerDisplay(secs) {
+      const m = Math.floor(secs / 60);
+      const s = secs % 60;
+      const str = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      const disp = document.getElementById("gamified-timer-display");
+      if (disp) disp.textContent = str;
+      const regularDisp = document.getElementById("timer-display");
+      if (regularDisp) regularDisp.textContent = str;
+    }
+
+    function onStudentAnswerLockedInGamified(isCorrect) {
+      if (!isGamifiedSession) return;
+      gamifiedRoundQuestionsAnswered++;
+      if (isCorrect) {
+        gamifiedPullMultiplier = +(gamifiedPullMultiplier + 0.25).toFixed(2);
+        if (window.GameArena) window.GameArena.SoundFX.correct();
+      } else {
+        if (window.GameArena) window.GameArena.SoundFX.wrong();
+      }
+
+      updateGamifiedRoundHUD();
+
+      // Check if round target reached!
+      if (gamifiedRoundQuestionsAnswered >= gamifiedQuestionsPerRound) {
+        showToast(
+          "⚡ Round Target Reached!",
+          `Unlocked 15s Action Phase with x${gamifiedPullMultiplier} Pull Multiplier!`,
+          "aurora",
+          2500
+        );
+        if (window.GameArena) window.GameArena.SoundFX.powerup();
+        setTimeout(() => {
+          triggerMiniGameActionPhase();
+        }, 800);
+      }
+    }
+
+    function triggerMiniGameActionPhase(isManual = false) {
+      const modal = document.getElementById("gamified-arena-modal");
+      if (!modal) return;
+      modal.classList.remove("hidden");
+
+      const titleEl = document.getElementById("arena-modal-title");
+      const subEl = document.getElementById("arena-modal-sub");
+      const multEl = document.getElementById("arena-multiplier-val");
+      const timerBadge = document.getElementById("arena-action-timer");
+      const canvas = document.getElementById("student-arena-canvas");
+
+      if (gamifiedGameMode === "mastery_peak") {
+        if (titleEl) titleEl.textContent = "⛰️ MASTERY PEAK — SUMMIT RUN!";
+        if (subEl) subEl.textContent = "Tap screen rapidly to ascend past wind gusts!";
+      } else if (gamifiedGameMode === "wayarena") {
+        if (titleEl) titleEl.textContent = "⚡ WAYARENA — VECTOR MAZE BATTLE!";
+        if (subEl) subEl.textContent = "WASD/Arrow keys or Touch to move, Space/Tap to BLAST opponents & grab powerups!";
+      } else {
+        if (titleEl) titleEl.textContent = "⚔️ TUG OF WAR — ACTION PHASE!";
+        if (subEl) subEl.textContent = "Click wooden barrels or screen rapidly to pull the rope!";
+      }
+
+      if (multEl) multEl.textContent = `x${gamifiedPullMultiplier} Power Multiplier Active`;
+
+      // Start 60fps Arena Canvas
+      if (studentArenaInstance) {
+        studentArenaInstance.stop();
+        studentArenaInstance = null;
+      }
+
+      if (window.GameArena && canvas) {
+        if (gamifiedGameMode === "mastery_peak") {
+          studentArenaInstance = window.GameArena.createMasteryPeakGame(canvas);
+        } else if (gamifiedGameMode === "wayarena") {
+          studentArenaInstance = window.GameArena.createMazeBattleGame(canvas);
+        } else {
+          studentArenaInstance = window.GameArena.createTugOfWarGame(canvas);
+          studentArenaInstance.pullLeft(gamifiedPullMultiplier * 6);
+        }
+      }
+
+      // Action phase countdown (25s for maze battle, 15s for tug of war)
+      let actionRemaining = (gamifiedGameMode === "wayarena" ? 25 : 15);
+      if (timerBadge) timerBadge.textContent = `⏱️ ${actionRemaining}s`;
+
+      if (arenaActionTimerInterval) clearInterval(arenaActionTimerInterval);
+      arenaActionTimerInterval = setInterval(() => {
+        actionRemaining--;
+        if (timerBadge) timerBadge.textContent = `⏱️ ${actionRemaining}s`;
+
+        if (actionRemaining <= 0) {
+          clearInterval(arenaActionTimerInterval);
+          arenaActionTimerInterval = null;
+          if (window.GameArena) window.GameArena.SoundFX.victory();
+          showToast(
+            "🏁 Round Complete!",
+            `Returning to AP Physics Question Sprint!`,
+            "plasma",
+            2200
+          );
+          setTimeout(() => {
+            exitMiniGameActionPhase();
+          }, 1200);
+        }
+      }, 1000);
+    }
+
+    function exitMiniGameActionPhase() {
+      if (arenaActionTimerInterval) {
+        clearInterval(arenaActionTimerInterval);
+        arenaActionTimerInterval = null;
+      }
+      if (studentArenaInstance) {
+        if (gamifiedGameMode === "wayarena" && studentArenaInstance.player) {
+          totalGamifiedKills += (studentArenaInstance.player.kills || 0);
+        } else if (gamifiedGameMode === "tug_of_war") {
+          totalGamifiedRopePull += Math.max(0, Math.round(studentArenaInstance.pullPowerLeft || 0));
+        } else if (gamifiedGameMode === "mastery_peak") {
+          totalGamifiedAltitude = Math.max(totalGamifiedAltitude, Math.round((studentArenaInstance.progress || 0) * 4200));
+        }
+        studentArenaInstance.stop();
+        studentArenaInstance = null;
+      }
+      totalGamifiedRounds++;
+      const modal = document.getElementById("gamified-arena-modal");
+      if (modal) modal.classList.add("hidden");
+
+      if (isGamifiedSession) {
+        gamifiedRoundQuestionsAnswered = 0;
+        gamifiedCurrentRound++;
+        updateGamifiedRoundHUD();
+        // Advance to next unanswered question
+        nextQuestion();
+      }
+    }
+
+    // ============================================================================
     // EXAM RUNNER
     // ============================================================================
     function startExamRunner() {
@@ -1534,6 +1869,10 @@
       studentCurrentStreak = 0;
       questionStartTime = Date.now();
       activeRecoveryChallenge = null;
+      totalGamifiedKills = 0;
+      totalGamifiedRounds = 0;
+      totalGamifiedRopePull = 0;
+      totalGamifiedAltitude = 0;
       if (window.RecoverySims) window.RecoverySims.stop();
 
       // Restore any recovery attempts completed in this session
@@ -1602,14 +1941,61 @@
       const allowCalc = currentAssignment.allow_calculator !== false;
       document.getElementById("calc-toggle-btn").classList.toggle("hidden", !allowCalc);
 
+      // Gamified Session Setup (Tug of War, Mastery Peak, etc.)
+      const isGamified = (quizMode === "student_led") && currentAssignment && currentAssignment.game_mode && (currentAssignment.game_mode !== "classic");
+      const arcadeHud = document.getElementById("gamified-arcade-hud");
+
+      if (isGamified) {
+        isGamifiedSession = true;
+        gamifiedGameMode = currentAssignment.game_mode;
+        gamifiedDurationMins = currentAssignment.game_duration_minutes || currentAssignment.time_limit_minutes || 5;
+        gamifiedQuestionsPerRound = currentAssignment.questions_per_round || 4;
+        gamifiedRoundQuestionsAnswered = 0;
+        gamifiedCurrentRound = 1;
+        gamifiedPullMultiplier = 1.0;
+
+        if (arcadeHud) {
+          arcadeHud.classList.remove("hidden");
+          const iconEl = document.getElementById("gamified-hud-icon");
+          const nameEl = document.getElementById("gamified-hud-game-name");
+          const statusEl = document.getElementById("gamified-hud-status");
+
+          if (gamifiedGameMode === "mastery_peak") {
+            if (iconEl) iconEl.textContent = "⛰️";
+            if (nameEl) nameEl.textContent = "MASTERY PEAK ASCENT";
+            if (statusEl) statusEl.textContent = `Solve ${gamifiedQuestionsPerRound} questions to climb the alpine summit!`;
+          } else if (gamifiedGameMode === "wayarena") {
+            if (iconEl) iconEl.textContent = "⚡";
+            if (nameEl) nameEl.textContent = "WAYARENA MAZE BATTLE";
+            if (statusEl) statusEl.textContent = `Solve ${gamifiedQuestionsPerRound} questions to enter the maze & blast opponents!`;
+          } else {
+            if (iconEl) iconEl.textContent = "⚔️";
+            if (nameEl) nameEl.textContent = "TUG OF WAR DUEL";
+            if (statusEl) statusEl.textContent = `Solve ${gamifiedQuestionsPerRound} questions to charge your team's pull momentum!`;
+          }
+          updateGamifiedRoundHUD();
+        }
+
+        // Master Game Clock with Deterministic Wall Clock Sync
+        remainingSeconds = gamifiedDurationMins * 60;
+        isCountDown = true;
+        gamifiedEndTime = Date.now() + (remainingSeconds * 1000);
+        updateGamifiedTimerDisplay(remainingSeconds);
+      } else {
+        isGamifiedSession = false;
+        if (arcadeHud) arcadeHud.classList.add("hidden");
+      }
+
       // Timer Setup (Teacher-Led mode is strictly untimed overall; pauses between questions are unhurried)
       const isTeacherLed = quizMode === "teacher_led";
-      const timeLimitMins = isTeacherLed ? 0 : (currentAssignment.time_limit_minutes || 0);
+      const timeLimitMins = isTeacherLed ? 0 : (isGamified ? gamifiedDurationMins : (currentAssignment.time_limit_minutes || 0));
       isCountDown = !isTeacherLed && timeLimitMins > 0;
       if (isCountDown) {
-        remainingSeconds = timeLimitMins * 60;
-        document.getElementById("timer-label").textContent = "Time Left:";
-        updateTimerDisplay(remainingSeconds);
+        if (!isGamified) {
+          remainingSeconds = timeLimitMins * 60;
+          document.getElementById("timer-label").textContent = "Time Left:";
+          updateTimerDisplay(remainingSeconds);
+        }
       } else {
         document.getElementById("timer-label").textContent = "Elapsed:";
         updateTimerDisplay(0);
@@ -1617,7 +2003,25 @@
 
       clearInterval(timerInterval);
       timerInterval = setInterval(() => {
-        if (isCountDown) {
+        if (isGamifiedSession && isCountDown) {
+          // Zero-Drift Deterministic Sync
+          const now = Date.now();
+          if (gamifiedEndTime > 0) {
+            remainingSeconds = Math.max(0, Math.round((gamifiedEndTime - now) / 1000));
+          } else {
+            remainingSeconds--;
+          }
+          elapsedSeconds++;
+          updateGamifiedTimerDisplay(remainingSeconds);
+          updateTimerUrgency();
+          if (remainingSeconds <= 0) {
+            clearInterval(timerInterval);
+            exitMiniGameActionPhase();
+            if (window.GameArena) window.GameArena.SoundFX.victory();
+            alert("⏰ Game Duration Complete! Submitting your assessment results for review.");
+            finishAssessment();
+          }
+        } else if (isCountDown) {
           remainingSeconds--;
           elapsedSeconds++;
           updateTimerDisplay(remainingSeconds);
@@ -2602,6 +3006,7 @@
       if (discussionActive) return;
       const realIdx = questionOrder[currentQuestionIdx];
       if (studentLockedAnswers[realIdx]) return; // Strictly cannot change if locked!
+      if (window.GameArena) window.GameArena.SoundFX.click();
       const wasSelected = studentAnswers[realIdx];
       studentAnswers[realIdx] = letter;
       
@@ -2694,6 +3099,13 @@
       // STRICT PEDAGOGICAL CONFIDENTIALITY:
       // Neutral lock notification — NEVER disclose right or wrong while time is active!
       showToast("Answer Finalized", `Option ${studentAnswers[realIdx]} locked in. Results revealed when timer expires or discussion begins.`, "copper", 2500);
+
+      // Gamified Progress Hook
+      if (isGamifiedSession) {
+        const correct = getQuestionCorrectAnswer(realIdx) || (currentQuiz && currentQuiz.questions[realIdx] && currentQuiz.questions[realIdx].correct_answer);
+        const isRight = Boolean(studentAnswers[realIdx] && correct && studentAnswers[realIdx] === correct);
+        onStudentAnswerLockedInGamified(isRight);
+      }
 
       // STRICT GATE: Recovery engine ONLY activates if the student has missed a question previously!
       if (hasPreviousIncorrectQuestion() && remSecs >= 2 && !recoveryAttemptedForQuestion[realIdx]) {
@@ -3522,10 +3934,124 @@
       }
     }
 
+    function renderGamifiedPodium(pct, score, total) {
+      const podiumEl = document.getElementById("gamified-results-podium");
+      if (!podiumEl) return;
+      if (!isGamifiedSession) {
+        podiumEl.classList.add("hidden");
+        return;
+      }
+
+      podiumEl.classList.remove("hidden");
+      const iconEl = document.getElementById("podium-game-icon");
+      const badgeTitle = document.getElementById("podium-badge-title");
+      const mainTitle = document.getElementById("podium-main-title");
+      const rankBadge = document.getElementById("podium-rank-badge");
+
+      const firstName = document.getElementById("podium-first-name");
+      const firstStat = document.getElementById("podium-first-stat");
+      const secondName = document.getElementById("podium-second-name");
+      const secondStat = document.getElementById("podium-second-stat");
+      const thirdName = document.getElementById("podium-third-name");
+      const thirdStat = document.getElementById("podium-third-stat");
+
+      const m1Lbl = document.getElementById("podium-metric-1-lbl");
+      const m1Val = document.getElementById("podium-metric-1-val");
+      const m2Lbl = document.getElementById("podium-metric-2-lbl");
+      const m2Val = document.getElementById("podium-metric-2-val");
+      const m3Lbl = document.getElementById("podium-metric-3-lbl");
+      const m3Val = document.getElementById("podium-metric-3-val");
+
+      if (gamifiedGameMode === "wayarena") {
+        if (iconEl) iconEl.textContent = "⚡";
+        if (badgeTitle) badgeTitle.textContent = "WAYARENA MAZE COMBAT";
+        if (mainTitle) mainTitle.textContent = "Neon Arena Elimination Podium";
+
+        const kills = totalGamifiedKills;
+        if (rankBadge) {
+          if (kills >= 3) {
+            rankBadge.textContent = "🥇 1ST PLACE CHAMPION";
+            rankBadge.className = "px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs";
+          } else if (kills >= 1) {
+            rankBadge.textContent = "🥈 2ND PLACE CONTENDER";
+            rankBadge.className = "px-3 py-1 rounded-xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-black text-xs";
+          } else {
+            rankBadge.textContent = "🥉 3RD PLACE SURVIVOR";
+            rankBadge.className = "px-3 py-1 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 font-black text-xs";
+          }
+        }
+
+        if (firstName) firstName.textContent = (kills >= 3 ? activeStudent : "NewtonBot");
+        if (firstStat) firstStat.textContent = (kills >= 3 ? `${kills} Kills` : "3 Kills");
+        if (secondName) secondName.textContent = (kills >= 3 ? "NewtonBot" : activeStudent);
+        if (secondStat) secondStat.textContent = (kills >= 3 ? "2 Kills" : `${Math.max(1, kills)} Kills`);
+        if (thirdName) thirdName.textContent = "GalileoBot";
+        if (thirdStat) thirdStat.textContent = "1 Kill";
+
+        if (m1Lbl) m1Lbl.textContent = "Total Knockouts";
+        if (m1Val) m1Val.textContent = `${kills} Kills`;
+        if (m2Lbl) m2Lbl.textContent = "Combat Rounds";
+        if (m2Val) m2Val.textContent = `${Math.max(1, totalGamifiedRounds)} Rounds`;
+        if (m3Lbl) m3Lbl.textContent = "Arcade Mastery";
+        if (m3Val) m3Val.textContent = (pct >= 80 ? "Quantum Apex" : (pct >= 50 ? "Vector Striker" : "Cadet"));
+
+      } else if (gamifiedGameMode === "mastery_peak") {
+        if (iconEl) iconEl.textContent = "⛰️";
+        if (badgeTitle) badgeTitle.textContent = "MASTERY PEAK ASCENT";
+        if (mainTitle) mainTitle.textContent = "Alpine Summit Expedition";
+        if (rankBadge) {
+          rankBadge.textContent = "🚩 SUMMIT ACHIEVED";
+          rankBadge.className = "px-3 py-1 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-black text-xs";
+        }
+
+        const alt = Math.max(3200, Math.min(4200, totalGamifiedAltitude || 4200));
+        if (firstName) firstName.textContent = activeStudent;
+        if (firstStat) firstStat.textContent = `${alt}m Flag`;
+        if (secondName) secondName.textContent = "NewtonBot";
+        if (secondStat) secondStat.textContent = "3,650m";
+        if (thirdName) thirdName.textContent = "GalileoBot";
+        if (thirdStat) thirdStat.textContent = "2,980m";
+
+        if (m1Lbl) m1Lbl.textContent = "Max Altitude";
+        if (m1Val) m1Val.textContent = `${alt}m`;
+        if (m2Lbl) m2Lbl.textContent = "Ascents Made";
+        if (m2Val) m2Val.textContent = `${Math.max(1, totalGamifiedRounds)} Stages`;
+        if (m3Lbl) m3Lbl.textContent = "Mountaineer Rank";
+        if (m3Val) m3Val.textContent = (alt >= 4000 ? "Summit Legend" : "High Climber");
+
+      } else {
+        // Tug of War
+        if (iconEl) iconEl.textContent = "⚔️";
+        if (badgeTitle) badgeTitle.textContent = "TUG OF WAR DUEL";
+        if (mainTitle) mainTitle.textContent = "Beach Pull Champions";
+        if (rankBadge) {
+          rankBadge.textContent = "🥇 1ST PLACE SQUAD";
+          rankBadge.className = "px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black text-xs";
+        }
+
+        if (firstName) firstName.textContent = `${activeStudent} (Alpha)`;
+        if (firstStat) firstStat.textContent = "Dominant";
+        if (secondName) secondName.textContent = "Beta Squad";
+        if (secondStat) secondStat.textContent = "Challenger";
+        if (thirdName) thirdName.textContent = "Gamma Squad";
+        if (thirdStat) thirdStat.textContent = "-14m Deficit";
+
+        const ropeAdv = Math.max(25, totalGamifiedRopePull * 8 || 35);
+        if (m1Lbl) m1Lbl.textContent = "Pull Advantage";
+        if (m1Val) m1Val.textContent = `+${ropeAdv}m`;
+        if (m2Lbl) m2Lbl.textContent = "Pulls Contested";
+        if (m2Val) m2Val.textContent = `${Math.max(1, totalGamifiedRounds)} Rounds`;
+        if (m3Lbl) m3Lbl.textContent = "Tug Rank";
+        if (m3Val) m3Val.textContent = (pct >= 80 ? "Titan Puller" : "Anchor");
+      }
+    }
+
     async function finishAssessment() {
       clearInterval(timerInterval);
       clearInterval(teacherLedPollInterval);
       if (perQTimerInterval) clearInterval(perQTimerInterval);
+      if (typeof exitMiniGameActionPhase === 'function') exitMiniGameActionPhase();
+      if (isGamifiedSession && window.GameArena) window.GameArena.SoundFX.victory();
 
       // Hydrate answer keys from bundle/offline cache
       hydrateQuizKeys(currentQuiz);
@@ -3604,6 +4130,9 @@
       const allowReview = currentAssignment.allow_student_review === true;
       document.getElementById("btn-review-answers").classList.toggle("hidden", !allowReview);
       document.getElementById("review-locked-notice").classList.toggle("hidden", allowReview);
+
+      // Gamified Victory Podium
+      renderGamifiedPodium(parseFloat(percentage), score, total);
 
       document.getElementById("view-exam-runner").classList.add("hidden");
       document.getElementById("test-status-bar").classList.add("hidden");

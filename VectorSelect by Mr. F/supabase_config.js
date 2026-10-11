@@ -142,6 +142,11 @@ function normalizeAssignment(assignment) {
     join_code: normalizeCode(assignment.join_code),
     title: assignment.title || assignment.assessment_title || "Assignment",
     assessment_title: assignment.assessment_title || assignment.title || "Assignment",
+    game_mode: assignment.game_mode || "classic",
+    game_duration_minutes: Number(assignment.game_duration_minutes || assignment.time_limit_minutes || 5),
+    questions_per_round: Number(assignment.questions_per_round || 4),
+    show_answer_timing: assignment.show_answer_timing || "immediate",
+    student_accommodations: assignment.student_accommodations !== false,
     is_started: assignment.is_started === true,
     timer_paused: assignment.timer_paused === true || assignment.is_paused === true,
     timer_remaining_seconds: assignment.timer_remaining_seconds ?? assignment.remaining_seconds,
@@ -165,6 +170,8 @@ const CLOUD_ASSIGNMENT_COLUMNS = new Set([
   "per_question_seconds", "current_question_index", "allow_calculator",
   "show_leaderboard", "enable_lockdown", "randomize_questions",
   "allow_student_review", "allow_review", "enable_point_redemption",
+  "game_mode", "game_duration_minutes", "questions_per_round",
+  "show_answer_timing", "student_accommodations",
   "is_active", "is_started", "started_at", "timer_paused", "is_paused",
   "paused_remaining_seconds", "timer_remaining_seconds", "remaining_seconds",
   "discussion_active", "answer_revealed", "revealed_answer",
@@ -277,6 +284,26 @@ async function createAssignmentOnCloud(assignmentData) {
     .select()
     .single();
   if (error) {
+    if (error.code === "42703" || (error.message && error.message.includes("does not exist"))) {
+      console.warn("Supabase table missing gamified columns. Retrying with legacy columns:", error.message);
+      const legacyPayload = { ...assignmentForCloud(assignment) };
+      delete legacyPayload.game_mode;
+      delete legacyPayload.game_duration_minutes;
+      delete legacyPayload.questions_per_round;
+      delete legacyPayload.show_answer_timing;
+      delete legacyPayload.student_accommodations;
+
+      const retryRes = await supabaseClient
+        .from("active_assignments")
+        .insert([legacyPayload])
+        .select()
+        .single();
+
+      if (!retryRes.error && retryRes.data) {
+        mirrorAssignment({ ...assignment, ...retryRes.data });
+        return { success: true, source: "supabase", data: { ...assignment, ...retryRes.data } };
+      }
+    }
     console.warn("Supabase assignment insert failed:", error);
     reportCloudSyncFailure("assignment", error.message || "The assignment could not be saved to Supabase.");
     return { success: false, source: "localStorage", data: assignment, error };
@@ -319,16 +346,24 @@ async function updateAssignment(join_code, patch) {
     };
   }
   let lastError = null;
+  let activePatch = { ...patch };
   for (let attempt = 0; attempt < 3; attempt++) {
     const { data, error } = await supabaseClient
       .from("active_assignments")
-      .update(patch)
+      .update(activePatch)
       .eq("join_code", code)
       .select()
       .maybeSingle();
     if (!error) {
-      if (data) mirrorAssignment(data);
+      if (data) mirrorAssignment({ ...patch, ...data });
       return { success: true, source: "supabase", data };
+    }
+    if (error.code === "42703" || (error.message && error.message.includes("does not exist"))) {
+      delete activePatch.game_mode;
+      delete activePatch.game_duration_minutes;
+      delete activePatch.questions_per_round;
+      delete activePatch.show_answer_timing;
+      delete activePatch.student_accommodations;
     }
     lastError = error;
     if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));

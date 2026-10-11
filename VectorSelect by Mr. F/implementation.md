@@ -257,3 +257,140 @@ Run the SQL script [`supabase_schema.sql`](supabase_schema.sql) in your **Supaba
   - Added `whitespace-nowrap shrink-0` to the wordmark (`VectorSelect`), the attribution card (`by Mr. F`), and the portal badges (`Student Portal` / `Teacher Hub`).
   - Guarantees the "by Mr. F" badge remains rendered seamlessly as an unbroken, single-line pill across all device screen widths.
 
+---
+
+## 11. Gamified Student-Paced Quizzes, Game Duration Studio & AAA Mini-Games Engine
+
+### A. System Architecture & Capabilities
+VectorSelect features an interactive student-paced gamification suite inspired by Wayground, Quizizz, and Blooket, elevated with:
+1. **60fps Hi-DPI Canvas Rendering**: Crisp, vector-proportional graphics with dynamic particle systems (dust, splashes, confetti) and spring physics.
+2. **Pedagogical Mechanics Integration**: Mini-games are tied directly to AP Physics mechanics (Newton's Laws $F = ma$ and friction in *Tug of War*; Work-Energy Theorem $\Delta U_g = mgh$ in *Mastery Peak*).
+3. **Pure Web Audio API Sound Synthesizer**: Procedural synthesized sounds (clicks, rope whooshes, correct jingles, error buzzes, powerups, victory fanfares) with zero external audio assets, zero download lag, and 100% offline capability.
+4. **Deterministic Wall-Clock Timer**: Eliminates timer drift across background tab throttling using absolute timestamp differences:
+   $$\text{Remaining Time} = \text{GameEndTime} - \text{Date.now}()$$
+
+---
+
+### B. Database & State Schema Extensions
+
+#### PostgreSQL Schema (`supabase_schema.sql`)
+Added to `public.active_assignments`:
+```sql
+alter table public.active_assignments add column if not exists game_mode text not null default 'classic';
+alter table public.active_assignments add column if not exists game_duration_minutes integer not null default 5;
+alter table public.active_assignments add column if not exists questions_per_round integer not null default 4;
+alter table public.active_assignments add column if not exists show_answer_timing text not null default 'immediate';
+alter table public.active_assignments add column if not exists student_accommodations boolean not null default true;
+```
+
+#### Client Normalization (`supabase_config.js`)
+- Whitelisted in `CLOUD_ASSIGNMENT_COLUMNS` for cloud persistence.
+- Hydrated in `normalizeAssignment()` with local fallbacks (`game_mode: "classic"`, `game_duration_minutes: 5`, `questions_per_round: 4`, `show_answer_timing: "immediate"`, `student_accommodations: true`) for seamless offline running.
+
+---
+
+### C. Teacher Portal: Mode Selection Hub & Game Studio (`teacher.html`)
+
+1. **Activity Mode Cards Hub**:
+   - Visual cards for **Classic** (Synchronized teacher-led), **Mastery Peak** (Self-paced ascent), **Playground** (Arcade & duel), **Test Mode** (Formal mock exam), and **Team Mode** (Co-op duel).
+2. **Student-Paced Gamified Controls Box (`#student-gamified-controls-box`)**:
+   - Automatically unhides when "Student-Led (Self-Paced)" is selected in `<select id="teacher-quiz-mode">`.
+   - Displays 4 interactive game cards:
+     - ⚡ **Wayarena Battle**: Vector laser shootout in a sci-fi maze with AI bots & 4 powerups.
+     - ⚔️ **Tug of War**: High-energy beach rope pull powered by question accuracy.
+     - ⛰️ **Mastery Peak**: Climb 4,200m alpine summit; repeat missed concepts.
+     - 📝 **Classic Exam**: Standard student-paced AP assessment with zero mini-games.
+   - Master Game Duration dropdown (3m, 5m, 7m, 10m, 15m, 20m, 30m).
+   - Questions-per-burst segmented pills (3 Qs, 4 Qs, 6 Qs) with dynamic hint text.
+   - One-click shortcut button to open the full 60fps Game Studio modal.
+3. **Game Selection & Configuration Studio Modal (`#game-studio-modal`)**:
+   - Live 60fps Canvas preview running `GameArena.createMazeBattlePreview()`, `createTugOfWarPreview()`, or `createMasteryPeakPreview()`.
+   - Comprehensive rulebook modal (`showGameRulesModal()`) detailing Wayarena laser combat, powerups, and scoring.
+   - Direct dispatch button with accommodations toggle and show-answer modes.
+
+---
+
+### D. High-Fidelity Canvas Mini-Game Engine (`data/game_arena.js`)
+
+- **Hi-DPI Responsive Canvas Setup**: Auto-calibrates against `devicePixelRatio` (up to 2.5x) with dynamic proportional rendering.
+- **Procedural Chibi Physicist Avatars**: Cute helmet characters with responsive facial expressions (straining during pull, smiling on streaks, blinking).
+- **Tug of War Beach Arena**:
+  - Parallax sky with animated clouds and distant island.
+  - Sine-wave oscillating turquoise ocean surf.
+  - Golden sand dunes with chalk center line.
+  - Dynamic catenary rope with center red ribbon marker and spring tension.
+  - Interactive clickable wooden barrels with bouncing spring transforms.
+  - Particle emitters for sand dust, water splashes, and victory confetti.
+- **Mastery Peak Alpine Arena**:
+  - Gradient mountain peaks with snow caps and summit flag.
+  - Winding trail with 4 altitude waypoints and climber avatar.
+  - Continuous falling snow particle simulation.
+- **Wayarena (Sci-Fi Vector Maze Battle)**:
+  - **Grid & Maze Topology**: 15x11 retro-futuristic labyrinth with laser-cut perimeter and neon-lit interior corridors.
+  - **Real-Time Ballistics**: Vector lasers with bounding collision checks, 2-bounce reflection vectors, and sparkling energy decay.
+  - **AI Bots**: 3 autonomous bots (*NewtonBot*, *GalileoBot*, *KeplerBot*) with raycast line-of-sight targeting, randomized patrol vectors, and smart obstacle avoidance.
+  - **Dynamic Power-Ups**:
+    - ⚡ *Quantum Dash*: +80% thruster velocity boost for fast flanking.
+    - 🛡️ *Kinetic Shield*: Invulnerability bubble and deflection barrier.
+    - 💥 *Triple Blast*: 3-way spread laser cannons for room-clearing coverage.
+    - 💣 *Graviton EMP*: Radial 360-degree shockwave detonation that stuns and clears nearby opponents.
+  - **Input Schemes**: Full keyboard (WASD / Arrow Keys + Space to fire) plus on-screen touch D-Pad and Fire button for Chromebooks and iPads.
+  - **Combat Feedback**: Knockout kill feed, HP/Shield bars, recharge indicators, and particle explosions.
+- **Web Audio API Synthesizer (`GameArena.SoundFX`)**:
+  - `click()`: 800Hz $\rightarrow$ 300Hz sine chirp (30ms).
+  - `tug()`: 140Hz $\rightarrow$ 65Hz triangle whoosh with low-pass impact.
+  - `correct()`: Four-note major triad arpeggio (C5, E5, G5, C6).
+  - `wrong()`: 180Hz sawtooth buzz.
+  - `laser()`: 920Hz $\rightarrow$ 210Hz futuristic frequency modulation blip.
+  - `hit()`: Low-pass filtered noise crunch for ballistic impact.
+  - `explosion()`: Sub-bass decay rumble with distortion.
+  - `powerup()`: Rising 320Hz $\rightarrow$ 880Hz square wave sweep.
+  - `victory()`: Multi-oscillator 4-note victory fanfare.
+
+---
+
+### E. Student Runner Gamified Pacing Loop & Victory Podium (`index.html`)
+
+1. **Gamified Arcade HUD (`#gamified-arcade-hud`)**:
+   - Dynamic game title badge (⚔️ *Tug of War*, ⛰️ *Mastery Peak*, ⚡ *Wayarena*).
+   - Round tracker (`Round 1`, `Round 2`, etc.) and progress bar (`X / Y Qs`).
+   - Master Game Clock: Large amber font displaying deterministic countdown (`05:00`) synchronized to `Date.now()`.
+2. **Knowledge Phase $\rightarrow$ Action Phase Rhythm**:
+   - Student answers AP Physics multiple-choice questions.
+   - Each correct answer boosts the **Quiz Power Multiplier** (`x1.25`, `x1.50`, etc.) and plays synthesized sound effects.
+   - Upon reaching the round target (e.g. 4 questions), screen unlocks the **Action Phase** (`#gamified-arena-modal`).
+   - Student plays a high-energy mini-game round (15s for Tug of War; 25s for Wayarena):
+     - In *Tug of War*, tapping barrels applies rope pulls amplified by their quiz accuracy multiplier!
+     - In *Wayarena*, student navigates the sci-fi maze, blasts bot classmates, picks up power-ups, and racks up knockouts!
+   - When the round concludes, victory fanfare sounds and student seamlessly returns to the next question set.
+3. **Master Game Completion & Victory Podium (`#gamified-results-podium`)**:
+   - When the master game duration hits `0:00`, the session finishes with celebratory fanfare.
+   - The results screen reveals a **3D-Style Victory Podium** displaying:
+     - 1st, 2nd, and 3rd place champions with custom player and bot standings.
+     - Total Knockouts / Pull Advantage / Summit Altitude metrics.
+     - Total Mini-Game Rounds cleared.
+     - Arcade Mastery Rank (e.g., *Quantum Apex*, *Vector Striker*, *Titan Puller*).
+   - Coexists harmoniously with standard AP Physics score, accuracy percentage, time spent, Concept Mastery Breakdown, and College Board rationale review.
+4. **Schema Resilience & URL Param Hydration**:
+   - `createAssignmentOnCloud` and `updateAssignment` automatically catch PostgreSQL error `42703` (missing column) and re-dispatch safely without dropping assignments.
+   - Student join URLs include `?join=CODE&game=wayarena&mins=5&qround=4`, ensuring 100% gamified fidelity even before cloud migrations are run.
+
+---
+
+### F. Multi-IDE Replication Checklist
+To replicate this gamified architecture in another IDE (VS Code, Cursor, WebStorm):
+1. **Schema**: Run the new columns migration in your Supabase SQL editor:
+   ```sql
+   alter table public.active_assignments add column if not exists game_mode text not null default 'classic';
+   alter table public.active_assignments add column if not exists game_duration_minutes integer not null default 5;
+   alter table public.active_assignments add column if not exists questions_per_round integer not null default 4;
+   alter table public.active_assignments add column if not exists show_answer_timing text not null default 'immediate';
+   alter table public.active_assignments add column if not exists student_accommodations boolean not null default true;
+   ```
+2. **Config**: Include `"game_mode"`, `"game_duration_minutes"`, `"questions_per_round"`, `"show_answer_timing"`, `"student_accommodations"` in your state normalization dictionary (`supabase_config.js`).
+3. **Engine**: Copy `data/game_arena.js` into your static asset folder.
+4. **Teacher Portal**: Add `#student-gamified-controls-box` and `#game-studio-modal` markup and handlers to `teacher.html`.
+5. **Student Portal**: Add `#gamified-arcade-hud`, `#gamified-arena-modal`, `#gamified-results-podium`, and the round progress handlers to `index.html`.
+6. **Zero Dependencies**: Requires zero build steps (`npm`, `webpack`, `vite` not required) — runs purely in vanilla JavaScript, Web Audio API, and HTML5 Canvas on any static server or web platform.
+
+

@@ -57,6 +57,16 @@ try {
   console.log(`  FAIL  supabase_config.js\n        ${err.message}`);
 }
 
+// data/game_arena.js too.
+try {
+  const code = fs.readFileSync(path.join(BASE, "data", "game_arena.js"), "utf8");
+  new vm.Script(code, { filename: "data/game_arena.js" });
+  console.log(`  PASS  data/game_arena.js  (${code.split("\n").length} lines)`);
+} catch (err) {
+  failures++;
+  console.log(`  FAIL  data/game_arena.js\n        ${err.message}`);
+}
+
 console.log();
 console.log(failures === 0 ? "All scripts parse cleanly." : `${failures} block(s) failed to parse.`);
 process.exit(failures === 0 ? 0 : 1);
