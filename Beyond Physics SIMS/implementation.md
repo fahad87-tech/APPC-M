@@ -126,5 +126,11 @@ node_modules/
    - Integrated PBKDF2 SHA-256 password gate (`beyondphysics`) into `optics/PRISM.html`.
    - Updated dashboard badge to `Simulation 🔒` in `index.html`.
    - Guaranteed failure/cancellation redirects back to dashboard and secured back-navigation via `pageshow` listener.
+6. **Curved Mirrors Laboratory (`optics/Curved Mirrors.html`)**:
+   - Added comprehensive ray optics laboratory for concave and convex spherical curved mirrors ($f = R/2$).
+   - Implemented real-time ray tracing of 3 principal rays (parallel, focal, and radial) with virtual image extensions.
+   - Integrated dynamic image categorization (real vs. virtual, inverted vs. upright, magnified vs. diminished), Chart.js optical graph telemetry, and client-side DOCX assessment export.
+   - Added interactive card to the Optics category in `index.html`.
+
 
 

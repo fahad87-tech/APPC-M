@@ -168,3 +168,36 @@ When on the **Dispersion** tab, the 3 metric cards update live as sliders move:
   - Linked directly via the Optics category in `Beyond Physics SIMS/index.html` with `Simulation 🔒` badge.
 
 
+
+---
+
+## 6. Curved Mirrors Laboratory (`Curved Mirrors.html`)
+
+### 6.1 Objectives & Pedagogical Scope
+`Curved Mirrors.html` is an interactive geometric optics simulator covering spherical mirror ray tracing, focal points, image attributes, and live analytical telemetry for both **Concave** and **Convex** curved mirrors.
+
+### 6.2 Mathematical Model
+1. **Mirror Equation & Focal Length**:
+   $$f = \frac{R}{2}$$
+   $$\frac{1}{f} = \frac{1}{d_o} + \frac{1}{d_i} \implies d_i = \frac{d_o f}{d_o - f}$$
+   - **Concave Mirror**: $f > 0$, $R > 0$
+     - Beyond $C$ ($d_o > 2f$): Real, inverted, diminished image between $C$ and $F$.
+     - At $C$ ($d_o = 2f$): Real, inverted, same size at $C$.
+     - Between $C$ and $F$ ($f < d_o < 2f$): Real, inverted, magnified beyond $C$.
+     - At $F$ ($d_o = f$): Reflected rays are parallel, image at infinity ($d_i \to \infty$).
+     - Inside $F$ ($d_o < f$): Virtual, upright, magnified image behind mirror ($d_i < 0$).
+   - **Convex Mirror**: $f < 0$, $R < 0$
+     - For all positive object distances: Virtual, upright, diminished image behind mirror ($|d_i| < |f|$).
+2. **Magnification & Image Height**:
+   $$m = -\frac{d_i}{d_o} = \frac{h_i}{h_o} \implies h_i = m \cdot h_o$$
+3. **Principal Ray Tracing Traced**:
+   - **Ray 1 (Parallel Ray)**: Incident parallel to the optical axis, reflects through $F$ (concave) or as if emerging from virtual $F$ (convex).
+   - **Ray 2 (Focal Ray)**: Incident toward/through focal point $F$, reflects parallel to the optical axis.
+   - **Ray 3 (Radial / Center of Curvature Ray)**: Passes through or points toward center of curvature $C = 2f$, strikes mirror perpendicularly, and reflects back on itself.
+   - **Virtual Ray Extensions**: Rendered with dashed extensions behind the mirror to locate virtual image intersections.
+
+### 6.3 Technical Implementation
+- **Rendering**: HTML5 Canvas with smooth responsive coordinate mapping.
+- **Analytics & Plots**: Embedded Chart.js for real-time $1/d_i$ vs $1/d_o$ or $d_i$ vs $d_o$ plotting.
+- **Assessment Export**: Direct client-side DOCX report generation via `docx@8.5.0` and `FileSaver.js`.
+- **Dashboard Integration**: Added to the Optics suite in `Beyond Physics SIMS/index.html`.
