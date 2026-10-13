@@ -130,7 +130,9 @@ node_modules/
    - Added comprehensive ray optics laboratory for concave and convex spherical curved mirrors ($f = R/2$).
    - Implemented real-time ray tracing of 3 principal rays (parallel, focal, and radial) with virtual image extensions.
    - Integrated dynamic image categorization (real vs. virtual, inverted vs. upright, magnified vs. diminished), Chart.js optical graph telemetry, and client-side DOCX assessment export.
-   - Added interactive card to the Optics category in `index.html`.
+   - Integrated PBKDF2 SHA-256 classroom password gate (`beyondphysics`) with `pageshow` bfcache protection.
+   - Added interactive card to the Optics category in `index.html` with `Simulation 🔒` badge.
+
 
 
 

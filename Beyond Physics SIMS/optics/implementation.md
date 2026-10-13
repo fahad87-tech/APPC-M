@@ -200,4 +200,9 @@ When on the **Dispersion** tab, the 3 metric cards update live as sliders move:
 - **Rendering**: HTML5 Canvas with smooth responsive coordinate mapping.
 - **Analytics & Plots**: Embedded Chart.js for real-time $1/d_i$ vs $1/d_o$ or $d_i$ vs $d_o$ plotting.
 - **Assessment Export**: Direct client-side DOCX report generation via `docx@8.5.0` and `FileSaver.js`.
-- **Dashboard Integration**: Added to the Optics suite in `Beyond Physics SIMS/index.html`.
+- **Security & Access Control Gate**:
+  - Implemented cryptographic PBKDF2 SHA-256 password gate (`SIM_AUTH`, 100,000 iterations) with suite key (`beyondphysics`).
+  - Hides simulation markup until verified; redirects unauthenticated visitors to `../index.html`.
+  - Added bfcache restoration listener (`pageshow`) for complete navigation security.
+- **Dashboard Integration**: Added to the Optics suite in `Beyond Physics SIMS/index.html` with `Simulation 🔒` badge.
+
