@@ -44,6 +44,11 @@ A rigid block of mass $m$ sits on an adjustable incline with angle $\theta$, sub
 
 ### 2.3 UI & Classroom Features
 - **Author Badge**: Integrated single-line glowing pill `.author-badge` (`by Mr. F`).
+- **Collapsible Sliding Live HUD Drawer**:
+  - Right-hand live telemetry readout panel (`#liveHudCard`) slides and collapses off-screen to maximize simulation canvas width on smaller displays or focused demonstrations.
+  - Initial state is configured to **collapsed by default** (`hud-collapsed` CSS class applied on grid initialization).
+  - When collapsed, a persistent 42px vertical tab (`#btnExpandHud` / `.hud-collapsed-tab`) remains pinned on the right edge featuring a glowing badge, pulse indicator, and vertical "LIVE HUD" typography.
+  - Clicking either the collapse button (`#btnCollapseHud`) or the persistent tab smoothly toggles the third grid column (`300px` $\leftrightarrow$ `42px`) with CSS `grid-template-columns` transition and triggers dynamic canvas viewport recalibration (`self.resize()`).
 - **Telemetry Charts**: Real-time Chart.js tracking friction force vs. applied force, velocity vs. time, and energy partitioning.
 - **Assessment Workspace**: Full 5E inquiry section with exportable Word (.docx) student lab reports.
 - **Access Control Gate**: Cryptographic PBKDF2 SHA-256 password protection gate (`SIM_AUTH`, `beyondphysics`, 100,000 iterations).

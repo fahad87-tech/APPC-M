@@ -139,6 +139,7 @@ node_modules/
    - Derived static breakaway threshold, kinetic sliding acceleration, critical angle $\theta_c = \arctan(\mu_s)$, and Amontons' contact area neutrality.
    - Solved with Velocity-Verlet numerical integration at $h = 1/240\text{ s}$ with mechanical-to-thermal energy conservation.
    - Added author badge pill (`by Mr. F`), PBKDF2 password gate (`beyondphysics`), and interactive card to the Newton's Laws grid in `index.html`.
+   - Built a collapsible sliding Live HUD drawer (`#liveHudCard`) that starts collapsed by default to maximize canvas visibility, retaining a persistent 42px interactive vertical tab (`#btnExpandHud`) along the right edge with smooth CSS grid transition and canvas auto-resize.
 
 
 

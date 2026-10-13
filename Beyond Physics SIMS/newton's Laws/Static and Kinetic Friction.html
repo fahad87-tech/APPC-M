@@ -154,9 +154,122 @@ header.top p{margin:0;color:var(--muted);font-size:13px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 12px 35px rgba(0,0,0,.35)}
 .card h2{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 12px;font-weight:700}
 .card h3{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 10px;font-weight:700}
-.sim-grid{display:grid;grid-template-columns:330px minmax(0,1fr) 300px;gap:14px;align-items:start}
+.sim-grid{
+  display:grid;
+  grid-template-columns:330px minmax(0,1fr) 300px;
+  gap:14px;
+  align-items:start;
+  transition:grid-template-columns .35s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position:relative;
+}
+.sim-grid.hud-collapsed{
+  grid-template-columns:330px minmax(0,1fr) 42px;
+}
 .panel-controls{max-height:calc(100vh - 130px);overflow:auto}
-.panel-hud{max-height:calc(100vh - 130px);overflow:auto;position:sticky;top:12px}
+.panel-hud{
+  max-height:calc(100vh - 130px);
+  overflow-y:auto;
+  overflow-x:hidden;
+  position:sticky;
+  top:12px;
+  transition:padding .3s ease, border-color .2s ease, box-shadow .2s ease, background .2s ease;
+  min-height:480px;
+  box-sizing:border-box;
+}
+.hud-top-bar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+.hud-top-bar h2{
+  margin:0;
+}
+.hud-collapse-btn{
+  background:rgba(0,229,255,0.08);
+  border:1px solid rgba(0,229,255,0.3);
+  color:var(--cyan);
+  border-radius:6px;
+  padding:3px 9px;
+  font-size:11px;
+  font-weight:700;
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  cursor:pointer;
+  transition:all .2s ease;
+  letter-spacing:.03em;
+}
+.hud-collapse-btn:hover{
+  background:rgba(0,229,255,0.2);
+  border-color:var(--cyan);
+  box-shadow:0 0 10px rgba(0,229,255,0.3);
+  transform:translateX(2px);
+}
+.hud-collapsed-tab{
+  display:none;
+  width:100%;
+  height:100%;
+  min-height:440px;
+  background:transparent;
+  border:none;
+  color:var(--cyan);
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+  padding-top:16px;
+  gap:14px;
+  cursor:pointer;
+  user-select:none;
+}
+.hud-collapsed-tab .hud-tab-arrow{
+  font-size:13px;
+  font-weight:800;
+  color:var(--cyan);
+  background:rgba(0,229,255,0.15);
+  border:1px solid rgba(0,229,255,0.45);
+  width:26px;
+  height:26px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  transition:transform .2s ease, box-shadow .2s ease;
+  box-shadow:0 0 10px rgba(0,229,255,0.25);
+}
+.hud-collapsed-tab:hover .hud-tab-arrow{
+  transform:scale(1.18) translateX(-2px);
+  box-shadow:0 0 16px rgba(0,229,255,0.55);
+}
+.hud-collapsed-tab .hud-tab-text{
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.18em;
+  color:var(--text);
+  transition:color .2s ease;
+}
+.hud-collapsed-tab:hover .hud-tab-text{
+  color:var(--cyan);
+}
+.sim-grid.hud-collapsed .panel-hud{
+  padding:12px 4px;
+  background:#0c1024;
+  border-color:rgba(0,229,255,0.4);
+  box-shadow:-4px 0 20px rgba(0,229,255,0.15);
+  cursor:pointer;
+}
+.sim-grid.hud-collapsed .panel-hud:hover{
+  border-color:var(--cyan);
+  box-shadow:-4px 0 26px rgba(0,229,255,0.32);
+}
+.sim-grid.hud-collapsed .hud-body{
+  display:none;
+}
+.sim-grid.hud-collapsed .hud-collapsed-tab{
+  display:flex;
+}
 .stage-card{padding:10px}
 .sim-canvas{width:100%;aspect-ratio:16/9.5;min-height:480px;max-height:76vh;display:block;background:#060814;border-radius:12px;box-shadow:0 0 50px rgba(0,229,255,.07), inset 0 0 1px rgba(255,255,255,0.1);will-change:transform;cursor:crosshair;touch-action:none}
 .legend-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 4px 4px;border-top:1px solid var(--line-soft);margin-top:8px}
@@ -309,7 +422,7 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing}
 
   <!-- ═══════════════ TAB 1 : SIMULATION ═══════════════ -->
   <section id="tab-sim" class="tab-panel active">
-    <div class="sim-grid">
+    <div class="sim-grid hud-collapsed" id="simGrid">
       <aside class="card panel-controls">
         <h2>Controls</h2>
         <label class="preset-label" for="presetSelect">Material preset</label>
@@ -356,10 +469,25 @@ input[type=range]:active::-webkit-slider-thumb{cursor:grabbing}
         </div>
       </div>
 
-      <aside class="card panel-hud">
-        <h2>Live HUD</h2>
-        <div id="regimeBadge" class="regime-badge regime-AT_REST">AT REST</div>
-        <div class="readout-grid" id="readoutGrid"></div>
+      <aside class="card panel-hud" id="panelHud" title="Live HUD (Click slider tab to toggle)">
+        <!-- Collapsed vertical slider tab button (visible when collapsed) -->
+        <button id="btnExpandHud" class="hud-collapsed-tab" title="Click slider button to expand Live HUD" aria-label="Expand Live HUD">
+          <span class="hud-tab-arrow">◀</span>
+          <span class="hud-tab-text">LIVE HUD</span>
+        </button>
+
+        <!-- Full HUD body (hidden when collapsed) -->
+        <div class="hud-body" id="hudBody">
+          <div class="hud-top-bar">
+            <h2>Live HUD</h2>
+            <button id="btnCollapseHud" class="hud-collapse-btn" title="Slide and collapse Live HUD to the right" aria-label="Collapse Live HUD">
+              <span>Hide</span>
+              <span style="font-size:12px;margin-left:2px">▶</span>
+            </button>
+          </div>
+          <div id="regimeBadge" class="regime-badge regime-AT_REST">AT REST</div>
+          <div class="readout-grid" id="readoutGrid"></div>
+        </div>
       </aside>
     </div>
   </section>
@@ -1687,6 +1815,46 @@ UIControls.prototype.bindToggles=function(){
       self.camera.followBlock = false;
       if(btnFollow) btnFollow.classList.remove('active');
       self.camera.fit(self.engine);
+    });
+  }
+
+  // Live HUD slide / collapse toggle (keeps slider button visible on right)
+  var simGrid = document.getElementById('simGrid');
+  var btnCollapseHud = document.getElementById('btnCollapseHud');
+  var btnExpandHud = document.getElementById('btnExpandHud');
+  var panelHud = document.getElementById('panelHud');
+
+  function setHudCollapsed(collapsed){
+    if(!simGrid) return;
+    if(collapsed){
+      simGrid.classList.add('hud-collapsed');
+    } else {
+      simGrid.classList.remove('hud-collapsed');
+    }
+    setTimeout(function(){
+      self.resize();
+    }, 360);
+  }
+
+  if(btnCollapseHud){
+    btnCollapseHud.addEventListener('click', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      setHudCollapsed(true);
+    });
+  }
+  if(btnExpandHud){
+    btnExpandHud.addEventListener('click', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      setHudCollapsed(false);
+    });
+  }
+  if(panelHud){
+    panelHud.addEventListener('click', function(ev){
+      if(simGrid && simGrid.classList.contains('hud-collapsed')){
+        setHudCollapsed(false);
+      }
     });
   }
 };
