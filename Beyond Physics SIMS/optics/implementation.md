@@ -205,5 +205,6 @@ When on the **Dispersion** tab, the 3 metric cards update live as sliders move:
   - Hides simulation markup until verified; redirects unauthenticated visitors to `../index.html`.
   - Added bfcache restoration listener (`pageshow`) for complete navigation security.
 - **UI Streamlining**: Completely removed the DataLogger table card, autofill buttons, and row recording actions to optimize bench workspace focus on real-time ray tracing and Chart.js telemetry curves.
+- **Branding Badge**: Replaced plain-text author attribution with a dedicated, single-line inline pill badge (`.brand-badge`: glowing cyan border, uppercase tracking, `whitespace-nowrap`, `shrink-0`) directly adjacent to the main header title.
 - **Dashboard Integration**: Added to the Optics suite in `Beyond Physics SIMS/index.html` with `Simulation 🔒` badge.
 

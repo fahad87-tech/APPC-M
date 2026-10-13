@@ -133,6 +133,8 @@ node_modules/
    - Integrated PBKDF2 SHA-256 classroom password gate (`beyondphysics`) with `pageshow` bfcache protection.
    - Added interactive card to the Optics category in `index.html` with `Simulation 🔒` badge.
    - Streamlined the interface by completely removing the DataLogger table card and row recording controls.
+   - Refactored the title to render `by Mr. F` as an unbroken, styled inline badge (`.brand-badge`).
+
 
 
 
