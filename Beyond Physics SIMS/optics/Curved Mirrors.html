@@ -516,35 +516,7 @@ input[type=range] {
   top: 0; left: 0; width: 100% !important; height: 100% !important;
 }
 
-/* DataLogger Table */
-.logger-card { grid-column: 1 / -1; margin-top: 14px; }
-.table-wrap {
-  overflow-x: auto;
-  max-height: 260px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  margin-top: 10px;
-}
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-.data-table th, .data-table td {
-  padding: 9px 12px;
-  text-align: right;
-  border-bottom: 1px solid rgba(100, 140, 240, 0.15);
-}
-.data-table th {
-  position: sticky;
-  top: 0;
-  background: #0f1433;
-  color: var(--muted);
-  font-weight: 700;
-  z-index: 2;
-}
-.data-table tr:hover { background: rgba(0, 240, 255, 0.06); }
+
 
 /* Assessment Tab */
 .assessment-card { max-width: 950px; margin: 0 auto; padding: 24px; }
@@ -884,11 +856,7 @@ input[type=range] {
               <label for="chkBigLabels">Large High-Contrast Diagram Labels</label>
             </div>
           </div>
-          <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
-            <button class="btn btn-sm btn-primary" id="btnLogPoint">📥 Record Row</button>
-            <button class="btn btn-sm" id="btnExportCsv">Export CSV</button>
-            <button class="btn btn-sm" id="btnClearLog">Clear Log</button>
-          </div>
+
         </div>
       </aside>
 
@@ -914,39 +882,7 @@ input[type=range] {
         </div>
       </div>
 
-      <!-- DataLogger Table Card -->
-      <div class="card logger-card">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-          <div>
-            <h3 style="font-size:13px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted)">DataLogger Table</h3>
-            <span style="font-size:12px;color:var(--muted)">Matches Tables 1, 2, &amp; 3 in your lab report</span>
-          </div>
-          <div style="display:flex;gap:6px">
-            <button class="btn btn-sm btn-primary" id="btnAutoFillTable2">Auto-Fill Table 2 (Concave)</button>
-            <button class="btn btn-sm btn-primary" id="btnAutoFillTable3">Auto-Fill Table 3 (Convex)</button>
-          </div>
-        </div>
-        <div class="table-wrap">
-          <table class="data-table" id="logTable">
-            <thead>
-              <tr>
-                <th>Sample #</th>
-                <th>Mirror Type</th>
-                <th>Radius R (cm)</th>
-                <th>Focal Length f (cm)</th>
-                <th>Object Dist d<sub>o</sub> (cm)</th>
-                <th>Image Dist d<sub>i</sub> (cm)</th>
-                <th>Object Ht h<sub>o</sub> (cm)</th>
-                <th>Image Ht h<sub>i</sub> (cm)</th>
-                <th>Magnification (M)</th>
-                <th>Nature</th>
-                <th>Orientation</th>
-              </tr>
-            </thead>
-            <tbody></tbody>
-          </table>
-        </div>
-      </div>
+
     </div>
   </section>
 
@@ -2204,74 +2140,7 @@ class Renderer {
   }
 }
 
-// --- DATALOGGER CLASS ---
-class DataLogger {
-  constructor() {
-    this.rows = [];
-    this.count = 0;
-  }
 
-  log(e) {
-    const img = e.computeImage();
-    this.count++;
-    const row = {
-      id: this.count,
-      mirror: e.type === 'concave' ? 'Concave' : 'Convex',
-      R: e.R.toFixed(1),
-      f: e.signedF.toFixed(1),
-      do: e.do.toFixed(1),
-      di: img.isInfinity ? 'Infinity' : img.di.toFixed(1),
-      ho: e.ho.toFixed(1),
-      hi: img.isInfinity ? 'Infinity' : img.hi.toFixed(1),
-      m: img.isInfinity ? 'Infinity' : img.m.toFixed(2),
-      nature: img.natureStr,
-      orient: img.orientStr
-    };
-    this.rows.push(row);
-    this.appendDomRow(row);
-  }
-
-  appendDomRow(r) {
-    const tbody = document.querySelector('#logTable tbody');
-    if (!tbody) return;
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${r.id}</td>
-      <td><strong>${r.mirror}</strong></td>
-      <td>${r.R}</td>
-      <td>${r.f}</td>
-      <td>${r.do}</td>
-      <td>${r.di}</td>
-      <td>${r.ho}</td>
-      <td>${r.hi}</td>
-      <td>${r.m}</td>
-      <td><span style="color:${r.nature === 'REAL' ? 'var(--green)' : 'var(--pink)'}">${r.nature}</span></td>
-      <td>${r.orient}</td>
-    `;
-    tbody.appendChild(tr);
-  }
-
-  clear() {
-    this.rows = [];
-    this.count = 0;
-    const tbody = document.querySelector('#logTable tbody');
-    if (tbody) tbody.innerHTML = '';
-  }
-
-  downloadCsv() {
-    if (this.rows.length === 0) {
-      alert('DataLogger is empty. Record some data rows first!');
-      return;
-    }
-    const headers = ['Sample #', 'Mirror Type', 'Radius R (cm)', 'Focal Length f (cm)', 'Object Distance do (cm)', 'Image Distance di (cm)', 'Object Height ho (cm)', 'Image Height hi (cm)', 'Magnification M', 'Nature', 'Orientation'];
-    const lines = [headers.join(',')];
-    this.rows.forEach(r => {
-      lines.push([r.id, r.mirror, r.R, r.f, r.do, r.di, r.ho, r.hi, r.m, r.nature, r.orient].join(','));
-    });
-    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8' });
-    saveAs(blob, 'Curved_Mirrors_Lab_Data.csv');
-  }
-}
 
 // --- EXPORT MANAGER CLASS ---
 class ExportManager {
@@ -2325,12 +2194,11 @@ class ExportManager {
 
 // --- UI CONTROLLER & APP ORCHESTRATION ---
 class UIControls {
-  constructor(engine, camera, renderer, ruler, logger) {
+  constructor(engine, camera, renderer, ruler) {
     this.e = engine;
     this.cam = camera;
     this.ren = renderer;
     this.ruler = ruler;
-    this.logger = logger;
     this.charts = {};
 
     this.initChartJs();
@@ -2536,32 +2404,7 @@ class UIControls {
       this.updateCharts();
     });
 
-    // DataLogger Buttons
-    document.getElementById('btnLogPoint').addEventListener('click', () => this.logger.log(this.e));
-    document.getElementById('btnExportCsv').addEventListener('click', () => this.logger.downloadCsv());
-    document.getElementById('btnClearLog').addEventListener('click', () => this.logger.clear());
 
-    document.getElementById('btnAutoFillTable2').addEventListener('click', () => {
-      this.setMirror('concave');
-      this.setR(150);
-      [200, 150, 125, 75, 50].forEach(d => {
-        this.e.do = d;
-        this.logger.log(this.e);
-      });
-      this.syncInputs();
-      this.updateReadouts();
-    });
-
-    document.getElementById('btnAutoFillTable3').addEventListener('click', () => {
-      this.setMirror('convex');
-      this.setR(150);
-      [150, 125, 100, 75, 50, 200, 225].forEach(d => {
-        this.e.do = d;
-        this.logger.log(this.e);
-      });
-      this.syncInputs();
-      this.updateReadouts();
-    });
 
     // Export DOCX
     document.getElementById('btnExportDocx').addEventListener('click', () => {
@@ -3005,8 +2848,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const camera = new Camera(canvas);
   const ruler = new InteractiveRuler();
   const renderer = new Renderer(canvas, engine, camera, ruler);
-  const logger = new DataLogger();
-  new UIControls(engine, camera, renderer, ruler, logger);
+  new UIControls(engine, camera, renderer, ruler);
 });
 </script>
 </body>

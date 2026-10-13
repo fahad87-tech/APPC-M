@@ -204,5 +204,6 @@ When on the **Dispersion** tab, the 3 metric cards update live as sliders move:
   - Implemented cryptographic PBKDF2 SHA-256 password gate (`SIM_AUTH`, 100,000 iterations) with suite key (`beyondphysics`).
   - Hides simulation markup until verified; redirects unauthenticated visitors to `../index.html`.
   - Added bfcache restoration listener (`pageshow`) for complete navigation security.
+- **UI Streamlining**: Completely removed the DataLogger table card, autofill buttons, and row recording actions to optimize bench workspace focus on real-time ray tracing and Chart.js telemetry curves.
 - **Dashboard Integration**: Added to the Optics suite in `Beyond Physics SIMS/index.html` with `Simulation 🔒` badge.
 

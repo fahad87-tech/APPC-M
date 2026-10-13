@@ -132,6 +132,8 @@ node_modules/
    - Integrated dynamic image categorization (real vs. virtual, inverted vs. upright, magnified vs. diminished), Chart.js optical graph telemetry, and client-side DOCX assessment export.
    - Integrated PBKDF2 SHA-256 classroom password gate (`beyondphysics`) with `pageshow` bfcache protection.
    - Added interactive card to the Optics category in `index.html` with `Simulation 🔒` badge.
+   - Streamlined the interface by completely removing the DataLogger table card and row recording controls.
+
 
 
 
