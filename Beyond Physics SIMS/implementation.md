@@ -134,6 +134,12 @@ node_modules/
    - Added interactive card to the Optics category in `index.html` with `Simulation 🔒` badge.
    - Streamlined the interface by completely removing the DataLogger table card and row recording controls.
    - Refactored the title to render `by Mr. F` as an unbroken, styled inline badge (`.brand-badge`).
+7. **Static and Kinetic Friction Explorer (`newton's Laws/Static and Kinetic Friction.html`)**:
+   - Added Coulomb friction laboratory with adjustable incline $\theta$, applied force $F_{\text{app}}$, mass $m$, and surface coefficient controls ($\mu_s, \mu_k$).
+   - Derived static breakaway threshold, kinetic sliding acceleration, critical angle $\theta_c = \arctan(\mu_s)$, and Amontons' contact area neutrality.
+   - Solved with Velocity-Verlet numerical integration at $h = 1/240\text{ s}$ with mechanical-to-thermal energy conservation.
+   - Added author badge pill (`by Mr. F`), PBKDF2 password gate (`beyondphysics`), and interactive card to the Newton's Laws grid in `index.html`.
+
 
 
 

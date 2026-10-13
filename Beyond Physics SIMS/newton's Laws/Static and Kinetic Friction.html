@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- SIM_SPEC: {"model":"Rigid block on an adjustable incline with Coulomb static/kinetic friction, integrated by velocity-Verlet at fixed substep h=1/240 s","assumptions":["Rigid ramp and rigid block; no air resistance; no deformation","Coulomb friction model: f_s <= mu_s*N (self-adjusting), f_k = mu_k*N opposing sliding","mu_k <= mu_s is enforced by clamping with a warning toast","Apparent contact area A is deliberately physics-neutral: it changes only the drawn block width, never N, f, or a","Coordinate s runs along the plane, positive up-plane, origin at the bottom pivot; height y = s*sin(theta)","Block is confined to the ramp segment s in [0, L=6 m]; end stops convert residual impact KE into thermal energy so E_total stays constant","Uniform adjustable gravitational field g","Time scale tau only changes the number of fixed substeps per rendered frame, never the physics"],"variables":[{"name":"t","unit":"s"},{"name":"s","unit":"m"},{"name":"v","unit":"m/s"},{"name":"a","unit":"m/s^2"},{"name":"theta","unit":"deg"},{"name":"m","unit":"kg"},{"name":"mu_s","unit":"1"},{"name":"mu_k","unit":"1"},{"name":"g","unit":"m/s^2"},{"name":"A","unit":"m^2"},{"name":"N","unit":"N"},{"name":"f_s,max","unit":"N"},{"name":"f","unit":"N"},{"name":"F_app","unit":"N"},{"name":"KE","unit":"J"},{"name":"PE","unit":"J"},{"name":"Q_thermal","unit":"J"},{"name":"E_total","unit":"J"}],"validationCases":[{"name":"Flat rest","expected":"theta=0 deg, F_app=0, any m and mu: regime=AT_REST, a=0.000 m/s^2, s constant"},{"name":"Incline slide mass independence","expected":"theta=25 deg, mu_s=0.35, mu_k=0.25, F_app=0: a=-1.92 m/s^2 (+/-0.05) for both m=3.0 kg and m=6.0 kg"},{"name":"Breakaway threshold","expected":"theta=0 deg, m=2.0 kg, wood on wood: breakaway at F_app=7.84 N (+/-2%), f drops from 7.84 N to 5.88 N"},{"name":"Critical angle","expected":"theta_c = arctan(mu_s) = 21.8 deg for wood on wood, identical for m=2.0 kg and m=8.0 kg"},{"name":"Area neutrality","expected":"Changing A from 0.01 to 0.25 m^2 leaves N, f, a, KE, PE, Q bit-identical"},{"name":"Energy conservation","expected":"F_app=0 over 60 s simulated: |E_total-E0|/E0 < 1.0%"}]} -->
+<title>Friction Force Explorer by Mr. F — AP Physics 1</title>
+<script>
+  const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+  document.documentElement.classList.add("password-locked");
+
+  async function pbkdf2Verify(password, storedHash, salt, iterations) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+    const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+    return hex === storedHash;
+  }
+
+  function requestPassword(title, message) {
+    return new Promise(resolve => {
+      const existingGate = document.getElementById("password-gate");
+      if (existingGate) existingGate.remove();
+      const gate = document.createElement("div");
+      gate.id = "password-gate";
+      gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+      document.body.appendChild(gate);
+      const input = document.getElementById("password-gate-input");
+      const finish = value => { gate.remove(); resolve(value); };
+      document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+      document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+      input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+      window.requestAnimationFrame(() => input.focus());
+    });
+  }
+
+  async function verifyPageAccess() {
+    const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+    if (userInput === null) { window.location.href = "../index.html"; return; }
+    if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+      document.documentElement.classList.remove("password-locked");
+    } else {
+      alert("Incorrect password. Access denied.");
+      window.location.href = "../index.html";
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+  } else {
+    verifyPageAccess();
+  }
+
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      document.documentElement.classList.add("password-locked");
+      verifyPageAccess();
+    }
+  });
+</script>
+<style id="password-gate-styles">
+  html.password-locked body { overflow: hidden; }
+  html.password-locked body > * { visibility: hidden; }
+  html.password-locked body > #password-gate { visibility: visible; }
+  #password-gate {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 9, 18, 0.88);
+    padding: 24px;
+    z-index: 9999;
+  }
+  html.password-locked #password-gate { display: flex; visibility: visible; }
+  #password-gate-card {
+    width: min(100%, 420px);
+    background: #101625;
+    border: 1px solid rgba(100,181,246,0.28);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    color: #e7edf7;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+  #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+  #password-gate-input {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35);
+    background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px;
+    box-sizing: border-box;
+  }
+  #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+  #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+  #password-gate-submit { background: #64b5f6; color: #08101c; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<style>
+:root{
+  --bg:#0a0a1a; --panel:#12122a; --panel-2:#16163a; --line:#242450; --line-soft:rgba(255,255,255,0.08);
+  --text:#e0e0e0; --muted:#8888aa;
+  --cyan:#00e5ff; --purple:#7c4dff; --pink:#ff4081; --amber:#ffd740; --green:#69f0ae;
+  --sim-cyan:#00e5ff; --sim-green:#39ff88; --sim-pink:#ff2d95; --sim-amber:#ffb300;
+  --sim-orange:#ff6d00; --sim-violet:#b388ff; --sim-red:#ff3d71; --sim-dim:#7c5cff;
+  --mono:'JetBrains Mono','Fira Code',ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(circle at 50% -10%, #18204b 0%, #0a0a1a 55%) , #0a0a1a;
+  color:var(--text);
+  font:14px/1.55 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  min-height:100vh;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+.wrap{max-width:1680px;margin:0 auto;padding:18px 18px 40px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+header.top h1{
+  margin:0 0 4px;font-size:clamp(22px,3vw,34px);font-weight:600;letter-spacing:.01em;
+  background:linear-gradient(90deg,#ffffff,#8888aa);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.author-badge{
+  display:inline-block;
+  font-size:0.46em;
+  font-weight:700;
+  vertical-align:middle;
+  margin-left:12px;
+  background:rgba(0,229,255,0.12);
+  border:1px solid rgba(0,229,255,0.45);
+  color:var(--cyan);
+  -webkit-text-fill-color:var(--cyan);
+  padding:3px 12px;
+  border-radius:999px;
+  letter-spacing:0.06em;
+  text-transform:none;
+  box-shadow:0 0 12px rgba(0,229,255,0.22);
+}
+header.top p{margin:0;color:var(--muted);font-size:13px}
+.badge-domain{
+  padding:7px 14px;border-radius:999px;border:1px solid rgba(0,229,255,.35);
+  background:rgba(0,229,255,.08);color:var(--cyan);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+}
+.tab-bar{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:16px}
+.tab-btn{padding:13px 24px;border:0;background:transparent;color:var(--muted);border-bottom:2px solid transparent;font-weight:600;font-size:14px}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;box-shadow:0 12px 35px rgba(0,0,0,.35)}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin:0 0 12px;font-weight:700}
+.card h3{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 10px;font-weight:700}
+.sim-grid{display:grid;grid-template-columns:330px minmax(0,1fr) 300px;gap:14px;align-items:start}
+.panel-controls{max-height:calc(100vh - 130px);overflow:auto}
+.panel-hud{max-height:calc(100vh - 130px);overflow:auto;position:sticky;top:12px}
+.stage-card{padding:10px}
+.sim-canvas{width:100%;aspect-ratio:16/9.5;min-height:480px;max-height:76vh;display:block;background:#060814;border-radius:12px;box-shadow:0 0 50px rgba(0,229,255,.07), inset 0 0 1px rgba(255,255,255,0.1);will-change:transform;cursor:crosshair;touch-action:none}
+.legend-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:10px 4px 4px;border-top:1px solid var(--line-soft);margin-top:8px}
+.legend-title{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--muted);text-transform:uppercase}
+.legend-toggles{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.leg-pill{
+  display:inline-flex;align-items:center;padding:5px 10px;border-radius:6px;border:1px solid #283256;
+  background:#10152e;color:var(--text);font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s ease;
+  user-select:none;
+}
+.leg-pill:hover{border-color:rgba(0,229,255,0.4);background:#161f42}
+.leg-pill.active{border-color:rgba(0,229,255,0.6);background:rgba(0,229,255,0.12);color:#fff}
+.leg-pill.inactive{opacity:0.35;border-color:transparent;background:#0c0f20;text-decoration:line-through;color:var(--muted)}
+.swatch{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;flex-shrink:0}
+.overlay-quick-controls{margin-top:12px;padding-top:10px;border-top:1px solid var(--line-soft)}
+.quick-toggle-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.toggle-chip{
+  display:flex;align-items:center;gap:6px;background:#0c1024;border:1px solid #202747;border-radius:6px;
+  padding:6px 8px;font-size:11.5px;color:var(--text);cursor:pointer;user-select:none;
+}
+.toggle-chip:hover{border-color:#384675}
+.toggle-chip input[type=checkbox]{accent-color:var(--cyan);cursor:pointer;margin:0}
+.preset-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;font-weight:700}
+select{width:100%;background:#0c1024;border:1px solid var(--line);border-radius:8px;padding:9px 10px;margin-bottom:14px}
+.control{margin-bottom:13px}
+.control label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:6px;font-size:12.5px;color:var(--text)}
+.control .value{color:var(--cyan);font-family:var(--mono);font-size:12px;font-variant-numeric:tabular-nums}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;outline:none;
+  background:linear-gradient(90deg,var(--cyan) var(--p,50%), rgba(255,255,255,.15) var(--p,50%));
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:0;
+  box-shadow:0 0 10px rgba(0,229,255,.8);cursor:grab;
+}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:0;box-shadow:0 0 10px rgba(0,229,255,.8);cursor:grab}
+input[type=range]:active::-webkit-slider-thumb{cursor:grabbing}
+.button-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.btn{border:1px solid var(--line);background:#1a2040;color:var(--text);padding:9px 13px;border-radius:8px;font-size:13px;font-weight:600}
+.btn:hover{border-color:rgba(0,229,255,.5)}
+.btn-primary{background:#06495b;border-color:#007a91;color:#d9fbff}
+.btn-warn{background:#4a2443;border-color:#874b78;color:#ffd2ec}
+.btn-small{padding:6px 10px;font-size:12px}
+.hint{color:var(--muted);font-size:11px;margin:12px 0 0;line-height:1.6}
+.regime-badge{
+  display:inline-block;padding:6px 16px;border-radius:999px;font-family:var(--mono);font-weight:700;
+  letter-spacing:.14em;font-size:12px;margin-bottom:12px;border:1px solid currentColor;
+}
+.regime-AT_REST{color:#8a8ab8;background:rgba(138,138,184,.12)}
+.regime-STATIC{color:var(--sim-green);background:rgba(57,255,136,.12)}
+.regime-KINETIC{color:var(--sim-pink);background:rgba(255,45,149,.12)}
+.readout-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.readout-grid div{background:#0c1024;border:1px solid #202747;border-radius:8px;padding:7px 9px}
+.readout-grid b{display:block;color:var(--muted);font-size:10px;letter-spacing:.06em;margin-bottom:2px;font-weight:600}
+.readout-grid span{font-family:var(--mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.pos{color:var(--green)} .neg{color:var(--pink)} .zero{color:var(--muted)}
+.daq-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:#0d122b;border:1px solid var(--line);border-radius:10px;padding:8px 14px;margin-bottom:14px}
+.daq-title{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;letter-spacing:.08em;color:var(--cyan);font-family:var(--mono)}
+.daq-dot{width:8px;height:8px;border-radius:50%;background:#39ff88;box-shadow:0 0 8px #39ff88;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+.daq-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.daq-label{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.06em}
+.daq-win-btn{padding:4px 9px;font-size:11px;transition:all .15s ease}
+.daq-win-btn.active{background:rgba(0,229,255,0.22) !important;border-color:var(--cyan) !important;color:#fff !important;box-shadow:0 0 8px rgba(0,229,255,0.35) !important}
+.daq-graph-pill{padding:4px 10px;font-size:11px}
+.graphs-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+@media(max-width:960px){.graphs-grid{grid-template-columns:1fr}}
+.graph-card.single-showcase{grid-column:1/-1}
+.graph-card.single-showcase .chart-container{height:420px;min-height:360px;max-height:540px}
+.graph-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}
+.graph-head h3{margin:0;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.graph-telemetry{font-family:var(--mono);font-size:11px;color:var(--cyan);background:#070a1a;padding:3px 8px;border-radius:5px;border:1px solid #1a2345;font-variant-numeric:tabular-nums}
+.chart-container{position:relative;width:100%;height:320px;min-height:280px;max-height:360px}
+.chart-container canvas{position:absolute;left:0;top:0;width:100% !important;height:100% !important}
+.drift{float:right;color:var(--sim-green);font-family:var(--mono);text-transform:none;letter-spacing:0}
+.assessment{max-width:1080px;margin:0 auto}
+.assess-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.assess-head h2{margin:8px 0 0;font-size:20px;text-transform:none;letter-spacing:0;color:var(--text)}
+.name-field{display:flex;flex-direction:column;gap:5px}
+.name-field label{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:700}
+.name-field input{background:#080c1d;border:1px solid #30395f;border-radius:8px;padding:9px 12px;min-width:230px}
+.assess-nav{display:flex;align-items:center;gap:12px;margin:6px 0 10px}
+.assess-nav input[type=range]{flex:1}
+.q-counter{font-family:var(--mono);color:var(--cyan);min-width:60px;text-align:right}
+.q-dots{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.q-dot{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid transparent;transition:all .15s}
+.q-dot.answered{background:var(--green)}
+.q-dot.current{border-color:var(--cyan);box-shadow:0 0 8px rgba(0,229,255,.7)}
+.assess-question{display:none;border:1px solid var(--line);border-radius:12px;padding:16px;background:#0d1125}
+.assess-question.active{display:block}
+.assess-question h3{font-size:13px;color:var(--muted);margin:10px 0 8px;letter-spacing:.1em}
+.q-prompt{margin:0 0 14px;font-size:15px;line-height:1.65}
+.q-points{color:var(--amber);font-size:12px;font-family:var(--mono);margin-left:8px}
+.answer-area{width:100%;background:#080c1d;border:1px solid #30395f;border-radius:8px;padding:10px 12px;min-height:130px;resize:vertical;font-family:var(--mono);font-size:13px;line-height:1.6}
+.answer-area:focus{outline:none;border-color:var(--cyan);box-shadow:0 0 0 2px rgba(0,229,255,.15)}
+.assess-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px;color:var(--muted);font-size:13px}
+.phase-badge{display:inline-block;padding:3px 11px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border:1px solid}
+.phase-engage{color:var(--cyan);background:rgba(0,229,255,.1);border-color:rgba(0,229,255,.4)}
+.phase-explore{color:var(--purple);background:rgba(124,77,255,.12);border-color:rgba(124,77,255,.45)}
+.phase-explain{color:var(--amber);background:rgba(255,215,64,.1);border-color:rgba(255,215,64,.4)}
+.phase-elaborate{color:var(--green);background:rgba(105,240,174,.1);border-color:rgba(105,240,174,.4)}
+.phase-evaluate{color:var(--pink);background:rgba(255,64,129,.1);border-color:rgba(255,64,129,.4)}
+.toast{
+  position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  background:#2a1030;border:1px solid var(--sim-orange);color:#ffd9b0;padding:11px 20px;border-radius:10px;
+  font-size:13px;z-index:120;transition:opacity .2s, transform .2s;box-shadow:0 10px 30px rgba(0,0,0,.5)
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.guard-banner{
+  position:fixed;top:14px;left:50%;transform:translateX(-50%);display:none;
+  background:#3a0d20;border:1px solid var(--pink);color:#ffc2d8;padding:10px 18px;border-radius:10px;z-index:130;font-size:13px
+}
+.guard-banner.show{display:block}
+.banner{display:none;background:#3a2a0d;border:1px solid var(--amber);color:#ffe9a8;padding:10px 16px;border-radius:10px;margin:10px 2px;font-size:12.5px}
+.banner.show{display:block}
+.modal{position:fixed;inset:0;background:rgba(4,4,14,.8);display:none;align-items:center;justify-content:center;z-index:140;padding:24px}
+.modal.show{display:flex}
+.modal-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;max-width:1200px;width:100%;max-height:86vh;display:flex;flex-direction:column}
+.modal-card header{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+.modal-card header h2{margin:0}
+.modal-body{overflow:auto;padding:14px 18px}
+.chart-fallback{color:var(--muted);font-size:13px;padding:20px}
+@media(max-width:1180px){
+  .sim-grid{grid-template-columns:300px minmax(0,1fr)}
+  .panel-hud{grid-column:1/-1;position:static;max-height:none}
+  .graphs-grid{grid-template-columns:1fr}
+}
+@media(max-width:820px){
+  .sim-grid{grid-template-columns:1fr}
+  .panel-controls{max-height:none}
+  .wrap{padding:12px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Friction Force Explorer <span class="author-badge">by Mr. F</span></h1>
+      <p>AP Physics 1 · Units 2–3 · Static &amp; kinetic friction on an adjustable incline — drag the sliders and watch the forces, motion and energy respond in real time.</p>
+    </div>
+    <div class="badge-domain">Newtonian Mechanics · Force &amp; Translational Dynamics</div>
+  </header>
+
+  <nav class="tab-bar" aria-label="Main tabs">
+    <button class="tab-btn active" data-tab="sim">Simulation</button>
+    <button class="tab-btn" data-tab="graphs">Graphs</button>
+    <button class="tab-btn" data-tab="assessment">Assessment (5E)</button>
+  </nav>
+
+  <!-- ═══════════════ TAB 1 : SIMULATION ═══════════════ -->
+  <section id="tab-sim" class="tab-panel active">
+    <div class="sim-grid">
+      <aside class="card panel-controls">
+        <h2>Controls</h2>
+        <label class="preset-label" for="presetSelect">Material preset</label>
+        <select id="presetSelect"></select>
+        <div id="sliderHost"></div>
+        <div class="button-row">
+          <button id="playBtn" class="btn btn-primary">Pause</button>
+          <button id="stepBtn" class="btn">Step</button>
+          <button id="resetBtn" class="btn btn-warn">Reset</button>
+        </div>
+        <div class="button-row" style="margin-top:8px">
+          <button id="snapshotBtn" class="btn btn-small" style="flex:1" title="Download PNG screenshot">📸 Snapshot</button>
+          <button id="saveJsonBtn" class="btn btn-small" title="Save parameters to JSON">Save</button>
+          <button id="loadJsonBtn" class="btn btn-small" title="Load parameters from JSON">Load</button>
+        </div>
+        <div class="overlay-quick-controls">
+          <label class="preset-label">Display Overlays</label>
+          <div class="quick-toggle-row">
+            <label class="toggle-chip"><input type="checkbox" id="chkForces" checked> Forces (FBD)</label>
+            <label class="toggle-chip"><input type="checkbox" id="chkKinematics"> Kinematics (v, a)</label>
+            <label class="toggle-chip"><input type="checkbox" id="chkValues" checked> Numeric Values</label>
+            <label class="toggle-chip"><input type="checkbox" id="chkSparks" checked> Friction Sparks</label>
+          </div>
+        </div>
+        <p class="hint">Space = play / pause · <b>.</b> = single frame · <b>R</b> = reset · drag canvas to pan · scroll to zoom · double-click slider to restore default.</p>
+      </aside>
+
+      <div class="card stage-card">
+        <canvas id="mainCanvas" class="sim-canvas"></canvas>
+        <div class="legend-bar">
+          <div class="legend-title">Toggle Overlays:</div>
+          <div class="legend-toggles" id="vectorToggles">
+            <button class="leg-pill inactive" data-toggle="v" title="Click to toggle velocity vector"><i class="swatch" style="background:#00e5ff"></i>velocity v</button>
+            <button class="leg-pill inactive" data-toggle="a" title="Click to toggle acceleration vector"><i class="swatch" style="background:#ff2d95"></i>acceleration a</button>
+            <button class="leg-pill active" data-toggle="f" title="Click to toggle friction force"><i class="swatch" style="background:#ffb300"></i>friction f</button>
+            <button class="leg-pill active" data-toggle="fapp" title="Click to toggle applied force"><i class="swatch" style="background:#ff6d00"></i>applied F</button>
+            <button class="leg-pill inactive" data-toggle="N" title="Click to toggle normal force"><i class="swatch" style="background:#39ff88"></i>normal N</button>
+            <button class="leg-pill inactive" data-toggle="mg" title="Click to toggle weight"><i class="swatch" style="background:#b388ff"></i>weight mg</button>
+            <button class="leg-pill inactive" data-toggle="mgpar" title="Click to toggle mg sin θ"><i class="swatch" style="background:#7c5cff"></i>mg sin θ</button>
+            <button class="leg-pill active" data-toggle="values" title="Click to toggle numerical value text on arrows">🔢 Values</button>
+            <button class="leg-pill" id="btnFollowBlock" title="Toggle camera following the moving block along the 12m track">🎥 Follow Block</button>
+            <button class="leg-pill" id="btnFitTrack" title="Reset camera pan &amp; zoom to fit full 12m track">🔍 Fit Track</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="card panel-hud">
+        <h2>Live HUD</h2>
+        <div id="regimeBadge" class="regime-badge regime-AT_REST">AT REST</div>
+        <div class="readout-grid" id="readoutGrid"></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ═══════════════ TAB 2 : GRAPHS ═══════════════ -->
+  <section id="tab-graphs" class="tab-panel">
+    <div class="daq-toolbar">
+      <div class="daq-title">
+        <span class="daq-dot"></span> REAL-TIME TELEMETRY &amp; FORCE DYNAMICS ACQUISITION
+      </div>
+      <div class="daq-actions">
+        <span class="daq-label">GRAPHS:</span>
+        <button class="leg-pill active daq-graph-pill" data-graph="fvsfapp" title="Toggle Friction Force vs Applied Force graph">f vs F_app</button>
+        <button class="leg-pill inactive daq-graph-pill" data-graph="pos" title="Toggle Position &amp; Velocity graph">s, v vs t</button>
+        <button class="leg-pill inactive daq-graph-pill" data-graph="force" title="Toggle Kinematics &amp; Friction graph">a, f vs t</button>
+        <button class="leg-pill inactive daq-graph-pill" data-graph="energy" title="Toggle Energy graph">Energy vs t</button>
+
+        <span class="daq-label" style="margin-left:8px">TIME WINDOW:</span>
+        <button class="btn btn-small daq-win-btn" data-win="5">5s</button>
+        <button class="btn btn-small daq-win-btn active" data-win="10">10s</button>
+        <button class="btn btn-small daq-win-btn" data-win="30">30s</button>
+        <button class="btn btn-small daq-win-btn" data-win="0">All</button>
+        <button id="clearChartBtn" class="btn btn-small btn-warn" style="margin-left:8px">Clear Traces</button>
+      </div>
+    </div>
+    <div class="graphs-grid" id="graphsGrid">
+      <div class="card graph-card single-showcase" id="card-graph-fvsfapp">
+        <div class="graph-head">
+          <h3>Friction Force vs Applied Force (f vs F_app)</h3>
+          <div class="graph-telemetry" id="telemFvsFapp">|f|: 0.00 N · F_app: 0.0 N · f_s,max: 0.00 N</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartFvsFapp"></canvas>
+        </div>
+      </div>
+      <div class="card graph-card" id="card-graph-pos" style="display:none">
+        <div class="graph-head">
+          <h3>Position &amp; Velocity vs Time</h3>
+          <div class="graph-telemetry" id="telemPos">s: 0.00 m · v: 0.00 m/s</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartPos"></canvas>
+        </div>
+      </div>
+      <div class="card graph-card" id="card-graph-force" style="display:none">
+        <div class="graph-head">
+          <h3>Kinematics &amp; Friction vs Time</h3>
+          <div class="graph-telemetry" id="telemForce">a: 0.00 m/s² · f: 0.00 N</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartForce"></canvas>
+        </div>
+      </div>
+      <div class="card graph-card" id="card-graph-energy" style="display:none">
+        <div class="graph-head">
+          <h3>Mechanical &amp; Thermal Energy vs Time</h3>
+          <div class="graph-telemetry" id="telemEnergy">E: 0.0 J · ΔE: 0.00%</div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartEnergy"></canvas>
+        </div>
+      </div>
+    </div>
+    <div id="chartFallback" class="chart-fallback" style="display:none">Chart.js could not be loaded — the simulation still works.</div>
+  </section>
+
+  <!-- ═══════════════ TAB 3 : ASSESSMENT ═══════════════ -->
+  <section id="tab-assessment" class="tab-panel">
+    <div class="card assessment">
+      <div class="assess-head">
+        <div>
+          <span class="phase-badge phase-evaluate">5E Assessment</span>
+          <h2>Friction Force Explorer — Formative Assessment</h2>
+        </div>
+        <div class="name-field">
+          <label for="studentName">Student name</label>
+          <input id="studentName" type="text" placeholder="Enter your name...">
+        </div>
+      </div>
+      <div class="assess-nav">
+        <button id="prevQ" class="btn" aria-label="Previous question">←</button>
+        <input id="qSlider" type="range" min="1" max="10" step="1" value="1" aria-label="Question navigation">
+        <button id="nextQ" class="btn" aria-label="Next question">→</button>
+        <span id="qCounter" class="q-counter">1 / 10</span>
+      </div>
+      <div id="qDots" class="q-dots"></div>
+      <div id="assessQuestions"></div>
+      <div class="assess-foot">
+        <span id="answeredCount">0 of 10 questions answered</span>
+        <button id="exportDocxBtn" class="btn btn-primary">Export to .DOCX</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="guardBanner" class="guard-banner">Numerical guard triggered — state restored</div>
+
+<input type="file" id="configFileInput" accept="application/json,.json" hidden>
+
+<script>
+(function(){
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════
+// CONFIGURATION & CONSTANTS
+// ═══════════════════════════════════════════════════════════════
+var H_SUB = 1/240;            // fixed physics substep (s)
+var V_EPS = 0.01;             // sticking / slipping threshold (m/s)
+var RAMP_L = 12.0;            // extended 12m optical rail track (m)
+var MAX_TRAIL = 200;          // fading trail buffer length
+var RECORD_EVERY = 6;         // graph sampling: 1 point per 6 rendered frames
+
+var SLIDERS = [
+  {key:'m',    label:'Block mass',                 symbol:'m',     unit:'kg',   min:0.5,  max:10,   step:0.1,  def:2.0},
+  {key:'theta',label:'Incline angle',              symbol:'θ',     unit:'°',    min:0,    max:45,   step:1,    def:0},
+  {key:'Fapp', label:'Applied force (along plane)',symbol:'F_app', unit:'N',    min:0,    max:60,   step:0.5,  def:0},
+  {key:'mus',  label:'Static coefficient',         symbol:'μs',    unit:'',     min:0.02, max:1.20, step:0.01, def:0.40},
+  {key:'muk',  label:'Kinetic coefficient',        symbol:'μk',    unit:'',     min:0.02, max:1.00, step:0.01, def:0.30},
+  {key:'g',    label:'Gravitational field',        symbol:'g',     unit:'m/s²', min:1.6,  max:24.8, step:0.1,  def:9.8},
+  {key:'area', label:'Apparent contact area',      symbol:'A',     unit:'m²',   min:0.01, max:0.25, step:0.01, def:0.04},
+  {key:'tau',  label:'Time scale',                 symbol:'τ',     unit:'×',    min:0.1,  max:2.0,  step:0.1,  def:1.0}
+];
+
+var PRESETS = [
+  {name:'Rubber on dry concrete', mus:1.00, muk:0.80, color:'#ff5252'},
+  {name:'Wood on wood',           mus:0.40, muk:0.30, color:'#a87c4a'},
+  {name:'Steel on steel (dry)',   mus:0.74, muk:0.57, color:'#90a4ae'},
+  {name:'Glass on glass',         mus:0.94, muk:0.40, color:'#80deea'},
+  {name:'Waxed ski on snow',      mus:0.10, muk:0.05, color:'#e1f5fe'},
+  {name:'Teflon on steel',        mus:0.04, muk:0.04, color:'#b2dfdb'},
+  {name:'Custom (sliders)',       mus:null, muk:null, color:'#b388ff'}
+];
+
+var READOUTS = [
+  {label:'t',        unit:'s',   get:function(e){return e.t;},              dec:2},
+  {label:'s',        unit:'m',   get:function(e){return e.s;},              dec:3},
+  {label:'v',        unit:'m/s', get:function(e){return e.v;},              dec:3},
+  {label:'a',        unit:'m/s²',get:function(e){return e.a;},              dec:3},
+  {label:'θ',        unit:'°',   get:function(e){return e.params.theta;},   dec:1},
+  {label:'m',        unit:'kg',  get:function(e){return e.params.m;},       dec:2},
+  {label:'N',        unit:'N',   get:function(e){return e.N;},              dec:2},
+  {label:'f_s,max',  unit:'N',   get:function(e){return e.fSMax;},          dec:2},
+  {label:'f',        unit:'N',   get:function(e){return e.fSigned;},        dec:2},
+  {label:'μs',       unit:'',    get:function(e){return e.params.mus;},     dec:2},
+  {label:'μk',       unit:'',    get:function(e){return e.params.muk;},     dec:2},
+  {label:'A',        unit:'m²',  get:function(e){return e.params.area;},    dec:3},
+  {label:'KE',       unit:'J',   get:function(e){return e.KE;},             dec:2},
+  {label:'PE',       unit:'J',   get:function(e){return e.PE;},             dec:2},
+  {label:'Q_thermal',unit:'J',   get:function(e){return e.Q;},              dec:2},
+  {label:'E_total',  unit:'J',   get:function(e){return e.Etotal;},         dec:2},
+  {label:'ΔE %',     unit:'%',   get:function(e){return e.driftPct;},       dec:3}
+];
+
+var QUESTIONS = [
+  {phase:'Engage', points:null,
+   prompt:'You slide the same wooden block across the same table twice — once alone, once with a 5 kg textbook on top. Predict: does the friction force change? Does the coefficient of friction change? Test it in the sim: set m = 2.0 kg, then m = 7.0 kg, with θ = 0° and F_app = 0, and watch f_s,max in the HUD.',
+   correct:'Friction force increases because f = μN and N = mg grows with mass. The COEFFICIENT of friction does NOT change — μ is a property of the two surfaces only. In the sim, f_s,max scales from 7.8 N to 27.4 N (wood on wood, μs = 0.40) while μs stays 0.40.'},
+  {phase:'Engage', points:null,
+   prompt:'You flip the block onto its narrow face so it touches the table with ¼ the area. Predict the friction force. Then drag the Area slider from 0.04 m² down to 0.01 m² with m, θ, μs, μk fixed and compare the readouts.',
+   correct:'Friction is unchanged. The sim\u2019s Area slider is deliberately physics-neutral: f = μN depends only on μ and N, not on apparent contact area. Real microscopic contact area grows with load, which is why the macroscopic rule holds. Many students predict more friction for more area — this is the misconception being targeted.'},
+  {phase:'Explore', points:null,
+   prompt:'θ = 0°, m = 2.0 kg, wood on wood (μs = 0.40, μk = 0.30), F_app starts at 0. Raise F_app in 0.5 N steps. Record the F_app at which the block first moves. Compare with μs·m·g. Report the % difference and explain any gap.',
+   correct:'f_s,max = μs·m·g = 0.40 × 2.0 × 9.8 = 7.84 N. Breakaway occurs between 7.5 N and 8.0 N, within ~2 % (the gap comes from the 0.5 N slider step and the v_eps = 0.01 m/s sticking threshold). Immediately after breakaway, friction DROPS to f_k = μk·m·g = 5.88 N, so the net force jumps to ≈ +1.96 N and a ≈ 0.98 m/s².'},
+  {phase:'Explore', points:null,
+   prompt:'θ = 0°, m = 2.0 kg, F_app = 0. Record f at the instant motion begins (or the max static value) for Teflon-on-steel, wood-on-wood, and rubber-on-concrete. Describe the relationship between f and μ.',
+   correct:'N = 19.6 N. f_s,max = 0.04 × 19.6 = 0.78 N; 0.40 × 19.6 = 7.84 N; 1.00 × 19.6 = 19.6 N. The relationship is linear through the origin with slope N = 19.6 N: f = N·μ. Doubling μ doubles f at fixed mass.'},
+  {phase:'Explain', points:null,
+   prompt:'Draw the free-body diagram for the block on the incline and derive N. Explain in words why N decreases as θ increases.',
+   correct:'Forces: weight mg (straight down), normal force N (perpendicular to plane), friction f (along the plane), applied force F_app (along the plane). Perpendicular to the plane there is no acceleration, so ΣF⊥ = N − mg cos θ = 0 ⇒ N = mg cos θ. Physically, the plane only has to support the component of the weight pressing into it; as θ → 90°, that component → 0 and N → 0, so friction (∝ N) also vanishes.'},
+  {phase:'Explain', points:null,
+   prompt:'State the static-friction inequality. Explain what "static friction is self-adjusting" means and describe exactly how the sim decides STATIC vs KINETIC each substep.',
+   correct:'f_s ≤ μs·N, with equality only at impending slip. Self-adjusting means static friction takes whatever value is needed (up to the ceiling μs·N) to keep a = 0: here f_s = −(F_app − mg sin θ). Each substep the engine computes F_drive = F_app − mg sin θ. If |v| < 0.01 m/s AND |F_drive| ≤ μs·N, it sets v = 0, a = 0 and f = −F_drive (STATIC). Otherwise the block is KINETIC and f = −sign(v)·μk·N, giving a = (F_drive + f)/m. Because μk < μs, the friction force visibly drops the instant slipping starts.'},
+  {phase:'Elaborate', points:null,
+   prompt:'Derive the critical angle θ_c at which a block on an incline begins to slide with no applied force, in terms of μs. Then verify in the sim at m = 2.0 kg and m = 8.0 kg (wood on wood). Why is the answer the same for both masses?',
+   correct:'At impending slip, mg sin θ = μs·mg cos θ ⇒ tan θ_c = μs ⇒ θ_c = arctan(0.40) = 21.8°. Mass cancels from both sides, so the sim shows breakaway at ≈22° for m = 2.0 kg and m = 8.0 kg alike. This is the same mass-independence that makes all objects slide down a frictionless incline at the same rate.'},
+  {phase:'Elaborate', points:null,
+   prompt:'Push the block up the incline at constant F_app so it slides up, then set F_app = 0 while it is still moving up. Describe and explain the friction force through all four phases: (i) pushed up, (ii) coasting up after release, (iii) momentarily at rest at the top, (iv) either sticking or sliding back down.',
+   correct:'(i) v up ⇒ f_k = μk·N directed DOWN the plane. (ii) Still moving up, so friction is still DOWN the plane with magnitude μk·N; a = −g(sin θ + μk cos θ), so it decelerates faster than gravity alone would. (iii) At the instant v = 0, friction may become static. (iv) If mg sin θ ≤ μs·N the block sticks: f_s = mg sin θ UP the plane, a = 0, and the sim labels it STATIC. If mg sin θ > μs·N it slides back down: friction REVERSES to point UP the plane with f_k = μk·N, and a = g(sin θ − μk cos θ) down the plane. The friction-force graph shows the trace flipping sign at the top.'},
+  {phase:'Evaluate', points:5,
+   prompt:'FRQ (5 pts). A 3.0 kg block sits on a 25° incline. The interface has μs = 0.35 and μk = 0.25. (a) Draw the free-body diagram. (b) Compute N and f_s,max. (c) Determine whether the block stays at rest, showing the comparison. (d) If it slides, find the acceleration. (e) Predict how the acceleration changes if the mass is doubled, and justify without re-deriving from numbers.',
+   correct:'(a) [FBD: weight mg vertically down; normal force N perpendicular to the incline; friction f along the incline surface.] (b) N = mg cos 25° = 3.0(9.8)(0.9063) = 26.6 N; f_s,max = 0.35(26.6) = 9.32 N. (c) The down-plane gravity component is mg sin 25° = 3.0(9.8)(0.4226) = 12.4 N. Since 12.4 N > 9.32 N, static friction cannot hold it — the block slides. (d) a = g(sin θ − μk cos θ) = 9.8(0.4226 − 0.25 × 0.9063) = 9.8(0.4226 − 0.2266) = 1.92 m/s² down the plane. (e) The acceleration is UNCHANGED. Both the driving force (mg sin θ) and the friction force (μk mg cos θ) are proportional to m, so m cancels in a = (mg sin θ − μk mg cos θ)/m = g(sin θ − μk cos θ). Doubling m doubles both forces but leaves a = 1.92 m/s². Verify in the sim: run m = 3.0 kg and m = 6.0 kg at θ = 25° with μs = 0.35, μk = 0.25 and compare the a(t) traces.'},
+  {phase:'Evaluate', points:5,
+   prompt:'FRQ / Experimental Design (5 pts). Using only this simulation, design a procedure to measure μs and μk for an unknown surface pair. State the independent and dependent variables, the number of trials, how you reduce uncertainty, the graph you would make, and what the slope represents. (5 pts: 1 IV/DV, 1 procedure, 1 uncertainty reduction, 1 graph, 1 interpretation.)',
+   correct:'(1) IV: incline angle θ (secondary method: applied force F_app). DV: the threshold value at which the block begins to move — the critical angle θ_c, or the breakaway force F_break. (2) Procedure A (angle method): set a fixed mass, increase θ in 1° steps from 0°, and record the smallest θ at which the block starts to slide (v first exceeds 0.01 m/s). Repeat 5 times per mass for m = 1.0, 2.0, 5.0 kg. Then μs = tan θ_c. Procedure B (force method): fix θ = 0°, increase F_app in 0.5 N steps and record F_break; repeat 5× at each of ≥4 masses. (3) Uncertainty reduction: average the 5 trials at each setting, ramp the slider slowly to avoid overshooting the threshold, use the STATIC/KINETIC regime readout as an objective criterion instead of eyeballing motion, and report the spread as the uncertainty. (4) Graph: plot F_break (N) on the y-axis versus N = mg cos θ (N) on the x-axis; also plot f_k (from the steady sliding region) versus N on the same axes. (5) Interpretation: both graphs are straight lines through the origin; the slope of the breakaway line is μs and the slope of the sliding line is μk, with μk < μs as required. Measuring μk directly from the post-breakaway steady friction reading is more reliable than from the angle method, since kinetic friction does not depend on how the motion started.'}
+];
+
+// ═══════════════════════════════════════════════════════════════
+// SMALL HELPERS
+// ═══════════════════════════════════════════════════════════════
+function clamp(v,lo,hi){ return v<lo?lo:(v>hi?hi:v); }
+function shade(hex,amt){
+  var c=hex.replace('#','');
+  var r=parseInt(c.substr(0,2),16), g=parseInt(c.substr(2,2),16), b=parseInt(c.substr(4,2),16);
+  r=clamp(Math.round(r+255*amt),0,255); g=clamp(Math.round(g+255*amt),0,255); b=clamp(Math.round(b+255*amt),0,255);
+  return 'rgb('+r+','+g+','+b+')';
+}
+function lerpHex(h1,h2,t){
+  var a=h1.replace('#',''), b=h2.replace('#','');
+  var r=Math.round(parseInt(a.substr(0,2),16)+(parseInt(b.substr(0,2),16)-parseInt(a.substr(0,2),16))*t);
+  var g=Math.round(parseInt(a.substr(2,2),16)+(parseInt(b.substr(2,2),16)-parseInt(a.substr(2,2),16))*t);
+  var bl=Math.round(parseInt(a.substr(4,2),16)+(parseInt(b.substr(4,2),16)-parseInt(a.substr(4,2),16))*t);
+  return 'rgb('+r+','+g+','+bl+')';
+}
+function showToast(msg){
+  var el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  window.setTimeout(function(){ el.classList.remove('show'); }, 2600);
+}
+function fmt(v,dec){ return (Number.isFinite(v)?v.toFixed(dec):'—'); }
+
+// ═══════════════════════════════════════════════════════════════
+// 1. PHYSICS ENGINE
+// ═══════════════════════════════════════════════════════════════
+function PhysicsEngine(){
+  this.params={m:2.0, theta:0, Fapp:0, mus:0.40, muk:0.30, g:9.8, area:0.04, tau:1.0};
+  this.presetName='Wood on wood';
+  this.blockColor='#a87c4a';
+  this.L=RAMP_L;
+  this.s0=2.0;
+  this.guardLog=[];
+  this.onGuard=null;
+  this.reset();
+}
+PhysicsEngine.prototype.thetaRad=function(){ return this.params.theta*Math.PI/180; };
+PhysicsEngine.prototype.reset=function(){
+  this.t=0; this.s=this.s0; this.v=0; this.a=0;
+  this.regime='AT_REST'; this.heldByStop=false;
+  this.N=0; this.fSMax=0; this.fSigned=0; this.Fdrive=0; this.FgPar=0;
+  this.KE=0; this.PE=0; this.Q=0; this.Wapp=0; this.Etotal=0;
+  this.E0=null; this.driftPct=0;
+  this.computeForces();
+  this.updateEnergies();
+  this.E0=this.Etotal;
+  this.lastGood=this.snapshot();
+};
+PhysicsEngine.prototype.setParam=function(key,value){ this.params[key]=value; };
+PhysicsEngine.prototype.computeForces=function(){
+  var p=this.params, th=this.thetaRad();
+  this.N=p.m*p.g*Math.cos(th);
+  this.FgPar=-p.m*p.g*Math.sin(th);
+  this.fSMax=p.mus*this.N;
+  this.Fdrive=p.Fapp+this.FgPar;
+  this.heldByStop=false;
+  if(Math.abs(this.v)<V_EPS && Math.abs(this.Fdrive)<=this.fSMax){
+    this.regime = Math.abs(this.Fdrive)<1e-9 ? 'AT_REST' : 'STATIC';
+    this.v=0; this.a=0; this.fSigned=-this.Fdrive;
+  } else {
+    this.regime='KINETIC';
+    var vEff = Math.abs(this.v)>=V_EPS ? this.v : Math.sign(this.Fdrive);
+    var sgn = vEff===0 ? 1 : (vEff>0?1:-1);
+    this.fSigned = -sgn*p.muk*this.N;
+    this.a = (this.Fdrive+this.fSigned)/p.m;
+  }
+};
+PhysicsEngine.prototype.updateEnergies=function(){
+  var p=this.params;
+  this.KE=0.5*p.m*this.v*this.v;
+  this.PE=p.m*p.g*this.s*Math.sin(this.thetaRad());
+  this.Wapp=p.Fapp*this.s;
+  this.Etotal=this.KE+this.PE+this.Q;
+  if(this.E0===null || this.E0===0) this.E0=this.Etotal;
+  this.driftPct = Math.abs((this.Etotal-this.E0)/this.E0)*100;
+};
+PhysicsEngine.prototype.step=function(h){
+  var s0=this.s, v0=this.v;
+  // --- start-of-substep force evaluation ---
+  this.computeForces();
+  var a0=this.a;
+  var vHalf=v0+a0*h*0.5;
+  // --- midpoint force evaluation ---
+  this.v=vHalf;
+  this.computeForces();
+  var aMid=this.a;
+  var sNew=s0+vHalf*h;
+  var vNew=vHalf+aMid*h*0.5;
+  // --- end stops: impact KE becomes thermal energy ---
+  var atBottom=s0<=1e-9, atTop=s0>=this.L-1e-9;
+  if(sNew<0){
+    sNew=0;
+    if(vNew<0){ if(!atBottom) this.Q+=0.5*this.params.m*vNew*vNew; vNew=0; }
+  } else if(sNew>this.L){
+    sNew=this.L;
+    if(vNew>0){ if(!atTop) this.Q+=0.5*this.params.m*vNew*vNew; vNew=0; }
+  }
+  var ds=sNew-s0;
+  if(this.regime==='KINETIC') this.Q+=Math.abs(this.fSigned)*Math.abs(ds);
+  this.s=sNew; this.v=vNew; this.t+=h;
+  // --- end-of-substep force evaluation ---
+  this.computeForces();
+  if(this.regime==='KINETIC' && this.v===0 &&
+     ((this.s<=1e-9 && this.Fdrive<0) || (this.s>=this.L-1e-9 && this.Fdrive>0))){
+    this.regime='AT_REST'; this.heldByStop=true; this.a=0; this.v=0; this.fSigned=-this.Fdrive;
+  }
+  this.updateEnergies();
+  this.guard();
+};
+PhysicsEngine.prototype.guard=function(){
+  var vals=[this.s,this.v,this.a,this.N,this.fSigned,this.fSMax,this.Fdrive,this.KE,this.PE,this.Q,this.Etotal];
+  var ok=true;
+  for(var i=0;i<vals.length;i++){ if(!Number.isFinite(vals[i])){ ok=false; break; } }
+  if(!ok){
+    var g=this.lastGood;
+    this.t=g.t; this.s=g.s; this.v=0; this.a=0; this.regime='AT_REST';
+    this.N=g.N; this.fSMax=g.fSMax; this.fSigned=g.fSigned; this.Fdrive=g.Fdrive;
+    this.KE=g.KE; this.PE=g.PE; this.Q=g.Q; this.Etotal=g.Etotal; this.Wapp=g.Wapp;
+    this.guardLog.push({t:g.t,msg:'non-finite state restored'});
+    if(this.guardLog.length>100) this.guardLog.length=100;
+    if(this.onGuard) this.onGuard();
+  } else {
+    this.lastGood=this.snapshot();
+  }
+  if(this.v>100) this.v=100;
+  if(this.v<-100) this.v=-100;
+  if(this.s>50) this.s=50;
+  if(this.s<-50) this.s=-50;
+};
+PhysicsEngine.prototype.snapshot=function(){
+  return {
+    t:this.t, s:this.s, v:this.v, a:this.a, regime:this.regime,
+    N:this.N, fSMax:this.fSMax, fSigned:this.fSigned, Fdrive:this.Fdrive,
+    KE:this.KE, PE:this.PE, Q:this.Q, Wapp:this.Wapp, Etotal:this.Etotal,
+    E0:this.E0, driftPct:this.driftPct, heldByStop:this.heldByStop
+  };
+};
+PhysicsEngine.prototype.getState=function(){ return this.snapshot(); };
+
+// ═══════════════════════════════════════════════════════════════
+// 2. CAMERA
+// ═══════════════════════════════════════════════════════════════
+function Camera(canvas){
+  this.canvas=canvas;
+  this.zoom=1; this.scale=60; this.ox=0; this.oy=0;
+  this.panX=0; this.panY=0;
+  this.baseOx=0; this.baseOy=0;
+  this.cssW=800; this.cssH=500;
+  this.followBlock=false;
+}
+Camera.prototype.fit=function(engine){
+  var L=engine.L, th=engine.thetaRad();
+  var xMin=-1.2, xMax=L*Math.cos(th)+1.5;
+  var yMin=-0.8, yMax=Math.max(L*Math.sin(th)+1.8, 2.4);
+  var w=xMax-xMin, h=yMax-yMin;
+  this.scale=Math.min(this.cssW/w, this.cssH/h)*this.zoom;
+  this.baseOx=(this.cssW-w*this.scale)/2 - xMin*this.scale;
+  this.baseOy=(this.cssH-h*this.scale)/2 + yMax*this.scale;
+  this.updateOrigin(engine);
+};
+Camera.prototype.updateOrigin=function(engine){
+  if(this.followBlock && engine){
+    var th=engine.thetaRad();
+    var bx=engine.s*Math.cos(th), by=engine.s*Math.sin(th);
+    this.ox = this.cssW*0.42 - bx*this.scale + this.panX;
+    this.oy = this.cssH*0.62 + by*this.scale + this.panY;
+  } else {
+    this.ox = this.baseOx + this.panX;
+    this.oy = this.baseOy + this.panY;
+  }
+};
+Camera.prototype.X=function(x){ return this.ox+x*this.scale; };
+Camera.prototype.Y=function(y){ return this.oy-y*this.scale; };
+
+// ═══════════════════════════════════════════════════════════════
+// 3. RENDERER
+// ═══════════════════════════════════════════════════════════════
+function Renderer(canvas, engine, camera){
+  this.canvas=canvas;
+  this.ctx=canvas.getContext('2d');
+  this.engine=engine;
+  this.camera=camera;
+  this.dpr=1; this.cssW=800; this.cssH=500;
+  this.stars=[]; this.buildStars();
+  this.trail=[]; this.staticTime=0;
+  this.sparks=[];
+  this.smooth={v:0,a:0,f:0,fapp:0,N:0,mg:0,mgpar:0};
+  this.toggles={
+    vectors:true, forces:true, kinematics:false, sparks:true, values:true,
+    v:false, a:false, f:true, fapp:true, N:false, mg:false, mgpar:false,
+    normal:false, weight:false, friction:true, applied:true,
+    energy:true, gauge:true
+  };
+}
+Renderer.prototype.buildStars=function(){
+  var seed=20240517;
+  var rnd=function(){ seed=(seed*1664525+1013904223)>>>0; return seed/4294967296; };
+  for(var i=0;i<60;i++){
+    this.stars.push({x:rnd(), y:rnd()*0.72, r:0.3+rnd()*1.1, a:0.05+rnd()*0.10});
+  }
+};
+Renderer.prototype.resize=function(){
+  var rect=this.canvas.getBoundingClientRect();
+  this.dpr=Math.min(2, window.devicePixelRatio||1);
+  this.cssW=Math.max(320, rect.width);
+  this.cssH=Math.max(280, rect.height);
+  this.canvas.width=Math.round(this.cssW*this.dpr);
+  this.canvas.height=Math.round(this.cssH*this.dpr);
+  this.ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+  this.camera.cssW=this.cssW; this.camera.cssH=this.cssH;
+  this.camera.fit(this.engine);
+};
+Renderer.prototype.blockGeom=function(){
+  var e=this.engine, th=e.thetaRad();
+  var baseH=0.50;
+  var baseW=0.85;
+  var w=clamp(baseW*Math.sqrt(e.params.area/0.04), 0.45, 1.80);
+  var h=baseH;
+  var upx=Math.cos(th), upy=Math.sin(th);
+  var nx=-Math.sin(th), ny=Math.cos(th);
+  var bx=e.s*upx, by=e.s*upy;
+  var off=h/2+0.003;
+  return {w:w, h:h, th:th, cx:bx+nx*off, cy:by+ny*off};
+};
+Renderer.prototype.arrow=function(x0,y0,x1,y1,color,width,dash){
+  var ctx=this.ctx;
+  ctx.save();
+  ctx.strokeStyle=color; ctx.fillStyle=color;
+  ctx.lineWidth=width; ctx.lineCap='round'; ctx.lineJoin='round';
+  if(dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+  ctx.setLineDash([]);
+  var ang=Math.atan2(y1-y0,x1-x0);
+  var size=clamp(width*3.6, 8, 16);
+  ctx.beginPath();
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x1-size*Math.cos(ang-0.42), y1-size*Math.sin(ang-0.42));
+  ctx.lineTo(x1-size*Math.cos(ang+0.42), y1-size*Math.sin(ang+0.42));
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+};
+Renderer.prototype.label=function(text,x,y,color,align,baseline){
+  var ctx=this.ctx;
+  ctx.save();
+  ctx.font='600 11px ui-monospace, Menlo, Consolas, monospace';
+  align = align || 'left';
+  baseline = baseline || 'middle';
+  ctx.textAlign = align;
+  ctx.textBaseline = baseline;
+  var w=ctx.measureText(text).width;
+  var padX=5, padY=3;
+  var bx = x;
+  if(align==='left') bx = x - padX;
+  else if(align==='center') bx = x - w/2 - padX;
+  else if(align==='right') bx = x - w - padX;
+
+  var by = y - 9;
+  if(baseline==='bottom') by = y - 18;
+  else if(baseline==='top') by = y - 2;
+
+  ctx.fillStyle='rgba(8,8,22,0.90)';
+  ctx.strokeStyle=color ? color : 'rgba(255,255,255,0.25)';
+  ctx.lineWidth=1;
+  var boxW = w + padX*2;
+  var boxH = 18;
+  if(ctx.roundRect){
+    ctx.beginPath(); ctx.roundRect(bx, by, boxW, boxH, 4); ctx.fill(); ctx.stroke();
+  } else {
+    ctx.fillRect(bx, by, boxW, boxH); ctx.strokeRect(bx, by, boxW, boxH);
+  }
+  ctx.fillStyle=color;
+  ctx.fillText(text,x,y);
+  ctx.restore();
+};
+Renderer.prototype.draw=function(realDt){
+  var ctx=this.ctx, e=this.engine, cam=this.camera;
+  if(cam.updateOrigin) cam.updateOrigin(e);
+  var W=this.cssW, H=this.cssH;
+  // ---- background ----
+  var g=ctx.createRadialGradient(W*0.5,-H*0.2, 0, W*0.5, H*0.65, Math.max(W,H)*1.1);
+  g.addColorStop(0,'#161633'); g.addColorStop(1,'#090918');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  // ---- starfield ----
+  ctx.save();
+  for(var i=0;i<this.stars.length;i++){
+    var st=this.stars[i];
+    ctx.globalAlpha=st.a; ctx.fillStyle='#cfd8ff';
+    ctx.beginPath(); ctx.arc(st.x*W, st.y*H, st.r, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+
+  var gy=cam.Y(0);
+  // ---- realistic laboratory bench top ----
+  var benchGrad=ctx.createLinearGradient(0, gy, 0, gy+24);
+  benchGrad.addColorStop(0, '#262a36');
+  benchGrad.addColorStop(0.25, '#191c26');
+  benchGrad.addColorStop(1, '#0e1017');
+  ctx.fillStyle=benchGrad;
+  ctx.fillRect(0, gy, W, Math.max(20, H-gy));
+
+  // Beveled benchtop edge lip
+  ctx.strokeStyle='#525a70'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+  ctx.strokeStyle='#0f1118'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(0, gy+2.5); ctx.lineTo(W, gy+2.5); ctx.stroke();
+
+  // Bench support stanchions / hatchings
+  ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+  for(var gx=-1.8; gx<e.L+2.5; gx+=0.4){
+    var bpx=cam.X(gx);
+    ctx.beginPath(); ctx.moveTo(bpx, gy+3); ctx.lineTo(bpx-10, gy+22); ctx.stroke();
+  }
+
+  // ---- ramp geometry ----
+  var th=e.thetaRad();
+  var upx=Math.cos(th), upy=Math.sin(th);
+  var nx=-Math.sin(th), ny=Math.cos(th);
+  var tTrack=0.15; // physical track height in meters
+  var p0={x:0, y:0};
+  var p1={x:e.L*upx, y:e.L*upy};
+  var q0={x:p0.x-nx*tTrack, y:p0.y-ny*tTrack};
+  var q1={x:p1.x-nx*tTrack, y:p1.y-ny*tTrack};
+
+  // Support strut / scissor jack underneath ramp if elevated
+  if(e.params.theta>0.5){
+    var jackPosM=e.L*0.62;
+    var jackTopX=jackPosM*upx - nx*tTrack;
+    var jackTopY=jackPosM*upy - ny*tTrack;
+    var jtx=cam.X(jackTopX), jty=cam.Y(jackTopY);
+    var jbx=cam.X(jackTopX), jby=gy;
+
+    ctx.save();
+    // Telescoping hydraulic cylinder base
+    var cylGrad=ctx.createLinearGradient(jbx-9, 0, jbx+9, 0);
+    cylGrad.addColorStop(0, '#33384a'); cylGrad.addColorStop(0.5, '#5c647d'); cylGrad.addColorStop(1, '#202431');
+    ctx.fillStyle=cylGrad;
+    var midY=(jty+jby)*0.5;
+    ctx.fillRect(jbx-7, midY, 14, jby-midY);
+    ctx.strokeStyle='#7a85a3'; ctx.lineWidth=1; ctx.strokeRect(jbx-7, midY, 14, jby-midY);
+
+    // Chrome inner piston rod
+    var rodGrad=ctx.createLinearGradient(jbx-4, 0, jbx+4, 0);
+    rodGrad.addColorStop(0, '#b0b8c8'); rodGrad.addColorStop(0.5, '#ffffff'); rodGrad.addColorStop(1, '#828a9b');
+    ctx.fillStyle=rodGrad;
+    ctx.fillRect(jbx-4, jty+8, 8, midY-jty-8);
+
+    // Knuckle swivel hinge at track underside
+    ctx.fillStyle='#3b4155';
+    ctx.beginPath(); ctx.arc(jtx, jty+5, 6, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle='#e0e6ed';
+    ctx.beginPath(); ctx.arc(jtx, jty+5, 2.5, 0, Math.PI*2); ctx.fill();
+
+    // Base flange bolted to bench
+    ctx.fillStyle='#1e212b';
+    ctx.fillRect(jbx-14, jby-4, 28, 6);
+    ctx.strokeStyle='#5a637a'; ctx.lineWidth=1; ctx.strokeRect(jbx-14, jby-4, 28, 6);
+    ctx.restore();
+  }
+
+  // ---- extruded aluminum track profile ----
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(cam.X(p0.x), cam.Y(p0.y));
+  ctx.lineTo(cam.X(p1.x), cam.Y(p1.y));
+  ctx.lineTo(cam.X(q1.x), cam.Y(q1.y));
+  ctx.lineTo(cam.X(q0.x), cam.Y(q0.y));
+  ctx.closePath();
+
+  // Anodized metallic aluminum gradient
+  var trackGrad=ctx.createLinearGradient(cam.X(p0.x), cam.Y(p0.y), cam.X(q0.x), cam.Y(q0.y));
+  trackGrad.addColorStop(0, '#3b4156');
+  trackGrad.addColorStop(0.2, '#4d556e');
+  trackGrad.addColorStop(0.55, '#2e3344');
+  trackGrad.addColorStop(0.85, '#202432');
+  trackGrad.addColorStop(1, '#151722');
+  ctx.fillStyle=trackGrad; ctx.fill();
+  ctx.strokeStyle='#5c6580'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Recessed anodized side T-slot channel
+  var tSlotFrac=0.48;
+  var s0x=p0.x-nx*tTrack*tSlotFrac, s0y=p0.y-ny*tTrack*tSlotFrac;
+  var s1x=p1.x-nx*tTrack*tSlotFrac, s1y=p1.y-ny*tTrack*tSlotFrac;
+  ctx.strokeStyle='#11131b'; ctx.lineWidth=5;
+  ctx.beginPath(); ctx.moveTo(cam.X(s0x), cam.Y(s0y)); ctx.lineTo(cam.X(s1x), cam.Y(s1y)); ctx.stroke();
+  ctx.strokeStyle='rgba(255,255,255,0.22)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(cam.X(s0x), cam.Y(s0y)+2.5); ctx.lineTo(cam.X(s1x), cam.Y(s1y)+2.5); ctx.stroke();
+
+  // Polished guide rail top surface
+  ctx.strokeStyle='#7985a6'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(cam.X(p0.x), cam.Y(p0.y)); ctx.lineTo(cam.X(p1.x), cam.Y(p1.y)); ctx.stroke();
+  ctx.strokeStyle='#c2ccdf'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(cam.X(p0.x), cam.Y(p0.y)); ctx.lineTo(cam.X(p1.x), cam.Y(p1.y)); ctx.stroke();
+
+  // Precision metric ruler graduations (every 0.1m tick, labeled every 1.0m)
+  ctx.save();
+  for(var rm=0.1; rm<=e.L; rm+=0.1){
+    var isMajor=(Math.round(rm*10)%10===0);
+    var isHalf=(Math.round(rm*10)%5===0 && !isMajor);
+    var tickLen = isMajor ? 0.055 : (isHalf ? 0.035 : 0.022);
+    var rtx=rm*upx, rty=rm*upy;
+    var sx0=cam.X(rtx), sy0=cam.Y(rty);
+    var sx1=cam.X(rtx - nx*tickLen), sy1=cam.Y(rty - ny*tickLen);
+
+    ctx.strokeStyle = isMajor ? '#00e5ff' : 'rgba(255,255,255,0.38)';
+    ctx.lineWidth = isMajor ? 1.5 : 0.8;
+    ctx.beginPath(); ctx.moveTo(sx0, sy0); ctx.lineTo(sx1, sy1); ctx.stroke();
+
+    if(isMajor && rm < e.L){
+      ctx.fillStyle='#a5b4d4';
+      ctx.font='700 9px ui-monospace, Menlo, monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      var lblX=cam.X(rtx - nx*0.085), lblY=cam.Y(rty - ny*0.085);
+      ctx.fillText(rm.toFixed(0)+'m', lblX, lblY);
+    }
+  }
+  ctx.restore();
+
+  // Rubberized shock bumper stop at bottom (s=0)
+  var bumpW=0.06;
+  var bp0x=-upx*bumpW, bp0y=-upy*bumpW;
+  var bq0x=bp0x+nx*0.06, bq0y=bp0y+ny*0.06;
+  ctx.fillStyle='#ff3344';
+  ctx.beginPath();
+  ctx.moveTo(cam.X(bp0x), cam.Y(bp0y));
+  ctx.lineTo(cam.X(bq0x), cam.Y(bq0y));
+  ctx.lineTo(cam.X(bq0x+nx*0.05), cam.Y(bq0y+ny*0.05));
+  ctx.lineTo(cam.X(bp0x-nx*tTrack), cam.Y(bp0y-ny*tTrack));
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=1; ctx.stroke();
+
+  // End stop bumper at top of track (s=L)
+  var topBx=e.L*upx, topBy=e.L*upy;
+  var topStopW=0.05;
+  ctx.fillStyle='#2a2e3d';
+  ctx.strokeStyle='#58617d'; ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(cam.X(topBx), cam.Y(topBy));
+  ctx.lineTo(cam.X(topBx + upx*topStopW), cam.Y(topBy + upy*topStopW));
+  ctx.lineTo(cam.X(topBx + upx*topStopW - nx*tTrack), cam.Y(topBy + upy*topStopW - ny*tTrack));
+  ctx.lineTo(cam.X(topBx - nx*tTrack), cam.Y(topBy - ny*tTrack));
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  // Red shock buffer facing inward
+  ctx.fillStyle='#ff3344';
+  ctx.beginPath();
+  ctx.moveTo(cam.X(topBx), cam.Y(topBy));
+  ctx.lineTo(cam.X(topBx - nx*0.06), cam.Y(topBy - ny*0.06));
+  ctx.lineTo(cam.X(topBx - upx*0.025 - nx*0.06), cam.Y(topBy - upy*0.025 - ny*0.06));
+  ctx.lineTo(cam.X(topBx - upx*0.025), cam.Y(topBy - upy*0.025));
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+
+  // ---- pivot bracket assembly at base (0,0) ----
+  ctx.save();
+  var pivX=cam.X(0), pivY=cam.Y(0);
+  // Cast steel bracket base
+  ctx.fillStyle='#2a2e3d';
+  ctx.beginPath();
+  ctx.moveTo(pivX-16, gy);
+  ctx.lineTo(pivX-12, pivY-2);
+  ctx.lineTo(pivX+14, pivY-2);
+  ctx.lineTo(pivX+18, gy);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle='#58617d'; ctx.lineWidth=1.5; ctx.stroke();
+
+  // Pivot axle concentric pin & bronze bushing
+  ctx.fillStyle='#a67c38';
+  ctx.beginPath(); ctx.arc(pivX, pivY, 7.5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#363b4d';
+  ctx.beginPath(); ctx.arc(pivX, pivY, 4.5, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle='#c8d4e6';
+  ctx.beginPath(); ctx.arc(pivX-1.5, pivY-1.5, 1.8, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // ---- angle protractor dial ----
+  if(e.params.theta>0.5){
+    ctx.save();
+    var arcR=0.75*cam.scale;
+    ctx.strokeStyle='rgba(0,229,255,0.30)'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    ctx.arc(pivX, pivY, arcR, -th, 0, false);
+    ctx.stroke();
+
+    // Protractor tick marks
+    for(var at=0; at<=th; at+=Math.PI/36){
+      var ax0=pivX + Math.cos(-at)*(arcR-4);
+      var ay0=pivY + Math.sin(-at)*(arcR-4);
+      var ax1=pivX + Math.cos(-at)*(arcR+4);
+      var ay1=pivY + Math.sin(-at)*(arcR+4);
+      ctx.strokeStyle='rgba(0,229,255,0.45)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(ax0, ay0); ctx.lineTo(ax1, ay1); ctx.stroke();
+    }
+
+    // High-visibility badge
+    var midAngle = -th*0.5;
+    var badgeX = pivX + Math.cos(midAngle)*(arcR + 16);
+    var badgeY = pivY + Math.sin(midAngle)*(arcR + 16);
+    this.label('θ = '+e.params.theta.toFixed(1)+'°', badgeX, badgeY, '#00e5ff', 'center', 'middle');
+    ctx.restore();
+  }
+
+
+
+  // ---- block geometry ----
+  var gm=this.blockGeom();
+
+  // ---- trail ----
+  var moving=Math.abs(e.v)>0.02;
+  if(moving){
+    this.trail.push({x:cam.X(gm.cx), y:cam.Y(gm.cy)});
+    if(this.trail.length>MAX_TRAIL) this.trail=this.trail.slice(this.trail.length-MAX_TRAIL);
+    this.staticTime=0;
+  } else {
+    this.staticTime+=realDt;
+    if(this.staticTime>1.0 && this.trail.length) this.trail.length=0;
+  }
+  ctx.save();
+  for(var k=0;k<this.trail.length;k++){
+    var pt=this.trail[k];
+    ctx.globalAlpha=(k/this.trail.length)*0.6;
+    ctx.fillStyle='#a855f7';
+    ctx.beginPath(); ctx.arc(pt.x,pt.y,2.4,0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+
+  // ---- contact friction sparks ----
+  if(e.regime==='KINETIC' && moving && Math.random()<0.35){
+    var bcx_t=cam.X(gm.cx), bcy_t=cam.Y(gm.cy);
+    var pw_t=gm.w*cam.scale, ph_t=gm.h*cam.scale;
+    var normScrX=-Math.sin(gm.th), normScrY=-Math.cos(gm.th);
+    var planeScrX=Math.cos(gm.th), planeScrY=-Math.sin(gm.th);
+    var contactX=bcx_t - normScrX*(ph_t/2) + planeScrX*(Math.random()-0.5)*pw_t*0.7;
+    var contactY=bcy_t - normScrY*(ph_t/2) + planeScrY*(Math.random()-0.5)*pw_t*0.7;
+    this.sparks.push({
+      x:contactX, y:contactY,
+      vx:(Math.random()-0.5)*35 - planeScrX*Math.sign(e.v)*25,
+      vy:-Math.random()*25 + (Math.random()-0.5)*15,
+      life:0.28, maxLife:0.28,
+      color:Math.random()<0.6?'#ffb300':'#ff3d71'
+    });
+  }
+  for(var si=this.sparks.length-1; si>=0; si--){
+    var sp=this.sparks[si];
+    sp.life -= realDt;
+    if(sp.life<=0){ this.sparks.splice(si,1); continue; }
+    sp.x += sp.vx*realDt; sp.y += sp.vy*realDt;
+    var alpha=sp.life/sp.maxLife;
+    ctx.save();
+    ctx.globalAlpha=alpha; ctx.fillStyle=sp.color; ctx.shadowColor=sp.color; ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.arc(sp.x, sp.y, 2.2, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  // Draw enhanced realistic block
+  this.drawBlock(gm);
+  // ---- vectors (clutter-free 4-quadrant layout with toggles) ----
+  this.drawVectors(gm);
+  // ---- energy bar (toggleable) ----
+  if(this.toggles.energy!==false) this.drawEnergyBar();
+  // ---- friction budget gauge (toggleable) ----
+  if(this.toggles.gauge!==false) this.drawGauge();
+  // ---- regime badge ----
+  this.drawBadge();
+};
+Renderer.prototype.drawBlock=function(gm){
+  var ctx=this.ctx, e=this.engine, cam=this.camera;
+  var bcx=cam.X(gm.cx), bcy=cam.Y(gm.cy);
+  var pw=gm.w*cam.scale, ph=gm.h*cam.scale;
+  var r=Math.min(8, ph*0.16);
+
+  ctx.save();
+  ctx.translate(bcx,bcy);
+  ctx.rotate(-gm.th);
+
+  // Helper for rounded rect path
+  function roundPath(x,y,w,h,rad){
+    ctx.beginPath();
+    if(ctx.roundRect){
+      ctx.roundRect(x,y,w,h,rad);
+    } else {
+      ctx.rect(x,y,w,h);
+    }
+  }
+
+  // 1. Soft contact shadow onto ramp
+  ctx.save();
+  var shadowGrad=ctx.createLinearGradient(0, ph/2-2, 0, ph/2+7);
+  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.65)');
+  shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle=shadowGrad;
+  ctx.fillRect(-pw/2+5, ph/2, pw-10, 7);
+  ctx.restore();
+
+  // 2. Material-specific realistic block body
+  roundPath(-pw/2, -ph/2, pw, ph, r);
+  var pName=e.presetName;
+
+  if(pName==='Wood on wood'){
+    var wg=ctx.createLinearGradient(-pw/2, -ph/2, -pw/2, ph/2);
+    wg.addColorStop(0, '#be8e56');
+    wg.addColorStop(0.5, '#996937');
+    wg.addColorStop(1, '#744a20');
+    ctx.fillStyle=wg; ctx.fill();
+
+    ctx.save();
+    ctx.clip();
+    ctx.strokeStyle='rgba(45,20,5,0.22)';
+    ctx.lineWidth=1.5;
+    for(var gy=-ph/2+6; gy<ph/2; gy+=8){
+      ctx.beginPath();
+      ctx.moveTo(-pw/2, gy);
+      ctx.bezierCurveTo(-pw/4, gy+3, pw/4, gy-3, pw/2, gy+1);
+      ctx.stroke();
+    }
+    ctx.strokeStyle='rgba(255,225,180,0.12)';
+    ctx.lineWidth=1;
+    for(var gy2=-ph/2+10; gy2<ph/2; gy2+=8){
+      ctx.beginPath(); ctx.moveTo(-pw/2, gy2); ctx.lineTo(pw/2, gy2); ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.strokeStyle='#dcb07b'; ctx.lineWidth=2;
+    roundPath(-pw/2, -ph/2, pw, ph, r); ctx.stroke();
+
+  } else if(pName==='Steel on steel (dry)'){
+    var sg=ctx.createLinearGradient(-pw/2, -ph/2, pw/2, ph/2);
+    sg.addColorStop(0, '#90a4ae');
+    sg.addColorStop(0.35, '#cfd8dc');
+    sg.addColorStop(0.55, '#78909c');
+    sg.addColorStop(1, '#546e7a');
+    ctx.fillStyle=sg; ctx.fill();
+
+    ctx.save();
+    ctx.clip();
+    ctx.strokeStyle='rgba(255,255,255,0.18)';
+    ctx.lineWidth=1;
+    for(var bx=-pw-ph; bx<pw+ph; bx+=7){
+      ctx.beginPath(); ctx.moveTo(bx, -ph/2); ctx.lineTo(bx+ph*0.8, ph/2); ctx.stroke();
+    }
+    var rivet=function(rx, ry){
+      ctx.fillStyle='#37474f';
+      ctx.beginPath(); ctx.arc(rx, ry, 2.8, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle='rgba(255,255,255,0.7)';
+      ctx.beginPath(); ctx.arc(rx-0.8, ry-0.8, 1.1, 0, Math.PI*2); ctx.fill();
+    };
+    rivet(-pw/2+11, -ph/2+11); rivet(pw/2-11, -ph/2+11);
+    rivet(-pw/2+11, ph/2-11); rivet(pw/2-11, ph/2-11);
+    ctx.restore();
+
+    ctx.strokeStyle='#eceff1'; ctx.lineWidth=2;
+    roundPath(-pw/2, -ph/2, pw, ph, r); ctx.stroke();
+
+  } else if(pName==='Rubber on dry concrete'){
+    var rg=ctx.createLinearGradient(-pw/2, -ph/2, -pw/2, ph/2);
+    rg.addColorStop(0, '#ff5252');
+    rg.addColorStop(0.35, '#d32f2f');
+    rg.addColorStop(1, '#8b0000');
+    ctx.fillStyle=rg; ctx.fill();
+
+    ctx.save();
+    ctx.clip();
+    ctx.strokeStyle='rgba(0,0,0,0.38)';
+    ctx.lineWidth=2.5;
+    for(var tx=-pw/2+14; tx<pw/2-8; tx+=16){
+      ctx.beginPath();
+      ctx.moveTo(tx, -ph/2+5);
+      ctx.lineTo(tx+6, 0);
+      ctx.lineTo(tx, ph/2-5);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.strokeStyle='#ff8a80'; ctx.lineWidth=2;
+    roundPath(-pw/2, -ph/2, pw, ph, r); ctx.stroke();
+
+  } else if(pName==='Glass on glass'){
+    var gg=ctx.createLinearGradient(-pw/2, -ph/2, pw/2, ph/2);
+    gg.addColorStop(0, 'rgba(178,235,242,0.65)');
+    gg.addColorStop(0.4, 'rgba(77,208,225,0.40)');
+    gg.addColorStop(0.7, 'rgba(0,188,212,0.55)');
+    gg.addColorStop(1, 'rgba(0,131,143,0.70)');
+    ctx.fillStyle=gg; ctx.fill();
+
+    ctx.save();
+    ctx.clip();
+    var flare=ctx.createLinearGradient(-pw/2, -ph/2, pw/2, ph/2);
+    flare.addColorStop(0.28, 'rgba(255,255,255,0)');
+    flare.addColorStop(0.48, 'rgba(255,255,255,0.45)');
+    flare.addColorStop(0.52, 'rgba(255,255,255,0.45)');
+    flare.addColorStop(0.72, 'rgba(255,255,255,0)');
+    ctx.fillStyle=flare; ctx.fillRect(-pw/2, -ph/2, pw, ph);
+    ctx.restore();
+
+    ctx.strokeStyle='#e0f7fa'; ctx.lineWidth=2;
+    roundPath(-pw/2, -ph/2, pw, ph, r); ctx.stroke();
+
+  } else if(pName==='Waxed ski on snow'){
+    var wg2=ctx.createLinearGradient(-pw/2, -ph/2, -pw/2, ph/2);
+    wg2.addColorStop(0, '#ffffff');
+    wg2.addColorStop(0.55, '#e1f5fe');
+    wg2.addColorStop(1, '#b3e5fc');
+    ctx.fillStyle=wg2; ctx.fill();
+
+    ctx.save();
+    ctx.clip();
+    ctx.fillStyle='#ff1744'; ctx.fillRect(-pw/2+12, -ph/2, 6, ph);
+    ctx.fillStyle='#2979ff'; ctx.fillRect(-pw/2+21, -ph/2, 6, ph);
+    ctx.restore();
+
+    ctx.strokeStyle='#80d8ff'; ctx.lineWidth=2;
+    roundPath(-pw/2, -ph/2, pw, ph, r); ctx.stroke();
+
+  } else if(pName==='Teflon on steel'){
+    var tg=ctx.createLinearGradient(-pw/2, -ph/2, pw/2, ph/2);
+    tg.addColorStop(0, '#80cbc4');
+    tg.addColorStop(0.5, '#26a69a');
+    tg.addColorStop(1, '#00695c');
+    ctx.fillStyle=tg; ctx.fill();
+
+    ctx.strokeStyle='#b2dfdb'; ctx.lineWidth=2;
+    roundPath(-pw/2, -ph/2, pw, ph, r); ctx.stroke();
+
+  } else {
+    var cg=ctx.createLinearGradient(-pw/2, -ph/2, -pw/2, ph/2);
+    cg.addColorStop(0, shade(e.blockColor, 0.25));
+    cg.addColorStop(1, shade(e.blockColor, -0.45));
+    ctx.fillStyle=cg; ctx.fill();
+
+    ctx.strokeStyle=e.blockColor; ctx.lineWidth=2;
+    roundPath(-pw/2, -ph/2, pw, ph, r); ctx.stroke();
+  }
+
+  // 3. Contact pad along bottom edge
+  ctx.save();
+  var padH=Math.max(5, ph*0.12);
+  var padColor = (e.regime==='STATIC') ? '#39ff88' : ((e.regime==='KINETIC') ? '#ff2d95' : '#8a8ab8');
+  ctx.fillStyle=padColor;
+  ctx.globalAlpha=0.75;
+  ctx.fillRect(-pw/2+4, ph/2-padH, pw-8, padH);
+  ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=1;
+  for(var px=-pw/2+8; px<pw/2-8; px+=7){
+    ctx.beginPath(); ctx.moveTo(px, ph/2-padH); ctx.lineTo(px, ph/2); ctx.stroke();
+  }
+  ctx.restore();
+
+  // 4. Center of Mass Reticle
+  ctx.save();
+  var cr=Math.min(9, ph*0.20);
+  ctx.strokeStyle='rgba(255,255,255,0.45)'; ctx.lineWidth=1;
+  ctx.beginPath();
+  ctx.moveTo(-cr-4, 0); ctx.lineTo(cr+4, 0);
+  ctx.moveTo(0, -cr-4); ctx.lineTo(0, cr+4);
+  ctx.stroke();
+  ctx.beginPath(); ctx.arc(0, 0, cr, 0, Math.PI*2);
+  ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.75)';
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0, 0, cr, 0, Math.PI/2); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0, 0, cr, Math.PI, Math.PI*1.5); ctx.closePath(); ctx.fill();
+  ctx.restore();
+
+  // 5. Sleek Mass Badge Label
+  ctx.save();
+  var labelText = e.params.m.toFixed(1) + ' kg';
+  ctx.font = '700 12px ui-monospace, Menlo, Consolas, monospace';
+  var tw = ctx.measureText(labelText).width;
+  var bw = tw + 14, bh = 18;
+  var byPos = (ph > 42) ? (-ph/2 + bh/2 + 5) : 0;
+  ctx.fillStyle = 'rgba(10, 10, 24, 0.78)';
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+  ctx.lineWidth = 1;
+  roundPath(-bw/2, byPos - bh/2, bw, bh, 4);
+  ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(labelText, 0, byPos + 0.5);
+  ctx.restore();
+
+  ctx.restore();
+};
+Renderer.prototype.drawVectors=function(gm){
+  var ctx=this.ctx, e=this.engine, cam=this.camera;
+  if(this.toggles && this.toggles.vectors === false) return;
+
+  var cx=cam.X(gm.cx), cy=cam.Y(gm.cy);
+  var pw=gm.w*cam.scale, ph=gm.h*cam.scale;
+  var th=gm.th;
+  var upx=Math.cos(th), upy=-Math.sin(th);          // screen dir: up the plane
+  var nrmx=-Math.sin(th), nrmy=-Math.cos(th);       // screen dir: outward normal
+  var p=e.params;
+  var showVal=(this.toggles.values !== false);
+  var showForces=(this.toggles.forces !== false);
+  var showKinematics=(this.toggles.kinematics !== false);
+
+  // 1. Normal force N: originates from TOP surface of block, points outward along normal
+  var drawN = showForces && (this.toggles.N !== false) && (this.toggles.normal !== false);
+  if(drawN){
+    var lenN = Math.min(160, Math.max(38, Math.abs(e.N)*3.2));
+    var nStartX = cx + nrmx*(ph/2);
+    var nStartY = cy + nrmy*(ph/2);
+    var nEndX = nStartX + nrmx*lenN;
+    var nEndY = nStartY + nrmy*lenN;
+    this.arrow(nStartX, nStartY, nEndX, nEndY, '#39ff88', 3.0, null);
+    var nTxt = showVal ? 'N = '+e.N.toFixed(1)+' N' : 'N';
+    this.label(nTxt, nEndX + nrmx*8, nEndY + nrmy*8, '#39ff88', 'center', 'bottom');
+  }
+
+  // 2. Weight mg: originates from Center of Mass, points straight down
+  var drawMg = showForces && (this.toggles.mg !== false) && (this.toggles.weight !== false);
+  if(drawMg){
+    var lenMg = Math.min(160, Math.max(38, (p.m*p.g)*3.2));
+    var mgEndY = cy + lenMg;
+    this.arrow(cx, cy, cx, mgEndY, '#b388ff', 3.0, null);
+    var mgTxt = showVal ? 'mg = '+(p.m*p.g).toFixed(1)+' N' : 'mg';
+    this.label(mgTxt, cx, mgEndY + 8, '#b388ff', 'center', 'top');
+  }
+
+  // 3. Parallel gravity component: mg sin θ along the incline
+  var drawMgPar = showForces && (this.toggles.mgpar !== false);
+  if(drawMgPar){
+    var magMgPar = p.m*p.g*Math.sin(th);
+    var lenMgPar = Math.min(160, Math.max(32, Math.abs(magMgPar)*3.2));
+    var gparStartX = cx - nrmx*(ph/2 - 6);
+    var gparStartY = cy - nrmy*(ph/2 - 6);
+    var gparEndX = gparStartX - upx*lenMgPar;
+    var gparEndY = gparStartY - upy*lenMgPar;
+    this.arrow(gparStartX, gparStartY, gparEndX, gparEndY, '#7c5cff', 2.2, [4,3]);
+    var gparTxt = showVal ? 'mg sinθ = '+magMgPar.toFixed(1)+' N' : 'mg sinθ';
+    this.label(gparTxt, gparEndX - upx*8, gparEndY - upy*8, '#7c5cff', 'right', 'middle');
+  }
+
+  // 4. Friction force f: along bottom contact pad interface
+  var drawF = showForces && (this.toggles.f !== false) && (this.toggles.friction !== false);
+  if(drawF){
+    var sF = e.fSigned >= 0 ? 1 : -1;
+    var magF = Math.abs(e.fSigned);
+    var lenF = Math.min(160, Math.max(34, magF*3.2));
+    var fStartX = cx - nrmx*(ph/2);
+    var fStartY = cy - nrmy*(ph/2);
+    var fEndX = fStartX + upx*(sF * lenF);
+    var fEndY = fStartY + upy*(sF * lenF);
+    this.arrow(fStartX, fStartY, fEndX, fEndY, '#ffb300', 3.8, null);
+    var fTxt = showVal ? 'f = '+magF.toFixed(1)+' N' : 'f';
+    var fAlign = (sF > 0) ? 'left' : 'right';
+    var fLblX = fEndX + upx*(sF*8);
+    var fLblY = fEndY + upy*(sF*8) + nrmy*8;
+    if(sF < 0 && fLblX < 70){
+      fAlign = 'left';
+      fLblX = fEndX + 6;
+    }
+    this.label(fTxt, fLblX, fLblY, '#ffb300', fAlign, 'middle');
+  }
+
+  // 5. Applied force F_app: originates from FRONT eyelet hitch on block
+  var drawFapp = showForces && (this.toggles.fapp !== false) && (this.toggles.applied !== false);
+  if(drawFapp){
+    var lenFapp = Math.min(160, Math.max(34, p.Fapp*3.2));
+    var appStartX = cx + upx*(pw/2);
+    var appStartY = cy + upy*(pw/2);
+    var appEndX = appStartX + upx*lenFapp;
+    var appEndY = appStartY + upy*lenFapp;
+    this.arrow(appStartX, appStartY, appEndX, appEndY, '#ff6d00', 3.2, null);
+    var appTxt = showVal ? 'F_app = '+p.Fapp.toFixed(1)+' N' : 'F_app';
+    this.label(appTxt, appEndX + upx*8, appEndY + upy*8, '#ff6d00', 'left', 'middle');
+  }
+
+  // 6. Kinematic lane indicators: Velocity v and Acceleration a
+  var drawV = showKinematics && (this.toggles.v !== false);
+  var drawA = showKinematics && (this.toggles.a !== false);
+  if(drawV || drawA){
+    var laneYOffset = ph/2 + 42;
+    var leadX0 = cx + nrmx*(ph/2);
+    var leadY0 = cy + nrmy*(ph/2);
+    var leadX1 = cx + nrmx*laneYOffset;
+    var leadY1 = cy + nrmy*laneYOffset;
+    ctx.save();
+    ctx.strokeStyle='rgba(255,255,255,0.22)'; ctx.setLineDash([2,4]); ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(leadX0, leadY0); ctx.lineTo(leadX1, leadY1); ctx.stroke();
+    ctx.restore();
+
+    if(drawV){
+      var sV = e.v >= 0 ? 1 : -1;
+      var lenV = Math.min(150, Math.max(32, Math.abs(e.v)*24));
+      var vEndX = leadX1 + upx*(sV * lenV);
+      var vEndY = leadY1 + upy*(sV * lenV);
+      this.arrow(leadX1, leadY1, vEndX, vEndY, '#00e5ff', 2.8, null);
+      var vTxt = showVal ? 'v = '+e.v.toFixed(2)+' m/s' : 'v';
+      var vAlign = (sV > 0) ? 'left' : 'right';
+      this.label(vTxt, vEndX + upx*(sV*8), vEndY + upy*(sV*8), '#00e5ff', vAlign, 'middle');
+    }
+
+    if(drawA){
+      var aLaneOffset = laneYOffset + 24;
+      var aLeadX1 = cx + nrmx*aLaneOffset;
+      var aLeadY1 = cy + nrmy*aLaneOffset;
+      var sA = e.a >= 0 ? 1 : -1;
+      var lenA = Math.min(150, Math.max(32, Math.abs(e.a)*24));
+      var aEndX = aLeadX1 + upx*(sA * lenA);
+      var aEndY = aLeadY1 + upy*(sA * lenA);
+      this.arrow(aLeadX1, aLeadY1, aEndX, aEndY, '#ff2d95', 2.8, null);
+      var aTxt = showVal ? 'a = '+e.a.toFixed(2)+' m/s²' : 'a';
+      var aAlign = (sA > 0) ? 'left' : 'right';
+      this.label(aTxt, aEndX + upx*(sA*8), aEndY + upy*(sA*8), '#ff2d95', aAlign, 'middle');
+    }
+  }
+};
+Renderer.prototype.drawEnergyBar=function(){
+  var ctx=this.ctx, e=this.engine;
+  var W=this.cssW, H=this.cssH;
+  var barW=34, barX=W-barW-16, barY=20, barH=H-40;
+  var total=Math.max(e.Etotal, 1);
+  ctx.save();
+  ctx.fillStyle='rgba(255,255,255,0.05)';
+  ctx.fillRect(barX,barY,barW,barH);
+  var segs=[{v:e.KE,c:'#00e5ff',n:'KE'},{v:e.PE,c:'#ffb300',n:'PE'},{v:e.Q,c:'#ff3d71',n:'Q'}];
+  var y=barY+barH;
+  for(var i=0;i<segs.length;i++){
+    var h=(segs[i].v/total)*barH;
+    if(h<=0) continue;
+    ctx.fillStyle=segs[i].c;
+    ctx.fillRect(barX, y-h, barW, h);
+    if(h>16){
+      ctx.fillStyle='#06121c';
+      ctx.font='9px ui-monospace, Menlo, monospace';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(segs[i].v.toFixed(1), barX+barW/2, y-h/2);
+    }
+    y-=h;
+  }
+  ctx.strokeStyle='#e0e0ff'; ctx.lineWidth=2;
+  ctx.strokeRect(barX,barY,barW,barH);
+  ctx.fillStyle='#8a8ab8';
+  ctx.font='9px ui-monospace, Menlo, monospace';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText('ENERGY (J)', barX+barW/2, barY-4);
+  ctx.restore();
+};
+Renderer.prototype.drawGauge=function(){
+  var ctx=this.ctx, e=this.engine;
+  var W=this.cssW, H=this.cssH;
+  var gw=Math.min(260, W*0.42), gx=(W-gw)/2, gy=H-30, gh=13;
+  var frac = e.fSMax>0 ? clamp(Math.abs(e.fSigned)/e.fSMax, 0, 1) : 0;
+  ctx.save();
+  ctx.fillStyle='rgba(255,255,255,0.08)';
+  ctx.fillRect(gx,gy,gw,gh);
+  ctx.fillStyle=lerpHex('#ffb300','#ff3d00',frac);
+  ctx.fillRect(gx,gy,gw*frac,gh);
+  ctx.strokeStyle='rgba(255,255,255,0.35)'; ctx.lineWidth=1;
+  ctx.strokeRect(gx,gy,gw,gh);
+  // breakaway tick
+  ctx.strokeStyle='#ff2d95'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(gx+gw,gy-5); ctx.lineTo(gx+gw,gy+gh+5); ctx.stroke();
+  ctx.fillStyle='#e0e0ff';
+  ctx.font='10px ui-monospace, Menlo, monospace';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText('FRICTION BUDGET  |f| / f_s,max = '+frac.toFixed(2)+'   ▲ breakaway', gx+gw/2, gy-8);
+  ctx.restore();
+};
+Renderer.prototype.drawBadge=function(){
+  var ctx=this.ctx, e=this.engine;
+  var colors={AT_REST:'#8a8ab8', STATIC:'#39ff88', KINETIC:'#ff2d95'};
+  var txt=e.regime + (e.heldByStop ? ' (end stop)' : '');
+  ctx.save();
+  ctx.font='700 12px ui-monospace, Menlo, monospace';
+  var w=ctx.measureText(txt).width+26;
+  ctx.fillStyle='rgba(10,10,26,0.8)';
+  ctx.strokeStyle=colors[e.regime]; ctx.lineWidth=1.5;
+  var x=16,y=16,h=26;
+  ctx.beginPath(); ctx.rect(x,y,w,h); ctx.fill(); ctx.stroke();
+  ctx.fillStyle=colors[e.regime];
+  ctx.textAlign='left'; ctx.textBaseline='middle';
+  ctx.fillText(txt, x+13, y+h/2+1);
+  ctx.restore();
+};
+
+// ═══════════════════════════════════════════════════════════════
+// 4. UI CONTROLS
+// ═══════════════════════════════════════════════════════════════
+function UIControls(engine, camera, renderer, history, exporter){
+  this.engine=engine; this.camera=camera; this.renderer=renderer;
+  this.history=history; this.exporter=exporter;
+  this.canvas=document.getElementById('mainCanvas');
+  this.paused=false; this.stepOnce=false; this.frameCount=0;
+  this.last=performance.now();
+  this.charts=null; this.chartsReady=false;
+  this.currentQ=0;
+  this.toggles=this.renderer.toggles;
+  this.timeWindow=10;
+  this.buildPresets();
+  this.buildSliders();
+  this.buildReadouts();
+  this.bindTabs();
+  this.bindButtons();
+  this.bindToggles();
+  this.bindDaqToolbar();
+  this.bindKeys();
+  this.bindCanvas();
+  this.buildAssessment();
+  this.resize();
+  var self=this;
+  if(window.ResizeObserver){
+    new ResizeObserver(function(){ self.resize(); }).observe(this.canvas);
+  } else {
+    window.addEventListener('resize', function(){ self.resize(); });
+  }
+  requestAnimationFrame(this.frame.bind(this));
+}
+UIControls.prototype.bindToggles=function(){
+  var self=this;
+  // Clickable pills below the viewport
+  var pills=document.querySelectorAll('.leg-pill[data-toggle]');
+  Array.prototype.forEach.call(pills, function(pill){
+    pill.addEventListener('click', function(ev){
+      ev.preventDefault();
+      var key=pill.dataset.toggle;
+      if(!key) return;
+      var current = self.toggles[key] !== false;
+      var next = !current;
+      self.toggles[key] = next;
+
+      // Sync aliases
+      if(key==='N'){ self.toggles.normal = next; }
+      if(key==='normal'){ self.toggles.N = next; }
+      if(key==='mg'){ self.toggles.weight = next; }
+      if(key==='weight'){ self.toggles.mg = next; }
+      if(key==='f'){ self.toggles.friction = next; }
+      if(key==='friction'){ self.toggles.f = next; }
+      if(key==='fapp'){ self.toggles.applied = next; }
+      if(key==='applied'){ self.toggles.fapp = next; }
+
+      // If turning ON any force vector, ensure master forces category is active
+      if(next && (key==='N'||key==='mg'||key==='f'||key==='fapp'||key==='mgpar'||key==='normal'||key==='weight'||key==='friction'||key==='applied')){
+        self.toggles.forces = true;
+        var chkF=document.getElementById('chkForces');
+        if(chkF) chkF.checked = true;
+      }
+      // If turning ON any kinematic vector, ensure master kinematics category is active
+      if(next && (key==='v'||key==='a')){
+        self.toggles.kinematics = true;
+        var chkK=document.getElementById('chkKinematics');
+        if(chkK) chkK.checked = true;
+      }
+
+      if(next){
+        pill.classList.add('active');
+        pill.classList.remove('inactive');
+      } else {
+        pill.classList.remove('active');
+        pill.classList.add('inactive');
+      }
+
+      // Mirror to sidebar checkbox if values
+      if(key==='values'){
+        var chkVal=document.getElementById('chkValues');
+        if(chkVal) chkVal.checked = next;
+      }
+    });
+  });
+
+  // Sidebar overlay checkboxes
+  var chkForces=document.getElementById('chkForces');
+  if(chkForces){
+    chkForces.addEventListener('change', function(){
+      self.toggles.forces = chkForces.checked;
+      var forceKeys=['N','mg','f','fapp','mgpar'];
+      forceKeys.forEach(function(k){
+        self.toggles[k] = chkForces.checked;
+        if(k==='N') self.toggles.normal = chkForces.checked;
+        if(k==='mg') self.toggles.weight = chkForces.checked;
+        if(k==='f') self.toggles.friction = chkForces.checked;
+        if(k==='fapp') self.toggles.applied = chkForces.checked;
+        var p=document.querySelector('.leg-pill[data-toggle="'+k+'"]');
+        if(p){
+          if(chkForces.checked){ p.classList.add('active'); p.classList.remove('inactive'); }
+          else { p.classList.remove('active'); p.classList.add('inactive'); }
+        }
+      });
+    });
+  }
+  var chkKinematics=document.getElementById('chkKinematics');
+  if(chkKinematics){
+    chkKinematics.addEventListener('change', function(){
+      self.toggles.kinematics = chkKinematics.checked;
+      var kinKeys=['v','a'];
+      kinKeys.forEach(function(k){
+        self.toggles[k] = chkKinematics.checked;
+        var p=document.querySelector('.leg-pill[data-toggle="'+k+'"]');
+        if(p){
+          if(chkKinematics.checked){ p.classList.add('active'); p.classList.remove('inactive'); }
+          else { p.classList.remove('active'); p.classList.add('inactive'); }
+        }
+      });
+    });
+  }
+  var chkValues=document.getElementById('chkValues');
+  if(chkValues){
+    chkValues.addEventListener('change', function(){
+      self.toggles.values = chkValues.checked;
+      var pill=document.querySelector('.leg-pill[data-toggle="values"]');
+      if(pill){
+        if(chkValues.checked){ pill.classList.add('active'); pill.classList.remove('inactive'); }
+        else { pill.classList.remove('active'); pill.classList.add('inactive'); }
+      }
+    });
+  }
+  var chkSparks=document.getElementById('chkSparks');
+  if(chkSparks){
+    chkSparks.addEventListener('change', function(){
+      self.toggles.sparks = chkSparks.checked;
+    });
+  }
+
+  // Camera buttons in legend bar
+  var btnFollow=document.getElementById('btnFollowBlock');
+  if(btnFollow){
+    btnFollow.addEventListener('click', function(ev){
+      ev.preventDefault();
+      self.camera.followBlock = !self.camera.followBlock;
+      if(self.camera.followBlock){
+        btnFollow.classList.add('active');
+        btnFollow.classList.remove('inactive');
+      } else {
+        btnFollow.classList.remove('active');
+        btnFollow.classList.remove('inactive');
+      }
+    });
+  }
+  var btnFit=document.getElementById('btnFitTrack');
+  if(btnFit){
+    btnFit.addEventListener('click', function(ev){
+      ev.preventDefault();
+      self.camera.panX = 0;
+      self.camera.panY = 0;
+      self.camera.zoom = 1;
+      self.camera.followBlock = false;
+      if(btnFollow) btnFollow.classList.remove('active');
+      self.camera.fit(self.engine);
+    });
+  }
+};
+UIControls.prototype.bindDaqToolbar=function(){
+  var self=this;
+  // Time window buttons (5s, 10s, 30s, All)
+  var winBtns=document.querySelectorAll('.daq-win-btn[data-win], .daq-btn[data-win]');
+  Array.prototype.forEach.call(winBtns, function(btn){
+    btn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      Array.prototype.forEach.call(winBtns, function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      self.timeWindow = Number(btn.dataset.win);
+      self.updateCharts();
+    });
+  });
+
+  // Graph visibility toggles
+  var graphPills=document.querySelectorAll('.daq-graph-pill');
+  Array.prototype.forEach.call(graphPills, function(pill){
+    pill.addEventListener('click', function(ev){
+      ev.preventDefault();
+      var gKey=pill.dataset.graph;
+      var card=document.getElementById('card-graph-'+gKey);
+      if(!card) return;
+      var isVisible = (card.style.display !== 'none');
+      if(isVisible){
+        var visibleCount=0;
+        Array.prototype.forEach.call(document.querySelectorAll('.graph-card'), function(c){
+          if(c.style.display !== 'none') visibleCount++;
+        });
+        if(visibleCount <= 1){
+          showToast('At least one graph must remain visible.');
+          return;
+        }
+        card.style.display = 'none';
+        pill.classList.remove('active');
+        pill.classList.add('inactive');
+      } else {
+        card.style.display = 'block';
+        pill.classList.add('active');
+        pill.classList.remove('inactive');
+      }
+      self.updateGraphLayout();
+    });
+  });
+
+  // Trace clear button
+  var clrBtn=document.getElementById('clearChartBtn') || document.getElementById('clearDataBtn');
+  if(clrBtn){
+    clrBtn.addEventListener('click', function(ev){
+      ev.preventDefault();
+      self.history.clear();
+      if(self.chartsReady && self.charts){
+        for(var k in self.charts){
+          if(self.charts[k]) self.charts[k].update('none');
+        }
+      }
+      self.updateCharts();
+      showToast('DAQ traces cleared.');
+    });
+  }
+};
+UIControls.prototype.updateGraphLayout=function(){
+  var cards=document.querySelectorAll('.graph-card');
+  var visibleList=[];
+  Array.prototype.forEach.call(cards, function(c){
+    if(c.style.display !== 'none') visibleList.push(c);
+  });
+  if(visibleList.length === 1){
+    visibleList[0].classList.add('single-showcase');
+  } else {
+    visibleList.forEach(function(c){ c.classList.remove('single-showcase'); });
+  }
+  if(this.chartsReady && this.charts){
+    for(var k in this.charts){
+      if(this.charts[k]) this.charts[k].resize();
+    }
+  }
+};
+UIControls.prototype.resize=function(){
+  this.renderer.resize();
+  if(this.chartsReady){
+    for(var k in this.charts){ this.charts[k].resize(); }
+  }
+};
+UIControls.prototype.buildPresets=function(){
+  var sel=document.getElementById('presetSelect');
+  var self=this;
+  PRESETS.forEach(function(p){
+    var o=document.createElement('option');
+    o.value=p.name; o.textContent=p.name;
+    sel.appendChild(o);
+  });
+  sel.value=this.engine.presetName;
+  sel.addEventListener('change', function(){
+    var p=null;
+    for(var i=0;i<PRESETS.length;i++){ if(PRESETS[i].name===sel.value) p=PRESETS[i]; }
+    if(!p) return;
+    self.engine.presetName=p.name;
+    self.engine.blockColor=p.color;
+    if(p.mus!==null){
+      self.engine.params.mus=p.mus;
+      self.engine.params.muk=p.muk;
+      self.engine.computeForces();
+      self.syncSliders();
+      if(self.chartsReady) self.updateCharts();
+    }
+  });
+};
+UIControls.prototype.buildSliders=function(){
+  var host=document.getElementById('sliderHost');
+  var self=this;
+  SLIDERS.forEach(function(cfg){
+    var wrap=document.createElement('div');
+    wrap.className='control';
+    var lab=document.createElement('label');
+    lab.setAttribute('for','sl_'+cfg.key);
+    var nameSpan=document.createElement('span');
+    nameSpan.textContent=cfg.label+' ('+cfg.symbol+')';
+    var valSpan=document.createElement('span');
+    valSpan.className='value'; valSpan.id='val_'+cfg.key;
+    lab.appendChild(nameSpan); lab.appendChild(valSpan);
+    var inp=document.createElement('input');
+    inp.type='range'; inp.id='sl_'+cfg.key;
+    inp.min=cfg.min; inp.max=cfg.max; inp.step=cfg.step; inp.value=cfg.def;
+    inp.dataset.key=cfg.key;
+    wrap.appendChild(lab); wrap.appendChild(inp);
+    host.appendChild(wrap);
+    function paint(){
+      var pct=( (inp.value-cfg.min)/(cfg.max-cfg.min) )*100;
+      inp.style.setProperty('--p', pct+'%');
+      var unit=cfg.unit?' '+cfg.unit:'';
+      valSpan.textContent=cfg.symbol+' = '+Number(inp.value).toFixed(cfg.step<1?2:0)+unit;
+    }
+    inp.addEventListener('input', function(){
+      self.engine.params[cfg.key]=Number(inp.value);
+      if(cfg.key==='mus' || cfg.key==='muk'){ self.enforceMuOrder(cfg.key); }
+      if(cfg.key!=='tau'){ self.engine.presetName='Custom (sliders)'; document.getElementById('presetSelect').value='Custom (sliders)'; }
+      if(cfg.key==='theta'){ self.camera.fit(self.engine); }
+      self.engine.computeForces();
+      if(self.chartsReady) self.updateCharts();
+      paint();
+    });
+    inp.addEventListener('dblclick', function(){
+      inp.value=cfg.def;
+      self.engine.params[cfg.key]=cfg.def;
+      if(cfg.key==='mus'||cfg.key==='muk') self.enforceMuOrder(cfg.key);
+      if(cfg.key==='theta') self.camera.fit(self.engine);
+      self.engine.computeForces();
+      if(self.chartsReady) self.updateCharts();
+      paint();
+    });
+    paint();
+  });
+};
+UIControls.prototype.enforceMuOrder=function(changed){
+  var p=this.engine.params;
+  if(p.muk>p.mus+1e-9){
+    if(changed==='muk'){ p.muk=p.mus; }
+    else { p.muk=p.mus; }
+    showToast('Physically, μk ≤ μs. Clamped.');
+    this.syncSliders();
+  }
+};
+UIControls.prototype.syncSliders=function(){
+  var self=this;
+  SLIDERS.forEach(function(cfg){
+    var inp=document.getElementById('sl_'+cfg.key);
+    if(!inp) return;
+    inp.value=self.engine.params[cfg.key];
+    var pct=((inp.value-cfg.min)/(cfg.max-cfg.min))*100;
+    inp.style.setProperty('--p', pct+'%');
+    var unit=cfg.unit?' '+cfg.unit:'';
+    document.getElementById('val_'+cfg.key).textContent=cfg.symbol+' = '+Number(inp.value).toFixed(cfg.step<1?2:0)+unit;
+  });
+};
+UIControls.prototype.buildReadouts=function(){
+  var host=document.getElementById('readoutGrid');
+  var self=this;
+  READOUTS.forEach(function(r){
+    var d=document.createElement('div');
+    var b=document.createElement('b');
+    b.textContent=r.label+(r.unit?' ('+r.unit+')':'');
+    var s=document.createElement('span');
+    s.className='zero';
+    d.appendChild(b); d.appendChild(s);
+    host.appendChild(d);
+    r.el=s;
+  });
+};
+UIControls.prototype.updateHud=function(){
+  var e=this.engine;
+  for(var i=0;i<READOUTS.length;i++){
+    var r=READOUTS[i];
+    var v=r.get(e);
+    r.el.textContent=fmt(v,r.dec);
+    if(v>1e-9) { r.el.className='pos'; }
+    else if(v<-1e-9){ r.el.className='neg'; }
+    else { r.el.className='zero'; }
+  }
+  var badge=document.getElementById('regimeBadge');
+  badge.textContent=e.regime+(e.heldByStop?' (end stop)':'');
+  badge.className='regime-badge regime-'+e.regime;
+  var dr=document.getElementById('driftReadout');
+  if(dr) dr.textContent='ΔE = '+e.driftPct.toFixed(3)+' %';
+};
+UIControls.prototype.bindTabs=function(){
+  var self=this;
+  var btns=document.querySelectorAll('.tab-btn');
+  Array.prototype.forEach.call(btns, function(b){
+    b.addEventListener('click', function(){
+      Array.prototype.forEach.call(btns, function(x){ x.classList.remove('active'); });
+      b.classList.add('active');
+      var panels=document.querySelectorAll('.tab-panel');
+      Array.prototype.forEach.call(panels, function(p){ p.classList.remove('active'); });
+      document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+      if(b.dataset.tab==='graphs'){
+        self.initCharts();
+        self.updateGraphLayout();
+        self.resize();
+      }
+    });
+  });
+};
+UIControls.prototype.bindButtons=function(){
+  var self=this;
+  document.getElementById('playBtn').addEventListener('click', function(){
+    self.paused=!self.paused;
+    this.textContent=self.paused?'Resume':'Pause';
+  });
+  document.getElementById('stepBtn').addEventListener('click', function(){
+    self.paused=true;
+    document.getElementById('playBtn').textContent='Resume';
+    self.stepOnce=true;
+  });
+  document.getElementById('resetBtn').addEventListener('click', function(){ self.resetAll(); });
+  document.getElementById('snapshotBtn').addEventListener('click', function(){ self.exporter.snapshotPNG(); });
+  document.getElementById('saveJsonBtn').addEventListener('click', function(){ self.exporter.saveJSON(); });
+  document.getElementById('loadJsonBtn').addEventListener('click', function(){ document.getElementById('configFileInput').click(); });
+  document.getElementById('exportDocxBtn').addEventListener('click', function(){
+    self.exporter.exportDocx();
+  });
+  this.engine.onGuard=function(){
+    var b=document.getElementById('guardBanner');
+    b.classList.add('show');
+    window.setTimeout(function(){ b.classList.remove('show'); }, 3000);
+  };
+};
+UIControls.prototype.bindKeys=function(ev){
+  var self=this;
+  window.addEventListener('keydown', function(ev){
+    var t=ev.target;
+    if(t && (t.tagName==='TEXTAREA'||t.tagName==='INPUT'||t.tagName==='SELECT')) return;
+    if(ev.code==='Space'){
+      ev.preventDefault();
+      self.paused=!self.paused;
+      document.getElementById('playBtn').textContent=self.paused?'Resume':'Pause';
+    } else if(ev.key==='.'){
+      self.paused=true;
+      document.getElementById('playBtn').textContent='Resume';
+      self.stepOnce=true;
+    } else if(ev.key==='r'||ev.key==='R'){
+      self.resetAll();
+    }
+  });
+};
+UIControls.prototype.bindCanvas=function(){
+  var self=this;
+  var isDragging = false;
+  var startX = 0, startY = 0;
+  var startPanX = 0, startPanY = 0;
+
+  this.canvas.addEventListener('wheel', function(ev){
+    ev.preventDefault();
+    var f=ev.deltaY<0?1.08:1/1.08;
+    self.camera.zoom=clamp(self.camera.zoom*f, 0.5, 3.0);
+    self.camera.fit(self.engine);
+  }, {passive:false});
+
+  this.canvas.addEventListener('mousedown', function(ev){
+    isDragging = true;
+    startX = ev.clientX;
+    startY = ev.clientY;
+    startPanX = self.camera.panX;
+    startPanY = self.camera.panY;
+    self.camera.followBlock = false;
+    var btnFollow = document.getElementById('btnFollowBlock');
+    if(btnFollow) btnFollow.classList.remove('active');
+    self.canvas.style.cursor = 'grabbing';
+  });
+
+  window.addEventListener('mousemove', function(ev){
+    if(!isDragging) return;
+    var dx = ev.clientX - startX;
+    var dy = ev.clientY - startY;
+    self.camera.panX = startPanX + dx;
+    self.camera.panY = startPanY + dy;
+  });
+
+  window.addEventListener('mouseup', function(){
+    if(isDragging){
+      isDragging = false;
+      self.canvas.style.cursor = 'crosshair';
+    }
+  });
+
+  // Touch pan support for tablet / mobile
+  this.canvas.addEventListener('touchstart', function(ev){
+    if(ev.touches.length === 1){
+      isDragging = true;
+      startX = ev.touches[0].clientX;
+      startY = ev.touches[0].clientY;
+      startPanX = self.camera.panX;
+      startPanY = self.camera.panY;
+      self.camera.followBlock = false;
+      var btnFollow = document.getElementById('btnFollowBlock');
+      if(btnFollow) btnFollow.classList.remove('active');
+    }
+  }, {passive:true});
+
+  window.addEventListener('touchmove', function(ev){
+    if(!isDragging || ev.touches.length !== 1) return;
+    var dx = ev.touches[0].clientX - startX;
+    var dy = ev.touches[0].clientY - startY;
+    self.camera.panX = startPanX + dx;
+    self.camera.panY = startPanY + dy;
+  }, {passive:true});
+
+  window.addEventListener('touchend', function(){
+    isDragging = false;
+  });
+
+  // Double click canvas to reset camera view
+  this.canvas.addEventListener('dblclick', function(ev){
+    ev.preventDefault();
+    self.camera.panX = 0;
+    self.camera.panY = 0;
+    self.camera.zoom = 1;
+    self.camera.followBlock = false;
+    var btnFollow = document.getElementById('btnFollowBlock');
+    if(btnFollow) btnFollow.classList.remove('active');
+    self.camera.fit(self.engine);
+  });
+};
+UIControls.prototype.resetAll=function(){
+  this.engine.reset();
+  this.history.clear();
+  this.renderer.trail.length=0;
+  this.renderer.sparks.length=0;
+  this.camera.zoom=1;
+  this.camera.panX=0;
+  this.camera.panY=0;
+  this.camera.followBlock=false;
+  var btnFollow = document.getElementById('btnFollowBlock');
+  if(btnFollow) btnFollow.classList.remove('active');
+  this.camera.fit(this.engine);
+  this.syncSliders();
+  if(this.chartsReady){
+    for(var k in this.charts){ this.charts[k].update('none'); }
+  }
+  this.updateHud();
+};
+UIControls.prototype.frame=function(now){
+  var realDt=Math.min((now-this.last)/1000, 0.016);
+  this.last=now;
+  if(!this.paused || this.stepOnce){
+    var scaled=realDt*this.engine.params.tau;
+    var nSub=clamp(Math.round(scaled/H_SUB), 1, 8);
+    for(var i=0;i<nSub;i++){ this.engine.step(H_SUB); }
+    this.stepOnce=false;
+    this.frameCount++;
+    if(this.frameCount%RECORD_EVERY===0){
+      this.history.record(this.engine);
+      this.updateCharts();
+    }
+  }
+  this.renderer.draw(realDt);
+  this.updateHud();
+  requestAnimationFrame(this.frame.bind(this));
+};
+// Helper for generating theoretical AP Physics f vs F_app characteristic curve
+function getFrictionTheoryCurve(engine, maxF){
+  var p=engine.params, th=engine.thetaRad();
+  var N=p.m*p.g*Math.cos(th);
+  var FgPar=p.m*p.g*Math.sin(th);
+  var fsmax=p.mus*N;
+  var fk=p.muk*N;
+  var maxFapp=Math.max(30, maxF || 30);
+  var pts=[];
+  var Fbreak=Math.max(0, fsmax + FgPar);
+  var steps=30;
+  for(var i=0; i<=steps; i++){
+    var F=(i/steps)*Fbreak;
+    var fVal=Math.min(fsmax, Math.abs(F - FgPar));
+    pts.push({x: Number(F.toFixed(2)), y: Number(fVal.toFixed(2))});
+  }
+  // Sudden drop to kinetic friction at breakaway
+  pts.push({x: Number((Fbreak + 0.05).toFixed(2)), y: Number(fk.toFixed(2))});
+  // Kinetic plateau across rest of applied force range
+  pts.push({x: Number(maxFapp.toFixed(2)), y: Number(fk.toFixed(2))});
+  return pts;
+}
+
+UIControls.prototype.initCharts=function(){
+  if(this.chartsReady) return;
+  if(!window.Chart){ document.getElementById('chartFallback').style.display='block'; return; }
+  var L=this.history;
+  var gridColor='#1e2238', tickColor='#8a95b8', legendColor='#e0e6ff';
+  function baseOpts(yLabel,y1Label,stacked){
+    var sc={
+      x:{type:'linear', min:0, max:10, title:{display:true,text:'t (s)',color:tickColor,font:{weight:'bold'}}, ticks:{color:tickColor}, grid:{color:gridColor}},
+      y:{position:'left', stacked:!!stacked, title:{display:true,text:yLabel,color:tickColor,font:{weight:'bold'}}, ticks:{color:tickColor}, grid:{color:gridColor}}
+    };
+    if(y1Label){
+      sc.y1={position:'right', stacked:false, title:{display:true,text:y1Label,color:tickColor,font:{weight:'bold'}}, ticks:{color:tickColor}, grid:{drawOnChartArea:false}};
+    }
+    return {
+      animation:false, responsive:true, maintainAspectRatio:false, parsing:false, normalized:true,
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{labels:{color:legendColor, boxWidth:12, font:{size:11}}},
+        tooltip:{backgroundColor:'rgba(12,14,28,0.92)', borderColor:'#384166', borderWidth:1, padding:8}
+      },
+      scales:sc
+    };
+  }
+  function ds(label,data,color,extra){
+    var o={label:label, data:data, borderColor:color, backgroundColor:color,
+           pointRadius:0, borderWidth:2.2, tension:0.25, cubicInterpolationMode:'monotone', spanGaps:false};
+    if(extra){ for(var k in extra){ o[k]=extra[k]; } }
+    return o;
+  }
+
+  var initMaxF=Math.max(30, Math.ceil((this.engine.params.Fapp+8)/10)*10);
+  var initFsmax=this.engine.fSMax;
+  var initFk=this.engine.params.muk*this.engine.N;
+
+  this.charts={
+    // FIRST GRAPH: Force of Friction vs Applied Force (f vs F_app)
+    fvsfapp: new Chart(document.getElementById('chartFvsFapp'), {
+      type: 'line',
+      data: {
+        datasets: [
+          {
+            label: 'Theoretical f(F_app)',
+            data: getFrictionTheoryCurve(this.engine, initMaxF),
+            borderColor: '#7c5cff',
+            backgroundColor: 'transparent',
+            borderWidth: 2,
+            borderDash: [6, 4],
+            pointRadius: 0,
+            tension: 0,
+            parsing: false,
+            normalized: true
+          },
+          {
+            label: 'f_s,max (Breakaway)',
+            data: [{x:0, y:initFsmax}, {x:initMaxF, y:initFsmax}],
+            borderColor: '#ff6d00',
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            borderDash: [4, 4],
+            pointRadius: 0,
+            tension: 0,
+            parsing: false,
+            normalized: true
+          },
+          {
+            label: 'f_k (Kinetic Level)',
+            data: [{x:0, y:initFk}, {x:initMaxF, y:initFk}],
+            borderColor: '#ff2d95',
+            backgroundColor: 'transparent',
+            borderWidth: 1.5,
+            borderDash: [2, 3],
+            pointRadius: 0,
+            tension: 0,
+            parsing: false,
+            normalized: true
+          },
+          {
+            label: 'Measured |f| (N)',
+            data: L.pts.fVsFapp,
+            borderColor: '#ffb300',
+            backgroundColor: 'rgba(255,179,0,0.15)',
+            borderWidth: 2.2,
+            pointRadius: 2.5,
+            pointHoverRadius: 4,
+            tension: 0.1,
+            showLine: true,
+            parsing: false,
+            normalized: true
+          },
+          {
+            label: 'Live Operating Point',
+            data: [{x: this.engine.params.Fapp, y: Math.abs(this.engine.fSigned)}],
+            borderColor: '#ffffff',
+            backgroundColor: '#00e5ff',
+            pointRadius: 7,
+            pointHoverRadius: 9,
+            pointBorderWidth: 2.5,
+            showLine: false,
+            parsing: false,
+            normalized: true
+          }
+        ]
+      },
+      options: {
+        animation: false, responsive: true, maintainAspectRatio: false, parsing: false, normalized: true,
+        interaction: {mode: 'nearest', intersect: false},
+        plugins: {
+          legend: {labels: {color: legendColor, boxWidth: 12, font: {size: 11}}},
+          tooltip: {
+            backgroundColor: 'rgba(12,14,28,0.92)', borderColor: '#384166', borderWidth: 1, padding: 8,
+            callbacks: {
+              label: function(ctx){
+                return ctx.dataset.label + ': (' + ctx.parsed.x.toFixed(1) + ' N, ' + ctx.parsed.y.toFixed(2) + ' N)';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'linear', min: 0, max: initMaxF,
+            title: {display: true, text: 'Applied Force F_app (N)', color: tickColor, font: {weight: 'bold'}},
+            ticks: {color: tickColor}, grid: {color: gridColor}
+          },
+          y: {
+            type: 'linear', min: 0, max: Math.max(20, Math.ceil(initFsmax*1.35)),
+            title: {display: true, text: 'Friction Force |f| (N)', color: tickColor, font: {weight: 'bold'}},
+            ticks: {color: tickColor}, grid: {color: gridColor}
+          }
+        }
+      }
+    }),
+    pos:new Chart(document.getElementById('chartPos'), {
+      type:'line',
+      data:{datasets:[
+        ds('s (m)', L.pts.s, '#00e5ff', {yAxisID:'y'}),
+        ds('v (m/s)', L.pts.v, '#39ff88', {yAxisID:'y1'})
+      ]},
+      options:baseOpts('s (m)','v (m/s)',false)
+    }),
+    force:new Chart(document.getElementById('chartForce'), {
+      type:'line',
+      data:{datasets:[
+        ds('v (m/s)', L.pts.v, '#39ff88', {yAxisID:'y'}),
+        ds('a (m/s²)', L.pts.a, '#ff2d95', {yAxisID:'y'}),
+        ds('f (N)', L.pts.f, '#ffb300', {yAxisID:'y1'}),
+        ds('f_s,max (N)', L.pts.fsmax, '#ff6d00', {yAxisID:'y1', borderDash:[6,4]}),
+        ds('F_drive (N)', L.pts.fdrive, '#b388ff', {yAxisID:'y1', borderDash:[2,3]})
+      ]},
+      options:baseOpts('v, a','Force (N)',false)
+    }),
+    energy:new Chart(document.getElementById('chartEnergy'), {
+      type:'line',
+      data:{datasets:[
+        ds('KE (J)', L.pts.KE, '#00e5ff', {fill:'origin', backgroundColor:'rgba(0,229,255,0.35)'}),
+        ds('PE (J)', L.pts.PE, '#ffb300', {fill:'origin', backgroundColor:'rgba(255,179,0,0.35)'}),
+        ds('Q_thermal (J)', L.pts.Q, '#ff3d71', {fill:'origin', backgroundColor:'rgba(255,61,113,0.35)'}),
+        ds('E_total (J)', L.pts.Etotal, '#e0e0ff', {fill:false, backgroundColor:'transparent', borderDash:[8,4], borderWidth:1.6})
+      ]},
+      options:baseOpts('Energy (J)',null,true)
+    })
+  };
+  this.chartsReady=true;
+};
+UIControls.prototype.updateCharts=function(){
+  if(!this.chartsReady) return;
+  var tNow=this.engine.t;
+  var xmin=0, xmax=10;
+  if(this.timeWindow>0){
+    xmax=Math.max(this.timeWindow, tNow);
+    xmin=Math.max(0, xmax-this.timeWindow);
+  } else {
+    xmin=0;
+    xmax=Math.max(10, Math.ceil(tNow));
+  }
+
+  // Time-based charts (pos, force, energy)
+  var timeCharts=['pos', 'force', 'energy'];
+  for(var i=0; i<timeCharts.length; i++){
+    var c=this.charts[timeCharts[i]];
+    if(c){
+      c.options.scales.x.min=xmin;
+      c.options.scales.x.max=xmax;
+      c.update('none');
+    }
+  }
+
+  // FIRST GRAPH: Force of Friction vs Applied Force (f vs F_app)
+  if(this.charts.fvsfapp){
+    var curFapp=this.engine.params.Fapp;
+    var maxF=Math.max(30, Math.ceil((curFapp+8)/10)*10);
+    var fsmax=this.engine.fSMax;
+    var fk=this.engine.params.muk*this.engine.N;
+    var curF=Math.abs(this.engine.fSigned);
+
+    this.charts.fvsfapp.options.scales.x.max=maxF;
+    this.charts.fvsfapp.options.scales.y.max=Math.max(20, Math.ceil(Math.max(fsmax, curF)*1.35));
+
+    this.charts.fvsfapp.data.datasets[0].data = getFrictionTheoryCurve(this.engine, maxF);
+    this.charts.fvsfapp.data.datasets[1].data = [{x:0, y:fsmax}, {x:maxF, y:fsmax}];
+    this.charts.fvsfapp.data.datasets[2].data = [{x:0, y:fk}, {x:maxF, y:fk}];
+    this.charts.fvsfapp.data.datasets[4].data = [{x: curFapp, y: curF}];
+
+    this.charts.fvsfapp.update('none');
+  }
+
+  // Update live telemetry badges in graph card headers
+  var elFvsFapp=document.getElementById('telemFvsFapp');
+  if(elFvsFapp){
+    elFvsFapp.textContent='|f|: '+Math.abs(this.engine.fSigned).toFixed(2)+' N · F_app: '+this.engine.params.Fapp.toFixed(1)+' N · fs,max: '+this.engine.fSMax.toFixed(2)+' N';
+  }
+  var elPos=document.getElementById('telemPos');
+  if(elPos){
+    elPos.textContent='s: '+this.engine.s.toFixed(2)+' m | v: '+this.engine.v.toFixed(2)+' m/s';
+  }
+  var elForce=document.getElementById('telemForce');
+  if(elForce){
+    elForce.textContent='f: '+this.engine.fSigned.toFixed(2)+' N | a: '+this.engine.a.toFixed(2)+' m/s²';
+  }
+  var elEnergy=document.getElementById('telemEnergy');
+  if(elEnergy){
+    elEnergy.textContent='KE: '+this.engine.KE.toFixed(1)+' J | PE: '+this.engine.PE.toFixed(1)+' J | Q: '+this.engine.Q.toFixed(1)+' J';
+  }
+};
+// ---- Assessment ----
+UIControls.prototype.buildAssessment=function(){
+  var self=this;
+  var host=document.getElementById('assessQuestions');
+  QUESTIONS.forEach(function(q,i){
+    var div=document.createElement('div');
+    div.className='assess-question';
+    div.setAttribute('data-correct', q.correct);
+    div.setAttribute('data-phase', q.phase);
+    div.setAttribute('data-index', String(i));
+    var badge=document.createElement('span');
+    badge.className='phase-badge phase-'+q.phase.toLowerCase();
+    badge.textContent=q.phase;
+    var h=document.createElement('h3');
+    h.textContent='Question '+(i+1)+' of 10';
+    if(q.points){
+      var pts=document.createElement('span');
+      pts.className='q-points'; pts.textContent=q.points+' pts';
+      h.appendChild(pts);
+    }
+    var p=document.createElement('p');
+    p.className='q-prompt'; p.textContent=q.prompt;
+    var ta=document.createElement('textarea');
+    ta.className='answer-area'; ta.placeholder='Type your answer here...';
+    ta.setAttribute('data-answer', String(i));
+    ta.addEventListener('input', function(){ self.updateDots(); });
+    div.appendChild(badge); div.appendChild(h); div.appendChild(p); div.appendChild(ta);
+    host.appendChild(div);
+  });
+  // dots
+  var dots=document.getElementById('qDots');
+  for(var d=0;d<10;d++){
+    var s=document.createElement('span');
+    s.className='q-dot'; s.setAttribute('data-dot', String(d));
+    dots.appendChild(s);
+  }
+  var slider=document.getElementById('qSlider');
+  slider.addEventListener('input', function(){ self.showQuestion(Number(slider.value)-1); });
+  document.getElementById('prevQ').addEventListener('click', function(){
+    self.showQuestion((self.currentQ+9)%10);
+  });
+  document.getElementById('nextQ').addEventListener('click', function(){
+    self.showQuestion((self.currentQ+1)%10);
+  });
+  this.showQuestion(0);
+};
+UIControls.prototype.showQuestion=function(i){
+  this.currentQ=i;
+  var cards=document.querySelectorAll('.assess-question');
+  Array.prototype.forEach.call(cards, function(c,idx){ c.classList.toggle('active', idx===i); });
+  document.getElementById('qSlider').value=String(i+1);
+  document.getElementById('qCounter').textContent=(i+1)+' / 10';
+  this.updateDots();
+};
+UIControls.prototype.updateDots=function(){
+  var dots=document.querySelectorAll('.q-dot');
+  Array.prototype.forEach.call(dots, function(d,idx){
+    var ta=document.querySelector('textarea[data-answer="'+idx+'"]');
+    var answered=ta && ta.value.trim().length>0;
+    d.classList.toggle('answered', !!answered);
+    d.classList.toggle('current', idx===this_current());
+  }, this);
+  function this_current(){ return null; }
+  // (current ring handled below without bind ambiguity)
+  var self=this;
+  Array.prototype.forEach.call(dots, function(d,idx){
+    d.classList.toggle('current', idx===self.currentQ);
+  });
+  var count=0;
+  for(var i=0;i<10;i++){
+    var t=document.querySelector('textarea[data-answer="'+i+'"]');
+    if(t && t.value.trim().length>0) count++;
+  }
+  document.getElementById('answeredCount').textContent=count+' of 10 questions answered';
+};
+
+// ═══════════════════════════════════════════════════════════════
+// 5. CHART HISTORY (INTERNAL BUFFER FOR GRAPHS)
+// ═══════════════════════════════════════════════════════════════
+function ChartHistory(){
+  this.clear();
+}
+ChartHistory.prototype.clear=function(){
+  if(this.pts){
+    for(var k in this.pts){
+      if(Array.isArray(this.pts[k])){
+        this.pts[k].length = 0;
+      }
+    }
+  } else {
+    this.pts={s:[], v:[], a:[], f:[], fsmax:[], fdrive:[], KE:[], PE:[], Q:[], Etotal:[], fVsFapp:[]};
+  }
+};
+ChartHistory.prototype.record=function(engine){
+  var st=engine.getState();
+  var t=st.t;
+  this.pts.s.push({x:t, y:st.s});
+  this.pts.v.push({x:t, y:st.v});
+  this.pts.a.push({x:t, y:st.a});
+  this.pts.f.push({x:t, y:st.fSigned});
+  this.pts.fsmax.push({x:t, y:st.fSMax});
+  this.pts.fdrive.push({x:t, y:st.Fdrive});
+  this.pts.KE.push({x:t, y:st.KE});
+  this.pts.PE.push({x:t, y:st.PE});
+  this.pts.Q.push({x:t, y:st.Q});
+  this.pts.Etotal.push({x:t, y:st.Etotal});
+
+  var curFapp=Number(engine.params.Fapp.toFixed(2));
+  var curF=Number(Math.abs(st.fSigned).toFixed(2));
+  var fLen=this.pts.fVsFapp.length;
+  var last=fLen>0 ? this.pts.fVsFapp[fLen-1] : null;
+  if(!last || Math.abs(last.x-curFapp)>0.05 || Math.abs(last.y-curF)>0.05){
+    this.pts.fVsFapp.push({x:curFapp, y:curF});
+    if(this.pts.fVsFapp.length>600) this.pts.fVsFapp.shift();
+  }
+
+  if(this.pts.s.length > 2500){
+    for(var k in this.pts){
+      if(k!=='fVsFapp') this.pts[k].shift();
+    }
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// 6. EXPORT MANAGER
+// ═══════════════════════════════════════════════════════════════
+function ExportManager(engine, history, canvas, ui){
+  this.engine=engine; this.history=history; this.canvas=canvas; this.ui=ui;
+}
+ExportManager.prototype.snapshotPNG=function(){
+  var self=this;
+  if(!this.canvas.toBlob){ showToast('Canvas snapshot is not supported in this browser.'); return; }
+  this.canvas.toBlob(function(blob){
+    if(!blob){ showToast('Snapshot failed.'); return; }
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='friction_force_explorer_snapshot.png';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    showToast('Snapshot saved as PNG.');
+  }, 'image/png');
+};
+ExportManager.prototype.saveJSON=function(){
+  var cfg={
+    simulation:'Friction Force Explorer by Mr. F — AP Physics 1',
+    version:1,
+    params:this.engine.params,
+    preset:this.engine.presetName,
+    cameraZoom:this.ui.camera.zoom,
+    savedAt:new Date().toISOString()
+  };
+  var blob=new Blob([JSON.stringify(cfg,null,2)], {type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='friction_force_explorer_config.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  showToast('Configuration saved as JSON.');
+};
+ExportManager.prototype.loadJSON=function(file){
+  var self=this;
+  var reader=new FileReader();
+  reader.onload=function(){
+    try{
+      var cfg=JSON.parse(reader.result);
+      if(cfg.params){
+        for(var k in cfg.params){
+          if(Object.prototype.hasOwnProperty.call(self.engine.params,k)) self.engine.params[k]=cfg.params[k];
+        }
+      }
+      if(cfg.preset) self.engine.presetName=cfg.preset;
+      if(typeof cfg.cameraZoom==='number') self.ui.camera.zoom=clamp(cfg.cameraZoom,0.6,2.2);
+      self.ui.enforceMuOrder('mus');
+      self.ui.syncSliders();
+      self.ui.camera.fit(self.engine);
+      showToast('Configuration loaded.');
+    }catch(e){
+      showToast('Could not read that configuration file.');
+    }
+  };
+  reader.readAsText(file);
+};
+ExportManager.prototype.exportDocx=function(){
+  var lib=window.docx;
+  if(!lib){ showToast('DOCX library unavailable — check your connection.'); return; }
+  var Document=lib.Document, Packer=lib.Packer, Paragraph=lib.Paragraph,
+      TextRun=lib.TextRun, HeadingLevel=lib.HeadingLevel, AlignmentType=lib.AlignmentType;
+  var name=(document.getElementById('studentName').value||'').trim()||'Student';
+  var now=new Date();
+  var children=[];
+  children.push(new Paragraph({heading:HeadingLevel.TITLE, children:[new TextRun({text:'AP Physics 5E Formative Assessment', bold:true})]}));
+  children.push(new Paragraph({children:[new TextRun({text:'Simulation: Friction Force Explorer by Mr. F — AP Physics 1', italics:true})]}));
+  children.push(new Paragraph({children:[new TextRun({text:'Student: '+name})]}));
+  children.push(new Paragraph({children:[new TextRun({text:'Exported: '+now.toLocaleString()})]}));
+  var answered=0;
+  for(var a=0;a<10;a++){
+    var ta=document.querySelector('textarea[data-answer="'+a+'"]');
+    if(ta && ta.value.trim().length>0) answered++;
+  }
+  children.push(new Paragraph({children:[new TextRun({text:'Questions answered: '+answered+' of 10'})]}));
+  children.push(new Paragraph({children:[new TextRun({text:''})]}));
+  QUESTIONS.forEach(function(q,i){
+    var ta=document.querySelector('textarea[data-answer="'+i+'"]');
+    var ans=(ta&&ta.value.trim().length)?ta.value.trim():'No answer provided';
+    children.push(new Paragraph({
+      spacing:{before:200},
+      children:[new TextRun({text:q.phase.toUpperCase()+(q.points?' · '+q.points+' pts':''), bold:true, color:'7c4dff'})]
+    }));
+    children.push(new Paragraph({children:[new TextRun({text:'Question '+(i+1)+': '+q.prompt})]}));
+    children.push(new Paragraph({children:[new TextRun({text:'Student answer: '+ans, italics:true})]}));
+  });
+  children.push(new Paragraph({spacing:{before:300}, alignment:AlignmentType.CENTER,
+    children:[new TextRun({text:'Generated by AP Physics Simulator', color:'8888aa'})]}));
+  var doc=new Document({sections:[{children:children}]});
+  Packer.toBlob(doc).then(function(blob){
+    var fname='Friction_Force_Explorer_'+name.replace(/[^\w\-]+/g,'_')+'_Assessment.docx';
+    if(window.saveAs){ window.saveAs(blob, fname); }
+    else{
+      var a2=document.createElement('a');
+      a2.href=URL.createObjectURL(blob);
+      a2.download=fname;
+      document.body.appendChild(a2); a2.click(); document.body.removeChild(a2);
+    }
+    showToast('Assessment worksheet exported.');
+  });
+};
+
+// ═══════════════════════════════════════════════════════════════
+// BOOTSTRAP
+// ═══════════════════════════════════════════════════════════════
+if(window.Chart){
+  Chart.defaults.animation=false;
+  Chart.defaults.font.family="ui-monospace, 'SF Mono', Menlo, monospace";
+  Chart.defaults.font.size=10;
+  Chart.defaults.elements.line.borderJoinStyle='round';
+}
+var engine=new PhysicsEngine();
+var camera=new Camera(document.getElementById('mainCanvas'));
+var renderer=new Renderer(document.getElementById('mainCanvas'), engine, camera);
+var history=new ChartHistory();
+var ui=new UIControls(engine, camera, renderer, history, null);
+var exporter=new ExportManager(engine, history, document.getElementById('mainCanvas'), ui);
+ui.exporter=exporter;
+
+document.getElementById('configFileInput').addEventListener('change', function(ev){
+  if(ev.target.files && ev.target.files[0]) exporter.loadJSON(ev.target.files[0]);
+  ev.target.value='';
+});
+})();
+</script>
+</body>
+</html>
