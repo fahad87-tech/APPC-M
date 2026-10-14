@@ -130,8 +130,9 @@ node_modules/
    - Added comprehensive ray optics laboratory for concave and convex spherical curved mirrors ($f = R/2$).
    - Implemented real-time ray tracing of 4 principal rays (parallel, focal, radial, and vertex) with virtual image extensions.
    - Designed and built virtual ray propagation behind the mirror: diverging reflected rays in front have their dashed extensions project behind the mirror and intersect precisely at the virtual image tip $(|d_i|, h_i)$ for convex mirrors and concave mirrors inside the focal length ($d_o < f$).
-   - Integrated glowing multi-color pulsing intersection node, optical crosshairs reticle, and anti-colliding educational callout badge (`✨ Virtual Ray Intersection`) displaying coordinates and ray divergence principles.
-   - Added `hudVirtualPill` in the simulation stage header and enabled virtual ray overlays by default.
+   - Solved real image convergence: eliminated spherical curvature divergence and artificial aperture clamping so that all 4 principal rays and all light bundle rays converge at the exact single focus point $(-d_i, h_i)$ with zero error.
+   - Integrated glowing multi-color pulsing intersection nodes, optical crosshairs reticles, and anti-colliding educational callout badges for both real convergence (`✨ Real Ray Focus`) and virtual intersection (`✨ Virtual Ray Intersection`).
+   - Added `hudRealPill` ("Real Rays: Converging at Single Focus") and `hudVirtualPill` in the simulation stage header with dedicated sidebar visibility controls.
    - Integrated dynamic image categorization (real vs. virtual, inverted vs. upright, magnified vs. diminished), Chart.js optical graph telemetry, and client-side DOCX assessment export.
    - Integrated PBKDF2 SHA-256 classroom password gate (`beyondphysics`) with `pageshow` bfcache protection.
    - Added interactive card to the Optics category in `index.html` with `Simulation 🔒` badge.

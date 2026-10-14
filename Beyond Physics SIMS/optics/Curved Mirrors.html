@@ -640,6 +640,7 @@ input[type=range] {
             <div class="hud-pill">Focal Length: <strong id="hudFocal">f = 75.0 cm</strong></div>
             <div class="hud-pill" id="hudImagePill" style="cursor:pointer" title="Click to Toggle Formed Image">Image: <span id="hudBadge" class="hud-badge hidden">HIDDEN</span> <small style="margin-left:4px;color:var(--cyan);font-weight:700">[Toggle]</small></div>
             <div class="hud-pill" id="hudVirtualPill" style="display:none;background:rgba(255,0,127,0.18);border:1px solid #ff007f;color:#ff77b9;box-shadow:0 0 10px rgba(255,0,127,0.25)"><span>✨</span> Virtual Rays: <strong style="color:#fff;margin-left:3px">Intersecting Behind Mirror</strong></div>
+            <div class="hud-pill" id="hudRealPill" style="display:none;background:rgba(16,185,129,0.18);border:1px solid #10b981;color:#34d399;box-shadow:0 0 10px rgba(16,185,129,0.25)"><span>✨</span> Real Rays: <strong style="color:#fff;margin-left:3px">Converging at Single Focus</strong></div>
             <div class="hud-pill">Orientation: <strong id="hudOrient">Hidden</strong></div>
             <div class="hud-pill">Size: <strong id="hudSize">Hidden</strong></div>
           </div>
@@ -879,6 +880,10 @@ input[type=range] {
               <label for="chkVirtualIntersect"><span style="color:#ff007f;font-weight:700">✨ Virtual Intersection:</span> Highlight Ray Crossing Point</label>
             </div>
             <div class="toggle-row">
+              <input type="checkbox" id="chkRealIntersect" checked>
+              <label for="chkRealIntersect"><span style="color:#10b981;font-weight:700">✨ Real Convergence:</span> Highlight Focus Crossing Point</label>
+            </div>
+            <div class="toggle-row">
               <input type="checkbox" id="chkNormals">
               <label for="chkNormals">Show Surface Normal Lines (from C)</label>
             </div>
@@ -972,6 +977,7 @@ class PhysicsEngine {
     // Display Enhancements
     this.showVirtual = true;
     this.showVirtualIntersect = true;
+    this.showRealIntersect = true;
     this.showNormals = false;
     this.bigLabels = true;
     this.showScreen = false;
@@ -2032,6 +2038,116 @@ class Renderer {
     }
   }
 
+  // Draw High-Contrast Real Ray Convergence Marker & Educational Callout
+  drawRealIntersection(img, pImgTip) {
+    if (!this.engine.showRealIntersect) return;
+    if (!Number.isFinite(pImgTip.x) || !Number.isFinite(pImgTip.y)) return;
+
+    const c = this.ctx;
+    const now = performance.now();
+    const pulse = Math.sin(now * 0.005) * 3;
+    const pulseAlpha = 0.7 + 0.3 * Math.sin(now * 0.006);
+
+    c.save();
+
+    // 1. Radiant pulsing emerald-to-cyan halo
+    const haloGrad = c.createRadialGradient(pImgTip.x, pImgTip.y, 2, pImgTip.x, pImgTip.y, 24 + pulse);
+    haloGrad.addColorStop(0, `rgba(16, 185, 129, ${0.92 * pulseAlpha})`);
+    haloGrad.addColorStop(0.45, `rgba(0, 240, 255, ${0.48 * pulseAlpha})`);
+    haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    c.fillStyle = haloGrad;
+    c.beginPath();
+    c.arc(pImgTip.x, pImgTip.y, 24 + pulse, 0, Math.PI * 2);
+    c.fill();
+
+    // 2. Neon convergence ring with glow
+    c.strokeStyle = '#10b981';
+    c.lineWidth = 2.4;
+    c.shadowColor = '#10b981';
+    c.shadowBlur = 14;
+    c.beginPath();
+    c.arc(pImgTip.x, pImgTip.y, 11 + pulse * 0.6, 0, Math.PI * 2);
+    c.stroke();
+
+    // 3. Crisp optical crosshairs marking the convergence point
+    c.strokeStyle = '#ffffff';
+    c.lineWidth = 1.6;
+    c.shadowColor = '#ffffff';
+    c.shadowBlur = 6;
+    c.beginPath();
+    c.moveTo(pImgTip.x - 18, pImgTip.y);
+    c.lineTo(pImgTip.x - 4, pImgTip.y);
+    c.moveTo(pImgTip.x + 4, pImgTip.y);
+    c.lineTo(pImgTip.x + 18, pImgTip.y);
+    c.moveTo(pImgTip.x, pImgTip.y - 18);
+    c.lineTo(pImgTip.x, pImgTip.y - 4);
+    c.moveTo(pImgTip.x, pImgTip.y + 4);
+    c.lineTo(pImgTip.x, pImgTip.y + 18);
+    c.stroke();
+
+    // 4. Brilliant white focal star core
+    c.fillStyle = '#ffffff';
+    c.beginPath();
+    c.arc(pImgTip.x, pImgTip.y, 4, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+
+    // 5. Anti-colliding Educational Callout Badge
+    if (this.engine.bigLabels) {
+      c.save();
+      const badgeTitle = this.engine.showImage
+        ? `✨ Real Ray Focus (di = ${img.di.toFixed(1)} cm, hi = ${img.hi.toFixed(1)} cm)`
+        : '✨ Real Ray Focus (Single Convergence Point)';
+      const badgeDesc = 'All reflected rays physically intersect here to form the inverted real image';
+
+      c.font = 'bold 12px Inter, sans-serif';
+      const titleW = c.measureText(badgeTitle).width;
+      c.font = '11px Inter, sans-serif';
+      const descW = c.measureText(badgeDesc).width;
+      const cardW = Math.max(titleW, descW) + 28;
+      const cardH = 46;
+
+      let bX = pImgTip.x + 22;
+      let bY = pImgTip.y + 24;
+      if (bX + cardW > this.canvas.width - 15) bX = pImgTip.x - cardW - 22;
+      if (bY + cardH > this.canvas.height - 15) bY = pImgTip.y - cardH - 24;
+
+      // Dark translucent glass card
+      c.fillStyle = 'rgba(10, 15, 34, 0.94)';
+      c.strokeStyle = '#10b981';
+      c.lineWidth = 1.8;
+      c.shadowColor = '#10b981';
+      c.shadowBlur = 10;
+      c.beginPath();
+      c.roundRect(bX, bY, cardW, cardH, 8);
+      c.fill();
+      c.stroke();
+      c.shadowBlur = 0;
+
+      // Leader pointer line from badge to intersection node
+      c.strokeStyle = 'rgba(16, 185, 129, 0.7)';
+      c.lineWidth = 1.5;
+      c.setLineDash([3, 3]);
+      c.beginPath();
+      const leadX = bX < pImgTip.x ? bX + cardW : bX;
+      c.moveTo(leadX, bY + cardH / 2);
+      c.lineTo(pImgTip.x + (bX < pImgTip.x ? 12 : -12), pImgTip.y);
+      c.stroke();
+
+      // Card Title
+      c.fillStyle = '#34d399';
+      c.font = 'bold 12px Inter, sans-serif';
+      c.fillText(badgeTitle, bX + 14, bY + 18);
+
+      // Card Description
+      c.fillStyle = '#cbd5e1';
+      c.font = '11px Inter, sans-serif';
+      c.fillText(badgeDesc, bX + 14, bY + 34);
+
+      c.restore();
+    }
+  }
+
   // Principal Rays & Cone of Light
   drawRays() {
     const c = this.ctx;
@@ -2080,15 +2196,19 @@ class Renderer {
       // Reflected ray & Virtual extension
       let pReflEnd, pVirtEnd;
       if (e.type === 'concave') {
-        const slope = (0 - y1) / (-fVal - x1);
-        const farY = y1 + slope * (farLeftX - x1);
-        pReflEnd = cam.worldToScreen(farLeftX, farY);
-
-        if (isVirtual) {
+        if (img.isReal) {
+          // Real Image: Reflected ray passes through pHit and converges through pImgTip (imgX, imgY)
+          const slope = (imgY - y1) / (imgX - x1);
+          const farY = y1 + slope * (farLeftX - x1);
+          pReflEnd = cam.worldToScreen(farLeftX, farY);
+          pVirtEnd = cam.worldToScreen(farRightX, y1 + slope * (farRightX - x1));
+        } else {
+          // Virtual Image: Reflected ray diverges in front, backward extension passes through virtual tip
+          const slope = (0 - y1) / (-fVal - x1);
+          const farY = y1 + slope * (farLeftX - x1);
+          pReflEnd = cam.worldToScreen(farLeftX, farY);
           const farVirtX = Math.max(imgX + 35, imgX * 1.25);
           pVirtEnd = cam.worldToScreen(farVirtX, y1 + slope * (farVirtX - x1));
-        } else {
-          pVirtEnd = cam.worldToScreen(farRightX, y1 + slope * (farRightX - x1));
         }
       } else {
         // Convex mirror
@@ -2109,14 +2229,21 @@ class Renderer {
       c.restore();
 
       // Dotted Virtual Ray behind mirror
-      this.drawDottedVirtual(pHit, pVirtEnd, '#00f0ff');
+      if (isVirtual) {
+        this.drawDottedVirtual(pHit, pVirtEnd, '#00f0ff');
+      }
       this.drawRayLabel(pStart, 'Ray 1: Parallel → Focus', '#00f0ff', labelStagger++);
     }
 
     // --- RAY 2: Focal-to-Parallel (F-Ray, Gold) ---
     if (e.ray2) {
       const slopeF = (focusPt.y - objTip.y) / (focusPt.x - objTip.x);
-      const y2 = Math.max(-e.aperture / 2, Math.min(e.aperture / 2, slopeF * (0 - focusPt.x)));
+      let y2;
+      if (img.isReal) {
+        y2 = imgY; // Perfectly parallel at image height so it passes right through (imgX, imgY)
+      } else {
+        y2 = slopeF * (0 - focusPt.x);
+      }
       const x2 = this.getMirrorX(y2);
 
       const pStart = cam.worldToScreen(objTip.x, objTip.y);
@@ -2133,7 +2260,7 @@ class Renderer {
       c.stroke();
       this.drawArrowhead(pStart, pHit, '#ffb703');
 
-      // Reflected ray emerges parallel (y = const)
+      // Reflected ray emerges parallel (y = const = y2 = imgY)
       const pReflEnd = cam.worldToScreen(farLeftX, y2);
       c.beginPath();
       c.moveTo(pHit.x, pHit.y);
@@ -2143,20 +2270,17 @@ class Renderer {
       c.restore();
 
       // Dotted Virtual Ray parallel behind mirror
-      let pVirtEnd;
       if (isVirtual) {
         const farVirtX = Math.max(imgX + 35, imgX * 1.25);
-        pVirtEnd = cam.worldToScreen(farVirtX, y2);
-      } else {
-        pVirtEnd = cam.worldToScreen(farRightX, y2);
-      }
-      this.drawDottedVirtual(pHit, pVirtEnd, '#ffb703');
+        const pVirtEnd = cam.worldToScreen(farVirtX, y2);
+        this.drawDottedVirtual(pHit, pVirtEnd, '#ffb703');
 
-      // Guide line showing direction toward focal point
-      if (e.type === 'convex') {
-        this.drawDottedVirtual(pHit, cam.worldToScreen(-fVal, 0), 'rgba(255, 183, 3, 0.45)');
-      } else if (isVirtual) {
-        this.drawDottedVirtual(pStart, cam.worldToScreen(-fVal, 0), 'rgba(255, 183, 3, 0.35)');
+        // Guide line showing direction toward focal point
+        if (e.type === 'convex') {
+          this.drawDottedVirtual(pHit, cam.worldToScreen(-fVal, 0), 'rgba(255, 183, 3, 0.45)');
+        } else {
+          this.drawDottedVirtual(pStart, cam.worldToScreen(-fVal, 0), 'rgba(255, 183, 3, 0.35)');
+        }
       }
 
       this.drawRayLabel(pStart, 'Ray 2: Focus → Parallel', '#ffb703', labelStagger++);
@@ -2164,8 +2288,16 @@ class Renderer {
 
     // --- RAY 3: Center-Radial (C-Ray, Pink) ---
     if (e.ray3) {
-      const slopeC = (centerPt.y - objTip.y) / (centerPt.x - objTip.x);
-      const y3 = Math.max(-e.aperture / 2, Math.min(e.aperture / 2, slopeC * (0 - centerPt.x)));
+      let slopeC, y3;
+      const dxC = centerPt.x - objTip.x;
+      if (Math.abs(dxC) < 0.1) {
+        // Singularity at C (do = R): ray through C is vertical at x = -RVal
+        slopeC = 0;
+        y3 = 0;
+      } else {
+        slopeC = (centerPt.y - objTip.y) / dxC;
+        y3 = slopeC * (0 - centerPt.x);
+      }
       const x3 = this.getMirrorX(y3);
 
       const pStart = cam.worldToScreen(objTip.x, objTip.y);
@@ -2182,8 +2314,21 @@ class Renderer {
       c.stroke();
       this.drawArrowhead(pStart, pHit, '#ff007f');
 
-      // Reflected ray bounces normal back through C
-      const pReflEnd = cam.worldToScreen(farLeftX, objTip.y + slopeC * (farLeftX - objTip.x));
+      // Reflected ray bounces normal back through C and (imgX, imgY)
+      let pReflEnd;
+      if (img.isReal) {
+        if (Math.abs(dxC) < 0.1) {
+          pReflEnd = cam.worldToScreen(farLeftX, objTip.y);
+        } else {
+          const slopeRefl = (imgY - y3) / (imgX - x3);
+          const farY = y3 + slopeRefl * (farLeftX - x3);
+          pReflEnd = cam.worldToScreen(farLeftX, farY);
+        }
+      } else {
+        const farY = objTip.y + slopeC * (farLeftX - objTip.x);
+        pReflEnd = cam.worldToScreen(farLeftX, farY);
+      }
+
       c.beginPath();
       c.moveTo(pHit.x, pHit.y);
       c.lineTo(pReflEnd.x, pReflEnd.y);
@@ -2192,17 +2337,17 @@ class Renderer {
       c.restore();
 
       // Dotted Virtual Ray through C
-      let pVirtEnd;
-      if (e.type === 'convex') {
-        pVirtEnd = cam.worldToScreen(-RVal, 0);
-      } else if (isVirtual) {
-        const farVirtX = Math.max(imgX + 35, imgX * 1.25);
-        pVirtEnd = cam.worldToScreen(farVirtX, objTip.y + slopeC * (farVirtX - objTip.x));
-        this.drawDottedVirtual(pStart, cam.worldToScreen(-RVal, 0), 'rgba(255, 0, 127, 0.35)');
-      } else {
-        pVirtEnd = cam.worldToScreen(farRightX, objTip.y + slopeC * (farRightX - objTip.x));
+      if (isVirtual) {
+        let pVirtEnd;
+        if (e.type === 'convex') {
+          pVirtEnd = cam.worldToScreen(-RVal, 0);
+        } else {
+          const farVirtX = Math.max(imgX + 35, imgX * 1.25);
+          pVirtEnd = cam.worldToScreen(farVirtX, objTip.y + slopeC * (farVirtX - objTip.x));
+          this.drawDottedVirtual(pStart, cam.worldToScreen(-RVal, 0), 'rgba(255, 0, 127, 0.35)');
+        }
+        this.drawDottedVirtual(pHit, pVirtEnd, '#ff007f');
       }
-      this.drawDottedVirtual(pHit, pVirtEnd, '#ff007f');
 
       // Surface Normal from C to hit point
       if (e.showNormals) {
@@ -2247,15 +2392,12 @@ class Renderer {
       this.drawArrowhead(pHit, pReflEnd, '#39ff14');
       c.restore();
 
-      // Dotted Virtual Ray: backward extension into x > 0 has y = (-slopeV) * x = (ho/do) * x > 0!
-      let pVirtEnd;
+      // Dotted Virtual Ray: only when virtual
       if (isVirtual) {
         const farVirtX = Math.max(imgX + 35, imgX * 1.25);
-        pVirtEnd = cam.worldToScreen(farVirtX, (-slopeV) * farVirtX);
-      } else {
-        pVirtEnd = cam.worldToScreen(farRightX, (-slopeV) * farRightX);
+        const pVirtEnd = cam.worldToScreen(farVirtX, (-slopeV) * farVirtX);
+        this.drawDottedVirtual(pHit, pVirtEnd, '#39ff14');
       }
-      this.drawDottedVirtual(pHit, pVirtEnd, '#39ff14');
       this.drawRayLabel(pStart, 'Ray 4: Vertex Pole (θi = θr)', '#39ff14', labelStagger++);
     }
 
@@ -2283,9 +2425,13 @@ class Renderer {
         // Reflected segment converging to image tip or diverging
         if (!img.isInfinity) {
           if (img.isReal) {
+            // Real Image: rays converge at pImgTip and continue through to farLeftX!
+            const slopeB = (imgY - yStrike) / (imgX - xStrike);
+            const farY = yStrike + slopeB * (farLeftX - xStrike);
+            const pEnd = cam.worldToScreen(farLeftX, farY);
             c.beginPath();
             c.moveTo(pHit.x, pHit.y);
-            c.lineTo(pImgTip.x, pImgTip.y);
+            c.lineTo(pEnd.x, pEnd.y);
             c.stroke();
           } else {
             // Diverges in real space in front of mirror
@@ -2305,9 +2451,13 @@ class Renderer {
       c.restore();
     }
 
-    // --- VIRTUAL INTERSECTION NODE & CALLOUT (Highlighting Ray Convergence Behind Mirror) ---
-    if (isVirtual && (e.ray1 || e.ray2 || e.ray3 || e.ray4 || e.bundle)) {
-      this.drawVirtualIntersection(img, pImgTip);
+    // --- CONVERGENCE NODE & CALLOUT (Highlighting Ray Intersection) ---
+    if (!img.isInfinity && (e.ray1 || e.ray2 || e.ray3 || e.ray4 || e.bundle)) {
+      if (img.isReal) {
+        this.drawRealIntersection(img, pImgTip);
+      } else if (isVirtual) {
+        this.drawVirtualIntersection(img, pImgTip);
+      }
     }
 
     // --- FORMED IMAGE RENDERING ---
@@ -2482,6 +2632,7 @@ class UIControls {
     // Visual options
     document.getElementById('chkVirtual').addEventListener('change', e => this.e.showVirtual = e.target.checked);
     document.getElementById('chkVirtualIntersect').addEventListener('change', e => this.e.showVirtualIntersect = e.target.checked);
+    document.getElementById('chkRealIntersect').addEventListener('change', e => this.e.showRealIntersect = e.target.checked);
     document.getElementById('chkNormals').addEventListener('change', e => this.e.showNormals = e.target.checked);
     document.getElementById('chkBigLabels').addEventListener('change', e => this.e.bigLabels = e.target.checked);
 
@@ -2590,6 +2741,7 @@ class UIControls {
       this.e.dimHi = false;
       this.e.showVirtual = true;
       this.e.showVirtualIntersect = true;
+      this.e.showRealIntersect = true;
       this.e.showNormals = false;
       this.e.showScreen = false;
       this.e.showImage = false;
@@ -2665,6 +2817,7 @@ class UIControls {
     document.getElementById('chkDimHi').checked = this.e.dimHi;
     document.getElementById('chkVirtual').checked = this.e.showVirtual;
     document.getElementById('chkVirtualIntersect').checked = this.e.showVirtualIntersect;
+    document.getElementById('chkRealIntersect').checked = this.e.showRealIntersect;
     document.getElementById('chkNormals').checked = this.e.showNormals;
     document.getElementById('chkBigLabels').checked = this.e.bigLabels;
     this.syncImageUI();
@@ -2896,6 +3049,11 @@ class UIControls {
     if (virtPill) {
       const isVirt = !img.isInfinity && !img.isReal;
       virtPill.style.display = isVirt ? 'flex' : 'none';
+    }
+
+    const realPill = document.getElementById('hudRealPill');
+    if (realPill) {
+      realPill.style.display = img.isReal ? 'flex' : 'none';
     }
   }
 
