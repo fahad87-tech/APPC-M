@@ -190,11 +190,17 @@ When on the **Dispersion** tab, the 3 metric cards update live as sliders move:
      - For all positive object distances: Virtual, upright, diminished image behind mirror ($|d_i| < |f|$).
 2. **Magnification & Image Height**:
    $$m = -\frac{d_i}{d_o} = \frac{h_i}{h_o} \implies h_i = m \cdot h_o$$
-3. **Principal Ray Tracing Traced**:
-   - **Ray 1 (Parallel Ray)**: Incident parallel to the optical axis, reflects through $F$ (concave) or as if emerging from virtual $F$ (convex).
-   - **Ray 2 (Focal Ray)**: Incident toward/through focal point $F$, reflects parallel to the optical axis.
-   - **Ray 3 (Radial / Center of Curvature Ray)**: Passes through or points toward center of curvature $C = 2f$, strikes mirror perpendicularly, and reflects back on itself.
-   - **Virtual Ray Extensions**: Rendered with dashed extensions behind the mirror to locate virtual image intersections.
+3. **Principal Ray Tracing & Virtual Image Formation**:
+   - **Ray 1 (Parallel Ray)**: Incident parallel to the optical axis, reflects through $F$ (concave) or as if emerging from virtual $F$ (convex). Backward extension behind mirror passes through the virtual image tip $(|d_i|, h_i)$.
+   - **Ray 2 (Focal Ray)**: Incident toward/through focal point $F$, reflects parallel to the optical axis. In convex mirrors, a dashed alignment guide shows the incident ray heading toward virtual focus $F(+f, 0)$, while its reflected ray's backward extension extends horizontally at $y = h_i$ through the virtual image tip.
+   - **Ray 3 (Radial / Center of Curvature Ray)**: Passes through or points toward center of curvature $C = 2f$, strikes mirror perpendicularly ($0^\circ$), and reflects back on itself. Backward extension projects through $(|d_i|, h_i)$ toward virtual center $C(+2f, 0)$.
+   - **Ray 4 (Vertex Ray)**: Strikes mirror pole $V(0,0)$ at angle $\theta$ and reflects symmetrically ($-\theta$). Its backward extension into $x > 0$ slopes upward at $+\theta$, passing exactly through $(|d_i|, h_i)$.
+   - **Ray Bundle (Cone of Light)**: Diverges in real space in front of mirror, while every dotted extension back-traces to intersect at the virtual image tip.
+   - **Virtual Ray Intersection Point & Focus Node**:
+     - When an image is virtual ($d_i < 0$), reflected rays diverge in front of the mirror; the human visual system perceives them as emanating from behind the mirror.
+     - The simulation clearly renders the backward dotted extensions crossing each other behind the mirror at $(|d_i|, h_i)$.
+     - Features an animated multi-color pulsing halo, optical crosshairs reticle, brilliant white focal core, and an anti-colliding educational callout badge (`✨ Virtual Ray Intersection`) displaying coordinates and ray divergence physics.
+     - Integrated `hudVirtualPill` in the simulation stage header to provide immediate feedback on virtual ray convergence behind the mirror.
 
 ### 6.3 Technical Implementation
 - **Rendering**: HTML5 Canvas with smooth responsive coordinate mapping.

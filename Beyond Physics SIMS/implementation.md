@@ -128,7 +128,10 @@ node_modules/
    - Guaranteed failure/cancellation redirects back to dashboard and secured back-navigation via `pageshow` listener.
 6. **Curved Mirrors Laboratory (`optics/Curved Mirrors.html`)**:
    - Added comprehensive ray optics laboratory for concave and convex spherical curved mirrors ($f = R/2$).
-   - Implemented real-time ray tracing of 3 principal rays (parallel, focal, and radial) with virtual image extensions.
+   - Implemented real-time ray tracing of 4 principal rays (parallel, focal, radial, and vertex) with virtual image extensions.
+   - Designed and built virtual ray propagation behind the mirror: diverging reflected rays in front have their dashed extensions project behind the mirror and intersect precisely at the virtual image tip $(|d_i|, h_i)$ for convex mirrors and concave mirrors inside the focal length ($d_o < f$).
+   - Integrated glowing multi-color pulsing intersection node, optical crosshairs reticle, and anti-colliding educational callout badge (`✨ Virtual Ray Intersection`) displaying coordinates and ray divergence principles.
+   - Added `hudVirtualPill` in the simulation stage header and enabled virtual ray overlays by default.
    - Integrated dynamic image categorization (real vs. virtual, inverted vs. upright, magnified vs. diminished), Chart.js optical graph telemetry, and client-side DOCX assessment export.
    - Integrated PBKDF2 SHA-256 classroom password gate (`beyondphysics`) with `pageshow` bfcache protection.
    - Added interactive card to the Optics category in `index.html` with `Simulation 🔒` badge.
