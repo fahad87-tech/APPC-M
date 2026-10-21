@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AP Physics: Pro SHM Simulator</title>
+    <title>AP Physics C: Realistic Vertical Series & Parallel Springs SHM Simulator</title>
     <script>
     const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
     document.documentElement.classList.add("password-locked");
@@ -89,299 +89,609 @@
     #password-gate-submit { background: #64b5f6; color: #08101c; }
   </style>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
         :root {
-            --bg-main: #0D1117;
-            --bg-panel: #161B22;
-            --border-color: #30363D;
-            --text-main: #C9D1D9;
-            --text-bright: #E6EDF3;
-            --accent-blue: #58A6FF;
+            --bg-main: #0B0F17;
+            --bg-panel: #131A26;
+            --bg-panel-sub: #1A2332;
+            --border-color: rgba(90, 115, 150, 0.28);
+            --border-glow: rgba(0, 229, 255, 0.4);
+            --text-main: #C5D1E0;
+            --text-bright: #F0F6FC;
+            --text-muted: #7D8B9F;
+            --accent-cyan: #00E5FF;
+            --accent-blue: #388BFD;
             --accent-green: #238636;
             --accent-green-hover: #2EA043;
-            --accent-red: #DA3633;
-            --accent-purple: #8957E5;
-            --accent-yellow: #D29922;
-            --accent-cyan: #00E5FF;
+            --accent-emerald: #00F59B;
+            --accent-red: #FF3B30;
+            --accent-purple: #A371F7;
+            --accent-amber: #F59E0B;
         }
+
+        * { box-sizing: border-box; }
 
         body, html {
             margin: 0; padding: 0; width: 100vw; height: 100vh;
             background-color: var(--bg-main); color: var(--text-main);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden; user-select: none;
         }
 
-        /* Tabs Styling */
-        .tab-bar { display: flex; border-bottom: 1px solid var(--border-color); background: var(--bg-main); padding-top: 10px; }
-        .tab { 
-            padding: 12px 25px; cursor: pointer; font-weight: bold; font-size: 14px; color: #8B949E;
-            background: var(--bg-panel); border: 1px solid var(--border-color); border-bottom: none;
-            border-top-left-radius: 6px; border-top-right-radius: 6px; margin-left: 10px;
+        /* Top Navigation Bar */
+        .header-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            background: rgba(11, 15, 23, 0.95);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 18px; height: 50px;
         }
-        .tab.active { background: var(--accent-green); color: white; border-color: var(--accent-green); }
-        .tab-content { display: none; height: calc(100vh - 45px); box-sizing: border-box; width: 100%; }
+        .header-title {
+            font-size: 15px; font-weight: 700; color: var(--text-bright);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .header-title span.badge {
+            background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 4px;
+            font-size: 11px; padding: 2px 6px; font-weight: 600; text-transform: uppercase;
+        }
+        .tab-bar { display: flex; gap: 8px; }
+        .tab {
+            padding: 8px 16px; cursor: pointer; font-weight: 600; font-size: 13px; color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color);
+            border-radius: 8px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .tab:hover { color: var(--text-bright); background: rgba(255, 255, 255, 0.08); }
+        .tab.active { background: linear-gradient(135deg, #1f6feb, #238636); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(35, 134, 54, 0.35); }
+
+        .tab-content { display: none; height: calc(100vh - 50px); width: 100%; }
         .tab-content.active { display: flex; }
 
-        /* Main Layout */
-        #sim-tab { padding: 20px; gap: 20px; box-sizing: border-box; }
-        #qa-tab { padding: 40px; flex-direction: column; gap: 20px; align-items: center; overflow-y: auto; }
+        /* Simulation Layout */
+        #sim-tab { padding: 14px; gap: 14px; }
+        
+        .left-panel {
+            width: 350px; display: flex; flex-direction: column; gap: 10px;
+            overflow-y: auto; padding-right: 4px;
+        }
+        .left-panel::-webkit-scrollbar { width: 4px; }
+        .left-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
 
-        .left-panel { width: 360px; display: flex; flex-direction: column; gap: 15px; }
-        .center-panel { width: 400px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-main); position: relative; overflow: hidden; }
-        .right-panel { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 300px; }
+        .center-panel {
+            flex: 1; border: 1px solid var(--border-color); border-radius: 12px;
+            background: radial-gradient(circle at 50% 25%, #141c2c 0%, #0a0d15 90%);
+            position: relative; overflow: hidden; display: flex; flex-direction: column;
+            box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .right-panel {
+            width: 440px; display: flex; flex-direction: column; gap: 10px;
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 12px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
 
         /* Group Boxes */
-        fieldset { 
-            border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; 
-            background-color: var(--bg-panel); margin-top: 10px;
+        fieldset {
+            border: 1px solid var(--border-color); border-radius: 10px; padding: 12px 14px;
+            background: var(--bg-panel); margin: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        legend { color: var(--accent-blue); font-size: 15px; font-weight: bold; padding: 0 5px; }
+        legend {
+            color: var(--accent-cyan); font-size: 13px; font-weight: 700;
+            padding: 0 6px; letter-spacing: 0.5px; text-transform: uppercase;
+        }
 
-        /* Controls */
-        .control-row { margin-bottom: 12px; }
-        .control-row label { display: flex; justify-content: space-between; color: var(--text-bright); font-size: 14px; font-weight: bold; margin-bottom: 5px; }
+        /* Educational Compliance & Stiffness Card */
+        .stiffness-card {
+            background: linear-gradient(135deg, rgba(26, 35, 50, 0.8), rgba(16, 22, 33, 0.95));
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            border-radius: 10px; padding: 10px 12px;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .stiffness-card .badge-row {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .stiffness-tag {
+            font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .stiffness-tag.stiff { background: rgba(255, 59, 48, 0.2); color: #ff6b6b; border: 1px solid rgba(255,59,48,0.4); }
+        .stiffness-tag.compliant { background: rgba(0, 245, 155, 0.2); color: #00F59B; border: 1px solid rgba(0,245,155,0.4); }
+        .stiffness-tag.standard { background: rgba(56, 139, 253, 0.2); color: #58a6ff; border: 1px solid rgba(56,139,253,0.4); }
         
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-runnable-track { height: 6px; background: #21262D; border: 1px solid var(--border-color); border-radius: 3px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; background: var(--accent-blue); border-radius: 8px; margin-top: -6px; cursor: pointer; }
+        .stiffness-metric {
+            font-size: 12px; color: var(--text-bright); line-height: 1.4;
+        }
+        .stiffness-metric strong { color: var(--accent-amber); }
 
-        .radio-group { display: flex; gap: 15px; margin-bottom: 10px; color: var(--text-main); font-size: 14px; }
-        
+        /* Configuration Segmented Radio Controls */
+        .config-segmented {
+            display: flex; background: rgba(0,0,0,0.3); padding: 3px; border-radius: 8px;
+            border: 1px solid var(--border-color); gap: 4px; margin-bottom: 8px;
+        }
+        .config-segmented label {
+            flex: 1; text-align: center; padding: 6px 4px; font-size: 12px; font-weight: 600;
+            border-radius: 6px; cursor: pointer; color: var(--text-muted); transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
+        .config-segmented input[type="radio"] { display: none; }
+        .config-segmented label.active {
+            background: var(--accent-blue); color: #fff;
+            box-shadow: 0 2px 8px rgba(56, 139, 253, 0.4);
+        }
+
+        /* Speed Control Segmented Buttons */
+        .speed-segmented {
+            display: flex; background: rgba(0,0,0,0.35); border-radius: 8px;
+            padding: 3px; border: 1px solid var(--border-color); gap: 4px;
+        }
+        .speed-btn {
+            flex: 1; padding: 6px 4px; font-size: 11px; font-weight: 700;
+            border-radius: 6px; cursor: pointer; background: transparent;
+            border: none; color: var(--text-muted); transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
+        .speed-btn:hover { color: var(--text-bright); }
+        .speed-btn.active {
+            background: var(--accent-cyan); color: #08101C;
+            box-shadow: 0 2px 8px rgba(0, 229, 255, 0.4);
+        }
+
+        /* Sliders */
+        .control-row { margin-bottom: 8px; }
+        .control-row label {
+            display: flex; justify-content: space-between; color: var(--text-bright);
+            font-size: 12px; font-weight: 600; margin-bottom: 3px;
+        }
+        .control-row .val-tag {
+            color: var(--accent-cyan); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 12px; font-weight: 700;
+        }
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; height: 5px; background: #21262D;
+            border-radius: 3px; outline: none; border: 1px solid var(--border-color);
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; background: var(--accent-cyan);
+            border-radius: 50%; cursor: pointer; box-shadow: 0 0 10px var(--accent-cyan);
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
         /* Buttons */
-        button { 
-            padding: 12px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer;
-            border: 1px solid rgba(240, 246, 252, 0.1); color: white; transition: 0.2s;
+        button {
+            padding: 10px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1); color: white; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn-primary { background-color: var(--accent-green); }
-        .btn-primary:hover { background-color: var(--accent-green-hover); }
-        .btn-secondary { background-color: #21262D; border-color: var(--border-color); }
-        .btn-secondary:hover { background-color: var(--border-color); }
-        .btn-danger { background-color: var(--accent-red); border-color: #F85149; }
-        .btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-data { background-color: var(--accent-purple); border-color: #9E6A03; }
+        button:hover { filter: brightness(1.12); }
+        .btn-primary { background: linear-gradient(135deg, #238636, #1a6327); border-color: #2ea043; }
+        .btn-secondary { background: #21262D; border-color: var(--border-color); color: var(--text-bright); }
+        .btn-danger { background: linear-gradient(135deg, #DA3633, #8a201e); border-color: #f85149; }
+        .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.8); }
 
-        /* Telemetry & Charts */
-        .telem-row { display: flex; justify-content: space-between; color: var(--accent-green-hover); font-size: 15px; font-weight: bold; }
-        .chart-wrapper { flex: 1; min-height: 0; background: var(--bg-main); border-radius: 8px; position: relative; }
-        canvas { width: 100% !important; height: 100% !important; }
+        /* Canvas Floating Overlays */
+        #simCanvas { width: 100%; height: 100%; display: block; cursor: grab; }
+        #simCanvas.grabbing { cursor: grabbing; }
 
-        /* QA Layout Elements */
-        .qa-container { width: 800px; max-width: 100%; display: flex; flex-direction: column; gap: 15px; margin: 0 auto; }
-        .qa-prompt { background: var(--bg-panel); border: 1px solid var(--border-color); padding: 25px; border-radius: 8px; font-size: 18px; color: var(--text-bright); }
-        
-        /* THE FIX: width: 100% and box-sizing guarantees the text area fills the screen nicely */
-        textarea { 
-            width: 100%; 
-            box-sizing: border-box; 
-            background: var(--bg-main); 
-            color: var(--text-main); 
-            font-size: 16px; 
-            padding: 15px; 
-            border: 1px solid var(--border-color); 
-            border-radius: 6px; 
-            height: 200px; 
-            resize: vertical; 
-            font-family: inherit; 
+        .canvas-overlay-top {
+            position: absolute; top: 12px; left: 12px; right: 12px;
+            display: flex; justify-content: space-between; pointer-events: none;
         }
-        textarea:focus { outline: none; border-color: var(--accent-blue); box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2); }
+        .canvas-badge {
+            background: rgba(16, 22, 33, 0.85); backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 6px 12px; font-size: 12px; color: var(--text-bright);
+            display: flex; gap: 12px; align-items: center; pointer-events: auto;
+        }
+        .drag-instruction {
+            position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+            background: rgba(16, 22, 33, 0.75); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+            padding: 4px 14px; font-size: 11px; color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        /* Graph Mode Switcher */
+        .graph-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-panel-sub); border: 1px solid var(--border-color);
+            border-radius: 8px; padding: 4px;
+        }
+        .graph-pill-group { display: flex; gap: 4px; }
+        .graph-pill {
+            padding: 5px 12px; font-size: 11px; font-weight: 700; border-radius: 6px;
+            cursor: pointer; color: var(--text-muted); background: transparent; border: none;
+            transition: 0.2s;
+        }
+        .graph-pill.active { background: var(--accent-cyan); color: #08101C; }
         
-        input[type=text] { background: #21262D; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); color: var(--text-bright); font-size: 14px; width: 100%; box-sizing: border-box; }
+        .chart-container-box {
+            flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px;
+            overflow: hidden;
+        }
+        .chart-box {
+            flex: 1; min-height: 90px; background: rgba(11, 15, 23, 0.75);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            position: relative; padding: 4px;
+        }
+
+        /* 5E QA Section */
+        #qa-tab { padding: 30px; justify-content: center; overflow-y: auto; }
+        .qa-container { width: 850px; max-width: 100%; display: flex; flex-direction: column; gap: 15px; }
+        .qa-card {
+            background: var(--bg-panel); border: 1px solid var(--border-color);
+            border-radius: 12px; padding: 25px; box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+        }
+        .qa-prompt {
+            background: var(--bg-panel-sub); border-left: 4px solid var(--accent-cyan);
+            padding: 16px; border-radius: 6px; font-size: 16px; color: var(--text-bright);
+            line-height: 1.5; margin: 15px 0;
+        }
+        textarea {
+            width: 100%; background: var(--bg-main); color: var(--text-bright);
+            font-size: 15px; padding: 14px; border: 1px solid var(--border-color);
+            border-radius: 8px; height: 180px; resize: vertical; font-family: inherit;
+        }
+        textarea:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2); }
     </style>
 </head>
 <body>
 
-    <div class="tab-bar">
-        <div class="tab active" onclick="switchTab('sim-tab', this)">🔬 Active Physics Simulation</div>
-        <div class="tab" onclick="switchTab('qa-tab', this)">📝 5E Knowledge Check</div>
-    </div>
+    <header class="header-bar">
+        <div class="header-title">
+            <span>🔬 AP Physics C: Series vs. Parallel Springs SHM</span>
+            <span class="badge">Advanced Dynamics</span>
+        </div>
+        <div class="tab-bar">
+            <div class="tab active" onclick="switchTab('sim-tab', this)">⚡ Interactive Simulation Bench</div>
+            <div class="tab" onclick="switchTab('qa-tab', this)">📝 5E Inquiry Lab Notebook</div>
+        </div>
+    </header>
 
     <div id="sim-tab" class="tab-content active">
+        <!-- LEFT CONTROL PANEL -->
         <div class="left-panel">
             <fieldset>
-                <legend>Physical Parameters</legend>
-                <div class="radio-group">
-                    <label><input type="radio" name="config" value="single" checked onchange="ui.updateKeq()"> Single</label>
-                    <label><input type="radio" name="config" value="parallel" onchange="ui.updateKeq()"> Parallel</label>
-                    <label><input type="radio" name="config" value="series" onchange="ui.updateKeq()"> Series</label>
-                </div>
-                
-                <div class="control-row">
-                    <label style="justify-content: flex-start; gap: 8px; font-weight: normal; color: var(--text-main);">
-                        <input type="checkbox" id="tog-vectors" checked> Show Vectors (v, a, F)
+                <legend>Spring Configuration</legend>
+                <div class="config-segmented" id="config-selector">
+                    <label id="lbl-cfg-single" class="active">
+                        <input type="radio" name="config" value="single" checked onchange="ui.onConfigChange()"> Single (k₁)
+                    </label>
+                    <label id="lbl-cfg-parallel">
+                        <input type="radio" name="config" value="parallel" onchange="ui.onConfigChange()"> Parallel (k₁+k₂)
+                    </label>
+                    <label id="lbl-cfg-series">
+                        <input type="radio" name="config" value="series" onchange="ui.onConfigChange()"> Series (k_eq)
                     </label>
                 </div>
 
+                <!-- Stiffness / Compliance Educational Card -->
+                <div class="stiffness-card">
+                    <div class="badge-row">
+                        <span id="card-config-name" style="font-weight: 700; color: #fff; font-size: 13px;">Single Spring</span>
+                        <span id="card-stiffness-tag" class="stiffness-tag standard">Standard Stiffness</span>
+                    </div>
+                    <div class="stiffness-metric" id="card-stiffness-desc">
+                        Baseline configuration. Direct Hooke's Law: <strong>F = -k₁x</strong>.
+                    </div>
+                    <div class="stiffness-metric" style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 4px; font-size: 11px; color: var(--text-muted);" id="card-stretch-ease">
+                        Force to stretch 0.5m: <strong>10.0 N</strong>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Playback & Speed Controls</legend>
                 <div class="control-row">
-                    <label><span>Block P Mass (m)</span><span id="lbl-mp">1.0 kg</span></label>
+                    <label><span>⏱️ Simulation Speed</span><span class="val-tag" id="lbl-speed">1.0x</span></label>
+                    <div class="speed-segmented">
+                        <button type="button" class="speed-btn" onclick="ui.setSpeed(0.25, this)">0.25x 🐢</button>
+                        <button type="button" class="speed-btn" onclick="ui.setSpeed(0.5, this)">0.5x ⏱️</button>
+                        <button type="button" class="speed-btn active" onclick="ui.setSpeed(1.0, this)">1.0x ⚡</button>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Physical System Parameters</legend>
+                <div class="control-row">
+                    <label><span>Block P Mass (m)</span><span class="val-tag" id="lbl-mp">1.0 kg</span></label>
                     <input type="range" id="in-mp" min="0.5" max="5.0" step="0.1" value="1.0" oninput="ui.updateLabels()">
                 </div>
                 <div class="control-row">
-                    <label><span>Block Q Mass (m_Q)</span><span id="lbl-mq">2.0 kg</span></label>
-                    <input type="range" id="in-mq" min="0.5" max="10.0" step="0.1" value="2.0" oninput="ui.updateLabels()">
+                    <label><span>Block Q Mass (m_Q)</span><span class="val-tag" id="lbl-mq">2.0 kg</span></label>
+                    <input type="range" id="in-mq" min="0.5" max="8.0" step="0.1" value="2.0" oninput="ui.updateLabels()">
                 </div>
                 <div class="control-row">
-                    <label><span>Spring Constant 1</span><span id="lbl-k1">20 N/m</span></label>
-                    <input type="range" id="in-k1" min="5" max="50" step="1" value="20" oninput="ui.updateLabels()">
+                    <label><span>Spring Constant 1 (k₁)</span><span class="val-tag" id="lbl-k1">25 N/m</span></label>
+                    <input type="range" id="in-k1" min="10" max="80" step="1" value="25" oninput="ui.updateLabels()">
+                </div>
+                <div class="control-row" id="row-k2">
+                    <label><span>Spring Constant 2 (k₂)</span><span class="val-tag" id="lbl-k2">25 N/m</span></label>
+                    <input type="range" id="in-k2" min="10" max="80" step="1" value="25" oninput="ui.updateLabels()">
                 </div>
                 <div class="control-row">
-                    <label><span>Spring Constant 2</span><span id="lbl-k2">20 N/m</span></label>
-                    <input type="range" id="in-k2" min="5" max="50" step="1" value="20" oninput="ui.updateLabels()">
+                    <label><span>Initial Amplitude (A₀)</span><span class="val-tag" id="lbl-a">1.0 m</span></label>
+                    <input type="range" id="in-a" min="0.2" max="2.0" step="0.1" value="1.0" oninput="ui.updateLabels()">
                 </div>
                 <div class="control-row" style="margin-bottom: 0;">
-                    <label><span>Initial Amplitude</span><span id="lbl-a">1.0 m</span></label>
-                    <input type="range" id="in-a" min="0.1" max="2.0" step="0.1" value="1.0" oninput="ui.updateLabels()">
+                    <label><span>Air Damping (b)</span><span class="val-tag" id="lbl-b">0.00</span></label>
+                    <input type="range" id="in-b" min="0" max="0.5" step="0.02" value="0.00" oninput="ui.updateLabels()">
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Simulation Visuals & Audio</legend>
+                <div style="display: flex; justify-content: space-between; font-size: 12px;">
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <input type="checkbox" id="tog-vectors" checked> Show Vectors (v, a, F)
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <input type="checkbox" id="tog-sound" checked> Realistic Audio
+                    </label>
                 </div>
             </fieldset>
 
             <button class="btn-primary" id="btn-play" onclick="ui.togglePlay()">▶ Start Simulation</button>
             <button class="btn-secondary" onclick="ui.resetSim()">↺ Reset System</button>
-            <button class="btn-danger" id="btn-drop" onclick="ui.queueDrop()" disabled>⏬ Drop Block Q (Queues at x=0)</button>
+            <button class="btn-danger" id="btn-drop" onclick="ui.queueDrop()" disabled>⏬ Drop Block Q (Inelastic Collision at x=0)</button>
         </div>
 
+        <!-- CENTER CANVAS VIEW -->
         <div class="center-panel" id="canvas-container">
             <canvas id="simCanvas"></canvas>
+            <div class="canvas-overlay-top">
+                <div class="canvas-badge">
+                    <span>k_eff: <strong id="hud-keff" style="color:var(--accent-cyan);">25.0 N/m</strong></span>
+                    <span>T: <strong id="hud-period" style="color:var(--accent-amber);">1.26 s</strong></span>
+                    <span>f: <strong id="hud-freq">0.79 Hz</strong></span>
+                </div>
+                <div class="canvas-badge">
+                    <span>F_net: <strong id="hud-fnet" style="color:var(--accent-red);">0.0 N</strong></span>
+                    <span>v: <strong id="hud-vel" style="color:var(--accent-emerald);">0.00 m/s</strong></span>
+                </div>
+            </div>
+            <div class="drag-instruction">
+                💡 Tip: Drag Block P to test spring resistance | Speed controls slow down physics for detailed analysis!
+            </div>
         </div>
 
+        <!-- RIGHT TELEMETRY & GRAPHS -->
         <div class="right-panel">
-            <fieldset style="margin-top: 0; padding: 10px 15px;">
-                <legend>Real-Time Telemetry</legend>
-                <div class="telem-row">
-                    <span id="tel-k">k_eq: -- N/m</span>
-                    <span id="tel-v">v_max: -- m/s</span>
-                    <span id="tel-pe">PE_max: -- J</span>
-                    <span id="tel-t">Period (T): -- s</span>
+            <div class="graph-nav">
+                <div style="font-size: 12px; font-weight: 700; color: var(--text-bright); padding-left: 6px;">
+                    📊 Real-Time Dynamic Charts
                 </div>
-            </fieldset>
+                <div class="graph-pill-group">
+                    <button class="graph-pill active" id="pill-motion" onclick="ui.setGraphMode('motion')">Motion (x, a, F)</button>
+                    <button class="graph-pill" id="pill-energy" onclick="ui.setGraphMode('energy')">Energy (KE, PE, E_tot)</button>
+                </div>
+            </div>
 
-            <div class="chart-wrapper"><canvas id="chartPos"></canvas></div>
-            <div class="chart-wrapper"><canvas id="chartKE"></canvas></div>
-            <div class="chart-wrapper"><canvas id="chartPE"></canvas></div>
+            <div class="chart-container-box">
+                <!-- Motion Charts -->
+                <div class="chart-box" id="box-chart1">
+                    <canvas id="chart1"></canvas>
+                </div>
+                <div class="chart-box" id="box-chart2">
+                    <canvas id="chart2"></canvas>
+                </div>
+                <div class="chart-box" id="box-chart3">
+                    <canvas id="chart3"></canvas>
+                </div>
+            </div>
 
-            <button class="btn-data" onclick="ui.exportCSV()">📊 Export Graph Data (.CSV)</button>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-secondary" style="flex: 1; font-size: 11px; padding: 8px;" onclick="ui.toggleEnergyOverlay()">
+                    ⚡ Toggle Energy Overlay
+                </button>
+                <button class="btn-secondary" style="flex: 1; font-size: 11px; padding: 8px; background: rgba(163, 113, 247, 0.15); border-color: rgba(163,113,247,0.3);" onclick="ui.exportCSV()">
+                    📥 Export Data (.CSV)
+                </button>
+            </div>
         </div>
     </div>
 
+    <!-- 5E INQUIRY TAB -->
     <div id="qa-tab" class="tab-content">
         <div class="qa-container">
-            <fieldset>
-                <legend>5E Guided Inquiry Assignment</legend>
-                <label style="color: var(--text-bright); font-weight: bold; display:block; margin-bottom: 5px;">Student Name:</label>
-                <input type="text" id="student-name" placeholder="Enter your full name">
-                
-                <div style="margin-top: 20px;">
-                    <span id="qa-stage" style="color: var(--accent-purple); font-size: 22px; font-weight: bold;">STAGE</span><br>
-                    <span id="qa-counter" style="color: #8B949E; font-size: 14px;">Prompt 1 of 5</span>
+            <div class="qa-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                    <div>
+                        <span id="qa-stage" style="color: var(--accent-cyan); font-size: 20px; font-weight: 800; letter-spacing: 1px;">STAGE: ENGAGE</span>
+                        <div id="qa-counter" style="color: var(--text-muted); font-size: 13px; margin-top: 2px;">Prompt 1 of 5</div>
+                    </div>
+                    <div style="width: 250px;">
+                        <input type="text" id="student-name" placeholder="Student Full Name" style="background: var(--bg-main); border: 1px solid var(--border-color); color: #fff; padding: 8px 12px; border-radius: 6px; width: 100%; font-size: 13px;">
+                    </div>
                 </div>
+
+                <div class="qa-prompt" id="qa-prompt-text">Loading question...</div>
+                <textarea id="qa-answer" placeholder="Formulate scientific claims using kinematic and energetic evidence from the simulation..."></textarea>
                 
-                <div class="qa-prompt" id="qa-prompt-text">Loading prompt...</div>
-                <textarea id="qa-answer" placeholder="Enter scientific reasoning here..."></textarea>
-                
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn-secondary" style="flex: 1;" onclick="inquiry.prev()">◀ Previous</button>
-                    <button class="btn-secondary" style="flex: 1;" onclick="inquiry.next()">Next ▶</button>
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn-secondary" style="flex: 1;" onclick="inquiry.prev()">◀ Previous Question</button>
+                    <button class="btn-secondary" style="flex: 1;" onclick="inquiry.next()">Next Question ▶</button>
                 </div>
-                <button class="btn-primary" style="margin-top: 10px;" onclick="inquiry.exportDOCX()">📄 Export Answers to Document</button>
-            </fieldset>
+                <button class="btn-primary" style="margin-top: 12px; width: 100%; background: linear-gradient(135deg, #0A84FF, #005bb5);" onclick="inquiry.exportDOCX()">
+                    📄 Generate & Export Verified Lab Report (.DOCX)
+                </button>
+            </div>
         </div>
     </div>
 
 <script>
-// ==========================================
-// 1. ANALYTICAL PHYSICS ENGINE
-// ==========================================
-class PhysicsEngine {
-    constructor() { this.reset(1.0, 20.0, 1.0); }
+/* =========================================================================
+   1. SOUND SYNTHESIZER (Web Audio API)
+   ========================================================================= */
+class AudioController {
+    constructor() { this.ctx = null; this.enabled = true; }
+    init() {
+        if (!this.ctx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioContext();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+    }
+    playDropImpact() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(160, t);
+        osc.frequency.exponentialRampToValueAtTime(35, t + 0.15);
+        gain.gain.setValueAtTime(0.4, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(t); osc.stop(t + 0.22);
 
-    reset(m_P, k_eq, A_0) {
-        this.m_P = m_P; this.m_Q = 0.0; this.k_eq = k_eq; this.m_total = m_P;
-        this.omega = Math.sqrt(k_eq / m_P);
-        this.A = A_0; this.phi = -Math.PI / 2;
+        const noise = this.ctx.createBufferSource();
+        const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.05, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+        noise.buffer = buffer;
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.2, t);
+        nGain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        noise.connect(nGain); nGain.connect(this.ctx.destination);
+        noise.start(t);
+    }
+    playLatch() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(800, t);
+        osc.frequency.exponentialRampToValueAtTime(200, t + 0.04);
+        gain.gain.setValueAtTime(0.15, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(t); osc.stop(t + 0.06);
+    }
+}
+const audio = new AudioController();
+
+/* =========================================================================
+   2. HIGH PRECISION PHYSICS ENGINE
+   ========================================================================= */
+class PhysicsEngine {
+    constructor() { this.reset(1.0, 25.0, 1.0, 0.0); }
+
+    reset(m_P, k_eq, A_0, damping = 0.0) {
+        this.m_P = m_P;
+        this.m_Q = 0.0;
+        this.k_eq = k_eq;
+        this.b = damping;
+        this.m_total = m_P;
         
-        this.omega_init = this.omega; this.A_init = this.A; this.phi_init = this.phi;
+        this.x = A_0;
+        this.v = 0.0;
+        this.a = 0.0;
+        this.F = 0.0;
+        this.initialA = A_0;
         
-        this.t_start = 0.0; this.collision_queued = false; this.m_Q_pending = 0.0;
-        this.t_drop_queued = -1.0; this.t_collision_actual = Infinity;
+        this.collision_queued = false;
+        this.m_Q_pending = 0.0;
         this.energy_lost = 0.0;
+        this.t_elapsed = 0.0;
+        this.isDragging = false;
     }
 
-    queue_collision(m_Q, current_t) {
+    queue_collision(m_Q) {
         if (this.collision_queued || this.m_Q > 0) return;
-        
         this.collision_queued = true;
         this.m_Q_pending = m_Q;
-        this.t_drop_queued = current_t;
-        
-        let phase_current = this.omega_init * current_t + this.phi_init;
-        let n = Math.ceil((phase_current - Math.PI/2) / Math.PI);
-        let target_phase = n * Math.PI + Math.PI/2;
-        let dt = (target_phase - phase_current) / this.omega_init;
-        
-        this.t_collision_actual = current_t + dt;
+        audio.playLatch();
     }
 
-    execute_collision(t) {
-        let v_old = -this.A_init * this.omega_init * Math.sin(this.omega_init * t + this.phi_init);
-        let p_initial = this.m_P * v_old;
-        
-        this.m_total = this.m_P + this.m_Q_pending;
-        this.m_Q = this.m_Q_pending;
-        let v_new = p_initial / this.m_total;
-        
-        let ke_old = 0.5 * this.m_P * (v_old * v_old);
-        let ke_new = 0.5 * this.m_total * (v_new * v_new);
-        this.energy_lost = ke_old - ke_new;
-        
-        this.omega = Math.sqrt(this.k_eq / this.m_total);
-        this.A = Math.abs(v_new / this.omega);
-        this.phi = v_new > 0 ? -Math.PI / 2 : Math.PI / 2;
-        this.collision_queued = false;
+    step(dt) {
+        if (this.isDragging) return;
+
+        const x_prev = this.x;
+        const v_prev = this.v;
+
+        // Collision trigger when crossing equilibrium (x = 0)
+        if (this.collision_queued && ((x_prev >= 0 && this.x <= 0) || (x_prev <= 0 && this.x >= 0) || Math.abs(this.x) < 0.015)) {
+            const p_initial = this.m_P * this.v;
+            const ke_pre = 0.5 * this.m_P * (this.v ** 2);
+            this.m_total = this.m_P + this.m_Q_pending;
+            this.m_Q = this.m_Q_pending;
+            this.v = p_initial / this.m_total;
+            const ke_post = 0.5 * this.m_total * (this.v ** 2);
+            this.energy_lost = ke_pre - ke_post;
+            this.collision_queued = false;
+            audio.playDropImpact();
+            triggerImpactFx(container.clientWidth / 2, (container.clientHeight / 2 - 20));
+        }
+
+        const F_spring = -this.k_eq * this.x;
+        const F_damping = -this.b * this.v;
+        this.F = F_spring + F_damping;
+        this.a = this.F / this.m_total;
+
+        this.v += this.a * dt;
+        this.x += this.v * dt;
+        this.t_elapsed += dt;
     }
 
-    evaluate_at(t) {
-        if (this.collision_queued && t >= this.t_collision_actual) {
-            this.execute_collision(this.t_collision_actual);
-        }
-        
-        let x, v;
-        if (this.m_Q > 0 && t >= this.t_collision_actual) {
-            let dt = t - this.t_collision_actual;
-            x = this.A * Math.cos(this.omega * dt + this.phi);
-            v = -this.A * this.omega * Math.sin(this.omega * dt + this.phi);
-        } else {
-            x = this.A_init * Math.cos(this.omega_init * t + this.phi_init);
-            v = -this.A_init * this.omega_init * Math.sin(this.omega_init * t + this.phi_init);
-        }
-        return { x, v, m_active: this.m_Q > 0 ? this.m_total : this.m_P };
+    getTelemetry() {
+        const KE = 0.5 * this.m_total * (this.v ** 2);
+        const PE = 0.5 * this.k_eq * (this.x ** 2);
+        const E_total = KE + PE;
+        const omega = Math.sqrt(this.k_eq / this.m_total);
+        const period = 2 * Math.PI / omega;
+        const freq = 1 / period;
+        return {
+            x: this.x, v: this.v, a: this.a, F: this.F,
+            KE, PE, E_total, period, freq,
+            k_eq: this.k_eq, m_total: this.m_total
+        };
     }
 }
 
-// ==========================================
-// 2. 5E INQUIRY MANAGER
-// ==========================================
+/* =========================================================================
+   3. 5E INQUIRY CONTENT & DOCUMENT EXPORT
+   ========================================================================= */
 const PROMPTS = [
-    { stage: "ENGAGE", text: "Set the simulation to Single Spring. Observe the position and energy graphs. Where is the block when Kinetic Energy is at its maximum? Where is it when Potential Energy is at its maximum?" },
-    { stage: "EXPLORE", text: "Click 'Drop Block Q' while the block is oscillating. The block will drop when P passes equilibrium. What happens instantly to the Kinetic Energy? What happens to the maximum amplitude on the position graph?" },
-    { stage: "EXPLAIN", text: "Using the law of conservation of momentum, explain *why* the velocity (and therefore the Kinetic Energy) decreases when Block Q sticks to Block P at the equilibrium position." },
-    { stage: "ELABORATE", text: "Switch the configuration to Parallel Springs, then to Series Springs. How does adding a spring in parallel affect the equivalent spring constant k_eq and the period of oscillation T compared to adding it in series?" },
-    { stage: "EVALUATE", text: "Let Block P have mass m and Block Q have mass 2m. Determine the exact mathematical ratio of the new period T_PQ to the original period T_P. Use the simulation data to verify your theoretical ratio." }
+    {
+        stage: "ENGAGE",
+        text: "Compare the Single Spring and Parallel Spring configurations with identical initial amplitudes (e.g., 1.0 m). Observe the velocity and acceleration graphs. Why does the Parallel system oscillate noticeably faster than the Single spring?"
+    },
+    {
+        stage: "EXPLORE",
+        text: "Switch to Series Springs. Compare the measured equivalent spring constant k_eq with Single and Parallel. Is the Series configuration easier or harder to stretch/compress for a given pulling force? Cite the stiffness metric in your explanation."
+    },
+    {
+        stage: "EXPLAIN",
+        text: "Derive mathematically why connecting two springs in parallel doubles the stiffness (k_eff = k₁ + k₂), while connecting them in series halves it for identical springs (1/k_eff = 1/k₁ + 1/k₂). Focus on the division of force vs. addition of displacements."
+    },
+    {
+        stage: "ELABORATE",
+        text: "With the simulation oscillating, click 'Drop Block Q' at equilibrium (x = 0). Examine the Energy graphs and Force graph before and after collision. Why does Kinetic Energy decrease immediately, and what happens to the subsequent amplitude and period?"
+    },
+    {
+        stage: "EVALUATE",
+        text: "An engineer needs to design a suspension system that must stretch 0.40 m when subjected to a 200 N load. Which configuration (Single, Series, or Parallel) should be chosen if only standard 250 N/m springs are available in inventory? Show calculations."
+    }
 ];
 
 const inquiry = {
     idx: 0,
     answers: Array(5).fill(""),
-    
     init() {
-        const saved = localStorage.getItem('shm_lab_answers_final');
-        if (saved) this.answers = JSON.parse(saved);
-        
+        const saved = localStorage.getItem('shm_vertical_5e_v2');
+        if (saved) { try { this.answers = JSON.parse(saved); } catch(e){} }
         document.getElementById('qa-answer').addEventListener('input', e => {
             this.answers[this.idx] = e.target.value;
-            localStorage.setItem('shm_lab_answers_final', JSON.stringify(this.answers));
+            localStorage.setItem('shm_vertical_5e_v2', JSON.stringify(this.answers));
         });
         this.render();
     },
@@ -396,134 +706,680 @@ const inquiry = {
     next() { if (this.idx < 4) { this.idx++; this.render(); } },
     async exportDOCX() {
         const name = document.getElementById('student-name').value.trim();
-        if (!name) return alert("Please enter your name.");
-        
-        if (typeof docx === 'undefined') {
-            return alert("Document export library failed to load. Please check your internet connection.");
-        }
-        
+        if (!name) return alert("Please enter your name at the top before exporting.");
+        if (typeof docx === 'undefined') return alert("Docx library not loaded.");
         const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
         const children = [
-            new Paragraph({ text: "AP Physics: SHM Lab Answers", heading: HeadingLevel.HEADING_1 }),
-            new Paragraph({ text: `Student: ${name}` }),
-            new Paragraph({ text: `Date: ${new Date().toLocaleString()}\n` })
+            new Paragraph({ text: "AP Physics C: Series & Parallel Springs SHM Lab", heading: HeadingLevel.HEADING_1 }),
+            new Paragraph({ text: `Student Investigator: ${name}` }),
+            new Paragraph({ text: `Date of Lab: ${new Date().toLocaleString()}\n` })
         ];
-        
         PROMPTS.forEach((p, i) => {
-            children.push(new Paragraph({ text: `[${p.stage}] Prompt ${i + 1}:`, heading: HeadingLevel.HEADING_2 }));
+            children.push(new Paragraph({ text: `[${p.stage}] Question ${i + 1}:`, heading: HeadingLevel.HEADING_2 }));
             children.push(new Paragraph({ children: [new TextRun({ text: p.text, italics: true })] }));
-            children.push(new Paragraph({ text: this.answers[i] || "(No answer)" }));
+            children.push(new Paragraph({ text: this.answers[i] || "(No written response provided)" }));
             children.push(new Paragraph({ text: "" }));
         });
-        
         const doc = new Document({ sections: [{ properties: {}, children }] });
         try {
             const blob = await Packer.toBlob(doc);
-            saveAs(blob, `SHM_Lab_${name.replace(/\s+/g, '_')}.docx`);
+            saveAs(blob, `Springs_SHM_Lab_${name.replace(/\s+/g, '_')}.docx`);
         } catch (e) {
+            alert("Error exporting document. See console.");
             console.error(e);
-            alert("There was an error generating the document. See console for details.");
         }
     }
 };
 
-// ==========================================
-// 3. GUI & VISUALIZATION CONTROLLER
-// ==========================================
-const engine = new PhysicsEngine();
-let isPlaying = false;
-let t_current = 0.0;
-let lastTime = 0;
-let chartUpdateCounter = 0; // Fixed: Defined counter for smooth rendering throttle
+/* =========================================================================
+   4. ADVANCED VISUAL PARTICLES & SHOCKWAVE SYSTEM
+   ========================================================================= */
+let particles = [];
+let shockwaves = [];
 
-// Setup Canvas
+function triggerImpactFx(x, y) {
+    shockwaves.push({ x, y, radius: 10, maxRadius: 85, alpha: 1.0 });
+    for (let i = 0; i < 35; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 160 + 40;
+        particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 1.0,
+            size: Math.random() * 3 + 2,
+            color: Math.random() > 0.4 ? '#f59e0b' : '#fef08a'
+        });
+    }
+}
+
+function updateAndDrawParticles(ctx, dt) {
+    // Shockwaves
+    for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const sw = shockwaves[i];
+        sw.radius += 120 * dt;
+        sw.alpha -= 1.8 * dt;
+        if (sw.alpha <= 0) {
+            shockwaves.splice(i, 1);
+            continue;
+        }
+        ctx.save();
+        ctx.strokeStyle = `rgba(255, 184, 0, ${sw.alpha})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // Spark Particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 300 * dt; // gravity
+        p.alpha -= 1.6 * dt;
+        if (p.alpha <= 0) {
+            particles.splice(i, 1);
+            continue;
+        }
+        ctx.save();
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+/* =========================================================================
+   5. 3D RENDERER WITH LIVE ENERGY METER & AMPLITUDE ENVELOPE
+   ========================================================================= */
 const canvas = document.getElementById('simCanvas');
 const ctx = canvas.getContext('2d');
 const container = document.getElementById('canvas-container');
 
 function resizeCanvas() {
-    canvas.width = container.clientWidth;
-    canvas.height = container.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = container.clientWidth * dpr;
+    canvas.height = container.clientHeight * dpr;
+    ctx.scale(dpr, dpr);
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
-// Setup Charts (Chart.js)
-Chart.defaults.color = '#8B949E';
-Chart.defaults.font.family = "'Segoe UI', sans-serif";
+const engine = new PhysicsEngine();
+let isPlaying = false;
+let simSpeed = 1.0;
+let graphMode = 'motion';
+let showEnergyOverlay = false;
+let historyData = { t: [], x: [], v: [], a: [], F: [], ke: [], pe: [], te: [] };
 
-const chartOptions = (title) => ({
-    responsive: true, maintainAspectRatio: false, animation: false,
-    elements: { 
-        point: { radius: 0 }, 
-        // THE FIX: tension 0.4 enables beautiful smooth bezier curves for perfect sine waves
-        line: { tension: 0.4, borderWidth: 2.5 } 
-    },
-    plugins: { legend: { display: false }, title: { display: true, text: title, color: '#C9D1D9' } },
-    scales: { x: { display: false }, y: { grid: { color: '#30363D' }, grace: '5%' } }
-});
+let isDraggingBlock = false;
+let dragStartY = 0;
+let dragStartDisplacement = 0;
 
-// THE FIX: Reduced to 120 points to stretch the waves horizontally
-const maxDataPoints = 120; 
-const createChart = (id, title, color) => new Chart(document.getElementById(id), {
-    type: 'line',
-    data: { labels: Array(maxDataPoints).fill(''), datasets: [{ data: Array(maxDataPoints).fill(0), borderColor: color }] },
-    options: chartOptions(title)
-});
+/* --- Realistic 3D Volumetric Spring Rendering with Stress Glow --- */
+function draw3DSpring(startX, startY, endY, springK, colorTheme = 'silver') {
+    const dy = endY - startY;
+    const coils = Math.max(8, Math.min(22, Math.floor(14 + springK * 0.1)));
+    const radius = 18;
+    const wireThickness = Math.max(2.5, Math.min(6.0, 2.0 + Math.sqrt(springK) * 0.4));
+    
+    // Spring tension / compression strain glow
+    const naturalLen = 140;
+    const strain = (dy - naturalLen) / naturalLen;
+    if (Math.abs(strain) > 0.2) {
+        ctx.save();
+        ctx.strokeStyle = strain > 0 ? 'rgba(245, 158, 11, 0.18)' : 'rgba(0, 229, 255, 0.18)';
+        ctx.lineWidth = wireThickness + 10;
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(startX, endY);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    const leadLen = 22;
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = wireThickness;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(startX, startY + leadLen);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(startX, endY - leadLen);
+    ctx.lineTo(startX, endY);
+    ctx.stroke();
+
+    const activeTop = startY + leadLen;
+    const activeBottom = endY - leadLen;
+    const activeLen = activeBottom - activeTop;
+    const coilStep = activeLen / coils;
+
+    for (let i = 0; i < coils; i++) {
+        const y0 = activeTop + i * coilStep;
+        const y1 = y0 + coilStep * 0.5;
+        const y2 = y0 + coilStep;
+
+        // BACK SEGMENT
+        ctx.beginPath();
+        ctx.strokeStyle = colorTheme === 'gold' ? '#785310' : '#334155';
+        ctx.lineWidth = wireThickness * 0.9;
+        ctx.moveTo(startX + radius, y1);
+        ctx.bezierCurveTo(startX + radius * 0.5, y1 - coilStep * 0.25, startX - radius * 0.5, y0 + coilStep * 0.25, startX - radius, y0);
+        ctx.stroke();
+
+        // FRONT SEGMENT
+        ctx.beginPath();
+        const grad = ctx.createLinearGradient(startX - radius, y0, startX + radius, y2);
+        if (colorTheme === 'gold') {
+            grad.addColorStop(0, '#d97706');
+            grad.addColorStop(0.35, '#fde68a');
+            grad.addColorStop(0.7, '#b45309');
+            grad.addColorStop(1, '#78350f');
+        } else {
+            grad.addColorStop(0, '#64748b');
+            grad.addColorStop(0.35, '#f8fafc');
+            grad.addColorStop(0.7, '#94a3b8');
+            grad.addColorStop(1, '#475569');
+        }
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = wireThickness;
+        ctx.moveTo(startX - radius, y0);
+        ctx.bezierCurveTo(startX - radius * 0.3, y0 + coilStep * 0.45, startX + radius * 0.8, y1 + coilStep * 0.1, startX + radius, y1);
+        ctx.stroke();
+    }
+}
+
+function drawArrow(fromX, fromY, toX, toY, color, label) {
+    const headlen = 9;
+    const dx = toX - fromX;
+    const dy = toY - fromY;
+    const angle = Math.atan2(dy, dx);
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(fromX, fromY);
+    ctx.lineTo(toX, toY);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(toX, toY);
+    ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.font = 'bold 13px -apple-system, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, toX + 8, toY);
+    ctx.restore();
+}
+
+/* --- Floating Live Energy Bar Gauge Widget --- */
+function drawLiveEnergyHUD(ctx, x, y, telem) {
+    const w = 150;
+    const h = 75;
+    ctx.save();
+    ctx.fillStyle = 'rgba(16, 22, 34, 0.82)';
+    ctx.strokeStyle = 'rgba(90, 115, 150, 0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, 8);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.font = 'bold 10px -apple-system, sans-serif';
+    ctx.fillStyle = '#94a3b8';
+    ctx.textAlign = 'left';
+    ctx.fillText('⚡ ENERGY BALANCE', x + 10, y + 16);
+
+    const maxE = Math.max(1, telem.E_total + engine.energy_lost);
+    const barW = 85;
+    const barH = 7;
+
+    // KE bar
+    const keRatio = Math.max(0, Math.min(1, telem.KE / maxE));
+    ctx.fillStyle = '#00F59B';
+    ctx.fillText('KE', x + 10, y + 33);
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.fillRect(x + 32, y + 26, barW, barH);
+    ctx.fillStyle = '#00F59B';
+    ctx.fillRect(x + 32, y + 26, barW * keRatio, barH);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText(`${telem.KE.toFixed(1)}J`, x + 122, y + 33);
+
+    // PE bar
+    const peRatio = Math.max(0, Math.min(1, telem.PE / maxE));
+    ctx.fillStyle = '#00E5FF';
+    ctx.fillText('PE', x + 10, y + 49);
+    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+    ctx.fillRect(x + 32, y + 42, barW, barH);
+    ctx.fillStyle = '#00E5FF';
+    ctx.fillRect(x + 32, y + 42, barW * peRatio, barH);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillText(`${telem.PE.toFixed(1)}J`, x + 122, y + 49);
+
+    // Lost Thermal bar
+    if (engine.energy_lost > 0.05) {
+        const lostRatio = Math.max(0, Math.min(1, engine.energy_lost / maxE));
+        ctx.fillStyle = '#FF3B30';
+        ctx.fillText('ΔQ', x + 10, y + 65);
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(x + 32, y + 58, barW, barH);
+        ctx.fillStyle = '#FF3B30';
+        ctx.fillRect(x + 32, y + 58, barW * lostRatio, barH);
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillText(`${engine.energy_lost.toFixed(1)}J`, x + 122, y + 65);
+    }
+    ctx.restore();
+}
+
+function renderScene() {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    ctx.clearRect(0, 0, w, h);
+
+    const cX = w / 2;
+    const eqY = h / 2 - 20;
+    const ceilingY = eqY - 210;
+    const scale = 70;
+    const blockY = eqY + (engine.x * scale);
+
+    const config = document.querySelector('input[name="config"]:checked').value;
+    const k1 = parseFloat(document.getElementById('in-k1').value);
+    const k2 = parseFloat(document.getElementById('in-k2').value);
+
+    // 1. Grid Background
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+    ctx.lineWidth = 1;
+    for (let y = 40; y < h; y += 30) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+
+    // Dynamic Translucent Amplitude Corridor Shading
+    const currentMaxA = Math.max(0.1, Math.abs(engine.x), engine.initialA * (engine.m_Q > 0 ? Math.sqrt(engine.m_P / engine.m_total) : 1));
+    const ampPx = currentMaxA * scale;
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 229, 255, 0.035)';
+    ctx.fillRect(cX - 120, eqY - ampPx, 240, ampPx * 2);
+    ctx.strokeStyle = 'rgba(245, 158, 11, 0.35)';
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(cX - 120, eqY - ampPx); ctx.lineTo(cX + 120, eqY - ampPx);
+    ctx.moveTo(cX - 120, eqY + ampPx); ctx.lineTo(cX + 120, eqY + ampPx);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Equilibrium marker (x = 0)
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 6]);
+    ctx.beginPath();
+    ctx.moveTo(cX - 160, eqY);
+    ctx.lineTo(cX + 160, eqY);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.fillStyle = 'rgba(0, 229, 255, 0.8)';
+    ctx.font = '600 12px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Equilibrium Position (x = 0)', cX, eqY + 18);
+
+    // 2. Ceiling Bracket
+    const ceilWidth = 190;
+    const ceilHeight = 22;
+    const ceilGrad = ctx.createLinearGradient(cX - ceilWidth / 2, ceilingY - ceilHeight, cX + ceilWidth / 2, ceilingY);
+    ceilGrad.addColorStop(0, '#1e293b');
+    ceilGrad.addColorStop(0.5, '#475569');
+    ceilGrad.addColorStop(1, '#0f172a');
+    ctx.fillStyle = ceilGrad;
+    ctx.fillRect(cX - ceilWidth / 2, ceilingY - ceilHeight, ceilWidth, ceilHeight);
+    ctx.strokeStyle = '#64748b';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(cX - ceilWidth / 2, ceilingY - ceilHeight, ceilWidth, ceilHeight);
+
+    for (let bx = cX - ceilWidth / 2 + 15; bx < cX + ceilWidth / 2; bx += 30) {
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath(); ctx.arc(bx, ceilingY - ceilHeight / 2, 3, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#0f172a'; ctx.stroke();
+    }
+
+    // 3. Springs
+    if (config === 'single') {
+        draw3DSpring(cX, ceilingY, blockY, k1, 'silver');
+    } else if (config === 'parallel') {
+        const offset = 34;
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(cX - offset - 10, ceilingY, offset * 2 + 20, 6);
+        draw3DSpring(cX - offset, ceilingY + 6, blockY, k1, 'silver');
+        draw3DSpring(cX + offset, ceilingY + 6, blockY, k2, 'gold');
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(cX - offset - 10, blockY - 6, offset * 2 + 20, 6);
+    } else if (config === 'series') {
+        const totalLen = Math.max(60, blockY - ceilingY);
+        const stretchRatio1 = k2 / (k1 + k2);
+        const midY = ceilingY + (totalLen * stretchRatio1);
+
+        draw3DSpring(cX, ceilingY, midY, k1, 'silver');
+        ctx.fillStyle = '#475569';
+        ctx.beginPath(); ctx.arc(cX, midY, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('k₁ ⟷ k₂', cX + 28, midY + 3);
+        draw3DSpring(cX, midY, blockY, k2, 'gold');
+    }
+
+    // 4. Block P
+    const blockW = 86;
+    const blockH = 50;
+    const bLeft = cX - blockW / 2;
+    const bTop = blockY;
+
+    // Contact drop shadow
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+    ctx.shadowBlur = 14;
+    ctx.fillRect(bLeft + 4, bTop + 4, blockW, blockH);
+    ctx.restore();
+
+    const blockGrad = ctx.createLinearGradient(bLeft, bTop, bLeft + blockW, bTop + blockH);
+    blockGrad.addColorStop(0, '#1e3a8a');
+    blockGrad.addColorStop(0.3, '#3b82f6');
+    blockGrad.addColorStop(0.7, '#2563eb');
+    blockGrad.addColorStop(1, '#1d4ed8');
+    ctx.fillStyle = blockGrad;
+    ctx.fillRect(bLeft, bTop, blockW, blockH);
+    ctx.strokeStyle = '#93c5fd';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bLeft, bTop, blockW, blockH);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.beginPath(); ctx.arc(cX, bTop, 5, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 15px -apple-system, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`P (${engine.m_P.toFixed(1)} kg)`, cX, bTop + 30);
+
+    // 5. Block Q
+    const qW = 68;
+    const qH = 34;
+    const qLeft = cX - qW / 2;
+
+    if (engine.m_Q > 0) {
+        const qTop = bTop - qH;
+        const qGrad = ctx.createLinearGradient(qLeft, qTop, qLeft + qW, qTop + qH);
+        qGrad.addColorStop(0, '#dc2626');
+        qGrad.addColorStop(0.5, '#ef4444');
+        qGrad.addColorStop(1, '#991b1b');
+        ctx.fillStyle = qGrad;
+        ctx.fillRect(qLeft, qTop, qW, qH);
+        ctx.strokeStyle = '#fca5a5';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(qLeft, qTop, qW, qH);
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 13px -apple-system, sans-serif';
+        ctx.fillText(`+Q (${engine.m_Q.toFixed(1)} kg)`, cX, qTop + 21);
+
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(cX - 6, bTop - 4, 12, 8);
+    } else if (engine.collision_queued) {
+        const waitY = eqY - 140;
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.85)';
+        ctx.fillRect(qLeft, waitY, qW, qH);
+        ctx.strokeStyle = '#fca5a5';
+        ctx.strokeRect(qLeft, waitY, qW, qH);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px -apple-system, sans-serif';
+        ctx.fillText(`Q (ARMED)`, cX, waitY + 20);
+
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(cX, waitY + qH); ctx.lineTo(cX, eqY); ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // 6. Vector Overlays
+    if (document.getElementById('tog-vectors').checked) {
+        const v = engine.v;
+        const a = engine.a;
+        const F = engine.F;
+        const vX = cX - 65;
+        const aX = cX + 65;
+        const fX = cX + 115;
+        const midBlockY = bTop + blockH / 2;
+
+        if (Math.abs(v) > 0.05) {
+            drawArrow(vX, midBlockY, vX, midBlockY + v * 30, '#00F59B', `v: ${v.toFixed(2)} m/s`);
+        }
+        if (Math.abs(a) > 0.08) {
+            drawArrow(aX, midBlockY, aX, midBlockY + a * 12, '#F59E0B', `a: ${a.toFixed(2)} m/s²`);
+        }
+        if (Math.abs(F) > 0.5) {
+            drawArrow(fX, midBlockY, fX, midBlockY + F * 2.8, '#FF3B30', `F_net: ${F.toFixed(1)} N`);
+        }
+    }
+
+    // 7. Live Floating Energy Meter HUD
+    drawLiveEnergyHUD(ctx, w - 170, 16, engine.getTelemetry());
+
+    // 8. Particles & Shockwaves
+    updateAndDrawParticles(ctx, 1 / 60);
+}
+
+/* =========================================================================
+   6. GRAPH MANAGER (CHART.JS)
+   ========================================================================= */
+Chart.defaults.color = '#7D8B9F';
+Chart.defaults.font.family = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+const maxPoints = 140;
+function createChartInstance(canvasId, title, color, unit) {
+    return new Chart(document.getElementById(canvasId), {
+        type: 'line',
+        data: {
+            labels: Array(maxPoints).fill(''),
+            datasets: [{
+                label: title,
+                data: Array(maxPoints).fill(0),
+                borderColor: color,
+                borderWidth: 2.2,
+                pointRadius: 0,
+                tension: 0.35,
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            plugins: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: `${title} (${unit})`,
+                    color: '#F0F6FC',
+                    font: { size: 11, weight: 'bold' },
+                    padding: { top: 2, bottom: 4 }
+                }
+            },
+            scales: {
+                x: { display: false },
+                y: {
+                    grid: { color: 'rgba(255, 255, 255, 0.06)' },
+                    ticks: { font: { size: 10 } },
+                    grace: '8%'
+                }
+            }
+        }
+    });
+}
 
 const charts = {
-    pos: createChart('chartPos', 'Position (m)', '#87CEFA'),
-    ke: createChart('chartKE', 'Kinetic Energy (J)', '#F85149'), 
-    pe: createChart('chartPE', 'Potential Energy (J)', '#2EA043') 
+    c1: createChartInstance('chart1', 'Position x(t)', '#00E5FF', 'm'),
+    c2: createChartInstance('chart2', 'Acceleration a(t)', '#F59E0B', 'm/s²'),
+    c3: createChartInstance('chart3', 'Restoring Net Force F(t)', '#FF3B30', 'N')
 };
 
-let historyData = { t: [], x: [], v: [], ke: [], pe: [] };
+let chartThrottle = 0;
+function updateGraphs(telem) {
+    if (chartThrottle++ % 2 !== 0) return;
 
+    if (graphMode === 'motion') {
+        pushData(charts.c1, telem.x);
+        pushData(charts.c2, telem.a);
+        pushData(charts.c3, telem.F);
+    } else {
+        pushData(charts.c1, telem.KE);
+        pushData(charts.c2, telem.PE);
+        pushData(charts.c3, telem.E_total);
+    }
+}
+
+function pushData(chart, val) {
+    chart.data.datasets[0].data.push(val);
+    chart.data.datasets[0].data.shift();
+    chart.update('none');
+}
+
+/* =========================================================================
+   7. UI CONTROLLER
+   ========================================================================= */
 const ui = {
+    setSpeed(speed, btn) {
+        simSpeed = speed;
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        document.getElementById('lbl-speed').innerText = `${speed.toFixed(2).replace(/\.00$/, '')}x`;
+    },
+
+    setGraphMode(mode) {
+        graphMode = mode;
+        document.getElementById('pill-motion').classList.toggle('active', mode === 'motion');
+        document.getElementById('pill-energy').classList.toggle('active', mode === 'energy');
+
+        if (mode === 'motion') {
+            charts.c1.options.plugins.title.text = 'Position x(t) (m)';
+            charts.c1.data.datasets[0].borderColor = '#00E5FF';
+            charts.c2.options.plugins.title.text = 'Acceleration a(t) (m/s²)';
+            charts.c2.data.datasets[0].borderColor = '#F59E0B';
+            charts.c3.options.plugins.title.text = 'Restoring Net Force F(t) (N)';
+            charts.c3.data.datasets[0].borderColor = '#FF3B30';
+        } else {
+            charts.c1.options.plugins.title.text = 'Kinetic Energy KE (J)';
+            charts.c1.data.datasets[0].borderColor = '#00F59B';
+            charts.c2.options.plugins.title.text = 'Elastic Potential Energy PE (J)';
+            charts.c2.data.datasets[0].borderColor = '#388BFD';
+            charts.c3.options.plugins.title.text = 'Total Mechanical Energy E_tot (J)';
+            charts.c3.data.datasets[0].borderColor = '#A371F7';
+        }
+        this.clearChartData();
+    },
+
+    clearChartData() {
+        Object.values(charts).forEach(c => {
+            c.data.datasets[0].data = Array(maxPoints).fill(0);
+            c.update('none');
+        });
+    },
+
+    toggleEnergyOverlay() {
+        this.setGraphMode(graphMode === 'motion' ? 'energy' : 'motion');
+    },
+
+    onConfigChange() {
+        const config = document.querySelector('input[name="config"]:checked').value;
+        document.querySelectorAll('.config-segmented label').forEach(lbl => lbl.classList.remove('active'));
+        document.getElementById(`lbl-cfg-${config}`).classList.add('active');
+        document.getElementById('row-k2').style.display = (config === 'single') ? 'none' : 'block';
+        this.updateKeq();
+    },
+
     updateLabels() {
-        document.getElementById('lbl-mp').innerText = document.getElementById('in-mp').value + ' kg';
-        document.getElementById('lbl-mq').innerText = document.getElementById('in-mq').value + ' kg';
+        document.getElementById('lbl-mp').innerText = parseFloat(document.getElementById('in-mp').value).toFixed(1) + ' kg';
+        document.getElementById('lbl-mq').innerText = parseFloat(document.getElementById('in-mq').value).toFixed(1) + ' kg';
         document.getElementById('lbl-k1').innerText = document.getElementById('in-k1').value + ' N/m';
         document.getElementById('lbl-k2').innerText = document.getElementById('in-k2').value + ' N/m';
-        document.getElementById('lbl-a').innerText = document.getElementById('in-a').value + ' m';
+        document.getElementById('lbl-a').innerText = parseFloat(document.getElementById('in-a').value).toFixed(1) + ' m';
+        document.getElementById('lbl-b').innerText = parseFloat(document.getElementById('in-b').value).toFixed(2);
+        audio.enabled = document.getElementById('tog-sound').checked;
         if (!isPlaying) this.updateKeq();
     },
 
     updateKeq() {
-        if (isPlaying) return;
-        t_current = 0.0;
-        historyData = { t: [], x: [], v: [], ke: [], pe: [] };
-        
         const config = document.querySelector('input[name="config"]:checked').value;
         const k1 = parseFloat(document.getElementById('in-k1').value);
         const k2 = parseFloat(document.getElementById('in-k2').value);
-        document.getElementById('in-k2').disabled = (config === 'single');
-        
+        const mp = parseFloat(document.getElementById('in-mp').value);
+        const a0 = parseFloat(document.getElementById('in-a').value);
+        const b = parseFloat(document.getElementById('in-b').value);
+
         let k_eq = k1;
-        if (config === 'parallel') k_eq = k1 + k2;
-        if (config === 'series') k_eq = (k1 * k2) / (k1 + k2);
-        
-        const m_p = parseFloat(document.getElementById('in-mp').value);
-        const a_0 = parseFloat(document.getElementById('in-a').value);
-        
-        engine.reset(m_p, k_eq, a_0);
-        
-        document.getElementById('tel-k').innerText = `k_eq: ${k_eq.toFixed(1)} N/m`;
-        document.getElementById('tel-v').innerText = `v_max: ${(a_0 * engine.omega).toFixed(2)} m/s`;
-        document.getElementById('tel-pe').innerText = `PE_max: ${(0.5 * k_eq * a_0**2).toFixed(1)} J`;
-        document.getElementById('tel-t').innerText = `Period (T): ${(2 * Math.PI / engine.omega).toFixed(2)} s`;
-        
+        const tag = document.getElementById('card-stiffness-tag');
+        const desc = document.getElementById('card-stiffness-desc');
+        const ease = document.getElementById('card-stretch-ease');
+        const cfgName = document.getElementById('card-config-name');
+
+        if (config === 'single') {
+            k_eq = k1;
+            cfgName.innerText = "Single Spring";
+            tag.className = "stiffness-tag standard";
+            tag.innerText = "Standard Stiffness";
+            desc.innerHTML = `Baseline Hooke's Law: <strong>k_eq = ${k_eq.toFixed(1)} N/m</strong>. Direct 1-to-1 displacement response.`;
+            ease.innerHTML = `Force required to stretch 0.5 m: <strong>${(k_eq * 0.5).toFixed(1)} N</strong>`;
+        } else if (config === 'parallel') {
+            k_eq = k1 + k2;
+            const pct1 = ((k1 / k_eq) * 100).toFixed(0);
+            const pct2 = ((k2 / k_eq) * 100).toFixed(0);
+            cfgName.innerText = "Parallel Springs (Side-by-Side)";
+            tag.className = "stiffness-tag stiff";
+            tag.innerText = "🛡️ Stiffest (Hard to Stretch)";
+            desc.innerHTML = `Springs share displacement (Δy₁ = Δy₂). Forces add: <strong>k_eq = k₁ + k₂ = ${k_eq.toFixed(1)} N/m</strong>.<br><span style="color:var(--accent-cyan); font-size:11px;">⚖️ <strong>Load Share:</strong> Spring 1 (${k1} N/m) carries <strong>${pct1}%</strong> of force | Spring 2 (${k2} N/m) carries <strong>${pct2}%</strong>.</span>`;
+            ease.innerHTML = `Force required to stretch 0.5 m: <strong>${(k_eq * 0.5).toFixed(1)} N</strong> (Requires MUCH more force!)`;
+        } else if (config === 'series') {
+            k_eq = (k1 * k2) / (k1 + k2);
+            const pct1 = ((k2 / (k1 + k2)) * 100).toFixed(0);
+            const pct2 = ((k1 / (k1 + k2)) * 100).toFixed(0);
+            cfgName.innerText = "Series Springs (End-to-End)";
+            tag.className = "stiffness-tag compliant";
+            tag.innerText = "🪶 Softest (High Compliance - Easy to Stretch)";
+            desc.innerHTML = `Tension is equal in both springs (F₁ = F₂ = F_net), but stretches add up (Δy = Δy₁ + Δy₂): <strong>k_eq = ${k_eq.toFixed(1)} N/m</strong>.<br><span style="color:var(--accent-cyan); font-size:11px;">📏 <strong>Stretch Share:</strong> Spring 1 stretches <strong>${pct1}%</strong> | Spring 2 stretches <strong>${pct2}%</strong> (Softer spring elongates more!).</span>`;
+            ease.innerHTML = `Force required to stretch 0.5 m: <strong>${(k_eq * 0.5).toFixed(1)} N</strong> (Requires LEAST force!)`;
+        }
+
+        engine.reset(mp, k_eq, a0, b);
+        this.clearChartData();
+        historyData = { t: [], x: [], v: [], a: [], F: [], ke: [], pe: [], te: [] };
+
+        const telem = engine.getTelemetry();
+        document.getElementById('hud-keff').innerText = `${telem.k_eq.toFixed(1)} N/m`;
+        document.getElementById('hud-period').innerText = `${telem.period.toFixed(2)} s`;
+        document.getElementById('hud-freq').innerText = `${telem.freq.toFixed(2)} Hz`;
+        document.getElementById('hud-fnet').innerText = `${telem.F.toFixed(1)} N`;
+        document.getElementById('hud-vel').innerText = `${telem.v.toFixed(2)} m/s`;
+
         document.getElementById('btn-drop').disabled = true;
-        document.getElementById('btn-drop').innerText = "⏬ Drop Block Q (Queues at x=0)";
-        
-        this.stepSimulation(true);
+        document.getElementById('btn-drop').innerText = "⏬ Drop Block Q (Inelastic Collision at x=0)";
     },
 
     togglePlay() {
         isPlaying = !isPlaying;
-        document.getElementById('btn-play').innerText = isPlaying ? "⏸ Pause" : "▶ Start Simulation";
+        document.getElementById('btn-play').innerText = isPlaying ? "⏸ Pause Simulation" : "▶ Start Simulation";
         document.getElementById('btn-drop').disabled = !isPlaying || engine.collision_queued || engine.m_Q > 0;
-        if (isPlaying) lastTime = performance.now();
+        audio.init();
     },
 
     resetSim() {
@@ -533,196 +1389,121 @@ const ui = {
     },
 
     queueDrop() {
-        engine.queue_collision(parseFloat(document.getElementById('in-mq').value), t_current);
+        const mq = parseFloat(document.getElementById('in-mq').value);
+        engine.queue_collision(mq);
         document.getElementById('btn-drop').disabled = true;
-        document.getElementById('btn-drop').innerText = "Collision Queued (Waiting for x=0)...";
-    },
-
-    stepSimulation(manual = false) {
-        if (!isPlaying && !manual) return;
-        if (isPlaying) {
-            const now = performance.now();
-            t_current += (now - lastTime) / 1000;
-            lastTime = now;
-        }
-
-        const state = engine.evaluate_at(t_current);
-        const pe = 0.5 * engine.k_eq * (state.x ** 2);
-        const ke = 0.5 * state.m_active * (state.v ** 2);
-
-        if (engine.m_Q > 0) {
-            document.getElementById('btn-drop').innerText = `Collided! Heat/Sound Loss: ${engine.energy_lost.toFixed(2)} J`;
-        }
-
-        this.drawCanvas(state.x, state.v, state.m_active);
-        
-        // Update Charts
-        if (isPlaying) {
-            
-            // THE FIX: Throttle rendering so points aren't stacked on top of each other
-            if (chartUpdateCounter++ % 2 === 0) {
-                const pushData = (chart, val) => {
-                    chart.data.datasets[0].data.push(val);
-                    chart.data.datasets[0].data.shift();
-                    chart.update();
-                };
-                pushData(charts.pos, state.x);
-                pushData(charts.ke, ke);
-                pushData(charts.pe, pe);
-            }
-
-            if (Math.random() < 0.2) {
-                historyData.t.push(t_current);
-                historyData.x.push(state.x);
-                historyData.v.push(state.v);
-                historyData.ke.push(ke);
-                historyData.pe.push(pe);
-            }
-        } else if (manual) {
-            const period = 2 * Math.PI / engine.omega_init;
-            for (let i = 0; i < maxDataPoints; i++) {
-                const t = (i / maxDataPoints) * period * 2;
-                const x = engine.A_init * Math.cos(engine.omega_init * t + engine.phi_init);
-                const v = -engine.A_init * engine.omega_init * Math.sin(engine.omega_init * t + engine.phi_init);
-                charts.pos.data.datasets[0].data[i] = x;
-                charts.ke.data.datasets[0].data[i] = 0.5 * engine.m_P * (v ** 2);
-                charts.pe.data.datasets[0].data[i] = 0.5 * engine.k_eq * (x ** 2);
-            }
-            Object.values(charts).forEach(c => c.update());
-        }
-    },
-
-    drawArrow(fromX, fromY, toX, toY, color, label) {
-        const headlen = 8;
-        const dx = toX - fromX; const dy = toY - fromY;
-        const angle = Math.atan2(dy, dx);
-        
-        ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 3; 
-        ctx.moveTo(fromX, fromY); ctx.lineTo(toX, toY);
-        ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
-        ctx.moveTo(toX, toY);
-        ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
-        ctx.stroke();
-        
-        ctx.fillStyle = color; ctx.font = 'bold 16px sans-serif';
-        ctx.fillText(label, toX + 15, toY + 5);
-    },
-
-    drawCanvas(x, v, m_active) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        const eqY = canvas.height / 2;
-        const ceilingY = eqY - 220;
-        const scale = 75;
-        const blockY = eqY + (x * scale);
-        const centerX = canvas.width / 2;
-
-        ctx.fillStyle = '#30363D'; 
-        ctx.fillRect(centerX - 80, ceilingY - 20, 160, 20);
-
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 2; ctx.setLineDash([8, 8]);
-        ctx.beginPath(); ctx.moveTo(centerX - 180, eqY); ctx.lineTo(centerX + 180, eqY); ctx.stroke(); ctx.setLineDash([]);
-        ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '14px Segoe UI'; ctx.textAlign = 'center';
-        ctx.fillText('Equilibrium (x = 0)', centerX, eqY + 20);
-
-        const drawSpring = (startX, startY, endY, color) => {
-            ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            const coils = 15; const dy = (endY - startY) / coils;
-            for (let i = 1; i < coils; i++) {
-                ctx.lineTo(startX + (i % 2 === 0 ? 15 : -15), startY + i * dy);
-            }
-            ctx.lineTo(startX, endY); ctx.stroke();
-        };
-
-        const config = document.querySelector('input[name="config"]:checked').value;
-        if (config === 'single') {
-            drawSpring(centerX, ceilingY, blockY, '#8B949E');
-        } else if (config === 'parallel') {
-            drawSpring(centerX - 25, ceilingY, blockY, '#8B949E');
-            drawSpring(centerX + 25, ceilingY, blockY, '#8B949E');
-        } else if (config === 'series') {
-            const midY = (ceilingY + blockY) / 2;
-            drawSpring(centerX, ceilingY, midY, '#8B949E');
-            ctx.fillStyle = '#666'; ctx.fillRect(centerX - 15, midY - 5, 30, 10); 
-            drawSpring(centerX, midY, blockY, 'var(--accent-yellow)');
-        }
-
-        ctx.fillStyle = 'var(--accent-blue)'; ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-        ctx.fillRect(centerX - 40, blockY, 80, 50); ctx.strokeRect(centerX - 40, blockY, 80, 50);
-        ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.font = 'bold 16px sans-serif';
-        ctx.fillText('P', centerX, blockY + 30);
-
-        if (engine.m_Q > 0) {
-            ctx.fillStyle = '#F85149'; ctx.fillRect(centerX - 30, blockY - 30, 60, 30); ctx.strokeRect(centerX - 30, blockY - 30, 60, 30);
-            ctx.fillStyle = 'white'; ctx.fillText('Q', centerX, blockY - 10);
-        } else if (engine.collision_queued) {
-            const startY = ceilingY + 30;
-            const progress = Math.max(0, Math.min(1, (t_current - engine.t_drop_queued) / (engine.t_collision_actual - engine.t_drop_queued)));
-            const currY = startY + progress * (eqY - startY);
-            ctx.fillStyle = '#F85149'; ctx.fillRect(centerX - 30, currY - 30, 60, 30); ctx.strokeRect(centerX - 30, currY - 30, 60, 30);
-            ctx.fillStyle = 'white'; ctx.fillText('Q', centerX, currY - 10);
-        }
-
-        if (document.getElementById('tog-vectors').checked) {
-            const cX = centerX;
-            const cY = blockY + 25;
-            
-            const a = -(engine.omega ** 2) * x;
-            const F = m_active * a;
-            
-            if (Math.abs(v) > 0.05) {
-                this.drawArrow(cX - 60, cY, cX - 60, cY + v * 35, '#32D74B', 'v');
-            }
-            if (Math.abs(a) > 0.05) {
-                this.drawArrow(cX + 60, cY, cX + 60, cY + a * 15, '#FFCC00', 'a');
-            }
-            if (Math.abs(F) > 0.05) {
-                this.drawArrow(cX + 110, cY, cX + 110, cY + F * 3, '#FF3B30', 'F');
-            }
-        }
+        document.getElementById('btn-drop').innerText = "Collision Queued (Releases precisely at x=0)...";
     },
 
     exportCSV() {
-        const name = document.getElementById('student-name').value.trim() || "Student";
-        if (historyData.t.length === 0) return alert("Run the simulation first to gather data.");
-        
-        let csv = "Time (s),Position (m),Velocity (m/s),Kinetic Energy (J),Potential Energy (J),Total Energy (J)\n";
+        if (historyData.t.length === 0) return alert("Run the simulation first to collect data.");
+        let csv = "Time(s),Position(m),Velocity(m/s),Acceleration(m/s^2),NetForce(N),KineticEnergy(J),PotentialEnergy(J),TotalEnergy(J)\n";
         for (let i = 0; i < historyData.t.length; i++) {
-            const te = historyData.ke[i] + historyData.pe[i];
-            csv += `${historyData.t[i].toFixed(4)},${historyData.x[i].toFixed(4)},${historyData.v[i].toFixed(4)},${historyData.ke[i].toFixed(4)},${historyData.pe[i].toFixed(4)},${te.toFixed(4)}\n`;
+            csv += `${historyData.t[i].toFixed(4)},${historyData.x[i].toFixed(4)},${historyData.v[i].toFixed(4)},${historyData.a[i].toFixed(4)},${historyData.F[i].toFixed(4)},${historyData.ke[i].toFixed(4)},${historyData.pe[i].toFixed(4)},${historyData.te[i].toFixed(4)}\n`;
         }
-        
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        saveAs(blob, `SHM_Data_${name.replace(/\s+/g, '_')}.csv`);
+        saveAs(blob, "Vertical_Series_Parallel_Springs_Data.csv");
     }
 };
 
-function switchTab(tabId, btnElement) {
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    
-    document.getElementById(tabId).classList.add('active');
-    
-    if (btnElement) {
-        btnElement.classList.add('active');
+/* --- Mouse Dragging --- */
+canvas.addEventListener('mousedown', e => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseY = e.clientY - rect.top;
+    const mouseX = e.clientX - rect.left;
+    const cX = container.clientWidth / 2;
+    const eqY = container.clientHeight / 2 - 20;
+    const scale = 70;
+    const blockY = eqY + (engine.x * scale);
+
+    if (Math.abs(mouseX - cX) < 60 && Math.abs(mouseY - (blockY + 25)) < 35) {
+        isDraggingBlock = true;
+        engine.isDragging = true;
+        canvas.classList.add('grabbing');
+        dragStartY = mouseY;
+        dragStartDisplacement = engine.x;
     }
-    
-    if(tabId === 'sim-tab') {
+});
+
+window.addEventListener('mousemove', e => {
+    if (!isDraggingBlock) return;
+    const rect = canvas.getBoundingClientRect();
+    const mouseY = e.clientY - rect.top;
+    const deltaY = mouseY - dragStartY;
+    const scale = 70;
+    engine.x = dragStartDisplacement + deltaY / scale;
+    engine.v = 0;
+    engine.a = (-engine.k_eq * engine.x) / engine.m_total;
+    engine.F = -engine.k_eq * engine.x;
+});
+
+window.addEventListener('mouseup', () => {
+    if (isDraggingBlock) {
+        isDraggingBlock = false;
+        engine.isDragging = false;
+        canvas.classList.remove('grabbing');
+    }
+});
+
+/* =========================================================================
+   8. FIXED 120HZ TIMESTEP LOOP WITH VARIABLE SPEED
+   ========================================================================= */
+let lastFrameTime = performance.now();
+const fixedDt = 1 / 120;
+let accumulator = 0;
+
+function mainLoop(now) {
+    let dt = (now - lastFrameTime) / 1000;
+    if (dt > 0.1) dt = 0.1;
+    lastFrameTime = now;
+
+    if (isPlaying) {
+        accumulator += dt * simSpeed;
+        while (accumulator >= fixedDt) {
+            engine.step(fixedDt);
+            accumulator -= fixedDt;
+        }
+
+        const telem = engine.getTelemetry();
+        updateGraphs(telem);
+
+        document.getElementById('hud-fnet').innerText = `${telem.F.toFixed(1)} N`;
+        document.getElementById('hud-vel').innerText = `${telem.v.toFixed(2)} m/s`;
+
+        if (engine.m_Q > 0) {
+            document.getElementById('btn-drop').innerText = `Collided! Lost Energy: ${engine.energy_lost.toFixed(2)} J`;
+        }
+
+        if (Math.random() < 0.25) {
+            historyData.t.push(engine.t_elapsed);
+            historyData.x.push(telem.x);
+            historyData.v.push(telem.v);
+            historyData.a.push(telem.a);
+            historyData.F.push(telem.F);
+            historyData.ke.push(telem.KE);
+            historyData.pe.push(telem.PE);
+            historyData.te.push(telem.E_total);
+        }
+    }
+
+    renderScene();
+    requestAnimationFrame(mainLoop);
+}
+
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+    if (tabId === 'sim-tab') {
         resizeCanvas();
         Object.values(charts).forEach(c => c.resize());
     }
 }
 
-function animate() {
-    ui.stepSimulation();
-    requestAnimationFrame(animate);
-}
-
 inquiry.init();
-ui.updateKeq();
-requestAnimationFrame(animate);
-
+ui.updateLabels();
+requestAnimationFrame(mainLoop);
 </script>
 </body>
 </html>

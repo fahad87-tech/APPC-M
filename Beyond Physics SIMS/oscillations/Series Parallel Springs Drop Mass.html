@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AP Physics: Advanced SHM Laboratory</title>
+    <title>AP Physics C: Realistic Horizontal Series/Parallel Springs & Builder Lab</title>
     <script>
     const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
     document.documentElement.classList.add("password-locked");
@@ -89,214 +89,661 @@
     #password-gate-submit { background: #64b5f6; color: #08101c; }
   </style>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/docx@7.8.2/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
         :root {
-            --bg-deep: #050508;
-            --glass-bg: rgba(18, 18, 22, 0.85);
-            --glass-border: rgba(255, 255, 255, 0.15);
+            --bg-deep: #06080F;
+            --glass-bg: rgba(18, 24, 38, 0.88);
+            --glass-border: rgba(90, 115, 150, 0.3);
             --accent-cyan: #00E5FF;
             --accent-red: #FF3B30;
-            --accent-green: #32d74b;
-            --accent-yellow: #FFCC00;
-            --text-main: #f0f0f5;
-            --text-muted: #9aa;
+            --accent-green: #00F59B;
+            --accent-amber: #FFB800;
+            --accent-purple: #B388FF;
+            --accent-blue: #388BFD;
+            --text-main: #E2E8F0;
+            --text-muted: #8492A6;
+            --track-metal: #2C3545;
         }
+
+        * { box-sizing: border-box; }
 
         body, html {
             margin: 0; padding: 0; width: 100vw; height: 100vh;
             background-color: var(--bg-deep); color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden; user-select: none;
         }
 
-        #simCanvas { position: absolute; top: 0; left: 0; z-index: 0; }
+        #simCanvas {
+            position: absolute; top: 0; left: 0; z-index: 1;
+            width: 100%; height: 100%; cursor: grab;
+        }
+        #simCanvas.grabbing { cursor: grabbing; }
 
-        /* Left Panel: Live Telemetry */
+        /* Left Panel: Real-Time Dynamic Multi-Graph Telemetry */
         #telemetry-panel {
-            position: absolute; top: 20px; left: 20px; width: 400px; height: calc(100vh - 40px);
-            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border); border-radius: 12px;
+            position: absolute; top: 16px; left: 16px; width: 380px; height: calc(100vh - 32px);
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 14px;
             display: flex; flex-direction: column; z-index: 10;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); padding: 15px; box-sizing: border-box; gap: 10px;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65); padding: 14px; gap: 8px;
         }
         
+        .panel-header-row {
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid var(--glass-border); padding-bottom: 8px; margin-bottom: 2px;
+        }
+        .panel-title {
+            font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
+            color: var(--accent-cyan); display: flex; align-items: center; gap: 6px;
+        }
+        .graph-mode-toggle {
+            display: flex; background: rgba(0,0,0,0.4); border-radius: 6px; padding: 2px;
+            border: 1px solid var(--glass-border); gap: 2px;
+        }
+        .graph-mode-btn {
+            background: transparent; border: none; color: var(--text-muted); font-size: 11px;
+            font-weight: 700; padding: 4px 8px; border-radius: 4px; cursor: pointer; transition: 0.2s;
+        }
+        .graph-mode-btn.active {
+            background: var(--accent-cyan); color: #06080F;
+        }
+
         .chart-wrapper {
-            flex: 1; background: rgba(0,0,0,0.5); border-radius: 8px; 
-            border: 1px solid rgba(255,255,255,0.05); padding: 5px; position: relative;
+            flex: 1; min-height: 85px; background: rgba(6, 8, 15, 0.7); border-radius: 8px; 
+            border: 1px solid rgba(255,255,255,0.06); padding: 4px 6px; position: relative;
         }
 
-        /* Right Panel: Controls & Notebook */
+        /* Right Panel: Controls & Spring Builder */
         #controls-panel {
-            position: absolute; top: 20px; right: 20px; width: 440px; max-height: calc(100vh - 40px);
-            background: var(--glass-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border); border-radius: 12px;
+            position: absolute; top: 16px; right: 16px; width: 440px; max-height: calc(100vh - 32px);
+            background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border); border-radius: 14px;
             display: flex; flex-direction: column; z-index: 10;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5); overflow: hidden;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65); overflow: hidden;
         }
 
-        .tabs { display: flex; border-bottom: 1px solid var(--glass-border); background: rgba(0,0,0,0.3); }
-        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-muted); transition: 0.3s; }
-        .tab.active { color: var(--accent-cyan); border-bottom: 2px solid var(--accent-cyan); background: rgba(0, 229, 255, 0.05); }
+        .tabs { display: flex; border-bottom: 1px solid var(--glass-border); background: rgba(0,0,0,0.35); }
+        .tab {
+            flex: 1; padding: 12px 8px; text-align: center; cursor: pointer; font-weight: 700;
+            font-size: 12px; color: var(--text-muted); transition: 0.2s; display: flex;
+            align-items: center; justify-content: center; gap: 6px;
+        }
+        .tab:hover { color: var(--text-main); }
+        .tab.active {
+            color: var(--accent-cyan); border-bottom: 2px solid var(--accent-cyan);
+            background: rgba(0, 229, 255, 0.08);
+        }
+        .tab.builder-tab.active {
+            color: var(--accent-amber); border-bottom: 2px solid var(--accent-amber);
+            background: rgba(255, 184, 0, 0.08);
+        }
 
-        .panel { padding: 20px; overflow-y: auto; display: none; flex-direction: column; gap: 15px; }
+        .panel { padding: 16px; overflow-y: auto; display: none; flex-direction: column; gap: 12px; max-height: calc(100vh - 100px); }
         .panel.active { display: flex; }
+        .panel::-webkit-scrollbar { width: 4px; }
+        .panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
 
-        h2, h3 { margin: 0; font-weight: 600; font-size: 1.1em;}
-        .subtitle { color: var(--text-muted); font-size: 0.85em; display: block; }
+        /* Stiffness Educational Card */
+        .stiffness-card {
+            background: linear-gradient(135deg, rgba(22, 31, 49, 0.9), rgba(12, 17, 28, 0.95));
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            border-radius: 10px; padding: 10px 12px;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .stiffness-badge-row { display: flex; justify-content: space-between; align-items: center; }
+        .stiffness-tag {
+            font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .stiffness-tag.stiff { background: rgba(255, 59, 48, 0.2); color: #ff6b6b; border: 1px solid rgba(255,59,48,0.4); }
+        .stiffness-tag.compliant { background: rgba(0, 245, 155, 0.2); color: #00F59B; border: 1px solid rgba(0,245,155,0.4); }
+        .stiffness-tag.standard { background: rgba(56, 139, 253, 0.2); color: #58a6ff; border: 1px solid rgba(56,139,253,0.4); }
 
-        .control-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 5px; }
-        .control-group label { font-size: 0.9em; display: flex; justify-content: space-between; font-weight: 500;}
-        .val-display { color: var(--accent-cyan); font-family: monospace; font-size: 1.05em;}
-        .val-red { color: var(--accent-red); }
-        
-        select {
-            background: rgba(0,0,0,0.5); color: var(--text-main); border: 1px solid var(--glass-border);
-            padding: 8px; border-radius: 6px; font-family: inherit; font-weight: 500; outline: none;
+        /* Speed Control Segmented Buttons */
+        .speed-segmented {
+            display: flex; background: rgba(0,0,0,0.35); border-radius: 8px;
+            padding: 3px; border: 1px solid var(--glass-border); gap: 4px;
+        }
+        .speed-btn {
+            flex: 1; padding: 6px 4px; font-size: 11px; font-weight: 700;
+            border-radius: 6px; cursor: pointer; background: transparent;
+            border: none; color: var(--text-muted); transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
+        .speed-btn:hover { color: var(--text-main); }
+        .speed-btn.active {
+            background: var(--accent-cyan); color: #06080F;
+            box-shadow: 0 2px 8px rgba(0, 229, 255, 0.4);
         }
 
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; }
+        .control-group { display: flex; flex-direction: column; gap: 4px; }
+        .control-group label {
+            font-size: 12px; display: flex; justify-content: space-between; font-weight: 600; color: var(--text-main);
+        }
+        .val-display { color: var(--accent-cyan); font-family: ui-monospace, Menlo, monospace; font-size: 12px; font-weight: 700; }
+        .val-red { color: var(--accent-red); }
+
+        select {
+            background: rgba(10, 14, 22, 0.8); color: var(--text-main); border: 1px solid var(--glass-border);
+            padding: 8px 10px; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; outline: none;
+        }
+
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; outline: none; }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
-            background: var(--accent-cyan); cursor: pointer; margin-top: -5px; box-shadow: 0 0 8px var(--accent-cyan);
+            background: var(--accent-cyan); cursor: pointer; box-shadow: 0 0 10px var(--accent-cyan);
         }
 
-        /* Buttons & Toggles */
-        .btn-row { display: flex; gap: 10px; margin-top: 5px; }
+        .btn-row { display: flex; gap: 8px; }
         button {
-            flex: 1; background: #2A2A35; color: white; border: 1px solid var(--glass-border);
-            padding: 10px; border-radius: 6px; font-size: 0.95em; font-weight: 600; cursor: pointer; transition: 0.2s;
+            flex: 1; background: #1E2638; color: white; border: 1px solid var(--glass-border);
+            padding: 9px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
         }
-        button:hover { background: #3A3A45; }
+        button:hover { filter: brightness(1.15); }
         
-        button#btn-play { background: linear-gradient(135deg, #28a745, #1e7e34); border: none; }
-        button#btn-play.paused { background: linear-gradient(135deg, #ffc107, #d39e00); color: #000;}
+        button#btn-play { background: linear-gradient(135deg, #00F59B, #00a86b); color: #06080F; border: none; }
+        button#btn-play.paused { background: linear-gradient(135deg, #FFB800, #d97706); color: #06080F; }
         
-        .action-drop { background: linear-gradient(135deg, #FF3B30, #b3241d); border: none; font-size: 0.85em; padding: 12px;}
-        .action-drop.armed { background: #fff; color: #FF3B30; box-shadow: 0 0 15px rgba(255, 59, 48, 0.5); }
+        .action-drop { background: linear-gradient(135deg, #FF3B30, #b91c1c); border: none; font-size: 12px; }
+        .action-drop.armed { background: #fff; color: #FF3B30; box-shadow: 0 0 16px rgba(255, 59, 48, 0.6); }
 
         .toggles { 
-            display: flex; justify-content: space-between; background: rgba(0,0,0,0.2); 
-            padding: 10px; border-radius: 6px; font-size: 0.85em; border: 1px solid var(--glass-border); 
+            display: flex; justify-content: space-between; background: rgba(0,0,0,0.3); 
+            padding: 8px 12px; border-radius: 8px; font-size: 12px; border: 1px solid var(--glass-border); 
         }
         .toggles label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: var(--text-main); }
 
+        /* Spring Builder Interactive Workbench */
+        .challenge-banner {
+            background: linear-gradient(135deg, rgba(255, 184, 0, 0.15), rgba(180, 83, 9, 0.25));
+            border: 1px solid rgba(255, 184, 0, 0.4); border-radius: 10px; padding: 12px;
+            display: flex; flex-direction: column; gap: 6px;
+        }
+        .challenge-header {
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .challenge-target {
+            font-size: 14px; font-weight: 800; color: #FFF;
+        }
+        .challenge-target span { color: var(--accent-amber); font-size: 17px; }
+        .challenge-inventory {
+            font-size: 11.5px; color: var(--text-muted); line-height: 1.4;
+        }
+
+        .builder-section {
+            background: rgba(12, 17, 28, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .builder-section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+        .spring-inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 8px;
+        }
+        .spring-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            cursor: grab;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+        .spring-card:hover {
+            border-color: var(--accent-cyan);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 229, 255, 0.15);
+        }
+        .spring-card.mounted {
+            opacity: 0.45;
+            cursor: default;
+            border-style: dashed;
+            transform: none;
+            box-shadow: none;
+        }
+        .spring-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .spring-k-badge {
+            background: rgba(0, 229, 255, 0.15);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            color: var(--accent-cyan);
+            font-family: ui-monospace, Menlo, monospace;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .spring-action-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            font-size: 10px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: 600;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        .spring-action-btn:hover {
+            background: var(--accent-cyan);
+            color: #06080F;
+            border-color: var(--accent-cyan);
+        }
+
+        /* Topology Switcher */
+        .topology-segmented {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 3px;
+            border: 1px solid var(--glass-border);
+            gap: 4px;
+        }
+        .top-btn {
+            flex: 1;
+            padding: 7px 4px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 6px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            transition: 0.2s;
+            text-align: center;
+        }
+        .top-btn.active {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            color: #FFF;
+            box-shadow: 0 2px 8px rgba(2, 132, 199, 0.4);
+        }
+
+        /* Assembly Bay Slots */
+        .assembly-bay {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 4px 0;
+            min-height: 80px;
+        }
+        .assembly-slot {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1.5px dashed rgba(148, 163, 184, 0.35);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            min-height: 38px;
+        }
+        .assembly-slot.drag-over {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 229, 255, 0.1);
+            border-style: solid;
+        }
+        .assembly-slot.filled {
+            border: 1px solid rgba(0, 245, 155, 0.4);
+            background: rgba(0, 245, 155, 0.08);
+            border-style: solid;
+        }
+        .slot-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .slot-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .slot-remove-btn {
+            background: rgba(255, 59, 48, 0.2);
+            border: 1px solid rgba(255, 59, 48, 0.4);
+            color: #ff8585;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .slot-remove-btn:hover {
+            background: #FF3B30;
+            color: #fff;
+        }
+        .slot-empty-hint {
+            font-size: 11px;
+            color: rgba(148, 163, 184, 0.6);
+            font-style: italic;
+        }
+        .series-coupler-symbol {
+            text-align: center;
+            font-size: 11px;
+            color: var(--accent-amber);
+            font-weight: 800;
+            line-height: 1;
+            margin: -2px 0;
+        }
+
+        .builder-result-msg {
+            padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; text-align: left; line-height: 1.45; display: none;
+        }
+        .builder-result-msg.success { background: rgba(0, 245, 155, 0.15); color: #00F59B; border: 1px solid rgba(0,245,155,0.4); display: block; }
+        .builder-result-msg.fail { background: rgba(255, 59, 48, 0.15); color: #ff8585; border: 1px solid rgba(255,59,48,0.4); display: block; }
+
         /* QA Panel */
         #qaTab textarea {
-            width: 100%; height: 200px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border);
-            color: var(--text-main); border-radius: 6px; padding: 10px; font-family: inherit; resize: vertical; box-sizing: border-box;
+            width: 100%; height: 160px; background: rgba(6, 8, 15, 0.7); border: 1px solid var(--glass-border);
+            color: var(--text-main); border-radius: 8px; padding: 10px; font-family: inherit; font-size: 13px;
+            resize: vertical; box-sizing: border-box; line-height: 1.4;
         }
-        #qaTab textarea:focus { outline: none; border-color: var(--accent-cyan); }
-        #status-msg { font-size: 0.8em; color: var(--accent-green); height: 15px; text-align: right;}
+        #qaTab textarea:focus { outline: none; border-color: var(--accent-cyan); box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.25); }
+        #status-msg { font-size: 11px; color: var(--accent-green); height: 15px; text-align: right; font-weight: 600; }
     </style>
 </head>
 <body>
 
     <canvas id="simCanvas"></canvas>
 
+    <!-- LEFT TELEMETRY PANEL -->
     <div id="telemetry-panel">
-        <h3 style="text-align: center; color: var(--text-muted); font-size: 0.9em; letter-spacing: 1px; text-transform: uppercase;">Real-Time Telemetry</h3>
-        <div class="chart-wrapper"><canvas id="dispChart"></canvas></div>
-        <div class="chart-wrapper"><canvas id="keChart"></canvas></div>
-        <div class="chart-wrapper"><canvas id="peChart"></canvas></div>
-    </div>
-
-    <div id="controls-panel">
-        <div class="tabs">
-            <div class="tab active" data-target="controlsTab">Parameters & Control</div>
-            <div class="tab" data-target="qaTab">5E Lab Notebook</div>
+        <div class="panel-header-row">
+            <div class="panel-title">
+                <span>📊 Precision Telemetry</span>
+            </div>
+            <div class="graph-mode-toggle">
+                <button class="graph-mode-btn active" id="btn-graph-motion" onclick="graph.setMode('motion')">Motion (x, a, F)</button>
+                <button class="graph-mode-btn" id="btn-graph-energy" onclick="graph.setMode('energy')">Energy (KE, PE, E)</button>
+            </div>
         </div>
 
+        <div class="chart-wrapper"><canvas id="chart1"></canvas></div>
+        <div class="chart-wrapper"><canvas id="chart2"></canvas></div>
+        <div class="chart-wrapper"><canvas id="chart3"></canvas></div>
+    </div>
+
+    <!-- RIGHT CONTROLS & BUILDER PANEL -->
+    <div id="controls-panel">
+        <div class="tabs">
+            <div class="tab active" data-target="controlsTab">🔬 Collision Bench</div>
+            <div class="tab builder-tab" data-target="builderTab">🛠️ Spring Builder Challenge</div>
+            <div class="tab" data-target="qaTab">📝 5E Lab Notebook</div>
+        </div>
+
+        <!-- TAB 1: COLLISION BENCH -->
         <div id="controlsTab" class="panel active">
-            
             <div class="btn-row">
-                <button id="btn-play">⏸ Pause Simulation</button>
-                <button id="btn-reset" style="background: transparent;">↺ Reset System</button>
+                <button id="btn-play" class="paused">▶ Start Simulation</button>
+                <button id="btn-reset">↺ Reset System</button>
+            </div>
+
+            <!-- Simulation Speed Buttons -->
+            <div class="control-group">
+                <label><span>⏱️ Simulation Speed</span><span class="val-display" id="lbl-speed">1.0x</span></label>
+                <div class="speed-segmented">
+                    <button type="button" class="speed-btn" onclick="setSpeed(0.25, this)">0.25x 🐢</button>
+                    <button type="button" class="speed-btn" onclick="setSpeed(0.5, this)">0.5x ⏱️</button>
+                    <button type="button" class="speed-btn active" onclick="setSpeed(1.0, this)">1.0x ⚡</button>
+                </div>
             </div>
             
-            <div class="toggles" style="margin-top: 5px;">
+            <div class="toggles">
                 <label><input type="checkbox" id="tog-vectors" checked> Show Vectors (v, a, F)</label>
+                <label><input type="checkbox" id="tog-sound" checked> Sound Effects</label>
             </div>
 
-            <div class="control-group" style="margin-top: 5px;">
-                <label>Initial Amplitude (A₀) <span id="val-a0" class="val-display">4.0 m</span></label>
-                <input type="range" id="in-a0" min="1.0" max="8.0" step="0.5" value="4.0">
-            </div>
-
-            <div class="control-group">
-                <label>Friction (Damping Coefficient c) <span id="val-fric" class="val-display">0.0</span></label>
-                <input type="range" id="in-fric" min="0" max="5" step="0.1" value="0">
+            <!-- Stiffness & Stretch Learning Card -->
+            <div class="stiffness-card">
+                <div class="stiffness-badge-row">
+                    <span id="card-config-title" style="font-weight: 800; font-size: 13px;">Single Spring</span>
+                    <span id="card-stiffness-tag" class="stiffness-tag standard">Standard Stiffness</span>
+                </div>
+                <div id="card-stiffness-desc" style="font-size: 12px; color: var(--text-main); line-height: 1.4;">
+                    Hooke's Law: <strong>F = -kx</strong>. Direct displacement response.
+                </div>
+                <div id="card-spring-breakdown" style="font-size: 11px; color: var(--accent-cyan); line-height: 1.4; display: none;">
+                    Spring 1 & Spring 2 load sharing...
+                </div>
+                <div id="card-force-needed" style="font-size: 11px; color: var(--text-muted); border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 4px;">
+                    Pull Force required to stretch 1.0 m: <strong>50.0 N</strong>
+                </div>
             </div>
 
             <div class="control-group">
                 <label>Spring Configuration</label>
                 <select id="k-config">
-                    <option value="single">Single Spring (k)</option>
-                    <option value="parallel">Parallel Springs (2k)</option>
-                    <option value="series">Series Springs (k/2)</option>
+                    <option value="single">Single Spring (k₁)</option>
+                    <option value="parallel">Parallel Springs (k₁ + k₂ - Side-by-Side)</option>
+                    <option value="series">Series Springs (k_eq - End-to-End)</option>
                 </select>
             </div>
 
             <div class="control-group">
-                <label>Spring Constant (k) <span id="val-k" class="val-display">50 N/m</span></label>
-                <input type="range" id="in-k" min="10" max="100" step="1" value="50">
+                <label><span>Spring Constant 1 (k₁)</span> <span id="val-k1" class="val-display">50 N/m</span></label>
+                <input type="range" id="in-k1" min="10" max="120" step="1" value="50">
+            </div>
+
+            <div class="control-group" id="grp-k2">
+                <label><span>Spring Constant 2 (k₂)</span> <span id="val-k2" class="val-display">50 N/m</span></label>
+                <input type="range" id="in-k2" min="10" max="120" step="1" value="50">
             </div>
 
             <div class="control-group">
-                <label>Base Mass (m) <span id="val-m" class="val-display">1.0 kg</span></label>
+                <label>Initial Displacement (A₀) <span id="val-a0" class="val-display">4.0 m</span></label>
+                <input type="range" id="in-a0" min="1.0" max="6.5" step="0.5" value="4.0">
+            </div>
+
+            <div class="control-group">
+                <label>Track Friction / Air Damping (c) <span id="val-fric" class="val-display">0.00</span></label>
+                <input type="range" id="in-fric" min="0" max="2.0" step="0.05" value="0.00">
+            </div>
+
+            <div class="control-group">
+                <label>Base Glider Mass (m) <span id="val-m" class="val-display">1.0 kg</span></label>
                 <input type="range" id="in-m" min="0.5" max="5.0" step="0.1" value="1.0">
             </div>
 
             <div class="control-group">
-                <label>Drop Mass (Q) <span id="val-q" class="val-display val-red">2.0 kg</span></label>
-                <input type="range" id="in-q" min="0.5" max="10.0" step="0.1" value="2.0">
+                <label>Drop Mass (Block Q) <span id="val-q" class="val-display val-red">2.0 kg</span></label>
+                <input type="range" id="in-q" min="0.5" max="6.0" step="0.1" value="2.0">
             </div>
 
-            <div class="btn-row" style="margin-top: 10px;">
-                <button id="btn-drop-eq" class="action-drop">Drop at<br>Equilibrium</button>
-                <button id="btn-drop-amp" class="action-drop">Drop at<br>Amplitude</button>
+            <div class="btn-row" style="margin-top: 4px;">
+                <button id="btn-drop-eq" class="action-drop">⏬ Drop at Equilibrium (x=0)</button>
+                <button id="btn-drop-amp" class="action-drop">⏬ Drop at Amplitude (v=0)</button>
             </div>
         </div>
 
-        <div id="qaTab" class="panel">
-            <div>
-                <h3 id="qa-stage" style="color: var(--accent-cyan);">[Engage]</h3>
-                <span class="subtitle" id="qa-counter">Prompt 1 of 10</span>
+        <!-- TAB 2: SPRING BUILDER CHALLENGE -->
+        <div id="builderTab" class="panel">
+            <div class="challenge-banner">
+                <div class="challenge-header">
+                    <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--accent-amber);">🎯 Mission Challenge <span id="lbl-ch-level">Level 1</span></span>
+                    <div style="display: flex; gap: 6px;">
+                        <button id="btn-builder-random" style="flex: 0; padding: 4px 8px; font-size: 10px; background: rgba(0,229,255,0.15); border: 1px solid rgba(0,229,255,0.4); color: #fff; cursor: pointer; border-radius: 6px;">🎲 Quest</button>
+                        <button id="btn-next-level" style="flex: 0; padding: 4px 8px; font-size: 10px; background: rgba(255,184,0,0.2); border: 1px solid rgba(255,184,0,0.4); color: #fff; cursor: pointer; border-radius: 6px;">Next ▶</button>
+                    </div>
+                </div>
+                <div class="challenge-target">
+                    Target Effective Stiffness: <span id="lbl-ch-target">100 N/m</span>
+                </div>
+                <div class="challenge-inventory" id="lbl-ch-prompt">
+                    Assemble the target stiffness using the available springs from your parts rack.
+                </div>
             </div>
-            <p id="qa-question" style="font-size: 0.95em; line-height: 1.5; color: #ddd;"></p>
+
+            <!-- PARTS RACK: FIXED SPRING CONSTANTS -->
+            <div class="builder-section">
+                <div class="builder-section-title">
+                    <span>📦 Spring Inventory (Fixed Constants 🔒)</span>
+                    <span style="font-size: 10px; color: var(--text-muted);">Cannot be modified</span>
+                </div>
+                <div class="spring-inventory-grid" id="inventory-rack">
+                    <!-- Populated dynamically with fixed-k spring cards -->
+                </div>
+            </div>
+
+            <!-- MOUNTING WORKBENCH -->
+            <div class="builder-section">
+                <div class="builder-section-title">
+                    <span>🛠️ Mounting Workstation</span>
+                    <span id="lbl-placed-count" style="font-size: 10px; color: var(--accent-cyan);">0 Mounted</span>
+                </div>
+
+                <!-- Topology Selector -->
+                <div class="topology-segmented">
+                    <button type="button" class="top-btn active" id="btn-top-parallel" onclick="builder.setTopology('parallel')">
+                        🔀 Parallel Rails (Side-by-Side)
+                    </button>
+                    <button type="button" class="top-btn" id="btn-top-series" onclick="builder.setTopology('series')">
+                        ⛓️ Series Chain (End-to-End)
+                    </button>
+                </div>
+
+                <!-- Interactive Slots -->
+                <div id="assembly-bay" class="assembly-bay">
+                    <!-- Generated slots where springs can be dragged or placed -->
+                </div>
+            </div>
+
+            <div id="builder-feedback" class="builder-result-msg"></div>
+
+            <div class="btn-row" style="margin-top: 6px;">
+                <button id="btn-builder-play" class="btn-builder-play paused" style="background: linear-gradient(135deg, #00F59B, #00a86b); color: #06080F; border: none; font-weight: 800; font-size: 13px; flex: 1;">
+                    ▶ Test Assembly (Play)
+                </button>
+                <button id="btn-builder-reset" style="background: #21262D; color: var(--text-main); flex: 0 0 110px;" title="Reset Simulation to Initial State">
+                    ↺ Reset Bench
+                </button>
+                <button id="btn-builder-clear" style="background: rgba(255,59,48,0.2); border: 1px solid rgba(255,59,48,0.4); color: #ff8585; flex: 0 0 70px;" title="Unmount all springs back to rack">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB 3: 5E LAB NOTEBOOK -->
+        <div id="qaTab" class="panel">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="qa-stage" style="color: var(--accent-cyan); font-size: 15px;">[Engage]</h3>
+                <span style="color: var(--text-muted); font-size: 12px;" id="qa-counter">Prompt 1 of 10</span>
+            </div>
+            <p id="qa-question" style="font-size: 13px; line-height: 1.5; color: #ddd; margin: 0;"></p>
             
-            <textarea id="qa-answer" placeholder="Analyze and explain your findings... (Autosaves as you type)"></textarea>
+            <textarea id="qa-answer" placeholder="Formulate scientific explanations using kinematic and energetic telemetry... (Autosaves)"></textarea>
             <div id="status-msg"></div>
 
             <div class="btn-row">
-                <button id="btn-prev">Back</button>
-                <button id="btn-next">Next</button>
+                <button id="btn-prev">◀ Back</button>
+                <button id="btn-next">Next ▶</button>
             </div>
-            <button style="background: linear-gradient(135deg, #0A84FF, #005bb5); border: none;" id="btn-export">Export .docx Report</button>
+            <button style="background: linear-gradient(135deg, #0A84FF, #005bb5); border: none;" id="btn-export">📄 Export Verified .docx Report</button>
         </div>
     </div>
 
 <script>
-/* ==========================================
-   1. PHYSICS ENGINE (Fixed Timestep)
-   ========================================== */
+/* =========================================================================
+   1. SOUND SYNTHESIZER (Web Audio API)
+   ========================================================================= */
+class AudioFx {
+    constructor() { this.ctx = null; this.enabled = true; }
+    init() {
+        if (!this.ctx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AC();
+        }
+        if (this.ctx.state === 'suspended') this.ctx.resume();
+    }
+    playImpact() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(180, t);
+        osc.frequency.exponentialRampToValueAtTime(30, t + 0.15);
+        gain.gain.setValueAtTime(0.35, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(t); osc.stop(t + 0.2);
+    }
+    playLatch() {
+        if (!this.enabled) return;
+        this.init();
+        const t = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(900, t);
+        osc.frequency.exponentialRampToValueAtTime(300, t + 0.05);
+        gain.gain.setValueAtTime(0.12, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(t); osc.stop(t + 0.07);
+    }
+}
+const sound = new AudioFx();
+
+/* =========================================================================
+   2. HIGH FIDELITY PHYSICS ENGINE WITH INDEPENDENT k1 AND k2
+   ========================================================================= */
 class PhysicsEngine {
     constructor() {
-        this.isRunning = true;
+        this.isRunning = false;
+        this.customSprings = null;
         this.resetParams();
     }
 
     resetParams() {
         this.baseMass = parseFloat(document.getElementById('in-m').value);
         this.dropMass = parseFloat(document.getElementById('in-q').value);
-        this.k_base = parseFloat(document.getElementById('in-k').value);
+        this.k1 = parseFloat(document.getElementById('in-k1').value);
+        this.k2 = parseFloat(document.getElementById('in-k2').value);
         this.config = document.getElementById('k-config').value;
         this.frictionC = parseFloat(document.getElementById('in-fric').value);
         this.initialA = parseFloat(document.getElementById('in-a0').value);
+        this.customSprings = null;
         
         this.m_current = this.baseMass;
         this.x = this.initialA; 
@@ -307,293 +754,1129 @@ class PhysicsEngine {
         this.dropArmedEq = false;
         this.dropArmedAmp = false;
         this.hasDropped = false;
-        this.dropAnimY = -200; // Starting height for drop animation
+        this.energy_lost = 0;
+        this.isDragging = false;
         
         this.calcKeq();
-        this.calculateForces(); // Initial force calc before step 1
+        this.calculateForces();
     }
 
     calcKeq() {
-        if (this.config === 'single') this.k_eq = this.k_base;
-        else if (this.config === 'parallel') this.k_eq = this.k_base * 2;
-        else if (this.config === 'series') this.k_eq = this.k_base / 2;
+        if (this.customSprings && this.customSprings.length > 0) {
+            if (this.config === 'parallel') {
+                this.k_eq = this.customSprings.reduce((a, b) => a + b, 0);
+            } else if (this.config === 'series') {
+                const sumInv = this.customSprings.reduce((a, b) => a + (1 / b), 0);
+                this.k_eq = parseFloat((1 / sumInv).toFixed(1));
+            } else {
+                this.k_eq = this.customSprings[0];
+            }
+            return;
+        }
+
+        if (this.config === 'single') {
+            this.k_eq = this.k1;
+        } else if (this.config === 'parallel') {
+            this.k_eq = this.k1 + this.k2;
+        } else if (this.config === 'series') {
+            this.k_eq = (this.k1 * this.k2) / (this.k1 + this.k2);
+        }
     }
 
-    armEq() { if(!this.hasDropped) { this.dropArmedEq = true; this.dropArmedAmp = false; this.dropAnimY = -200; } }
-    armAmp() { if(!this.hasDropped) { this.dropArmedAmp = true; this.dropArmedEq = false; this.dropAnimY = -200; } }
+    armEq() {
+        if (!this.hasDropped) {
+            this.dropArmedEq = true; this.dropArmedAmp = false;
+            sound.playLatch();
+        }
+    }
+    armAmp() {
+        if (!this.hasDropped) {
+            this.dropArmedAmp = true; this.dropArmedEq = false;
+            sound.playLatch();
+        }
+    }
 
     calculateForces() {
-        this.a = (-(this.k_eq * this.x) - (this.frictionC * this.v)) / this.m_current;
-        this.F = this.a * this.m_current;
+        const F_spring = -this.k_eq * this.x;
+        const F_damping = -this.frictionC * this.v;
+        this.F = F_spring + F_damping;
+        this.a = this.F / this.m_current;
     }
 
     step(dt) {
-        if (!this.isRunning) return;
+        if (!this.isRunning || this.isDragging) return;
 
         const x_old = this.x;
         const v_old = this.v;
 
-        // Semi-Implicit Euler with friction
         this.calculateForces();
         this.v += this.a * dt;
         this.x += this.v * dt;
 
-        // Visual animation of drop mass falling before impact
-        if(this.dropArmedEq || this.dropArmedAmp) {
-            this.dropAnimY += 600 * dt; // Fall speed
-            if (this.dropAnimY > 10) this.dropAnimY = 10; // Stop just above block
-        }
-
-        // Collision Detection Logic
         if ((this.dropArmedEq || this.dropArmedAmp) && !this.hasDropped) {
             let trigger = false;
-
             if (this.dropArmedEq) {
-                // Check if crossing zero
                 if (x_old * this.x <= 0) { trigger = true; this.x = 0; }
             } else if (this.dropArmedAmp) {
-                // Check if velocity reverses direction
                 if (v_old * this.v <= 0) { trigger = true; this.v = 0; }
             }
 
             if (trigger) {
-                // Conservation of Momentum: m_old * v_old = (m_old + m_drop) * v_new
+                const ke_before = 0.5 * this.m_current * (this.v ** 2);
                 const v_new = this.v * (this.m_current / (this.m_current + this.dropMass));
                 this.v = v_new;
                 this.m_current += this.dropMass;
+                const ke_after = 0.5 * this.m_current * (this.v ** 2);
+                this.energy_lost = ke_before - ke_after;
+
                 this.dropArmedEq = false;
                 this.dropArmedAmp = false;
                 this.hasDropped = true;
+                sound.playImpact();
+                triggerImpactFx(renderer.eqX + (this.x * renderer.scale), renderer.surfaceY - 50);
             }
         }
     }
 
     getTelemetry() {
-        const KE = 0.5 * this.m_current * (this.v * this.v);
-        const PE = 0.5 * this.k_eq * (this.x * this.x);
-        return { x: this.x, KE, PE };
+        const KE = 0.5 * this.m_current * (this.v ** 2);
+        const PE = 0.5 * this.k_eq * (this.x ** 2);
+        const E_tot = KE + PE;
+        const omega = Math.sqrt(this.k_eq / this.m_current);
+        const period = 2 * Math.PI / omega;
+        const freq = 1 / period;
+
+        // Individual Spring Forces & Elongations
+        let F1 = 0, F2 = 0, dx1 = 0, dx2 = 0;
+        if (this.config === 'single') {
+            F1 = this.F; dx1 = this.x;
+        } else if (this.config === 'parallel') {
+            F1 = -this.k1 * this.x;
+            F2 = -this.k2 * this.x;
+            dx1 = this.x; dx2 = this.x;
+        } else if (this.config === 'series') {
+            F1 = this.F; F2 = this.F;
+            dx1 = this.x * (this.k2 / (this.k1 + this.k2));
+            dx2 = this.x * (this.k1 / (this.k1 + this.k2));
+        }
+
+        return { x: this.x, v: this.v, a: this.a, F: this.F, KE, PE, E_tot, period, freq, F1, F2, dx1, dx2 };
     }
 }
 
-/* ==========================================
-   2. RENDERER
-   ========================================== */
+/* =========================================================================
+   3. VISUAL PARTICLES & IMPACT SHOCKWAVES
+   ========================================================================= */
+let particles = [];
+let shockwaves = [];
+
+function triggerImpactFx(x, y) {
+    shockwaves.push({ x, y, radius: 8, maxRadius: 75, alpha: 1.0 });
+    for (let i = 0; i < 35; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = Math.random() * 150 + 35;
+        particles.push({
+            x, y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            alpha: 1.0,
+            size: Math.random() * 3 + 2,
+            color: Math.random() > 0.4 ? '#00F59B' : '#00E5FF'
+        });
+    }
+}
+
+function updateAndDrawParticles(ctx, dt) {
+    for (let i = shockwaves.length - 1; i >= 0; i--) {
+        const sw = shockwaves[i];
+        sw.radius += 110 * dt;
+        sw.alpha -= 1.8 * dt;
+        if (sw.alpha <= 0) { shockwaves.splice(i, 1); continue; }
+        ctx.save();
+        ctx.strokeStyle = `rgba(0, 245, 155, ${sw.alpha})`;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vy += 260 * dt;
+        p.alpha -= 1.6 * dt;
+        if (p.alpha <= 0) { particles.splice(i, 1); continue; }
+        ctx.save();
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+    }
+}
+
+/* =========================================================================
+   4. 3D RENDERER WITH TRACK REFLECTION & ENERGY HUD
+   ========================================================================= */
 class Renderer {
     constructor(canvas, engine) {
-        this.canvas = canvas; this.ctx = canvas.getContext('2d');
-        this.engine = engine; this.scale = 50; 
-        this.wallX = 440; // Avoid left panel
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.engine = engine;
+        this.scale = 45;
+        this.wallX = 420;
         this.resize();
         window.addEventListener('resize', () => this.resize());
     }
 
     resize() {
-        this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight;
-        this.surfaceY = this.canvas.height / 2 + 80;
-        this.eqX = this.canvas.width / 2 + 50; 
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = window.innerWidth * dpr;
+        this.canvas.height = window.innerHeight * dpr;
+        this.ctx.resetTransform();
+        this.ctx.scale(dpr, dpr);
+        this.surfaceY = window.innerHeight / 2 + 70;
+        this.eqX = this.wallX + (window.innerWidth - this.wallX - 440) / 2;
     }
 
-    drawSpring(startX, endX, yOffset, isSeriesConnector = false) {
-        const ctx = this.ctx; ctx.beginPath(); ctx.strokeStyle = '#888'; ctx.lineWidth = 3;
-        if (isSeriesConnector) {
-            ctx.fillStyle = '#666'; ctx.fillRect(startX - 5, yOffset - 10, 10, 20); return;
+    drawHorizontal3DSpring(startX, endX, yCenter, springK, colorTheme = 'silver') {
+        const ctx = this.ctx;
+        const length = endX - startX;
+        if (length < 25) return;
+        const coils = Math.max(8, Math.min(24, Math.floor(11 + springK * 0.1)));
+        const radius = 16;
+        const wireThick = Math.max(2.5, Math.min(5.8, 2.0 + Math.sqrt(springK) * 0.35));
+        const leadLen = 18;
+
+        const naturalLen = 160;
+        const strain = (length - naturalLen) / naturalLen;
+        if (Math.abs(strain) > 0.15) {
+            ctx.save();
+            ctx.strokeStyle = strain > 0 ? 'rgba(255, 184, 0, 0.16)' : 'rgba(0, 229, 255, 0.16)';
+            ctx.lineWidth = wireThick + 8;
+            ctx.beginPath();
+            ctx.moveTo(startX, yCenter);
+            ctx.lineTo(endX, yCenter);
+            ctx.stroke();
+            ctx.restore();
         }
-        const coils = 15; const coilWidth = (endX - startX) / coils; const amplitude = 18;
-        ctx.moveTo(startX, yOffset);
-        for (let i = 1; i <= coils; i++) {
-            const px = startX + i * coilWidth - (coilWidth / 2);
-            const py = yOffset + (i % 2 === 0 ? amplitude : -amplitude);
-            ctx.lineTo(px, py);
+
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = wireThick;
+        ctx.beginPath();
+        ctx.moveTo(startX, yCenter);
+        ctx.lineTo(startX + leadLen, yCenter);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(endX - leadLen, yCenter);
+        ctx.lineTo(endX, yCenter);
+        ctx.stroke();
+
+        const activeStart = startX + leadLen;
+        const activeEnd = endX - leadLen;
+        const activeLen = activeEnd - activeStart;
+        const step = activeLen / coils;
+
+        for (let i = 0; i < coils; i++) {
+            const x0 = activeStart + i * step;
+            const x1 = x0 + step * 0.5;
+            const x2 = x0 + step;
+
+            ctx.beginPath();
+            ctx.strokeStyle = colorTheme === 'gold' ? '#78350f' : '#1e293b';
+            ctx.lineWidth = wireThick * 0.9;
+            ctx.moveTo(x0, yCenter - radius);
+            ctx.bezierCurveTo(x0 + step * 0.25, yCenter - radius * 0.6, x1 - step * 0.25, yCenter + radius * 0.6, x1, yCenter + radius);
+            ctx.stroke();
+
+            ctx.beginPath();
+            const grad = ctx.createLinearGradient(x1, yCenter - radius, x2, yCenter + radius);
+            if (colorTheme === 'gold') {
+                grad.addColorStop(0, '#f59e0b');
+                grad.addColorStop(0.35, '#fef08a');
+                grad.addColorStop(0.7, '#d97706');
+                grad.addColorStop(1, '#92400e');
+            } else {
+                grad.addColorStop(0, '#64748b');
+                grad.addColorStop(0.35, '#f8fafc');
+                grad.addColorStop(0.7, '#94a3b8');
+                grad.addColorStop(1, '#334155');
+            }
+            ctx.strokeStyle = grad;
+            ctx.lineWidth = wireThick;
+            ctx.moveTo(x1, yCenter + radius);
+            ctx.bezierCurveTo(x1 + step * 0.3, yCenter + radius * 0.5, x2 - step * 0.3, yCenter - radius * 0.5, x2, yCenter - radius);
+            ctx.stroke();
         }
-        ctx.lineTo(endX, yOffset); ctx.stroke();
     }
 
     drawArrow(fromX, fromY, toX, toY, color, label) {
         const ctx = this.ctx;
         const headlen = 8;
-        const dx = toX - fromX; const dy = toY - fromY;
+        const dx = toX - fromX;
+        const dy = toY - fromY;
         const angle = Math.atan2(dy, dx);
-        
-        ctx.beginPath(); ctx.strokeStyle = color; ctx.lineWidth = 2.5;
-        ctx.moveTo(fromX, fromY); ctx.lineTo(toX, toY);
-        ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
-        ctx.moveTo(toX, toY);
-        ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
         ctx.stroke();
-        
-        ctx.fillStyle = color; ctx.font = 'bold 14px sans-serif';
-        ctx.fillText(label, toX + (dx > 0 ? 8 : -20), toY - 8);
+
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+        ctx.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.font = 'bold 12px sans-serif';
+        ctx.fillText(label, toX + (dx > 0 ? 8 : -22), toY - 8);
+        ctx.restore();
+    }
+
+    drawLiveEnergyHUD(telem) {
+        const ctx = this.ctx;
+        const x = window.innerWidth - 440 - 165;
+        const y = 20;
+        const w = 155;
+        const h = 76;
+        ctx.save();
+        ctx.fillStyle = 'rgba(16, 24, 38, 0.85)';
+        ctx.strokeStyle = 'rgba(90, 115, 150, 0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.font = 'bold 10px -apple-system, sans-serif';
+        ctx.fillStyle = '#8492A6';
+        ctx.textAlign = 'left';
+        ctx.fillText('⚡ LIVE ENERGY HUD', x + 10, y + 16);
+
+        const maxE = Math.max(1, telem.E_tot + this.engine.energy_lost);
+        const barW = 86;
+        const barH = 7;
+
+        // KE
+        const keR = Math.max(0, Math.min(1, telem.KE / maxE));
+        ctx.fillStyle = '#00F59B';
+        ctx.fillText('KE', x + 10, y + 33);
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(x + 32, y + 26, barW, barH);
+        ctx.fillStyle = '#00F59B';
+        ctx.fillRect(x + 32, y + 26, barW * keR, barH);
+        ctx.fillStyle = '#E2E8F0';
+        ctx.fillText(`${telem.KE.toFixed(1)}J`, x + 124, y + 33);
+
+        // PE
+        const peR = Math.max(0, Math.min(1, telem.PE / maxE));
+        ctx.fillStyle = '#00E5FF';
+        ctx.fillText('PE', x + 10, y + 49);
+        ctx.fillStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(x + 32, y + 42, barW, barH);
+        ctx.fillStyle = '#00E5FF';
+        ctx.fillRect(x + 32, y + 42, barW * peR, barH);
+        ctx.fillStyle = '#E2E8F0';
+        ctx.fillText(`${telem.PE.toFixed(1)}J`, x + 124, y + 49);
+
+        // Lost
+        if (this.engine.energy_lost > 0.05) {
+            const lostR = Math.max(0, Math.min(1, this.engine.energy_lost / maxE));
+            ctx.fillStyle = '#FF3B30';
+            ctx.fillText('ΔQ', x + 10, y + 65);
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.fillRect(x + 32, y + 58, barW, barH);
+            ctx.fillStyle = '#FF3B30';
+            ctx.fillRect(x + 32, y + 58, barW * lostR, barH);
+            ctx.fillStyle = '#E2E8F0';
+            ctx.fillText(`${this.engine.energy_lost.toFixed(1)}J`, x + 124, y + 65);
+        }
+        ctx.restore();
     }
 
     render() {
         const ctx = this.ctx;
-        ctx.fillStyle = this.engine.isRunning ? '#050508' : '#0a0a0f'; 
-        ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        const w = window.innerWidth;
+        const h = window.innerHeight;
 
-        // Prominent Equilibrium Line
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)'; ctx.lineWidth = 2;
-        ctx.setLineDash([8, 8]);
-        ctx.beginPath(); ctx.moveTo(this.eqX, this.surfaceY - 200); ctx.lineTo(this.eqX, this.surfaceY + 50); ctx.stroke();
+        ctx.fillStyle = '#06080F';
+        ctx.fillRect(0, 0, w, h);
+
+        const trackY = this.surfaceY;
+        const trackHeight = 18;
+
+        // 1. Precision Linear Air Track Surface
+        const trackGrad = ctx.createLinearGradient(0, trackY, 0, trackY + trackHeight);
+        trackGrad.addColorStop(0, '#334155');
+        trackGrad.addColorStop(0.5, '#1e293b');
+        trackGrad.addColorStop(1, '#0f172a');
+        ctx.fillStyle = trackGrad;
+        ctx.fillRect(this.wallX, trackY, w - this.wallX, trackHeight);
+
+        // Metric Millimeter Markings
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '9px monospace';
+        ctx.textAlign = 'center';
+        for (let px = this.wallX; px < w; px += (this.scale * 0.5)) {
+            const distM = (px - this.eqX) / this.scale;
+            ctx.beginPath();
+            ctx.moveTo(px, trackY);
+            ctx.lineTo(px, trackY + 8);
+            ctx.stroke();
+            if (Math.abs(distM % 1) < 0.05) {
+                ctx.fillText(`${distM > 0 ? '+' : ''}${distM.toFixed(0)}m`, px, trackY + 16);
+            }
+        }
+
+        // Equilibrium marker (x = 0)
+        ctx.strokeStyle = 'rgba(0, 229, 255, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 6]);
+        ctx.beginPath();
+        ctx.moveTo(this.eqX, trackY - 200);
+        ctx.lineTo(this.eqX, trackY + 40);
+        ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '14px monospace'; ctx.textAlign = 'center';
-        ctx.fillText('Equilibrium (x=0)', this.eqX, this.surfaceY + 30);
+        ctx.fillStyle = 'rgba(0, 229, 255, 0.85)';
+        ctx.font = '600 12px -apple-system, sans-serif';
+        ctx.fillText('Equilibrium (x = 0)', this.eqX, trackY + 34);
 
-        // Surface & Friction Indicator
-        if(this.engine.frictionC > 0) {
-            ctx.fillStyle = `rgba(255, 100, 50, ${Math.min(0.3, this.engine.frictionC * 0.1)})`;
-            ctx.fillRect(this.wallX, this.surfaceY, this.canvas.width, 20);
-            ctx.fillStyle = 'rgba(255, 100, 50, 0.5)'; ctx.textAlign = 'left';
-            ctx.fillText(`Friction c = ${this.engine.frictionC}`, this.eqX + 10, this.surfaceY + 15);
-        } else {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.fillRect(this.wallX, this.surfaceY, this.canvas.width, 2);
+        // 2. Anchor Wall
+        const wallGrad = ctx.createLinearGradient(0, trackY - 240, this.wallX, trackY + 40);
+        wallGrad.addColorStop(0, '#0f172a');
+        wallGrad.addColorStop(0.5, '#1e293b');
+        wallGrad.addColorStop(1, '#090d16');
+        ctx.fillStyle = wallGrad;
+        ctx.fillRect(0, trackY - 240, this.wallX, 280);
+
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(this.wallX, trackY - 240);
+        ctx.lineTo(this.wallX, trackY + 40);
+        ctx.stroke();
+
+        for (let by = trackY - 200; by < trackY + 20; by += 45) {
+            ctx.fillStyle = '#94a3b8';
+            ctx.beginPath(); ctx.arc(this.wallX - 12, by, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2; ctx.stroke();
         }
 
-        // Wall
-        ctx.fillStyle = '#111'; ctx.fillRect(0, this.surfaceY - 300, this.wallX, 350);
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(this.wallX, this.surfaceY - 300); ctx.lineTo(this.wallX, this.surfaceY+50); ctx.stroke();
-
+        // 3. Glider Cart & Springs (Dynamic Multi-Spring Support)
         const blockX = this.eqX + (this.engine.x * this.scale);
-        const baseSize = 60 + (this.engine.baseMass * 5); 
-        const attachY = this.surfaceY - baseSize/2;
-        
-        // Draw Springs
-        if (this.engine.config === 'single') {
-            this.drawSpring(this.wallX, blockX - baseSize/2, attachY);
+        const baseW = 75 + (this.engine.baseMass * 4);
+        const baseH = 50;
+        const cartY = trackY - baseH;
+        const attachY = cartY + baseH / 2;
+        const k1 = this.engine.k1;
+        const k2 = this.engine.k2;
+
+        const springs = this.engine.customSprings || 
+            (this.engine.config === 'single' ? [k1] : [k1, k2]);
+        const themes = ['silver', 'gold', 'cyan', 'emerald'];
+
+        if (this.engine.config === 'single' || springs.length === 1) {
+            this.drawHorizontal3DSpring(this.wallX, blockX - baseW / 2, attachY, springs[0], 'silver');
         } else if (this.engine.config === 'parallel') {
-            this.drawSpring(this.wallX, blockX - baseSize/2, attachY - 15);
-            this.drawSpring(this.wallX, blockX - baseSize/2, attachY + 15);
+            const count = springs.length;
+            const spacing = Math.min(22, 44 / Math.max(1, count - 1));
+            const startOffset = -((count - 1) * spacing) / 2;
+            for (let i = 0; i < count; i++) {
+                const yOffset = startOffset + i * spacing;
+                this.drawHorizontal3DSpring(this.wallX, blockX - baseW / 2, attachY + yOffset, springs[i], themes[i % themes.length]);
+            }
         } else if (this.engine.config === 'series') {
-            const midX = this.wallX + (blockX - baseSize/2 - this.wallX) / 2;
-            this.drawSpring(this.wallX, midX, attachY);
-            this.drawSpring(midX, midX, attachY, true);
-            this.drawSpring(midX, blockX - baseSize/2, attachY);
+            const count = springs.length;
+            const totalAvailable = Math.max(40, blockX - baseW / 2 - this.wallX);
+            const compliances = springs.map(k => 1 / k);
+            const totalCompliance = compliances.reduce((a, b) => a + b, 0);
+
+            let currentStartX = this.wallX;
+            for (let i = 0; i < count; i++) {
+                const segLen = totalAvailable * (compliances[i] / totalCompliance);
+                const segEndX = currentStartX + segLen;
+                this.drawHorizontal3DSpring(currentStartX, segEndX, attachY, springs[i], themes[i % themes.length]);
+                if (i < count - 1) {
+                    ctx.fillStyle = '#475569';
+                    ctx.fillRect(segEndX - 5, attachY - 14, 10, 28);
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(segEndX - 5, attachY - 14, 10, 28);
+                }
+                currentStartX = segEndX;
+            }
         }
 
-        // Base Mass
-        ctx.fillStyle = 'rgba(0, 229, 255, 0.2)'; ctx.strokeStyle = '#00E5FF'; ctx.lineWidth = 2;
-        ctx.fillRect(blockX - baseSize/2, this.surfaceY - baseSize, baseSize, baseSize);
-        ctx.strokeRect(blockX - baseSize/2, this.surfaceY - baseSize, baseSize, baseSize);
-        ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(`${this.engine.baseMass} kg`, blockX, this.surfaceY - baseSize/2 + 5);
+        // Track Reflection
+        ctx.save();
+        ctx.globalAlpha = 0.22;
+        ctx.translate(0, trackY * 2);
+        ctx.scale(1, -1);
+        ctx.fillStyle = '#0284c7';
+        ctx.fillRect(blockX - baseW / 2, cartY, baseW, baseH);
+        ctx.restore();
 
-        // Physics Vectors Toggle
+        // 4. Glider Cart Body
+        const cartGrad = ctx.createLinearGradient(blockX - baseW / 2, cartY, blockX + baseW / 2, cartY + baseH);
+        cartGrad.addColorStop(0, '#0284c7');
+        cartGrad.addColorStop(0.35, '#38bdf8');
+        cartGrad.addColorStop(0.7, '#0369a1');
+        cartGrad.addColorStop(1, '#0c4a6e');
+        ctx.fillStyle = cartGrad;
+        ctx.fillRect(blockX - baseW / 2, cartY, baseW, baseH);
+
+        ctx.strokeStyle = '#7dd3fc';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(blockX - baseW / 2, cartY, baseW, baseH);
+
+        const wheelR = 6;
+        ctx.fillStyle = '#e2e8f0';
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(blockX - baseW / 2 + 14, trackY - wheelR, wheelR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.arc(blockX + baseW / 2 - 14, trackY - wheelR, wheelR, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 13px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`P: ${this.engine.baseMass.toFixed(1)} kg`, blockX, cartY + 30);
+
+        // 5. Vectors Overlay
         if (document.getElementById('tog-vectors').checked) {
-            const cY = this.surfaceY - baseSize/2;
-            
-            // Force (F) - Red (Scaled visually)
-            if (Math.abs(this.engine.F) > 0.5) {
-                this.drawArrow(blockX, cY + 20, blockX + this.engine.F * 0.8, cY + 20, '#FF3B30', 'F');
+            const v = this.engine.v;
+            const a = this.engine.a;
+            const F = this.engine.F;
+            const midY = cartY + baseH / 2;
+
+            if (Math.abs(v) > 0.05) {
+                this.drawArrow(blockX, midY - 24, blockX + v * 14, midY - 24, '#00F59B', `v: ${v.toFixed(2)} m/s`);
             }
-            // Acceleration (a) - Yellow
-            if (Math.abs(this.engine.a) > 0.5) {
-                this.drawArrow(blockX, cY, blockX + this.engine.a * 2.5, cY, '#FFCC00', 'a');
+            if (Math.abs(a) > 0.08) {
+                this.drawArrow(blockX, midY, blockX + a * 5.5, midY, '#FFB800', `a: ${a.toFixed(2)} m/s²`);
             }
-            // Velocity (v) - Cyan
-            if (Math.abs(this.engine.v) > 0.5) {
-                this.drawArrow(blockX, cY - 20, blockX + this.engine.v * 10, cY - 20, '#00E5FF', 'v');
+            if (Math.abs(F) > 0.5) {
+                this.drawArrow(blockX, midY + 24, blockX + F * 1.2, midY + 24, '#FF3B30', `F: ${F.toFixed(1)} N`);
             }
         }
 
-        // Drop Mass Visualization
-        const dropSize = 40 + (this.engine.dropMass * 3);
-        
+        // 6. Drop Mass Q
+        const dropW = 54 + (this.engine.dropMass * 3);
+        const dropH = 34;
+
         if (this.engine.hasDropped) {
-            // Stacked on top
-            ctx.fillStyle = 'rgba(255, 59, 48, 0.4)'; ctx.strokeStyle = '#FF3B30';
-            ctx.fillRect(blockX - dropSize/2, this.surfaceY - baseSize - dropSize, dropSize, dropSize);
-            ctx.strokeRect(blockX - dropSize/2, this.surfaceY - baseSize - dropSize, dropSize, dropSize);
-            ctx.fillStyle = '#fff'; ctx.fillText(`+${this.engine.dropMass} kg`, blockX, this.surfaceY - baseSize - dropSize/2 + 5);
-        } else if (this.engine.dropArmedEq || this.engine.dropArmedAmp) {
-            // Falling from top of screen tracking target
-            let targetX = this.engine.dropArmedEq ? this.eqX : blockX;
-            let currentY = this.surfaceY - baseSize - dropSize - 40 + this.engine.dropAnimY;
-            
-            // Limit Y so it doesn't go through block
-            if (currentY > this.surfaceY - baseSize - dropSize - 5) currentY = this.surfaceY - baseSize - dropSize - 5;
+            const qY = cartY - dropH;
+            const qGrad = ctx.createLinearGradient(blockX - dropW / 2, qY, blockX + dropW / 2, qY + dropH);
+            qGrad.addColorStop(0, '#dc2626');
+            qGrad.addColorStop(0.5, '#ef4444');
+            qGrad.addColorStop(1, '#991b1b');
+            ctx.fillStyle = qGrad;
+            ctx.fillRect(blockX - dropW / 2, qY, dropW, dropH);
+            ctx.strokeStyle = '#fca5a5';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(blockX - dropW / 2, qY, dropW, dropH);
 
-            ctx.fillStyle = 'rgba(255, 59, 48, 0.8)'; ctx.strokeStyle = '#FF3B30';
-            ctx.fillRect(targetX - dropSize/2, currentY, dropSize, dropSize);
-            ctx.strokeRect(targetX - dropSize/2, currentY, dropSize, dropSize);
-            ctx.fillStyle = '#fff'; ctx.fillText(`FALLING`, targetX, currentY + dropSize/2 + 5);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px -apple-system, sans-serif';
+            ctx.fillText(`+Q (${this.engine.dropMass.toFixed(1)} kg)`, blockX, qY + 21);
+        } else if (this.engine.dropArmedEq || this.engine.dropArmedAmp) {
+            const targetX = this.engine.dropArmedEq ? this.eqX : blockX;
+            const gantryY = trackY - 180;
+
+            ctx.fillStyle = '#334155';
+            ctx.fillRect(targetX - 30, gantryY - 14, 60, 14);
+            ctx.strokeStyle = '#64748b';
+            ctx.strokeRect(targetX - 30, gantryY - 14, 60, 14);
+
+            ctx.strokeStyle = 'rgba(255, 59, 48, 0.4)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath(); ctx.moveTo(targetX, gantryY); ctx.lineTo(targetX, cartY); ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+            ctx.fillRect(targetX - dropW / 2, gantryY, dropW, dropH);
+            ctx.strokeStyle = '#fca5a5';
+            ctx.strokeRect(targetX - dropW / 2, gantryY, dropW, dropH);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.fillText(`ARMED Q`, targetX, gantryY + 20);
         }
+
+        // 7. Live Floating Energy Bar HUD
+        this.drawLiveEnergyHUD(this.engine.getTelemetry());
+
+        // 8. Particles & Shockwaves
+        updateAndDrawParticles(ctx, 1 / 60);
     }
 }
 
-/* ==========================================
-   3. TRIPLE GRAPH MANAGER (Chart.js)
-   ========================================== */
+/* =========================================================================
+   5. MULTI-MODE GRAPH SYSTEM (CHART.JS)
+   ========================================================================= */
 class GraphManager {
     constructor() {
-        Chart.defaults.color = '#778';
+        Chart.defaults.color = '#8492A6';
         Chart.defaults.font.family = '-apple-system, sans-serif';
-        
-        this.maxPoints = 120; 
+        this.maxPoints = 140;
+        this.mode = 'motion';
         this.updateCounter = 0;
 
-        const commonOptions = (title, yLabel) => ({
+        const commonOpt = (title, unit) => ({
             responsive: true, maintainAspectRatio: false, animation: false,
-            plugins: { 
+            plugins: {
                 legend: { display: false },
-                title: { display: true, text: title, color: '#f0f0f5', font: {size: 11}, padding: {top: 2, bottom: 2} }
+                title: { display: true, text: `${title} (${unit})`, color: '#F1F5F9', font: { size: 11, weight: 'bold' }, padding: { top: 2, bottom: 4 } }
             },
-            elements: { point: { radius: 0 }, line: { tension: 0.4 } }, 
+            elements: { point: { radius: 0 }, line: { tension: 0.35, borderWidth: 2.2 } },
             scales: {
-                x: { display: true, title: {display: true, text: 'Time (s)', color: '#556'}, grid: {display: false}, ticks: {display: false} },
-                y: { display: true, title: {display: true, text: yLabel, color: '#556'}, grid: { color: 'rgba(255,255,255,0.05)' }, grace: '5%' }
+                x: { display: false },
+                y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { font: { size: 10 } }, grace: '8%' }
             }
         });
 
-        this.dispChart = new Chart(document.getElementById('dispChart').getContext('2d'), {
-            type: 'line', data: { labels: Array(this.maxPoints).fill(''), datasets: [{ borderColor: '#00E5FF', data: Array(this.maxPoints).fill(0), borderWidth: 2.5 }] },
-            options: commonOptions('Displacement (x)', 'Meters (m)')
+        this.c1 = new Chart(document.getElementById('chart1').getContext('2d'), {
+            type: 'line', data: { labels: Array(this.maxPoints).fill(''), datasets: [{ borderColor: '#00E5FF', data: Array(this.maxPoints).fill(0) }] },
+            options: commonOpt('Displacement x(t)', 'm')
         });
 
-        this.keChart = new Chart(document.getElementById('keChart').getContext('2d'), {
-            type: 'line', data: { labels: Array(this.maxPoints).fill(''), datasets: [{ borderColor: '#FF3B30', data: Array(this.maxPoints).fill(0), borderWidth: 2.5 }] },
-            options: commonOptions('Kinetic Energy (KE)', 'Joules (J)')
+        this.c2 = new Chart(document.getElementById('chart2').getContext('2d'), {
+            type: 'line', data: { labels: Array(this.maxPoints).fill(''), datasets: [{ borderColor: '#FFB800', data: Array(this.maxPoints).fill(0) }] },
+            options: commonOpt('Acceleration a(t)', 'm/s²')
         });
 
-        this.peChart = new Chart(document.getElementById('peChart').getContext('2d'), {
-            type: 'line', data: { labels: Array(this.maxPoints).fill(''), datasets: [{ borderColor: '#32d74b', data: Array(this.maxPoints).fill(0), borderWidth: 2.5 }] },
-            options: commonOptions('Potential Energy (PE)', 'Joules (J)')
+        this.c3 = new Chart(document.getElementById('chart3').getContext('2d'), {
+            type: 'line', data: { labels: Array(this.maxPoints).fill(''), datasets: [{ borderColor: '#FF3B30', data: Array(this.maxPoints).fill(0) }] },
+            options: commonOpt('Restoring Force F(t)', 'N')
         });
     }
 
+    setMode(newMode) {
+        this.mode = newMode;
+        document.getElementById('btn-graph-motion').classList.toggle('active', newMode === 'motion');
+        document.getElementById('btn-graph-energy').classList.toggle('active', newMode === 'energy');
+
+        if (newMode === 'motion') {
+            this.c1.options.plugins.title.text = 'Displacement x(t) (m)';
+            this.c1.data.datasets[0].borderColor = '#00E5FF';
+            this.c2.options.plugins.title.text = 'Acceleration a(t) (m/s²)';
+            this.c2.data.datasets[0].borderColor = '#FFB800';
+            this.c3.options.plugins.title.text = 'Restoring Force F(t) (N)';
+            this.c3.data.datasets[0].borderColor = '#FF3B30';
+        } else {
+            this.c1.options.plugins.title.text = 'Kinetic Energy KE (J)';
+            this.c1.data.datasets[0].borderColor = '#00F59B';
+            this.c2.options.plugins.title.text = 'Elastic Potential Energy PE (J)';
+            this.c2.data.datasets[0].borderColor = '#388BFD';
+            this.c3.options.plugins.title.text = 'Total Mechanical Energy E (J)';
+            this.c3.data.datasets[0].borderColor = '#B388FF';
+        }
+        this.reset();
+    }
+
     reset() {
-        [this.dispChart, this.keChart, this.peChart].forEach(chart => {
+        [this.c1, this.c2, this.c3].forEach(chart => {
             chart.data.datasets[0].data = Array(this.maxPoints).fill(0);
             chart.update('none');
         });
     }
 
-    update(data, isRunning) {
-        if (!isRunning) return; 
-        
-        // Push data to chart every 2nd frame for higher visual fidelity (prevents aliasing)
-        if (this.updateCounter++ % 2 !== 0) return; 
+    update(telem, isRunning) {
+        if (!isRunning) return;
+        if (this.updateCounter++ % 2 !== 0) return;
 
-        this.dispChart.data.datasets[0].data.shift(); this.dispChart.data.datasets[0].data.push(data.x);
-        this.keChart.data.datasets[0].data.shift(); this.keChart.data.datasets[0].data.push(data.KE);
-        this.peChart.data.datasets[0].data.shift(); this.peChart.data.datasets[0].data.push(data.PE);
+        const pushVal = (chart, val) => {
+            chart.data.datasets[0].data.shift();
+            chart.data.datasets[0].data.push(val);
+            chart.update('none');
+        };
 
-        this.dispChart.update('none'); this.keChart.update('none'); this.peChart.update('none');
+        if (this.mode === 'motion') {
+            pushVal(this.c1, telem.x);
+            pushVal(this.c2, telem.a);
+            pushVal(this.c3, telem.F);
+        } else {
+            pushVal(this.c1, telem.KE);
+            pushVal(this.c2, telem.PE);
+            pushVal(this.c3, telem.E_tot);
+        }
     }
 }
 
-/* ==========================================
-   4. INQUIRY STATE MANAGER (5E)
-   ========================================== */
+/* =========================================================================
+   6. SPRING BUILDER MECHANISM & INTERACTIVE WORKSTATION
+   ========================================================================= */
+const BUILDER_CHALLENGES = [
+    {
+        level: 1,
+        targetK: 24,
+        springs: [
+            { id: "S1", name: "Spring A", k: 40 },
+            { id: "S2", name: "Spring B", k: 60 },
+            { id: "S3", name: "Spring C", k: 80 },
+            { id: "S4", name: "Spring D", k: 120 }
+        ],
+        prompt: "Challenge 1: Determine which 2 springs and topology achieve an effective stiffness of 24.0 N/m."
+    },
+    {
+        level: 2,
+        targetK: 105,
+        springs: [
+            { id: "S1", name: "Spring A", k: 30 },
+            { id: "S2", name: "Spring B", k: 45 },
+            { id: "S3", name: "Spring C", k: 60 },
+            { id: "S4", name: "Spring D", k: 75 },
+            { id: "S5", name: "Spring E", k: 90 }
+        ],
+        prompt: "Challenge 2: Select 2 springs from your rack to achieve an effective stiffness of 105.0 N/m."
+    },
+    {
+        level: 3,
+        targetK: 18,
+        springs: [
+            { id: "S1", name: "Spring A", k: 30 },
+            { id: "S2", name: "Spring B", k: 45 },
+            { id: "S3", name: "Spring C", k: 60 },
+            { id: "S4", name: "Spring D", k: 90 }
+        ],
+        prompt: "Challenge 3: Achieve an effective stiffness of 18.0 N/m using 2 of the available springs."
+    },
+    {
+        level: 4,
+        targetK: 16,
+        springs: [
+            { id: "S1", name: "Spring A", k: 32 },
+            { id: "S2", name: "Spring B", k: 64 },
+            { id: "S3", name: "Spring C", k: 64 },
+            { id: "S4", name: "Spring D", k: 48 },
+            { id: "S5", name: "Spring E", k: 96 }
+        ],
+        prompt: "Challenge 4 (3-Spring Series): Select 3 springs in chain series to achieve an effective compliance stiffness of exactly 16.0 N/m."
+    },
+    {
+        level: 5,
+        targetK: 144,
+        springs: [
+            { id: "S1", name: "Spring A", k: 24 },
+            { id: "S2", name: "Spring B", k: 36 },
+            { id: "S3", name: "Spring C", k: 48 },
+            { id: "S4", name: "Spring D", k: 72 },
+            { id: "S5", name: "Spring E", k: 96 }
+        ],
+        prompt: "Challenge 5 (3-Spring Parallel): Achieve an effective stiffness of 144.0 N/m using 3 springs in parallel."
+    },
+    {
+        level: 6,
+        targetK: 28.8,
+        springs: [
+            { id: "S1", name: "Spring A", k: 36 },
+            { id: "S2", name: "Spring B", k: 48 },
+            { id: "S3", name: "Spring C", k: 72 },
+            { id: "S4", name: "Spring D", k: 96 }
+        ],
+        prompt: "Challenge 6 (AP Precision): Achieve a precision target stiffness of 28.8 N/m."
+    },
+    {
+        level: 7,
+        targetK: 12,
+        springs: [
+            { id: "S1", name: "Spring A", k: 24 },
+            { id: "S2", name: "Spring B", k: 40 },
+            { id: "S3", name: "Spring C", k: 60 },
+            { id: "S4", name: "Spring D", k: 80 }
+        ],
+        prompt: "Challenge 7 (Mastery): Achieve an ultra-compliant stiffness of 12.0 N/m using 3 distinct springs in chain series."
+    }
+];
+
+class SpringBuilder {
+    constructor() {
+        this.currentIdx = 0;
+        this.topology = 'parallel';
+        this.availableSprings = [];
+        this.slots = [null, null, null, null];
+        this.customTarget = null;
+        this.init();
+    }
+
+    init() {
+        this.loadChallenge(this.currentIdx);
+
+        document.getElementById('btn-next-level').onclick = () => {
+            this.currentIdx = (this.currentIdx + 1) % BUILDER_CHALLENGES.length;
+            this.customTarget = null;
+            this.loadChallenge(this.currentIdx);
+        };
+
+        document.getElementById('btn-builder-random').onclick = () => this.generateRandomChallenge();
+        document.getElementById('btn-builder-play').onclick = () => this.togglePlay();
+        document.getElementById('btn-builder-reset').onclick = () => this.resetBench();
+        document.getElementById('btn-builder-clear').onclick = () => this.clearAll();
+    }
+
+    loadChallenge(idx) {
+        engine.isRunning = false; // Never auto-run!
+        const ch = BUILDER_CHALLENGES[idx];
+        document.getElementById('lbl-ch-level').innerText = `Level ${ch.level}`;
+        document.getElementById('lbl-ch-target').innerText = `${ch.targetK} N/m`;
+        document.getElementById('lbl-ch-prompt').innerText = ch.prompt;
+
+        this.availableSprings = ch.springs.map(s => ({ ...s }));
+        const slotCount = Math.max(3, Math.min(5, this.availableSprings.length));
+        this.slots = Array(slotCount).fill(null);
+
+        const fb = document.getElementById('builder-feedback');
+        fb.className = "builder-result-msg";
+        fb.innerText = "";
+
+        this.renderRack();
+        this.renderSlots();
+        this.syncWithEngine();
+        this.updatePlayBtn(false);
+    }
+
+    generateRandomChallenge() {
+        engine.isRunning = false; // Never auto-run!
+        const complexConfigs = [
+            { springs: [{ k: 30 }, { k: 60 }, { k: 90 }, { k: 45 }], top: 'series', targetK: 20 },
+            { springs: [{ k: 40 }, { k: 60 }, { k: 80 }, { k: 120 }], top: 'series', targetK: 24 },
+            { springs: [{ k: 50 }, { k: 75 }, { k: 100 }, { k: 150 }], top: 'series', targetK: 30 },
+            { springs: [{ k: 30 }, { k: 45 }, { k: 60 }, { k: 90 }], top: 'parallel', targetK: 135 },
+            { springs: [{ k: 25 }, { k: 50 }, { k: 75 }, { k: 100 }], top: 'parallel', targetK: 100 },
+            { springs: [{ k: 36 }, { k: 54 }, { k: 72 }, { k: 108 }], top: 'series', targetK: 21.6 },
+            { springs: [{ k: 20 }, { k: 30 }, { k: 60 }, { k: 40 }], top: 'series', targetK: 10 }
+        ];
+        const pick = complexConfigs[Math.floor(Math.random() * complexConfigs.length)];
+        const alphabet = ['Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon'];
+        const springs = pick.springs.map((s, idx) => ({
+            id: `QR${idx + 1}`,
+            name: `Spring ${alphabet[idx]}`,
+            k: s.k
+        }));
+
+        this.customTarget = {
+            targetK: pick.targetK,
+            springs: springs,
+            prompt: `Custom Quest: Select the correct springs and arrangement to achieve an effective stiffness of ${pick.targetK} N/m.`
+        };
+
+        document.getElementById('lbl-ch-level').innerText = "Custom Quest";
+        document.getElementById('lbl-ch-target').innerText = `${pick.targetK} N/m`;
+        document.getElementById('lbl-ch-prompt').innerText = this.customTarget.prompt;
+
+        this.availableSprings = springs.map(s => ({ ...s }));
+        this.slots = Array(Math.max(3, springs.length)).fill(null);
+
+        const fb = document.getElementById('builder-feedback');
+        fb.className = "builder-result-msg";
+        fb.innerText = "";
+
+        this.renderRack();
+        this.renderSlots();
+        this.syncWithEngine();
+        this.updatePlayBtn(false);
+    }
+
+    setTopology(top) {
+        this.topology = top;
+        document.getElementById('btn-top-parallel').classList.toggle('active', top === 'parallel');
+        document.getElementById('btn-top-series').classList.toggle('active', top === 'series');
+        this.renderSlots();
+        this.syncWithEngine();
+        if (engine.isRunning) {
+            // Re-evaluate if running
+            this.togglePlay();
+        }
+    }
+
+    renderRack() {
+        const rack = document.getElementById('inventory-rack');
+        rack.innerHTML = "";
+
+        this.availableSprings.forEach(s => {
+            const isMounted = this.slots.some(slot => slot && slot.id === s.id);
+            const card = document.createElement('div');
+            card.className = `spring-card ${isMounted ? 'mounted' : ''}`;
+            card.draggable = !isMounted;
+
+            card.innerHTML = `
+                <div class="spring-card-header">
+                    <span>🌀 ${s.name}</span>
+                    <span class="spring-k-badge">${s.k} N/m 🔒</span>
+                </div>
+                <div style="font-size: 10px; color: var(--text-muted);">Fixed Constant</div>
+                <button type="button" class="spring-action-btn">
+                    ${isMounted ? '↺ Recall to Rack' : '+ Mount in Slot'}
+                </button>
+            `;
+
+            if (!isMounted) {
+                card.ondragstart = (e) => {
+                    e.dataTransfer.setData('text/plain', s.id);
+                };
+                card.querySelector('button').onclick = () => {
+                    this.mountFirstAvailable(s.id);
+                };
+            } else {
+                card.querySelector('button').onclick = () => {
+                    this.unmountSpring(s.id);
+                };
+            }
+
+            rack.appendChild(card);
+        });
+
+        const placedCount = this.slots.filter(s => s !== null).length;
+        document.getElementById('lbl-placed-count').innerText = `${placedCount} Mounted`;
+    }
+
+    renderSlots() {
+        const bay = document.getElementById('assembly-bay');
+        bay.innerHTML = "";
+
+        this.slots.forEach((slot, idx) => {
+            if (this.topology === 'series' && idx > 0) {
+                const couplerDiv = document.createElement('div');
+                couplerDiv.className = 'series-coupler-symbol';
+                couplerDiv.innerText = '▼ ── 🔗 Inline Coupler ── ▼';
+                bay.appendChild(couplerDiv);
+            }
+
+            const slotEl = document.createElement('div');
+            slotEl.className = `assembly-slot ${slot ? 'filled' : ''}`;
+
+            const labelPrefix = this.topology === 'parallel' ? `Rail Slot ${idx + 1}` : `Chain Link ${idx + 1}`;
+
+            if (slot) {
+                slotEl.innerHTML = `
+                    <div class="slot-label">
+                        <span style="color:var(--accent-cyan);">●</span>
+                        <span>${labelPrefix}:</span>
+                        <span style="color:#FFF;">🌀 ${slot.name}</span>
+                        <span class="spring-k-badge">${slot.k} N/m 🔒</span>
+                    </div>
+                    <button type="button" class="slot-remove-btn" title="Remove Spring">✖ Remove</button>
+                `;
+                slotEl.querySelector('.slot-remove-btn').onclick = () => {
+                    this.unmountSlot(idx);
+                };
+            } else {
+                slotEl.innerHTML = `
+                    <div class="slot-label">
+                        <span style="color:var(--text-muted);">○</span>
+                        <span>${labelPrefix}:</span>
+                        <span class="slot-empty-hint">[ Drag or Click Spring to Mount ]</span>
+                    </div>
+                `;
+            }
+
+            slotEl.ondragover = (e) => {
+                e.preventDefault();
+                slotEl.classList.add('drag-over');
+            };
+            slotEl.ondragleave = () => {
+                slotEl.classList.remove('drag-over');
+            };
+            slotEl.addEventListener('drop', (e) => {
+                e.preventDefault();
+                slotEl.classList.remove('drag-over');
+                const springId = e.dataTransfer.getData('text/plain');
+                if (springId) {
+                    this.mountSpring(springId, idx);
+                }
+            });
+
+            bay.appendChild(slotEl);
+        });
+    }
+
+    mountSpring(springId, slotIdx) {
+        const spring = this.availableSprings.find(s => s.id === springId);
+        if (!spring) return;
+
+        const oldSlotIdx = this.slots.findIndex(s => s && s.id === springId);
+        if (oldSlotIdx !== -1) {
+            this.slots[oldSlotIdx] = null;
+        }
+
+        this.slots[slotIdx] = { ...spring };
+        this.renderRack();
+        this.renderSlots();
+        this.syncWithEngine();
+        this.updatePlayBtn(engine.isRunning);
+    }
+
+    mountFirstAvailable(springId) {
+        const emptySlotIdx = this.slots.findIndex(s => s === null);
+        if (emptySlotIdx === -1) {
+            alert("All assembly slots are occupied! Remove a spring first or switch arrangement.");
+            return;
+        }
+        this.mountSpring(springId, emptySlotIdx);
+    }
+
+    unmountSlot(idx) {
+        this.slots[idx] = null;
+        this.renderRack();
+        this.renderSlots();
+        this.syncWithEngine();
+        this.updatePlayBtn(engine.isRunning);
+    }
+
+    unmountSpring(springId) {
+        const slotIdx = this.slots.findIndex(s => s && s.id === springId);
+        if (slotIdx !== -1) {
+            this.unmountSlot(slotIdx);
+        }
+    }
+
+    resetBench() {
+        engine.isRunning = false;
+        engine.x = 3.0;
+        engine.v = 0;
+        engine.calculateForces();
+        this.updatePlayBtn(false);
+        graph.reset();
+
+        const fb = document.getElementById('builder-feedback');
+        fb.className = "builder-result-msg";
+        fb.innerText = "";
+
+        this.syncWithEngine();
+    }
+
+    clearAll() {
+        engine.isRunning = false;
+        engine.x = 3.0;
+        engine.v = 0;
+        engine.calculateForces();
+        this.slots = this.slots.map(() => null);
+        this.updatePlayBtn(false);
+        graph.reset();
+
+        const fb = document.getElementById('builder-feedback');
+        fb.className = "builder-result-msg";
+        fb.innerText = "";
+
+        this.renderRack();
+        this.renderSlots();
+        this.syncWithEngine();
+    }
+
+    updatePlayBtn(isRunning) {
+        const btn = document.getElementById('btn-builder-play');
+        if (!btn) return;
+        if (isRunning) {
+            btn.innerText = "⏸ Pause Simulation";
+            btn.className = "btn-builder-play running";
+            btn.style.background = "linear-gradient(135deg, #FFB800, #d97706)";
+        } else {
+            const placed = this.slots.filter(s => s !== null);
+            btn.innerText = (placed.length > 0 && Math.abs(engine.x - 3.0) > 0.1) ? "▶ Resume Simulation" : "▶ Test Assembly (Play)";
+            btn.className = "btn-builder-play paused";
+            btn.style.background = "linear-gradient(135deg, #00F59B, #00a86b)";
+        }
+    }
+
+    syncWithEngine() {
+        const placed = this.slots.filter(s => s !== null);
+        engine.config = this.topology;
+        if (placed.length > 0) {
+            engine.customSprings = placed.map(s => s.k);
+            engine.calcKeq();
+            engine.calculateForces();
+        } else {
+            engine.customSprings = [1];
+            engine.calcKeq();
+            engine.calculateForces();
+        }
+    }
+
+    togglePlay() {
+        const placed = this.slots.filter(s => s !== null);
+        const fb = document.getElementById('builder-feedback');
+
+        // MANDATORY REQUIREMENT: MOUNTING MUST BE DONE FIRST!
+        if (placed.length === 0) {
+            engine.isRunning = false;
+            this.updatePlayBtn(false);
+            fb.className = "builder-result-msg fail";
+            fb.innerHTML = `⚠️ <strong>Mounting Required First!</strong><br>You must place at least one spring from your inventory into the assembly workstation before playing the simulation.`;
+            return;
+        }
+
+        if (!engine.isRunning) {
+            let achievedK = 0;
+            if (this.topology === 'parallel') {
+                achievedK = placed.reduce((sum, s) => sum + s.k, 0);
+            } else {
+                const sumInv = placed.reduce((sum, s) => sum + (1 / s.k), 0);
+                achievedK = parseFloat((1 / sumInv).toFixed(1));
+            }
+
+            const targetK = this.customTarget ? this.customTarget.targetK : BUILDER_CHALLENGES[this.currentIdx].targetK;
+            const diff = Math.abs(achievedK - targetK);
+
+            engine.customSprings = placed.map(s => s.k);
+            engine.config = this.topology;
+            engine.k_eq = achievedK;
+            if (Math.abs(engine.x) < 0.2) engine.x = 3.0;
+            engine.calculateForces();
+            engine.isRunning = true;
+            this.updatePlayBtn(true);
+            graph.reset();
+
+            const period = (2 * Math.PI * Math.sqrt(engine.baseMass / achievedK)).toFixed(2);
+            const freq = (1 / parseFloat(period)).toFixed(2);
+
+            if (diff < 0.2) {
+                sound.playLatch();
+                fb.className = "builder-result-msg success";
+                fb.innerHTML = `🎉 <strong>TARGET ACHIEVED! (k_eff = ${achievedK} N/m)</strong><br>` +
+                    `✓ Oscillation Period T = ${period} s | Frequency f = ${freq} Hz<br>` +
+                    `💡 <em>Physics Insight:</em> ${this.topology === 'parallel' 
+                        ? 'In Parallel, every spring shares identical displacement (Δx₁ = Δx₂ = x) so restoring forces add directly (F_net = Σ k_i x), producing a much stiffer system!' 
+                        : 'In Series, the springs share the tensile force (F₁ = F₂ = F_net) while individual elongations add up (Δx = Σ Δx_i), producing a softer, highly compliant system!'}`;
+            } else {
+                fb.className = "builder-result-msg fail";
+                if (achievedK > targetK) {
+                    fb.innerHTML = `❌ <strong>Too Stiff! Measured k_eff = ${achievedK} N/m (Target: ${targetK} N/m)</strong><br>` +
+                        `The system resisted displacement too strongly (T = ${period} s).<br>` +
+                        `💡 <em>Hint:</em> Chaining springs end-to-end (Series) allows each spring to elongate, softening overall stiffness!`;
+                } else {
+                    fb.innerHTML = `❌ <strong>Too Compliant / Soft! Measured k_eff = ${achievedK} N/m (Target: ${targetK} N/m)</strong><br>` +
+                        `The system stretched too easily (T = ${period} s).<br>` +
+                        `💡 <em>Hint:</em> Mounting springs side-by-side (Parallel) combines their restoring forces, making the system stiffer!`;
+                }
+            }
+        } else {
+            engine.isRunning = false;
+            this.updatePlayBtn(false);
+        }
+    }
+}
+
+/* =========================================================================
+   7. 5E INQUIRY LAB NOTEBOOK
+   ========================================================================= */
 const prompts = [
     { stage: "Engage", q: "Observe the continuous oscillation. At what point in the motion is the Kinetic Energy at its maximum, and where is the Elastic Potential Energy at its maximum?" },
-    { stage: "Engage", q: "Increase the 'Friction' slider. Observe the Displacement graph. What mathematical shape describes the decay of the amplitude envelope over time?" },
-    { stage: "Explore", q: "Turn friction to 0 and Reset. Click 'Drop at Equilibrium'. Describe what happens to the Displacement amplitude immediately after the mass drops. Why does it change?" },
-    { stage: "Explore", q: "Reset. Click 'Drop at Amplitude'. How does the final amplitude compare to the equilibrium drop? Explain why looking at the Kinetic Energy graph at the moment of the drop." },
-    { stage: "Explain", q: "Using the law of conservation of momentum, explain why dropping at Equilibrium (max velocity) results in a loss of velocity, but dropping at Amplitude (zero velocity) results in no change to the momentary velocity." },
-    { stage: "Explain", q: "Because dropping at Equilibrium reduces velocity, the total mechanical energy of the system decreases. Prove mathematically why the new amplitude A_final must be less than the original amplitude A_initial." },
-    { stage: "Elaborate", q: "Look at the frequency/period of the waves in the graph. Does dropping the mass at Amplitude vs Equilibrium result in a different final Period (T)? Relate your answer to T = 2π√(m/k)." },
-    { stage: "Elaborate", q: "Switch to the 'Parallel' spring configuration. Explain how the equivalent spring constant k_eq changes, and predict how this affects the period compared to a single spring." },
-    { stage: "Evaluate", q: "A student claims: 'Since the total mass increased, the total mechanical energy must increase because KE = ½mv² and PE = ½kx².' Use the graphs and your knowledge of inelastic collisions to refute this claim." },
-    { stage: "Evaluate", q: "In a real-world car suspension (which acts like a spring), shock absorbers are added to provide friction (damping). Without shock absorbers, what would happen to the car after hitting a bump, as modeled by this simulation?" }
+    { stage: "Engage", q: "Increase the 'Track Friction' slider. Observe the Displacement graph. What mathematical shape describes the decay envelope over time?" },
+    { stage: "Explore", q: "Set friction to 0 and Reset. Click 'Drop at Equilibrium (x=0)'. Describe what happens to the velocity and the Displacement amplitude immediately after Block Q drops. Why does it change?" },
+    { stage: "Explore", q: "Reset. Click 'Drop at Amplitude (v=0)'. How does the final amplitude compare to the equilibrium drop? Explain why by inspecting the Kinetic Energy and velocity at the moment of release." },
+    { stage: "Explain", q: "Using the law of conservation of momentum, explain why dropping at Equilibrium (max velocity) results in a loss of kinetic energy, but dropping at Amplitude (zero velocity) conserves mechanical energy." },
+    { stage: "Explain", q: "Because dropping at Equilibrium reduces velocity, prove mathematically why the new amplitude A_final must equal A_initial * sqrt(m / (m + m_Q))." },
+    { stage: "Elaborate", q: "Look at the period of the waves in the graph. Does dropping the mass at Amplitude vs Equilibrium result in a different final Period T? Relate your answer to T = 2π√(m_total / k)." },
+    { stage: "Elaborate", q: "Switch to 'Parallel Springs'. Explain how the equivalent spring constant k_eq changes, and explain why a parallel system is significantly harder to stretch than a series system." },
+    { stage: "Evaluate", q: "A student asserts: 'Since the total mass increases after the drop, total mechanical energy must increase.' Use the simulation telemetry and inelastic collision physics to refute this assertion." },
+    { stage: "Evaluate", q: "In automotive suspension design, springs and shock absorbers work together. Based on your experiments with the friction and k_config sliders, explain the role of damping in preventing continuous oscillation." }
 ];
 
 class InquiryStateManager {
@@ -601,14 +1884,22 @@ class InquiryStateManager {
         this.idx = 0; this.answers = Array(10).fill("");
         this.load(); this.bindEvents(); this.render();
     }
-    load() { const saved = localStorage.getItem('shm_v6_answers'); if (saved) this.answers = JSON.parse(saved); }
+    load() {
+        const saved = localStorage.getItem('shm_v7_answers');
+        if (saved) { try { this.answers = JSON.parse(saved); } catch(e){} }
+    }
     save() {
-        localStorage.setItem('shm_v6_answers', JSON.stringify(this.answers));
-        const status = document.getElementById('status-msg'); status.innerText = "Autosaved ✓";
-        clearTimeout(this.msgTimer); this.msgTimer = setTimeout(() => status.innerText = "", 2000);
+        localStorage.setItem('shm_v7_answers', JSON.stringify(this.answers));
+        const status = document.getElementById('status-msg');
+        status.innerText = "Autosaved ✓";
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => status.innerText = "", 2000);
     }
     bindEvents() {
-        document.getElementById('qa-answer').addEventListener('input', (e) => { this.answers[this.idx] = e.target.value; this.save(); });
+        document.getElementById('qa-answer').addEventListener('input', (e) => {
+            this.answers[this.idx] = e.target.value;
+            this.save();
+        });
         document.getElementById('btn-prev').onclick = () => { if (this.idx > 0) { this.idx--; this.render(); } };
         document.getElementById('btn-next').onclick = () => { if (this.idx < 9) { this.idx++; this.render(); } };
         document.getElementById('btn-export').onclick = () => this.exportDOCX();
@@ -621,53 +1912,127 @@ class InquiryStateManager {
         document.getElementById('qa-answer').value = this.answers[this.idx];
     }
     async exportDOCX() {
-        const name = prompt("Enter Student Name for the Lab Report:"); if (!name) return;
+        const name = prompt("Enter Student Full Name for the Lab Report:");
+        if (!name) return;
         const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
         const children = [
-            new Paragraph({ text: "AP Physics: SHM & Momentum Lab Report", heading: HeadingLevel.HEADING_1 }),
-            new Paragraph({ text: `Student Name: ${name}` }), new Paragraph({ text: `Date: ${new Date().toLocaleString()}\n` })
+            new Paragraph({ text: "AP Physics C: Advanced Horizontal Springs & Collision Lab", heading: HeadingLevel.HEADING_1 }),
+            new Paragraph({ text: `Student Name: ${name}` }),
+            new Paragraph({ text: `Date: ${new Date().toLocaleString()}\n` })
         ];
         prompts.forEach((p, i) => {
-            children.push(new Paragraph({ text: `[${p.stage}] Prompt ${i + 1}:`, heading: HeadingLevel.HEADING_2 }));
+            children.push(new Paragraph({ text: `[${p.stage}] Question ${i + 1}:`, heading: HeadingLevel.HEADING_2 }));
             children.push(new Paragraph({ children: [new TextRun({ text: p.q, italics: true })] }));
-            children.push(new Paragraph({ text: this.answers[i] || "(No Answer)" })); children.push(new Paragraph({ text: "" }));
+            children.push(new Paragraph({ text: this.answers[i] || "(No Response Provided)" }));
+            children.push(new Paragraph({ text: "" }));
         });
-        const doc = new Document({ sections: [{ properties: {}, children: children }] });
-        try { const blob = await Packer.toBlob(doc); saveAs(blob, `${name.replace(/\s+/g, '_')}_SHM_Lab.docx`); } 
-        catch (err) { alert("Export failed. See console."); console.error(err); }
+        const doc = new Document({ sections: [{ properties: {}, children }] });
+        try {
+            const blob = await Packer.toBlob(doc);
+            saveAs(blob, `${name.replace(/\s+/g, '_')}_Horizontal_Springs_Report.docx`);
+        } catch (err) {
+            alert("Export error. Check console.");
+            console.error(err);
+        }
     }
 }
 
-/* ==========================================
-   5. UI CONTROLLER & MAIN LOOP
-   ========================================== */
+/* =========================================================================
+   8. UI CONTROLS & MAIN LOOP WITH INDEPENDENT k1 AND k2
+   ========================================================================= */
 const engine = new PhysicsEngine();
 const renderer = new Renderer(document.getElementById('simCanvas'), engine);
 const graph = new GraphManager();
+const builder = new SpringBuilder();
 const inquiry = new InquiryStateManager();
 
-// Input Listeners
+let simSpeed = 1.0;
+
+function setSpeed(speed, btn) {
+    simSpeed = speed;
+    document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    document.getElementById('lbl-speed').innerText = `${speed.toFixed(2).replace(/\.00$/, '')}x`;
+}
+
+function updateStiffnessCard() {
+    const k1 = parseFloat(document.getElementById('in-k1').value);
+    const k2 = parseFloat(document.getElementById('in-k2').value);
+    const cfg = document.getElementById('k-config').value;
+    const title = document.getElementById('card-config-title');
+    const tag = document.getElementById('card-stiffness-tag');
+    const desc = document.getElementById('card-stiffness-desc');
+    const breakdown = document.getElementById('card-spring-breakdown');
+    const needed = document.getElementById('card-force-needed');
+
+    document.getElementById('grp-k2').style.display = (cfg === 'single') ? 'none' : 'flex';
+
+    let keff = k1;
+    if (cfg === 'single') {
+        title.innerText = "Single Spring";
+        tag.className = "stiffness-tag standard";
+        tag.innerText = "Standard Stiffness";
+        desc.innerHTML = `Baseline Hooke's Law: <strong>k_eq = ${k1.toFixed(1)} N/m</strong>. Direct displacement response.`;
+        breakdown.style.display = 'none';
+        needed.innerHTML = `Pull force to stretch 1.0 m: <strong>${k1.toFixed(1)} N</strong>`;
+    } else if (cfg === 'parallel') {
+        keff = k1 + k2;
+        const pct1 = ((k1 / keff) * 100).toFixed(0);
+        const pct2 = ((k2 / keff) * 100).toFixed(0);
+        title.innerText = "Parallel Springs (Side-by-Side)";
+        tag.className = "stiffness-tag stiff";
+        tag.innerText = "🛡️ Stiffest (Hard to Stretch)";
+        desc.innerHTML = `Both springs share displacement (Δx₁ = Δx₂ = x). Forces combine: <strong>k_eq = k₁ + k₂ = ${keff.toFixed(1)} N/m</strong>.`;
+        breakdown.style.display = 'block';
+        breakdown.innerHTML = `⚖️ <strong>Load Sharing:</strong> Spring 1 (${k1} N/m) carries <strong>${pct1}%</strong> of force | Spring 2 (${k2} N/m) carries <strong>${pct2}%</strong>.`;
+        needed.innerHTML = `Pull force to stretch 1.0 m: <strong>${keff.toFixed(1)} N</strong> (Requires MORE force!)`;
+    } else if (cfg === 'series') {
+        keff = (k1 * k2) / (k1 + k2);
+        const pct1 = ((k2 / (k1 + k2)) * 100).toFixed(0);
+        const pct2 = ((k1 / (k1 + k2)) * 100).toFixed(0);
+        title.innerText = "Series Springs (End-to-End)";
+        tag.className = "stiffness-tag compliant";
+        tag.innerText = "🪶 Softest (High Compliance - Easy to Stretch)";
+        desc.innerHTML = `Tension is equal throughout (F₁ = F₂ = F_net), but individual elongations add up: <strong>k_eq = ${keff.toFixed(1)} N/m</strong>.`;
+        breakdown.style.display = 'block';
+        breakdown.innerHTML = `📏 <strong>Elongation Sharing:</strong> Spring 1 stretches <strong>${pct1}%</strong> | Spring 2 stretches <strong>${pct2}%</strong> (Softer spring elongates more!).`;
+        needed.innerHTML = `Pull force to stretch 1.0 m: <strong>${keff.toFixed(1)} N</strong> (Requires LESS force!)`;
+    }
+}
+
 const updateVal = (id, suffix) => {
     document.getElementById(`val-${id}`).innerText = parseFloat(document.getElementById(`in-${id}`).value).toFixed(1) + suffix;
     engine.resetParams();
+    updateStiffnessCard();
 };
+
 document.getElementById('in-a0').oninput = () => updateVal('a0', ' m');
-document.getElementById('in-k').oninput = () => updateVal('k', ' N/m');
+document.getElementById('in-k1').oninput = () => updateVal('k1', ' N/m');
+document.getElementById('in-k2').oninput = () => updateVal('k2', ' N/m');
 document.getElementById('in-m').oninput = () => updateVal('m', ' kg');
 document.getElementById('in-q').oninput = () => updateVal('q', ' kg');
 document.getElementById('in-fric').oninput = () => updateVal('fric', '');
-document.getElementById('k-config').onchange = () => { engine.resetParams(); graph.reset(); };
+document.getElementById('k-config').onchange = () => {
+    engine.resetParams();
+    updateStiffnessCard();
+    graph.reset();
+};
+document.getElementById('tog-sound').onchange = (e) => sound.enabled = e.target.checked;
 
-// Buttons
 const resetBtnState = () => {
-    document.getElementById('btn-drop-eq').innerText = "Drop at\nEquilibrium";
+    document.getElementById('btn-drop-eq').innerText = "⏬ Drop at Equilibrium (x=0)";
     document.getElementById('btn-drop-eq').className = "action-drop";
-    document.getElementById('btn-drop-amp').innerText = "Drop at\nAmplitude";
+    document.getElementById('btn-drop-amp').innerText = "⏬ Drop at Amplitude (v=0)";
     document.getElementById('btn-drop-amp').className = "action-drop";
 };
 
-document.getElementById('btn-reset').onclick = () => { 
-    engine.resetParams(); graph.reset(); resetBtnState();
+document.getElementById('btn-reset').onclick = () => {
+    engine.resetParams();
+    engine.isRunning = false;
+    btnPlay.innerText = "▶ Start Simulation";
+    btnPlay.className = "paused";
+    graph.reset();
+    resetBtnState();
 };
 
 const btnPlay = document.getElementById('btn-play');
@@ -675,76 +2040,115 @@ btnPlay.onclick = () => {
     engine.isRunning = !engine.isRunning;
     btnPlay.innerText = engine.isRunning ? "⏸ Pause Simulation" : "▶ Resume Simulation";
     btnPlay.className = engine.isRunning ? "" : "paused";
+    sound.init();
 };
 
 const btnDropEq = document.getElementById('btn-drop-eq');
 const btnDropAmp = document.getElementById('btn-drop-amp');
 
 btnDropEq.onclick = () => {
-    if(!engine.hasDropped) {
+    if (!engine.hasDropped) {
         engine.armEq();
         resetBtnState();
-        btnDropEq.innerText = "ARMED (WAITING)";
+        btnDropEq.innerText = "ARMED: DROPS AT x=0";
         btnDropEq.className = "action-drop armed";
     }
 };
 
 btnDropAmp.onclick = () => {
-    if(!engine.hasDropped) {
+    if (!engine.hasDropped) {
         engine.armAmp();
         resetBtnState();
-        btnDropAmp.innerText = "ARMED (WAITING)";
+        btnDropAmp.innerText = "ARMED: DROPS AT v=0";
         btnDropAmp.className = "action-drop armed";
     }
 };
 
-// Tab Navigation
 document.querySelectorAll('.tab').forEach(tab => {
     tab.onclick = (e) => {
         document.querySelectorAll('.tab, .panel').forEach(el => el.classList.remove('active'));
-        e.target.classList.add('active');
-        document.getElementById(e.target.getAttribute('data-target')).classList.add('active');
+        const target = e.currentTarget;
+        target.classList.add('active');
+        const targetId = target.getAttribute('data-target');
+        document.getElementById(targetId).classList.add('active');
+        engine.isRunning = false; // Always pause when changing tabs
+        if (targetId === 'controlsTab') {
+            engine.customSprings = null;
+            engine.resetParams();
+            btnPlay.innerText = "▶ Start Simulation";
+            btnPlay.className = "paused";
+            updateStiffnessCard();
+        } else if (targetId === 'builderTab') {
+            builder.syncWithEngine();
+            builder.updatePlayBtn(false);
+        }
+        renderer.resize();
     };
 });
 
-// Fixed Timestep Loop for Perfect Sinusoids
+const simCanvas = document.getElementById('simCanvas');
+let isDraggingCart = false;
+let dragStartX = 0;
+let dragStartDisplacement = 0;
+
+simCanvas.addEventListener('mousedown', (e) => {
+    const rect = simCanvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const blockX = renderer.eqX + (engine.x * renderer.scale);
+    const cartY = renderer.surfaceY - 50;
+
+    if (Math.abs(mouseX - blockX) < 55 && Math.abs(mouseY - (cartY + 25)) < 35) {
+        isDraggingCart = true;
+        engine.isDragging = true;
+        simCanvas.classList.add('grabbing');
+        dragStartX = mouseX;
+        dragStartDisplacement = engine.x;
+    }
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (!isDraggingCart) return;
+    const rect = simCanvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const deltaX = mouseX - dragStartX;
+    engine.x = dragStartDisplacement + deltaX / renderer.scale;
+    engine.v = 0;
+    engine.calculateForces();
+});
+
+window.addEventListener('mouseup', () => {
+    if (isDraggingCart) {
+        isDraggingCart = false;
+        engine.isDragging = false;
+        simCanvas.classList.remove('grabbing');
+    }
+});
+
 let lastTime = performance.now();
 let dtAccumulator = 0;
-const fixedDt = 1 / 120; // 120Hz physics step
+const fixedDt = 1 / 120;
 
 function loop(currentTime) {
     let frameTime = (currentTime - lastTime) / 1000;
-    if (frameTime > 0.1) frameTime = 0.1; // Prevent massive jumps
+    if (frameTime > 0.1) frameTime = 0.1;
     lastTime = currentTime;
 
     if (engine.isRunning) {
-        dtAccumulator += frameTime;
+        dtAccumulator += frameTime * simSpeed;
         while (dtAccumulator >= fixedDt) {
             engine.step(fixedDt);
             dtAccumulator -= fixedDt;
         }
         graph.update(engine.getTelemetry(), engine.isRunning);
     }
-    
+
     renderer.render();
     requestAnimationFrame(loop);
 }
-requestAnimationFrame(loop);
 
-/* ==========================================
-TEACHER GRADING RUBRIC
-=============================================
-1. [Engage] KE is max at equilibrium (x=0) because velocity is highest. PE is max at the turning points (amplitude) because displacement x is highest.
-2. [Engage] Exponential decay. The amplitude decreases exponentially over time due to the viscous damping force (friction) being proportional to velocity.
-3. [Explore] Amplitude decreases instantly. The inelastic collision at max velocity loses kinetic energy. Since total energy drops, it cannot reach the same potential energy (amplitude) again.
-4. [Explore] Amplitude does NOT change. Because velocity was zero at the turning point, dropping mass adds zero momentum. No kinetic energy is lost.
-5. [Explain] p_i = p_f. If dropped at eq, m*v_max = (m+drop)*v_new. Velocity must drop. If dropped at amp, m*(0) = (m+drop)*v_new. Velocity remains 0. 
-6. [Explain] E_total = ½mv² + ½kx². At equilibrium, x=0, so E_total = ½mv². Since v drops (and mass increases), the new E_total is lower. Since E_total also equals ½kA², a lower E_total means A must be smaller.
-7. [Elaborate] Period T depends ONLY on mass and k. Since final mass is the same in both scenarios (m + dropMass), the new period is identical regardless of *where* the mass was dropped.
-8. [Elaborate] Parallel springs double the k (2k). Since T = 2π√(m/k), doubling k decreases the period (it oscillates faster).
-9. [Evaluate] False. The collision is inelastic. The "missing" energy was converted to internal energy (heat/deformation) when the blocks collided at equilibrium. If dropped at amplitude, energy stays exactly the same, it does not increase.
-10. [Evaluate] Without damping (friction), the car would continue to oscillate back and forth indefinitely after hitting a bump, perfectly conserving its mechanical energy.
-============================================= */
+updateStiffnessCard();
+requestAnimationFrame(loop);
 </script>
 </body>
 </html>
