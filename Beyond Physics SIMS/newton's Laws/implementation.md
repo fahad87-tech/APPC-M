@@ -53,3 +53,33 @@ A rigid block of mass $m$ sits on an adjustable incline with angle $\theta$, sub
 - **Assessment Workspace**: Full 5E inquiry section with exportable Word (.docx) student lab reports.
 - **Access Control Gate**: Cryptographic PBKDF2 SHA-256 password protection gate (`SIM_AUTH`, `beyondphysics`, 100,000 iterations).
 - **Dashboard Integration**: Added to the Newton's Laws grid in `Beyond Physics SIMS/index.html` with `Simulation 🔒` badge.
+
+
+---
+
+## 3. Classic Circular Motion Laboratory (`Classic Circular Motion LAB.html`)
+
+### 3.1 Physical Model & Governing Dynamics
+The simulation models the classic AP Physics 1 uniform circular force laboratory apparatus:
+- A rubber stopper of mass $m_{\text{stopper}}$ rotates horizontally overhead in a circle of radius $r$.
+- A string runs through a vertical glass/plastic tube held by a clamp and attaches to $N$ hanging washers of mass $m_{\text{washer}}$.
+- An equilibrium reference clip is fastened to the string immediately below the lower rim of the tube to verify constant radius without friction assistance.
+
+#### Equations of Motion:
+1. **Centripetal Force Requirement**:
+   $$F_c = m_{\text{stopper}} a_c = m_{\text{stopper}} \frac{v^2}{r} = m_{\text{stopper}} \omega^2 r = m_{\text{stopper}} \left(\frac{2\pi}{T}\right)^2 r = \frac{4\pi^2 m_{\text{stopper}} r}{T^2}$$
+2. **Equilibrium Tension from Suspended Washers**:
+   $$T = M_{\text{hanging}} g = (N \cdot m_{\text{washer}}) g$$
+3. **Period & Washer Mass Relationship**:
+   $$(N \cdot m_{\text{washer}}) g = \frac{4\pi^2 m_{\text{stopper}} r}{T^2} \implies T = 2\pi \sqrt{\frac{m_{\text{stopper}} r}{N m_{\text{washer}} g}}$$
+4. **Target Calculation for Student**:
+   $$m_{\text{washer}} = \frac{4\pi^2 m_{\text{stopper}} r}{N g \left(\frac{t_{10}}{10}\right)^2}$$
+   where $t_{10}$ is the recorded time for exactly 10 complete revolutions.
+
+### 3.2 Key Features & Educational Design
+- **Precision 10-Revolution Auto-Stop**: Apparatus whirls and halts automatically at exactly 10 revolutions with synchronised Web Audio pass chime.
+- **Precision Digital Stopwatch**: Integrated millisecond timer coupled directly to rotation physics.
+- **Randomized Parameter Generation**: Guarantees distinct values for $r$, $m_{\text{stopper}}$, $N$, and $m_{\text{washer}}$ on every reset/trial.
+- **Direct Student Assessment**: Formative verification box showing student computed washer mass vs. true physical value with $\pm 5\%$ tolerance margin.
+- **Security & Access Control**: PBKDF2 SHA-256 password protection gate (`SIM_AUTH`, `beyondphysics`, 100,000 iterations).
+- **Branding & Navigation**: Styled `.author-badge` (`by Mr. F`) and direct return link to Dashboard.

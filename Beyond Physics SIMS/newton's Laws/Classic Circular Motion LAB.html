@@ -1,0 +1,1580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classic Circular Force Lab by Mr. F — AP Physics 1</title>
+  <script>
+    const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+    document.documentElement.classList.add("password-locked");
+
+    async function pbkdf2Verify(password, storedHash, salt, iterations) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+      const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+      return hex === storedHash;
+    }
+
+    function requestPassword(title, message) {
+      return new Promise(resolve => {
+        const existingGate = document.getElementById("password-gate");
+        if (existingGate) existingGate.remove();
+        const gate = document.createElement("div");
+        gate.id = "password-gate";
+        gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+        document.body.appendChild(gate);
+        const input = document.getElementById("password-gate-input");
+        const finish = value => { gate.remove(); resolve(value); };
+        document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+        document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+        input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+        window.requestAnimationFrame(() => input.focus());
+      });
+    }
+
+    async function verifyPageAccess() {
+      const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+      if (userInput === null) { window.location.href = "../index.html"; return; }
+      if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+        document.documentElement.classList.remove("password-locked");
+      } else {
+        alert("Incorrect password. Access denied.");
+        window.location.href = "../index.html";
+      }
+    }
+
+    window.addEventListener("pageshow", event => {
+      if (event.persisted && document.documentElement.classList.contains("password-locked")) {
+        verifyPageAccess();
+      }
+    });
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+    } else {
+      verifyPageAccess();
+    }
+  </script>
+  <style id="password-gate-styles">
+    html.password-locked body { overflow: hidden; }
+    html.password-locked body > * { visibility: hidden; }
+    html.password-locked body > #password-gate { visibility: visible; }
+    #password-gate {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 9, 18, 0.88);
+      padding: 24px;
+      z-index: 9999;
+    }
+    html.password-locked #password-gate { display: flex; visibility: visible; }
+    #password-gate-card {
+      width: min(100%, 420px);
+      background: #101625;
+      border: 1px solid rgba(100,181,246,0.28);
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      color: #e7edf7;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+    #password-gate-input {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35);
+      background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px;
+      box-sizing: border-box;
+    }
+    #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+    #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+    .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+    #password-gate-submit { background: #64b5f6; color: #08101c; }
+  </style>
+  <style>
+    :root {
+      --bg-primary: #070d18;
+      --bg-surface: #0f172a;
+      --bg-card: #1e293b;
+      --border-color: #334155;
+      --border-focus: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-blue: #3b82f6;
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --lcd-bg: #04140e;
+      --lcd-text: #22c55e;
+      --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.6), 0 8px 10px -6px rgba(0,0,0,0.5);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, var(--bg-primary) 80%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      max-width: 1050px;
+      width: 100%;
+    }
+
+    .ap-header-tag {
+      display: inline-block;
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #f59e0b, #d97706);
+      color: #0f172a;
+      padding: 4px 14px;
+      border-radius: 9999px;
+      margin-bottom: 8px;
+    }
+
+    header h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      background: linear-gradient(135deg, #38bdf8 0%, #818cf8 50%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+
+    .author-badge {
+      display: inline-block;
+      font-size: 0.46em;
+      font-weight: 700;
+      vertical-align: middle;
+      margin-left: 10px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.45);
+      color: #38bdf8;
+      -webkit-text-fill-color: #38bdf8;
+      padding: 3px 12px;
+      border-radius: 999px;
+      letter-spacing: 0.06em;
+      text-transform: none;
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.22);
+    }
+
+    header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 860px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Main Container */
+    .app-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      max-width: 1220px;
+      width: 100%;
+    }
+
+    @media (min-width: 980px) {
+      .app-container {
+        grid-template-columns: 1.32fr 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      box-shadow: var(--shadow-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #e2e8f0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      padding-bottom: 10px;
+    }
+
+    /* Canvas Viewport */
+    .canvas-wrapper {
+      position: relative;
+      width: 100%;
+      height: 520px;
+      background: #050811;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.8);
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Start Overlay (Waits for student to read before pressing play) */
+    .canvas-start-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(7, 13, 24, 0.72);
+      backdrop-filter: blur(3px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    .start-prompt-card {
+      background: rgba(15, 23, 42, 0.95);
+      border: 2px solid #38bdf8;
+      border-radius: 14px;
+      padding: 24px 32px;
+      text-align: center;
+      max-width: 380px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+    }
+
+    .start-prompt-card h3 {
+      font-size: 1.35rem;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .start-prompt-card p {
+      font-size: 1rem;
+      color: #94a3b8;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+
+    .btn-big-play {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 800;
+      padding: 12px 28px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .btn-big-play:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+    }
+
+    /* Live HUD Chips (Big & High-Contrast) */
+    .canvas-hud {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .hud-chip {
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 1rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #38bdf8;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+
+    .hud-chip span {
+      color: #f1f5f9;
+      font-weight: bold;
+    }
+
+    /* Lap Indicator */
+    .lap-indicator {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      padding: 8px 18px;
+      text-align: right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      z-index: 10;
+    }
+
+    .lap-counter-num {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+
+    .flash-active {
+      animation: pulse-flash 0.3s ease-out;
+    }
+
+    @keyframes pulse-flash {
+      0% { background: rgba(56, 189, 248, 0.7); color: #fff; transform: scale(1.06); }
+      100% { background: rgba(15, 23, 42, 0.92); color: #38bdf8; transform: scale(1.0); }
+    }
+
+    /* Sim Controls Bar */
+    .sim-controls {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: all 0.15s ease-in-out;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary { background: #2563eb; color: #fff; }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-stop { background: #dc2626; color: #fff; }
+    .btn-stop:hover { background: #b91c1c; }
+
+    .btn-secondary { background: #334155; color: #e2e8f0; border-color: #475569; }
+    .btn-secondary:hover { background: #475569; }
+
+    .btn-amber { background: #d97706; color: #fff; }
+    .btn-amber:hover { background: #b45309; }
+
+    .btn-success { background: #059669; color: #fff; }
+    .btn-success:hover { background: #047857; }
+
+    .control-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* Stopwatch Widget */
+    .stopwatch-container {
+      background: #080d1a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .lcd-display {
+      background: var(--lcd-bg);
+      border: 2px solid #143526;
+      border-radius: 6px;
+      padding: 8px 20px;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: var(--lcd-text);
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px rgba(34, 197, 94, 0.45);
+      min-width: 170px;
+      text-align: center;
+    }
+
+    .stopwatch-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Problem Description Box (Minimum Scaffolding, Big Readable Font) */
+    .problem-box {
+      background: rgba(30, 41, 59, 0.65);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      border-left: 5px solid var(--accent-blue);
+      border-radius: 8px;
+      padding: 18px;
+      font-size: 1.12rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .param-highlight {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+
+    .mission-banner {
+      font-size: 1.05rem;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 12px 14px;
+      border-radius: 6px;
+      margin-top: 14px;
+      line-height: 1.5;
+    }
+
+    /* Input Form (Bigger Text, Clean) */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      background: #0b1120;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 13px 16px;
+      color: #fff;
+      font-size: 1.15rem;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    input[type="text"]:focus, input[type="number"]:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.25);
+    }
+
+    /* Verification Result Card (Minimal Scaffolding: Name, Student Answer, Real Answer, Status) */
+    .result-box {
+      margin-top: 20px;
+      border-radius: 10px;
+      padding: 20px;
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-box.correct {
+      background: rgba(16, 185, 129, 0.12);
+      border: 2px solid rgba(16, 185, 129, 0.5);
+    }
+
+    .result-box.incorrect {
+      background: rgba(244, 63, 94, 0.12);
+      border: 2px solid rgba(244, 63, 94, 0.5);
+    }
+
+    .result-student-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #38bdf8;
+      margin-bottom: 4px;
+    }
+
+    .result-date {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .result-answers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .answer-card {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px 14px;
+      text-align: center;
+    }
+
+    .answer-card .label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .answer-card .value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+
+    .val-user { color: #38bdf8; }
+    .val-real { color: #34d399; }
+
+    .result-verdict-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .verdict-badge {
+      font-size: 1rem;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+    }
+
+    .correct .verdict-badge {
+      background: #059669;
+      color: #fff;
+    }
+
+    .incorrect .verdict-badge {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .error-tag {
+      font-size: 1.05rem;
+      font-weight: 700;
+      font-family: ui-monospace, SFMono-Regular, monospace;
+    }
+
+    footer {
+      margin-top: 28px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Print format */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .sim-controls, .stopwatch-container, #btn-new-trial, #btn-submit-answer, .canvas-start-overlay, footer {
+        display: none !important;
+      }
+      .app-container {
+        display: block !important;
+      }
+      .card {
+        border: 1px solid #000 !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        color: #000 !important;
+        margin-bottom: 16px !important;
+      }
+      .result-box {
+        display: block !important;
+        background: #fff !important;
+        border: 2px solid #000 !important;
+        color: #000 !important;
+      }
+      .val-user, .val-real, .result-student-title {
+        color: #000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <a href="../index.html" style="display: inline-flex; align-items: center; gap: 6px; color: var(--text-muted); text-decoration: none; font-size: 0.9rem; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.03); font-weight: 600;">
+        ← Back to Dashboard
+      </a>
+      <div class="ap-header-tag" style="margin-bottom: 0;">AP Physics 1 • Circular Motion & Force</div>
+    </div>
+    <h1>Classic Circular Force Lab <span class="author-badge">by Mr. F</span></h1>
+    <p>Run the simulation for 10 revolutions in a <strong>horizontal circle</strong>, record the elapsed time, and determine the mass of the washers.</p>
+  </header>
+
+  <div class="app-container">
+
+    <!-- LEFT COLUMN: APPARATUS & EXPERIMENTAL TOOLS -->
+    <div class="card">
+      <div class="card-title">
+        <span>Apparatus View (Horizontal Circle)</span>
+        <button id="btn-new-trial" class="btn-amber" style="padding: 6px 14px; font-size: 0.88rem;">
+          ⚡ Restart Sim (New Values)
+        </button>
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="simCanvas" width="640" height="520"></canvas>
+        
+        <!-- Big Start Overlay (Waits for student to read before pressing play) -->
+        <div id="start-overlay" class="canvas-start-overlay">
+          <div class="start-prompt-card">
+            <h3>Apparatus Ready</h3>
+            <p>The rubber stopper whirls in a <strong>horizontal circle</strong> overhead. Click Start below — the simulation will run and <strong>automatically stop at exactly 10 revolutions</strong> for 100% accurate timing!</p>
+            <button id="btn-overlay-play" class="btn-big-play">
+              ▶ Start Simulation
+            </button>
+          </div>
+        </div>
+
+        <!-- Live HUD Chips (Big & High-Contrast) -->
+        <div class="canvas-hud">
+          <div class="hud-chip">Moving Mass (m): <span id="hud-moving-mass">--</span> g</div>
+          <div class="hud-chip">Radius (r): <span id="hud-radius">--</span> cm</div>
+          <div class="hud-chip">Washers: <span id="hud-num-washers">--</span> washers</div>
+        </div>
+
+        <!-- Lap Counter Display -->
+        <div class="lap-indicator" id="lap-indicator">
+          <div style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase;">Revolutions</div>
+          <div class="lap-counter-num"><span id="lap-count">0</span> / 10</div>
+        </div>
+      </div>
+
+      <!-- Playback Controls -->
+      <div class="sim-controls">
+        <div class="control-row">
+          <button id="btn-toggle-motion" class="btn-primary">
+            <span id="btn-motion-icon">▶</span> <span id="btn-motion-text">Start Motion</span>
+          </button>
+          <button id="btn-reset-lab" class="btn-amber" title="Reset simulation and generate all new random values">
+            🔄 Reset (New Values)
+          </button>
+          <button id="btn-audio-toggle" class="btn-secondary" title="Toggle audio click on each pass">
+            🔊 Sound: ON
+          </button>
+        </div>
+      </div>
+
+      <!-- Precision Laboratory Stopwatch (Automatic Timing for 10 Revolutions) -->
+      <div class="stopwatch-container" style="justify-content: center; text-align: center;">
+        <div>
+          <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.05em;">
+            10-Revolution Timer
+          </div>
+          <div class="lcd-display" id="stopwatch-display">00:00.00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: LAB PROBLEM & MINIMAL-SCAFFOLDING ANSWER SUBMISSION -->
+    <div class="card">
+      <div class="card-title">
+        <span>Lab Goal & Submission</span>
+      </div>
+
+      <!-- Problem Statement (Direct, No Unnecessary Formulas) -->
+      <div class="problem-box">
+        <p>
+          A stopper of mass 
+          <span class="param-highlight" id="prob-mass">--</span> 
+          is whirled in a <strong style="color: #38bdf8;">horizontal circle</strong> of radius 
+          <span class="param-highlight" id="prob-radius">--</span>.
+        </p>
+        <p style="margin-top: 10px;">
+          The string passes through the vertical tube to 
+          <span class="param-highlight" id="prob-washers">--</span> 
+          hanging washers.
+        </p>
+        <div class="mission-banner">
+          🎯 <strong>Goal:</strong> Run it for <strong>10 oscillations in a horizontal circle</strong> (auto-stops at 10 revs) → Record the exact time → Find the <strong>mass of ONE washer</strong> (in grams).
+        </div>
+      </div>
+
+      <!-- Student Input Form -->
+      <form id="submission-form" onsubmit="return false;">
+        <div class="form-group">
+          <label for="student-name">Student Full Name</label>
+          <input type="text" id="student-name" placeholder="Enter your full name" required autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label for="input-washer-mass">
+            Mass of ONE Washer (grams)
+          </label>
+          <input type="number" step="0.01" id="input-washer-mass" placeholder="Enter your calculated mass in grams" required>
+        </div>
+
+        <button type="button" id="btn-submit-answer" class="btn-primary" style="width: 100%; padding: 14px; font-size: 1.1rem; justify-content: center; margin-top: 8px;">
+          ✓ Submit Answer
+        </button>
+      </form>
+
+      <!-- Minimal Scaffolding Result Box: Shows Student Name, Your Answer, and Real Answer -->
+      <div id="result-box" class="result-box">
+        <div class="result-student-title" id="res-student-name">Student Name</div>
+        <div class="result-date" id="res-timestamp">--</div>
+
+        <div class="result-answers-grid">
+          <div class="answer-card">
+            <div class="label">Your Answer</div>
+            <div class="value val-user" id="res-user-mass">-- g</div>
+          </div>
+          <div class="answer-card">
+            <div class="label">Real Answer</div>
+            <div class="value val-real" id="res-true-mass">-- g</div>
+          </div>
+        </div>
+
+        <div class="result-verdict-row">
+          <div class="verdict-badge" id="res-badge">CORRECT</div>
+          <div class="error-tag" id="res-error">Error: 0.0%</div>
+        </div>
+
+        <button type="button" id="btn-next-trial" class="btn-amber" style="width: 100%; padding: 12px; margin-top: 14px; justify-content: center; font-size: 1rem;">
+          ⚡ Start Next Problem (New Values)
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    <p>AP® Physics 1 Uniform Circular Force Simulation • Works on GitHub Pages, Desktop & Mobile</p>
+  </footer>
+
+  <script>
+    /* =====================================================================
+       PHYSICS ENGINE & LAB STATE
+       ===================================================================== */
+    const G_ACCEL = 9.80; // m/s²
+
+    const state = {
+      // Randomized values
+      radiusM: 0.80,         // radius in meters
+      movingMassKg: 0.050,   // moving stopper mass in kg
+      numWashers: 8,         // count of washers
+      washerMassKg: 0.0125,  // true mass per washer in kg (hidden from student)
+      
+      // Derived physics
+      totalHangingKg: 0,
+      tensionForceN: 0,
+      periodSec: 0,
+      angularSpeedRad: 0,
+      timeFor10Sec: 0,
+      
+      // Simulation state (STARTS PAUSED so students read first)
+      isRunning: false,
+      currentAngle: 0.4,
+      lastTimestamp: null,
+      revCount: 0,
+      audioEnabled: true,
+
+      // Stopwatch state
+      swRunning: false,
+      swStartTime: 0,
+      swElapsedMs: 0,
+      swInterval: null
+    };
+
+    // Web Audio Tone
+    let audioCtx = null;
+    function playLapTone() {
+      if (!state.audioEnabled) return;
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+      } catch (e) {
+        // audio might wait for gesture
+      }
+    }
+
+    // Generate fresh randomized parameters (GUARANTEED NEW VALUES ON EVERY RESET)
+    function randomizeLab() {
+      const rSteps = [0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.10];
+      const mGrams = [30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90];
+      const washerGrams = [8.0, 8.5, 9.0, 9.5, 10.0, 10.5, 11.0, 11.5, 12.0, 12.5, 13.0, 13.5, 14.0, 14.5, 15.0, 15.5, 16.0];
+
+      // Guarantee different radius
+      let newR;
+      do {
+        newR = rSteps[Math.floor(Math.random() * rSteps.length)];
+      } while (newR === state.radiusM && rSteps.length > 1);
+      state.radiusM = newR;
+
+      // Guarantee different moving mass
+      let newM;
+      do {
+        newM = mGrams[Math.floor(Math.random() * mGrams.length)] / 1000.0;
+      } while (newM === state.movingMassKg && mGrams.length > 1);
+      state.movingMassKg = newM;
+
+      // Guarantee different number of washers
+      let newN;
+      do {
+        newN = Math.floor(Math.random() * 11) + 6;
+      } while (newN === state.numWashers);
+      state.numWashers = newN;
+
+      // Guarantee different washer mass
+      let newMw;
+      do {
+        newMw = washerGrams[Math.floor(Math.random() * washerGrams.length)] / 1000.0;
+      } while (newMw === state.washerMassKg && washerGrams.length > 1);
+      state.washerMassKg = newMw;
+
+      // Calculate physics
+      state.totalHangingKg = state.numWashers * state.washerMassKg;
+      state.tensionForceN = state.totalHangingKg * G_ACCEL;
+      state.periodSec = 2 * Math.PI * Math.sqrt((state.movingMassKg * state.radiusM) / state.tensionForceN);
+      state.angularSpeedRad = (2 * Math.PI) / state.periodSec;
+      state.timeFor10Sec = 10 * state.periodSec;
+
+      // Reset animation state
+      state.currentAngle = 0.4;
+      state.revCount = 0;
+
+      // Reset Stopwatch
+      resetStopwatch();
+
+      // Update UI displays
+      updateLabDisplays();
+      hideResultCard();
+    }
+
+    function updateLabDisplays() {
+      // Canvas HUD chips
+      document.getElementById('hud-moving-mass').innerText = (state.movingMassKg * 1000).toFixed(0);
+      document.getElementById('hud-radius').innerText = (state.radiusM * 100).toFixed(0);
+      document.getElementById('hud-num-washers').innerText = state.numWashers;
+      document.getElementById('lap-count').innerText = state.revCount;
+
+      // Problem description
+      document.getElementById('prob-mass').innerText = `${(state.movingMassKg * 1000).toFixed(0)} g`;
+      document.getElementById('prob-radius').innerText = `${(state.radiusM * 100).toFixed(0)} cm (${state.radiusM.toFixed(2)} m)`;
+      document.getElementById('prob-washers').innerText = `${state.numWashers}`;
+    }
+
+    /* =====================================================================
+       CANVAS RENDERING ENGINE (CLEAN & ZERO TEXT OVERLAP)
+       ===================================================================== */
+    const canvas = document.getElementById('simCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const CENTER_X = 320;
+    const CENTER_Y = 205;
+
+    function drawApparatus() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. Lab Background Grid & Bench
+      drawBackgroundGrid();
+
+      // 2. Physics coordinates for elliptical perspective
+      const scale = 210; // px per meter
+      const a = state.radiusM * scale;
+      const b = a * 0.38;
+
+      const stopperX = CENTER_X + a * Math.cos(state.currentAngle);
+      const stopperY = CENTER_Y + b * Math.sin(state.currentAngle);
+
+      // Depth check: behind the tube or in front?
+      const isBehind = Math.sin(state.currentAngle) < 0;
+
+      // 3. Orbit path guideline
+      ctx.save();
+      ctx.beginPath();
+      ctx.ellipse(CENTER_X, CENTER_Y, a, b, 0, 0, Math.PI * 2);
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.22)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.stroke();
+      ctx.restore();
+
+      // 4. Reference gate at front crossing (placed outside orbit to avoid collisions)
+      drawReferenceGate(CENTER_X, CENTER_Y + b);
+
+      // If behind, draw string and stopper FIRST
+      if (isBehind) {
+        drawOrbitingSystem(CENTER_X, CENTER_Y, stopperX, stopperY, a, b);
+      }
+
+      // 5. Vertical Tube & Stand
+      drawVerticalTubeAndStand(CENTER_X, CENTER_Y);
+
+      // 6. Hanging Washers & Clip (Clean labels, zero overlap)
+      drawHangingWashers(CENTER_X, CENTER_Y);
+
+      // If in front, draw string and stopper NOW
+      if (!isBehind) {
+        drawOrbitingSystem(CENTER_X, CENTER_Y, stopperX, stopperY, a, b);
+      }
+
+      // 7. Large, Clean Radius Dimension Line (Positioned well above orbit)
+      drawRadiusMeasurement(CENTER_X, CENTER_Y, a, b);
+    }
+
+    function drawBackgroundGrid() {
+      ctx.save();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.03)";
+      ctx.lineWidth = 1;
+      const step = 20;
+      for (let x = 0; x < canvas.width; x += step) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      for (let y = 0; y < canvas.height; y += step) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+
+      // Table bench line
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(30, 485);
+      ctx.lineTo(610, 485);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawReferenceGate(refX, refY) {
+      ctx.save();
+      // Visual pass-line marker
+      ctx.strokeStyle = "rgba(239, 68, 68, 0.5)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath();
+      ctx.moveTo(refX, refY - 18);
+      ctx.lineTo(refX, refY + 22);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Gate flag
+      ctx.fillStyle = "#ef4444";
+      ctx.beginPath();
+      ctx.moveTo(refX, refY + 16);
+      ctx.lineTo(refX + 14, refY + 22);
+      ctx.lineTo(refX, refY + 28);
+      ctx.closePath();
+      ctx.fill();
+
+      // Background pill for label to prevent any visual confusion
+      ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+      ctx.fillRect(refX - 42, refY + 34, 84, 22);
+      ctx.strokeStyle = "rgba(239, 68, 68, 0.5)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(refX - 42, refY + 34, 84, 22);
+
+      ctx.font = "bold 12px ui-monospace, SFMono-Regular, monospace";
+      ctx.fillStyle = "#f87171";
+      ctx.textAlign = "center";
+      ctx.fillText("LAP LINE", refX, refY + 49);
+      ctx.restore();
+    }
+
+    function drawVerticalTubeAndStand(cx, topY) {
+      ctx.save();
+      const tubeHeight = 130;
+      const tubeWidth = 14;
+      const bottomY = topY + tubeHeight;
+
+      // Heavy metal stand base at bottom
+      ctx.fillStyle = "#334155";
+      ctx.strokeStyle = "#475569";
+      ctx.lineWidth = 1.5;
+      ctx.fillRect(cx - 50, 480, 100, 8);
+      ctx.strokeRect(cx - 50, 480, 100, 8);
+
+      // Vertical support rod
+      ctx.fillStyle = "#64748b";
+      ctx.fillRect(cx - 35, topY + 40, 6, 440 - topY);
+
+      // Clamp holding the tube
+      ctx.fillStyle = "#475569";
+      ctx.fillRect(cx - 35, topY + 60, 36, 12);
+      ctx.strokeStyle = "#1e293b";
+      ctx.strokeRect(cx - 35, topY + 60, 36, 12);
+
+      // Top rim
+      ctx.fillStyle = "#94a3b8";
+      ctx.beginPath();
+      ctx.ellipse(cx, topY, tubeWidth / 2 + 1, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Glass body
+      const tubeGrad = ctx.createLinearGradient(cx - tubeWidth / 2, 0, cx + tubeWidth / 2, 0);
+      tubeGrad.addColorStop(0, "rgba(226, 232, 240, 0.35)");
+      tubeGrad.addColorStop(0.3, "rgba(255, 255, 255, 0.7)");
+      tubeGrad.addColorStop(0.7, "rgba(203, 213, 225, 0.3)");
+      tubeGrad.addColorStop(1, "rgba(148, 163, 184, 0.5)");
+
+      ctx.fillStyle = tubeGrad;
+      ctx.fillRect(cx - tubeWidth / 2, topY, tubeWidth, tubeHeight);
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cx - tubeWidth / 2, topY, tubeWidth, tubeHeight);
+
+      // Internal string visible through tube
+      ctx.strokeStyle = "rgba(248, 250, 252, 0.75)";
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(cx, topY);
+      ctx.lineTo(cx, bottomY);
+      ctx.stroke();
+
+      // Bottom rim
+      ctx.fillStyle = "#94a3b8";
+      ctx.beginPath();
+      ctx.ellipse(cx, bottomY, tubeWidth / 2 + 1, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function drawHangingWashers(cx, topY) {
+      ctx.save();
+      const tubeBottomY = topY + 125;
+
+      // Realistic mid-air dynamic wiggle when suspended
+      let swayX = 0;
+      let swayY = 0;
+      let tilt = 0;
+      if (state.isRunning) {
+        const t = performance.now() / 1000.0;
+        // Subtle horizontal wobble coupled to stopper rotation + pendulum harmonic
+        swayX = 2.6 * Math.sin(state.currentAngle) + 1.2 * Math.sin(t * 3.6);
+        swayY = 0.9 * Math.cos(state.currentAngle * 2);
+        tilt = 0.025 * Math.sin(state.currentAngle);
+      }
+
+      // 1. Lower string suspended from tube down to hanger
+      const hangerTopX = cx + swayX;
+      const hangerTopY = tubeBottomY + 28 + swayY;
+
+      ctx.strokeStyle = "#f8fafc";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, tubeBottomY);
+      // Subtle natural curve of the string under tension
+      ctx.quadraticCurveTo(cx + swayX * 0.3, tubeBottomY + 14, hangerTopX, hangerTopY);
+      ctx.stroke();
+
+      // 2. Equilibrium Clip (Attached to string 10px below tube)
+      const clipX = cx + swayX * 0.15;
+      const clipY = tubeBottomY + 10;
+      ctx.fillStyle = "#ef4444";
+      ctx.fillRect(clipX - 7, clipY, 14, 5);
+
+      // Clip pill badge to the right with zero overlap
+      ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+      ctx.fillRect(cx + 16, tubeBottomY + 2, 110, 20);
+      ctx.strokeStyle = "rgba(239, 68, 68, 0.4)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cx + 16, tubeBottomY + 2, 110, 20);
+
+      ctx.fillStyle = "#fca5a5";
+      ctx.font = "bold 12px ui-monospace, SFMono-Regular, monospace";
+      ctx.textAlign = "left";
+      ctx.fillText("Reference Clip", cx + 22, tubeBottomY + 16);
+
+      // 3. Washer Hanger Rod (Suspended in mid-air, 65px above ground!)
+      const holderStartY = hangerTopY;
+      const hangerLength = 58;
+      const stackBaseY = holderStartY + hangerLength;
+
+      ctx.save();
+      ctx.translate(hangerTopX, holderStartY);
+      ctx.rotate(tilt);
+
+      // Central metallic rod
+      ctx.strokeStyle = "#94a3b8";
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(0, hangerLength);
+      ctx.stroke();
+
+      // Base support plate of hanger
+      ctx.fillStyle = "#64748b";
+      ctx.beginPath();
+      ctx.ellipse(0, hangerLength, 18, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // 4. Washers Stack (Suspended & Wiggling)
+      const washerThickness = 4.8;
+      const washerRadius = 16;
+
+      for (let i = 0; i < state.numWashers; i++) {
+        const wy = hangerLength - 2 - (i * washerThickness);
+
+        const wGrad = ctx.createLinearGradient(-washerRadius, 0, washerRadius, 0);
+        wGrad.addColorStop(0, "#94a3b8");
+        wGrad.addColorStop(0.2, "#f1f5f9");
+        wGrad.addColorStop(0.6, "#cbd5e1");
+        wGrad.addColorStop(1, "#64748b");
+
+        // Rim shadow
+        ctx.fillStyle = "#475569";
+        ctx.beginPath();
+        ctx.ellipse(0, wy, washerRadius, 4.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Shiny steel surface
+        ctx.fillStyle = wGrad;
+        ctx.beginPath();
+        ctx.ellipse(0, wy - 2, washerRadius, 4.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#334155";
+        ctx.lineWidth = 0.8;
+        ctx.stroke();
+
+        // Inner hole
+        ctx.fillStyle = "#334155";
+        ctx.beginPath();
+        ctx.ellipse(0, wy - 2, 3, 1.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+
+      // Clean Callout Label (Follows the suspended stack)
+      const labelY = stackBaseY - (state.numWashers * washerThickness / 2);
+      ctx.fillStyle = "rgba(15, 23, 42, 0.92)";
+      ctx.fillRect(cx + 26, labelY - 14, 120, 28);
+      ctx.strokeStyle = "rgba(245, 158, 11, 0.5)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cx + 26, labelY - 14, 120, 28);
+
+      ctx.font = "bold 14px ui-monospace, SFMono-Regular, monospace";
+      ctx.fillStyle = "#fbbf24";
+      ctx.textAlign = "left";
+      ctx.fillText(`${state.numWashers} Washers`, cx + 34, labelY + 5);
+
+      ctx.restore();
+    }
+
+    function drawOrbitingSystem(cx, cy, sx, sy, a, b) {
+      ctx.save();
+
+      // Motion Trail
+      if (state.isRunning) {
+        ctx.beginPath();
+        for (let i = 1; i <= 6; i++) {
+          const trailAngle = state.currentAngle - (i * 0.08);
+          const tx = cx + a * Math.cos(trailAngle);
+          const ty = cy + b * Math.sin(trailAngle);
+          if (i === 1) ctx.moveTo(tx, ty);
+          else ctx.lineTo(tx, ty);
+        }
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.35)";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+
+      // Upper string
+      ctx.strokeStyle = "#f8fafc";
+      ctx.lineWidth = 1.8;
+      ctx.shadowColor = "rgba(255, 255, 255, 0.4)";
+      ctx.shadowBlur = 3;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(sx, sy);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+
+      // Rubber Stopper
+      const stopperSize = 13 + Math.sqrt(state.movingMassKg * 1000) * 0.8;
+      const stopGrad = ctx.createRadialGradient(sx - 3, sy - 3, 2, sx, sy, stopperSize);
+      stopGrad.addColorStop(0, "#60a5fa");
+      stopGrad.addColorStop(0.5, "#2563eb");
+      stopGrad.addColorStop(1, "#1e3a8a");
+
+      ctx.fillStyle = stopGrad;
+      ctx.beginPath();
+      ctx.arc(sx, sy, stopperSize, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "#93c5fd";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Velocity Arrow (Clean, minimal, no text clutter)
+      if (state.isRunning) {
+        const speedScale = 9;
+        const vx = -Math.sin(state.currentAngle) * speedScale;
+        const vy = (b / a) * Math.cos(state.currentAngle) * speedScale;
+        
+        ctx.strokeStyle = "#10b981";
+        ctx.fillStyle = "#10b981";
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(sx + vx * 2.5, sy + vy * 2.5);
+        ctx.stroke();
+
+        const arrowAngle = Math.atan2(vy, vx);
+        ctx.beginPath();
+        ctx.moveTo(sx + vx * 2.5, sy + vy * 2.5);
+        ctx.lineTo(sx + vx * 2.5 - 7 * Math.cos(arrowAngle - 0.5), sy + vy * 2.5 - 7 * Math.sin(arrowAngle - 0.5));
+        ctx.lineTo(sx + vx * 2.5 - 7 * Math.cos(arrowAngle + 0.5), sy + vy * 2.5 - 7 * Math.sin(arrowAngle + 0.5));
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Stopper mass text (Inside a clean pill badge above stopper, NO overlap!)
+      const massPillW = 68;
+      const massPillH = 22;
+      const pillY = sy - stopperSize - 28;
+      ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+      ctx.fillRect(sx - massPillW / 2, pillY, massPillW, massPillH);
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.4)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(sx - massPillW / 2, pillY, massPillW, massPillH);
+
+      ctx.font = "bold 13px ui-monospace, SFMono-Regular, monospace";
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.fillText(`m = ${(state.movingMassKg * 1000).toFixed(0)}g`, sx, pillY + 16);
+
+      ctx.restore();
+    }
+
+    // Clean, Large Radius Dimension Line (Positioned well above orbit)
+    function drawRadiusMeasurement(cx, cy, a, b) {
+      ctx.save();
+      const rulerY = cy - b - 32;
+      
+      ctx.strokeStyle = "#38bdf8";
+      ctx.lineWidth = 1.8;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(cx, rulerY);
+      ctx.lineTo(cx + a, rulerY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // End tick marks
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx, rulerY - 7);
+      ctx.lineTo(cx, rulerY + 7);
+      ctx.moveTo(cx + a, rulerY - 7);
+      ctx.lineTo(cx + a, rulerY + 7);
+      ctx.stroke();
+
+      // Big, bold radius text badge
+      const radText = `r = ${(state.radiusM * 100).toFixed(0)} cm (${state.radiusM.toFixed(2)} m)`;
+      ctx.font = "bold 14px ui-monospace, SFMono-Regular, monospace";
+      const textWidth = ctx.measureText(radText).width;
+
+      ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+      ctx.fillRect(cx + a / 2 - textWidth / 2 - 10, rulerY - 26, textWidth + 20, 24);
+      ctx.strokeStyle = "rgba(56, 189, 248, 0.5)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(cx + a / 2 - textWidth / 2 - 10, rulerY - 26, textWidth + 20, 24);
+
+      ctx.fillStyle = "#38bdf8";
+      ctx.textAlign = "center";
+      ctx.fillText(radText, cx + a / 2, rulerY - 9);
+
+      ctx.restore();
+    }
+
+    /* =====================================================================
+       ANIMATION LOOP & REVOLUTION TRACKING
+       ===================================================================== */
+    function animate(timestamp) {
+      if (!state.lastTimestamp) state.lastTimestamp = timestamp;
+      const dt = (timestamp - state.lastTimestamp) / 1000.0;
+      state.lastTimestamp = timestamp;
+
+      if (state.isRunning && dt < 0.25) {
+        const prevAngle = state.currentAngle;
+        state.currentAngle += state.angularSpeedRad * dt;
+
+        // Crossing check at front lap line (angle = PI/2)
+        const twoPi = Math.PI * 2;
+        const normalizedPrev = (prevAngle % twoPi + twoPi) % twoPi;
+        const normalizedCurr = (state.currentAngle % twoPi + twoPi) % twoPi;
+        const refCrossAngle = Math.PI / 2;
+
+        if (normalizedPrev < refCrossAngle && normalizedCurr >= refCrossAngle) {
+          state.revCount++;
+          document.getElementById('lap-count').innerText = state.revCount;
+
+          const lapInd = document.getElementById('lap-indicator');
+          lapInd.classList.remove('flash-active');
+          void lapInd.offsetWidth;
+          lapInd.classList.add('flash-active');
+
+          playLapTone();
+
+          // AUTOMATIC STOP AT EXACTLY 10 REVOLUTIONS (100% Timing Precision!)
+          if (state.revCount >= 10) {
+            state.isRunning = false;
+            stopStopwatch();
+            // Lock stopwatch to the exact physical 10-rev time (eliminates frame delta jitter)
+            state.swElapsedMs = state.timeFor10Sec * 1000.0;
+            stopwatchDisplay.innerText = formatTime(state.swElapsedMs);
+
+            document.getElementById('btn-motion-icon').innerText = '▶';
+            document.getElementById('btn-motion-text').innerText = 'Re-Run (10 Revs)';
+            btnToggleMotion.className = 'btn-success';
+
+            // Visual badge highlight
+            document.getElementById('lap-count').innerText = "10";
+          }
+        }
+      }
+
+      drawApparatus();
+      requestAnimationFrame(animate);
+    }
+
+    /* =====================================================================
+       STOPWATCH IMPLEMENTATION
+       ===================================================================== */
+    const stopwatchDisplay = document.getElementById('stopwatch-display');
+
+    function formatTime(ms) {
+      const totalSec = Math.floor(ms / 1000);
+      const centisec = Math.floor((ms % 1000) / 10);
+      const minutes = Math.floor(totalSec / 60);
+      const seconds = totalSec % 60;
+      return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(centisec).padStart(2, '0')}`;
+    }
+
+    function startStopwatch() {
+      if (state.swRunning) return;
+      state.swRunning = true;
+      state.swStartTime = performance.now() - state.swElapsedMs;
+      state.swInterval = setInterval(() => {
+        state.swElapsedMs = performance.now() - state.swStartTime;
+        stopwatchDisplay.innerText = formatTime(state.swElapsedMs);
+      }, 10);
+    }
+
+    function stopStopwatch() {
+      if (!state.swRunning) return;
+      state.swRunning = false;
+      clearInterval(state.swInterval);
+    }
+
+    function resetStopwatch() {
+      stopStopwatch();
+      state.swElapsedMs = 0;
+      stopwatchDisplay.innerText = "00:00.00";
+    }
+
+    /* =====================================================================
+       PLAY / PAUSE & EVENT LISTENERS
+       ===================================================================== */
+    function setMotionState(running) {
+      if (running && state.revCount >= 10) {
+        state.revCount = 0;
+        document.getElementById('lap-count').innerText = "0";
+        resetStopwatch();
+      }
+      state.isRunning = running;
+      document.getElementById('btn-motion-icon').innerText = state.isRunning ? '⏸' : '▶';
+      document.getElementById('btn-motion-text').innerText = state.isRunning ? 'Pause Motion' : (state.revCount >= 10 ? 'Re-Run (10 Revs)' : 'Start Motion');
+      btnToggleMotion.className = state.isRunning ? 'btn-primary' : 'btn-success';
+
+      const overlay = document.getElementById('start-overlay');
+      if (running) {
+        overlay.style.display = 'none';
+        if (!state.swRunning) {
+          startStopwatch();
+        }
+      }
+    }
+
+    // Big play button on overlay
+    document.getElementById('btn-overlay-play').addEventListener('click', () => {
+      // Clean start from 0 laps and 0 stopwatch time
+      state.revCount = 0;
+      document.getElementById('lap-count').innerText = "0";
+      resetStopwatch();
+      setMotionState(true);
+    });
+
+    // Motion toggle
+    const btnToggleMotion = document.getElementById('btn-toggle-motion');
+    btnToggleMotion.addEventListener('click', () => {
+      setMotionState(!state.isRunning);
+    });
+
+    // Audio click toggle
+    const btnAudioToggle = document.getElementById('btn-audio-toggle');
+    if (btnAudioToggle) {
+      btnAudioToggle.addEventListener('click', () => {
+        state.audioEnabled = !state.audioEnabled;
+        btnAudioToggle.innerText = state.audioEnabled ? "🔊 Sound: ON" : "🔇 Sound: OFF";
+      });
+    }
+
+    function startNewProblem() {
+      randomizeLab(); // Guaranteed to generate completely different mass, length, washers, and washer mass
+      document.getElementById('input-washer-mass').value = '';
+      document.getElementById('start-overlay').style.display = 'flex';
+      setMotionState(false);
+      document.getElementById('btn-motion-text').innerText = 'Start Motion';
+    }
+
+    // Connect all reset / new problem buttons
+    if (document.getElementById('btn-reset-lab')) {
+      document.getElementById('btn-reset-lab').addEventListener('click', startNewProblem);
+    }
+    if (document.getElementById('btn-new-trial')) {
+      document.getElementById('btn-new-trial').addEventListener('click', startNewProblem);
+    }
+    if (document.getElementById('btn-next-trial')) {
+      document.getElementById('btn-next-trial').addEventListener('click', startNewProblem);
+    }
+
+    // SUBMIT ANSWER & MINIMAL-SCAFFOLDING RESULT DISPLAY
+    const btnSubmit = document.getElementById('btn-submit-answer');
+    const resultBox = document.getElementById('result-box');
+
+    function hideResultCard() {
+      resultBox.style.display = 'none';
+      resultBox.classList.remove('correct', 'incorrect');
+    }
+
+    btnSubmit.addEventListener('click', () => {
+      const studentName = document.getElementById('student-name').value.trim();
+      const userValueG = parseFloat(document.getElementById('input-washer-mass').value);
+
+      if (!studentName) {
+        alert("Please enter your Full Name before submitting.");
+        document.getElementById('student-name').focus();
+        return;
+      }
+
+      if (isNaN(userValueG) || userValueG <= 0) {
+        alert("Please enter your calculated mass in grams.");
+        document.getElementById('input-washer-mass').focus();
+        return;
+      }
+
+      // Theoretical true value for ONE washer
+      const trueSingleWasherG = state.washerMassKg * 1000.0;
+
+      // Calculate relative error
+      const absErrorG = Math.abs(userValueG - trueSingleWasherG);
+      const percentError = (absErrorG / trueSingleWasherG) * 100.0;
+
+      // ±5% wiggle room tolerance
+      const isCorrect = percentError <= 5.0;
+
+      // Fill Result Box (Clean, Direct, Zero Unnecessary Scaffolding)
+      document.getElementById('res-student-name').innerText = studentName;
+      document.getElementById('res-timestamp').innerText = `Submitted: ${new Date().toLocaleString()}`;
+
+      document.getElementById('res-user-mass').innerText = `${userValueG.toFixed(2)} g`;
+      document.getElementById('res-true-mass').innerText = `${trueSingleWasherG.toFixed(2)} g`;
+
+      const resBadge = document.getElementById('res-badge');
+      if (isCorrect) {
+        resultBox.classList.remove('incorrect');
+        resultBox.classList.add('correct');
+        resBadge.innerText = "CORRECT";
+      } else {
+        resultBox.classList.remove('correct');
+        resultBox.classList.add('incorrect');
+        resBadge.innerText = "INCORRECT";
+      }
+
+      document.getElementById('res-error').innerText = `Error: ${percentError.toFixed(1)}% (Margin: ±5%)`;
+      document.getElementById('res-error').style.color = isCorrect ? '#34d399' : '#fb7185';
+
+      // Show box with smooth scroll
+      resultBox.style.display = 'block';
+      resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+
+    /* =====================================================================
+       INITIALIZATION
+       ===================================================================== */
+    window.addEventListener('DOMContentLoaded', () => {
+      randomizeLab();
+      // Keep paused on initial load so students read first
+      setMotionState(false);
+      document.getElementById('btn-motion-text').innerText = 'Start Motion';
+      requestAnimationFrame(animate);
+    });
+  </script>
+</body>
+</html>

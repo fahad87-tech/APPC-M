@@ -144,6 +144,29 @@ node_modules/
    - Solved with Velocity-Verlet numerical integration at $h = 1/240\text{ s}$ with mechanical-to-thermal energy conservation.
    - Added author badge pill (`by Mr. F`), PBKDF2 password gate (`beyondphysics`), and interactive card to the Newton's Laws grid in `index.html`.
    - Built a collapsible sliding Live HUD drawer (`#liveHudCard`) that starts collapsed by default to maximize canvas visibility, retaining a persistent 42px interactive vertical tab (`#btnExpandHud`) along the right edge with smooth CSS grid transition and canvas auto-resize.
+8. **Advanced SHM & Spring Configuration Laboratories (`oscillations/Vertical Series Parallel Springs.html` and `oscillations/Series Parallel Springs Drop Mass.html`)**:
+   - Upgraded both simulators with procedural **3D volumetric helical springs**, multi-pass lighting, depth shading, dynamic wire gauge ($\propto \sqrt{k}$), and cast-metal ceiling/wall brackets.
+   - Built an interactive **Stiffness & Compliance Educational Card** in both simulations that dynamically explains Hooke's Law:
+     - **Parallel (Side-by-Side)**: $k_{\text{eff}} = k_1 + k_2$ — Stiffest configuration, forces combine, hardest to stretch/compress.
+     - **Series (End-to-End)**: $\frac{1}{k_{\text{eff}}} = \frac{1}{k_1} + \frac{1}{k_2}$ — Most compliant configuration, elongations add up, easiest to stretch/compress.
+     - Displays exact pull force required to produce a $0.5\text{ m}$ or $1.0\text{ m}$ elongation.
+   - Replaced fixed graphs with multi-mode telemetry:
+     - **Motion Mode**: Real-time graphs for Displacement/Position $x(t)$, Velocity $v(t)$, Acceleration $a(t)$, and Restoring Net Force $F_{\text{net}}(t)$.
+     - **Energy Mode (Toggleable)**: Kinetic Energy $KE(t)$, Elastic Potential Energy $PE(t)$, and Total Mechanical Energy $E_{\text{total}}(t)$.
+   - Configured **immediate paused initial state** on both simulations: simulations load paused (`▶ Start Simulation`), enabling students to explore and tune parameters ($m, m_Q, k_1, k_2, A_0, b, c$, and configuration) before activating dynamic motion.
+   - Cleaned up the horizontal mass-spring visual background by **removing the amplitude corridor bounding lines**, providing an unobstructed view of the glider, air track, and springs.
+   - Upgraded the **Spring Builder Challenge Mode** into an interactive **Assembly Workstation**:
+     - Each spring in inventory has an **immutably fixed spring constant** (e.g. $50\text{ N/m}$ [Locked 🔒]), reflecting real lab equipment where $k$ cannot be altered.
+     - Students physically move/mount springs via **HTML5 drag-and-drop** and **click-to-mount** into Parallel Rail Slots or Series Chain Links.
+     - Added dynamic multi-spring canvas rendering for $N$ springs in parallel (vertically distributed with alternating color themes) and $N$ springs in series (segmented by individual compliance with inline couplers).
+     - Added dedicated **Play/Pause, Reset, and Clear controls** to the Spring Builder workbench (`▶ Test Assembly (Play)`, `⏸ Pause Simulation`, `↺ Reset Bench`, `Clear`). The challenge **never auto-runs**, and **mounting springs is strictly mandatory before playback begins**.
+     - Upgraded the Spring Builder challenge curriculum to **AP Physics C level difficulty** with non-trivial multi-spring combinations (2-spring and 3-spring series/parallel), fractional stiffnesses ($12.0, 16.0, 18.0, 24.0, 28.8, 105.0, 144.0\text{ N/m}$), and distractor springs in the parts rack.
+   - Added full independent adjustment for both **$k_1$ and $k_2$** across both simulations, dynamically demonstrating asymmetric load sharing in parallel ($F_1/F_2 = k_1/k_2$) and asymmetric elongation sharing in series ($\Delta x_1/\Delta x_2 = k_2/k_1$), with corresponding 3D wire gauge scaling and physical intermediate coupler displacement.
+   - Added interactive direct-manipulation dragging: students can click and drag the mass directly on the canvas to feel and see spring resistance.
+   - Added **multi-speed playback controls** (`0.25x 🐢`, `0.5x ⏱️`, `1.0x ⚡`) allowing students to analyze collisions and turning points in smooth slow motion.
+   - Added rich visual systems: on-canvas **Live Energy Bar HUD**, collision **spark particle explosions** and expanding **shockwave rings**, dynamic **spring strain color glow**, and **polished rail reflections**.
+   - Added Web Audio API sound synthesis for latch clicks and inelastic collision thuds.
+   - Created detailed module guide in `oscillations/implementation.md`.
 
 
 
@@ -151,3 +174,9 @@ node_modules/
 
 
 
+9. **Classic Circular Force Laboratory (`newton's Laws/Classic Circular Motion LAB.html`)**:
+   - Implemented AP Physics 1 horizontal circular motion inquiry apparatus with rotating stopper overhead and hanging washers below.
+   - Derived coupled dynamics $T = N m_w g = m_{\text{stopper}} \frac{4\pi^2 r}{T^2}$, allowing students to measure $t_{10}$ and calculate individual washer mass $m_w$.
+   - Added automatic 10-revolution stop trigger with synchronized Web Audio audio feedback and precision digital stopwatch.
+   - Integrated PBKDF2 SHA-256 password protection gate (`SIM_AUTH`, `beyondphysics`, 100,000 iterations).
+   - Added author badge (`by Mr. F`), return navigation, and synchronized dashboard card in `index.html` with `Simulation 🔒` tag.
