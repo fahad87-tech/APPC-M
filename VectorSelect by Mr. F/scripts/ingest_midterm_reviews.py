@@ -185,7 +185,7 @@ def process_review_pdf(review_info):
             # Ensure valid box
             if y1 > y0 + 10:
                 card_filename = f"{slug}_q{qnum}.png"
-                card_rel_path = f"assets/cards/{card_filename}"
+                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v2"
                 card_abs_path = os.path.join(CARDS_DIR, card_filename)
 
                 # Special enhancement for Q13 in APPC Unit 2 Midterm Review (tiny embedded image stem)

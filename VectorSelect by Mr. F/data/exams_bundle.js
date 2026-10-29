@@ -1151,7 +1151,7 @@ window.EXAM_DATA = {
               "questions": [
                 {
                   "number": 1,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q1.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q1.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1175,7 +1175,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 2,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q2.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q2.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1203,7 +1203,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q3.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q3.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1227,7 +1227,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 4,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q4.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q4.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1255,7 +1255,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 5,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q5.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q5.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1279,7 +1279,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 6,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q6.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q6.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1303,7 +1303,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 7,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q7.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q7.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1331,7 +1331,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 8,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q8.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q8.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1355,7 +1355,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 9,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q9.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q9.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1383,7 +1383,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 10,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q10.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q10.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -1411,7 +1411,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 11,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q11.png",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q11.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4124,7 +4124,7 @@ window.EXAM_DATA = {
               "questions": [
                 {
                   "number": 1,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q1.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q1.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4148,7 +4148,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 2,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q2.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q2.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4172,7 +4172,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q3.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q3.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4196,7 +4196,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 4,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q4.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q4.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4220,7 +4220,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 5,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q5.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q5.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4244,7 +4244,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 6,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q6.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q6.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4268,7 +4268,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 7,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q7.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q7.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4296,7 +4296,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 8,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q8.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q8.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4320,7 +4320,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 9,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q9.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q9.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4348,7 +4348,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 10,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q10.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_1_q10.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4385,7 +4385,7 @@ window.EXAM_DATA = {
               "questions": [
                 {
                   "number": 1,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q1.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q1.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4413,7 +4413,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 2,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q2.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q2.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4437,7 +4437,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q3.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q3.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4461,7 +4461,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 4,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q4.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q4.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4489,7 +4489,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 5,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q5.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q5.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4517,7 +4517,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 6,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q6.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q6.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4541,7 +4541,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 7,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q7.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q7.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4569,7 +4569,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 8,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q8.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q8.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4597,7 +4597,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 9,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q9.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q9.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -4625,7 +4625,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 10,
-                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q10.png",
+                  "card_image": "assets/cards/app1_unit2_midterm_review_2_q10.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14644,7 +14644,7 @@ window.EXAM_DATA = {
               "questions": [
                 {
                   "number": 1,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q1.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q1.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14668,7 +14668,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 2,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q2.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q2.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14696,7 +14696,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q3.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q3.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14724,7 +14724,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 4,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q4.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q4.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14748,7 +14748,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 5,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q5.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q5.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14772,7 +14772,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 6,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q6.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q6.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14796,7 +14796,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 7,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q7.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q7.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14824,7 +14824,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 8,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q8.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q8.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14852,7 +14852,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 9,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q9.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q9.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14880,7 +14880,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 10,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q10.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q10.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14908,7 +14908,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 11,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q11.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q11.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14932,7 +14932,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 12,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q12.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q12.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14960,7 +14960,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 13,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q13.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q13.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14988,7 +14988,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 14,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q14.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q14.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -15012,7 +15012,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 15,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q15.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q15.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -15040,7 +15040,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 16,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q16.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q16.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -15064,7 +15064,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 17,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q17.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q17.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -15088,7 +15088,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 18,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q18.png",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q18.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17713,7 +17713,7 @@ window.EXAM_DATA = {
               "questions": [
                 {
                   "number": 1,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q1.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q1.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17737,7 +17737,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 2,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q2.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q2.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17761,7 +17761,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q3.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q3.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17785,7 +17785,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 4,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q4.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q4.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17809,7 +17809,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 5,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q5.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q5.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17833,7 +17833,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 6,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q6.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q6.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17857,7 +17857,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 7,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q7.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q7.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17881,7 +17881,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 8,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q8.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q8.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17905,7 +17905,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 9,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q9.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q9.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17929,7 +17929,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 10,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q10.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q10.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17953,7 +17953,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 11,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q11.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q11.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -17977,7 +17977,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 12,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q12.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q12.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -18001,7 +18001,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 13,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q13.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q13.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -18025,7 +18025,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 14,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q14.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q14.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -18049,7 +18049,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 15,
-                  "card_image": "assets/cards/appc_unit2_midterm_review_q15.png",
+                  "card_image": "assets/cards/appc_unit2_midterm_review_q15.png?v=20261029_v2",
                   "choices": [
                     {
                       "letter": "A",
