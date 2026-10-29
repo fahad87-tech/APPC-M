@@ -152,24 +152,29 @@ def process_review_pdf(review_info):
             if i + 1 < len(q_matches):
                 # Another question follows on the same page
                 next_top = q_matches[i + 1][2]
-                crop_bottom = max(crop_top + 30.0, next_top - 12.0)
+                crop_bottom = next_top - 10.0
             else:
-                # Last question on this page: find bottom of content before footer
-                cutoff = text.rfind('04/10/2026')
-                if cutoff < 0:
-                    cutoff = text.rfind('https://wayground.com')
-                if cutoff < 0:
-                    cutoff = len(text)
-                    
-                last_idx = cutoff - 1
-                while last_idx >= char_idx and text[last_idx].isspace():
-                    last_idx -= 1
-                    
-                if last_idx >= char_idx:
-                    box_last = tp.get_charbox(last_idx)
-                    crop_bottom = min(h - 25.0, (h - box_last[1]) + 15.0)
-                else:
-                    crop_bottom = h - 45.0
+                # Last question on this page: find bottom of all text characters & images above footer
+                max_y = crop_top + 50.0
+                for c in range(len(text)):
+                    if not text[c].isspace():
+                        c_box = tp.get_charbox(c)
+                        c_bot = h - c_box[1]
+                        c_top = h - c_box[3]
+                        if c_top >= crop_top - 5.0 and c_bot < 762.0:
+                            if c_bot > max_y:
+                                max_y = c_bot
+
+                for obj in page.get_objects():
+                    if obj.type == pdfium.raw.FPDF_PAGEOBJ_IMAGE:
+                        l, b, r, t = obj.get_bounds()
+                        obj_bot = h - b
+                        obj_top = h - t
+                        if obj_top >= crop_top - 5.0 and obj_bot < 762.0:
+                            if obj_bot > max_y:
+                                max_y = obj_bot
+
+                crop_bottom = min(h - 22.0, max_y + 16.0)
                     
             # Crop image
             x0 = int(22 * scale)
@@ -179,11 +184,38 @@ def process_review_pdf(review_info):
             
             # Ensure valid box
             if y1 > y0 + 10:
-                cropped = page_img.crop((x0, y0, x1, y1))
                 card_filename = f"{slug}_q{qnum}.png"
                 card_rel_path = f"assets/cards/{card_filename}"
                 card_abs_path = os.path.join(CARDS_DIR, card_filename)
-                cropped.save(card_abs_path, optimize=True)
+
+                # Special enhancement for Q13 in APPC Unit 2 Midterm Review (tiny embedded image stem)
+                if slug == "appc_unit2_midterm_review" and qnum == 13:
+                    base_q13 = page_img.crop((x0, y0, x1, y1))
+                    native_img = None
+                    for obj in page.get_objects():
+                        if obj.type == pdfium.raw.FPDF_PAGEOBJ_IMAGE:
+                            l, b, r, t = obj.get_bounds()
+                            if t < 300: # Q13 image
+                                native_img = obj.get_bitmap().to_pil()
+                                break
+                    if native_img:
+                        target_w = 980
+                        target_h = int(native_img.height * (target_w / native_img.width))
+                        scaled_prompt = native_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
+                        new_card_h = base_q13.height + (target_h - 28) + 15
+                        enhanced_card = Image.new("RGB", (base_q13.width, new_card_h), (255, 255, 255))
+                        num_crop = base_q13.crop((0, 0, 120, 60))
+                        enhanced_card.paste(num_crop, (0, 0))
+                        enhanced_card.paste(scaled_prompt, (120, 16))
+                        choices_crop = base_q13.crop((0, int(45 * scale), base_q13.width, base_q13.height))
+                        enhanced_card.paste(choices_crop, (0, 16 + target_h + 15))
+                        enhanced_card.save(card_abs_path, optimize=True)
+                    else:
+                        cropped = page_img.crop((x0, y0, x1, y1))
+                        cropped.save(card_abs_path, optimize=True)
+                else:
+                    cropped = page_img.crop((x0, y0, x1, y1))
+                    cropped.save(card_abs_path, optimize=True)
             else:
                 card_rel_path = ""
                 

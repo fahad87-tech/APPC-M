@@ -1,4 +1,4 @@
-// VectorSelect by Mr. F — AP Physics Assessments Database (Sanitized - Zero Key Exposure)
+// VectorSelect by Mr. F — AP Physics Assessments Database
 window.EXAM_DATA = {
   "subjects": {
     "APP1": {
@@ -695,15 +695,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "No, because the student, bus, and observer are all included in Earth’s reference frame so the student and\r\nbus must be traveling at the same speed."
+                      "text": "No, because the student, bus, and observer are all included in Earth\u2019s reference frame so the student and\r\nbus must be traveling at the same speed."
                     },
                     {
                       "letter": "C",
-                      "text": "Yes, because according to the stationary observer, the student’s velocity is the velocity of the bus plus\r\nthe velocity of the student relative to the bus."
+                      "text": "Yes, because according to the stationary observer, the student\u2019s velocity is the velocity of the bus plus\r\nthe velocity of the student relative to the bus."
                     },
                     {
                       "letter": "D",
-                      "text": "Yes, because according to the stationary observer, the student’s velocity is the difference between the\r\nvelocity of the bus and the velocity of the student relative to the bus."
+                      "text": "Yes, because according to the stationary observer, the student\u2019s velocity is the difference between the\r\nvelocity of the bus and the velocity of the student relative to the bus."
                     }
                   ],
                   "question_id": "app1_unit1_1_4_q2"
@@ -726,7 +726,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Yes, because both observers are external to the rowboat’s frame of reference and will therefore measure\r\nzero acceleration."
+                      "text": "Yes, because both observers are external to the rowboat\u2019s frame of reference and will therefore measure\r\nzero acceleration."
                     }
                   ],
                   "question_id": "app1_unit1_1_4_q3"
@@ -1170,7 +1170,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q1"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 1 from official review materials."
                 },
                 {
                   "number": 2,
@@ -1197,7 +1198,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q2"
+                  "correct_answer": "E",
+                  "explanation": "Mid-Term Review Question 2 from official review materials."
                 },
                 {
                   "number": 3,
@@ -1220,7 +1222,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q3"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 3 from official review materials."
                 },
                 {
                   "number": 4,
@@ -1247,7 +1250,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q4"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 4 from official review materials."
                 },
                 {
                   "number": 5,
@@ -1270,7 +1274,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q5"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 5 from official review materials."
                 },
                 {
                   "number": 6,
@@ -1293,7 +1298,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q6"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 6 from official review materials."
                 },
                 {
                   "number": 7,
@@ -1320,7 +1326,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q7"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 7 from official review materials."
                 },
                 {
                   "number": 8,
@@ -1343,7 +1350,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q8"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 8 from official review materials."
                 },
                 {
                   "number": 9,
@@ -1370,7 +1378,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q9"
+                  "correct_answer": "E",
+                  "explanation": "Mid-Term Review Question 9 from official review materials."
                 },
                 {
                   "number": 10,
@@ -1397,7 +1406,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q10"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 10 from official review materials."
                 },
                 {
                   "number": 11,
@@ -1420,7 +1430,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_midterm_review_q11"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 11 from official review materials."
                 }
               ]
             },
@@ -1533,11 +1544,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "√2 m/s"
+                      "text": "\u221a2 m/s"
                     },
                     {
                       "letter": "C",
-                      "text": "3\r\n√2\r\nm/s"
+                      "text": "3\r\n\u221a2\r\nm/s"
                     },
                     {
                       "letter": "D",
@@ -1564,7 +1575,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "at\r\n2\r\n2 −\r\na\r\n2t\r\n2\r\n2g"
+                      "text": "at\r\n2\r\n2 \u2212\r\na\r\n2t\r\n2\r\n2g"
                     }
                   ],
                   "question_id": "app1_unit1_unit_1_practice_exam_q6"
@@ -1644,7 +1655,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "√hv0"
+                      "text": "\u221ahv0"
                     },
                     {
                       "letter": "B",
@@ -1656,7 +1667,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "2h/g\r\n(E) √2h/g\r\no\r\n0\r\n0\nUnit 1 - TEST\r\nScoring Guide"
+                      "text": "2h/g\r\n(E) \u221a2h/g\r\no\r\n0\r\n0\nUnit 1 - TEST\r\nScoring Guide"
                     }
                   ],
                   "question_id": "app1_unit1_unit_1_practice_exam_q10"
@@ -2609,7 +2620,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "No, because the step exerts a force on the person greater than the person’s weight."
+                      "text": "No, because the step exerts a force on the person greater than the person\u2019s weight."
                     },
                     {
                       "letter": "C",
@@ -2732,7 +2743,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": ", because the chain links are an interacting Newton’s third law pair."
+                      "text": ", because the chain links are an interacting Newton\u2019s third law pair."
                     }
                   ],
                   "question_id": "app1_unit2_2_3_q6"
@@ -2825,7 +2836,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Yes, because the astronaut’s vertical velocity is instantaneously zero."
+                      "text": "Yes, because the astronaut\u2019s vertical velocity is instantaneously zero."
                     },
                     {
                       "letter": "C",
@@ -3322,7 +3333,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Because Earth’s radius is constant."
+                      "text": "Because Earth\u2019s radius is constant."
                     },
                     {
                       "letter": "B",
@@ -3334,7 +3345,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Because distance scales near Earth’s surface are very small compared to Earth’s radius."
+                      "text": "Because distance scales near Earth\u2019s surface are very small compared to Earth\u2019s radius."
                     }
                   ],
                   "question_id": "app1_unit2_2_6_q4"
@@ -3345,7 +3356,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The scale reading is between and , because the scale is not precise enough to read the\r\nexact value of the object’s weight."
+                      "text": "The scale reading is between and , because the scale is not precise enough to read the\r\nexact value of the object\u2019s weight."
                     },
                     {
                       "letter": "B",
@@ -3357,7 +3368,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "The scale reading is between and , because weight is an intrinsic property of an object\r\nwhich doesn’t change even when the gravitational field changes."
+                      "text": "The scale reading is between and , because weight is an intrinsic property of an object\r\nwhich doesn\u2019t change even when the gravitational field changes."
                     }
                   ],
                   "question_id": "app1_unit2_2_6_q5"
@@ -3477,11 +3488,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "increases and decreases as the board’s angle is increased"
+                      "text": "increases and decreases as the board\u2019s angle is increased"
                     },
                     {
                       "letter": "D",
-                      "text": "decreases and increases as the board’s angle is increased"
+                      "text": "decreases and increases as the board\u2019s angle is increased"
                     }
                   ],
                   "question_id": "app1_unit2_2_7_q1"
@@ -3642,7 +3653,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "There is not enough information to make a claim about the direction of the object’s acceleration."
+                      "text": "There is not enough information to make a claim about the direction of the object\u2019s acceleration."
                     }
                   ],
                   "question_id": "app1_unit2_2_7_q8"
@@ -3823,19 +3834,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The weight’s acceleration is downward."
+                      "text": "The weight\u2019s acceleration is downward."
                     },
                     {
                       "letter": "B",
-                      "text": "The weight’s acceleration is upward."
+                      "text": "The weight\u2019s acceleration is upward."
                     },
                     {
                       "letter": "C",
-                      "text": "The weight’s velocity is downward."
+                      "text": "The weight\u2019s velocity is downward."
                     },
                     {
                       "letter": "D",
-                      "text": "The weight’s velocity is upward."
+                      "text": "The weight\u2019s velocity is upward."
                     }
                   ],
                   "question_id": "app1_unit2_2_8_q7"
@@ -4085,7 +4096,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "At the topmost point, because the tension force and gravitational force are both directed toward the\r\ncenter of the ball’s motion."
+                      "text": "At the topmost point, because the tension force and gravitational force are both directed toward the\r\ncenter of the ball\u2019s motion."
                     },
                     {
                       "letter": "B",
@@ -4132,7 +4143,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q1"
+                  "correct_answer": "A,D",
+                  "explanation": "Mid-Term Review Question 1 from official review materials."
                 },
                 {
                   "number": 2,
@@ -4155,7 +4167,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q2"
+                  "correct_answer": "B,D",
+                  "explanation": "Mid-Term Review Question 2 from official review materials."
                 },
                 {
                   "number": 3,
@@ -4178,7 +4191,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q3"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 3 from official review materials."
                 },
                 {
                   "number": 4,
@@ -4201,7 +4215,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q4"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 4 from official review materials."
                 },
                 {
                   "number": 5,
@@ -4224,7 +4239,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q5"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 5 from official review materials."
                 },
                 {
                   "number": 6,
@@ -4247,7 +4263,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q6"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 6 from official review materials."
                 },
                 {
                   "number": 7,
@@ -4274,7 +4291,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q7"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 7 from official review materials."
                 },
                 {
                   "number": 8,
@@ -4297,7 +4315,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q8"
+                  "correct_answer": "B,D",
+                  "explanation": "Mid-Term Review Question 8 from official review materials."
                 },
                 {
                   "number": 9,
@@ -4324,7 +4343,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q9"
+                  "correct_answer": "E",
+                  "explanation": "Mid-Term Review Question 9 from official review materials."
                 },
                 {
                   "number": 10,
@@ -4351,7 +4371,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_1_q10"
+                  "correct_answer": "E",
+                  "explanation": "Mid-Term Review Question 10 from official review materials."
                 }
               ]
             },
@@ -4387,7 +4408,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q1"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 1 from official review materials."
                 },
                 {
                   "number": 2,
@@ -4410,7 +4432,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q2"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 2 from official review materials."
                 },
                 {
                   "number": 3,
@@ -4433,7 +4456,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q3"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 3 from official review materials."
                 },
                 {
                   "number": 4,
@@ -4460,7 +4484,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q4"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 4 from official review materials."
                 },
                 {
                   "number": 5,
@@ -4487,7 +4512,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q5"
+                  "correct_answer": "E",
+                  "explanation": "Mid-Term Review Question 5 from official review materials."
                 },
                 {
                   "number": 6,
@@ -4510,7 +4536,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q6"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 6 from official review materials."
                 },
                 {
                   "number": 7,
@@ -4537,7 +4564,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q7"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 7 from official review materials."
                 },
                 {
                   "number": 8,
@@ -4564,7 +4592,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q8"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 8 from official review materials."
                 },
                 {
                   "number": 9,
@@ -4591,7 +4620,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q9"
+                  "correct_answer": "E",
+                  "explanation": "Mid-Term Review Question 9 from official review materials."
                 },
                 {
                   "number": 10,
@@ -4618,7 +4648,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_midterm_review_2_q10"
+                  "correct_answer": "E",
+                  "explanation": "Mid-Term Review Question 10 from official review materials."
                 }
               ]
             },
@@ -5191,7 +5222,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "The magnitude of the gravitational force should be equal to the magnitude of the normal force because\r\nthe normal force on an object is always equal to the object’s weight."
+                      "text": "The magnitude of the gravitational force should be equal to the magnitude of the normal force because\r\nthe normal force on an object is always equal to the object\u2019s weight."
                     },
                     {
                       "letter": "C",
@@ -5454,19 +5485,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The object’s kinetic energy decreases, then increases."
+                      "text": "The object\u2019s kinetic energy decreases, then increases."
                     },
                     {
                       "letter": "B",
-                      "text": "The object’s kinetic energy increases, then decreases."
+                      "text": "The object\u2019s kinetic energy increases, then decreases."
                     },
                     {
                       "letter": "C",
-                      "text": "The object’s kinetic energy increases throughout the entire time interval."
+                      "text": "The object\u2019s kinetic energy increases throughout the entire time interval."
                     },
                     {
                       "letter": "D",
-                      "text": "The object’s kinetic energy decreases throughout the entire time interval."
+                      "text": "The object\u2019s kinetic energy decreases throughout the entire time interval."
                     }
                   ],
                   "question_id": "app1_unit3a_3_1_q6"
@@ -5751,7 +5782,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Non-zero net work could be done on the block either when it is accelerating or when it is moving with\r\nconstant speed, depending on the values of the block’s mass, acceleration, and maximum speed."
+                      "text": "Non-zero net work could be done on the block either when it is accelerating or when it is moving with\r\nconstant speed, depending on the values of the block\u2019s mass, acceleration, and maximum speed."
                     }
                   ],
                   "question_id": "app1_unit3a_3_2_q9"
@@ -6897,11 +6928,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "0.02 N⋅s"
+                      "text": "0.02 N\u22c5s"
                     },
                     {
                       "letter": "C",
-                      "text": "0.03 N⋅s"
+                      "text": "0.03 N\u22c5s"
                     },
                     {
                       "letter": "D",
@@ -7008,19 +7039,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "4.0 × 10\r\n2 N ⋅ s"
+                      "text": "4.0 \u00d7 10\r\n2 N \u22c5 s"
                     },
                     {
                       "letter": "B",
-                      "text": "4.0 × 10\r\n3 N ⋅ s"
+                      "text": "4.0 \u00d7 10\r\n3 N \u22c5 s"
                     },
                     {
                       "letter": "C",
-                      "text": "5.5 × 10\r\n3 N ⋅ s"
+                      "text": "5.5 \u00d7 10\r\n3 N \u22c5 s"
                     },
                     {
                       "letter": "D",
-                      "text": "2.2 × 10\r\n5 N ⋅ s"
+                      "text": "2.2 \u00d7 10\r\n5 N \u22c5 s"
                     }
                   ],
                   "question_id": "app1_unit4_4_1_q8"
@@ -7067,15 +7098,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "maΔt"
+                      "text": "ma\u0394t"
                     },
                     {
                       "letter": "C",
-                      "text": "m (v0 + aΔt)"
+                      "text": "m (v0 + a\u0394t)"
                     },
                     {
                       "letter": "D",
-                      "text": "v0Δt + 1\r\n2\r\na(Δt)\r\n2"
+                      "text": "v0\u0394t + 1\r\n2\r\na(\u0394t)\r\n2"
                     }
                   ],
                   "question_id": "app1_unit4_4_2_q1"
@@ -7090,15 +7121,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "m (vi − vf)"
+                      "text": "m (vi \u2212 vf)"
                     },
                     {
                       "letter": "C",
-                      "text": "μkg"
+                      "text": "\u03bckg"
                     },
                     {
                       "letter": "D",
-                      "text": "μkmg"
+                      "text": "\u03bckmg"
                     }
                   ],
                   "question_id": "app1_unit4_4_2_q2"
@@ -7109,11 +7140,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "FΔt"
+                      "text": "F\u0394t"
                     },
                     {
                       "letter": "B",
-                      "text": "FΔt\r\nm"
+                      "text": "F\u0394t\r\nm"
                     },
                     {
                       "letter": "C",
@@ -7121,7 +7152,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "FmΔt"
+                      "text": "Fm\u0394t"
                     }
                   ],
                   "question_id": "app1_unit4_4_2_q3"
@@ -7425,7 +7456,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "(m2−m1)\r\nm2\r\nv0"
+                      "text": "(m2\u2212m1)\r\nm2\r\nv0"
                     },
                     {
                       "letter": "D",
@@ -7553,7 +7584,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "It can’t be determined without knowing the relative masses of the carts."
+                      "text": "It can\u2019t be determined without knowing the relative masses of the carts."
                     }
                   ],
                   "question_id": "app1_unit4_4_4_q3"
@@ -7610,19 +7641,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "(ΔK1 = ΔK2) > ΔK3"
+                      "text": "(\u0394K1 = \u0394K2) > \u0394K3"
                     },
                     {
                       "letter": "B",
-                      "text": "ΔK3 > (ΔK1 = ΔK2)"
+                      "text": "\u0394K3 > (\u0394K1 = \u0394K2)"
                     },
                     {
                       "letter": "C",
-                      "text": "ΔK2 > ΔK3 > ΔK1"
+                      "text": "\u0394K2 > \u0394K3 > \u0394K1"
                     },
                     {
                       "letter": "D",
-                      "text": "ΔK3 > ΔK2 > ΔK1"
+                      "text": "\u0394K3 > \u0394K2 > \u0394K1"
                     }
                   ],
                   "question_id": "app1_unit4_4_4_q6"
@@ -7711,19 +7742,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "12 kg ⋅ m/s"
+                      "text": "12 kg \u22c5 m/s"
                     },
                     {
                       "letter": "B",
-                      "text": "20 kg ⋅ m/s"
+                      "text": "20 kg \u22c5 m/s"
                     },
                     {
                       "letter": "C",
-                      "text": "24 kg ⋅ m/s"
+                      "text": "24 kg \u22c5 m/s"
                     },
                     {
                       "letter": "D",
-                      "text": "30 kg ⋅ m/s"
+                      "text": "30 kg \u22c5 m/s"
                     }
                   ],
                   "question_id": "app1_unit4_unit_4_progress_check_q1"
@@ -7738,15 +7769,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "F2−F1\r\ntf"
+                      "text": "F2\u2212F1\r\ntf"
                     },
                     {
                       "letter": "C",
-                      "text": "(\r\nF2−F1\r\n2 )tf"
+                      "text": "(\r\nF2\u2212F1\r\n2 )tf"
                     },
                     {
                       "letter": "D",
-                      "text": "(F1 +\r\nF2−F1\r\n2 )tf"
+                      "text": "(F1 +\r\nF2\u2212F1\r\n2 )tf"
                     }
                   ],
                   "question_id": "app1_unit4_unit_4_progress_check_q2"
@@ -7757,7 +7788,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "(\r\n2mc\r\nmc−mb\r\n)v0"
+                      "text": "(\r\n2mc\r\nmc\u2212mb\r\n)v0"
                     },
                     {
                       "letter": "B",
@@ -7765,7 +7796,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "(\r\n2mc−mb\r\nmc+mb\r\n)v0"
+                      "text": "(\r\n2mc\u2212mb\r\nmc+mb\r\n)v0"
                     },
                     {
                       "letter": "D",
@@ -7849,11 +7880,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "−2.7 m/s"
+                      "text": "\u22122.7 m/s"
                     },
                     {
                       "letter": "B",
-                      "text": "−0.4 m/s"
+                      "text": "\u22120.4 m/s"
                     },
                     {
                       "letter": "C",
@@ -7941,7 +7972,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The momentum doesn’t change in either system."
+                      "text": "The momentum doesn\u2019t change in either system."
                     },
                     {
                       "letter": "B",
@@ -8640,15 +8671,15 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "θ θ θ"
+                      "text": "\u03b8 \u03b8 \u03b8"
                     },
                     {
                       "letter": "B",
-                      "text": "θ θ"
+                      "text": "\u03b8 \u03b8"
                     },
                     {
                       "letter": "C",
-                      "text": "θ θ"
+                      "text": "\u03b8 \u03b8"
                     },
                     {
                       "letter": "D",
@@ -8925,19 +8956,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The rod and the disk both contribute the same amount to the system’s rotational inertia."
+                      "text": "The rod and the disk both contribute the same amount to the system\u2019s rotational inertia."
                     },
                     {
                       "letter": "B",
-                      "text": "The rod contributes more to the system’s rotational inertia than the disk."
+                      "text": "The rod contributes more to the system\u2019s rotational inertia than the disk."
                     },
                     {
                       "letter": "C",
-                      "text": "The disk contributes more to the system’s rotational inertia than the rod."
+                      "text": "The disk contributes more to the system\u2019s rotational inertia than the rod."
                     },
                     {
                       "letter": "D",
-                      "text": "The faster the system spins, the more the disk contributes to the system’s rotational inertia."
+                      "text": "The faster the system spins, the more the disk contributes to the system\u2019s rotational inertia."
                     }
                   ],
                   "question_id": "app1_unit5_5_4_q7"
@@ -10257,7 +10288,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "The cube, because the cube’s kinetic energy will all be in the form of translational kinetic energy, while\r\nsome of the sphere’s kinetic energy will be in the form of rotational kinetic energy."
+                      "text": "The cube, because the cube\u2019s kinetic energy will all be in the form of translational kinetic energy, while\r\nsome of the sphere\u2019s kinetic energy will be in the form of rotational kinetic energy."
                     },
                     {
                       "letter": "D",
@@ -10381,11 +10412,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": ", because the gravitational potential energy increases with increasing distance from Earth’s\r\ncenter."
+                      "text": ", because the gravitational potential energy increases with increasing distance from Earth\u2019s\r\ncenter."
                     },
                     {
                       "letter": "D",
-                      "text": ", because the total mechanical energy of the system is proportional to the distance between\r\nthe satellite and Earth’s center."
+                      "text": ", because the total mechanical energy of the system is proportional to the distance between\r\nthe satellite and Earth\u2019s center."
                     }
                   ],
                   "question_id": "app1_unit6_6_5_q4"
@@ -10796,7 +10827,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The magnitude of the comet’s angular momentum increases."
+                      "text": "The magnitude of the comet\u2019s angular momentum increases."
                     },
                     {
                       "letter": "B",
@@ -10956,7 +10987,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "Location , because the spring exerts a force opposite to the block’s displacement from equilibrium."
+                      "text": "Location , because the spring exerts a force opposite to the block\u2019s displacement from equilibrium."
                     },
                     {
                       "letter": "D",
@@ -11090,7 +11121,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "because the force on the block is constant throughout the block’s motion."
+                      "text": "because the force on the block is constant throughout the block\u2019s motion."
                     },
                     {
                       "letter": "C",
@@ -11132,11 +11163,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The force exerted on the object is in the direction of the object’s displacement."
+                      "text": "The force exerted on the object is in the direction of the object\u2019s displacement."
                     },
                     {
                       "letter": "B",
-                      "text": "The magnitude of the force exerted on the object is proportional to the object’s displacement from\r\nequilibrium."
+                      "text": "The magnitude of the force exerted on the object is proportional to the object\u2019s displacement from\r\nequilibrium."
                     },
                     {
                       "letter": "C",
@@ -11210,7 +11241,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Yes, because the amplitude of the pendulum’s oscillation will be smaller."
+                      "text": "Yes, because the amplitude of the pendulum\u2019s oscillation will be smaller."
                     },
                     {
                       "letter": "B",
@@ -12100,7 +12131,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "No, because the restoring force exerted by the component of the gravitational force parallel to the ramp\r\nis not proportional to the block’s displacement from equilibrium.\r\nScoring Guide\r\nUnit 7 Progress Check: MCQ"
+                      "text": "No, because the restoring force exerted by the component of the gravitational force parallel to the ramp\r\nis not proportional to the block\u2019s displacement from equilibrium.\r\nScoring Guide\r\nUnit 7 Progress Check: MCQ"
                     }
                   ],
                   "question_id": "app1_unit7_unit_7_progress_check_q13"
@@ -13914,19 +13945,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The student’s equation does not account for the initial position of the object."
+                      "text": "The student\u2019s equation does not account for the initial position of the object."
                     },
                     {
                       "letter": "B",
-                      "text": "The student’s equation does not account for the initial velocity of the object."
+                      "text": "The student\u2019s equation does not account for the initial velocity of the object."
                     },
                     {
                       "letter": "C",
-                      "text": "The student’s equation does not substitute in the term."
+                      "text": "The student\u2019s equation does not substitute in the term."
                     },
                     {
                       "letter": "D",
-                      "text": "The student’s equation should not have a term, as integrating the acceleration function twice yields\r\n."
+                      "text": "The student\u2019s equation should not have a term, as integrating the acceleration function twice yields\r\n."
                     }
                   ],
                   "question_id": "appc_unit1_1_2_q8"
@@ -14015,11 +14046,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "One time because the graph indicates that there is a single point where the object’s velocity is zero and\r\nits acceleration is zero."
+                      "text": "One time because the graph indicates that there is a single point where the object\u2019s velocity is zero and\r\nits acceleration is zero."
                     },
                     {
                       "letter": "B",
-                      "text": "One time because the graph indicates that there is a single point where the object’s velocity is zero and\r\nits acceleration is nonzero."
+                      "text": "One time because the graph indicates that there is a single point where the object\u2019s velocity is zero and\r\nits acceleration is nonzero."
                     },
                     {
                       "letter": "C",
@@ -14482,7 +14513,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Boat takes less time because the current increases the boat’s speed relative to the ground."
+                      "text": "Boat takes less time because the current increases the boat\u2019s speed relative to the ground."
                     }
                   ],
                   "question_id": "appc_unit1_1_5_q4"
@@ -14632,7 +14663,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q1"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 1 from official review materials."
                 },
                 {
                   "number": 2,
@@ -14659,7 +14691,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q2"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 2 from official review materials."
                 },
                 {
                   "number": 3,
@@ -14686,7 +14719,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q3"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 3 from official review materials."
                 },
                 {
                   "number": 4,
@@ -14709,7 +14743,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q4"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 4 from official review materials."
                 },
                 {
                   "number": 5,
@@ -14732,7 +14767,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q5"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 5 from official review materials."
                 },
                 {
                   "number": 6,
@@ -14755,7 +14791,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q6"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 6 from official review materials."
                 },
                 {
                   "number": 7,
@@ -14782,7 +14819,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q7"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 7 from official review materials."
                 },
                 {
                   "number": 8,
@@ -14809,7 +14847,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q8"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 8 from official review materials."
                 },
                 {
                   "number": 9,
@@ -14836,7 +14875,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q9"
+                  "correct_answer": "E",
+                  "explanation": "Mid-Term Review Question 9 from official review materials."
                 },
                 {
                   "number": 10,
@@ -14863,7 +14903,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q10"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 10 from official review materials."
                 },
                 {
                   "number": 11,
@@ -14886,7 +14927,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q11"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 11 from official review materials."
                 },
                 {
                   "number": 12,
@@ -14913,7 +14955,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q12"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 12 from official review materials."
                 },
                 {
                   "number": 13,
@@ -14940,7 +14983,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q13"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 13 from official review materials."
                 },
                 {
                   "number": 14,
@@ -14963,7 +15007,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q14"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 14 from official review materials."
                 },
                 {
                   "number": 15,
@@ -14990,7 +15035,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q15"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 15 from official review materials."
                 },
                 {
                   "number": 16,
@@ -15013,7 +15059,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q16"
+                  "correct_answer": "C",
+                  "explanation": "Mid-Term Review Question 16 from official review materials."
                 },
                 {
                   "number": 17,
@@ -15036,7 +15083,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q17"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 17 from official review materials."
                 },
                 {
                   "number": 18,
@@ -15063,7 +15111,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_midterm_review_q18"
+                  "correct_answer": "E",
+                  "explanation": "Mid-Term Review Question 18 from official review materials."
                 }
               ]
             },
@@ -15356,19 +15405,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water."
+                      "text": "Toward Point because the -component of the boat\u2019s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water."
                     },
                     {
                       "letter": "B",
-                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water but in the opposite direction."
+                      "text": "Toward Point because the -component of the boat\u2019s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water but in the opposite direction."
                     },
                     {
                       "letter": "C",
-                      "text": "Toward Point because the magnitude of the boat’s velocity with respect to the water is greater than the\r\nmagnitude of the velocity of the water."
+                      "text": "Toward Point because the magnitude of the boat\u2019s velocity with respect to the water is greater than the\r\nmagnitude of the velocity of the water."
                     },
                     {
                       "letter": "D",
-                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water is not affected\r\nby the motion of the water."
+                      "text": "Toward Point because the -component of the boat\u2019s velocity with respect to the water is not affected\r\nby the motion of the water."
                     }
                   ],
                   "question_id": "appc_unit1_unit_1_progress_check_q13"
@@ -15379,11 +15428,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "No, because the object’s speed is increasing, the acceleration should be positive."
+                      "text": "No, because the object\u2019s speed is increasing, the acceleration should be positive."
                     },
                     {
                       "letter": "B",
-                      "text": "No, because the object’s speed is increasing, the acceleration should be increasing in magnitude."
+                      "text": "No, because the object\u2019s speed is increasing, the acceleration should be increasing in magnitude."
                     },
                     {
                       "letter": "C",
@@ -16403,7 +16452,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "because Newton’s third law states that every action has an equal and opposite reaction."
+                      "text": "because Newton\u2019s third law states that every action has an equal and opposite reaction."
                     },
                     {
                       "letter": "D",
@@ -16596,11 +16645,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "It decreases with increasing distance from the planet’s center."
+                      "text": "It decreases with increasing distance from the planet\u2019s center."
                     },
                     {
                       "letter": "D",
-                      "text": "It increases with increasing distance from the planet’s center."
+                      "text": "It increases with increasing distance from the planet\u2019s center."
                     }
                   ],
                   "question_id": "appc_unit2_2_6_q1"
@@ -16615,15 +16664,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Between the center of the shell and the shell’s inner surface"
+                      "text": "Between the center of the shell and the shell\u2019s inner surface"
                     },
                     {
                       "letter": "C",
-                      "text": "Between the shell’s inner surface and the object’s original location"
+                      "text": "Between the shell\u2019s inner surface and the object\u2019s original location"
                     },
                     {
                       "letter": "D",
-                      "text": "Between the object’s original location and the shell’s outer surface\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.6\r\nAP Physics C: Mechanics Page 1 of 6"
+                      "text": "Between the object\u2019s original location and the shell\u2019s outer surface\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.6\r\nAP Physics C: Mechanics Page 1 of 6"
                     }
                   ],
                   "question_id": "appc_unit2_2_6_q2"
@@ -17158,19 +17207,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The effective spring constant is less than because the force exerted by the combination is the same as\r\nexerted by any individual spring and the stretched distance is the sum of each of the spring’s individual\r\nstretch."
+                      "text": "The effective spring constant is less than because the force exerted by the combination is the same as\r\nexerted by any individual spring and the stretched distance is the sum of each of the spring\u2019s individual\r\nstretch."
                     },
                     {
                       "letter": "B",
-                      "text": "The effective spring constant is less than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring’s\r\nindividual stretch."
+                      "text": "The effective spring constant is less than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring\u2019s\r\nindividual stretch."
                     },
                     {
                       "letter": "C",
-                      "text": "The effective spring constant is more than because the force exerted by the combination is the same\r\nas exerted by any individual spring and the stretched distance is the sum of each of the spring’s\r\nindividual stretch."
+                      "text": "The effective spring constant is more than because the force exerted by the combination is the same\r\nas exerted by any individual spring and the stretched distance is the sum of each of the spring\u2019s\r\nindividual stretch."
                     },
                     {
                       "letter": "D",
-                      "text": "The effective spring constant is more than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring’s\r\nindividual stretch."
+                      "text": "The effective spring constant is more than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring\u2019s\r\nindividual stretch."
                     }
                   ],
                   "question_id": "appc_unit2_2_8_q7"
@@ -17363,7 +17412,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "The object will not reach its terminal velocity before reaching the ground because the weight of the\r\nobject increases as the object approaches Earth’s surface."
+                      "text": "The object will not reach its terminal velocity before reaching the ground because the weight of the\r\nobject increases as the object approaches Earth\u2019s surface."
                     }
                   ],
                   "question_id": "appc_unit2_2_9_q6"
@@ -17405,7 +17454,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "Yes, because Newton’s second law indicates that acceleration is inversely proportional to mass."
+                      "text": "Yes, because Newton\u2019s second law indicates that acceleration is inversely proportional to mass."
                     },
                     {
                       "letter": "D",
@@ -17594,11 +17643,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Car . The car’s acceleration is the vector sum of both tangential and centripetal accelerations."
+                      "text": "Car . The car\u2019s acceleration is the vector sum of both tangential and centripetal accelerations."
                     },
                     {
                       "letter": "C",
-                      "text": "Car . The centripetal acceleration of Car is less than that Car ’s because Car is slowing down."
+                      "text": "Car . The centripetal acceleration of Car is less than that Car \u2019s because Car is slowing down."
                     },
                     {
                       "letter": "D",
@@ -17683,7 +17732,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q1"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 1 from official review materials."
                 },
                 {
                   "number": 2,
@@ -17706,7 +17756,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q2"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 2 from official review materials."
                 },
                 {
                   "number": 3,
@@ -17729,7 +17780,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q3"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 3 from official review materials."
                 },
                 {
                   "number": 4,
@@ -17752,7 +17804,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q4"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 4 from official review materials."
                 },
                 {
                   "number": 5,
@@ -17775,7 +17828,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q5"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 5 from official review materials."
                 },
                 {
                   "number": 6,
@@ -17798,7 +17852,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q6"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 6 from official review materials."
                 },
                 {
                   "number": 7,
@@ -17821,7 +17876,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q7"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 7 from official review materials."
                 },
                 {
                   "number": 8,
@@ -17844,7 +17900,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q8"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 8 from official review materials."
                 },
                 {
                   "number": 9,
@@ -17867,7 +17924,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q9"
+                  "correct_answer": "D",
+                  "explanation": "Mid-Term Review Question 9 from official review materials."
                 },
                 {
                   "number": 10,
@@ -17890,7 +17948,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q10"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 10 from official review materials."
                 },
                 {
                   "number": 11,
@@ -17913,7 +17972,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q11"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 11 from official review materials."
                 },
                 {
                   "number": 12,
@@ -17936,7 +17996,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q12"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 12 from official review materials."
                 },
                 {
                   "number": 13,
@@ -17959,7 +18020,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q13"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 13 from official review materials."
                 },
                 {
                   "number": 14,
@@ -17982,7 +18044,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q14"
+                  "correct_answer": "A",
+                  "explanation": "Mid-Term Review Question 14 from official review materials."
                 },
                 {
                   "number": 15,
@@ -18005,7 +18068,8 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_midterm_review_q15"
+                  "correct_answer": "B",
+                  "explanation": "Mid-Term Review Question 15 from official review materials."
                 }
               ]
             },
@@ -18988,11 +19052,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Group because the slope of an object’s kinetic energy graph is proportional to its acceleration."
+                      "text": "Group because the slope of an object\u2019s kinetic energy graph is proportional to its acceleration."
                     },
                     {
                       "letter": "B",
-                      "text": "Group because the object’s speed is increasing at a decreasing rate, so its kinetic energy is also\r\nincreasing at a decreasing rate."
+                      "text": "Group because the object\u2019s speed is increasing at a decreasing rate, so its kinetic energy is also\r\nincreasing at a decreasing rate."
                     },
                     {
                       "letter": "C",
@@ -19130,7 +19194,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": ", because half of the block’s kinetic energy is converted into gravitational potential energy."
+                      "text": ", because half of the block\u2019s kinetic energy is converted into gravitational potential energy."
                     },
                     {
                       "letter": "C",
@@ -20013,7 +20077,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "and are the same because the direction of velocity does not affect an object’s kinetic energy."
+                      "text": "and are the same because the direction of velocity does not affect an object\u2019s kinetic energy."
                     },
                     {
                       "letter": "B",
@@ -20197,7 +20261,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The claim is correct. At , the slope of the velocity curve for Object ’s is greater than the\r\nslope of the velocity curve for Object ."
+                      "text": "The claim is correct. At , the slope of the velocity curve for Object \u2019s is greater than the\r\nslope of the velocity curve for Object ."
                     },
                     {
                       "letter": "B",
@@ -20450,7 +20514,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Both students have the same final speed because the student-chair system and the ball￾student-chair system have the same mass and experience impulses of the same magnitude."
+                      "text": "Both students have the same final speed because the student-chair system and the ball\ufffestudent-chair system have the same mass and experience impulses of the same magnitude."
                     },
                     {
                       "letter": "B",
@@ -21282,19 +21346,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The cart’s momentum changes direction at exactly one instant."
+                      "text": "The cart\u2019s momentum changes direction at exactly one instant."
                     },
                     {
                       "letter": "B",
-                      "text": "The cart’s momentum changes direction at exactly two different instants."
+                      "text": "The cart\u2019s momentum changes direction at exactly two different instants."
                     },
                     {
                       "letter": "C",
-                      "text": "The cart’s momentum is constant."
+                      "text": "The cart\u2019s momentum is constant."
                     },
                     {
                       "letter": "D",
-                      "text": "The cart’s momentum is not constant and does not change directions at any point in this interval."
+                      "text": "The cart\u2019s momentum is not constant and does not change directions at any point in this interval."
                     }
                   ],
                   "question_id": "appc_unit4_unit_4_progress_check_q9"
@@ -21466,7 +21530,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Object because its momentum is greater in magnitude than Object ’s momentum at all times shown."
+                      "text": "Object because its momentum is greater in magnitude than Object \u2019s momentum at all times shown."
                     },
                     {
                       "letter": "B",
@@ -21478,7 +21542,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Both objects have the same net force because the slope of each object’s momentum versus time graph is\r\nthe same."
+                      "text": "Both objects have the same net force because the slope of each object\u2019s momentum versus time graph is\r\nthe same."
                     }
                   ],
                   "question_id": "appc_unit4_unit_4_progress_check_q17"
@@ -21746,15 +21810,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "It has magnitude and is directed tangent to the coin’s circular path."
+                      "text": "It has magnitude and is directed tangent to the coin\u2019s circular path."
                     },
                     {
                       "letter": "C",
-                      "text": "It has magnitude . It is initially directed toward the center of the platform, with an\r\nincreasing component tangent to the coin’s circular path."
+                      "text": "It has magnitude . It is initially directed toward the center of the platform, with an\r\nincreasing component tangent to the coin\u2019s circular path."
                     },
                     {
                       "letter": "D",
-                      "text": "It has magnitude . It is initially tangent to the coin’s circular path, with an increasing\r\ncomponent directed toward the center of the platform."
+                      "text": "It has magnitude . It is initially tangent to the coin\u2019s circular path, with an increasing\r\ncomponent directed toward the center of the platform."
                     }
                   ],
                   "question_id": "appc_unit5_5_2_q1"
@@ -23342,7 +23406,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "is zero. The velocity of the disk’s center of mass is zero."
+                      "text": "is zero. The velocity of the disk\u2019s center of mass is zero."
                     },
                     {
                       "letter": "B",
@@ -23350,11 +23414,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "is greater than zero. The disk’s mass and rotational inertia are both greater than zero."
+                      "text": "is greater than zero. The disk\u2019s mass and rotational inertia are both greater than zero."
                     },
                     {
                       "letter": "D",
-                      "text": "is greater than zero. Except for the disk’s center, all parts of the disk are moving."
+                      "text": "is greater than zero. Except for the disk\u2019s center, all parts of the disk are moving."
                     }
                   ],
                   "question_id": "appc_unit6_6_1_q5"
@@ -23516,15 +23580,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Divide by the slope of the ‐ graph."
+                      "text": "Divide by the slope of the \u2010 graph."
                     },
                     {
                       "letter": "C",
-                      "text": "Determine the area under the ‐ graph."
+                      "text": "Determine the area under the \u2010 graph."
                     },
                     {
                       "letter": "D",
-                      "text": "Multiply the area under the ‐ graph by ."
+                      "text": "Multiply the area under the \u2010 graph by ."
                     }
                   ],
                   "question_id": "appc_unit6_6_2_q3"
@@ -23682,7 +23746,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "is greater than . The bar’s angular momentum changes by a greater amount in Collision ."
+                      "text": "is greater than . The bar\u2019s angular momentum changes by a greater amount in Collision ."
                     },
                     {
                       "letter": "B",
@@ -23732,7 +23796,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "The cylinder. The torque has the same sign as the cylinder’s angular velocity."
+                      "text": "The cylinder. The torque has the same sign as the cylinder\u2019s angular velocity."
                     },
                     {
                       "letter": "C",
@@ -23740,7 +23804,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "The sphere. The torque has the opposite sign to the sphere’s angular velocity."
+                      "text": "The sphere. The torque has the opposite sign to the sphere\u2019s angular velocity."
                     }
                   ],
                   "question_id": "appc_unit6_6_3_q3"
@@ -23755,7 +23819,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Counterclockwise. When an object’s rotational motion is slowing down, the angular impulse has the\r\nopposite direction as the torque."
+                      "text": "Counterclockwise. When an object\u2019s rotational motion is slowing down, the angular impulse has the\r\nopposite direction as the torque."
                     },
                     {
                       "letter": "C",
@@ -23763,7 +23827,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Clockwise. When an object’s rotational motion is slowing down, the angular impulse has the same\r\ndirection as the angular displacement.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 3 of 8"
+                      "text": "Clockwise. When an object\u2019s rotational motion is slowing down, the angular impulse has the same\r\ndirection as the angular displacement.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 3 of 8"
                     }
                   ],
                   "question_id": "appc_unit6_6_3_q4"
@@ -23975,7 +24039,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "The rest of the bicycle rotates clockwise because there is an external torque exerted on the bicycle￾cyclist system."
+                      "text": "The rest of the bicycle rotates clockwise because there is an external torque exerted on the bicycle\ufffecyclist system."
                     },
                     {
                       "letter": "D",
@@ -24059,19 +24123,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The skater’s angular speed is increasing in magnitude."
+                      "text": "The skater\u2019s angular speed is increasing in magnitude."
                     },
                     {
                       "letter": "B",
-                      "text": "The skater’s angular speed is decreasing in magnitude."
+                      "text": "The skater\u2019s angular speed is decreasing in magnitude."
                     },
                     {
                       "letter": "C",
-                      "text": "The skater’s angular momentum is increasing in magnitude."
+                      "text": "The skater\u2019s angular momentum is increasing in magnitude."
                     },
                     {
                       "letter": "D",
-                      "text": "The skater’s angular momentum is decreasing in magnitude."
+                      "text": "The skater\u2019s angular momentum is decreasing in magnitude."
                     }
                   ],
                   "question_id": "appc_unit6_6_4_q8"
@@ -24137,19 +24201,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Wheel is more massive and on average, its mass is distributed closer to the wheel’s center."
+                      "text": "Wheel is more massive and on average, its mass is distributed closer to the wheel\u2019s center."
                     },
                     {
                       "letter": "B",
-                      "text": "Wheel is more massive and on average, its mass is distributed farther from the wheel’s center."
+                      "text": "Wheel is more massive and on average, its mass is distributed farther from the wheel\u2019s center."
                     },
                     {
                       "letter": "C",
-                      "text": "Wheel is less massive and on average, its mass is distributed closer to the wheel’s center."
+                      "text": "Wheel is less massive and on average, its mass is distributed closer to the wheel\u2019s center."
                     },
                     {
                       "letter": "D",
-                      "text": "Wheel is less massive and on average, its mass is distributed farther from the wheel’s center."
+                      "text": "Wheel is less massive and on average, its mass is distributed farther from the wheel\u2019s center."
                     }
                   ],
                   "question_id": "appc_unit6_6_5_q2"
@@ -24338,7 +24402,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "has a maximum magnitude when the asteroids are at points and . These are the locations where\r\nthe asteroids’ speeds are greatest."
+                      "text": "has a maximum magnitude when the asteroids are at points and . These are the locations where\r\nthe asteroids\u2019 speeds are greatest."
                     },
                     {
                       "letter": "D",
@@ -24422,11 +24486,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The satellite’s angular momentum has a nonzero magnitude."
+                      "text": "The satellite\u2019s angular momentum has a nonzero magnitude."
                     },
                     {
                       "letter": "B",
-                      "text": "The satellite’s angular momentum has the same direction throughout the orbit."
+                      "text": "The satellite\u2019s angular momentum has the same direction throughout the orbit."
                     },
                     {
                       "letter": "C",
@@ -24937,7 +25001,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "It decreases because the satellite’s speed decreases."
+                      "text": "It decreases because the satellite\u2019s speed decreases."
                     },
                     {
                       "letter": "B",
@@ -25032,7 +25096,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "No. The net force on the ball is in the same direction as the ball’s displacement from equilibrium."
+                      "text": "No. The net force on the ball is in the same direction as the ball\u2019s displacement from equilibrium."
                     }
                   ],
                   "question_id": "appc_unit7_7_1_q3"
@@ -25055,7 +25119,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "There is an equilibrium position and a restoring force in both directions from equilibrium, but the\r\nrestoring force is not proportional to the cart’s displacement from equilibrium."
+                      "text": "There is an equilibrium position and a restoring force in both directions from equilibrium, but the\r\nrestoring force is not proportional to the cart\u2019s displacement from equilibrium."
                     }
                   ],
                   "question_id": "appc_unit7_7_1_q4"
@@ -25078,7 +25142,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "No. The net force is not in the opposite direction from the object’s displacement from equilibrium."
+                      "text": "No. The net force is not in the opposite direction from the object\u2019s displacement from equilibrium."
                     }
                   ],
                   "question_id": "appc_unit7_7_1_q5"
@@ -25567,19 +25631,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The object’s displacement from equilibrium and its velocity are both in the positive direction."
+                      "text": "The object\u2019s displacement from equilibrium and its velocity are both in the positive direction."
                     },
                     {
                       "letter": "B",
-                      "text": "The object’s displacement from equilibrium and its velocity are both in the negative direction."
+                      "text": "The object\u2019s displacement from equilibrium and its velocity are both in the negative direction."
                     },
                     {
                       "letter": "C",
-                      "text": "The object’s displacement from equilibrium is in the positive direction, and its velocity is in the negative\r\ndirection."
+                      "text": "The object\u2019s displacement from equilibrium is in the positive direction, and its velocity is in the negative\r\ndirection."
                     },
                     {
                       "letter": "D",
-                      "text": "The object’s displacement from equilibrium is in the negative direction, and its velocity is in the positive\r\ndirection."
+                      "text": "The object\u2019s displacement from equilibrium is in the negative direction, and its velocity is in the positive\r\ndirection."
                     }
                   ],
                   "question_id": "appc_unit7_7_3_q8"
@@ -25764,15 +25828,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Yes. Most of the system’s total mechanical energy is in the form of potential energy, which is true\r\nwhenever the object’s distance from equilibrium is a maximum."
+                      "text": "Yes. Most of the system\u2019s total mechanical energy is in the form of potential energy, which is true\r\nwhenever the object\u2019s distance from equilibrium is a maximum."
                     },
                     {
                       "letter": "C",
-                      "text": "No. The system still has kinetic energy that must be completely converted to potential energy when the\r\nobject’s distance from equilibrium is a maximum."
+                      "text": "No. The system still has kinetic energy that must be completely converted to potential energy when the\r\nobject\u2019s distance from equilibrium is a maximum."
                     },
                     {
                       "letter": "D",
-                      "text": "No. When the kinetic energy is less than half of the system’s total mechanical energy, the object is\r\napproaching the equilibrium position."
+                      "text": "No. When the kinetic energy is less than half of the system\u2019s total mechanical energy, the object is\r\napproaching the equilibrium position."
                     }
                   ],
                   "question_id": "appc_unit7_7_4_q7"
@@ -25787,7 +25851,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "It is closer to the surface. The potential energy of the rock-moon system is proportional to the square of\r\nthe rock’s distance from the center."
+                      "text": "It is closer to the surface. The potential energy of the rock-moon system is proportional to the square of\r\nthe rock\u2019s distance from the center."
                     },
                     {
                       "letter": "C",
@@ -26288,11 +26352,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Yes. The force exerted on Object O is in the opposite direction of Object O’s displacement from\r\nequilibrium."
+                      "text": "Yes. The force exerted on Object O is in the opposite direction of Object O\u2019s displacement from\r\nequilibrium."
                     },
                     {
                       "letter": "C",
-                      "text": "No. The force exerted on Object O is not proportional to Object O’s displacement from equilibrium."
+                      "text": "No. The force exerted on Object O is not proportional to Object O\u2019s displacement from equilibrium."
                     },
                     {
                       "letter": "D",

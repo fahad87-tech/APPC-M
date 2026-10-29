@@ -1247,3 +1247,108 @@ sequenceDiagram
 2. **Dynamic Sky Gradient Shift**: Transition canvas background gradients based on elevation percentage (Teal valley -> Twilight ridge -> Cosmic navy with twinkling stars).
 3. **Passive Touch Handling**: Always pass `{ passive: true }` to `touchstart` event listeners on mobile devices to prevent browser scroll lag during rapid clicking.
 4. **Episodic Minimum Floor**: When hazard pushback occurs, ensure `Math.max(this.initialProgress, this.targetProgress - netPush)` so students never lose progress earned in prior completed question rounds.
+
+
+---
+
+## 14. AP Physics C Midterm Review Card Ingestion & Image Clarity Architecture
+
+### A. Context & Identified Defects
+During classroom review sessions for **AP Physics C: Mechanics Unit 2 Midterm Review** (`appc_unit2_midterm_review`), two severe presentation defects were identified:
+1. **Truncated Question Stems & Missing Choices (Q9)**:
+   - Question 9 (Astronaut inside spaceship on a scale) was cropped prematurely at `y = 336.8 pt`, cutting off the final prompt sentence:
+     > *"Based only on observing the scale reading, which of the following is the most accurate?"*
+     and amputating all 4 answer choices (A, B, C, D).
+2. **Illegibly Tiny Image Question Stems (Q13)**:
+   - Question 13 (Two satellites in circular orbit around Earth) had its entire question prompt embedded as a miniature $184.5 \times 14.2\text{ pt}$ image inside Quizizz/Wayground printable worksheets.
+   - At standard rendering scale, two full lines of dense mathematical physics text were squeezed into a 14 pt vertical strip, rendering the problem stem completely unreadable to students.
+
+---
+
+### B. Root Cause Analysis
+1. **PDF Text Stream Ordering Mismatch**:
+   - The legacy cropping logic in `scripts/ingest_midterm_reviews.py` located the bottom of the last question on each page by searching backwards in the character string:
+     ```python
+     cutoff = text.rfind('04/10/2026')
+     last_idx = cutoff - 1
+     box_last = tp.get_charbox(last_idx)
+     crop_bottom = min(h - 25.0, (h - box_last[1]) + 15.0)
+     ```
+   - In PDF object architecture, the physical order of characters in the content stream does **not** equal visual reading order from top to bottom.
+   - On Page 5 (Q9), mathematical symbols and superscripts (e.g. the exponent `2` in $\text{m/s}^2$) appeared late in the text stream but were physically positioned at $y = 284\text{ pt}$ (in the middle of the page).
+   - This caused `box_last[1]` to evaluate to the vertical center of the page, prematurely terminating the crop and truncating over 100 points ($200+\text{ px}$) of essential question content.
+2. **Quizizz Thumbnail Constraint on Question Prompts**:
+   - In Q13, the question stem was authored as an external image and uploaded to Quizizz.
+   - Quizizz printable templates force all image elements into a fixed $184.5\text{ pt}$ column width.
+   - For wide images ($1584 \times 118\text{ px}$, aspect ratio $13.4:1$), forcing width to $184.5\text{ pt}$ crushed the height down to $14.2\text{ pt}$ ($28.5\text{ px}$), shrinking the font size to $\approx 5\text{ px}$.
+
+---
+
+### C. Architectural Fixes & Implementation
+
+#### 1. Robust Visual Coordinate Bounding-Box Detection
+The cropping algorithm in `scripts/ingest_midterm_reviews.py` was rebuilt to evaluate the true physical bounds of all rendered elements on the page:
+- For any question that is the last question on a page, instead of relying on linear character index searches, the engine scans **every non-whitespace character** and **every image object** on the page.
+- Elements starting above `crop_top - 5.0 pt` and residing above the footer threshold (`y < 762.0 pt`) contribute to `max_y`:
+  ```python
+  max_y = crop_top + 50.0
+  for c in range(len(text)):
+      if not text[c].isspace():
+          c_box = tp.get_charbox(c)
+          c_bot = h - c_box[1]
+          c_top = h - c_box[3]
+          if c_top >= crop_top - 5.0 and c_bot < 762.0:
+              if c_bot > max_y:
+                  max_y = c_bot
+
+  for obj in page.get_objects():
+      if obj.type == pdfium.raw.FPDF_PAGEOBJ_IMAGE:
+          l, b, r, t = obj.get_bounds()
+          obj_bot = h - b
+          obj_top = h - t
+          if obj_top >= crop_top - 5.0 and obj_bot < 762.0:
+              if obj_bot > max_y:
+                  max_y = obj_bot
+
+  crop_bottom = min(h - 22.0, max_y + 16.0)
+  ```
+- Generous padding (`+16.0 pt`) ensures fractions, sub-choices, and square root radicals (e.g. Q4 and Q15) retain full visual clarity without clipped denominators.
+
+#### 2. Native-Resolution Question Stem Compositing (Q13)
+For Q13, the script extracts the native $1584 \times 118\text{ px}$ uncompressed image directly from the PDF's internal image stream (`FPDF_PAGEOBJ_IMAGE`).
+- Rescales the prompt image to an optimal reading width of $980\text{ px}$ ($73\text{ px}$ height) using high-quality Lanczos interpolation (`Image.Resampling.LANCZOS`).
+- Recomposites the card with:
+  1. The question number `"13."` on the left.
+  2. The full-width, crisp question prompt text.
+  3. The choices A, B, C, D positioned below with balanced vertical whitespace.
+- Generates a crystal-clear, Retina-sharp card image (`assets/cards/appc_unit2_midterm_review_q13.png`).
+
+---
+
+### D. Verification Audit of All 15 Questions (APPC Unit 2 Midterm Review)
+
+| Question | Topic / Description | Status & Card Resolution | Correct Answer | Notes |
+|:---:|:---|:---:|:---:|:---|
+| **Q1** | Center of mass of 3-object system (A, B, C) | Validated `(1136 x 541)` | **A** | Full table and choices present |
+| **Q2** | Incline with pulley & kinetic friction ($\mu_k = 0.3$) | Validated `(1136 x 543)` | **A** | Diagram, system acceleration fully visible |
+| **Q3** | Block $M_0$ between vertical walls with block $m$ on top | Validated `(1136 x 702)` | **B** | Static friction equilibrium equation |
+| **Q4** | Vertical spring with block $m_0$ pulled down $h_0$ | Validated `(1136 x 615)` | **D** | Extra bottom padding prevents clipped denominator |
+| **Q5** | Hanging vs accelerating rope with tension at A & B | Validated `(1136 x 589)` | **D** | Both situations clearly diagrammed |
+| **Q6** | Table pulley system ($2.0\text{ kg}$ on rough table, $1.0\text{ kg}$ hanging) | Validated `(1136 x 617)` | **B** | Minimum $\mu_s = 0.50$ |
+| **Q7** | Acceleration vs time graph with air resistance drag | Validated `(1136 x 622)` | **D** | Comparison of $F_2 > F_1 > 0$ |
+| **Q8** | Center of mass of 3 masses on a circle ($2m_0$ and two $m_0$) | Validated `(1136 x 728)` | **B** | Above Point P for $0 < \theta < 90^\circ$ |
+| **Q9** | Astronaut on scale in spaceship ($100\text{ kg}, 2000\text{ N}$) | **RESTORED** `(1136 x 866)` | **D** | **Fixed**: Stem & all 4 choices fully restored |
+| **Q10** | Linearly increasing horizontal force $F(t)$ and friction forces | Validated `(1136 x 847)` | **A** | Graph and static/kinetic friction comparison |
+| **Q11** | Parallel vs series springs ($\Delta x_1$ vs $\Delta x_2$) | Validated `(1136 x 733)` | **A** | Clear comparison between Figure 1 and 2 |
+| **Q12** | Drag resistive forces ($F_S = k_0 v^2$ vs $F_L = 9F_S$) | Validated `(1136 x 372)` | **B** | Ratio of terminal speeds $2:3$ |
+| **Q13** | Two orbiting satellites ($m_0, T_0, R_A$ vs $2m_0, 2T_0, R_B$) | **ENHANCED** `(1136 x 306)` | **B** | **Fixed**: Replaced tiny thumbnail with 980px sharp stem |
+| **Q14** | Suspended block with String 1 and String 2 at angles | Validated `(1136 x 855)` | **A** | Free body diagram & tension components |
+| **Q15** | Marble sliding into vertical circular track of radius $R$ | Validated `(1136 x 642)` | **B** | $v_B = \sqrt{Rg \cos\theta}$, ample radical margin |
+
+---
+
+### E. Replication Checklist for Other IDEs
+1. **Never Rely on Text-Stream Indices for Layout Crop Bottom**: When cropping content pages from printable worksheets, extract character bounding boxes and find `max(y)` across all characters and image objects on the page.
+2. **Footer Exclusion Boundary**: Bound the bottom search to elements above the worksheet footer (`y < 762.0 pt` on standard $792\text{ pt}$ Letter pages).
+3. **Handle Thumbnail-Squeezed Images**: When an assessment author uploads a wide text banner as an image, check the native image resolution (`FPDF_PAGEOBJ_IMAGE`). If native aspect ratio is high ($\ge 4:1$), rescale the native bitmap using Lanczos sampling across the card width rather than capturing the downscaled page thumbnail.
+4. **Synchronize Data Stores**: Always re-generate both `data/exams.json` and `data/exams_bundle.js` simultaneously so static web clients and offline runners receive identical card paths and metadata.
