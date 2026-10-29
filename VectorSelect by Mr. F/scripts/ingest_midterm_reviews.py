@@ -128,6 +128,61 @@ ENHANCEMENTS = {
         "target_w": 700,
         "text_split_y": 230,
     },
+    ("app1_unit1_midterm_review", 1): {
+        "bbox": (12, 10, 873, 470),
+        "target_w": 700,
+        "text_split_y": 240,
+    },
+    ("app1_unit1_midterm_review", 3): {
+        "bbox": (4, 13, 922, 125),
+        "target_w": 850,
+        "text_split_y": 96,
+    },
+    ("app1_unit1_midterm_review", 6): {
+        "bbox": (18, 5, 976, 476),
+        "target_w": 700,
+        "text_split_y": 225,
+    },
+    ("app1_unit1_midterm_review", 8): {
+        "bbox": (1, 25, 986, 479),
+        "target_w": 700,
+        "text_split_y": 225,
+    },
+    ("app1_unit1_midterm_review", 11): {
+        "bbox": (3, 24, 611, 275),
+        "target_w": 650,
+        "text_split_y": 210,
+    },
+    ("appc_unit1_midterm_review", 1): {
+        "bbox": (0, 1, 1428, 668),
+        "target_w": 750,
+        "text_split_y": 220,
+    },
+    ("appc_unit1_midterm_review", 3): {
+        "bbox": (217, 32, 1289, 165),
+        "target_w": 850,
+        "text_split_y": 86,
+    },
+    ("appc_unit1_midterm_review", 6): {
+        "bbox": (88, 4, 559, 71),
+        "target_w": 700,
+        "text_split_y": 90,
+    },
+    ("appc_unit1_midterm_review", 11): {
+        "bbox": (52, 12, 1123, 454),
+        "target_w": 750,
+        "text_split_y": 191,
+    },
+    ("appc_unit1_midterm_review", 13): {
+        "bbox": (22, 10, 1092, 615),
+        "target_w": 700,
+        "text_split_y": 246,
+    },
+    ("appc_unit1_midterm_review", 18): {
+        "bbox": (59, 19, 1131, 221),
+        "target_w": 800,
+        "text_split_y": 116,
+    },
 }
 
 def parse_answer_keys(doc):
@@ -233,7 +288,7 @@ def process_review_pdf(review_info):
             # Ensure valid box
             if y1 > y0 + 10:
                 card_filename = f"{slug}_q{qnum}.png"
-                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v3"
+                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v4"
                 card_abs_path = os.path.join(CARDS_DIR, card_filename)
 
                 # Special enhancement for Q13 in APPC Unit 2 Midterm Review (tiny embedded image stem)

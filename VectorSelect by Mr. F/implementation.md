@@ -1449,3 +1449,68 @@ To guarantee that end-users see the upgraded, enhanced cards immediately without
 2. **Crop Sub-Regions to Remove Duplicate Text**: In assessments where authors paste an entire problem screenshot as an image, identify the bounding box of just the visual diagram or table and crop out redundant text.
 3. **Safe Split Point Calculation**: Find the top coordinate of the first text line after the diagram, and set `text_split_y` approximately $20\text{ px}$ above it to ensure zero character clipping and clean whitespace.
 4. **Cache Invalidation Discipline**: Whenever image cards are re-rendered, always bump the asset query tag in `exams.json`, `exams_bundle.js`, and HTML script imports.
+
+---
+
+## 16. High-Fidelity Diagram Recomposition & Comprehensive Audit for AP Physics 1 and AP Physics C Unit 1 Mid-Term Reviews
+
+### A. Context & Audit Objectives
+Following the successful recomposition of Unit 2 reviews, a comprehensive audit was executed across both **AP Physics 1 Unit 1 Mid-Term Review MCQ** (11 questions, `Free Printable APP1 Unit 1 Review.pdf`) and **AP Physics C Mechanics Unit 1 Mid-Term Review MCQ** (18 questions, `Free Printable APPC - Unit 1 Review.pdf`).
+
+The audit evaluated:
+1. **Vertical Bounds & Choice Retention**: Verified that all character boxes and choices (A, B, C, D, and E if present) fall strictly within `[crop_top, crop_bottom]` with healthy padding ($> 14\text{ pt}$ margin before the bottom crop).
+2. **Quizizz Fixed-Width Column Distortion**: Evaluated all stem images constrained to the standard $184.5\text{ pt}$ ($369\text{ px}$) column width. Extreme aspect-ratio diagrams (e.g. 6.7:1 and 8.3:1) suffered from severe vertical squashing ($< 50\text{ px}$ height in the PDF), rendering blocks, springs, vectors, and tables microscopic.
+3. **High-Fidelity Recomposition**: Extracted native uncompressed bitmaps (`FPDF_PAGEOBJ_IMAGE`), cropped extraneous white borders, rescaled to $650\text{ px} - 850\text{ px}$ width via Lanczos interpolation, and spliced the prompt body below.
+
+---
+
+### B. Audit & Enhancement Table (AP Physics 1 Unit 1 Review)
+
+Total questions: **11** | Worksheet Time: **15 mins** | Database ID: `app1_unit1_midterm_review`
+
+| Question | Topic / Diagram Description | Native Size | Target Width | Final Card Size | Status | Correct Answer | Notes |
+|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---|
+| **Q1** | Position $x(t)$ for two objects (linear & curve) | $877 \times 473$ | $700\text{ px}$ | $1136 \times 680$ | **ENHANCED** | **C** | Graph enlarged from $369\text{ px}$ to $700\text{ px}$ |
+| **Q2** | Two balls thrown horizontally from same height | Text-only | — | $1136 \times 412$ | Validated | **E** | Margin $16.0\text{ pt}$, choices A–E clear |
+| **Q3** | Block 1 sliding toward Block 2 with spring | $924 \times 138$ | $850\text{ px}$ | $1136 \times 739$ | **ENHANCED** | **A** | **Fixed**: 6.7:1 banner enlarged from $55\text{ px}$ to $127\text{ px}$ height; choice graphs intact |
+| **Q4** | Block projected up frictionless inclined plane | Text-only | — | $1136 \times 337$ | Validated | **B** | Choices A–E fully visible |
+| **Q5** | Ball in free fall on another planet ($y$ vs $t^2$) | $768 \times 578$ | Native | $1136 \times 592$ | Validated | **B** | Native 1.33:1 aspect already legible |
+| **Q6** | Oscillating object on spring, motion detector | $978 \times 486$ | $700\text{ px}$ | $1136 \times 815$ | **ENHANCED** | **D** | $2.01:1$ graph enlarged to $700\text{ px}$ width |
+| **Q7** | Position $x$ vs time $t$ parabolic graph | $486 \times 415$ | Native | $1136 \times 634$ | Validated | **D** | Native 1.17:1 aspect clear |
+| **Q8** | Vertical spring launcher on top of block | $998 \times 498$ | $700\text{ px}$ | $1136 \times 797$ | **ENHANCED** | **A** | $2.0:1$ diagram enlarged to $700\text{ px}$ width |
+| **Q9** | Object thrown with initial speed $v$ on Earth | Text-only | — | $1136 \times 316$ | Validated | **E** | Text & choices A–E fully visible |
+| **Q10** | Rock thrown horizontally from 20 m cliff | Text-only | — | $1136 \times 316$ | Validated | **C** | Text & choices A–E fully visible |
+| **Q11** | Projectile launched from cliff trajectory | $634 \times 286$ | $650\text{ px}$ | $1136 \times 805$ | **ENHANCED** | **C** | Trajectory diagram enlarged to $650\text{ px}$; choice velocity vectors intact |
+
+---
+
+### C. Audit & Enhancement Table (AP Physics C Mechanics Unit 1 Review)
+
+Total questions: **18** | Worksheet Time: **25 mins** | Database ID: `appc_unit1_midterm_review`
+
+| Question | Topic / Diagram Description | Native Size | Target Width | Final Card Size | Status | Correct Answer | Notes |
+|:---:|:---|:---:|:---:|:---:|:---:|:---:|:---|
+| **Q1** | Ball thrown into air with initial velocity vector | $1428 \times 684$ | $750\text{ px}$ | $1136 \times 1122$ | **ENHANCED** | **C** | $1428\text{ px}$ stem diagram scaled to $750\text{ px}$; choice vector diagrams sharp |
+| **Q2** | Ball thrown into air ($10\text{ m/s}, 45^\circ$) | Text-only | — | $1136 \times 352$ | Validated | **B** | Choices A–E fully visible |
+| **Q3** | Block on horizontal surface with $v$ and $a$ vectors | $1428 \times 172$ | $850\text{ px}$ | $1136 \times 551$ | **ENHANCED** | **C** | **Fixed**: 8.3:1 banner enlarged from $45\text{ px}$ to $105\text{ px}$ height; vectors sharp |
+| **Q4** | Coffee filter drop, terminal speed graphs | $1149 \times 1041$ | Native | $1136 \times 967$ | Validated | **D** | 1.1:1 square stem & 4 choice graphs intact |
+| **Q5** | Toy car table with distance vs $t^2$ | $1192 \times 1142$ | Native | $1136 \times 769$ | Validated | **A** | Data table clear and legible |
+| **Q6** | Acceleration vector table for first 3 seconds | $611 \times 82$ | $700\text{ px}$ | $1136 \times 658$ | **ENHANCED** | **D** | **Fixed**: 7.45:1 vector strip scaled to $700\text{ px}$; choice tables sharp |
+| **Q7** | Cart upward toward motion detector on incline | $914 \times 802$ | Native | $1136 \times 759$ | Validated | **D** | 1.14:1 aspect graph clear |
+| **Q8** | Position and time collected for object at rest | $457 \times 285$ | Native | $1136 \times 551$ | Validated | **D** | Data table clear |
+| **Q9** | Ball launched vertically upward motion sensor | $946 \times 1049$ | Native | $1136 \times 854$ | Validated | **E** | Vertical sensor graph clear |
+| **Q10** | Cart position $x(t)$ experimental curve | $434 \times 346$ | Native | $1136 \times 657$ | Validated | **C** | Graph clear |
+| **Q11** | Block on frictionless incline of angle $\theta$ | $1149 \times 465$ | $750\text{ px}$ | $1136 \times 740$ | **ENHANCED** | **B** | 2.47:1 ramp diagram scaled to $750\text{ px}$ |
+| **Q12** | Car speeding up at constant acceleration | Text-only | — | $1136 \times 357$ | Validated | **D** | Choices A–E fully visible |
+| **Q13** | Ball launched at angle above horizontal trajectory | $1126 \times 620$ | $700\text{ px}$ | $1136 \times 827$ | **ENHANCED** | **B** | Trajectory diagram scaled to $700\text{ px}$ |
+| **Q14** | $x(t)$ and $y(t)$ position components parametric | Text-only | — | $1136 \times 277$ | Validated | **A** | Equations and choices fully visible |
+| **Q15** | Object sliding on table with velocity $v_0$ | Text-only | — | $1136 \times 441$ | Validated | **C** | Choices A–E fully visible |
+| **Q16** | Velocity components $v_x(t) = 3t^2, v_y(t) = 4t$ | Text-only | — | $1136 \times 334$ | Validated | **C** | Derivative calculations clear |
+| **Q17** | Speed $v(t)$ velocity graph approaching asymptote | $1017 \times 1007$ | Native | $1136 \times 727$ | Validated | **A** | $30\text{ px}$ clean margin before card border |
+| **Q18** | Sling giving stone initial velocity at angle | $1172 \times 228$ | $800\text{ px}$ | $1136 \times 1018$ | **ENHANCED** | **E** | **Fixed**: 5.14:1 diagram enlarged from $72\text{ px}$ to $150\text{ px}$ height |
+
+---
+
+### D. Synchronized Deployment & Cache Invalidation
+1. **Cache Version**: Bumped all asset queries to `?v=20261029_v4` in `exams.json`, `exams_bundle.js`, `index.html`, and `teacher.html`.
+2. **Re-generation**: Executed `scripts/ingest_midterm_reviews.py` regenerating all 64 question cards across all 5 midterm reviews with unified styling and optimal reading widths.
