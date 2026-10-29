@@ -82,6 +82,54 @@ REVIEWS = [
     }
 ]
 
+ENHANCEMENTS = {
+    ("app1_unit2_midterm_review_1", 1): {
+        "bbox": (7, 7, 681, 191),
+        "target_w": 650,
+        "text_split_y": 145,
+    },
+    ("app1_unit2_midterm_review_1", 3): {
+        "bbox": (488, 40, 1245, 398),
+        "target_w": 750,
+        "text_split_y": 210,
+    },
+    ("app1_unit2_midterm_review_1", 4): {
+        "bbox": (200, 0, 1240, 350),
+        "target_w": 750,
+        "text_split_y": 135,
+    },
+    ("app1_unit2_midterm_review_1", 6): {
+        "bbox": (48, 32, 1021, 325),
+        "target_w": 750,
+        "text_split_y": 165,
+    },
+    ("app1_unit2_midterm_review_1", 7): {
+        "bbox": (58, 18, 752, 268),
+        "target_w": 750,
+        "text_split_y": 180,
+    },
+    ("app1_unit2_midterm_review_1", 9): {
+        "bbox": (8, 11, 790, 314),
+        "target_w": 700,
+        "text_split_y": 190,
+    },
+    ("app1_unit2_midterm_review_2", 2): {
+        "bbox": (17, 47, 1049, 229),
+        "target_w": 850,
+        "text_split_y": 135,
+    },
+    ("app1_unit2_midterm_review_2", 6): {
+        "bbox": (5, 26, 590, 227),
+        "target_w": 650,
+        "text_split_y": 190,
+    },
+    ("app1_unit2_midterm_review_2", 10): {
+        "bbox": (34, 11, 735, 355),
+        "target_w": 700,
+        "text_split_y": 230,
+    },
+}
+
 def parse_answer_keys(doc):
     ak_text = ""
     # Look in the last 3 pages
@@ -185,7 +233,7 @@ def process_review_pdf(review_info):
             # Ensure valid box
             if y1 > y0 + 10:
                 card_filename = f"{slug}_q{qnum}.png"
-                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v2"
+                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v3"
                 card_abs_path = os.path.join(CARDS_DIR, card_filename)
 
                 # Special enhancement for Q13 in APPC Unit 2 Midterm Review (tiny embedded image stem)
@@ -209,6 +257,39 @@ def process_review_pdf(review_info):
                         enhanced_card.paste(scaled_prompt, (120, 16))
                         choices_crop = base_q13.crop((0, int(45 * scale), base_q13.width, base_q13.height))
                         enhanced_card.paste(choices_crop, (0, 16 + target_h + 15))
+                        enhanced_card.save(card_abs_path, optimize=True)
+                    else:
+                        cropped = page_img.crop((x0, y0, x1, y1))
+                        cropped.save(card_abs_path, optimize=True)
+                elif (slug, qnum) in ENHANCEMENTS:
+                    cfg = ENHANCEMENTS[(slug, qnum)]
+                    base_card = page_img.crop((x0, y0, x1, y1))
+                    native_img = None
+                    for obj in page.get_objects():
+                        if obj.type == pdfium.raw.FPDF_PAGEOBJ_IMAGE:
+                            l, b, r, t = obj.get_bounds()
+                            obj_top = h - t
+                            obj_bot = h - b
+                            if obj_top >= crop_top - 5.0 and obj_bot <= crop_bottom + 5.0:
+                                if (r - l > 150) and (l < 100):
+                                    native_img = obj.get_bitmap().to_pil()
+                                    break
+                    if native_img:
+                        diag_crop = native_img.crop(cfg["bbox"])
+                        target_w = cfg["target_w"]
+                        target_h = int(diag_crop.height * (target_w / diag_crop.width))
+                        scaled_diag = diag_crop.resize((target_w, target_h), Image.Resampling.LANCZOS)
+                        
+                        text_and_choices = base_card.crop((0, cfg["text_split_y"], base_card.width, base_card.height))
+                        num_crop = base_card.crop((0, 0, 120, 45))
+                        
+                        pad = 16
+                        new_h = 45 + pad + target_h + pad + text_and_choices.height
+                        enhanced_card = Image.new("RGB", (base_card.width, new_h), (255, 255, 255))
+                        enhanced_card.paste(num_crop, (0, 0))
+                        diag_x = (base_card.width - target_w) // 2
+                        enhanced_card.paste(scaled_diag, (diag_x, 45 + pad))
+                        enhanced_card.paste(text_and_choices, (0, 45 + pad + target_h + pad))
                         enhanced_card.save(card_abs_path, optimize=True)
                     else:
                         cropped = page_img.crop((x0, y0, x1, y1))

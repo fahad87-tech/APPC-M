@@ -1352,3 +1352,100 @@ For Q13, the script extracts the native $1584 \times 118\text{ px}$ uncompressed
 2. **Footer Exclusion Boundary**: Bound the bottom search to elements above the worksheet footer (`y < 762.0 pt` on standard $792\text{ pt}$ Letter pages).
 3. **Handle Thumbnail-Squeezed Images**: When an assessment author uploads a wide text banner as an image, check the native image resolution (`FPDF_PAGEOBJ_IMAGE`). If native aspect ratio is high ($\ge 4:1$), rescale the native bitmap using Lanczos sampling across the card width rather than capturing the downscaled page thumbnail.
 4. **Synchronize Data Stores**: Always re-generate both `data/exams.json` and `data/exams_bundle.js` simultaneously so static web clients and offline runners receive identical card paths and metadata.
+
+---
+
+## 15. High-Fidelity Diagram Recomposition & Cache Invalidation for AP Physics 1 Unit 2 Mid-Term Reviews (Part 1 & Part 2)
+
+### A. Architectural Root Cause Analysis
+During comprehensive review of **AP Physics 1 Unit 2 Mid-Term Review MCQ (Part 1 and Part 2)** (`Free Printable APP1 Unit 2 REview.pdf` and `Free Printable APP1 Unit 2A Review.pdf`), a critical layout artifact from Quizizz/Wayground was identified:
+1. **The 184.5 pt Column Constraint**:
+   - The PDF generator forces all question stem images into a fixed column width of `184.5 pt` (`x = 83.25 pt` to `x = 267.75 pt`), while the page width is `612.0 pt`.
+   - When authors upload wide diagrams or tables (e.g. native resolutions of $1518 \times 692$, $1518 \times 374$, or $1066 \times 258$), the generator shrinks the entire image to fit $184.5\text{ pt}$ (only $369\text{ px}$ in a $1136\text{ px}$ wide card), leaving over $760\text{ px}$ of empty white space on the right.
+   - For complex diagrams—such as the Part 1 Q3 momentum/impulse collision data table, the Part 1 Q4 inclined plane coordinate system, the Part 2 Q2 three-case roller coaster carts (hill, dip, vertical loop), and the Part 1 Q7 three position-time graphs—the visual elements and text labels became unreadably small and blurry.
+2. **Author Screenshot Artifacts**:
+   - In Part 1 Q3, the uploaded image contained a screenshot of the entire problem (including question number, question text, and table), which was then duplicated by the typed text below.
+   - In Part 1 Q4, the diagram image contained an embedded `"4."` at the far left and empty margins on the right.
+3. **Browser HTTP Caching**:
+   - Static asset updates to GitHub Pages without bumped query tags (`?v=...`) caused client browsers to reuse stale, cached images from disk.
+
+---
+
+### B. High-Fidelity Recomposition Pipeline
+
+To resolve these issues without distorting text or choices, a specialized compositing engine was implemented in `scripts/ingest_midterm_reviews.py`:
+
+```mermaid
+flowchart TD
+    PDF["Original PDF Page (scale=2.0)"] --> BaseCrop["Extract Base Card<br/>(Question #, Prompt & Choices)"]
+    PDF --> NativeObj["Extract Native Image Stream<br/>(FPDF_PAGEOBJ_IMAGE, r - l > 150 pt)"]
+    NativeObj --> BBoxCrop["Precise Diagram Bounding Crop<br/>(Strip '4.', Screenshot Text, Whitespace)"]
+    BBoxCrop --> Lanczos["Lanczos Resample to Target Width<br/>(650 px - 850 px)"]
+    BaseCrop --> Header["Extract Q# Header (py: 0..45)"]
+    BaseCrop --> Body["Extract Prompt Text & Choices<br/>(py: text_split_y..height)"]
+    Header --> Canvas["New Hi-Res Composite Canvas<br/>(Width: 1136 px, Height: Header + Img + Body + Padding)"]
+    Lanczos --> Canvas
+    Body --> Canvas
+    Canvas --> Export["Export Optimized PNG<br/>(assets/cards/*_q*.png)"]
+```
+
+1. **Native Image Extraction**:
+   - Isolates the uncompressed native bitmap from the PDF page object (`FPDF_PAGEOBJ_IMAGE`) with filter `(r - l > 150) and (l < 100)` to distinguish stem diagrams from choice option images and header logos.
+2. **Clean Bounding Box Cropping**:
+   - **Part 1 Q1**: `(7, 7, 681, 191)` — Incline block diagram cleanly cropped without outer borders.
+   - **Part 1 Q3**: `(488, 40, 1245, 398)` — Isolates the high-resolution collision data table from the screenshot, removing duplicate text and footers.
+   - **Part 1 Q4**: `(200, 0, 1240, 350)` — Crops the ramp with vectors and $+x, +y$ axes, eliminating the embedded `"4."` label.
+   - **Part 1 Q6**: `(48, 32, 1021, 325)` — Crops the 3-block pushing force diagram cleanly.
+   - **Part 1 Q7**: `(58, 18, 752, 268)` — Crops the three position-time graphs side by side.
+   - **Part 1 Q9**: `(8, 11, 790, 314)` — Crops the frictionless incline diagram from X to Y.
+   - **Part 2 Q2**: `(17, 47, 1049, 229)` — Crops all three cases (hill, dip, vertical loop) side by side.
+   - **Part 2 Q6**: `(5, 26, 590, 227)` — Crops the horizontal circular motion string diagram.
+   - **Part 2 Q10**: `(34, 11, 735, 355)` — Crops the track with circular loop and positions A, B, C.
+3. **Lanczos Upscaling & Centering**:
+   - Scales the clean diagrams to widths between $650\text{ px}$ and $850\text{ px}$ (preserving aspect ratio with `Image.Resampling.LANCZOS`).
+   - Centers each diagram horizontally on the $1136\text{ px}$ card canvas.
+4. **Seamless Body Splicing**:
+   - Slices the base card at `text_split_y` (leaving an 18–26 px gap above the first line of question prompt text).
+   - Pastes the full prompt text and choices A, B, C, D (and E) directly below the diagram with consistent vertical rhythm.
+
+---
+
+### C. Enhanced Questions Audit & Verification Table
+
+| Exam | Question | Topic / Diagram | Native Size | Target Width | Final Card Size | Status | Correct Answer |
+|:---|:---:|:---|:---:|:---:|:---:|:---:|:---:|
+| **Part 1** | **Q1** | Block on rough incline ($m$, static friction) | $683 \times 197$ | $650\text{ px}$ | $1136 \times 674$ | **ENHANCED** | **B, C** (Multi-select) |
+| **Part 1** | **Q2** | Vehicle landing on Mars (weight on Mars) | Text-only | — | $1136 \times 371$ | Validated | **B, C** (Multi-select) |
+| **Part 1** | **Q3** | Cart collision momentum/impulse table | $1518 \times 692$ | $750\text{ px}$ | $1136 \times 720$ | **ENHANCED** | **B** ($F_2 = 30\text{ N}, a_2 = 30\text{ m/s}^2$) |
+| **Part 1** | **Q4** | Box sliding up ramp ($+x, +y$ axes, friction $f$) | $1518 \times 374$ | $750\text{ px}$ | $1136 \times 632$ | **ENHANCED** | **D** ($-f - mg\sin\theta = ma$) |
+| **Part 1** | **Q5** | Distant planet cliff drop & projectile | Text-only | — | $1136 \times 352$ | Validated | **A** ($1.2\text{ s}$) |
+| **Part 1** | **Q6** | Three blocks pushed along rough surface | $1058 \times 358$ | $750\text{ px}$ | $1136 \times 957$ | **ENHANCED** | **D** (FBD for Block 3) |
+| **Part 1** | **Q7** | Three position-time graphs (I, II, III) | $803 \times 302$ | $750\text{ px}$ | $1136 \times 663$ | **ENHANCED** | **D** (I and III only) |
+| **Part 1** | **Q8** | Block on inclined plane constant velocity | Text-only | — | $1136 \times 268$ | Validated | **B, D** (Multi-select) |
+| **Part 1** | **Q9** | Frictionless incline drop from X to Y ($10\text{ m}$) | $794 \times 321$ | $700\text{ px}$ | $1136 \times 677$ | **ENHANCED** | **D** ($5.0\text{ N}$) |
+| **Part 1** | **Q10** | Spring on inclined plane oscillation | $426 \times 411$ | Native | $1136 \times 892$ | Validated | **A** ($mg\sin\theta / d$) |
+| **Part 2** | **Q1** | Artificial satellite orbiting Earth ($7800\text{ m/s}$) | Text-only | — | $1136 \times 316$ | Validated | **B** ($< 39\text{ m/s}^2$ but $> 9.8$) |
+| **Part 2** | **Q2** | Carts on Hill (1), Dip (2), Loop (3) | $1066 \times 258$ | $850\text{ px}$ | $1136 \times 543$ | **ENHANCED** | **C** ($F_n > F_g$: Case 2; $F_n < F_g$: Case 1) |
+| **Part 2** | **Q3** | Two solid steel spheres ($R$ and $3R$) | $326 \times 196$ | Native | $1136 \times 604$ | Validated | **C** ($81 F_1$) |
+| **Part 2** | **Q4** | Rocket payload gravity with altitude | Text-only | — | $1136 \times 358$ | Validated | **D** ($2R$) |
+| **Part 2** | **Q5** | Steel ball on stick rotating in circle | $510 \times 532$ | Native | $1136 \times 1123$ | Validated | **D** (Vector D) |
+| **Part 2** | **Q6** | Block on string with slowly increasing radius | $602 \times 250$ | $650\text{ px}$ | $1136 \times 1067$ | **ENHANCED** | **A** (Hyperbolic decrease $F \propto 1/r$) |
+| **Part 2** | **Q7** | Roller coaster vertical loop ($m=100\text{ kg}$) | Text-only | — | $1136 \times 302$ | Validated | **A** ($220\text{ N}$) |
+| **Part 2** | **Q8** | Car on unbanked circular curve ($m, 2v$ vs $2m, v$) | Text-only | — | $1136 \times 393$ | Validated | **C** ($F/2$) |
+| **Part 2** | **Q9** | Planet orbiting star (Keplerian properties) | Text-only | — | $1136 \times 403$ | Validated | **E** (I, II, and III) |
+| **Part 2** | **Q10** | Track with vertical loop and positions A, B, C | $756 \times 385$ | $700\text{ px}$ | $1136 \times 792$ | **ENHANCED** | **C** (Downward and toward left) |
+
+---
+
+### D. Synchronized Cache-Busting Version Bump
+To guarantee that end-users see the upgraded, enhanced cards immediately without requiring manual browser cache clearing:
+1. All card image paths in `data/exams.json` and `data/exams_bundle.js` were updated with cache-busting tag `?v=20261029_v3`.
+2. Both `index.html` and `teacher.html` were updated to load `data/exams_bundle.js?v=20261029_v3`.
+
+---
+
+### E. Multi-IDE Replication Checklist
+1. **Detecting Compressed Column Diagrams**: Inspect PDF image objects (`FPDF_PAGEOBJ_IMAGE`). If image bounding width is constrained to $< 200\text{ pt}$ while native resolution is $\ge 600\text{ px}$, extract the native image and recomposite the card rather than accepting the squeezed layout.
+2. **Crop Sub-Regions to Remove Duplicate Text**: In assessments where authors paste an entire problem screenshot as an image, identify the bounding box of just the visual diagram or table and crop out redundant text.
+3. **Safe Split Point Calculation**: Find the top coordinate of the first text line after the diagram, and set `text_split_y` approximately $20\text{ px}$ above it to ensure zero character clipping and clean whitespace.
+4. **Cache Invalidation Discipline**: Whenever image cards are re-rendered, always bump the asset query tag in `exams.json`, `exams_bundle.js`, and HTML script imports.
