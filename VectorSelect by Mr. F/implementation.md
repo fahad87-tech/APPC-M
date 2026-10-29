@@ -1514,3 +1514,55 @@ Total questions: **18** | Worksheet Time: **25 mins** | Database ID: `appc_unit1
 ### D. Synchronized Deployment & Cache Invalidation
 1. **Cache Version**: Bumped all asset queries to `?v=20261029_v4` in `exams.json`, `exams_bundle.js`, `index.html`, and `teacher.html`.
 2. **Re-generation**: Executed `scripts/ingest_midterm_reviews.py` regenerating all 64 question cards across all 5 midterm reviews with unified styling and optimal reading widths.
+
+---
+
+## 20. Surgical Rectification of Mid-Term Review Question Cards (Crops, Redundant Text & Box Borders)
+
+### A. Root Cause Diagnostics
+A microscopic pixel and layout audit across all 5 Mid-Term Review worksheets revealed four distinct failure modes that led to "weirdly cropped" questions and "useless text in questions":
+
+1. **Embedded Raster Screenshots with Redundant Text (Part 1 Q3)**:
+   - In `Free Printable APP1 Unit 2 REview.pdf` Q3, the original quiz author uploaded a composite screenshot (`1518 x 692`) that included the data table, two lines of typed question text, and a Wayground UI footer.
+   - The previous bounding box `(488, 40, 1245, 398)` cut through the top header row ("Cart 1", "Cart 2") at `y=40` and sliced into the screenshot text at `y=340..398`, producing duplicate, half-chopped text followed by the full typed question prompt below.
+   - **Resolution**: Strict coordinate containment isolating ONLY the table (`bbox = (488, 28, 1245, 286)`), eliminating all screenshot text and preserving all four table rows and headers.
+
+2. **Foreign Remnants in Diagram Bounding Boxes (Part 1 Q4)**:
+   - In Part 1 Q4, the author's uploaded image contained the bottom blue line of the Q3 table at `y=0..30` and a question number "4." at `x=19..41`.
+   - The previous bbox `(200, 0, 1240, 350)` captured this floating blue table line above the ramp and clipped the top of the `+y` arrow label.
+   - **Resolution**: Shifted crop to `bbox = (480, 90, 1240, 350)`, cleanly capturing the entire `+y` and `+x` axes, the block $m$, and angle $\theta$ while excluding all table remnants.
+
+3. **Upper-Left Box Hook Artifact (`Q. ┌`)**:
+   - In all recomposed cards, `num_crop = base_card.crop((0, 0, 120, 45))` was used to retain the question number.
+   - In Quizizz worksheets, question numbers end at $x \le 97\text{ px}$, while the gray image container box begins at $x \ge 109\text{ px}$. A crop width of $120\text{ px}$ captured the upper-left corner of the container box, resulting in a stray hook next to every question number (e.g. `1. ┌`, `6. ┌`).
+   - **Resolution**: Constrained `num_crop` strictly to `(0, 0, 102, 45)`, mathematically guaranteeing complete number retention with zero container border pixels.
+
+4. **Quizizz Duplicate Choice Text (Part 2 Q6 & APPC Unit 1 Q1)**:
+   - In Part 2 Q6, Quizizz printed the choice labels and option texts redundantly at the bottom of the card (`Force decreases linearly with radius` and `Force decreases nonlinearly...` each printed twice).
+   - In APPC Unit 1 Q1, Quizizz printed the choice d description paragraph twice, and the native diagram had a thick black header line at $y=1$.
+   - **Resolution**:
+     - Part 2 Q6: Masked duplicate left lines at `y >= 805, x < 550` and cleanly trimmed the card at `y = 838`.
+     - APPC Unit 1 Q1: Cropped native image at `y = 20` (`bbox = (0, 20, 1428, 668)`) to remove the black bar, and truncated choice d text at `y = 515` to preserve exactly one copy of the text.
+
+---
+
+### B. Summary of Bounding Box & Split Adjustments
+
+| Assessment | Question | Diagram Bounding Box | Text Split $y$ | Crop / Mask Action | Result |
+|:---|:---:|:---:|:---:|:---|:---|
+| **APP1 Unit 2 Part 1** | **Q1** | `(7, 7, 681, 191)` | `y = 158` | `num_crop` width $102\text{ px}$ | Clean ramp, no hook |
+| **APP1 Unit 2 Part 1** | **Q3** | `(488, 28, 1245, 286)` | `y = 220` | Table only; zero duplicate text | Full header row + pristine table |
+| **APP1 Unit 2 Part 1** | **Q4** | `(480, 90, 1240, 350)` | `y = 150` | Cleared blue line; full $+y$ axis | Clean ramp diagram with axes |
+| **APP1 Unit 2 Part 1** | **Q6** | `(48, 32, 1021, 325)` | `y = 178` | Cleared gray box cut line | Pristine blocks diagram + FBD choices |
+| **APP1 Unit 2 Part 1** | **Q7** | `(58, 18, 752, 268)` | `y = 193` | `num_crop` width $102\text{ px}$ | Graphs I, II, III clean |
+| **APP1 Unit 2 Part 1** | **Q9** | `(8, 11, 790, 314)` | `y = 203` | `num_crop` width $102\text{ px}$ | Pristine ramp diagram |
+| **APP1 Unit 2 Part 2** | **Q2** | `(17, 47, 1049, 229)` | `y = 142` | `num_crop` width $102\text{ px}$ | Cases 1, 2, 3 clean |
+| **APP1 Unit 2 Part 2** | **Q6** | Native page layout | — | Mask duplicate lines; trim to $y=838$ | Exactly one description per choice |
+| **APP1 Unit 2 Part 2** | **Q10** | `(34, 11, 735, 355)` | `y = 239` | `num_crop` width $102\text{ px}$ | Incline loop track clean |
+| **APPC Unit 1** | **Q1** | `(0, 20, 1428, 668)` | `y = 220` | Cleared top bar; trimmed choice d at $y=515$ | Single copy of choice d paragraph |
+
+---
+
+### C. Cache Invalidation & Verification
+- **Cache Key**: Bumped to `?v=20261029_v5` across `exams.json`, `exams_bundle.js`, `index.html`, and `teacher.html`.
+- **Verification**: All 20 questions in APP1 Unit 2 (Part 1 and Part 2) and all enhanced cards across APPC were individually visually validated via direct image rendering. Zero border hooks, zero duplicate text blocks, and zero missing diagram elements remain.

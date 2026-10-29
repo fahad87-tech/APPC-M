@@ -86,47 +86,42 @@ ENHANCEMENTS = {
     ("app1_unit2_midterm_review_1", 1): {
         "bbox": (7, 7, 681, 191),
         "target_w": 650,
-        "text_split_y": 145,
+        "text_split_y": 158,
     },
     ("app1_unit2_midterm_review_1", 3): {
-        "bbox": (488, 40, 1245, 398),
+        "bbox": (488, 28, 1245, 286),
         "target_w": 750,
-        "text_split_y": 210,
+        "text_split_y": 220,
     },
     ("app1_unit2_midterm_review_1", 4): {
-        "bbox": (200, 0, 1240, 350),
+        "bbox": (480, 90, 1240, 350),
         "target_w": 750,
-        "text_split_y": 135,
+        "text_split_y": 150,
     },
     ("app1_unit2_midterm_review_1", 6): {
         "bbox": (48, 32, 1021, 325),
         "target_w": 750,
-        "text_split_y": 165,
+        "text_split_y": 178,
     },
     ("app1_unit2_midterm_review_1", 7): {
         "bbox": (58, 18, 752, 268),
         "target_w": 750,
-        "text_split_y": 180,
+        "text_split_y": 193,
     },
     ("app1_unit2_midterm_review_1", 9): {
         "bbox": (8, 11, 790, 314),
         "target_w": 700,
-        "text_split_y": 190,
+        "text_split_y": 203,
     },
     ("app1_unit2_midterm_review_2", 2): {
         "bbox": (17, 47, 1049, 229),
         "target_w": 850,
-        "text_split_y": 135,
-    },
-    ("app1_unit2_midterm_review_2", 6): {
-        "bbox": (5, 26, 590, 227),
-        "target_w": 650,
-        "text_split_y": 190,
+        "text_split_y": 142,
     },
     ("app1_unit2_midterm_review_2", 10): {
         "bbox": (34, 11, 735, 355),
         "target_w": 700,
-        "text_split_y": 230,
+        "text_split_y": 239,
     },
     ("app1_unit1_midterm_review", 1): {
         "bbox": (12, 10, 873, 470),
@@ -154,7 +149,7 @@ ENHANCEMENTS = {
         "text_split_y": 210,
     },
     ("appc_unit1_midterm_review", 1): {
-        "bbox": (0, 1, 1428, 668),
+        "bbox": (0, 20, 1428, 668),
         "target_w": 750,
         "text_split_y": 220,
     },
@@ -288,7 +283,7 @@ def process_review_pdf(review_info):
             # Ensure valid box
             if y1 > y0 + 10:
                 card_filename = f"{slug}_q{qnum}.png"
-                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v4"
+                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v5"
                 card_abs_path = os.path.join(CARDS_DIR, card_filename)
 
                 # Special enhancement for Q13 in APPC Unit 2 Midterm Review (tiny embedded image stem)
@@ -307,15 +302,23 @@ def process_review_pdf(review_info):
                         scaled_prompt = native_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
                         new_card_h = base_q13.height + (target_h - 28) + 15
                         enhanced_card = Image.new("RGB", (base_q13.width, new_card_h), (255, 255, 255))
-                        num_crop = base_q13.crop((0, 0, 120, 60))
+                        num_crop = base_q13.crop((0, 0, 102, 60))
                         enhanced_card.paste(num_crop, (0, 0))
-                        enhanced_card.paste(scaled_prompt, (120, 16))
+                        enhanced_card.paste(scaled_prompt, (110, 16))
                         choices_crop = base_q13.crop((0, int(45 * scale), base_q13.width, base_q13.height))
                         enhanced_card.paste(choices_crop, (0, 16 + target_h + 15))
                         enhanced_card.save(card_abs_path, optimize=True)
                     else:
                         cropped = page_img.crop((x0, y0, x1, y1))
                         cropped.save(card_abs_path, optimize=True)
+                elif slug == "app1_unit2_midterm_review_2" and qnum == 6:
+                    # Clean mask for duplicate bottom choices text in Q6
+                    from PIL import ImageDraw
+                    base_card = page_img.crop((x0, y0, x1, y1))
+                    draw = ImageDraw.Draw(base_card)
+                    draw.rectangle([0, 805, 550, base_card.height], fill=(255, 255, 255))
+                    clean_card = base_card.crop((0, 0, base_card.width, 838))
+                    clean_card.save(card_abs_path, optimize=True)
                 elif (slug, qnum) in ENHANCEMENTS:
                     cfg = ENHANCEMENTS[(slug, qnum)]
                     base_card = page_img.crop((x0, y0, x1, y1))
@@ -336,7 +339,10 @@ def process_review_pdf(review_info):
                         scaled_diag = diag_crop.resize((target_w, target_h), Image.Resampling.LANCZOS)
                         
                         text_and_choices = base_card.crop((0, cfg["text_split_y"], base_card.width, base_card.height))
-                        num_crop = base_card.crop((0, 0, 120, 45))
+                        if slug == "appc_unit1_midterm_review" and qnum == 1:
+                            text_and_choices = text_and_choices.crop((0, 0, text_and_choices.width, 515))
+
+                        num_crop = base_card.crop((0, 0, 102, 45))
                         
                         pad = 16
                         new_h = 45 + pad + target_h + pad + text_and_choices.height
