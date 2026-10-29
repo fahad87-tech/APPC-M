@@ -1566,3 +1566,51 @@ A microscopic pixel and layout audit across all 5 Mid-Term Review worksheets rev
 ### C. Cache Invalidation & Verification
 - **Cache Key**: Bumped to `?v=20261029_v5` across `exams.json`, `exams_bundle.js`, `index.html`, and `teacher.html`.
 - **Verification**: All 20 questions in APP1 Unit 2 (Part 1 and Part 2) and all enhanced cards across APPC were individually visually validated via direct image rendering. Zero border hooks, zero duplicate text blocks, and zero missing diagram elements remain.
+
+---
+
+## 21. Recomposition of Remaining Cropped Review Question Cards (Part 1 Q10, Part 2 Q3, Part 2 Q5) & Cache Invalidation to v6
+
+### A. Root Cause Analysis
+1. **Part 1 Q10 (Spring on Incline Label Clipping)**:
+   - In Quizizz review worksheets, Question 10 (*"An object of mass $m$ is attached to a spring on a frictionless inclined plane..."*) was laid out in Quizizz's default 2-column container.
+   - The native spring diagram (`px_size = (426, 411)`) embeds the critical physics label `"Unstretched Position of the Spring"` at `y=12..72`, with an arrow pointing down from the label to the spring at `y=80..145`.
+   - In Quizizz's unenhanced page crop, the top border of the gray box was placed right at `y=14`, cutting directly through the arrow and clipping the label `"Unstretched Position of the Spring"`.
+   - **Resolution**:
+     - Added `("app1_unit2_midterm_review_1", 10)` to `ENHANCEMENTS` in `scripts/ingest_midterm_reviews.py`.
+     - Extracted native high-resolution image object with `bbox = (8, 8, 424, 408)`.
+     - Recomposed card: scaled diagram to `target_w = 520` (height 502 px), centered horizontally on the 1136 px canvas.
+     - Split text cleanly at `text_split_y = 415`, retaining `"10."` via `num_crop = base_card.crop((0, 0, 102, 45))` and placing the full question prompt and choices `a` through `e` below the centered diagram.
+     - Result: `"Unstretched Position of the Spring"` is 100% visible, centered, and razor-sharp.
+
+2. **Part 2 Q3 (Solid Spheres in Contact)**:
+   - In Part 2 Q3 (*"Two solid spheres of radius made of the same type of steel are placed in contact..."*), the native diagram (`px_size = (326, 196)`) was previously rendered in a tiny 200 pt Quizizz side box.
+   - **Resolution**:
+     - Added `("app1_unit2_midterm_review_2", 3)` to `ENHANCEMENTS`.
+     - `bbox = (12, 12, 320, 175)`, `target_w = 600`, `text_split_y = 280`.
+     - Scaled and centered the spheres diagram, placing the prompt and choices neatly below.
+
+3. **Part 2 Q5 (Rotating Ball on Stick)**:
+   - In Part 2 Q5 (*"A steel ball supported by a stick rotates in a circle of radius r..."*), the native diagram (`px_size = (510, 532)`) was in a cramped side box.
+   - **Resolution**:
+     - Added `("app1_unit2_midterm_review_2", 5)` to `ENHANCEMENTS`.
+     - `bbox = (20, 10, 490, 520)`, `target_w = 420`, `text_split_y = 445`.
+     - Centered the circular motion diagram cleanly above the question stem and the 5 direction arrows.
+
+---
+
+### B. Summary of Bounding Box & Recomposition Settings
+
+| Assessment | Question | Diagram Bounding Box | Target Width | Text Split $y$ | Crop / Layout Action | Verification Result |
+|:---|:---:|:---:|:---:|:---:|:---|:---|
+| **APP1 Unit 2 Part 1** | **Q10** | `(8, 8, 424, 408)` | `520 px` | `y = 415` | Native spring extraction + center | Full `"Unstretched Position of the Spring"` label restored |
+| **APP1 Unit 2 Part 2** | **Q3** | `(12, 12, 320, 175)` | `600 px` | `y = 280` | Native spheres extraction + center | Clean spheres diagram, zero container clipping |
+| **APP1 Unit 2 Part 2** | **Q5** | `(20, 10, 490, 520)` | `420 px` | `y = 445` | Native stick extraction + center | Clean rotating ball diagram + 5 direction choices |
+
+---
+
+### C. Cache Invalidation & Deployment
+- **Cache Key**: Bumped to `?v=20261029_v6` across `exams.json`, `exams_bundle.js`, `index.html`, and `teacher.html`.
+- **Database & Bundle**: Re-ingested all review exams via `python scripts/ingest_midterm_reviews.py`.
+- **Git Push**: Committed and pushed to GitHub `origin main`.
+- **Supabase Integrity**: Authoritative answer keys in `data/answer_keys.js` (`window.OFFLINE_ANSWER_KEYS`) and runtime tables remained intact.

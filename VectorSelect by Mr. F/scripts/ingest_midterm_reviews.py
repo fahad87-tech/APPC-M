@@ -113,10 +113,25 @@ ENHANCEMENTS = {
         "target_w": 700,
         "text_split_y": 203,
     },
+    ("app1_unit2_midterm_review_1", 10): {
+        "bbox": (8, 8, 424, 408),
+        "target_w": 520,
+        "text_split_y": 415,
+    },
     ("app1_unit2_midterm_review_2", 2): {
         "bbox": (17, 47, 1049, 229),
         "target_w": 850,
         "text_split_y": 142,
+    },
+    ("app1_unit2_midterm_review_2", 3): {
+        "bbox": (12, 12, 320, 175),
+        "target_w": 600,
+        "text_split_y": 280,
+    },
+    ("app1_unit2_midterm_review_2", 5): {
+        "bbox": (20, 10, 490, 520),
+        "target_w": 420,
+        "text_split_y": 445,
     },
     ("app1_unit2_midterm_review_2", 10): {
         "bbox": (34, 11, 735, 355),
@@ -283,7 +298,7 @@ def process_review_pdf(review_info):
             # Ensure valid box
             if y1 > y0 + 10:
                 card_filename = f"{slug}_q{qnum}.png"
-                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v5"
+                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v6"
                 card_abs_path = os.path.join(CARDS_DIR, card_filename)
 
                 # Special enhancement for Q13 in APPC Unit 2 Midterm Review (tiny embedded image stem)
