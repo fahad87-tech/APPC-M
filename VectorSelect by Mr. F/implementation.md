@@ -1778,3 +1778,34 @@ flowchart TD
 - **Concurrent Load Capacity**: 30–50 concurrent classroom students can enter simultaneously with zero rate limiting or connection dropouts.
 - **Join Robustness**: Students typing with spaces, hyphens, or lowercase letters are seamlessly normalized.
 - **Fail-Safe UI**: Button displays a loading spinner with *"Connecting to Classroom..."* and disables duplicate submissions during connection handshakes.
+
+---
+
+## 25. Midterm Review PDFs & Master Answer Key Guide Export
+
+### A. Purpose & Location
+To provide Mr. F with classroom-ready printed materials and instant grading references, all 5 official Midterm Review worksheets for AP Physics 1 and AP Physics C: Mechanics were exported to:
+`C:\Users\fahad\Desktop\MT REVIEWs`
+
+### B. Exported Materials & Contents
+
+1. **Individual Assessment PDFs (Full Question Sheets + End-of-Quiz Answer Keys)**:
+   - `APP1 Unit 1 Midterm Review (with Answers).pdf` (7 pages • 11 Questions • Kinematics)
+   - `APP1 Unit 2 Midterm Review - Part 1 (with Answers).pdf` (7 pages • 10 Questions • Newton's Laws & Friction)
+   - `APP1 Unit 2 Midterm Review - Part 2 (with Answers).pdf` (7 pages • 10 Questions • Circular Motion & Gravitation)
+   - `APPC Unit 1 Midterm Review (with Answers).pdf` (12 pages • 18 Questions • Calculus-based Kinematics)
+   - `APPC Unit 2 Midterm Review (with Answers).pdf` (10 pages • 15 Questions • Newton's Laws, Drag & Circular Motion)
+
+2. **Master Teacher Solution & Grading Guide**:
+   - `Midterm Reviews - Complete Answer Key Guide (APP1 & APPC).pdf` (3 pages • 64 Total Questions)
+   - Formatted using ReportLab with clean tabular layout, bold question labels, prominent letter answers (including multi-select indicators), and physical rationales/formulas.
+
+### C. Master Quick-Reference Summary
+
+| Assessment | Questions | Answer Keys |
+| :--- | :---: | :--- |
+| **APP1 Unit 1 Review** | 11 | Q1: C, Q2: E, Q3: A, Q4: B, Q5: B, Q6: D, Q7: D, Q8: A, Q9: E, Q10: C, Q11: C |
+| **APP1 Unit 2 Part 1** | 10 | Q1: A,D (Multi), Q2: B,D (Multi), Q3: C, Q4: D, Q5: B, Q6: C, Q7: C, Q8: B,D (Multi), Q9: E, Q10: E |
+| **APP1 Unit 2 Part 2** | 10 | Q1: D, Q2: B, Q3: D, Q4: B, Q5: E, Q6: D, Q7: A, Q8: D, Q9: E, Q10: E |
+| **APPC Unit 1 Review** | 18 | Q1: C, Q2: B, Q3: C, Q4: D, Q5: A, Q6: D, Q7: D, Q8: D, Q9: E, Q10: C, Q11: B, Q12: D, Q13: B, Q14: A, Q15: C, Q16: C, Q17: A, Q18: E |
+| **APPC Unit 2 Review** | 15 | Q1: A, Q2: A, Q3: B, Q4: D, Q5: D, Q6: B, Q7: D, Q8: B, Q9: D, Q10: A, Q11: A, Q12: B, Q13: B, Q14: A, Q15: B |
