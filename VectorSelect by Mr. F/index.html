@@ -577,8 +577,8 @@
 
           <!-- Question Card Visual Display (High Resolution & Full Width Area) -->
           <div id="q-card-container" class="hidden bg-slate-950/80 border border-slate-800 rounded-3xl p-3 sm:p-4 md:p-5 text-center shadow-inner relative">
-            <div id="q-card-white-box" class="bg-white rounded-2xl p-2 sm:p-4 shadow-xl inline-block w-full overflow-hidden transition-all duration-300 relative">
-              <img id="q-card-img" src="" alt="AP Physics Question Card" class="mx-auto max-h-[92vh] w-full object-contain cursor-zoom-in transition-transform duration-200 hover:scale-[1.01]" onclick="onQuestionCardClick(event)" title="Click to zoom question card (125%+ vector inspector)">
+            <div id="q-card-white-box" class="bg-white rounded-2xl p-2 sm:p-4 shadow-xl inline-block w-full overflow-visible transition-all duration-300 relative">
+              <img id="q-card-img" src="" alt="AP Physics Question Card" class="mx-auto w-full h-auto cursor-zoom-in transition-transform duration-200 hover:scale-[1.005]" onclick="onQuestionCardClick(event)" title="Click to zoom question card (125%+ vector inspector)">
               <canvas id="q-card-canvas" class="absolute inset-0 pointer-events-none z-10 w-full h-full touch-none"></canvas>
 
               <!-- Floating Canvas Annotation Badge Tool (Top-Right of Question Card) -->
@@ -5100,8 +5100,10 @@
 
       if (scale === 1.0) {
         img.style.transform = "scale(1)";
-        img.style.maxHeight = "92vh";
-        if (whiteBox) whiteBox.style.overflow = "hidden";
+        img.style.maxHeight = "none";
+        img.style.width = "100%";
+        img.style.height = "auto";
+        if (whiteBox) whiteBox.style.overflow = "visible";
       } else {
         img.style.transform = `scale(${scale})`;
         img.style.transformOrigin = "top center";

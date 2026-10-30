@@ -26,6 +26,8 @@ BUNDLE_PATH = os.path.join(DATA_DIR, "exams_bundle.js")
 
 os.makedirs(CARDS_DIR, exist_ok=True)
 
+CACHE_VERSION = "20261030_v1"
+
 def assessment_sort_key(a):
     title = a.get("title", "")
     m = re.match(r'^(\d+)\.(\d+)', title)
@@ -82,125 +84,12 @@ REVIEWS = [
     }
 ]
 
-ENHANCEMENTS = {
-    ("app1_unit2_midterm_review_1", 1): {
-        "bbox": (7, 7, 681, 191),
-        "target_w": 650,
-        "text_split_y": 158,
-    },
-    ("app1_unit2_midterm_review_1", 3): {
-        "bbox": (488, 28, 1245, 286),
-        "target_w": 750,
-        "text_split_y": 220,
-    },
-    ("app1_unit2_midterm_review_1", 4): {
-        "bbox": (480, 90, 1240, 350),
-        "target_w": 750,
-        "text_split_y": 150,
-    },
-    ("app1_unit2_midterm_review_1", 6): {
-        "bbox": (48, 32, 1021, 325),
-        "target_w": 750,
-        "text_split_y": 178,
-    },
-    ("app1_unit2_midterm_review_1", 7): {
-        "bbox": (58, 18, 752, 268),
-        "target_w": 750,
-        "text_split_y": 193,
-    },
-    ("app1_unit2_midterm_review_1", 9): {
-        "bbox": (8, 11, 790, 314),
-        "target_w": 700,
-        "text_split_y": 203,
-    },
-    ("app1_unit2_midterm_review_1", 10): {
-        "bbox": (8, 8, 424, 408),
-        "target_w": 520,
-        "text_split_y": 415,
-    },
-    ("app1_unit2_midterm_review_2", 2): {
-        "bbox": (17, 47, 1049, 229),
-        "target_w": 850,
-        "text_split_y": 142,
-    },
-    ("app1_unit2_midterm_review_2", 3): {
-        "bbox": (12, 12, 320, 175),
-        "target_w": 600,
-        "text_split_y": 280,
-    },
-    ("app1_unit2_midterm_review_2", 5): {
-        "bbox": (20, 10, 490, 520),
-        "target_w": 420,
-        "text_split_y": 445,
-    },
-    ("app1_unit2_midterm_review_2", 10): {
-        "bbox": (34, 11, 735, 355),
-        "target_w": 700,
-        "text_split_y": 239,
-    },
-    ("app1_unit1_midterm_review", 1): {
-        "bbox": (12, 10, 873, 470),
-        "target_w": 700,
-        "text_split_y": 240,
-    },
-    ("app1_unit1_midterm_review", 3): {
-        "bbox": (4, 13, 922, 125),
-        "target_w": 850,
-        "text_split_y": 96,
-    },
-    ("app1_unit1_midterm_review", 6): {
-        "bbox": (18, 5, 976, 476),
-        "target_w": 700,
-        "text_split_y": 225,
-    },
-    ("app1_unit1_midterm_review", 8): {
-        "bbox": (1, 25, 986, 479),
-        "target_w": 700,
-        "text_split_y": 225,
-    },
-    ("app1_unit1_midterm_review", 11): {
-        "bbox": (3, 24, 611, 275),
-        "target_w": 650,
-        "text_split_y": 210,
-    },
-    ("appc_unit1_midterm_review", 1): {
-        "bbox": (0, 20, 1428, 668),
-        "target_w": 750,
-        "text_split_y": 220,
-    },
-    ("appc_unit1_midterm_review", 3): {
-        "bbox": (217, 32, 1289, 165),
-        "target_w": 850,
-        "text_split_y": 86,
-    },
-    ("appc_unit1_midterm_review", 6): {
-        "bbox": (88, 4, 559, 71),
-        "target_w": 700,
-        "text_split_y": 90,
-    },
-    ("appc_unit1_midterm_review", 11): {
-        "bbox": (52, 12, 1123, 454),
-        "target_w": 750,
-        "text_split_y": 191,
-    },
-    ("appc_unit1_midterm_review", 13): {
-        "bbox": (22, 10, 1092, 615),
-        "target_w": 700,
-        "text_split_y": 246,
-    },
-    ("appc_unit1_midterm_review", 18): {
-        "bbox": (59, 19, 1131, 221),
-        "target_w": 800,
-        "text_split_y": 116,
-    },
-}
-
 def parse_answer_keys(doc):
     ak_text = ""
     # Look in the last 3 pages
     for i in range(max(0, len(doc) - 3), len(doc)):
         txt = doc[i].get_textpage().get_text_range()
-        if "Answer Key" in txt:
+        if "Answer Key" in txt or "Answer Keys" in txt:
             ak_text += txt
             
     answers = {}
@@ -228,21 +117,20 @@ def process_review_pdf(review_info):
     doc = pdfium.PdfDocument(pdf_path)
     ans_keys = parse_answer_keys(doc)
     scale = 2.0
-    
-    # Map questions per page (ignoring last 2 pages: Answer Keys & URL footer)
-    content_pages = len(doc) - 2
-    # Ensure answer keys page is excluded
-    while content_pages > 0 and "Answer Key" in doc[content_pages - 1].get_textpage().get_text_range():
-        content_pages -= 1
-        
     questions = []
     
-    for p_idx in range(content_pages):
+    for p_idx in range(len(doc)):
         page = doc[p_idx]
-        w, h = page.get_size()
+        h = page.get_height()
+        w = page.get_width()
         tp = page.get_textpage()
         text = tp.get_text_range()
         
+        # Stop content extraction when reaching the Answer Key pages!
+        if "Answer Key" in text or "Answer Keys" in text:
+            print(f"  Reached Answer Key on page {p_idx + 1}. Halting content extraction.")
+            break
+            
         # Render high-res image of page
         bitmap = page.render(scale=scale)
         page_img = bitmap.to_pil()
@@ -251,43 +139,52 @@ def process_review_pdf(review_info):
         q_matches = []
         for m in re.finditer(r'(?:^|\n)\s*([1-9]\d?)\.\s*(?!\d)', text):
             qnum = int(m.group(1))
-            char_idx = m.start(1)
-            box = tp.get_charbox(char_idx)
+            digit_idx = text.find(f"{qnum}.", m.start(0))
+            box = tp.get_charbox(digit_idx)
             top_y = h - box[3]
-            q_matches.append((qnum, char_idx, top_y))
+            q_matches.append((qnum, digit_idx, top_y))
             
         if not q_matches:
             continue
             
-        for i, (qnum, char_idx, top_y) in enumerate(q_matches):
+        for i, (qnum, digit_idx, top_y) in enumerate(q_matches):
             crop_top = max(10.0, top_y - 12.0)
+            
+            # Check for diagrams/paths that start above the question digit
+            for obj in page.get_objects():
+                if obj.type in [pdfium.raw.FPDF_PAGEOBJ_IMAGE, pdfium.raw.FPDF_PAGEOBJ_PATH]:
+                    l, b, r, t = obj.get_bounds()
+                    obj_top = h - t
+                    obj_bot = h - b
+                    if obj_top >= crop_top - 15.0 and obj_bot <= top_y + 250.0:
+                        if obj_top < crop_top:
+                            crop_top = max(10.0, obj_top - 6.0)
             
             if i + 1 < len(q_matches):
                 # Another question follows on the same page
                 next_top = q_matches[i + 1][2]
                 crop_bottom = next_top - 10.0
             else:
-                # Last question on this page: find bottom of all text characters & images above footer
-                max_y = crop_top + 50.0
-                for c in range(len(text)):
+                # Last question on this page: find bottom of all characters and objects above footer
+                max_bot = crop_top + 50.0
+                for c in range(digit_idx, len(text)):
+                    line_start = text[c:c+30]
+                    if any(term in line_start for term in ["https://", "Free Printable", "04/10/2026"]):
+                        continue
                     if not text[c].isspace():
-                        c_box = tp.get_charbox(c)
-                        c_bot = h - c_box[1]
-                        c_top = h - c_box[3]
-                        if c_top >= crop_top - 5.0 and c_bot < 762.0:
-                            if c_bot > max_y:
-                                max_y = c_bot
+                        cb = tp.get_charbox(c)
+                        c_bot = h - cb[1]
+                        if c_bot > max_bot and c_bot < 762.0:
+                            max_bot = c_bot
 
                 for obj in page.get_objects():
                     if obj.type == pdfium.raw.FPDF_PAGEOBJ_IMAGE:
                         l, b, r, t = obj.get_bounds()
                         obj_bot = h - b
-                        obj_top = h - t
-                        if obj_top >= crop_top - 5.0 and obj_bot < 762.0:
-                            if obj_bot > max_y:
-                                max_y = obj_bot
+                        if obj_bot > max_bot and obj_bot < 762.0:
+                            max_bot = obj_bot
 
-                crop_bottom = min(h - 22.0, max_y + 16.0)
+                crop_bottom = min(h - 20.0, max_bot + 16.0)
                     
             # Crop image
             x0 = int(22 * scale)
@@ -298,10 +195,10 @@ def process_review_pdf(review_info):
             # Ensure valid box
             if y1 > y0 + 10:
                 card_filename = f"{slug}_q{qnum}.png"
-                card_rel_path = f"assets/cards/{card_filename}?v=20261029_v6"
+                card_rel_path = f"assets/cards/{card_filename}?v={CACHE_VERSION}"
                 card_abs_path = os.path.join(CARDS_DIR, card_filename)
 
-                # Special enhancement for Q13 in APPC Unit 2 Midterm Review (tiny embedded image stem)
+                # Special enhancement for Q13 in APPC Unit 2 Midterm Review (tiny embedded 14pt image stem)
                 if slug == "appc_unit2_midterm_review" and qnum == 13:
                     base_q13 = page_img.crop((x0, y0, x1, y1))
                     native_img = None
@@ -317,55 +214,11 @@ def process_review_pdf(review_info):
                         scaled_prompt = native_img.resize((target_w, target_h), Image.Resampling.LANCZOS)
                         new_card_h = base_q13.height + (target_h - 28) + 15
                         enhanced_card = Image.new("RGB", (base_q13.width, new_card_h), (255, 255, 255))
-                        num_crop = base_q13.crop((0, 0, 102, 60))
+                        num_crop = base_q13.crop((0, 0, int(50 * scale), int(22 * scale)))
                         enhanced_card.paste(num_crop, (0, 0))
                         enhanced_card.paste(scaled_prompt, (110, 16))
                         choices_crop = base_q13.crop((0, int(45 * scale), base_q13.width, base_q13.height))
                         enhanced_card.paste(choices_crop, (0, 16 + target_h + 15))
-                        enhanced_card.save(card_abs_path, optimize=True)
-                    else:
-                        cropped = page_img.crop((x0, y0, x1, y1))
-                        cropped.save(card_abs_path, optimize=True)
-                elif slug == "app1_unit2_midterm_review_2" and qnum == 6:
-                    # Clean mask for duplicate bottom choices text in Q6
-                    from PIL import ImageDraw
-                    base_card = page_img.crop((x0, y0, x1, y1))
-                    draw = ImageDraw.Draw(base_card)
-                    draw.rectangle([0, 805, 550, base_card.height], fill=(255, 255, 255))
-                    clean_card = base_card.crop((0, 0, base_card.width, 838))
-                    clean_card.save(card_abs_path, optimize=True)
-                elif (slug, qnum) in ENHANCEMENTS:
-                    cfg = ENHANCEMENTS[(slug, qnum)]
-                    base_card = page_img.crop((x0, y0, x1, y1))
-                    native_img = None
-                    for obj in page.get_objects():
-                        if obj.type == pdfium.raw.FPDF_PAGEOBJ_IMAGE:
-                            l, b, r, t = obj.get_bounds()
-                            obj_top = h - t
-                            obj_bot = h - b
-                            if obj_top >= crop_top - 5.0 and obj_bot <= crop_bottom + 5.0:
-                                if (r - l > 150) and (l < 100):
-                                    native_img = obj.get_bitmap().to_pil()
-                                    break
-                    if native_img:
-                        diag_crop = native_img.crop(cfg["bbox"])
-                        target_w = cfg["target_w"]
-                        target_h = int(diag_crop.height * (target_w / diag_crop.width))
-                        scaled_diag = diag_crop.resize((target_w, target_h), Image.Resampling.LANCZOS)
-                        
-                        text_and_choices = base_card.crop((0, cfg["text_split_y"], base_card.width, base_card.height))
-                        if slug == "appc_unit1_midterm_review" and qnum == 1:
-                            text_and_choices = text_and_choices.crop((0, 0, text_and_choices.width, 515))
-
-                        num_crop = base_card.crop((0, 0, 102, 45))
-                        
-                        pad = 16
-                        new_h = 45 + pad + target_h + pad + text_and_choices.height
-                        enhanced_card = Image.new("RGB", (base_card.width, new_h), (255, 255, 255))
-                        enhanced_card.paste(num_crop, (0, 0))
-                        diag_x = (base_card.width - target_w) // 2
-                        enhanced_card.paste(scaled_diag, (diag_x, 45 + pad))
-                        enhanced_card.paste(text_and_choices, (0, 45 + pad + target_h + pad))
                         enhanced_card.save(card_abs_path, optimize=True)
                     else:
                         cropped = page_img.crop((x0, y0, x1, y1))
@@ -378,9 +231,8 @@ def process_review_pdf(review_info):
                 
             # Choices (detect if e is present in choices or answer key)
             has_e = False
-            # Check text between this question and next
             next_char_idx = q_matches[i+1][1] if i + 1 < len(q_matches) else len(text)
-            q_slice = text[char_idx:next_char_idx]
+            q_slice = text[digit_idx:next_char_idx]
             if re.search(r'\be\)', q_slice) or ans_keys.get(qnum) == 'E':
                 has_e = True
                 
@@ -431,7 +283,6 @@ def main():
         
         if c_key in database["subjects"] and u_key in database["subjects"][c_key]["units"]:
             unit_obj = database["subjects"][c_key]["units"][u_key]
-            # Replace existing or append
             existing_idx = None
             for idx, item in enumerate(unit_obj["assessments"]):
                 if item["id"] == rev["slug"]:

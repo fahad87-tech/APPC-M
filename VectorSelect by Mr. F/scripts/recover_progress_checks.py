@@ -35,6 +35,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_ROOT = os.path.join(BASE_DIR, "input pdf")
 CARDS_DIR = os.path.join(BASE_DIR, "assets", "cards")
 JSON_PATH = os.path.join(BASE_DIR, "data", "exams.json")
+BUNDLE_PATH = os.path.join(BASE_DIR, "data", "exams_bundle.js")
 
 SCALE = 2.0
 HEADER_MARGIN = 65.0
@@ -64,6 +65,11 @@ TARGETS = [
         "APPC", "Unit 4", "appc_unit4_unit_4_progress_check",
         os.path.join(SRC_ROOT, "APPC", "unit 4",
                      "SG_Unit4ProgressCheckMCQ_67397b832856f4.67397b857700e4.45142013.pdf"),
+    ),
+    (
+        "APPC", "Unit 2", "appc_unit2_unit_2_progress_check",
+        os.path.join(SRC_ROOT, "APPC", "Unit 2",
+                     "SG_Unit2ProgressCheckMCQ_66ce78e6058b57.66ce78e91b15e2.86274411.pdf"),
     ),
 ]
 
@@ -327,28 +333,41 @@ def main():
             (a for a in unit["assessments"] if a["id"] == assessment_id), None
         )
         if assessment:
-            have = {q["number"] for q in assessment["questions"]}
+            existing_map = {q["number"]: q for q in assessment["questions"]}
             added = 0
             for qnum in sorted(cropped):
-                if qnum in have:
-                    continue
                 letter = keys.get(qnum, "")
-                assessment["questions"].append({
-                    "number": qnum,
-                    "card_image": cropped[qnum],
-                    "choices": [{"letter": c, "text": ""} for c in "ABCD"],
-                    "correct_answer": letter,
-                    "explanation": "",
-                })
-                added += 1
+                if qnum in existing_map:
+                    q_obj = existing_map[qnum]
+                    if not q_obj.get("card_image"):
+                        q_obj["card_image"] = cropped[qnum]
+                        if not q_obj.get("correct_answer") and letter:
+                            q_obj["correct_answer"] = letter
+                        added += 1
+                else:
+                    assessment["questions"].append({
+                        "number": qnum,
+                        "card_image": cropped[qnum],
+                        "choices": [{"letter": c, "text": ""} for c in "ABCD"],
+                        "correct_answer": letter,
+                        "explanation": "",
+                    })
+                    added += 1
             assessment["questions"].sort(key=lambda q: q["number"])
             assessment["question_count"] = len(assessment["questions"])
-            print(f"  added to database : {added} (total now {assessment['question_count']})")
+            print(f"  added/updated in database : {added} (total now {assessment['question_count']})")
         print()
 
     with open(JSON_PATH, "w", encoding="utf-8") as fh:
         json.dump(db, fh, indent=2, ensure_ascii=False)
     print(f"Wrote {JSON_PATH}")
+
+    with open(BUNDLE_PATH, "w", encoding="utf-8") as fh:
+        fh.write("// VectorSelect by Mr. F — AP Physics Assessments Database\n")
+        fh.write("window.EXAM_DATA = ")
+        json.dump(db, fh, indent=2, ensure_ascii=False)
+        fh.write(";\n")
+    print(f"Wrote {BUNDLE_PATH}")
     print("Next: run scripts/tag_concepts.py to re-tag and rebuild the bundle.")
 
 

@@ -1614,3 +1614,89 @@ A microscopic pixel and layout audit across all 5 Mid-Term Review worksheets rev
 - **Database & Bundle**: Re-ingested all review exams via `python scripts/ingest_midterm_reviews.py`.
 - **Git Push**: Committed and pushed to GitHub `origin main`.
 - **Supabase Integrity**: Authoritative answer keys in `data/answer_keys.js` (`window.OFFLINE_ANSWER_KEYS`) and runtime tables remained intact.
+
+---
+
+## 22. Full 100% Zoom Visibility Fix, Clean Midterm Review Vector Regeneration & Answer Key Page Overwrite Elimination (October 30, 2026)
+
+### A. Problem Statement & Root Cause Analysis
+
+1. **100% Zoom Question Clipping (Bottom Half Invisible)**:
+   - **Symptom**: Students/teachers at 100% default zoom on standard laptops or Chromebooks (viewport height $\sim 600\text{--}768\text{ px}$) could not see the bottom of tall questions. Specifically:
+     - In APPC Unit 2 Midterm Review Q9 (Astronaut on Scale), the question stopped after *"Claim B: ... 20 m/s²."*—the prompt conclusion and choices `a` through `d` were cut off.
+     - In APP1 Unit 2 Part 1 Q10 (Spring on Incline), the card cut off after *"An object of mass m is attached to a spring on a..."*, completely hiding the choices.
+   - **Root Cause**:
+     - `#q-card-white-box` was styled with `overflow-hidden`.
+     - `#q-card-img` was styled with `max-h-[92vh] object-contain`.
+     - In `index.html` `setInPageCardZoom(scale)`, `scale === 1.0` locked `img.style.maxHeight = "92vh"` and `whiteBox.style.overflow = "hidden"`.
+     - When cards were taller than the viewport, `maxHeight` forced height capping, while `overflow: hidden` prevented scrolling, completely clipping the bottom of the card with no scrollbar.
+
+2. **"Wiredly Cropped" Questions & Useless / Duplicate Text**:
+   - **Symptom**: In APP1 Unit 2 Review Part 1 Q3 (Collision Table), the table card had chopped lines of text (*"ple above were recorded during an experiment in which tv / ad-on..."*) glued to the bottom of the table, followed by duplicate text below.
+   - **Root Cause 1 (Answer Key Overwrite Bug)**:
+     - In `scripts/ingest_midterm_reviews.py`, the loop attempting to exclude answer keys used a reverse while-loop that inspected `doc[content_pages - 1]`. Because Wayground review PDFs end with a trailing URL page (e.g. Page 7 with 163 bytes) that does not contain the words "Answer Key", the loop stopped before examining Page 6 (which contained `"Answer Keys"`).
+     - Page 6 was thus processed as an assessment content page! Because Page 6 lists questions `1.`, `2.`, `3.`, `4.`, `7.`, `9.`, `10.`, it was overwriting the genuine question cards with 4px to 100px answer key snippets!
+   - **Root Cause 2 (Fragile Manual `ENHANCEMENTS` Bounding Boxes)**:
+     - In `ENHANCEMENTS`, manual bounding boxes like `bbox = (488, 28, 1245, 286)` for Q3 captured the table *and* 64 pixels of text from the question prompt below it.
+     - Hardcoded `text_split_y` offsets sliced through text lines and created duplicate diagram snippets.
+     - For Q4, the script grabbed the first image on Page 2 (which was the collision table from Q3), mistakenly pasting a collision table onto a ramp question.
+
+---
+
+### B. Engineering Fixes
+
+1. **Responsive Card Container & Removal of Height Capping (`index.html` & `teacher.html`)**:
+   - Changed `#q-card-white-box` to `overflow-visible`.
+   - Changed `#q-card-img` to `w-full h-auto object-contain cursor-zoom-in`.
+   - Updated `setInPageCardZoom(scale)`:
+     ```javascript
+     if (scale === 1.0) {
+       img.style.transform = "scale(1)";
+       img.style.maxHeight = "none";
+       img.style.width = "100%";
+       img.style.height = "auto";
+       if (whiteBox) whiteBox.style.overflow = "visible";
+     } else {
+       img.style.transform = `scale(${scale})`;
+       img.style.transformOrigin = "top center";
+       img.style.maxHeight = "none";
+       if (whiteBox) whiteBox.style.overflow = "auto";
+     }
+     ```
+   - In `teacher.html`, removed `max-h-[850px]` from question card render blocks. Cards now render at 100% natural width and scroll naturally without vertical clipping.
+
+2. **Early Termination on Answer Key Pages**:
+   - Added strict break check at the start of page processing in `scripts/ingest_midterm_reviews.py`:
+     ```python
+     if "Answer Key" in text or "Answer Keys" in text:
+         print(f"  Reached Answer Key on page {p_idx + 1}. Halting content extraction.")
+         break
+     ```
+   - Zero Answer Key pages are ever processed as questions, eliminating all overwrite anomalies.
+
+3. **Pure Precision Vector Extraction**:
+   - Replaced fragile manual bounding box splicing with clean vector rendering directly from the official PDF pages.
+   - `crop_top`: Accurately placed at `max(10.0, top_y - 12.0)`, automatically checking for any diagram paths starting above the question digit.
+   - `crop_bottom`: Uses `next_top - 10.0` for mid-page questions, or computes `max_bot` across all non-footer characters and objects (`bot < 762.0`) + 16px pad for the last question on each page.
+   - Preserved specialized enhancement for APPC Unit 2 Midterm Review Q13, scaling the native 1584x118 prompt banner to 980px.
+   - Result: Exactly 64 clean, full-height question cards generated across all 5 review exams:
+     - `app1_unit1_midterm_review`: 11 questions [1..11]
+     - `app1_unit2_midterm_review_1`: 10 questions [1..10]
+     - `app1_unit2_midterm_review_2`: 10 questions [1..10]
+     - `appc_unit1_midterm_review`: 18 questions [1..18]
+     - `appc_unit2_midterm_review`: 15 questions [1..15]
+
+4. **APPC Unit 2 Progress Check Recovery**:
+   - Verified all 30 questions in `appc_unit2_unit_2_progress_check` are fully populated with cards (`appc_unit2_unit_2_progress_check_q1.png` through `q30.png`).
+   - Total empty questions across all 104 exams and 1,102 questions in `exams.json`: **0**.
+
+---
+
+### C. Cache Invalidation & Verification
+- **Cache Version**: Updated to `?v=20261030_v1` across `scripts/ingest_midterm_reviews.py`, `exams.json`, and `exams_bundle.js`.
+- **Database Sync**: Both `data/exams.json` and `data/exams_bundle.js` updated and aligned.
+- **Verification**:
+  - Q9 (Astronaut) displays spaceship, prompt, and choices `a` through `d` in full.
+  - Q3 (Collision Table) displays table cleanly with zero duplicate or sliced text.
+  - Q10 (Spring on Incline) displays full spring diagram, intact arrow, and choices `a` through `e`.
+
