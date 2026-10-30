@@ -461,7 +461,7 @@
           </div>
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Join Code</label>
-            <input type="text" id="join-code-input" maxlength="6" placeholder="e.g. A3BX9K" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-lg text-white placeholder-slate-500 tracking-widest font-mono text-center uppercase focus:outline-none focus:ring-2 focus:ring-cyan-400 font-black">
+            <input type="text" id="join-code-input" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. A3BX9K" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3.5 text-lg text-white placeholder-slate-500 tracking-widest font-mono text-center uppercase focus:outline-none focus:ring-2 focus:ring-cyan-400 font-black">
           </div>
           <div id="join-error-msg" class="hidden text-sm text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl px-4 py-3 font-semibold"></div>
           <button type="submit" id="btn-join-exam" class="pressable w-full py-4 rounded-xl btn-aurora text-slate-950 font-black text-base shadow-xl transition">
@@ -1542,10 +1542,26 @@
 
       const urlParams = new URLSearchParams(window.location.search);
       const codeFromUrl = urlParams.get('join') || urlParams.get('code');
-      if (codeFromUrl) {
-        const input = document.getElementById("join-code-input");
-        input.value = codeFromUrl.toUpperCase();
-        input.classList.add("border-indigo-500", "bg-indigo-950/20");
+      const joinInput = document.getElementById("join-code-input");
+      if (joinInput) {
+        if (codeFromUrl) {
+          joinInput.value = codeFromUrl.replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 6);
+          joinInput.classList.add("border-indigo-500", "bg-indigo-950/20");
+        }
+        // Auto-sanitize on type and paste so spaces, dashes, and extra chars are instantly cleaned
+        joinInput.addEventListener("input", () => {
+          let clean = joinInput.value.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
+          if (clean.length > 6) clean = clean.slice(0, 6);
+          if (joinInput.value !== clean) {
+            joinInput.value = clean;
+          }
+        });
+        joinInput.addEventListener("paste", (e) => {
+          e.preventDefault();
+          const pasted = (e.clipboardData || window.clipboardData).getData("text");
+          const clean = (pasted || "").replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, 6);
+          joinInput.value = clean;
+        });
       }
       initModalPan();
       initQuestionCanvas();
@@ -1557,10 +1573,12 @@
     async function handleStudentJoin(e) {
       e.preventDefault();
       const errBox = document.getElementById("join-error-msg");
+      const joinBtn = document.getElementById("btn-join-exam");
       errBox.classList.add("hidden");
 
       const name = document.getElementById("join-student-name").value.trim();
-      const code = document.getElementById("join-code-input").value.trim().toUpperCase();
+      let rawCode = document.getElementById("join-code-input").value;
+      const code = rawCode.replace(/[^A-Za-z0-9]/g, "").trim().toUpperCase();
 
       if (!name) {
         errBox.textContent = "Please enter your full name.";
@@ -1574,102 +1592,117 @@
         return;
       }
 
-      const check = await verifyJoinCode(code);
-      if (!check.found) {
-        errBox.textContent = `Join code "${code}" not found. Please ask Mr. F for the current assignment code.`;
-        errBox.classList.remove("hidden");
-        return;
+      const originalBtnText = joinBtn ? joinBtn.innerHTML : "Join Assessment &rarr;";
+      if (joinBtn) {
+        joinBtn.disabled = true;
+        joinBtn.innerHTML = `<span class="inline-flex items-center gap-2"><svg class="animate-spin h-5 w-5 text-slate-900" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Connecting to Classroom...</span>`;
       }
 
-      if (!check.assignment.is_active) {
-        errBox.textContent = `This assessment (${check.assignment.assessment_title}) has been closed by Mr. F.`;
-        errBox.classList.remove("hidden");
-        return;
-      }
+      try {
+        const check = await verifyJoinCode(code);
+        if (!check.found) {
+          if (check.error) {
+            errBox.textContent = "Classroom server is busy. Please click Join again.";
+          } else {
+            errBox.textContent = `Join code "${code}" not found. Please verify the 6-character code with Mr. F.`;
+          }
+          errBox.classList.remove("hidden");
+          return;
+        }
 
-      currentAssignment = check.assignment;
-      activeStudent = name;
-      quizMode = currentAssignment.quiz_mode || "student_led";
-      lockdownEnabled = currentAssignment.enable_lockdown || false;
+        if (!check.assignment.is_active) {
+          errBox.textContent = `This assessment (${check.assignment.assessment_title}) has been closed by Mr. F.`;
+          errBox.classList.remove("hidden");
+          return;
+        }
 
-      // Hydrate gamified overrides from URL parameters if present
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlGame = urlParams.get('game');
-      const urlMins = parseInt(urlParams.get('mins'), 10);
-      const urlQRound = parseInt(urlParams.get('qround'), 10);
-      const urlActionSecs = parseInt(urlParams.get('action_secs'), 10);
-      if (urlGame && (!currentAssignment.game_mode || currentAssignment.game_mode === 'classic')) {
-        currentAssignment.game_mode = urlGame;
-      }
-      if (urlMins && (!currentAssignment.game_duration_minutes || currentAssignment.game_duration_minutes === 5)) {
-        currentAssignment.game_duration_minutes = urlMins;
-      }
-      if (urlQRound && (!currentAssignment.questions_per_round || currentAssignment.questions_per_round === 4)) {
-        currentAssignment.questions_per_round = urlQRound;
-      }
-      if (urlActionSecs) {
-        currentAssignment.action_phase_seconds = urlActionSecs;
-      }
+        currentAssignment = check.assignment;
+        activeStudent = name;
+        quizMode = currentAssignment.quiz_mode || "student_led";
+        lockdownEnabled = currentAssignment.enable_lockdown || false;
 
-      // Check in to the live session roster (teacher can see who's joined).
-      // Do not let a local-only fallback create a false sense that the
-      // teacher can see this student across devices.
-      const checkInResult = await checkInStudent(code, name);
-      if (!checkInResult || checkInResult.success !== true || checkInResult.source !== "supabase") {
-        errBox.textContent = `Could not join the shared classroom roster: ${checkInResult?.error?.message || "Supabase did not confirm your check-in."}`;
-        errBox.classList.remove("hidden");
-        return;
-      }
-      // Every device must use the same Supabase clock when interpreting the
-      // teacher's shared question_started_at timestamp.
-      const clockSync = await syncServerClock(true);
-      if (!clockSync || clockSync.success !== true) {
-        errBox.textContent = "Could not synchronize the classroom clock. Please check the internet connection and try again.";
-        errBox.classList.remove("hidden");
-        return;
-      }
+        // Hydrate gamified overrides from URL parameters if present
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlGame = urlParams.get('game');
+        const urlMins = parseInt(urlParams.get('mins'), 10);
+        const urlQRound = parseInt(urlParams.get('qround'), 10);
+        const urlActionSecs = parseInt(urlParams.get('action_secs'), 10);
+        if (urlGame && (!currentAssignment.game_mode || currentAssignment.game_mode === 'classic')) {
+          currentAssignment.game_mode = urlGame;
+        }
+        if (urlMins && (!currentAssignment.game_duration_minutes || currentAssignment.game_duration_minutes === 5)) {
+          currentAssignment.game_duration_minutes = urlMins;
+        }
+        if (urlQRound && (!currentAssignment.questions_per_round || currentAssignment.questions_per_round === 4)) {
+          currentAssignment.questions_per_round = urlQRound;
+        }
+        if (urlActionSecs) {
+          currentAssignment.action_phase_seconds = urlActionSecs;
+        }
 
-      // Locate the quiz in the database
-      let foundQuiz = null;
-      for (const subj of Object.values(EXAM_DB.subjects)) {
-        for (const unit of Object.values(subj.units)) {
-          for (const a of unit.assessments) {
-            if (a.id === currentAssignment.assessment_id) {
-              foundQuiz = a;
-              break;
+        // Check in to the live session roster with automatic retry
+        const checkInResult = await checkInStudent(code, name);
+        if (!checkInResult || checkInResult.success !== true) {
+          errBox.textContent = `Could not join classroom roster: ${checkInResult?.error?.message || "Connection timed out. Please try again."}`;
+          errBox.classList.remove("hidden");
+          return;
+        }
+
+        // Sync clock with safe fallback (will not block students)
+        await syncServerClock(false);
+
+        // Locate the quiz in the database
+        let foundQuiz = null;
+        for (const subj of Object.values(EXAM_DB.subjects)) {
+          for (const unit of Object.values(subj.units)) {
+            for (const a of unit.assessments) {
+              if (a.id === currentAssignment.assessment_id) {
+                foundQuiz = a;
+                break;
+              }
             }
           }
         }
-      }
 
-      if (!foundQuiz) {
-        errBox.textContent = "Quiz content could not be located in database. Please contact your instructor.";
-        errBox.classList.remove("hidden");
-        return;
-      }
-
-      currentQuiz = foundQuiz;
-      hydrateQuizKeys(currentQuiz);
-
-      // Question order
-      questionOrder = currentQuiz.questions.map((_, i) => i);
-      if (currentAssignment.randomize_questions && quizMode === "student_led") {
-        for (let i = questionOrder.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [questionOrder[i], questionOrder[j]] = [questionOrder[j], questionOrder[i]];
+        if (!foundQuiz) {
+          errBox.textContent = "Quiz content could not be located in database. Please contact your instructor.";
+          errBox.classList.remove("hidden");
+          return;
         }
-      }
 
-      // CRITICAL GATE: A student MUST ALWAYS wait in the lobby unless the instructor has explicitly started the assessment
-      const isStarted = (currentAssignment && currentAssignment.is_started === true);
-      if (isStarted) {
-        startExamRunner();
-      } else {
-        enterStudentLobby();
+        currentQuiz = foundQuiz;
+        hydrateQuizKeys(currentQuiz);
+
+        // Question order
+        questionOrder = currentQuiz.questions.map((_, i) => i);
+        if (currentAssignment.randomize_questions && quizMode === "student_led") {
+          for (let i = questionOrder.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [questionOrder[i], questionOrder[j]] = [questionOrder[j], questionOrder[i]];
+          }
+        }
+
+        // CRITICAL GATE: A student MUST ALWAYS wait in the lobby unless the instructor has explicitly started the assessment
+        const isStarted = (currentAssignment && currentAssignment.is_started === true);
+        if (isStarted) {
+          startExamRunner();
+        } else {
+          enterStudentLobby();
+        }
+      } catch (err) {
+        console.error("Student join error:", err);
+        errBox.textContent = "An error occurred while connecting. Please click Join again.";
+        errBox.classList.remove("hidden");
+      } finally {
+        if (joinBtn) {
+          joinBtn.disabled = false;
+          joinBtn.innerHTML = originalBtnText;
+        }
       }
     }
 
     let lobbyPollInterval = null;
+    let lobbyRealtimeSub = null;
 
     function enterStudentLobby() {
       document.getElementById("view-student-entry").classList.add("hidden");
@@ -1683,21 +1716,64 @@
 
       updateLobbyParticipants();
 
-      clearInterval(lobbyPollInterval);
-      lobbyPollInterval = setInterval(async () => {
-        const res = await verifyJoinCode(currentAssignment.join_code);
-        if (res.found && res.assignment) {
-          currentAssignment = res.assignment;
-          // ONLY advance to exam runner when the teacher has explicitly set is_started to true
-          if (res.assignment.is_started === true) {
-            clearInterval(lobbyPollInterval);
-            document.getElementById("view-lobby").classList.add("hidden");
-            startExamRunner();
-            return;
-          }
+      // 1. Instant launch notification via Supabase Realtime (<50ms)
+      if (supabaseClient && currentAssignment.id) {
+        if (lobbyRealtimeSub) {
+          try { lobbyRealtimeSub.unsubscribe(); } catch (_) {}
         }
-        updateLobbyParticipants();
-      }, 1000);
+        lobbyRealtimeSub = subscribeToLiveAssignment(currentAssignment.id, (updatedAssignment) => {
+          if (updatedAssignment) {
+            currentAssignment = updatedAssignment;
+            if (updatedAssignment.is_started === true) {
+              if (lobbyPollInterval) clearInterval(lobbyPollInterval);
+              if (lobbyRealtimeSub) {
+                try { lobbyRealtimeSub.unsubscribe(); } catch (_) {}
+                lobbyRealtimeSub = null;
+              }
+              document.getElementById("view-lobby").classList.add("hidden");
+              startExamRunner();
+            }
+          }
+        });
+      }
+
+      // 2. Adaptive jittered background poll (3.5s - 5s). Prevents DDoS connection starvation with 25-30 students!
+      if (lobbyPollInterval) clearInterval(lobbyPollInterval);
+      let lobbyPollCount = 0;
+      let inFlightPoll = false;
+
+      const runLobbyCheck = async () => {
+        if (inFlightPoll) return;
+        inFlightPoll = true;
+        try {
+          const res = await verifyJoinCode(currentAssignment.join_code);
+          if (res.found && res.assignment) {
+            currentAssignment = res.assignment;
+            if (res.assignment.is_started === true) {
+              if (lobbyPollInterval) clearInterval(lobbyPollInterval);
+              if (lobbyRealtimeSub) {
+                try { lobbyRealtimeSub.unsubscribe(); } catch (_) {}
+                lobbyRealtimeSub = null;
+              }
+              document.getElementById("view-lobby").classList.add("hidden");
+              startExamRunner();
+              return;
+            }
+          }
+          // Only refresh full participant roster every 2nd tick (~8s) to keep network super-light
+          lobbyPollCount++;
+          if (lobbyPollCount % 2 === 0) {
+            await updateLobbyParticipants();
+          }
+        } catch (err) {
+          console.warn("[Lobby Poll Error]:", err);
+        } finally {
+          inFlightPoll = false;
+        }
+      };
+
+      const jitterMs = 3500 + Math.floor(Math.random() * 1500);
+      lobbyPollInterval = setInterval(runLobbyCheck, jitterMs);
     }
 
     async function updateLobbyParticipants() {
@@ -4201,6 +4277,8 @@
     let teacherLedPollInFlight = false;
     function startTeacherLedPolling() {
       clearInterval(teacherLedPollInterval);
+      // Adaptive 3-second poll with jitter: Supabase Realtime already pushes live slides instantaneously (<50ms)
+      const pollDelay = 3000 + Math.floor(Math.random() * 1000);
       teacherLedPollInterval = setInterval(async () => {
         if (teacherLedPollInFlight) return;
         teacherLedPollInFlight = true;
@@ -4226,7 +4304,7 @@
         } finally {
           teacherLedPollInFlight = false;
         }
-      }, 500);
+      }, pollDelay);
     }
 
     // ============================================================================

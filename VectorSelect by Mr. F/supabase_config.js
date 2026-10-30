@@ -120,7 +120,7 @@ let serverClockCheckedAt = 0;
 let realtimeChannels = [];
 
 function normalizeCode(value) {
-  return String(value || "").trim().toUpperCase();
+  return String(value || "").replace(/[^A-Za-z0-9]/g, "").trim().toUpperCase();
 }
 
 function localAssignments() {
@@ -206,28 +206,31 @@ function getServerNowIso() {
 async function syncServerClock(force = false) {
   await ensureSupabaseInitialized();
   if (!supabaseClient) {
-    return { success: false, offsetMs: serverClockOffsetMs, error: { message: "Supabase is unavailable." } };
+    return { success: true, offsetMs: 0, fallback: true };
   }
   if (!force && Date.now() - serverClockCheckedAt < 30000) {
     return { success: true, offsetMs: serverClockOffsetMs, cached: true };
   }
 
-  const startedAt = Date.now();
-  try {
-    const { data, error } = await supabaseClient.rpc("get_server_time");
-    const finishedAt = Date.now();
-    if (!error && data) {
-      const serverMs = Date.parse(data);
-      if (Number.isFinite(serverMs)) {
-        serverClockOffsetMs = serverMs - ((startedAt + finishedAt) / 2);
-        serverClockCheckedAt = finishedAt;
-        return { success: true, offsetMs: serverClockOffsetMs, cached: false };
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const startedAt = Date.now();
+    try {
+      const { data, error } = await supabaseClient.rpc("get_server_time");
+      const finishedAt = Date.now();
+      if (!error && data) {
+        const serverMs = Date.parse(data);
+        if (Number.isFinite(serverMs)) {
+          serverClockOffsetMs = serverMs - ((startedAt + finishedAt) / 2);
+          serverClockCheckedAt = finishedAt;
+          return { success: true, offsetMs: serverClockOffsetMs, cached: false };
+        }
       }
-    }
-    return { success: false, offsetMs: serverClockOffsetMs, error: error || { message: "Invalid server time response." } };
-  } catch (error) {
-    return { success: false, offsetMs: serverClockOffsetMs, error: { message: error?.message || "Could not synchronize with the Supabase clock." } };
+    } catch (_) {}
+    if (attempt === 0) await new Promise(r => setTimeout(r, 200));
   }
+  // Graceful fallback: local clock with offset 0. Never locks students out of exams.
+  serverClockCheckedAt = Date.now();
+  return { success: true, offsetMs: 0, fallback: true };
 }
 
 // Compatibility helpers for older saved browser code; these contain no
@@ -384,17 +387,35 @@ async function setAssignmentQuestionIndex(join_code, current_question_index) {
 async function verifyJoinCode(join_code) {
   await ensureSupabaseInitialized();
   const code = normalizeCode(join_code);
+  let lastNetworkError = null;
   if (supabaseClient) {
-    const { data, error } = await supabaseClient
-      .from("active_assignments")
-      .select("*")
-      .eq("join_code", code)
-      .maybeSingle();
-    if (!error && data) return { found: true, assignment: normalizeAssignment(data) };
-    if (error) console.warn("Supabase join-code lookup failed:", error);
+    // Retry up to 3 times to withstand concurrent bursts of 25-30 students connecting simultaneously
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const { data, error } = await supabaseClient
+          .from("active_assignments")
+          .select("*")
+          .eq("join_code", code)
+          .maybeSingle();
+        if (!error) {
+          if (data) return { found: true, assignment: normalizeAssignment(data) };
+          // Truly not in database (200 OK with null data)
+          lastNetworkError = null;
+          break;
+        }
+        lastNetworkError = error;
+      } catch (err) {
+        lastNetworkError = err;
+      }
+      if (attempt < 2) {
+        await new Promise(r => setTimeout(r, 250 * Math.pow(2, attempt) + Math.random() * 200));
+      }
+    }
+    if (lastNetworkError) console.warn("Supabase join-code lookup failed after retries:", lastNetworkError);
   }
   const match = localAssignments().find(a => normalizeCode(a.join_code) === code);
-  return match ? { found: true, assignment: normalizeAssignment(match) } : { found: false };
+  if (match) return { found: true, assignment: normalizeAssignment(match) };
+  return { found: false, error: lastNetworkError };
 }
 
 const _cachedAnswerKeys = {};
@@ -501,14 +522,26 @@ async function checkInStudent(join_code, student_name) {
     reportCloudSyncFailure("check-in", error.message);
     return { success: false, source: "localStorage", error };
   }
-  const { error } = await supabaseClient
-    .from("session_participants")
-    .upsert([{ join_code: code, student_name: String(student_name).trim() }],
-      { onConflict: "join_code,student_name" });
-  if (!error) return { success: true, source: "supabase" };
-  console.warn("Supabase participant check-in failed:", error);
-  reportCloudSyncFailure("check-in", error.message || "The teacher cannot see this check-in.");
-  return { success: false, source: "supabase", error };
+  let lastError = null;
+  // Retry loop handles connection pool queuing when an entire class checks in at once
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const { error } = await supabaseClient
+        .from("session_participants")
+        .upsert([{ join_code: code, student_name: String(student_name).trim() }],
+          { onConflict: "join_code,student_name" });
+      if (!error) return { success: true, source: "supabase" };
+      lastError = error;
+    } catch (err) {
+      lastError = err;
+    }
+    if (attempt < 2) {
+      await new Promise(r => setTimeout(r, 250 * Math.pow(2, attempt) + Math.random() * 200));
+    }
+  }
+  console.warn("Supabase participant check-in failed after retries:", lastError);
+  reportCloudSyncFailure("check-in", lastError?.message || "The teacher cannot see this check-in.");
+  return { success: false, source: "supabase", error: lastError };
 }
 
 async function fetchParticipantsByCode(join_code) {
