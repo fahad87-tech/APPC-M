@@ -1809,3 +1809,22 @@ To provide Mr. F with classroom-ready printed materials and instant grading refe
 | **APP1 Unit 2 Part 2** | 10 | Q1: D, Q2: B, Q3: D, Q4: B, Q5: E, Q6: D, Q7: A, Q8: D, Q9: E, Q10: E |
 | **APPC Unit 1 Review** | 18 | Q1: C, Q2: B, Q3: C, Q4: D, Q5: A, Q6: D, Q7: D, Q8: D, Q9: E, Q10: C, Q11: B, Q12: D, Q13: B, Q14: A, Q15: C, Q16: C, Q17: A, Q18: E |
 | **APPC Unit 2 Review** | 15 | Q1: A, Q2: A, Q3: B, Q4: D, Q5: D, Q6: B, Q7: D, Q8: B, Q9: D, Q10: A, Q11: A, Q12: B, Q13: B, Q14: A, Q15: B |
+
+
+---
+
+## 26. Wayground Text & Trailing Blank Page Sanitization
+
+### A. Sanitization Process
+Every page across all Midterm Review PDFs in `C:\Users\fahad\Desktop\MT REVIEWs` was audited and sanitized using PyMuPDF vector redaction:
+1. **Trailing Empty Pages Removed**: Removed Quizizz's auto-generated blank trailing pages that contained no questions or answers.
+2. **Wayground URLs Redacted**: Permanently expunged the footer URLs (`https://wayground.com/print/quiz/...`) across every page using true PDF redaction annotations with clean white fills (`fill=(1, 1, 1)`).
+3. **Metadata Scrubbed**: Removed any document metadata referencing Wayground.
+
+### B. Audit Results
+- `APP1 Unit 1 Midterm Review (with Answers).pdf`: 0 Wayground matches (6 pages)
+- `APP1 Unit 2 Midterm Review - Part 1 (Clean - with Answers).pdf`: 0 Wayground matches (6 pages)
+- `APP1 Unit 2 Midterm Review - Part 2 (with Answers).pdf`: 0 Wayground matches (6 pages)
+- `APPC Unit 1 Midterm Review (with Answers).pdf`: 0 Wayground matches (11 pages)
+- `APPC Unit 2 Midterm Review (with Answers).pdf`: 0 Wayground matches (9 pages)
+- `Midterm Reviews - Complete Answer Key Guide (APP1 & APPC).pdf`: 0 Wayground matches (3 pages)
