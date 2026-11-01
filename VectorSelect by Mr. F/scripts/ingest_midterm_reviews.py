@@ -49,16 +49,17 @@ def repair_unit1_card(slug, qnum, page, page_img, box, scale):
         header = page_img.crop((x0, y0, x1, int(177 * scale))).convert("RGB")
         images = [obj.get_bitmap().to_pil().convert("RGB") for obj in page.get_objects()
                   if obj.type == pdfium.raw.FPDF_PAGEOBJ_IMAGE][1:5]
-        result = Image.new("RGB", (width, header.height + 4 * 485), "white")
+        result = Image.new("RGB", (width, header.height + 2 * 270 + 20), "white")
         result.paste(header, (0, 0))
         draw = ImageDraw.Draw(result)
         font = card_font(25)
         for i, image in enumerate(images):
-            image.thumbnail((900, 430), Image.Resampling.LANCZOS)
-            top = header.height + i * 485
-            draw.text((90, top + 8), f"{chr(97 + i)})", font=font, fill="black")
-            result.paste(image, (135, top))
-        return result.crop((0, 0, width, header.height + 4 * 485 - 25))
+            image.thumbnail((460, 235), Image.Resampling.LANCZOS)
+            left = 70 + (i % 2) * 520
+            top = header.height + (i // 2) * 270
+            draw.text((left, top + 8), f"{chr(97 + i)})", font=font, fill="black")
+            result.paste(image, (left + 35, top))
+        return result
     if slug != "appc_unit1_midterm_review":
         return card
     if qnum == 1:
@@ -270,6 +271,8 @@ def process_review_pdf(review_info):
                 repaired = ((slug == "app1_unit1_midterm_review" and qnum == 3) or
                             (slug == "appc_unit1_midterm_review" and qnum in (1, 2, 5, 6, 17)))
                 version = UNIT1_CARD_VERSION if repaired else CACHE_VERSION
+                if slug == "app1_unit1_midterm_review" and qnum == 3:
+                    version = "20261101_v3"
                 card_rel_path = f"assets/cards/{card_filename}?v={version}"
                 card_abs_path = os.path.join(CARDS_DIR, card_filename)
 

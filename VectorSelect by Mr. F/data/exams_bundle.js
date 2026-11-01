@@ -1203,7 +1203,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q3.png?v=20261101_v2",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q3.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1444,7 +1444,7 @@ window.EXAM_DATA = {
               "questions": [
                 {
                   "number": 1,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q1.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q1.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1467,7 +1467,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 2,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q2.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q2.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1484,13 +1484,17 @@ window.EXAM_DATA = {
                     {
                       "letter": "D",
                       "text": "Acceleration a Time to Hit Ground\r\nEqual Less for ball 2\r\n(E)\r\nAcceleration a Time to Hit Ground\r\nEqual Equal"
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
                     }
                   ],
                   "question_id": "app1_unit1_unit_1_practice_exam_q2"
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q3.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q3.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1507,13 +1511,17 @@ window.EXAM_DATA = {
                     {
                       "letter": "D",
                       "text": "Between 30 s and 40 s\r\n(E) After 40 s\nUnit 1 - TEST\r\nScoring Guide"
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
                     }
                   ],
                   "question_id": "app1_unit1_unit_1_practice_exam_q3"
                 },
                 {
                   "number": 4,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q4.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q4.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1536,7 +1544,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 5,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q5.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q5.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1559,7 +1567,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 6,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q6.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q6.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1582,7 +1590,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 7,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q7.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q7.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1605,7 +1613,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 8,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q8.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q8.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1628,7 +1636,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 9,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q9.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q9.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1651,7 +1659,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 10,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q10.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q10.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1668,13 +1676,17 @@ window.EXAM_DATA = {
                     {
                       "letter": "D",
                       "text": "2h/g\r\n(E) \u221a2h/g\r\no\r\n0\r\n0\nUnit 1 - TEST\r\nScoring Guide"
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
                     }
                   ],
                   "question_id": "app1_unit1_unit_1_practice_exam_q10"
                 },
                 {
                   "number": 11,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q11.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q11.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1697,7 +1709,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 12,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q12.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q12.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",
@@ -1720,7 +1732,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 13,
-                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q13.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_practice_exam_q13.png?v=20261101_v3",
                   "choices": [
                     {
                       "letter": "A",

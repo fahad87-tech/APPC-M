@@ -523,6 +523,24 @@ def crop_tb_questions(doc, quiz_slug):
                 for im in imgs:
                     card.paste(im, (0, y_off))
                     y_off += im.height
+            if quiz_slug == 'app1_unit1_unit_1_practice_exam' and qnum in (4, 7):
+                # This booklet places Q4's diagrams on two subsequent pages;
+                # Q7's last diagram extends below its last text object.
+                spans = ([(3, 65, 125), (4, 65, 550), (5, 65, 550)]
+                         if qnum == 4 else [(7, 65, 665)])
+                pieces = []
+                for page_index, top, bottom in spans:
+                    source_page = doc[page_index]
+                    rendered = source_page.render(scale=scale).to_pil().convert('RGB')
+                    pieces.append(rendered.crop((int(30 * scale), int(top * scale),
+                                                 int((source_page.get_width() - 30) * scale),
+                                                 int(bottom * scale))))
+                card = Image.new('RGB', (max(im.width for im in pieces),
+                                         sum(im.height for im in pieces)), 'white')
+                y = 0
+                for piece in pieces:
+                    card.paste(piece, (0, y))
+                    y += piece.height
             card = sharpen_card(card)
             img_fname = f"{quiz_slug}_q{qnum}.png"
             full_out = os.path.join(CARDS_DIR, img_fname)
@@ -753,6 +771,11 @@ async def process_all_exams():
             candidate_files = []
             for f in files:
                 if not f.endswith('.pdf') or 'FRQ' in f or ' (1)' in f or 'Cover' in f or 'Mid-Term' in f:
+                    continue
+                # This standalone key is not a question booklet. Its numbered
+                # answers otherwise overwrite the real Unit 1 practice cards.
+                if (course_key == 'APP1' and u_dir.lower() == 'unit 1' and
+                        f.lower() == 'test 1 answers.pdf'):
                     continue
                 # Unit tests are intentionally excluded from this app.
                 if re.search(r'unit\s*test', f, re.IGNORECASE):
