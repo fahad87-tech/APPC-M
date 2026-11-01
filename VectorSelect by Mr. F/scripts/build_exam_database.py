@@ -1,4 +1,5 @@
 import os
+import ctypes
 import re
 import json
 import asyncio
@@ -558,10 +559,33 @@ def crop_sg_questions(doc, quiz_slug):
     scale = 2.0
     header_margin = 65.0
     footer_margin = 25.0
+
+    source_pages = list(doc)
+    if quiz_slug == 'app1_unit1_unit_1_progress_check':
+        # Remove the scoring guide's background, outlines and checkmarks as
+        # PDF objects before rendering, preserving the original choice text.
+        removed = 0
+        for page in source_pages:
+            for obj in list(page.get_objects()):
+                if obj.type != pdfium.raw.FPDF_PAGEOBJ_PATH:
+                    continue
+                colors = []
+                for getter in (pdfium.raw.FPDFPageObj_GetFillColor,
+                               pdfium.raw.FPDFPageObj_GetStrokeColor):
+                    channels = [ctypes.c_uint() for _ in range(4)]
+                    if getter(obj.raw, *(ctypes.byref(c) for c in channels)):
+                        colors.append(tuple(c.value for c in channels[:3]))
+                if any(c in ((230, 255, 230), (227, 255, 222),
+                             (58, 145, 63), (0, 128, 0)) for c in colors):
+                    page.remove_obj(obj)
+                    removed += 1
+            page.gen_content()
+        if removed < 18:
+            raise ValueError('Expected scoring-guide answer highlights were not found; refusing unsafe cards')
     
     # 1. Parse each page for questions and answers
     pages_data = []
-    for p_idx, page in enumerate(doc):
+    for p_idx, page in enumerate(source_pages):
         tp = page.get_textpage()
         text = tp.get_text_range()
         w, h = page.get_size()
@@ -621,7 +645,7 @@ def crop_sg_questions(doc, quiz_slug):
         valid_ans = [a for a in start_pd['ans'] if a['top_y'] > start_q_obj['top_y']]
         if valid_ans:
             # Answer is on the same page!
-            bottom_y = valid_ans[0]['top_y'] - 8.0
+            bottom_y = valid_ans[0]['top_y'] - (20.0 if quiz_slug == 'app1_unit1_unit_1_progress_check' else 8.0)
             segments.append({'p_idx': p_idx, 'top_y': top_y, 'bottom_y': bottom_y})
         else:
             # Question continues onto subsequent pages until its Answer is reached
@@ -631,7 +655,7 @@ def crop_sg_questions(doc, quiz_slug):
                 next_pd = pages_data[curr_p]
                 if next_pd['ans']:
                     # Reached answer on this page
-                    cont_bottom = next_pd['ans'][0]['top_y'] - 8.0
+                    cont_bottom = next_pd['ans'][0]['top_y'] - (20.0 if quiz_slug == 'app1_unit1_unit_1_progress_check' else 8.0)
                     segments.append({'p_idx': curr_p, 'top_y': header_margin, 'bottom_y': cont_bottom})
                     break
                 elif next_pd['qs']:
@@ -646,7 +670,7 @@ def crop_sg_questions(doc, quiz_slug):
                     
         imgs = []
         for s in segments:
-            page = doc[s['p_idx']]
+            page = source_pages[s['p_idx']]
             w, h = page.get_size()
             pil = page.render(scale=scale).to_pil()
             top_px = int(max(0, s['top_y'] * scale))
@@ -672,7 +696,8 @@ def crop_sg_questions(doc, quiz_slug):
             img_fname = f"{quiz_slug}_q{qnum}.png"
             full_out = os.path.join(CARDS_DIR, img_fname)
             card.save(full_out, "PNG")
-            card_paths[qnum] = f"assets/cards/{img_fname}"
+            version = '?v=20261101_v4' if quiz_slug == 'app1_unit1_unit_1_progress_check' else ''
+            card_paths[qnum] = f"assets/cards/{img_fname}{version}"
             
     return card_paths
 

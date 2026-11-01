@@ -1764,7 +1764,7 @@ window.EXAM_DATA = {
               "questions": [
                 {
                   "number": 1,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q1.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q1.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1787,7 +1787,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 2,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q2.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q2.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1810,7 +1810,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q3.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q3.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1833,7 +1833,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 4,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q4.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q4.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1856,7 +1856,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 5,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q5.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q5.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1879,7 +1879,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 6,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q6.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q6.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1902,7 +1902,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 7,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q7.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q7.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1925,7 +1925,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 8,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q8.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q8.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1948,7 +1948,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 9,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q9.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q9.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1971,7 +1971,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 10,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q10.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q10.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -1994,7 +1994,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 11,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q11.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q11.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -2017,7 +2017,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 12,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q12.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q12.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -2040,7 +2040,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 13,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q13.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q13.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -2063,7 +2063,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 14,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q14.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q14.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -2086,7 +2086,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 15,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q15.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q15.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -2109,7 +2109,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 16,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q16.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q16.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -2132,7 +2132,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 17,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q17.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q17.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
@@ -2155,7 +2155,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 18,
-                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q18.png",
+                  "card_image": "assets/cards/app1_unit1_unit_1_progress_check_q18.png?v=20261101_v4",
                   "choices": [
                     {
                       "letter": "A",
