@@ -1843,3 +1843,62 @@ The folder now exclusively contains the 6 finalized, 100% sanitized documents:
 4. `APPC Unit 1 Midterm Review (with Answers).pdf` (11 pages) • 100% Clean
 5. `APPC Unit 2 Midterm Review (with Answers).pdf` (9 pages) • 100% Clean
 6. `Midterm Reviews - Complete Answer Key Guide (APP1 & APPC).pdf` (3 pages) • 100% Clean
+
+
+---
+
+## 28. Q1 Exam Review (APP1 Unit 2) Ingestion & Question Audit
+
+### A. Purpose & Source Material
+Ingested and audited the 22-question AP Physics 1 Quarter 1 Exam as a cumulative review module into **Unit 2** under **AP Physics 1: Algebra-Based**.
+
+- **Test Booklet**: `C:\Users\fahad\Desktop\MT REVIEWs\Q1 Exam Updated.pdf` (15 pages • 22 Questions)
+- **Scoring Guide**: `C:\Users\fahad\Desktop\MT REVIEWs\Q1 Exam Answers.pdf` (20 pages • Official AP Classroom Scoring Guide with rationales)
+- **Target Slug / ID**: `app1_unit2_q1_exam_review`
+- **Assessment Title**: `Q1 Exam Review`
+- **Location**: `subjects["APP1"]["units"]["Unit 2"]["assessments"]` (ordered logically immediately following Unit 2 Mid-Term Reviews and preceding the Progress Check)
+
+### B. High-Fidelity Cropping & Multi-Page Stitching Pipeline (`scripts/ingest_q1_exam_review.py`)
+1. **Rendering & Scale**: Rendered all pages using `pypdfium2` at `scale=2.0` (144 DPI equivalent) for sharp vector diagrams, equations, and mathematical symbols.
+2. **Divider-Bounded Isolation**: Used the PDF's native horizontal divider lines (`y=187.4 pt` header line, `y=507.9 pt`, `y=416.1 pt`, `y=422.6 pt`, `y=374.5 pt`, `y=682.8 pt`, and `y=758.0 pt` footer lines) to guarantee zero header/footer noise and ensure that adjacent items are never clipped.
+3. **Multi-Page Question Stitching**:
+   - **Question 2**: Stitched Page 1 stem (`y=510.0..620.0`) with Page 2 choices table (`y=80.0..500.0`).
+   - **Question 7**: Stitched Page 5 position/velocity graphs and stem (`y=80.0..410.0`) with Page 6 choices table (`y=80.0..436.0`).
+   - **Question 9**: Stitched Page 7 dual-scenario diagram & stem (`y=82.0..500.0`) with Page 8 graph choices A–D (`y=78.0..545.0`).
+   - **Question 10**: Stitched Page 7 Scenario 2 pulling diagram & stem (`y=240.0..455.0`) with Page 8 Newton's second law prompt & algebraic choices (`y=552.0..678.0`) so the student has the scenario diagram directly on the card.
+   - **Question 13**: Stitched Page 10 ramp diagram & stem (`y=548.0..725.0`) with Page 11 equation choices A–D (`y=78.0..152.0`).
+4. **Sharpening & Padding**: Applied subtle print-grade unsharp masking (`radius=1.2, percent=28, threshold=5`) and an expanded 10 px white boundary (`ImageOps.expand(border=10, fill="white")`) to ensure border-to-edge breathing room.
+
+### C. Master 22-Question Audit Table
+
+| # | Topic / Concept | Choices | Key | Detailed Physics Rationale |
+| :-: | :--- | :-: | :-: | :--- |
+| **1** | Position vs. Time Kinematics | A–D | **A** | Object 1 reverses direction to return to initial position; distance traveled exceeds unidirectional displacement of Object 2. |
+| **2** | Horizontal Projectile Motion | A–E | **E** | Vertical free fall acceleration is $g$ for both; launch height is identical with zero initial vertical velocity, so fall times and accelerations are equal. |
+| **3** | Planetary Free Fall Graph | A–D | **B** | Constant gravitational acceleration on another planet fit from $h(t) = h_0 - \frac{1}{2}gt^2$ parabolic curvature yields $g \approx 8\text{ m/s}^2$. |
+| **4** | SHM Velocity-Time Tangent | A–D | **D** | Instantaneous acceleration is the derivative $a = \frac{dv}{dt}$, given by the tangent slope to the sinusoidal curve at $t = 0.7\text{ s}$. |
+| **5** | Circular Arc Projectile Apex | A–D | **C** | Block launches at angle $\theta$ with speed $v_0$; at the apex $v_y = 0$, leaving purely horizontal speed $v_x = v_0\cos\theta$. |
+| **6** | Average Speed from $x(t)$ | A–E | **D** | Average speed is $v_{\text{avg}} = \frac{\Delta x}{\Delta t} = \frac{x(2\text{ s}) - x(1\text{ s})}{1\text{ s}} = 6\text{ m/s}$. |
+| **7** | Motion Graphs Speed & Accel | A–D | **C** | Velocity magnitude decreases toward zero (decreasing speed); slope of velocity vs. time graph indicates positive acceleration. |
+| **8** | River Crossing Relative Velocity | A–D | **D** | Upstream component must cancel river current ($v\sin\theta = v_{\text{river}}$), crossing perpendicular speed is $v\cos\theta$, and time is $d / (v\cos\theta)$. |
+| **9** | Push vs. Pull Friction Slopes | A–D | **C** | Pushing down increases normal force ($F_N = mg + F\sin\theta$) and friction; pulling up decreases normal force and friction. Scenario 2 acceleration is larger (steeper slope). |
+| **10** | Pulling Acceleration Expression | A–D | **A** | Horizontal Newton's law: $F\cos\theta - \mu_k(mg - F\sin\theta) = ma \implies a = \frac{F\cos\theta - \mu_k(mg - F\sin\theta)}{m}$. |
+| **11** | Glued vs. Spring Incline Blocks | A–D | **C** | Internal spring forces cancel for the 2-block system (net system force unchanged); on Block Y individually, the spring adds a force (net force on Y is different). |
+| **12** | String vs. Spring Pulley Carts | A–D | **D** | Inextensible string maintains uniform tension; spring oscillates and stretches with time-dependent tension, causing different time-dependent acceleration. |
+| **13** | Incline Box Moving Upward | A–D | **D** | Sliding up an incline, kinetic friction and gravity component both direct down the plane ($-f_k - mg\sin\theta = ma$). |
+| **14** | Contact Force Between Blocks | A–E | **B** | Applied contact force of $2.0\text{ N}$ on $2.0\text{ kg}$ block gives $a = \frac{F}{m} = \frac{2.0\text{ N}}{2.0\text{ kg}} = 1.0\text{ m/s}^2$. |
+| **15** | Elevator Accelerating Upward | A–D | **D** | Free-body analysis on top box: $F_N - Mg = Ma \implies F_N = M(a + g)$. |
+| **16** | 3 Blocks Free-Body Diagram | A–D | **C** | Middle block experiences contact force from block 1 to right, contact force from block 3 to left, normal force up, gravity down, and friction to left. |
+| **17** | Fixed Block Pulley Tension | A–D | **B** | System in static equilibrium has string tension $T = m_C g$; fixed block A exerts balancing force $m_C g$ on block B. |
+| **18** | High-Altitude Moon Gravity | A–D | **A** | Gravitational force follows $F_g = \frac{G M m}{r^2}$; rising to height $R$ ($r = 2R$) experiences a downward, decreasing gravitational force. |
+| **19** | Whirling Toy Centripetal Accel | A–E | **B** | Orbital speed $v = \frac{2\pi R}{T}$; centripetal acceleration $a_c = \frac{v^2}{R} = \frac{4\pi^2 R}{T^2}$. |
+| **20** | Dual-String Whirling Net Force | A–E | **A** | Vertical components of tension balance gravity; horizontal components provide purely centripetal force $F_{\text{net}} = \frac{m v^2}{r}$. |
+| **21** | Circular Valley Normal Force | A–D | **D** | In upward circular curve at bottom of hill, $F_N - mg = \frac{m v^2}{R} \implies F_N > mg$ because the cart is experiencing upward centripetal acceleration. |
+| **22** | String Tension vs. Radius Curve | A–D | **D** | Centripetal force $F = \frac{m v^2}{r} \propto \frac{1}{r}$ at constant speed; represented by the inverse decay curve in graph D. |
+
+### D. File Artifacts & System Updates
+- `assets/cards/app1_unit2_q1_exam_review_q1.png` through `..._q22.png`: 22 generated cards at $1104\text{ px}$ width with sharp typography.
+- `scripts/ingest_q1_exam_review.py`: Automated ingestion engine for replication on any workstation or IDE.
+- `data/exams.json` & `data/exams_bundle.js`: Updated with 22-question assessment metadata in APP1 Unit 2.
+- `data/answer_keys.json` & `data/answer_keys.js`: Offline enclave keys populated with official Scoring Guide explanations.
+- `data/supabase_seed.sql`: Appended SQL upsert statement for cloud database synchronization.

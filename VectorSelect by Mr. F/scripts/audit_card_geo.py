@@ -12,7 +12,7 @@ from pathlib import Path
 from PIL import Image
 import csv
 
-CARDS_DIR = Path(r"D:\APPS\VectorSelect by Mr. F\assets\cards")
+CARDS_DIR = Path(__file__).resolve().parent.parent / "assets" / "cards"
 WHITE_THRESHOLD = 240       # 0-255, > this is considered white
 MIN_NONWHITE_RATIO = 0.04   # at least 4% non-white pixels in bottom band
 BOTTOM_BAND_PCT = 0.18      # inspect bottom 18% of height

@@ -21,7 +21,7 @@ from pathlib import Path
 import pytesseract
 from PIL import Image, ImageFilter
 
-CARDS_DIR = Path(r"D:\APPS\VectorSelect by Mr. F\assets\cards")
+CARDS_DIR = Path(__file__).resolve().parent.parent / "assets" / "cards"
 MIN_CHOICE_D_CHARS = 8      # minimum visible chars after "(D)" to consider it unclipped
 BOTTOM_BAND_PCT = 0.35      # scan bottom 35% of image
 MIN_WHITE_MARGIN_PX = 3     # min white margin at very bottom edge

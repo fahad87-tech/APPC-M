@@ -35,7 +35,9 @@ window.EXAM_DATA = {
                       "text": "units, because the object moves a distance of units followed by a distance of units."
                     }
                   ],
-                  "question_id": "app1_unit1_1_1_q1"
+                  "question_id": "app1_unit1_1_1_q1",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 2,
@@ -58,7 +60,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit1_1_1_q2"
+                  "question_id": "app1_unit1_1_1_q2",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 3,
@@ -81,7 +85,9 @@ window.EXAM_DATA = {
                       "text": "and the vectors have opposite directions."
                     }
                   ],
-                  "question_id": "app1_unit1_1_1_q3"
+                  "question_id": "app1_unit1_1_1_q3",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 4,
@@ -104,7 +110,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit1_1_1_q4"
+                  "question_id": "app1_unit1_1_1_q4",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 5,
@@ -127,7 +135,9 @@ window.EXAM_DATA = {
                       "text": "The claim is incorrect, because the values of and must be equal since the magnitude of a vector sum\r\nmust equal the sum of the individual vector magnitudes.\r\nScoring Guide\r\n1.1"
                     }
                   ],
-                  "question_id": "app1_unit1_1_1_q5"
+                  "question_id": "app1_unit1_1_1_q5",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 6,
@@ -150,7 +160,9 @@ window.EXAM_DATA = {
                       "text": "to the left"
                     }
                   ],
-                  "question_id": "app1_unit1_1_1_q6"
+                  "question_id": "app1_unit1_1_1_q6",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 7,
@@ -173,7 +185,9 @@ window.EXAM_DATA = {
                       "text": "Car"
                     }
                   ],
-                  "question_id": "app1_unit1_1_1_q7"
+                  "question_id": "app1_unit1_1_1_q7",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 8,
@@ -196,7 +210,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_1_q8"
+                  "question_id": "app1_unit1_1_1_q8",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 9,
@@ -219,7 +235,9 @@ window.EXAM_DATA = {
                       "text": "No, because the vectors are in opposite directions, which means the velocities are different."
                     }
                   ],
-                  "question_id": "app1_unit1_1_1_q9"
+                  "question_id": "app1_unit1_1_1_q9",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 }
               ]
             },
@@ -251,7 +269,9 @@ window.EXAM_DATA = {
                       "text": "Equal to because the cart has an average acceleration of over an interval of ."
                     }
                   ],
-                  "question_id": "app1_unit1_1_2_q1"
+                  "question_id": "app1_unit1_1_2_q1",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -274,7 +294,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_2_q2"
+                  "question_id": "app1_unit1_1_2_q2",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 3,
@@ -297,7 +319,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_2_q3"
+                  "question_id": "app1_unit1_1_2_q3",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -320,7 +344,9 @@ window.EXAM_DATA = {
                       "text": "The transition between intervals and ."
                     }
                   ],
-                  "question_id": "app1_unit1_1_2_q4"
+                  "question_id": "app1_unit1_1_2_q4",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 5,
@@ -343,7 +369,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_2_q5"
+                  "question_id": "app1_unit1_1_2_q5",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -366,7 +394,9 @@ window.EXAM_DATA = {
                       "text": "No, because the cart spends more time with a positive acceleration than with a negative acceleration."
                     }
                   ],
-                  "question_id": "app1_unit1_1_2_q6"
+                  "question_id": "app1_unit1_1_2_q6",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 7,
@@ -389,7 +419,9 @@ window.EXAM_DATA = {
                       "text": "None of the carts has a leftward acceleration."
                     }
                   ],
-                  "question_id": "app1_unit1_1_2_q7"
+                  "question_id": "app1_unit1_1_2_q7",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -412,7 +444,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.2"
                     }
                   ],
-                  "question_id": "app1_unit1_1_2_q8"
+                  "question_id": "app1_unit1_1_2_q8",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 9,
@@ -435,7 +469,9 @@ window.EXAM_DATA = {
                       "text": "Case , because the toy travels for a longer time"
                     }
                   ],
-                  "question_id": "app1_unit1_1_2_q9"
+                  "question_id": "app1_unit1_1_2_q9",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             },
@@ -467,7 +503,9 @@ window.EXAM_DATA = {
                       "text": "The cart is moving right with speed ."
                     }
                   ],
-                  "question_id": "app1_unit1_1_3_q1"
+                  "question_id": "app1_unit1_1_3_q1",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 2,
@@ -490,7 +528,9 @@ window.EXAM_DATA = {
                       "text": "It cannot be determined without knowing the distance traveled by the cars."
                     }
                   ],
-                  "question_id": "app1_unit1_1_3_q2"
+                  "question_id": "app1_unit1_1_3_q2",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 3,
@@ -513,7 +553,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_3_q3"
+                  "question_id": "app1_unit1_1_3_q3",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 4,
@@ -536,7 +578,9 @@ window.EXAM_DATA = {
                       "text": "The car is speeding up at a constant rate, then slows down at a constant rate"
                     }
                   ],
-                  "question_id": "app1_unit1_1_3_q4"
+                  "question_id": "app1_unit1_1_3_q4",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 5,
@@ -559,7 +603,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_3_q5"
+                  "question_id": "app1_unit1_1_3_q5",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 6,
@@ -582,7 +628,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_3_q6"
+                  "question_id": "app1_unit1_1_3_q6",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 7,
@@ -605,7 +653,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.3"
                     }
                   ],
-                  "question_id": "app1_unit1_1_3_q7"
+                  "question_id": "app1_unit1_1_3_q7",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 8,
@@ -628,7 +678,9 @@ window.EXAM_DATA = {
                       "text": "The velocity is in the -direction and the acceleration is in the -direction"
                     }
                   ],
-                  "question_id": "app1_unit1_1_3_q8"
+                  "question_id": "app1_unit1_1_3_q8",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 9,
@@ -651,7 +703,9 @@ window.EXAM_DATA = {
                       "text": "Average velocity"
                     }
                   ],
-                  "question_id": "app1_unit1_1_3_q9"
+                  "question_id": "app1_unit1_1_3_q9",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             },
@@ -683,7 +737,9 @@ window.EXAM_DATA = {
                       "text": "The passenger is stationary relative to the shore because the boat is moving at relative to the\r\nwater and the passenger is moving at in the opposite direction relative to the water."
                     }
                   ],
-                  "question_id": "app1_unit1_1_4_q1"
+                  "question_id": "app1_unit1_1_4_q1",
+                  "concept": "relative_motion",
+                  "concept_label": "Relative Motion & Reference Frames"
                 },
                 {
                   "number": 2,
@@ -695,18 +751,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "No, because the student, bus, and observer are all included in Earth\u2019s reference frame so the student and\r\nbus must be traveling at the same speed."
+                      "text": "No, because the student, bus, and observer are all included in Earth’s reference frame so the student and\r\nbus must be traveling at the same speed."
                     },
                     {
                       "letter": "C",
-                      "text": "Yes, because according to the stationary observer, the student\u2019s velocity is the velocity of the bus plus\r\nthe velocity of the student relative to the bus."
+                      "text": "Yes, because according to the stationary observer, the student’s velocity is the velocity of the bus plus\r\nthe velocity of the student relative to the bus."
                     },
                     {
                       "letter": "D",
-                      "text": "Yes, because according to the stationary observer, the student\u2019s velocity is the difference between the\r\nvelocity of the bus and the velocity of the student relative to the bus."
+                      "text": "Yes, because according to the stationary observer, the student’s velocity is the difference between the\r\nvelocity of the bus and the velocity of the student relative to the bus."
                     }
                   ],
-                  "question_id": "app1_unit1_1_4_q2"
+                  "question_id": "app1_unit1_1_4_q2",
+                  "concept": "relative_motion",
+                  "concept_label": "Relative Motion & Reference Frames"
                 },
                 {
                   "number": 3,
@@ -726,10 +784,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Yes, because both observers are external to the rowboat\u2019s frame of reference and will therefore measure\r\nzero acceleration."
+                      "text": "Yes, because both observers are external to the rowboat’s frame of reference and will therefore measure\r\nzero acceleration."
                     }
                   ],
-                  "question_id": "app1_unit1_1_4_q3"
+                  "question_id": "app1_unit1_1_4_q3",
+                  "concept": "relative_motion",
+                  "concept_label": "Relative Motion & Reference Frames"
                 },
                 {
                   "number": 4,
@@ -752,7 +812,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit1_1_4_q4"
+                  "question_id": "app1_unit1_1_4_q4",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 5,
@@ -775,7 +837,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_4_q5"
+                  "question_id": "app1_unit1_1_4_q5",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 6,
@@ -798,7 +862,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_4_q6"
+                  "question_id": "app1_unit1_1_4_q6",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 7,
@@ -821,7 +887,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_4_q7"
+                  "question_id": "app1_unit1_1_4_q7",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 8,
@@ -844,7 +912,9 @@ window.EXAM_DATA = {
                       "text": "seconds"
                     }
                   ],
-                  "question_id": "app1_unit1_1_4_q8"
+                  "question_id": "app1_unit1_1_4_q8",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 9,
@@ -867,7 +937,9 @@ window.EXAM_DATA = {
                       "text": "to the west"
                     }
                   ],
-                  "question_id": "app1_unit1_1_4_q9"
+                  "question_id": "app1_unit1_1_4_q9",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 }
               ]
             },
@@ -899,7 +971,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_5_q1"
+                  "question_id": "app1_unit1_1_5_q1",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 2,
@@ -922,7 +996,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_5_q2"
+                  "question_id": "app1_unit1_1_5_q2",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 3,
@@ -945,7 +1021,9 @@ window.EXAM_DATA = {
                       "text": "No, because the less massive marble will have a smaller initial vertical velocity."
                     }
                   ],
-                  "question_id": "app1_unit1_1_5_q3"
+                  "question_id": "app1_unit1_1_5_q3",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 4,
@@ -968,7 +1046,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_5_q4"
+                  "question_id": "app1_unit1_1_5_q4",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 5,
@@ -991,7 +1071,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_1_5_q5"
+                  "question_id": "app1_unit1_1_5_q5",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 6,
@@ -1014,7 +1096,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "app1_unit1_1_5_q6"
+                  "question_id": "app1_unit1_1_5_q6",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 7,
@@ -1037,7 +1121,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.5"
                     }
                   ],
-                  "question_id": "app1_unit1_1_5_q7"
+                  "question_id": "app1_unit1_1_5_q7",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 8,
@@ -1060,7 +1146,9 @@ window.EXAM_DATA = {
                       "text": ", because the ball on the moon travels less distance horizontally each second than the ball on the Earth"
                     }
                   ],
-                  "question_id": "app1_unit1_1_5_q8"
+                  "question_id": "app1_unit1_1_5_q8",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 9,
@@ -1083,7 +1171,9 @@ window.EXAM_DATA = {
                       "text": "The flight time cannot be compared without knowing the relative initial speeds."
                     }
                   ],
-                  "question_id": "app1_unit1_1_5_q9"
+                  "question_id": "app1_unit1_1_5_q9",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 }
               ]
             },
@@ -1115,7 +1205,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_section_2_quiz_q1"
+                  "question_id": "app1_unit1_section_2_quiz_q1",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -1138,7 +1230,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_section_2_quiz_q2"
+                  "question_id": "app1_unit1_section_2_quiz_q2",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             },
@@ -1171,7 +1265,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 1 from official review materials."
+                  "explanation": "Mid-Term Review Question 1 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -1199,7 +1295,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "E",
-                  "explanation": "Mid-Term Review Question 2 from official review materials."
+                  "explanation": "Mid-Term Review Question 2 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 3,
@@ -1223,7 +1321,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 3 from official review materials."
+                  "explanation": "Mid-Term Review Question 3 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -1251,7 +1351,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 4 from official review materials."
+                  "explanation": "Mid-Term Review Question 4 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 5,
@@ -1275,7 +1377,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 5 from official review materials."
+                  "explanation": "Mid-Term Review Question 5 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -1299,7 +1403,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 6 from official review materials."
+                  "explanation": "Mid-Term Review Question 6 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 7,
@@ -1327,7 +1433,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 7 from official review materials."
+                  "explanation": "Mid-Term Review Question 7 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -1351,7 +1459,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 8 from official review materials."
+                  "explanation": "Mid-Term Review Question 8 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 9,
@@ -1379,7 +1489,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "E",
-                  "explanation": "Mid-Term Review Question 9 from official review materials."
+                  "explanation": "Mid-Term Review Question 9 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 10,
@@ -1407,7 +1519,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 10 from official review materials."
+                  "explanation": "Mid-Term Review Question 10 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 11,
@@ -1431,7 +1545,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 11 from official review materials."
+                  "explanation": "Mid-Term Review Question 11 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             },
@@ -1463,7 +1579,9 @@ window.EXAM_DATA = {
                       "text": "tD"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q1"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q1",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -1490,7 +1608,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q2"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q2",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 3,
@@ -1517,7 +1637,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q3"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q3",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -1540,7 +1662,9 @@ window.EXAM_DATA = {
                       "text": "Horizontal Displacement Vertical Velocity Component"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q4"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q4",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 5,
@@ -1552,18 +1676,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "\u221a2 m/s"
+                      "text": "√2 m/s"
                     },
                     {
                       "letter": "C",
-                      "text": "3\r\n\u221a2\r\nm/s"
+                      "text": "3\r\n√2\r\nm/s"
                     },
                     {
                       "letter": "D",
                       "text": "3\r\n2\r\nm/s"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q5"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q5",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -1583,10 +1709,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "at\r\n2\r\n2 \u2212\r\na\r\n2t\r\n2\r\n2g"
+                      "text": "at\r\n2\r\n2 −\r\na\r\n2t\r\n2\r\n2g"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q6"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q6",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 7,
@@ -1609,7 +1737,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q7"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q7",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -1632,7 +1762,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q8"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q8",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 9,
@@ -1655,7 +1787,9 @@ window.EXAM_DATA = {
                       "text": "22 m/s"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q9"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q9",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 10,
@@ -1663,7 +1797,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "\u221ahv0"
+                      "text": "√hv0"
                     },
                     {
                       "letter": "B",
@@ -1675,14 +1809,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "2h/g\r\n(E) \u221a2h/g\r\no\r\n0\r\n0\nUnit 1 - TEST\r\nScoring Guide"
+                      "text": "2h/g\r\n(E) √2h/g\r\no\r\n0\r\n0\nUnit 1 - TEST\r\nScoring Guide"
                     },
                     {
                       "letter": "E",
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q10"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q10",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 11,
@@ -1705,7 +1841,9 @@ window.EXAM_DATA = {
                       "text": "45 m"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q11"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q11",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 12,
@@ -1728,7 +1866,9 @@ window.EXAM_DATA = {
                       "text": "S3 > S1 > S2"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q12"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q12",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 13,
@@ -1751,7 +1891,9 @@ window.EXAM_DATA = {
                       "text": "The relative position of the ball depends on the horizontal speed of the block."
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_practice_exam_q13"
+                  "question_id": "app1_unit1_unit_1_practice_exam_q13",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 }
               ]
             },
@@ -1783,7 +1925,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q1"
+                  "question_id": "app1_unit1_unit_1_progress_check_q1",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -1806,7 +1950,9 @@ window.EXAM_DATA = {
                       "text": "The cart moved first in the negative direction and then in the positive direction because the velocity of\r\nthe cart was negative and then changed to positive."
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q2"
+                  "question_id": "app1_unit1_unit_1_progress_check_q2",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 3,
@@ -1829,7 +1975,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 1 Progress Check: MCQ\r\nPage 2 of 14 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q3"
+                  "question_id": "app1_unit1_unit_1_progress_check_q3",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -1852,7 +2000,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q4"
+                  "question_id": "app1_unit1_unit_1_progress_check_q4",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 5,
@@ -1875,7 +2025,9 @@ window.EXAM_DATA = {
                       "text": "Find the average velocity between and and divide that value by ."
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q5"
+                  "question_id": "app1_unit1_unit_1_progress_check_q5",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -1898,7 +2050,9 @@ window.EXAM_DATA = {
                       "text": "No, because the car had to go faster in the first time interval since it was at rest for the first second."
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q6"
+                  "question_id": "app1_unit1_unit_1_progress_check_q6",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 7,
@@ -1921,7 +2075,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q7"
+                  "question_id": "app1_unit1_unit_1_progress_check_q7",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -1944,7 +2100,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q8"
+                  "question_id": "app1_unit1_unit_1_progress_check_q8",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 9,
@@ -1967,7 +2125,9 @@ window.EXAM_DATA = {
                       "text": "The object is accelerating at both and ."
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q9"
+                  "question_id": "app1_unit1_unit_1_progress_check_q9",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 10,
@@ -1990,7 +2150,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q10"
+                  "question_id": "app1_unit1_unit_1_progress_check_q10",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 11,
@@ -2013,7 +2175,9 @@ window.EXAM_DATA = {
                       "text": "The acceleration is zero because only the position is changing, while acceleration is the change in the\r\nvelocity."
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q11"
+                  "question_id": "app1_unit1_unit_1_progress_check_q11",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 12,
@@ -2036,7 +2200,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q12"
+                  "question_id": "app1_unit1_unit_1_progress_check_q12",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 13,
@@ -2059,7 +2225,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q13"
+                  "question_id": "app1_unit1_unit_1_progress_check_q13",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 14,
@@ -2082,7 +2250,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q14"
+                  "question_id": "app1_unit1_unit_1_progress_check_q14",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 15,
@@ -2105,7 +2275,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q15"
+                  "question_id": "app1_unit1_unit_1_progress_check_q15",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 16,
@@ -2128,7 +2300,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q16"
+                  "question_id": "app1_unit1_unit_1_progress_check_q16",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 17,
@@ -2151,7 +2325,9 @@ window.EXAM_DATA = {
                       "text": "The relationship between and cannot be determined without knowing the relative heights of the\r\ntables and the initial speed of the ball in Figure 2."
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q17"
+                  "question_id": "app1_unit1_unit_1_progress_check_q17",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 18,
@@ -2174,7 +2350,9 @@ window.EXAM_DATA = {
                       "text": "It increases from zero to a maximum value at a rate with an increasing magnitude."
                     }
                   ],
-                  "question_id": "app1_unit1_unit_1_progress_check_q18"
+                  "question_id": "app1_unit1_unit_1_progress_check_q18",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             }
@@ -2211,7 +2389,9 @@ window.EXAM_DATA = {
                       "text": "It cannot be determined without knowing the mass of the third block."
                     }
                   ],
-                  "question_id": "app1_unit2_2_1_q1"
+                  "question_id": "app1_unit2_2_1_q1",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -2234,7 +2414,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_1_q2"
+                  "question_id": "app1_unit2_2_1_q2",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 3,
@@ -2257,7 +2439,9 @@ window.EXAM_DATA = {
                       "text": "It cannot be determined without knowing the exact ratio of the diameters of the nail heads."
                     }
                   ],
-                  "question_id": "app1_unit2_2_1_q3"
+                  "question_id": "app1_unit2_2_1_q3",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 4,
@@ -2280,7 +2464,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_1_q4"
+                  "question_id": "app1_unit2_2_1_q4",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 5,
@@ -2303,7 +2489,9 @@ window.EXAM_DATA = {
                       "text": "Moves to the right by an amount greater than"
                     }
                   ],
-                  "question_id": "app1_unit2_2_1_q5"
+                  "question_id": "app1_unit2_2_1_q5",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -2326,7 +2514,9 @@ window.EXAM_DATA = {
                       "text": "meters\r\nScoring Guide\r\n2.1"
                     }
                   ],
-                  "question_id": "app1_unit2_2_1_q6"
+                  "question_id": "app1_unit2_2_1_q6",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 7,
@@ -2349,7 +2539,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_1_q7"
+                  "question_id": "app1_unit2_2_1_q7",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -2372,7 +2564,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_1_q8"
+                  "question_id": "app1_unit2_2_1_q8",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -2395,7 +2589,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_1_q9"
+                  "question_id": "app1_unit2_2_1_q9",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 }
               ]
             },
@@ -2427,7 +2623,9 @@ window.EXAM_DATA = {
                       "text": "It could either increase or decrease depending on the materials that the crate and floor are made of."
                     }
                   ],
-                  "question_id": "app1_unit2_2_2_q1"
+                  "question_id": "app1_unit2_2_2_q1",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 2,
@@ -2450,7 +2648,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_2_q2"
+                  "question_id": "app1_unit2_2_2_q2",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 3,
@@ -2473,7 +2673,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_2_q3"
+                  "question_id": "app1_unit2_2_2_q3",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 4,
@@ -2496,7 +2698,9 @@ window.EXAM_DATA = {
                       "text": "No, because the magnitudes of all the forces are not equal"
                     }
                   ],
-                  "question_id": "app1_unit2_2_2_q4"
+                  "question_id": "app1_unit2_2_2_q4",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 5,
@@ -2519,7 +2723,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_2_q5"
+                  "question_id": "app1_unit2_2_2_q5",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 6,
@@ -2542,7 +2748,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_2_q6"
+                  "question_id": "app1_unit2_2_2_q6",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 7,
@@ -2565,7 +2773,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_2_q7"
+                  "question_id": "app1_unit2_2_2_q7",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 8,
@@ -2588,7 +2798,9 @@ window.EXAM_DATA = {
                       "text": "Down and to the left, because it will balance the downward gravitational force"
                     }
                   ],
-                  "question_id": "app1_unit2_2_2_q8"
+                  "question_id": "app1_unit2_2_2_q8",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 9,
@@ -2611,7 +2823,9 @@ window.EXAM_DATA = {
                       "text": "The vertical forces are unbalanced."
                     }
                   ],
-                  "question_id": "app1_unit2_2_2_q9"
+                  "question_id": "app1_unit2_2_2_q9",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 }
               ]
             },
@@ -2632,7 +2846,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "No, because the step exerts a force on the person greater than the person\u2019s weight."
+                      "text": "No, because the step exerts a force on the person greater than the person’s weight."
                     },
                     {
                       "letter": "C",
@@ -2643,7 +2857,9 @@ window.EXAM_DATA = {
                       "text": "Yes, because the person and the step create an interacting force pair."
                     }
                   ],
-                  "question_id": "app1_unit2_2_3_q1"
+                  "question_id": "app1_unit2_2_3_q1",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 2,
@@ -2666,7 +2882,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_3_q2"
+                  "question_id": "app1_unit2_2_3_q2",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 3,
@@ -2689,7 +2907,9 @@ window.EXAM_DATA = {
                       "text": "The magnitude of the force that the nail exerts on the hammer is equal to the force that the wood exerts\r\non the nail."
                     }
                   ],
-                  "question_id": "app1_unit2_2_3_q3"
+                  "question_id": "app1_unit2_2_3_q3",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 4,
@@ -2712,7 +2932,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_3_q4"
+                  "question_id": "app1_unit2_2_3_q4",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 5,
@@ -2735,7 +2957,9 @@ window.EXAM_DATA = {
                       "text": "The tension in String is equal throughout its length because tension is always the same through a\r\nstring.\r\nScoring Guide\r\n2.3"
                     }
                   ],
-                  "question_id": "app1_unit2_2_3_q5"
+                  "question_id": "app1_unit2_2_3_q5",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 6,
@@ -2755,10 +2979,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": ", because the chain links are an interacting Newton\u2019s third law pair."
+                      "text": ", because the chain links are an interacting Newton’s third law pair."
                     }
                   ],
-                  "question_id": "app1_unit2_2_3_q6"
+                  "question_id": "app1_unit2_2_3_q6",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 7,
@@ -2781,7 +3007,9 @@ window.EXAM_DATA = {
                       "text": "None of the four forces are an interacting force pair because all four forces are exerted on the same\r\nobject."
                     }
                   ],
-                  "question_id": "app1_unit2_2_3_q7"
+                  "question_id": "app1_unit2_2_3_q7",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 8,
@@ -2804,7 +3032,9 @@ window.EXAM_DATA = {
                       "text": "The tensions cannot be compared without knowing the relative masses of the boxes."
                     }
                   ],
-                  "question_id": "app1_unit2_2_3_q8"
+                  "question_id": "app1_unit2_2_3_q8",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 9,
@@ -2827,7 +3057,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_3_q9"
+                  "question_id": "app1_unit2_2_3_q9",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 }
               ]
             },
@@ -2848,7 +3080,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Yes, because the astronaut\u2019s vertical velocity is instantaneously zero."
+                      "text": "Yes, because the astronaut’s vertical velocity is instantaneously zero."
                     },
                     {
                       "letter": "C",
@@ -2859,7 +3091,9 @@ window.EXAM_DATA = {
                       "text": "No, because there is a downward net force on the astronaut."
                     }
                   ],
-                  "question_id": "app1_unit2_2_4_q1"
+                  "question_id": "app1_unit2_2_4_q1",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 2,
@@ -2882,7 +3116,9 @@ window.EXAM_DATA = {
                       "text": "The tension must be greater than ."
                     }
                   ],
-                  "question_id": "app1_unit2_2_4_q2"
+                  "question_id": "app1_unit2_2_4_q2",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 3,
@@ -2905,7 +3141,9 @@ window.EXAM_DATA = {
                       "text": "The velocity of the box changes because the sum of the horizontal components of the forces no longer\r\nequals zero."
                     }
                   ],
-                  "question_id": "app1_unit2_2_4_q3"
+                  "question_id": "app1_unit2_2_4_q3",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 4,
@@ -2928,7 +3166,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit2_2_4_q4"
+                  "question_id": "app1_unit2_2_4_q4",
+                  "concept": "newton_1d",
+                  "concept_label": "Newton's First Law (Inertia)"
                 },
                 {
                   "number": 5,
@@ -2951,7 +3191,9 @@ window.EXAM_DATA = {
                       "text": "The puck will slide with a constant velocity."
                     }
                   ],
-                  "question_id": "app1_unit2_2_4_q5"
+                  "question_id": "app1_unit2_2_4_q5",
+                  "concept": "newton_1d",
+                  "concept_label": "Newton's First Law (Inertia)"
                 },
                 {
                   "number": 6,
@@ -2974,7 +3216,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2.4"
                     }
                   ],
-                  "question_id": "app1_unit2_2_4_q6"
+                  "question_id": "app1_unit2_2_4_q6",
+                  "concept": "newton_1d",
+                  "concept_label": "Newton's First Law (Inertia)"
                 },
                 {
                   "number": 7,
@@ -2997,7 +3241,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_4_q7"
+                  "question_id": "app1_unit2_2_4_q7",
+                  "concept": "newton_1d",
+                  "concept_label": "Newton's First Law (Inertia)"
                 },
                 {
                   "number": 8,
@@ -3020,7 +3266,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_4_q8"
+                  "question_id": "app1_unit2_2_4_q8",
+                  "concept": "newton_1d",
+                  "concept_label": "Newton's First Law (Inertia)"
                 },
                 {
                   "number": 9,
@@ -3043,7 +3291,9 @@ window.EXAM_DATA = {
                       "text": "To the left only, because the leftward force has the greatest magnitude of the three forces."
                     }
                   ],
-                  "question_id": "app1_unit2_2_4_q9"
+                  "question_id": "app1_unit2_2_4_q9",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 }
               ]
             },
@@ -3075,7 +3325,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_5_q1"
+                  "question_id": "app1_unit2_2_5_q1",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -3098,7 +3350,9 @@ window.EXAM_DATA = {
                       "text": "The acceleration of the center of mass depends on the relative speeds of the stars."
                     }
                   ],
-                  "question_id": "app1_unit2_2_5_q2"
+                  "question_id": "app1_unit2_2_5_q2",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 3,
@@ -3121,7 +3375,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_5_q3"
+                  "question_id": "app1_unit2_2_5_q3",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 4,
@@ -3144,7 +3400,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2.5"
                     }
                   ],
-                  "question_id": "app1_unit2_2_5_q4"
+                  "question_id": "app1_unit2_2_5_q4",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 5,
@@ -3167,7 +3425,9 @@ window.EXAM_DATA = {
                       "text": "There is a net force exerted on the system directed to the right."
                     }
                   ],
-                  "question_id": "app1_unit2_2_5_q5"
+                  "question_id": "app1_unit2_2_5_q5",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -3190,7 +3450,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_5_q6"
+                  "question_id": "app1_unit2_2_5_q6",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 7,
@@ -3213,7 +3475,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "app1_unit2_2_5_q7"
+                  "question_id": "app1_unit2_2_5_q7",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -3236,7 +3500,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_5_q8"
+                  "question_id": "app1_unit2_2_5_q8",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -3259,7 +3525,9 @@ window.EXAM_DATA = {
                       "text": "The elevator could possibly be moving downward and slowing down."
                     }
                   ],
-                  "question_id": "app1_unit2_2_5_q9"
+                  "question_id": "app1_unit2_2_5_q9",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 }
               ]
             },
@@ -3291,7 +3559,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_6_q1"
+                  "question_id": "app1_unit2_2_6_q1",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 2,
@@ -3314,7 +3584,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_6_q2"
+                  "question_id": "app1_unit2_2_6_q2",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 3,
@@ -3337,7 +3609,9 @@ window.EXAM_DATA = {
                       "text": "because both elevators are traveling with a constant speed."
                     }
                   ],
-                  "question_id": "app1_unit2_2_6_q3"
+                  "question_id": "app1_unit2_2_6_q3",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 4,
@@ -3345,7 +3619,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Because Earth\u2019s radius is constant."
+                      "text": "Because Earth’s radius is constant."
                     },
                     {
                       "letter": "B",
@@ -3357,10 +3631,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Because distance scales near Earth\u2019s surface are very small compared to Earth\u2019s radius."
+                      "text": "Because distance scales near Earth’s surface are very small compared to Earth’s radius."
                     }
                   ],
-                  "question_id": "app1_unit2_2_6_q4"
+                  "question_id": "app1_unit2_2_6_q4",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 5,
@@ -3368,7 +3644,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The scale reading is between and , because the scale is not precise enough to read the\r\nexact value of the object\u2019s weight."
+                      "text": "The scale reading is between and , because the scale is not precise enough to read the\r\nexact value of the object’s weight."
                     },
                     {
                       "letter": "B",
@@ -3380,10 +3656,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "The scale reading is between and , because weight is an intrinsic property of an object\r\nwhich doesn\u2019t change even when the gravitational field changes."
+                      "text": "The scale reading is between and , because weight is an intrinsic property of an object\r\nwhich doesn’t change even when the gravitational field changes."
                     }
                   ],
-                  "question_id": "app1_unit2_2_6_q5"
+                  "question_id": "app1_unit2_2_6_q5",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 6,
@@ -3406,7 +3684,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_6_q6"
+                  "question_id": "app1_unit2_2_6_q6",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 7,
@@ -3429,7 +3709,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_6_q7"
+                  "question_id": "app1_unit2_2_6_q7",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 8,
@@ -3452,7 +3734,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "app1_unit2_2_6_q8"
+                  "question_id": "app1_unit2_2_6_q8",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 9,
@@ -3475,7 +3759,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_6_q9"
+                  "question_id": "app1_unit2_2_6_q9",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 }
               ]
             },
@@ -3500,14 +3786,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "increases and decreases as the board\u2019s angle is increased"
+                      "text": "increases and decreases as the board’s angle is increased"
                     },
                     {
                       "letter": "D",
-                      "text": "decreases and increases as the board\u2019s angle is increased"
+                      "text": "decreases and increases as the board’s angle is increased"
                     }
                   ],
-                  "question_id": "app1_unit2_2_7_q1"
+                  "question_id": "app1_unit2_2_7_q1",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 2,
@@ -3530,7 +3818,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_7_q2"
+                  "question_id": "app1_unit2_2_7_q2",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 3,
@@ -3553,7 +3843,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_7_q3"
+                  "question_id": "app1_unit2_2_7_q3",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 4,
@@ -3576,7 +3868,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2.7"
                     }
                   ],
-                  "question_id": "app1_unit2_2_7_q4"
+                  "question_id": "app1_unit2_2_7_q4",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 5,
@@ -3599,7 +3893,9 @@ window.EXAM_DATA = {
                       "text": "The comparison cannot be made without knowing the surface areas of the blocks."
                     }
                   ],
-                  "question_id": "app1_unit2_2_7_q5"
+                  "question_id": "app1_unit2_2_7_q5",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 6,
@@ -3622,7 +3918,9 @@ window.EXAM_DATA = {
                       "text": "It may or may not be the same depending on the surface area of the boxes in contact with the surface."
                     }
                   ],
-                  "question_id": "app1_unit2_2_7_q6"
+                  "question_id": "app1_unit2_2_7_q6",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 7,
@@ -3645,7 +3943,9 @@ window.EXAM_DATA = {
                       "text": "The box will begin sliding to the right."
                     }
                   ],
-                  "question_id": "app1_unit2_2_7_q7"
+                  "question_id": "app1_unit2_2_7_q7",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 8,
@@ -3665,10 +3965,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "There is not enough information to make a claim about the direction of the object\u2019s acceleration."
+                      "text": "There is not enough information to make a claim about the direction of the object’s acceleration."
                     }
                   ],
-                  "question_id": "app1_unit2_2_7_q8"
+                  "question_id": "app1_unit2_2_7_q8",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 9,
@@ -3691,7 +3993,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_7_q9"
+                  "question_id": "app1_unit2_2_7_q9",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 }
               ]
             },
@@ -3723,7 +4027,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_8_q1"
+                  "question_id": "app1_unit2_2_8_q1",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 2,
@@ -3746,7 +4052,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_8_q2"
+                  "question_id": "app1_unit2_2_8_q2",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 3,
@@ -3769,7 +4077,9 @@ window.EXAM_DATA = {
                       "text": "to the right"
                     }
                   ],
-                  "question_id": "app1_unit2_2_8_q3"
+                  "question_id": "app1_unit2_2_8_q3",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 4,
@@ -3792,7 +4102,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_8_q4"
+                  "question_id": "app1_unit2_2_8_q4",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 5,
@@ -3815,7 +4127,9 @@ window.EXAM_DATA = {
                       "text": "It starts off greater than and slowly decreases."
                     }
                   ],
-                  "question_id": "app1_unit2_2_8_q5"
+                  "question_id": "app1_unit2_2_8_q5",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 6,
@@ -3838,7 +4152,9 @@ window.EXAM_DATA = {
                       "text": "There is an additional force exerted on the block."
                     }
                   ],
-                  "question_id": "app1_unit2_2_8_q6"
+                  "question_id": "app1_unit2_2_8_q6",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 7,
@@ -3846,22 +4162,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The weight\u2019s acceleration is downward."
+                      "text": "The weight’s acceleration is downward."
                     },
                     {
                       "letter": "B",
-                      "text": "The weight\u2019s acceleration is upward."
+                      "text": "The weight’s acceleration is upward."
                     },
                     {
                       "letter": "C",
-                      "text": "The weight\u2019s velocity is downward."
+                      "text": "The weight’s velocity is downward."
                     },
                     {
                       "letter": "D",
-                      "text": "The weight\u2019s velocity is upward."
+                      "text": "The weight’s velocity is upward."
                     }
                   ],
-                  "question_id": "app1_unit2_2_8_q7"
+                  "question_id": "app1_unit2_2_8_q7",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 8,
@@ -3884,7 +4202,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_8_q8"
+                  "question_id": "app1_unit2_2_8_q8",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 9,
@@ -3907,7 +4227,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_8_q9"
+                  "question_id": "app1_unit2_2_8_q9",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 }
               ]
             },
@@ -3939,7 +4261,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_9_q1"
+                  "question_id": "app1_unit2_2_9_q1",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 2,
@@ -3962,7 +4286,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_9_q2"
+                  "question_id": "app1_unit2_2_9_q2",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 3,
@@ -3985,7 +4311,9 @@ window.EXAM_DATA = {
                       "text": "No, because the force would decrease as speed increases.\r\nScoring Guide\r\n2.9"
                     }
                   ],
-                  "question_id": "app1_unit2_2_9_q3"
+                  "question_id": "app1_unit2_2_9_q3",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 4,
@@ -4008,7 +4336,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_9_q4"
+                  "question_id": "app1_unit2_2_9_q4",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 5,
@@ -4031,7 +4361,9 @@ window.EXAM_DATA = {
                       "text": "No, because the speed is increasing and therefore the net force is directed to the right."
                     }
                   ],
-                  "question_id": "app1_unit2_2_9_q5"
+                  "question_id": "app1_unit2_2_9_q5",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 6,
@@ -4054,7 +4386,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_9_q6"
+                  "question_id": "app1_unit2_2_9_q6",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 7,
@@ -4077,7 +4411,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_9_q7"
+                  "question_id": "app1_unit2_2_9_q7",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 8,
@@ -4100,7 +4436,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_2_9_q8"
+                  "question_id": "app1_unit2_2_9_q8",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 9,
@@ -4108,7 +4446,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "At the topmost point, because the tension force and gravitational force are both directed toward the\r\ncenter of the ball\u2019s motion."
+                      "text": "At the topmost point, because the tension force and gravitational force are both directed toward the\r\ncenter of the ball’s motion."
                     },
                     {
                       "letter": "B",
@@ -4123,7 +4461,9 @@ window.EXAM_DATA = {
                       "text": "At the bottommost point, because the net force on the ball is a maximum."
                     }
                   ],
-                  "question_id": "app1_unit2_2_9_q9"
+                  "question_id": "app1_unit2_2_9_q9",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 }
               ]
             },
@@ -4156,7 +4496,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A,D",
-                  "explanation": "Mid-Term Review Question 1 from official review materials."
+                  "explanation": "Mid-Term Review Question 1 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -4180,7 +4522,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B,D",
-                  "explanation": "Mid-Term Review Question 2 from official review materials."
+                  "explanation": "Mid-Term Review Question 2 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 3,
@@ -4204,7 +4548,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 3 from official review materials."
+                  "explanation": "Mid-Term Review Question 3 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 4,
@@ -4228,7 +4574,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 4 from official review materials."
+                  "explanation": "Mid-Term Review Question 4 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 5,
@@ -4252,7 +4600,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 5 from official review materials."
+                  "explanation": "Mid-Term Review Question 5 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -4276,7 +4626,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 6 from official review materials."
+                  "explanation": "Mid-Term Review Question 6 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 7,
@@ -4304,7 +4656,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 7 from official review materials."
+                  "explanation": "Mid-Term Review Question 7 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -4328,7 +4682,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B,D",
-                  "explanation": "Mid-Term Review Question 8 from official review materials."
+                  "explanation": "Mid-Term Review Question 8 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -4356,7 +4712,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "E",
-                  "explanation": "Mid-Term Review Question 9 from official review materials."
+                  "explanation": "Mid-Term Review Question 9 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 10,
@@ -4384,7 +4742,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "E",
-                  "explanation": "Mid-Term Review Question 10 from official review materials."
+                  "explanation": "Mid-Term Review Question 10 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 }
               ]
             },
@@ -4421,7 +4781,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 1 from official review materials."
+                  "explanation": "Mid-Term Review Question 1 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -4445,7 +4807,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 2 from official review materials."
+                  "explanation": "Mid-Term Review Question 2 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 3,
@@ -4469,7 +4833,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 3 from official review materials."
+                  "explanation": "Mid-Term Review Question 3 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 4,
@@ -4497,7 +4863,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 4 from official review materials."
+                  "explanation": "Mid-Term Review Question 4 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 5,
@@ -4525,7 +4893,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "E",
-                  "explanation": "Mid-Term Review Question 5 from official review materials."
+                  "explanation": "Mid-Term Review Question 5 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -4549,7 +4919,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 6 from official review materials."
+                  "explanation": "Mid-Term Review Question 6 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 7,
@@ -4577,7 +4949,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 7 from official review materials."
+                  "explanation": "Mid-Term Review Question 7 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -4605,7 +4979,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 8 from official review materials."
+                  "explanation": "Mid-Term Review Question 8 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -4633,7 +5009,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "E",
-                  "explanation": "Mid-Term Review Question 9 from official review materials."
+                  "explanation": "Mid-Term Review Question 9 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 10,
@@ -4661,7 +5039,632 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "E",
-                  "explanation": "Mid-Term Review Question 10 from official review materials."
+                  "explanation": "Mid-Term Review Question 10 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
+                }
+              ]
+            },
+            {
+              "id": "app1_unit2_q1_exam_review",
+              "title": "Q1 Exam Review",
+              "unit": "Unit 2",
+              "subject": "AP Physics 1: Algebra-Based",
+              "question_count": 22,
+              "questions": [
+                {
+                  "number": 1,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q1.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "A",
+                  "explanation": "Correct. The graph shows the position of each object as a function of time. Since object 1 is at the same position that it started at, but reversed direction, the total distance it has traveled is greater than that of object 2, which traveled in one direction.",
+                  "question_id": "app1_unit2_q1_exam_review_q1",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
+                },
+                {
+                  "number": 2,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q2.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "E",
+                  "explanation": "Correct. Both balls are in free fall after leaving the hand. The downward acceleration of both balls is the acceleration due to gravity (g), so their accelerations are equal. Because both balls are launched horizontally from the same height, their initial vertical velocities are zero, and their vertical motions are identical: h = 1/2 g t^2. Therefore, both balls hit the ground in the exact same amount of time.",
+                  "question_id": "app1_unit2_q1_exam_review_q2",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
+                },
+                {
+                  "number": 3,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q3.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "B",
+                  "explanation": "Correct. The free fall acceleration close to the surface of any planet can be treated as constant, so height follows h(t) = h0 - 1/2 g t^2. Reading data points from the parabolic curvature of the height versus time graph yields an acceleration due to gravity most nearly equal to 8 m/s^2.",
+                  "question_id": "app1_unit2_q1_exam_review_q3",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
+                },
+                {
+                  "number": 4,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q4.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "D",
+                  "explanation": "Correct. Acceleration is the time derivative of velocity, a(t) = dv/dt. On a velocity versus time graph, the instantaneous acceleration at any given moment t = 0.7 s is equal to the slope of the tangent to a best-fit sinusoidal curve at 0.7 s.",
+                  "question_id": "app1_unit2_q1_exam_review_q4",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
+                },
+                {
+                  "number": 5,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q5.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "C",
+                  "explanation": "Correct. The block leaves the frictionless circular arc at speed v0 directed at an angle theta above the horizontal. In projectile motion, the horizontal component of velocity remains constant: vx = v0*cos(theta). At the highest point of its trajectory, the vertical velocity is zero (vy = 0), so the block's speed is purely horizontal: v = v0*cos(theta).",
+                  "question_id": "app1_unit2_q1_exam_review_q5",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
+                },
+                {
+                  "number": 6,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q6.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "D",
+                  "explanation": "Correct. Average speed during a time interval is equal to total distance divided by elapsed time: v_avg = Delta_x / Delta_t = (x(2 s) - x(1 s)) / (2 s - 1 s). Reading the positions at 1 s and 2 s from the graph gives Delta_x = 6 m, yielding an average speed of 6 m/s.",
+                  "question_id": "app1_unit2_q1_exam_review_q6",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
+                },
+                {
+                  "number": 7,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q7.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "C",
+                  "explanation": "Correct. Speed is the magnitude of velocity. From the position and velocity graphs, the car starts moving with a positive velocity that decreases toward zero, so its speed is decreasing. The slope of the velocity graph is constant and positive or the car's acceleration is positive (directed opposite to velocity, or defined positive by coordinates).",
+                  "question_id": "app1_unit2_q1_exam_review_q7",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
+                },
+                {
+                  "number": 8,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q8.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "D",
+                  "explanation": "Correct. In order for the boat to land directly across from the starting point, the boat must head at an angle upstream such that its upstream velocity component cancels the river speed: v_boat * sin(theta) = v_river. The resulting crossing speed perpendicular to shore is v_perp = v_boat * cos(theta), and the total travel time across width d is t = d / v_perp.",
+                  "question_id": "app1_unit2_q1_exam_review_q8",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
+                },
+                {
+                  "number": 9,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q9.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "C",
+                  "explanation": "Correct. The horizontal component of applied force F is identical in both scenarios (F*cos(theta)). In scenario 1, pushing downward increases normal force (F_N = mg + F*sin(theta)) and friction. In scenario 2, pulling upward reduces normal force (F_N = mg - F*sin(theta)) and friction. Thus, acceleration in scenario 2 is greater than in scenario 1, giving a steeper slope on the speed vs. time graph in choice C.",
+                  "question_id": "app1_unit2_q1_exam_review_q9",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
+                },
+                {
+                  "number": 10,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q10.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "A",
+                  "explanation": "Correct. In scenario 2, vertical equilibrium yields F_N + F*sin(theta) = mg, so F_N = mg - F*sin(theta). Friction is f_k = mu_k*(mg - F*sin(theta)). Applying Newton's second law horizontally gives Sigma F_x = F*cos(theta) - mu_k*(mg - F*sin(theta)) = m*a, so a = [F*cos(theta) - mu_k*(mg - F*sin(theta))] / m.",
+                  "question_id": "app1_unit2_q1_exam_review_q10",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
+                },
+                {
+                  "number": 11,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q11.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "C",
+                  "explanation": "Correct. In trial 2, the spring exerts equal and opposite internal forces on blocks X and Y that cancel out for the two-block system. Because the external forces (gravity and normal force) are identical between trials, the net force on the two-block system is the same. However, considering block Y alone, the spring exerts an additional force on block Y, so the net force on block Y is different.",
+                  "question_id": "app1_unit2_q1_exam_review_q11",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
+                },
+                {
+                  "number": 12,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q12.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "D",
+                  "explanation": "Correct. In system 1, with an ideal inextensible string, the tension in the string supporting the hanging block is constant. In system 2, when the string between carts is replaced with a spring, the spring stretches and exerts an oscillating, time-dependent force, altering tension over time. Thus, the hanging block's acceleration as a function of time is not the same because string tension is constant in one system but not in the other.",
+                  "question_id": "app1_unit2_q1_exam_review_q12",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
+                },
+                {
+                  "number": 13,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q13.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "D",
+                  "explanation": "Correct. As the box slides up the ramp, both kinetic friction and the parallel component of gravity point down the incline (the negative direction). It is the sum of these two opposing forces that determines the acceleration of the box: Sigma F_x = -f_k - mg*sin(theta) = m*a.",
+                  "question_id": "app1_unit2_q1_exam_review_q13",
+                  "concept": "friction",
+                  "concept_label": "Friction"
+                },
+                {
+                  "number": 14,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q14.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "B",
+                  "explanation": "Correct. The 1.0 kg block pushes the 2.0 kg block with a contact force of 2.0 N across a frictionless horizontal surface. Applying Newton's second law to the 2.0 kg block: F_contact = m_2 * a ==> 2.0 N = (2.0 kg) * a ==> a = 1.0 m/s^2.",
+                  "question_id": "app1_unit2_q1_exam_review_q14",
+                  "concept": "friction",
+                  "concept_label": "Friction"
+                },
+                {
+                  "number": 15,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q15.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "D",
+                  "explanation": "Correct. For a stack of two boxes of mass M inside an elevator accelerating upward with acceleration a, applying Newton's second law to the top box gives F_N - M*g = M*a ==> F_N = M*(a + g). The normal force exerted on the top box by the bottom box is M*(a + g).",
+                  "question_id": "app1_unit2_q1_exam_review_q15",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
+                },
+                {
+                  "number": 16,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q16.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "C",
+                  "explanation": "Correct. For block 2 (middle block): block 1 pushes block 2 to the right with contact force F_12, block 3 pushes block 2 to the left with contact force F_32, normal force F_N acts upward, gravity F_g acts downward, and kinetic friction f_k opposes motion to the left. Choice C correctly displays all five force vectors.",
+                  "question_id": "app1_unit2_q1_exam_review_q16",
+                  "concept": "friction",
+                  "concept_label": "Friction"
+                },
+                {
+                  "number": 17,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q17.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "B",
+                  "explanation": "Correct. Blocks A and B are at rest on a frictionless horizontal table with block A fixed to the table. Block C hangs over a pulley from a string tied to block B. Because the system is in static equilibrium, string tension is T = mC*g. To keep block B stationary, block A must exert an equal and opposite horizontal force on block B of magnitude mC*g.",
+                  "question_id": "app1_unit2_q1_exam_review_q17",
+                  "concept": "friction",
+                  "concept_label": "Friction"
+                },
+                {
+                  "number": 18,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q18.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "A",
+                  "explanation": "Correct. The gravitational force between the moon and the object is modeled by F_g = G*M*m / r^2. Because the object rises to a height R above the surface (r increasing from R to 2R), the only force acting on the object (neglecting friction) is a downward gravitational force that decreases in magnitude with increasing distance.",
+                  "question_id": "app1_unit2_q1_exam_review_q18",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
+                },
+                {
+                  "number": 19,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q19.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "B",
+                  "explanation": "Correct. The toy moves in a horizontal circle of radius R with period T, giving speed v = 2*pi*R / T. Centripetal acceleration is a_c = v^2 / R = (4*pi^2 * R^2 / T^2) / R = 4*pi^2 * R / T^2.",
+                  "question_id": "app1_unit2_q1_exam_review_q19",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
+                },
+                {
+                  "number": 20,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q20.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    },
+                    {
+                      "letter": "E",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "A",
+                  "explanation": "Correct. The ball of mass m rotates in a horizontal circle of radius r at constant speed v. The vertical components of tension balance the downward gravitational force, leaving a net force that is purely horizontal and provides centripetal acceleration: F_net = m*v^2 / r.",
+                  "question_id": "app1_unit2_q1_exam_review_q20",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
+                },
+                {
+                  "number": 21,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q21.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "D",
+                  "explanation": "Correct. At the circular bottom of the hill (point P), the cart is moving along a path curved upward, so it experiences an upward centripetal acceleration: a = v^2 / R. By Newton's second law: F_N - m*g = m*v^2 / R ==> F_N = m*g + m*v^2 / R > m*g. The normal force is greater than m*g because the cart is accelerating upward.",
+                  "question_id": "app1_unit2_q1_exam_review_q21",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
+                },
+                {
+                  "number": 22,
+                  "card_image": "assets/cards/app1_unit2_q1_exam_review_q22.png?v=20261101_v1",
+                  "choices": [
+                    {
+                      "letter": "A",
+                      "text": ""
+                    },
+                    {
+                      "letter": "B",
+                      "text": ""
+                    },
+                    {
+                      "letter": "C",
+                      "text": ""
+                    },
+                    {
+                      "letter": "D",
+                      "text": ""
+                    }
+                  ],
+                  "correct_answer": "D",
+                  "explanation": "Correct. The force exerted on the block by the string provides the centripetal force: F = m*v^2 / r. Because the mass m and speed v remain constant as the radius r increases, the force is inversely proportional to r (F proportional to 1/r), which corresponds to the inverse decay curve in graph D.",
+                  "question_id": "app1_unit2_q1_exam_review_q22",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 }
               ]
             },
@@ -4693,7 +5696,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q1"
+                  "question_id": "app1_unit2_unit_2_progress_check_q1",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -4716,7 +5721,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q2"
+                  "question_id": "app1_unit2_unit_2_progress_check_q2",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 3,
@@ -4739,7 +5746,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q3"
+                  "question_id": "app1_unit2_unit_2_progress_check_q3",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 4,
@@ -4762,7 +5771,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q4"
+                  "question_id": "app1_unit2_unit_2_progress_check_q4",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 5,
@@ -4785,7 +5796,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q5"
+                  "question_id": "app1_unit2_unit_2_progress_check_q5",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -4808,7 +5821,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ\r\nPage 6 of 28 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q6"
+                  "question_id": "app1_unit2_unit_2_progress_check_q6",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 7,
@@ -4831,7 +5846,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q7"
+                  "question_id": "app1_unit2_unit_2_progress_check_q7",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -4854,7 +5871,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q8"
+                  "question_id": "app1_unit2_unit_2_progress_check_q8",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -4877,7 +5896,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q9"
+                  "question_id": "app1_unit2_unit_2_progress_check_q9",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 10,
@@ -4900,7 +5921,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q10"
+                  "question_id": "app1_unit2_unit_2_progress_check_q10",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 11,
@@ -4923,7 +5946,9 @@ window.EXAM_DATA = {
                       "text": "Between and"
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q11"
+                  "question_id": "app1_unit2_unit_2_progress_check_q11",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 12,
@@ -4946,7 +5971,9 @@ window.EXAM_DATA = {
                       "text": "The force the bucket exerts on the rock is greater in magnitude than the force Earth exerts on the rock."
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q12"
+                  "question_id": "app1_unit2_unit_2_progress_check_q12",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 13,
@@ -4969,7 +5996,9 @@ window.EXAM_DATA = {
                       "text": "A ball being swung in a vertical circle at constant speed."
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q13"
+                  "question_id": "app1_unit2_unit_2_progress_check_q13",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 14,
@@ -4992,7 +6021,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q14"
+                  "question_id": "app1_unit2_unit_2_progress_check_q14",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 15,
@@ -5015,7 +6046,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q15"
+                  "question_id": "app1_unit2_unit_2_progress_check_q15",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 16,
@@ -5038,7 +6071,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ"
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q16"
+                  "question_id": "app1_unit2_unit_2_progress_check_q16",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 17,
@@ -5061,7 +6096,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q17"
+                  "question_id": "app1_unit2_unit_2_progress_check_q17",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 18,
@@ -5084,7 +6121,9 @@ window.EXAM_DATA = {
                       "text": "The center of mass of the toolbox is to the right of the dashed line."
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q18"
+                  "question_id": "app1_unit2_unit_2_progress_check_q18",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 19,
@@ -5107,7 +6146,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q19"
+                  "question_id": "app1_unit2_unit_2_progress_check_q19",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 20,
@@ -5130,7 +6171,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q20"
+                  "question_id": "app1_unit2_unit_2_progress_check_q20",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 21,
@@ -5153,7 +6196,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ"
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q21"
+                  "question_id": "app1_unit2_unit_2_progress_check_q21",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 22,
@@ -5176,7 +6221,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q22"
+                  "question_id": "app1_unit2_unit_2_progress_check_q22",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 23,
@@ -5199,7 +6246,9 @@ window.EXAM_DATA = {
                       "text": "The force exerted by the spring is decreasing and the speed of the block is decreasing."
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q23"
+                  "question_id": "app1_unit2_unit_2_progress_check_q23",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 24,
@@ -5222,7 +6271,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q24"
+                  "question_id": "app1_unit2_unit_2_progress_check_q24",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 25,
@@ -5234,7 +6285,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "The magnitude of the gravitational force should be equal to the magnitude of the normal force because\r\nthe normal force on an object is always equal to the object\u2019s weight."
+                      "text": "The magnitude of the gravitational force should be equal to the magnitude of the normal force because\r\nthe normal force on an object is always equal to the object’s weight."
                     },
                     {
                       "letter": "C",
@@ -5245,7 +6296,9 @@ window.EXAM_DATA = {
                       "text": "The friction force should be directed up the ramp because the box is slowing down and therefore the\r\nacceleration of the box is opposite its direction of motion.\r\nScoring Guide\r\nUnit 2 Progress Check: MCQ"
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q25"
+                  "question_id": "app1_unit2_unit_2_progress_check_q25",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 26,
@@ -5268,7 +6321,9 @@ window.EXAM_DATA = {
                       "text": "No, because the forces are not an interaction between the same two objects."
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q26"
+                  "question_id": "app1_unit2_unit_2_progress_check_q26",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 27,
@@ -5291,7 +6346,9 @@ window.EXAM_DATA = {
                       "text": ", because in Case the horizontal component of the tension force in Rope is smaller."
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q27"
+                  "question_id": "app1_unit2_unit_2_progress_check_q27",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 28,
@@ -5314,7 +6371,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q28"
+                  "question_id": "app1_unit2_unit_2_progress_check_q28",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 29,
@@ -5337,7 +6396,9 @@ window.EXAM_DATA = {
                       "text": "No, because the acceleration of the system will be larger than in the original setup when the more\r\nmassive block is moved closer to the pulley."
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q29"
+                  "question_id": "app1_unit2_unit_2_progress_check_q29",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 30,
@@ -5360,7 +6421,9 @@ window.EXAM_DATA = {
                       "text": "Less than , because the mass of the block is less than the inertial mass of the two-block system."
                     }
                   ],
-                  "question_id": "app1_unit2_unit_2_progress_check_q30"
+                  "question_id": "app1_unit2_unit_2_progress_check_q30",
+                  "concept": "newton_1d",
+                  "concept_label": "Newton's First Law (Inertia)"
                 }
               ]
             }
@@ -5397,7 +6460,9 @@ window.EXAM_DATA = {
                       "text": ", because the velocity of the car changes direction."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_1_q1"
+                  "question_id": "app1_unit3a_3_1_q1",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 2,
@@ -5420,7 +6485,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_1_q2"
+                  "question_id": "app1_unit3a_3_1_q2",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 3,
@@ -5443,7 +6510,9 @@ window.EXAM_DATA = {
                       "text": "It is not correct, because the puck is moving at a constant velocity."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_1_q3"
+                  "question_id": "app1_unit3a_3_1_q3",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 4,
@@ -5466,7 +6535,9 @@ window.EXAM_DATA = {
                       "text": ", because the speed of Cart relative to Cart is less than the speed of Cart relative\r\nto Cart ."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_1_q4"
+                  "question_id": "app1_unit3a_3_1_q4",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 5,
@@ -5489,7 +6560,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energy of the ball relative to Person is positive and the kinetic energy of the ball relative\r\nto Person is negative."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_1_q5"
+                  "question_id": "app1_unit3a_3_1_q5",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 6,
@@ -5497,22 +6570,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The object\u2019s kinetic energy decreases, then increases."
+                      "text": "The object’s kinetic energy decreases, then increases."
                     },
                     {
                       "letter": "B",
-                      "text": "The object\u2019s kinetic energy increases, then decreases."
+                      "text": "The object’s kinetic energy increases, then decreases."
                     },
                     {
                       "letter": "C",
-                      "text": "The object\u2019s kinetic energy increases throughout the entire time interval."
+                      "text": "The object’s kinetic energy increases throughout the entire time interval."
                     },
                     {
                       "letter": "D",
-                      "text": "The object\u2019s kinetic energy decreases throughout the entire time interval."
+                      "text": "The object’s kinetic energy decreases throughout the entire time interval."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_1_q6"
+                  "question_id": "app1_unit3a_3_1_q6",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 7,
@@ -5535,7 +6610,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_1_q7"
+                  "question_id": "app1_unit3a_3_1_q7",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 8,
@@ -5558,7 +6635,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energy is decreasing.\r\nScoring Guide\r\n1"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_1_q8"
+                  "question_id": "app1_unit3a_3_1_q8",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 9,
@@ -5581,7 +6660,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_1_q9"
+                  "question_id": "app1_unit3a_3_1_q9",
+                  "concept": "work",
+                  "concept_label": "Work"
                 }
               ]
             },
@@ -5613,7 +6694,9 @@ window.EXAM_DATA = {
                       "text": "No work is done on the block."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_2_q1"
+                  "question_id": "app1_unit3a_3_2_q1",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 2,
@@ -5636,7 +6719,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_2_q2"
+                  "question_id": "app1_unit3a_3_2_q2",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 3,
@@ -5659,7 +6744,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_2_q3"
+                  "question_id": "app1_unit3a_3_2_q3",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 4,
@@ -5682,7 +6769,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_2_q4"
+                  "question_id": "app1_unit3a_3_2_q4",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 5,
@@ -5705,7 +6794,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_2_q5"
+                  "question_id": "app1_unit3a_3_2_q5",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 6,
@@ -5728,7 +6819,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_2_q6"
+                  "question_id": "app1_unit3a_3_2_q6",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 7,
@@ -5751,7 +6844,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_2_q7"
+                  "question_id": "app1_unit3a_3_2_q7",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 8,
@@ -5774,7 +6869,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_2_q8"
+                  "question_id": "app1_unit3a_3_2_q8",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 9,
@@ -5794,10 +6891,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Non-zero net work could be done on the block either when it is accelerating or when it is moving with\r\nconstant speed, depending on the values of the block\u2019s mass, acceleration, and maximum speed."
+                      "text": "Non-zero net work could be done on the block either when it is accelerating or when it is moving with\r\nconstant speed, depending on the values of the block’s mass, acceleration, and maximum speed."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_2_q9"
+                  "question_id": "app1_unit3a_3_2_q9",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 }
               ]
             },
@@ -5829,7 +6928,9 @@ window.EXAM_DATA = {
                       "text": "The magnitudes of the changes in the gravitational potential energies cannot be compared without\r\nknowing the height of the ceiling."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_3_q1"
+                  "question_id": "app1_unit3a_3_3_q1",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 2,
@@ -5852,7 +6953,9 @@ window.EXAM_DATA = {
                       "text": "The potential energy increases and then decreases"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_3_q2"
+                  "question_id": "app1_unit3a_3_3_q2",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 3,
@@ -5875,7 +6978,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_3_q3"
+                  "question_id": "app1_unit3a_3_3_q3",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 4,
@@ -5898,7 +7003,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_3_q4"
+                  "question_id": "app1_unit3a_3_3_q4",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 5,
@@ -5921,7 +7028,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_3_q5"
+                  "question_id": "app1_unit3a_3_3_q5",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 6,
@@ -5944,7 +7053,9 @@ window.EXAM_DATA = {
                       "text": "The gravitational potential energy decreases both during the initial acceleration period and as the object\r\nfalls at terminal velocity."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_3_q6"
+                  "question_id": "app1_unit3a_3_3_q6",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 7,
@@ -5967,7 +7078,9 @@ window.EXAM_DATA = {
                       "text": "The changes in potential energy cannot be determined without knowing the original compression."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_3_q7"
+                  "question_id": "app1_unit3a_3_3_q7",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 8,
@@ -5990,7 +7103,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_3_q8"
+                  "question_id": "app1_unit3a_3_3_q8",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 9,
@@ -6013,7 +7128,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_3_q9"
+                  "question_id": "app1_unit3a_3_3_q9",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 }
               ]
             },
@@ -6045,7 +7162,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_4_q1"
+                  "question_id": "app1_unit3a_3_4_q1",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 2,
@@ -6068,7 +7187,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_4_q2"
+                  "question_id": "app1_unit3a_3_4_q2",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 3,
@@ -6091,7 +7212,9 @@ window.EXAM_DATA = {
                       "text": "Stays the same because gravitational potential energy is converted into kinetic energy"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_4_q3"
+                  "question_id": "app1_unit3a_3_4_q3",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 4,
@@ -6114,7 +7237,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_4_q4"
+                  "question_id": "app1_unit3a_3_4_q4",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 5,
@@ -6137,7 +7262,9 @@ window.EXAM_DATA = {
                       "text": "No, because the kinetic energy of the skydiver increases, and the potential energy of the system remains\r\nconstant."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_4_q5"
+                  "question_id": "app1_unit3a_3_4_q5",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 6,
@@ -6160,7 +7287,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_4_q6"
+                  "question_id": "app1_unit3a_3_4_q6",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 7,
@@ -6183,7 +7312,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_4_q7"
+                  "question_id": "app1_unit3a_3_4_q7",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 8,
@@ -6206,7 +7337,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_4_q8"
+                  "question_id": "app1_unit3a_3_4_q8",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 9,
@@ -6229,7 +7362,9 @@ window.EXAM_DATA = {
                       "text": "The mechanical energy remains constant because energy is always conserved."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_4_q9"
+                  "question_id": "app1_unit3a_3_4_q9",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 }
               ]
             },
@@ -6261,7 +7396,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_5_q1"
+                  "question_id": "app1_unit3a_3_5_q1",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 2,
@@ -6284,7 +7421,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_5_q2"
+                  "question_id": "app1_unit3a_3_5_q2",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 3,
@@ -6307,7 +7446,9 @@ window.EXAM_DATA = {
                       "text": "Stays the same because gravitational potential energy is converted into kinetic energy"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_5_q3"
+                  "question_id": "app1_unit3a_3_5_q3",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 4,
@@ -6330,7 +7471,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_5_q4"
+                  "question_id": "app1_unit3a_3_5_q4",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 5,
@@ -6353,7 +7496,9 @@ window.EXAM_DATA = {
                       "text": "No, because the kinetic energy of the skydiver increases, and the potential energy of the system remains\r\nconstant."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_5_q5"
+                  "question_id": "app1_unit3a_3_5_q5",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 6,
@@ -6376,7 +7521,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1"
                     }
                   ],
-                  "question_id": "app1_unit3a_3_5_q6"
+                  "question_id": "app1_unit3a_3_5_q6",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 7,
@@ -6399,7 +7546,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_5_q7"
+                  "question_id": "app1_unit3a_3_5_q7",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 8,
@@ -6422,7 +7571,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_3_5_q8"
+                  "question_id": "app1_unit3a_3_5_q8",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 9,
@@ -6445,7 +7596,9 @@ window.EXAM_DATA = {
                       "text": "The mechanical energy remains constant because energy is always conserved."
                     }
                   ],
-                  "question_id": "app1_unit3a_3_5_q9"
+                  "question_id": "app1_unit3a_3_5_q9",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 }
               ]
             },
@@ -6477,7 +7630,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q1"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q1",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 2,
@@ -6500,7 +7655,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q2"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q2",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 3,
@@ -6523,7 +7680,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q3"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q3",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 4,
@@ -6546,7 +7705,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q4"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q4",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 5,
@@ -6569,7 +7730,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q5"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q5",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 6,
@@ -6592,7 +7755,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q6"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q6",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 7,
@@ -6615,7 +7780,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nPage 4 of 13 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q7"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q7",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 8,
@@ -6638,7 +7805,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q8"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q8",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 9,
@@ -6661,7 +7830,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q9"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q9",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 10,
@@ -6684,7 +7855,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nPage 6 of 13 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q10"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q10",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 11,
@@ -6707,7 +7880,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energy is not changing."
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q11"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q11",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 12,
@@ -6730,7 +7905,9 @@ window.EXAM_DATA = {
                       "text": "could be less than, equal to, or greater than ."
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q12"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q12",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 13,
@@ -6753,7 +7930,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nPage 8 of 13 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q13"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q13",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 14,
@@ -6776,7 +7955,9 @@ window.EXAM_DATA = {
                       "text": "No, because the spring must be exerting a force on the left block and therefore must be stretched beyond\r\nits equilibrium length."
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q14"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q14",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 15,
@@ -6799,7 +7980,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q15"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q15",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 16,
@@ -6822,7 +8005,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q16"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q16",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 17,
@@ -6845,7 +8030,9 @@ window.EXAM_DATA = {
                       "text": ", because in Figure the person is doing the same amount of work on the bell as in Figure ."
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q17"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q17",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 18,
@@ -6868,7 +8055,9 @@ window.EXAM_DATA = {
                       "text": "When the acrobat and platform come to rest, because the spring has transferred all of its energy to the\r\nacrobat"
                     }
                   ],
-                  "question_id": "app1_unit3a_unit_3_progress_check_q18"
+                  "question_id": "app1_unit3a_unit_3_progress_check_q18",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 }
               ]
             }
@@ -6905,7 +8094,9 @@ window.EXAM_DATA = {
                       "text": "(vA = vB) > vC"
                     }
                   ],
-                  "question_id": "app1_unit4_4_1_q1"
+                  "question_id": "app1_unit4_4_1_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -6928,7 +8119,9 @@ window.EXAM_DATA = {
                       "text": "v1 = v2 and p1 = p2"
                     }
                   ],
-                  "question_id": "app1_unit4_4_1_q2"
+                  "question_id": "app1_unit4_4_1_q2",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -6940,18 +8133,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "0.02 N\u22c5s"
+                      "text": "0.02 N⋅s"
                     },
                     {
                       "letter": "C",
-                      "text": "0.03 N\u22c5s"
+                      "text": "0.03 N⋅s"
                     },
                     {
                       "letter": "D",
                       "text": "It cannot be determined without knowing the initial mass of the cart and sand."
                     }
                   ],
-                  "question_id": "app1_unit4_4_1_q3"
+                  "question_id": "app1_unit4_4_1_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -6974,7 +8169,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit4_4_1_q4"
+                  "question_id": "app1_unit4_4_1_q4",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -6997,7 +8194,9 @@ window.EXAM_DATA = {
                       "text": "The device is internal to the system and therefore does not exert any forces on the pieces of\r\nthe cart."
                     }
                   ],
-                  "question_id": "app1_unit4_4_1_q5"
+                  "question_id": "app1_unit4_4_1_q5",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -7020,7 +8219,9 @@ window.EXAM_DATA = {
                       "text": "p2 = 4p1"
                     }
                   ],
-                  "question_id": "app1_unit4_4_1_q6"
+                  "question_id": "app1_unit4_4_1_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -7043,7 +8244,9 @@ window.EXAM_DATA = {
                       "text": "0.50 m/s to the left"
                     }
                   ],
-                  "question_id": "app1_unit4_4_1_q7"
+                  "question_id": "app1_unit4_4_1_q7",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -7051,22 +8254,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "4.0 \u00d7 10\r\n2 N \u22c5 s"
+                      "text": "4.0 × 10\r\n2 N ⋅ s"
                     },
                     {
                       "letter": "B",
-                      "text": "4.0 \u00d7 10\r\n3 N \u22c5 s"
+                      "text": "4.0 × 10\r\n3 N ⋅ s"
                     },
                     {
                       "letter": "C",
-                      "text": "5.5 \u00d7 10\r\n3 N \u22c5 s"
+                      "text": "5.5 × 10\r\n3 N ⋅ s"
                     },
                     {
                       "letter": "D",
-                      "text": "2.2 \u00d7 10\r\n5 N \u22c5 s"
+                      "text": "2.2 × 10\r\n5 N ⋅ s"
                     }
                   ],
-                  "question_id": "app1_unit4_4_1_q8"
+                  "question_id": "app1_unit4_4_1_q8",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -7089,7 +8294,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit4_4_1_q9"
+                  "question_id": "app1_unit4_4_1_q9",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 }
               ]
             },
@@ -7110,18 +8317,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "ma\u0394t"
+                      "text": "maΔt"
                     },
                     {
                       "letter": "C",
-                      "text": "m (v0 + a\u0394t)"
+                      "text": "m (v0 + aΔt)"
                     },
                     {
                       "letter": "D",
-                      "text": "v0\u0394t + 1\r\n2\r\na(\u0394t)\r\n2"
+                      "text": "v0Δt + 1\r\n2\r\na(Δt)\r\n2"
                     }
                   ],
-                  "question_id": "app1_unit4_4_2_q1"
+                  "question_id": "app1_unit4_4_2_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -7133,18 +8342,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "m (vi \u2212 vf)"
+                      "text": "m (vi − vf)"
                     },
                     {
                       "letter": "C",
-                      "text": "\u03bckg"
+                      "text": "μkg"
                     },
                     {
                       "letter": "D",
-                      "text": "\u03bckmg"
+                      "text": "μkmg"
                     }
                   ],
-                  "question_id": "app1_unit4_4_2_q2"
+                  "question_id": "app1_unit4_4_2_q2",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -7152,11 +8363,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "F\u0394t"
+                      "text": "FΔt"
                     },
                     {
                       "letter": "B",
-                      "text": "F\u0394t\r\nm"
+                      "text": "FΔt\r\nm"
                     },
                     {
                       "letter": "C",
@@ -7164,10 +8375,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Fm\u0394t"
+                      "text": "FmΔt"
                     }
                   ],
-                  "question_id": "app1_unit4_4_2_q3"
+                  "question_id": "app1_unit4_4_2_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -7190,7 +8403,9 @@ window.EXAM_DATA = {
                       "text": "Because the foam pad increases the time that the force is applied to the brick to stop it."
                     }
                   ],
-                  "question_id": "app1_unit4_4_2_q4"
+                  "question_id": "app1_unit4_4_2_q4",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 5,
@@ -7213,7 +8428,9 @@ window.EXAM_DATA = {
                       "text": "4F"
                     }
                   ],
-                  "question_id": "app1_unit4_4_2_q5"
+                  "question_id": "app1_unit4_4_2_q5",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -7236,7 +8453,9 @@ window.EXAM_DATA = {
                       "text": "Neither ball, because both had the same acceleration during the collision."
                     }
                   ],
-                  "question_id": "app1_unit4_4_2_q6"
+                  "question_id": "app1_unit4_4_2_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -7259,7 +8478,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit4_4_2_q7"
+                  "question_id": "app1_unit4_4_2_q7",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -7282,7 +8503,9 @@ window.EXAM_DATA = {
                       "text": "No, because the areas under the curve for both cars are equal."
                     }
                   ],
-                  "question_id": "app1_unit4_4_2_q8"
+                  "question_id": "app1_unit4_4_2_q8",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 9,
@@ -7305,7 +8528,9 @@ window.EXAM_DATA = {
                       "text": "8Favg"
                     }
                   ],
-                  "question_id": "app1_unit4_4_2_q9"
+                  "question_id": "app1_unit4_4_2_q9",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 }
               ]
             },
@@ -7337,7 +8562,9 @@ window.EXAM_DATA = {
                       "text": "3v"
                     }
                   ],
-                  "question_id": "app1_unit4_4_3_q1"
+                  "question_id": "app1_unit4_4_3_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -7360,7 +8587,9 @@ window.EXAM_DATA = {
                       "text": "Neither, because the change in momentum of the clay is equal and opposite to that of the rod."
                     }
                   ],
-                  "question_id": "app1_unit4_4_3_q2"
+                  "question_id": "app1_unit4_4_3_q2",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -7383,7 +8612,9 @@ window.EXAM_DATA = {
                       "text": "3vR"
                     }
                   ],
-                  "question_id": "app1_unit4_4_3_q3"
+                  "question_id": "app1_unit4_4_3_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -7406,7 +8637,9 @@ window.EXAM_DATA = {
                       "text": "The three objects will not move for any value of block mass."
                     }
                   ],
-                  "question_id": "app1_unit4_4_3_q4"
+                  "question_id": "app1_unit4_4_3_q4",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -7429,7 +8662,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit4_4_3_q5"
+                  "question_id": "app1_unit4_4_3_q5",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -7452,7 +8687,9 @@ window.EXAM_DATA = {
                       "text": "No, because the mechanical energy was zero before launch but greater than zero after launch."
                     }
                   ],
-                  "question_id": "app1_unit4_4_3_q6"
+                  "question_id": "app1_unit4_4_3_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -7468,14 +8705,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "(m2\u2212m1)\r\nm2\r\nv0"
+                      "text": "(m2−m1)\r\nm2\r\nv0"
                     },
                     {
                       "letter": "D",
                       "text": "(m2+m1)\r\nm2\r\nv0"
                     }
                   ],
-                  "question_id": "app1_unit4_4_3_q7"
+                  "question_id": "app1_unit4_4_3_q7",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -7498,7 +8737,9 @@ window.EXAM_DATA = {
                       "text": "There is no external force on the system so kinetic energy must remain constant."
                     }
                   ],
-                  "question_id": "app1_unit4_4_3_q8"
+                  "question_id": "app1_unit4_4_3_q8",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 9,
@@ -7521,7 +8762,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit4_4_3_q9"
+                  "question_id": "app1_unit4_4_3_q9",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 }
               ]
             },
@@ -7553,7 +8796,9 @@ window.EXAM_DATA = {
                       "text": "K2 = 4K1"
                     }
                   ],
-                  "question_id": "app1_unit4_4_4_q1"
+                  "question_id": "app1_unit4_4_4_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -7576,7 +8821,9 @@ window.EXAM_DATA = {
                       "text": "All of the kinetic energy is lost during the collision."
                     }
                   ],
-                  "question_id": "app1_unit4_4_4_q2"
+                  "question_id": "app1_unit4_4_4_q2",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 3,
@@ -7596,10 +8843,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "It can\u2019t be determined without knowing the relative masses of the carts."
+                      "text": "It can’t be determined without knowing the relative masses of the carts."
                     }
                   ],
-                  "question_id": "app1_unit4_4_4_q3"
+                  "question_id": "app1_unit4_4_4_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -7622,7 +8871,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energy cannot be determined without knowing if the cart has greater or less mass\r\nthan the clay."
                     }
                   ],
-                  "question_id": "app1_unit4_4_4_q4"
+                  "question_id": "app1_unit4_4_4_q4",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 5,
@@ -7645,7 +8896,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit4_4_4_q5"
+                  "question_id": "app1_unit4_4_4_q5",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -7653,22 +8906,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "(\u0394K1 = \u0394K2) > \u0394K3"
+                      "text": "(ΔK1 = ΔK2) > ΔK3"
                     },
                     {
                       "letter": "B",
-                      "text": "\u0394K3 > (\u0394K1 = \u0394K2)"
+                      "text": "ΔK3 > (ΔK1 = ΔK2)"
                     },
                     {
                       "letter": "C",
-                      "text": "\u0394K2 > \u0394K3 > \u0394K1"
+                      "text": "ΔK2 > ΔK3 > ΔK1"
                     },
                     {
                       "letter": "D",
-                      "text": "\u0394K3 > \u0394K2 > \u0394K1"
+                      "text": "ΔK3 > ΔK2 > ΔK1"
                     }
                   ],
-                  "question_id": "app1_unit4_4_4_q6"
+                  "question_id": "app1_unit4_4_4_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -7691,7 +8946,9 @@ window.EXAM_DATA = {
                       "text": "1\r\n2\r\n(\r\nm2\r\n1\r\nm1 + m2\r\n)v\r\n2"
                     }
                   ],
-                  "question_id": "app1_unit4_4_4_q7"
+                  "question_id": "app1_unit4_4_4_q7",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -7714,7 +8971,9 @@ window.EXAM_DATA = {
                       "text": "It increases by mv\r\n2\r\n."
                     }
                   ],
-                  "question_id": "app1_unit4_4_4_q8"
+                  "question_id": "app1_unit4_4_4_q8",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -7737,7 +8996,9 @@ window.EXAM_DATA = {
                       "text": "{"
                     }
                   ],
-                  "question_id": "app1_unit4_4_4_q9"
+                  "question_id": "app1_unit4_4_4_q9",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 }
               ]
             },
@@ -7754,22 +9015,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "12 kg \u22c5 m/s"
+                      "text": "12 kg ⋅ m/s"
                     },
                     {
                       "letter": "B",
-                      "text": "20 kg \u22c5 m/s"
+                      "text": "20 kg ⋅ m/s"
                     },
                     {
                       "letter": "C",
-                      "text": "24 kg \u22c5 m/s"
+                      "text": "24 kg ⋅ m/s"
                     },
                     {
                       "letter": "D",
-                      "text": "30 kg \u22c5 m/s"
+                      "text": "30 kg ⋅ m/s"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q1"
+                  "question_id": "app1_unit4_unit_4_progress_check_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -7781,18 +9044,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "F2\u2212F1\r\ntf"
+                      "text": "F2−F1\r\ntf"
                     },
                     {
                       "letter": "C",
-                      "text": "(\r\nF2\u2212F1\r\n2 )tf"
+                      "text": "(\r\nF2−F1\r\n2 )tf"
                     },
                     {
                       "letter": "D",
-                      "text": "(F1 +\r\nF2\u2212F1\r\n2 )tf"
+                      "text": "(F1 +\r\nF2−F1\r\n2 )tf"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q2"
+                  "question_id": "app1_unit4_unit_4_progress_check_q2",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -7800,7 +9065,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "(\r\n2mc\r\nmc\u2212mb\r\n)v0"
+                      "text": "(\r\n2mc\r\nmc−mb\r\n)v0"
                     },
                     {
                       "letter": "B",
@@ -7808,14 +9073,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "(\r\n2mc\u2212mb\r\nmc+mb\r\n)v0"
+                      "text": "(\r\n2mc−mb\r\nmc+mb\r\n)v0"
                     },
                     {
                       "letter": "D",
                       "text": "(\r\n2mc+mb\r\nmc+mb\r\n)v0"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q3"
+                  "question_id": "app1_unit4_unit_4_progress_check_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -7838,7 +9105,9 @@ window.EXAM_DATA = {
                       "text": "3 Mv\r\n2"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q4"
+                  "question_id": "app1_unit4_unit_4_progress_check_q4",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -7861,7 +9130,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q5"
+                  "question_id": "app1_unit4_unit_4_progress_check_q5",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -7884,7 +9155,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q6"
+                  "question_id": "app1_unit4_unit_4_progress_check_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -7892,11 +9165,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "\u22122.7 m/s"
+                      "text": "−2.7 m/s"
                     },
                     {
                       "letter": "B",
-                      "text": "\u22120.4 m/s"
+                      "text": "−0.4 m/s"
                     },
                     {
                       "letter": "C",
@@ -7907,7 +9180,9 @@ window.EXAM_DATA = {
                       "text": "+2.7 m/s"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q7"
+                  "question_id": "app1_unit4_unit_4_progress_check_q7",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -7930,7 +9205,9 @@ window.EXAM_DATA = {
                       "text": "Less than\r\n1\r\n2 hmax"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q8"
+                  "question_id": "app1_unit4_unit_4_progress_check_q8",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -7953,7 +9230,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q9"
+                  "question_id": "app1_unit4_unit_4_progress_check_q9",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 10,
@@ -7976,7 +9255,9 @@ window.EXAM_DATA = {
                       "text": "2 J0"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q10"
+                  "question_id": "app1_unit4_unit_4_progress_check_q10",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 11,
@@ -7984,7 +9265,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The momentum doesn\u2019t change in either system."
+                      "text": "The momentum doesn’t change in either system."
                     },
                     {
                       "letter": "B",
@@ -7999,7 +9280,9 @@ window.EXAM_DATA = {
                       "text": "The momentum changes in both systems."
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q11"
+                  "question_id": "app1_unit4_unit_4_progress_check_q11",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 12,
@@ -8022,7 +9305,9 @@ window.EXAM_DATA = {
                       "text": "9 : 2"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q12"
+                  "question_id": "app1_unit4_unit_4_progress_check_q12",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 13,
@@ -8045,7 +9330,9 @@ window.EXAM_DATA = {
                       "text": "It will increase by a factor of 2"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q13"
+                  "question_id": "app1_unit4_unit_4_progress_check_q13",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 14,
@@ -8068,7 +9355,9 @@ window.EXAM_DATA = {
                       "text": "2v"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q14"
+                  "question_id": "app1_unit4_unit_4_progress_check_q14",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 15,
@@ -8091,7 +9380,9 @@ window.EXAM_DATA = {
                       "text": "J1 = J2, because the momentum of the brick is constant."
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q15"
+                  "question_id": "app1_unit4_unit_4_progress_check_q15",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 16,
@@ -8114,7 +9405,9 @@ window.EXAM_DATA = {
                       "text": "No, because the total momentum in Figure 2 is zero."
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q16"
+                  "question_id": "app1_unit4_unit_4_progress_check_q16",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 17,
@@ -8137,7 +9430,9 @@ window.EXAM_DATA = {
                       "text": "0.26 J"
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q17"
+                  "question_id": "app1_unit4_unit_4_progress_check_q17",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 18,
@@ -8160,7 +9455,9 @@ window.EXAM_DATA = {
                       "text": "It increases, because some mechanical energy is transferred from the block to the cart during the\r\ncollision."
                     }
                   ],
-                  "question_id": "app1_unit4_unit_4_progress_check_q18"
+                  "question_id": "app1_unit4_unit_4_progress_check_q18",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 }
               ]
             }
@@ -8197,7 +9494,9 @@ window.EXAM_DATA = {
                       "text": "The angular accelerations cannot be determined without know the mass of each block."
                     }
                   ],
-                  "question_id": "app1_unit5_5_1_q1"
+                  "question_id": "app1_unit5_5_1_q1",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 2,
@@ -8220,7 +9519,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_1_q2"
+                  "question_id": "app1_unit5_5_1_q2",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 3,
@@ -8243,7 +9544,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_1_q3"
+                  "question_id": "app1_unit5_5_1_q3",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 4,
@@ -8266,7 +9569,9 @@ window.EXAM_DATA = {
                       "text": "The linear speed of the insect is greater at Point than at Point ."
                     }
                   ],
-                  "question_id": "app1_unit5_5_1_q4"
+                  "question_id": "app1_unit5_5_1_q4",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 5,
@@ -8289,7 +9594,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_1_q5"
+                  "question_id": "app1_unit5_5_1_q5",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 6,
@@ -8312,7 +9619,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit5_5_1_q6"
+                  "question_id": "app1_unit5_5_1_q6",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 7,
@@ -8335,7 +9644,9 @@ window.EXAM_DATA = {
                       "text": "It cannot be determined without knowing the relative radii of the axles and the disk"
                     }
                   ],
-                  "question_id": "app1_unit5_5_1_q7"
+                  "question_id": "app1_unit5_5_1_q7",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 8,
@@ -8358,7 +9669,9 @@ window.EXAM_DATA = {
                       "text": ";"
                     }
                   ],
-                  "question_id": "app1_unit5_5_1_q8"
+                  "question_id": "app1_unit5_5_1_q8",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 9,
@@ -8381,7 +9694,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nConnecting Linear and Rotational Motion Quiz\r\nPage 8 of 9 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit5_5_1_q9"
+                  "question_id": "app1_unit5_5_1_q9",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 }
               ]
             },
@@ -8413,7 +9728,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_2_q1"
+                  "question_id": "app1_unit5_5_2_q1",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 2,
@@ -8436,7 +9753,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_2_q2"
+                  "question_id": "app1_unit5_5_2_q2",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 3,
@@ -8459,7 +9778,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_2_q3"
+                  "question_id": "app1_unit5_5_2_q3",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 4,
@@ -8482,7 +9803,9 @@ window.EXAM_DATA = {
                       "text": "No, because the graph has a vertical intercept of zero.\r\nScoring Guide\r\nRotational Kinematics Quiz"
                     }
                   ],
-                  "question_id": "app1_unit5_5_2_q4"
+                  "question_id": "app1_unit5_5_2_q4",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 5,
@@ -8505,7 +9828,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_2_q5"
+                  "question_id": "app1_unit5_5_2_q5",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 6,
@@ -8528,7 +9853,9 @@ window.EXAM_DATA = {
                       "text": "The magnitude of the angular acceleration was less than the magnitude of the angular velocity.\r\nScoring Guide\r\nRotational Kinematics Quiz\r\nPage 4 of 6 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit5_5_2_q6"
+                  "question_id": "app1_unit5_5_2_q6",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 7,
@@ -8551,7 +9878,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_2_q7"
+                  "question_id": "app1_unit5_5_2_q7",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 8,
@@ -8574,7 +9903,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nRotational Kinematics Quiz"
                     }
                   ],
-                  "question_id": "app1_unit5_5_2_q8"
+                  "question_id": "app1_unit5_5_2_q8",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 9,
@@ -8597,7 +9928,9 @@ window.EXAM_DATA = {
                       "text": "No, because the initial direction of rotation must be known to calculate the change in the angular\r\nvelocity."
                     }
                   ],
-                  "question_id": "app1_unit5_5_2_q9"
+                  "question_id": "app1_unit5_5_2_q9",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 }
               ]
             },
@@ -8629,7 +9962,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit5_5_3_q1"
+                  "question_id": "app1_unit5_5_3_q1",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 2,
@@ -8652,7 +9987,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nTorque Quiz"
                     }
                   ],
-                  "question_id": "app1_unit5_5_3_q2"
+                  "question_id": "app1_unit5_5_3_q2",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 3,
@@ -8675,7 +10012,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nTorque Quiz\r\nPage 4 of 12 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit5_5_3_q3"
+                  "question_id": "app1_unit5_5_3_q3",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 4,
@@ -8683,22 +10022,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "\u03b8 \u03b8 \u03b8"
+                      "text": "θ θ θ"
                     },
                     {
                       "letter": "B",
-                      "text": "\u03b8 \u03b8"
+                      "text": "θ θ"
                     },
                     {
                       "letter": "C",
-                      "text": "\u03b8 \u03b8"
+                      "text": "θ θ"
                     },
                     {
                       "letter": "D",
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_3_q4"
+                  "question_id": "app1_unit5_5_3_q4",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 5,
@@ -8721,7 +10062,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_3_q5"
+                  "question_id": "app1_unit5_5_3_q5",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 6,
@@ -8744,7 +10087,9 @@ window.EXAM_DATA = {
                       "text": "At the center of the rod"
                     }
                   ],
-                  "question_id": "app1_unit5_5_3_q6"
+                  "question_id": "app1_unit5_5_3_q6",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 7,
@@ -8767,7 +10112,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_3_q7"
+                  "question_id": "app1_unit5_5_3_q7",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 8,
@@ -8790,7 +10137,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_3_q8"
+                  "question_id": "app1_unit5_5_3_q8",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 9,
@@ -8813,7 +10162,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_3_q9"
+                  "question_id": "app1_unit5_5_3_q9",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 }
               ]
             },
@@ -8845,7 +10196,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_4_q1"
+                  "question_id": "app1_unit5_5_4_q1",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 2,
@@ -8868,7 +10221,9 @@ window.EXAM_DATA = {
                       "text": "Moving the rotational axis from the center of mass to another axis parallel to the original axis will only\r\ndecrease the rotational inertia of the object about the axis if the mass is distributed symmetrically about\r\nthe center of mass."
                     }
                   ],
-                  "question_id": "app1_unit5_5_4_q2"
+                  "question_id": "app1_unit5_5_4_q2",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 3,
@@ -8891,7 +10246,9 @@ window.EXAM_DATA = {
                       "text": "Axis"
                     }
                   ],
-                  "question_id": "app1_unit5_5_4_q3"
+                  "question_id": "app1_unit5_5_4_q3",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 4,
@@ -8914,7 +10271,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_4_q4"
+                  "question_id": "app1_unit5_5_4_q4",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 5,
@@ -8937,7 +10296,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_4_q5"
+                  "question_id": "app1_unit5_5_4_q5",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 6,
@@ -8960,7 +10321,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_4_q6"
+                  "question_id": "app1_unit5_5_4_q6",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 7,
@@ -8968,22 +10331,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The rod and the disk both contribute the same amount to the system\u2019s rotational inertia."
+                      "text": "The rod and the disk both contribute the same amount to the system’s rotational inertia."
                     },
                     {
                       "letter": "B",
-                      "text": "The rod contributes more to the system\u2019s rotational inertia than the disk."
+                      "text": "The rod contributes more to the system’s rotational inertia than the disk."
                     },
                     {
                       "letter": "C",
-                      "text": "The disk contributes more to the system\u2019s rotational inertia than the rod."
+                      "text": "The disk contributes more to the system’s rotational inertia than the rod."
                     },
                     {
                       "letter": "D",
-                      "text": "The faster the system spins, the more the disk contributes to the system\u2019s rotational inertia."
+                      "text": "The faster the system spins, the more the disk contributes to the system’s rotational inertia."
                     }
                   ],
-                  "question_id": "app1_unit5_5_4_q7"
+                  "question_id": "app1_unit5_5_4_q7",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 8,
@@ -9006,7 +10371,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_4_q8"
+                  "question_id": "app1_unit5_5_4_q8",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 9,
@@ -9029,7 +10396,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_4_q9"
+                  "question_id": "app1_unit5_5_4_q9",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 }
               ]
             },
@@ -9061,7 +10430,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_5_q1"
+                  "question_id": "app1_unit5_5_5_q1",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 2,
@@ -9084,7 +10455,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_5_q2"
+                  "question_id": "app1_unit5_5_5_q2",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 3,
@@ -9107,7 +10480,9 @@ window.EXAM_DATA = {
                       "text": "The disk will be at rest and not rotating."
                     }
                   ],
-                  "question_id": "app1_unit5_5_5_q3"
+                  "question_id": "app1_unit5_5_5_q3",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 4,
@@ -9130,7 +10505,9 @@ window.EXAM_DATA = {
                       "text": "Graphs and"
                     }
                   ],
-                  "question_id": "app1_unit5_5_5_q4"
+                  "question_id": "app1_unit5_5_5_q4",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 5,
@@ -9153,7 +10530,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nPage 4 of 8 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit5_5_5_q5"
+                  "question_id": "app1_unit5_5_5_q5",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 6,
@@ -9176,7 +10555,9 @@ window.EXAM_DATA = {
                       "text": "The bar is not in rotational equilibrium in any of the orientations."
                     }
                   ],
-                  "question_id": "app1_unit5_5_5_q6"
+                  "question_id": "app1_unit5_5_5_q6",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 7,
@@ -9199,7 +10580,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_5_q7"
+                  "question_id": "app1_unit5_5_5_q7",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 8,
@@ -9222,7 +10605,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_5_q8"
+                  "question_id": "app1_unit5_5_5_q8",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 9,
@@ -9245,7 +10630,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_5_q9"
+                  "question_id": "app1_unit5_5_5_q9",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 }
               ]
             },
@@ -9277,7 +10664,9 @@ window.EXAM_DATA = {
                       "text": "Yes, because the force is exerted at the same distance from the axis in both cases."
                     }
                   ],
-                  "question_id": "app1_unit5_5_6_q1"
+                  "question_id": "app1_unit5_5_6_q1",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 2,
@@ -9300,7 +10689,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_6_q2"
+                  "question_id": "app1_unit5_5_6_q2",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 3,
@@ -9323,7 +10714,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_6_q3"
+                  "question_id": "app1_unit5_5_6_q3",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 4,
@@ -9346,7 +10739,9 @@ window.EXAM_DATA = {
                       "text": "The force is constant the entire time."
                     }
                   ],
-                  "question_id": "app1_unit5_5_6_q4"
+                  "question_id": "app1_unit5_5_6_q4",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 5,
@@ -9369,7 +10764,9 @@ window.EXAM_DATA = {
                       "text": "No, because frictional forces are negligible, and therefore the bar slides freely on the pivot and the pivot\r\nexerts no force or torque on the bar."
                     }
                   ],
-                  "question_id": "app1_unit5_5_6_q5"
+                  "question_id": "app1_unit5_5_6_q5",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 6,
@@ -9392,7 +10789,9 @@ window.EXAM_DATA = {
                       "text": "The net force and net torque are both zero in Figure , but the net torque and net force are both nonzero\r\nin Figure ."
                     }
                   ],
-                  "question_id": "app1_unit5_5_6_q6"
+                  "question_id": "app1_unit5_5_6_q6",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 7,
@@ -9415,7 +10814,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_6_q7"
+                  "question_id": "app1_unit5_5_6_q7",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 8,
@@ -9438,7 +10839,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit5_5_6_q8"
+                  "question_id": "app1_unit5_5_6_q8",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 9,
@@ -9461,7 +10864,9 @@ window.EXAM_DATA = {
                       "text": "Figure , because the forces in Figure cancel each other out."
                     }
                   ],
-                  "question_id": "app1_unit5_5_6_q9"
+                  "question_id": "app1_unit5_5_6_q9",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 }
               ]
             }
@@ -9498,7 +10903,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_1_q1"
+                  "question_id": "app1_unit6_6_1_q1",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 2,
@@ -9521,7 +10928,9 @@ window.EXAM_DATA = {
                       "text": "The rotational kinetic energy can be less than, equal to, or greater than the translational kinetic energy."
                     }
                   ],
-                  "question_id": "app1_unit6_6_1_q2"
+                  "question_id": "app1_unit6_6_1_q2",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 3,
@@ -9544,7 +10953,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_1_q3"
+                  "question_id": "app1_unit6_6_1_q3",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 4,
@@ -9567,7 +10978,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_1_q4"
+                  "question_id": "app1_unit6_6_1_q4",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 5,
@@ -9590,7 +11003,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_1_q5"
+                  "question_id": "app1_unit6_6_1_q5",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 6,
@@ -9613,7 +11028,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_1_q6"
+                  "question_id": "app1_unit6_6_1_q6",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 7,
@@ -9636,7 +11053,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_1_q7"
+                  "question_id": "app1_unit6_6_1_q7",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 8,
@@ -9659,7 +11078,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit6_6_1_q8"
+                  "question_id": "app1_unit6_6_1_q8",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 9,
@@ -9682,7 +11103,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_1_q9"
+                  "question_id": "app1_unit6_6_1_q9",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 }
               ]
             },
@@ -9714,7 +11137,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_2_q1"
+                  "question_id": "app1_unit6_6_2_q1",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -9737,7 +11162,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_2_q2"
+                  "question_id": "app1_unit6_6_2_q2",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -9760,7 +11187,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_2_q3"
+                  "question_id": "app1_unit6_6_2_q3",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -9783,7 +11212,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_2_q4"
+                  "question_id": "app1_unit6_6_2_q4",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -9806,7 +11237,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_2_q5"
+                  "question_id": "app1_unit6_6_2_q5",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -9829,7 +11262,9 @@ window.EXAM_DATA = {
                       "text": "The ratio cannot be determined without knowing the relative masses of the disks."
                     }
                   ],
-                  "question_id": "app1_unit6_6_2_q6"
+                  "question_id": "app1_unit6_6_2_q6",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -9852,7 +11287,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_2_q7"
+                  "question_id": "app1_unit6_6_2_q7",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -9875,7 +11312,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_2_q8"
+                  "question_id": "app1_unit6_6_2_q8",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -9898,7 +11337,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_2_q9"
+                  "question_id": "app1_unit6_6_2_q9",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 }
               ]
             },
@@ -9930,7 +11371,9 @@ window.EXAM_DATA = {
                       "text": "The angular impulse could be greater than or less than zero depending on the initial direction of rotation."
                     }
                   ],
-                  "question_id": "app1_unit6_6_3_q1"
+                  "question_id": "app1_unit6_6_3_q1",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -9953,7 +11396,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_3_q2"
+                  "question_id": "app1_unit6_6_3_q2",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -9976,7 +11421,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_3_q3"
+                  "question_id": "app1_unit6_6_3_q3",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -9999,7 +11446,9 @@ window.EXAM_DATA = {
                       "text": "The angular momentum increases."
                     }
                   ],
-                  "question_id": "app1_unit6_6_3_q4"
+                  "question_id": "app1_unit6_6_3_q4",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -10022,7 +11471,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_3_q5"
+                  "question_id": "app1_unit6_6_3_q5",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -10045,7 +11496,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_3_q6"
+                  "question_id": "app1_unit6_6_3_q6",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -10068,7 +11521,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_3_q7"
+                  "question_id": "app1_unit6_6_3_q7",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -10091,7 +11546,9 @@ window.EXAM_DATA = {
                       "text": "The torque increases in magnitude and is in the opposite direction of the angular momentum."
                     }
                   ],
-                  "question_id": "app1_unit6_6_3_q8"
+                  "question_id": "app1_unit6_6_3_q8",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -10114,7 +11571,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_3_q9"
+                  "question_id": "app1_unit6_6_3_q9",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 }
               ]
             },
@@ -10146,7 +11605,9 @@ window.EXAM_DATA = {
                       "text": "No, because when the center of mass of the hoop is momentarily at rest it has nonzero rotational kinetic\r\nenergy."
                     }
                   ],
-                  "question_id": "app1_unit6_6_4_q1"
+                  "question_id": "app1_unit6_6_4_q1",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 2,
@@ -10169,7 +11630,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_4_q2"
+                  "question_id": "app1_unit6_6_4_q2",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 3,
@@ -10192,7 +11655,9 @@ window.EXAM_DATA = {
                       "text": "No, because when an object is slipping, the motion of the center of mass and the rotational motion of the\r\nobject are not related."
                     }
                   ],
-                  "question_id": "app1_unit6_6_4_q3"
+                  "question_id": "app1_unit6_6_4_q3",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 4,
@@ -10215,7 +11680,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit6_6_4_q4"
+                  "question_id": "app1_unit6_6_4_q4",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 5,
@@ -10238,7 +11705,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_4_q5"
+                  "question_id": "app1_unit6_6_4_q5",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 6,
@@ -10261,7 +11730,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_4_q6"
+                  "question_id": "app1_unit6_6_4_q6",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 7,
@@ -10284,7 +11755,9 @@ window.EXAM_DATA = {
                       "text": "The comparison cannot be made without knowing the coefficient of static friction between the hoop and\r\nRamp ."
                     }
                   ],
-                  "question_id": "app1_unit6_6_4_q7"
+                  "question_id": "app1_unit6_6_4_q7",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 8,
@@ -10300,14 +11773,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "The cube, because the cube\u2019s kinetic energy will all be in the form of translational kinetic energy, while\r\nsome of the sphere\u2019s kinetic energy will be in the form of rotational kinetic energy."
+                      "text": "The cube, because the cube’s kinetic energy will all be in the form of translational kinetic energy, while\r\nsome of the sphere’s kinetic energy will be in the form of rotational kinetic energy."
                     },
                     {
                       "letter": "D",
                       "text": "The cube, because none of the mechanical energy of the cube will be dissipated by friction, while some\r\nof the mechanical energy of the sphere will be dissipated by friction."
                     }
                   ],
-                  "question_id": "app1_unit6_6_4_q8"
+                  "question_id": "app1_unit6_6_4_q8",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 9,
@@ -10330,7 +11805,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit6_6_4_q9"
+                  "question_id": "app1_unit6_6_4_q9",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 }
               ]
             },
@@ -10362,7 +11839,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_5_q1"
+                  "question_id": "app1_unit6_6_5_q1",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -10385,7 +11864,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_5_q2"
+                  "question_id": "app1_unit6_6_5_q2",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -10408,7 +11889,9 @@ window.EXAM_DATA = {
                       "text": "The comparison of the escape speeds cannot be made without knowing the masses of the satellites."
                     }
                   ],
-                  "question_id": "app1_unit6_6_5_q3"
+                  "question_id": "app1_unit6_6_5_q3",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -10424,14 +11907,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": ", because the gravitational potential energy increases with increasing distance from Earth\u2019s\r\ncenter."
+                      "text": ", because the gravitational potential energy increases with increasing distance from Earth’s\r\ncenter."
                     },
                     {
                       "letter": "D",
-                      "text": ", because the total mechanical energy of the system is proportional to the distance between\r\nthe satellite and Earth\u2019s center."
+                      "text": ", because the total mechanical energy of the system is proportional to the distance between\r\nthe satellite and Earth’s center."
                     }
                   ],
-                  "question_id": "app1_unit6_6_5_q4"
+                  "question_id": "app1_unit6_6_5_q4",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 5,
@@ -10454,7 +11939,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_5_q5"
+                  "question_id": "app1_unit6_6_5_q5",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -10477,7 +11964,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_6_5_q6"
+                  "question_id": "app1_unit6_6_5_q6",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -10500,7 +11989,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n6"
                     }
                   ],
-                  "question_id": "app1_unit6_6_5_q7"
+                  "question_id": "app1_unit6_6_5_q7",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -10523,7 +12014,9 @@ window.EXAM_DATA = {
                       "text": "No, because Satellite requires less energy to escape because it has a smaller mass than Satellite ."
                     }
                   ],
-                  "question_id": "app1_unit6_6_5_q8"
+                  "question_id": "app1_unit6_6_5_q8",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 9,
@@ -10546,7 +12039,9 @@ window.EXAM_DATA = {
                       "text": "Nonzero, because the magnitude of the gravitational force changes throughout the orbit"
                     }
                   ],
-                  "question_id": "app1_unit6_6_5_q9"
+                  "question_id": "app1_unit6_6_5_q9",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 }
               ]
             },
@@ -10578,7 +12073,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q1"
+                  "question_id": "app1_unit6_unit_6_progress_check_q1",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -10601,7 +12098,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q2"
+                  "question_id": "app1_unit6_unit_6_progress_check_q2",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -10624,7 +12123,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 2 of 15 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q3"
+                  "question_id": "app1_unit6_unit_6_progress_check_q3",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -10647,7 +12148,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q4"
+                  "question_id": "app1_unit6_unit_6_progress_check_q4",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -10670,7 +12173,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ"
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q5"
+                  "question_id": "app1_unit6_unit_6_progress_check_q5",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -10693,7 +12198,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 4 of 15 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q6"
+                  "question_id": "app1_unit6_unit_6_progress_check_q6",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -10716,7 +12223,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q7"
+                  "question_id": "app1_unit6_unit_6_progress_check_q7",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -10739,7 +12248,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q8"
+                  "question_id": "app1_unit6_unit_6_progress_check_q8",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -10762,7 +12273,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q9"
+                  "question_id": "app1_unit6_unit_6_progress_check_q9",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 10,
@@ -10785,7 +12298,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q10"
+                  "question_id": "app1_unit6_unit_6_progress_check_q10",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 11,
@@ -10808,7 +12323,9 @@ window.EXAM_DATA = {
                       "text": "Increases, because the angular speed of the pulley increases"
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q11"
+                  "question_id": "app1_unit6_unit_6_progress_check_q11",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 12,
@@ -10831,7 +12348,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q12"
+                  "question_id": "app1_unit6_unit_6_progress_check_q12",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 13,
@@ -10839,7 +12358,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The magnitude of the comet\u2019s angular momentum increases."
+                      "text": "The magnitude of the comet’s angular momentum increases."
                     },
                     {
                       "letter": "B",
@@ -10854,7 +12373,9 @@ window.EXAM_DATA = {
                       "text": "The magnitude of the gravitational potential energy of the comet-star system will never be zero."
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q13"
+                  "question_id": "app1_unit6_unit_6_progress_check_q13",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 14,
@@ -10877,7 +12398,9 @@ window.EXAM_DATA = {
                       "text": "because the rock will have nonzero kinetic energy when it is very far from the planet.\r\nScoring Guide\r\nUnit 6 Progress Check: MCQ"
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q14"
+                  "question_id": "app1_unit6_unit_6_progress_check_q14",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 15,
@@ -10900,7 +12423,9 @@ window.EXAM_DATA = {
                       "text": "The cylinder and the block have the same translational speed because the normal force exerted on both\r\nthe block and the cylinder is the same."
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q15"
+                  "question_id": "app1_unit6_unit_6_progress_check_q15",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 16,
@@ -10923,7 +12448,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q16"
+                  "question_id": "app1_unit6_unit_6_progress_check_q16",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 17,
@@ -10946,7 +12473,9 @@ window.EXAM_DATA = {
                       "text": "The angular speed increases."
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q17"
+                  "question_id": "app1_unit6_unit_6_progress_check_q17",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 18,
@@ -10969,7 +12498,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 14 of 15 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit6_unit_6_progress_check_q18"
+                  "question_id": "app1_unit6_unit_6_progress_check_q18",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 }
               ]
             }
@@ -10999,14 +12530,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "Location , because the spring exerts a force opposite to the block\u2019s displacement from equilibrium."
+                      "text": "Location , because the spring exerts a force opposite to the block’s displacement from equilibrium."
                     },
                     {
                       "letter": "D",
                       "text": "Location , because the horizontal force exerted by the spring is equal in magnitude to the weight of the\r\nblock."
                     }
                   ],
-                  "question_id": "app1_unit7_7_1_q1"
+                  "question_id": "app1_unit7_7_1_q1",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 2,
@@ -11029,7 +12562,9 @@ window.EXAM_DATA = {
                       "text": "No, because the acceleration is always decreasing with increasing position."
                     }
                   ],
-                  "question_id": "app1_unit7_7_1_q2"
+                  "question_id": "app1_unit7_7_1_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -11052,7 +12587,9 @@ window.EXAM_DATA = {
                       "text": "The cart will reach equilibrium at a different position than in the first scenario."
                     }
                   ],
-                  "question_id": "app1_unit7_7_1_q3"
+                  "question_id": "app1_unit7_7_1_q3",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 4,
@@ -11075,7 +12612,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_1_q4"
+                  "question_id": "app1_unit7_7_1_q4",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 5,
@@ -11098,7 +12637,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_1_q5"
+                  "question_id": "app1_unit7_7_1_q5",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 6,
@@ -11121,7 +12662,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_1_q6"
+                  "question_id": "app1_unit7_7_1_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -11133,7 +12676,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "because the force on the block is constant throughout the block\u2019s motion."
+                      "text": "because the force on the block is constant throughout the block’s motion."
                     },
                     {
                       "letter": "C",
@@ -11144,7 +12687,9 @@ window.EXAM_DATA = {
                       "text": "because the force is zero at the equilibrium position and a maximum at maximum\r\ndisplacement."
                     }
                   ],
-                  "question_id": "app1_unit7_7_1_q7"
+                  "question_id": "app1_unit7_7_1_q7",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 8,
@@ -11167,7 +12712,9 @@ window.EXAM_DATA = {
                       "text": "A dropped ball that collides elastically with the floor and returns to its initial height"
                     }
                   ],
-                  "question_id": "app1_unit7_7_1_q8"
+                  "question_id": "app1_unit7_7_1_q8",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 9,
@@ -11175,11 +12722,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The force exerted on the object is in the direction of the object\u2019s displacement."
+                      "text": "The force exerted on the object is in the direction of the object’s displacement."
                     },
                     {
                       "letter": "B",
-                      "text": "The magnitude of the force exerted on the object is proportional to the object\u2019s displacement from\r\nequilibrium."
+                      "text": "The magnitude of the force exerted on the object is proportional to the object’s displacement from\r\nequilibrium."
                     },
                     {
                       "letter": "C",
@@ -11190,7 +12737,9 @@ window.EXAM_DATA = {
                       "text": "The speed of the object is at its maximum value when the object is at its maximum displacement."
                     }
                   ],
-                  "question_id": "app1_unit7_7_1_q9"
+                  "question_id": "app1_unit7_7_1_q9",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 }
               ]
             },
@@ -11222,7 +12771,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_2_q1"
+                  "question_id": "app1_unit7_7_2_q1",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 2,
@@ -11245,7 +12796,9 @@ window.EXAM_DATA = {
                       "text": "No, because the shorter string will cause the pendulum to have a greater frequency."
                     }
                   ],
-                  "question_id": "app1_unit7_7_2_q2"
+                  "question_id": "app1_unit7_7_2_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -11253,7 +12806,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Yes, because the amplitude of the pendulum\u2019s oscillation will be smaller."
+                      "text": "Yes, because the amplitude of the pendulum’s oscillation will be smaller."
                     },
                     {
                       "letter": "B",
@@ -11268,7 +12821,9 @@ window.EXAM_DATA = {
                       "text": "No, because the pendulum will have a smaller average speed, so will take longer to complete a full\r\noscillation."
                     }
                   ],
-                  "question_id": "app1_unit7_7_2_q3"
+                  "question_id": "app1_unit7_7_2_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -11291,7 +12846,9 @@ window.EXAM_DATA = {
                       "text": "No, because the ratio will not change if both quantities are quadrupled."
                     }
                   ],
-                  "question_id": "app1_unit7_7_2_q4"
+                  "question_id": "app1_unit7_7_2_q4",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 5,
@@ -11314,7 +12871,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_2_q5"
+                  "question_id": "app1_unit7_7_2_q5",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 6,
@@ -11337,7 +12896,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_2_q6"
+                  "question_id": "app1_unit7_7_2_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -11360,7 +12921,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_2_q7"
+                  "question_id": "app1_unit7_7_2_q7",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 8,
@@ -11383,7 +12946,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_2_q8"
+                  "question_id": "app1_unit7_7_2_q8",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 9,
@@ -11406,7 +12971,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_2_q9"
+                  "question_id": "app1_unit7_7_2_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 }
               ]
             },
@@ -11438,7 +13005,9 @@ window.EXAM_DATA = {
                       "text": "Object has half the amplitude and half the period of Object ."
                     }
                   ],
-                  "question_id": "app1_unit7_7_3_q1"
+                  "question_id": "app1_unit7_7_3_q1",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 2,
@@ -11461,7 +13030,9 @@ window.EXAM_DATA = {
                       "text": ", because the amplitude in Figure is greater than that in Figure ."
                     }
                   ],
-                  "question_id": "app1_unit7_7_3_q2"
+                  "question_id": "app1_unit7_7_3_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -11484,7 +13055,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_3_q3"
+                  "question_id": "app1_unit7_7_3_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -11507,7 +13080,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n3"
                     }
                   ],
-                  "question_id": "app1_unit7_7_3_q4"
+                  "question_id": "app1_unit7_7_3_q4",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 5,
@@ -11530,7 +13105,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_3_q5"
+                  "question_id": "app1_unit7_7_3_q5",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 6,
@@ -11553,7 +13130,9 @@ window.EXAM_DATA = {
                       "text": "The graph would be compressed horizontally, because the spring constant has decreased."
                     }
                   ],
-                  "question_id": "app1_unit7_7_3_q6"
+                  "question_id": "app1_unit7_7_3_q6",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 7,
@@ -11576,7 +13155,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_3_q7"
+                  "question_id": "app1_unit7_7_3_q7",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 8,
@@ -11599,7 +13180,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_3_q8"
+                  "question_id": "app1_unit7_7_3_q8",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 9,
@@ -11622,7 +13205,9 @@ window.EXAM_DATA = {
                       "text": "No, because the springs are identical."
                     }
                   ],
-                  "question_id": "app1_unit7_7_3_q9"
+                  "question_id": "app1_unit7_7_3_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 }
               ]
             },
@@ -11654,7 +13239,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_4_q1"
+                  "question_id": "app1_unit7_7_4_q1",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 2,
@@ -11677,7 +13264,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_4_q2"
+                  "question_id": "app1_unit7_7_4_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -11700,7 +13289,9 @@ window.EXAM_DATA = {
                       "text": ";"
                     }
                   ],
-                  "question_id": "app1_unit7_7_4_q3"
+                  "question_id": "app1_unit7_7_4_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -11723,7 +13314,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_4_q4"
+                  "question_id": "app1_unit7_7_4_q4",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 5,
@@ -11746,7 +13339,9 @@ window.EXAM_DATA = {
                       "text": "It cannot be determined without knowing the length of the strings."
                     }
                   ],
-                  "question_id": "app1_unit7_7_4_q5"
+                  "question_id": "app1_unit7_7_4_q5",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 6,
@@ -11769,7 +13364,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_4_q6"
+                  "question_id": "app1_unit7_7_4_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -11792,7 +13389,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_7_4_q7"
+                  "question_id": "app1_unit7_7_4_q7",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 8,
@@ -11815,7 +13414,9 @@ window.EXAM_DATA = {
                       "text": "The relative values of the maximum kinetic and potential energies depend on the mass of the block and\r\nthe spring constant of the spring."
                     }
                   ],
-                  "question_id": "app1_unit7_7_4_q8"
+                  "question_id": "app1_unit7_7_4_q8",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 9,
@@ -11838,7 +13439,9 @@ window.EXAM_DATA = {
                       "text": "Both and are increasing."
                     }
                   ],
-                  "question_id": "app1_unit7_7_4_q9"
+                  "question_id": "app1_unit7_7_4_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 }
               ]
             },
@@ -11870,7 +13473,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q1"
+                  "question_id": "app1_unit7_unit_7_progress_check_q1",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 2,
@@ -11893,7 +13498,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q2"
+                  "question_id": "app1_unit7_unit_7_progress_check_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -11916,7 +13523,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q3"
+                  "question_id": "app1_unit7_unit_7_progress_check_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -11939,7 +13548,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q4"
+                  "question_id": "app1_unit7_unit_7_progress_check_q4",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 5,
@@ -11962,7 +13573,9 @@ window.EXAM_DATA = {
                       "text": "There is no equilibrium position because the force is nonzero at ."
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q5"
+                  "question_id": "app1_unit7_unit_7_progress_check_q5",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 6,
@@ -11985,7 +13598,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q6"
+                  "question_id": "app1_unit7_unit_7_progress_check_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -12008,7 +13623,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q7"
+                  "question_id": "app1_unit7_unit_7_progress_check_q7",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 8,
@@ -12031,7 +13648,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q8"
+                  "question_id": "app1_unit7_unit_7_progress_check_q8",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 9,
@@ -12054,7 +13673,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q9"
+                  "question_id": "app1_unit7_unit_7_progress_check_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 10,
@@ -12077,7 +13698,9 @@ window.EXAM_DATA = {
                       "text": "Because even though the block travels a larger distance during one oscillation when the initial\r\ndisplacement is greater, the average speed also increases by the same factor."
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q10"
+                  "question_id": "app1_unit7_unit_7_progress_check_q10",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 11,
@@ -12100,7 +13723,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q11"
+                  "question_id": "app1_unit7_unit_7_progress_check_q11",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 12,
@@ -12123,7 +13748,9 @@ window.EXAM_DATA = {
                       "text": "The comparison cannot be made without knowing the relative spring constants.\r\nScoring Guide\r\nUnit 7 Progress Check: MCQ\r\nPage 8 of 18 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q12"
+                  "question_id": "app1_unit7_unit_7_progress_check_q12",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 13,
@@ -12143,10 +13770,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "No, because the restoring force exerted by the component of the gravitational force parallel to the ramp\r\nis not proportional to the block\u2019s displacement from equilibrium.\r\nScoring Guide\r\nUnit 7 Progress Check: MCQ"
+                      "text": "No, because the restoring force exerted by the component of the gravitational force parallel to the ramp\r\nis not proportional to the block’s displacement from equilibrium.\r\nScoring Guide\r\nUnit 7 Progress Check: MCQ"
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q13"
+                  "question_id": "app1_unit7_unit_7_progress_check_q13",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 14,
@@ -12169,7 +13798,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q14"
+                  "question_id": "app1_unit7_unit_7_progress_check_q14",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 15,
@@ -12192,7 +13823,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 7 Progress Check: MCQ"
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q15"
+                  "question_id": "app1_unit7_unit_7_progress_check_q15",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 16,
@@ -12215,7 +13848,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q16"
+                  "question_id": "app1_unit7_unit_7_progress_check_q16",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 17,
@@ -12238,7 +13873,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q17"
+                  "question_id": "app1_unit7_unit_7_progress_check_q17",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 18,
@@ -12261,7 +13898,9 @@ window.EXAM_DATA = {
                       "text": "No, because changing the amplitude of the oscillation changes the initial potential energy, which is\r\nequal to the maximum kinetic energy of the block."
                     }
                   ],
-                  "question_id": "app1_unit7_unit_7_progress_check_q18"
+                  "question_id": "app1_unit7_unit_7_progress_check_q18",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 }
               ]
             }
@@ -12298,7 +13937,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_1_q1"
+                  "question_id": "app1_unit8_8_1_q1",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 2,
@@ -12321,7 +13962,9 @@ window.EXAM_DATA = {
                       "text": "The comparison cannot be made without knowing the mass of each block."
                     }
                   ],
-                  "question_id": "app1_unit8_8_1_q2"
+                  "question_id": "app1_unit8_8_1_q2",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 3,
@@ -12344,7 +13987,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_1_q3"
+                  "question_id": "app1_unit8_8_1_q3",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 4,
@@ -12367,7 +14012,9 @@ window.EXAM_DATA = {
                       "text": "Dividing by , because the difference in mass represents the mass of the object\r\nand the difference in volume represents the volume of the water."
                     }
                   ],
-                  "question_id": "app1_unit8_8_1_q4"
+                  "question_id": "app1_unit8_8_1_q4",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 5,
@@ -12390,7 +14037,9 @@ window.EXAM_DATA = {
                       "text": "The density of the gas will increase because the mass of the gas increases.\r\nScoring Guide\r\n1"
                     }
                   ],
-                  "question_id": "app1_unit8_8_1_q5"
+                  "question_id": "app1_unit8_8_1_q5",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 6,
@@ -12413,7 +14062,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_1_q6"
+                  "question_id": "app1_unit8_8_1_q6",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 7,
@@ -12436,7 +14087,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_1_q7"
+                  "question_id": "app1_unit8_8_1_q7",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 8,
@@ -12459,7 +14112,9 @@ window.EXAM_DATA = {
                       "text": "No, because the student neglected to account for the total volume of the cylinders."
                     }
                   ],
-                  "question_id": "app1_unit8_8_1_q8"
+                  "question_id": "app1_unit8_8_1_q8",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 9,
@@ -12482,7 +14137,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_1_q9"
+                  "question_id": "app1_unit8_8_1_q9",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 }
               ]
             },
@@ -12514,7 +14171,9 @@ window.EXAM_DATA = {
                       "text": "No, because the pressure decreases with increasing surface area in contact with the table."
                     }
                   ],
-                  "question_id": "app1_unit8_8_2_q1"
+                  "question_id": "app1_unit8_8_2_q1",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 2,
@@ -12537,7 +14196,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_2_q2"
+                  "question_id": "app1_unit8_8_2_q2",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 3,
@@ -12560,7 +14221,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_2_q3"
+                  "question_id": "app1_unit8_8_2_q3",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 4,
@@ -12583,7 +14246,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_2_q4"
+                  "question_id": "app1_unit8_8_2_q4",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 5,
@@ -12606,7 +14271,9 @@ window.EXAM_DATA = {
                       "text": "Graph pressure as a function of distance below the surface. The density of the water is the slope of the\r\nline because pressure is given by ."
                     }
                   ],
-                  "question_id": "app1_unit8_8_2_q5"
+                  "question_id": "app1_unit8_8_2_q5",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 6,
@@ -12629,7 +14296,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2"
                     }
                   ],
-                  "question_id": "app1_unit8_8_2_q6"
+                  "question_id": "app1_unit8_8_2_q6",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 7,
@@ -12652,7 +14321,9 @@ window.EXAM_DATA = {
                       "text": "The comparison cannot be made without knowing the relative densities of the fluids."
                     }
                   ],
-                  "question_id": "app1_unit8_8_2_q7"
+                  "question_id": "app1_unit8_8_2_q7",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 8,
@@ -12675,7 +14346,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_2_q8"
+                  "question_id": "app1_unit8_8_2_q8",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 9,
@@ -12698,7 +14371,9 @@ window.EXAM_DATA = {
                       "text": "The claim is incorrect, because Cylinder has a smaller surface area so the pressure at the top surface of\r\nCylinder is greater than the pressure at the top surface of Cylinder .\r\nScoring Guide\r\n2"
                     }
                   ],
-                  "question_id": "app1_unit8_8_2_q9"
+                  "question_id": "app1_unit8_8_2_q9",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 }
               ]
             },
@@ -12730,7 +14405,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_3_q1"
+                  "question_id": "app1_unit8_8_3_q1",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 2,
@@ -12753,7 +14430,9 @@ window.EXAM_DATA = {
                       "text": "The density is related to but not equal to the slope of the graph."
                     }
                   ],
-                  "question_id": "app1_unit8_8_3_q2"
+                  "question_id": "app1_unit8_8_3_q2",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 3,
@@ -12776,7 +14455,9 @@ window.EXAM_DATA = {
                       "text": "The buoyant force is directed upward."
                     }
                   ],
-                  "question_id": "app1_unit8_8_3_q3"
+                  "question_id": "app1_unit8_8_3_q3",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 4,
@@ -12799,7 +14480,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_3_q4"
+                  "question_id": "app1_unit8_8_3_q4",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 5,
@@ -12822,7 +14505,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_3_q5"
+                  "question_id": "app1_unit8_8_3_q5",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 6,
@@ -12845,7 +14530,9 @@ window.EXAM_DATA = {
                       "text": "The forces cannot be compared without knowing the ratio of the densities of iron and water."
                     }
                   ],
-                  "question_id": "app1_unit8_8_3_q6"
+                  "question_id": "app1_unit8_8_3_q6",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 7,
@@ -12868,7 +14555,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_3_q7"
+                  "question_id": "app1_unit8_8_3_q7",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 8,
@@ -12891,7 +14580,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_3_q8"
+                  "question_id": "app1_unit8_8_3_q8",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 9,
@@ -12914,7 +14605,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_3_q9"
+                  "question_id": "app1_unit8_8_3_q9",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 }
               ]
             },
@@ -12946,7 +14639,9 @@ window.EXAM_DATA = {
                       "text": "If the container had a larger diameter, the water would land closer to the container."
                     }
                   ],
-                  "question_id": "app1_unit8_8_4_q1"
+                  "question_id": "app1_unit8_8_4_q1",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 2,
@@ -12969,7 +14664,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_4_q2"
+                  "question_id": "app1_unit8_8_4_q2",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 3,
@@ -12992,7 +14689,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_4_q3"
+                  "question_id": "app1_unit8_8_4_q3",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 4,
@@ -13015,7 +14714,9 @@ window.EXAM_DATA = {
                       "text": "The pressures cannot be compared without knowing the ratio of the diameters of the reservoir and tube"
                     }
                   ],
-                  "question_id": "app1_unit8_8_4_q4"
+                  "question_id": "app1_unit8_8_4_q4",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 5,
@@ -13038,7 +14739,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "app1_unit8_8_4_q5"
+                  "question_id": "app1_unit8_8_4_q5",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 6,
@@ -13061,7 +14764,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_4_q6"
+                  "question_id": "app1_unit8_8_4_q6",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 7,
@@ -13084,7 +14789,9 @@ window.EXAM_DATA = {
                       "text": "The radius of the section through which the bead flows during is one-third of the radius of the\r\nsection through which the bead flows during ."
                     }
                   ],
-                  "question_id": "app1_unit8_8_4_q7"
+                  "question_id": "app1_unit8_8_4_q7",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 8,
@@ -13107,7 +14814,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_8_4_q8"
+                  "question_id": "app1_unit8_8_4_q8",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 9,
@@ -13130,7 +14839,9 @@ window.EXAM_DATA = {
                       "text": "The speeds cannot be compared without knowing the density of the fluid."
                     }
                   ],
-                  "question_id": "app1_unit8_8_4_q9"
+                  "question_id": "app1_unit8_8_4_q9",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 }
               ]
             },
@@ -13162,7 +14873,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q1"
+                  "question_id": "app1_unit8_unit_8_progress_check_q1",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 2,
@@ -13185,7 +14898,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q2"
+                  "question_id": "app1_unit8_unit_8_progress_check_q2",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 3,
@@ -13208,7 +14923,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q3"
+                  "question_id": "app1_unit8_unit_8_progress_check_q3",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 4,
@@ -13231,7 +14948,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q4"
+                  "question_id": "app1_unit8_unit_8_progress_check_q4",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 5,
@@ -13254,7 +14973,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 8 Progress Check: MCQ\r\nPage 4 of 15 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q5"
+                  "question_id": "app1_unit8_unit_8_progress_check_q5",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 6,
@@ -13277,7 +14998,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q6"
+                  "question_id": "app1_unit8_unit_8_progress_check_q6",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 7,
@@ -13300,7 +15023,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q7"
+                  "question_id": "app1_unit8_unit_8_progress_check_q7",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 8,
@@ -13323,7 +15048,9 @@ window.EXAM_DATA = {
                       "text": ";"
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q8"
+                  "question_id": "app1_unit8_unit_8_progress_check_q8",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 9,
@@ -13346,7 +15073,9 @@ window.EXAM_DATA = {
                       "text": "The density of each block increases with increasing volume."
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q9"
+                  "question_id": "app1_unit8_unit_8_progress_check_q9",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 10,
@@ -13369,7 +15098,9 @@ window.EXAM_DATA = {
                       "text": "No, because the pressure at the bottom of the two columns of liquid cannot be compared without\r\nknowing the relative values of the densities of the individual fluids."
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q10"
+                  "question_id": "app1_unit8_unit_8_progress_check_q10",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 11,
@@ -13392,7 +15123,9 @@ window.EXAM_DATA = {
                       "text": "It cannot be determined without knowing the ratio of the densities of the blocks."
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q11"
+                  "question_id": "app1_unit8_unit_8_progress_check_q11",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 12,
@@ -13415,7 +15148,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q12"
+                  "question_id": "app1_unit8_unit_8_progress_check_q12",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 13,
@@ -13438,7 +15173,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q13"
+                  "question_id": "app1_unit8_unit_8_progress_check_q13",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 14,
@@ -13461,7 +15198,9 @@ window.EXAM_DATA = {
                       "text": "The cross-sectional area of the pipe"
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q14"
+                  "question_id": "app1_unit8_unit_8_progress_check_q14",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 15,
@@ -13484,7 +15223,9 @@ window.EXAM_DATA = {
                       "text": "The buoyant force is greater than .\r\nScoring Guide\r\nUnit 8 Progress Check: MCQ\r\nPage 12 of 15 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q15"
+                  "question_id": "app1_unit8_unit_8_progress_check_q15",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 16,
@@ -13507,7 +15248,9 @@ window.EXAM_DATA = {
                       "text": ", because the total volume of water displaced by the raft-block system is the same before\r\nand after the block is lowered.\r\nScoring Guide\r\nUnit 8 Progress Check: MCQ"
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q16"
+                  "question_id": "app1_unit8_unit_8_progress_check_q16",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 17,
@@ -13530,7 +15273,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 8 Progress Check: MCQ\r\nPage 14 of 15 AP Physics 1"
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q17"
+                  "question_id": "app1_unit8_unit_8_progress_check_q17",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 18,
@@ -13553,7 +15298,9 @@ window.EXAM_DATA = {
                       "text": ", because the water slows down as it moves vertically upward between Point and Point ."
                     }
                   ],
-                  "question_id": "app1_unit8_unit_8_progress_check_q18"
+                  "question_id": "app1_unit8_unit_8_progress_check_q18",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 }
               ]
             }
@@ -13595,7 +15342,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_1_q1"
+                  "question_id": "appc_unit1_1_1_q1",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -13618,7 +15367,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit1_1_1_q2"
+                  "question_id": "appc_unit1_1_1_q2",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 3,
@@ -13641,7 +15392,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.1\r\nPage 2 of 7 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit1_1_1_q3"
+                  "question_id": "appc_unit1_1_1_q3",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -13664,7 +15417,9 @@ window.EXAM_DATA = {
                       "text": "It is a vector that has the same magnitude as both and ."
                     }
                   ],
-                  "question_id": "appc_unit1_1_1_q4"
+                  "question_id": "appc_unit1_1_1_q4",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 5,
@@ -13687,7 +15442,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_1_q5"
+                  "question_id": "appc_unit1_1_1_q5",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -13710,7 +15467,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.1\r\nPage 4 of 7 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit1_1_1_q6"
+                  "question_id": "appc_unit1_1_1_q6",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 7,
@@ -13733,7 +15492,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.1\r\nAP Physics C: Mechanics Page 5 of 7"
                     }
                   ],
-                  "question_id": "appc_unit1_1_1_q7"
+                  "question_id": "appc_unit1_1_1_q7",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -13756,7 +15517,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_1_q8"
+                  "question_id": "appc_unit1_1_1_q8",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 9,
@@ -13779,7 +15542,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_1_q9"
+                  "question_id": "appc_unit1_1_1_q9",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             },
@@ -13811,7 +15576,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_2_q1"
+                  "question_id": "appc_unit1_1_2_q1",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -13834,7 +15601,9 @@ window.EXAM_DATA = {
                       "text": "AP PHYSICS C: MECHANICS Scoring Guide\r\n1.2\r\nAP Physics C: Mechanics Page 1 of 5"
                     }
                   ],
-                  "question_id": "appc_unit1_1_2_q2"
+                  "question_id": "appc_unit1_1_2_q2",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 3,
@@ -13857,7 +15626,9 @@ window.EXAM_DATA = {
                       "text": "Yes because the velocity of the object changes sign at ."
                     }
                   ],
-                  "question_id": "appc_unit1_1_2_q3"
+                  "question_id": "appc_unit1_1_2_q3",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -13880,7 +15651,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit1_1_2_q4"
+                  "question_id": "appc_unit1_1_2_q4",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 5,
@@ -13903,7 +15676,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_2_q5"
+                  "question_id": "appc_unit1_1_2_q5",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -13926,7 +15701,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_2_q6"
+                  "question_id": "appc_unit1_1_2_q6",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 7,
@@ -13949,7 +15726,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.2\r\nPage 4 of 5 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit1_1_2_q7"
+                  "question_id": "appc_unit1_1_2_q7",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -13957,22 +15736,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The student\u2019s equation does not account for the initial position of the object."
+                      "text": "The student’s equation does not account for the initial position of the object."
                     },
                     {
                       "letter": "B",
-                      "text": "The student\u2019s equation does not account for the initial velocity of the object."
+                      "text": "The student’s equation does not account for the initial velocity of the object."
                     },
                     {
                       "letter": "C",
-                      "text": "The student\u2019s equation does not substitute in the term."
+                      "text": "The student’s equation does not substitute in the term."
                     },
                     {
                       "letter": "D",
-                      "text": "The student\u2019s equation should not have a term, as integrating the acceleration function twice yields\r\n."
+                      "text": "The student’s equation should not have a term, as integrating the acceleration function twice yields\r\n."
                     }
                   ],
-                  "question_id": "appc_unit1_1_2_q8"
+                  "question_id": "appc_unit1_1_2_q8",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             },
@@ -14004,7 +15785,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q1"
+                  "question_id": "appc_unit1_1_3_q1",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -14027,7 +15810,9 @@ window.EXAM_DATA = {
                       "text": "Yes, because the acceleration of the object is negative during this time interval.\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n1.3\r\nAP Physics C: Mechanics Page 1 of 7"
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q2"
+                  "question_id": "appc_unit1_1_3_q2",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 3,
@@ -14050,7 +15835,9 @@ window.EXAM_DATA = {
                       "text": "The car has a negative initial velocity and a negative acceleration because the position is decreasing and\r\nthe magnitude of displacement in each time interval increases."
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q3"
+                  "question_id": "appc_unit1_1_3_q3",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -14058,11 +15845,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "One time because the graph indicates that there is a single point where the object\u2019s velocity is zero and\r\nits acceleration is zero."
+                      "text": "One time because the graph indicates that there is a single point where the object’s velocity is zero and\r\nits acceleration is zero."
                     },
                     {
                       "letter": "B",
-                      "text": "One time because the graph indicates that there is a single point where the object\u2019s velocity is zero and\r\nits acceleration is nonzero."
+                      "text": "One time because the graph indicates that there is a single point where the object’s velocity is zero and\r\nits acceleration is nonzero."
                     },
                     {
                       "letter": "C",
@@ -14073,7 +15860,9 @@ window.EXAM_DATA = {
                       "text": "Two times because the graph indicates that the position of the object is zero at two different points."
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q4"
+                  "question_id": "appc_unit1_1_3_q4",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 5,
@@ -14096,7 +15885,9 @@ window.EXAM_DATA = {
                       "text": "The position of the object is the same as its position at , because the area under the velocity graph\r\nis zero for the entire time interval."
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q5"
+                  "question_id": "appc_unit1_1_3_q5",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -14119,7 +15910,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.3\r\nPage 4 of 7 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q6"
+                  "question_id": "appc_unit1_1_3_q6",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 7,
@@ -14142,7 +15935,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q7"
+                  "question_id": "appc_unit1_1_3_q7",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -14165,7 +15960,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q8"
+                  "question_id": "appc_unit1_1_3_q8",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 9,
@@ -14188,7 +15985,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q9"
+                  "question_id": "appc_unit1_1_3_q9",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 10,
@@ -14211,7 +16010,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.3\r\nPage 6 of 7 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit1_1_3_q10"
+                  "question_id": "appc_unit1_1_3_q10",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             },
@@ -14243,7 +16044,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "appc_unit1_1_4_q1"
+                  "question_id": "appc_unit1_1_4_q1",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 2,
@@ -14266,7 +16069,9 @@ window.EXAM_DATA = {
                       "text": "West"
                     }
                   ],
-                  "question_id": "appc_unit1_1_4_q2"
+                  "question_id": "appc_unit1_1_4_q2",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 3,
@@ -14289,7 +16094,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_4_q3"
+                  "question_id": "appc_unit1_1_4_q3",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 4,
@@ -14312,7 +16119,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_4_q4"
+                  "question_id": "appc_unit1_1_4_q4",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 5,
@@ -14335,7 +16144,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_4_q5"
+                  "question_id": "appc_unit1_1_4_q5",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 6,
@@ -14358,7 +16169,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_4_q6"
+                  "question_id": "appc_unit1_1_4_q6",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 7,
@@ -14381,7 +16194,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_4_q7"
+                  "question_id": "appc_unit1_1_4_q7",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 8,
@@ -14404,7 +16219,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_4_q8"
+                  "question_id": "appc_unit1_1_4_q8",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 9,
@@ -14427,7 +16244,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_4_q9"
+                  "question_id": "appc_unit1_1_4_q9",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 }
               ]
             },
@@ -14459,7 +16278,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_5_q1"
+                  "question_id": "appc_unit1_1_5_q1",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 2,
@@ -14482,7 +16303,9 @@ window.EXAM_DATA = {
                       "text": "At and . is at its greatest value."
                     }
                   ],
-                  "question_id": "appc_unit1_1_5_q2"
+                  "question_id": "appc_unit1_1_5_q2",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 3,
@@ -14505,7 +16328,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1.5\r\nPage 2 of 7 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit1_1_5_q3"
+                  "question_id": "appc_unit1_1_5_q3",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 4,
@@ -14525,10 +16350,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Boat takes less time because the current increases the boat\u2019s speed relative to the ground."
+                      "text": "Boat takes less time because the current increases the boat’s speed relative to the ground."
                     }
                   ],
-                  "question_id": "appc_unit1_1_5_q4"
+                  "question_id": "appc_unit1_1_5_q4",
+                  "concept": "relative_motion",
+                  "concept_label": "Relative Motion & Reference Frames"
                 },
                 {
                   "number": 5,
@@ -14551,7 +16378,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_5_q5"
+                  "question_id": "appc_unit1_1_5_q5",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 6,
@@ -14574,7 +16403,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_5_q6"
+                  "question_id": "appc_unit1_1_5_q6",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 7,
@@ -14597,7 +16428,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_5_q7"
+                  "question_id": "appc_unit1_1_5_q7",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 8,
@@ -14620,7 +16453,9 @@ window.EXAM_DATA = {
                       "text": "Ball takes less time. The maximum height it reaches is less than that of Ball ."
                     }
                   ],
-                  "question_id": "appc_unit1_1_5_q8"
+                  "question_id": "appc_unit1_1_5_q8",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 9,
@@ -14643,7 +16478,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_1_5_q9"
+                  "question_id": "appc_unit1_1_5_q9",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 }
               ]
             },
@@ -14676,7 +16513,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 1 from official review materials."
+                  "explanation": "Mid-Term Review Question 1 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -14704,7 +16543,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 2 from official review materials."
+                  "explanation": "Mid-Term Review Question 2 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 3,
@@ -14732,7 +16573,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 3 from official review materials."
+                  "explanation": "Mid-Term Review Question 3 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -14756,7 +16599,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 4 from official review materials."
+                  "explanation": "Mid-Term Review Question 4 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 5,
@@ -14780,7 +16625,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 5 from official review materials."
+                  "explanation": "Mid-Term Review Question 5 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -14804,7 +16651,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 6 from official review materials."
+                  "explanation": "Mid-Term Review Question 6 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 7,
@@ -14832,7 +16681,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 7 from official review materials."
+                  "explanation": "Mid-Term Review Question 7 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -14860,7 +16711,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 8 from official review materials."
+                  "explanation": "Mid-Term Review Question 8 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 9,
@@ -14888,7 +16741,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "E",
-                  "explanation": "Mid-Term Review Question 9 from official review materials."
+                  "explanation": "Mid-Term Review Question 9 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 10,
@@ -14916,7 +16771,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 10 from official review materials."
+                  "explanation": "Mid-Term Review Question 10 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 11,
@@ -14940,7 +16797,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 11 from official review materials."
+                  "explanation": "Mid-Term Review Question 11 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 12,
@@ -14968,7 +16827,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 12 from official review materials."
+                  "explanation": "Mid-Term Review Question 12 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 13,
@@ -14996,7 +16857,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 13 from official review materials."
+                  "explanation": "Mid-Term Review Question 13 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 14,
@@ -15020,7 +16883,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 14 from official review materials."
+                  "explanation": "Mid-Term Review Question 14 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 15,
@@ -15048,7 +16913,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 15 from official review materials."
+                  "explanation": "Mid-Term Review Question 15 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 16,
@@ -15072,7 +16939,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "C",
-                  "explanation": "Mid-Term Review Question 16 from official review materials."
+                  "explanation": "Mid-Term Review Question 16 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 17,
@@ -15096,7 +16965,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 17 from official review materials."
+                  "explanation": "Mid-Term Review Question 17 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 18,
@@ -15124,7 +16995,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "E",
-                  "explanation": "Mid-Term Review Question 18 from official review materials."
+                  "explanation": "Mid-Term Review Question 18 from official review materials.",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             },
@@ -15156,7 +17029,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q1"
+                  "question_id": "appc_unit1_unit_1_progress_check_q1",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 2,
@@ -15179,7 +17054,9 @@ window.EXAM_DATA = {
                       "text": "in the -direction\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\nUnit 1 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 1 of 13"
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q2"
+                  "question_id": "appc_unit1_unit_1_progress_check_q2",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 3,
@@ -15202,7 +17079,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q3"
+                  "question_id": "appc_unit1_unit_1_progress_check_q3",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -15225,7 +17104,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q4"
+                  "question_id": "appc_unit1_unit_1_progress_check_q4",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 5,
@@ -15248,7 +17129,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q5"
+                  "question_id": "appc_unit1_unit_1_progress_check_q5",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -15271,7 +17154,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q6"
+                  "question_id": "appc_unit1_unit_1_progress_check_q6",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 7,
@@ -15294,7 +17179,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q7"
+                  "question_id": "appc_unit1_unit_1_progress_check_q7",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -15317,7 +17204,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 1 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 5 of 13"
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q8"
+                  "question_id": "appc_unit1_unit_1_progress_check_q8",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 9,
@@ -15340,7 +17229,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q9"
+                  "question_id": "appc_unit1_unit_1_progress_check_q9",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 10,
@@ -15363,7 +17254,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q10"
+                  "question_id": "appc_unit1_unit_1_progress_check_q10",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 11,
@@ -15386,7 +17279,9 @@ window.EXAM_DATA = {
                       "text": "A vector with a magnitude greater than .\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nPage 8 of 13 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q11"
+                  "question_id": "appc_unit1_unit_1_progress_check_q11",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 12,
@@ -15409,7 +17304,9 @@ window.EXAM_DATA = {
                       "text": "D\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 9 of 13"
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q12"
+                  "question_id": "appc_unit1_unit_1_progress_check_q12",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 13,
@@ -15417,22 +17314,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Toward Point because the -component of the boat\u2019s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water."
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water."
                     },
                     {
                       "letter": "B",
-                      "text": "Toward Point because the -component of the boat\u2019s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water but in the opposite direction."
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water but in the opposite direction."
                     },
                     {
                       "letter": "C",
-                      "text": "Toward Point because the magnitude of the boat\u2019s velocity with respect to the water is greater than the\r\nmagnitude of the velocity of the water."
+                      "text": "Toward Point because the magnitude of the boat’s velocity with respect to the water is greater than the\r\nmagnitude of the velocity of the water."
                     },
                     {
                       "letter": "D",
-                      "text": "Toward Point because the -component of the boat\u2019s velocity with respect to the water is not affected\r\nby the motion of the water."
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water is not affected\r\nby the motion of the water."
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q13"
+                  "question_id": "appc_unit1_unit_1_progress_check_q13",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 14,
@@ -15440,11 +17339,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "No, because the object\u2019s speed is increasing, the acceleration should be positive."
+                      "text": "No, because the object’s speed is increasing, the acceleration should be positive."
                     },
                     {
                       "letter": "B",
-                      "text": "No, because the object\u2019s speed is increasing, the acceleration should be increasing in magnitude."
+                      "text": "No, because the object’s speed is increasing, the acceleration should be increasing in magnitude."
                     },
                     {
                       "letter": "C",
@@ -15455,7 +17354,9 @@ window.EXAM_DATA = {
                       "text": "Yes, because the slope of the graph of acceleration versus time is constant, so the velocity of the object\r\napproaches a constant value."
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q14"
+                  "question_id": "appc_unit1_unit_1_progress_check_q14",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 15,
@@ -15478,7 +17379,9 @@ window.EXAM_DATA = {
                       "text": "West\r\nScoring Guide\r\nUnit 1 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 11 of 13"
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q15"
+                  "question_id": "appc_unit1_unit_1_progress_check_q15",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 16,
@@ -15501,7 +17404,9 @@ window.EXAM_DATA = {
                       "text": "The average acceleration is to the right because the position of the car is increasing."
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q16"
+                  "question_id": "appc_unit1_unit_1_progress_check_q16",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 17,
@@ -15524,7 +17429,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q17"
+                  "question_id": "appc_unit1_unit_1_progress_check_q17",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 18,
@@ -15547,7 +17454,9 @@ window.EXAM_DATA = {
                       "text": "East"
                     }
                   ],
-                  "question_id": "appc_unit1_unit_1_progress_check_q18"
+                  "question_id": "appc_unit1_unit_1_progress_check_q18",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             }
@@ -15584,7 +17493,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_1_q1"
+                  "question_id": "appc_unit2_2_1_q1",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -15607,7 +17518,9 @@ window.EXAM_DATA = {
                       "text": "Cannot be determined without knowing the coordinates of the vertices of each triangle"
                     }
                   ],
-                  "question_id": "appc_unit2_2_1_q2"
+                  "question_id": "appc_unit2_2_1_q2",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 3,
@@ -15630,7 +17543,9 @@ window.EXAM_DATA = {
                       "text": "Location"
                     }
                   ],
-                  "question_id": "appc_unit2_2_1_q3"
+                  "question_id": "appc_unit2_2_1_q3",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 4,
@@ -15653,7 +17568,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_1_q4"
+                  "question_id": "appc_unit2_2_1_q4",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 5,
@@ -15676,7 +17593,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_1_q5"
+                  "question_id": "appc_unit2_2_1_q5",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -15699,7 +17618,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_1_q6"
+                  "question_id": "appc_unit2_2_1_q6",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 7,
@@ -15722,7 +17643,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_1_q7"
+                  "question_id": "appc_unit2_2_1_q7",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -15745,7 +17668,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_1_q8"
+                  "question_id": "appc_unit2_2_1_q8",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -15768,7 +17693,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_1_q9"
+                  "question_id": "appc_unit2_2_1_q9",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 }
               ]
             },
@@ -15800,7 +17727,9 @@ window.EXAM_DATA = {
                       "text": "Earth, the book, and the desk"
                     }
                   ],
-                  "question_id": "appc_unit2_2_2_q1"
+                  "question_id": "appc_unit2_2_2_q1",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 2,
@@ -15823,7 +17752,9 @@ window.EXAM_DATA = {
                       "text": "The force of friction, the normal force, the force exerted by the student, and the weight of the box"
                     }
                   ],
-                  "question_id": "appc_unit2_2_2_q2"
+                  "question_id": "appc_unit2_2_2_q2",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 3,
@@ -15846,7 +17777,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_2_q3"
+                  "question_id": "appc_unit2_2_2_q3",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 4,
@@ -15869,7 +17802,9 @@ window.EXAM_DATA = {
                       "text": "because the string between the blocks is pulling Block down the incline."
                     }
                   ],
-                  "question_id": "appc_unit2_2_2_q4"
+                  "question_id": "appc_unit2_2_2_q4",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 5,
@@ -15892,7 +17827,9 @@ window.EXAM_DATA = {
                       "text": "The diagrams are not accurate because the gravitational force is independent of mass and will be the\r\nsame on both blocks."
                     }
                   ],
-                  "question_id": "appc_unit2_2_2_q5"
+                  "question_id": "appc_unit2_2_2_q5",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 6,
@@ -15915,7 +17852,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_2_q6"
+                  "question_id": "appc_unit2_2_2_q6",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 7,
@@ -15938,7 +17877,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_2_q7"
+                  "question_id": "appc_unit2_2_2_q7",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 8,
@@ -15961,7 +17902,9 @@ window.EXAM_DATA = {
                       "text": "Four upward forces are exerted on the system because there are four tensions which exert upward forces\r\non the system."
                     }
                   ],
-                  "question_id": "appc_unit2_2_2_q8"
+                  "question_id": "appc_unit2_2_2_q8",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 9,
@@ -15984,7 +17927,9 @@ window.EXAM_DATA = {
                       "text": "Each of the above statements is possible depending on which object or system the free-body diagram\r\nrepresents."
                     }
                   ],
-                  "question_id": "appc_unit2_2_2_q9"
+                  "question_id": "appc_unit2_2_2_q9",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 }
               ]
             },
@@ -16016,7 +17961,9 @@ window.EXAM_DATA = {
                       "text": "The center of mass does not move because the astronaut will move a larger distance to the right than the\r\nrock moves to the left."
                     }
                   ],
-                  "question_id": "appc_unit2_2_3_q1"
+                  "question_id": "appc_unit2_2_3_q1",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -16039,7 +17986,9 @@ window.EXAM_DATA = {
                       "text": "The tension in the rope changes uniformly from at the bottom of the rope to at the top of the\r\nrope."
                     }
                   ],
-                  "question_id": "appc_unit2_2_3_q2"
+                  "question_id": "appc_unit2_2_3_q2",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 3,
@@ -16062,7 +18011,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2.3\r\nPage 2 of 7 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit2_2_3_q3"
+                  "question_id": "appc_unit2_2_3_q3",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 4,
@@ -16085,7 +18036,9 @@ window.EXAM_DATA = {
                       "text": "This claim is true regardless of the type of motion or the relative mass of the object."
                     }
                   ],
-                  "question_id": "appc_unit2_2_3_q4"
+                  "question_id": "appc_unit2_2_3_q4",
+                  "concept": "newton_1d",
+                  "concept_label": "Newton's First Law (Inertia)"
                 },
                 {
                   "number": 5,
@@ -16108,7 +18061,9 @@ window.EXAM_DATA = {
                       "text": "because the force of friction is negligible in each case."
                     }
                   ],
-                  "question_id": "appc_unit2_2_3_q5"
+                  "question_id": "appc_unit2_2_3_q5",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -16131,7 +18086,9 @@ window.EXAM_DATA = {
                       "text": "The relative magnitude of the force exerted on the spring by the block and launcher cannot be\r\ndetermined without knowing and ."
                     }
                   ],
-                  "question_id": "appc_unit2_2_3_q6"
+                  "question_id": "appc_unit2_2_3_q6",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 7,
@@ -16154,7 +18111,9 @@ window.EXAM_DATA = {
                       "text": "and would both increase and would remain equal to each other.\r\nScoring Guide\r\n2.3\r\nAP Physics C: Mechanics Page 5 of 7"
                     }
                   ],
-                  "question_id": "appc_unit2_2_3_q7"
+                  "question_id": "appc_unit2_2_3_q7",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -16177,7 +18136,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_3_q8"
+                  "question_id": "appc_unit2_2_3_q8",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -16200,7 +18161,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit2_2_3_q9"
+                  "question_id": "appc_unit2_2_3_q9",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 }
               ]
             },
@@ -16232,7 +18195,9 @@ window.EXAM_DATA = {
                       "text": "D\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.4\r\nAP Physics C: Mechanics Page 1 of 8"
                     }
                   ],
-                  "question_id": "appc_unit2_2_4_q1"
+                  "question_id": "appc_unit2_2_4_q1",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 2,
@@ -16255,7 +18220,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_4_q2"
+                  "question_id": "appc_unit2_2_4_q2",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 3,
@@ -16278,7 +18245,9 @@ window.EXAM_DATA = {
                       "text": "No, an additional force could not cause the object to move with a constant velocity, because the object is\r\nalready in motion, and any additional force will cause the object to change its direction while\r\nmaintaining the speed the object had before the additional force."
                     }
                   ],
-                  "question_id": "appc_unit2_2_4_q3"
+                  "question_id": "appc_unit2_2_4_q3",
+                  "concept": "newton_1d",
+                  "concept_label": "Newton's First Law (Inertia)"
                 },
                 {
                   "number": 4,
@@ -16301,7 +18270,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_4_q4"
+                  "question_id": "appc_unit2_2_4_q4",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 5,
@@ -16324,7 +18295,9 @@ window.EXAM_DATA = {
                       "text": ". The -components of the strings must each equal half the weight of the hanging mass and the\r\n-component of is greater than that of because ."
                     }
                   ],
-                  "question_id": "appc_unit2_2_4_q5"
+                  "question_id": "appc_unit2_2_4_q5",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 6,
@@ -16347,7 +18320,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_4_q6"
+                  "question_id": "appc_unit2_2_4_q6",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 7,
@@ -16370,7 +18345,9 @@ window.EXAM_DATA = {
                       "text": "is negative and is positive"
                     }
                   ],
-                  "question_id": "appc_unit2_2_4_q7"
+                  "question_id": "appc_unit2_2_4_q7",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 8,
@@ -16393,7 +18370,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_4_q8"
+                  "question_id": "appc_unit2_2_4_q8",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 9,
@@ -16416,7 +18395,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_4_q9"
+                  "question_id": "appc_unit2_2_4_q9",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 }
               ]
             },
@@ -16448,7 +18429,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_5_q1"
+                  "question_id": "appc_unit2_2_5_q1",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 2,
@@ -16464,14 +18447,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "because Newton\u2019s third law states that every action has an equal and opposite reaction."
+                      "text": "because Newton’s third law states that every action has an equal and opposite reaction."
                     },
                     {
                       "letter": "D",
                       "text": "because the acceleration of the center of mass of the two-block system is zero as there is no\r\nexternal net force exerted on the system.\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.5\r\nAP Physics C: Mechanics Page 1 of 8"
                     }
                   ],
-                  "question_id": "appc_unit2_2_5_q2"
+                  "question_id": "appc_unit2_2_5_q2",
+                  "concept": "newton_3d",
+                  "concept_label": "Newton's Third Law"
                 },
                 {
                   "number": 3,
@@ -16494,7 +18479,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_5_q3"
+                  "question_id": "appc_unit2_2_5_q3",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 4,
@@ -16517,7 +18504,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_5_q4"
+                  "question_id": "appc_unit2_2_5_q4",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 5,
@@ -16540,7 +18529,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_5_q5"
+                  "question_id": "appc_unit2_2_5_q5",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 6,
@@ -16563,7 +18554,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_5_q6"
+                  "question_id": "appc_unit2_2_5_q6",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 7,
@@ -16586,7 +18579,9 @@ window.EXAM_DATA = {
                       "text": "is the same as the first situation because the net force on Block is the same in both situations."
                     }
                   ],
-                  "question_id": "appc_unit2_2_5_q7"
+                  "question_id": "appc_unit2_2_5_q7",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -16609,7 +18604,9 @@ window.EXAM_DATA = {
                       "text": "Each block has the same acceleration. The system of blocks on the left has twice the mass and also twice\r\nthe weight compared to the block on the right."
                     }
                   ],
-                  "question_id": "appc_unit2_2_5_q8"
+                  "question_id": "appc_unit2_2_5_q8",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -16632,7 +18629,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_5_q9"
+                  "question_id": "appc_unit2_2_5_q9",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 }
               ]
             },
@@ -16657,14 +18656,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "It decreases with increasing distance from the planet\u2019s center."
+                      "text": "It decreases with increasing distance from the planet’s center."
                     },
                     {
                       "letter": "D",
-                      "text": "It increases with increasing distance from the planet\u2019s center."
+                      "text": "It increases with increasing distance from the planet’s center."
                     }
                   ],
-                  "question_id": "appc_unit2_2_6_q1"
+                  "question_id": "appc_unit2_2_6_q1",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 2,
@@ -16676,18 +18677,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Between the center of the shell and the shell\u2019s inner surface"
+                      "text": "Between the center of the shell and the shell’s inner surface"
                     },
                     {
                       "letter": "C",
-                      "text": "Between the shell\u2019s inner surface and the object\u2019s original location"
+                      "text": "Between the shell’s inner surface and the object’s original location"
                     },
                     {
                       "letter": "D",
-                      "text": "Between the object\u2019s original location and the shell\u2019s outer surface\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.6\r\nAP Physics C: Mechanics Page 1 of 6"
+                      "text": "Between the object’s original location and the shell’s outer surface\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.6\r\nAP Physics C: Mechanics Page 1 of 6"
                     }
                   ],
-                  "question_id": "appc_unit2_2_6_q2"
+                  "question_id": "appc_unit2_2_6_q2",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 3,
@@ -16710,7 +18713,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_6_q3"
+                  "question_id": "appc_unit2_2_6_q3",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 4,
@@ -16733,7 +18738,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_6_q4"
+                  "question_id": "appc_unit2_2_6_q4",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 5,
@@ -16756,7 +18763,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_6_q5"
+                  "question_id": "appc_unit2_2_6_q5",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 6,
@@ -16779,7 +18788,9 @@ window.EXAM_DATA = {
                       "text": "A solid sphere of non-uniform density"
                     }
                   ],
-                  "question_id": "appc_unit2_2_6_q6"
+                  "question_id": "appc_unit2_2_6_q6",
+                  "concept": "fluids",
+                  "concept_label": "Fluids"
                 },
                 {
                   "number": 7,
@@ -16802,7 +18813,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_6_q7"
+                  "question_id": "appc_unit2_2_6_q7",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 8,
@@ -16825,7 +18838,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_6_q8"
+                  "question_id": "appc_unit2_2_6_q8",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 9,
@@ -16848,7 +18863,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_6_q9"
+                  "question_id": "appc_unit2_2_6_q9",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 }
               ]
             },
@@ -16880,7 +18897,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_7_q1"
+                  "question_id": "appc_unit2_2_7_q1",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 2,
@@ -16903,7 +18922,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_7_q2"
+                  "question_id": "appc_unit2_2_7_q2",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 3,
@@ -16926,7 +18947,9 @@ window.EXAM_DATA = {
                       "text": "The string tension is the same in all three trials."
                     }
                   ],
-                  "question_id": "appc_unit2_2_7_q3"
+                  "question_id": "appc_unit2_2_7_q3",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 4,
@@ -16949,7 +18972,9 @@ window.EXAM_DATA = {
                       "text": "Any side, since the acceleration would be the same for all three sides\r\nScoring Guide\r\n2.7\r\nPage 2 of 5 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit2_2_7_q4"
+                  "question_id": "appc_unit2_2_7_q4",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 5,
@@ -16972,7 +18997,9 @@ window.EXAM_DATA = {
                       "text": "The box will start sliding down the incline and then continue to speed up at a constant rate."
                     }
                   ],
-                  "question_id": "appc_unit2_2_7_q5"
+                  "question_id": "appc_unit2_2_7_q5",
+                  "concept": "newton_1d",
+                  "concept_label": "Newton's First Law (Inertia)"
                 },
                 {
                   "number": 6,
@@ -16995,7 +19022,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_7_q6"
+                  "question_id": "appc_unit2_2_7_q6",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 7,
@@ -17018,7 +19047,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_7_q7"
+                  "question_id": "appc_unit2_2_7_q7",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 8,
@@ -17041,7 +19072,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2.7\r\nPage 4 of 5 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit2_2_7_q8"
+                  "question_id": "appc_unit2_2_7_q8",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 },
                 {
                   "number": 9,
@@ -17064,7 +19097,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_7_q9"
+                  "question_id": "appc_unit2_2_7_q9",
+                  "concept": "gravity",
+                  "concept_label": "Gravity & Weight"
                 }
               ]
             },
@@ -17096,7 +19131,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_8_q1"
+                  "question_id": "appc_unit2_2_8_q1",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 2,
@@ -17119,7 +19156,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_8_q2"
+                  "question_id": "appc_unit2_2_8_q2",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 3,
@@ -17142,7 +19181,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_8_q3"
+                  "question_id": "appc_unit2_2_8_q3",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 4,
@@ -17165,7 +19206,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_8_q4"
+                  "question_id": "appc_unit2_2_8_q4",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 5,
@@ -17188,7 +19231,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_8_q5"
+                  "question_id": "appc_unit2_2_8_q5",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 6,
@@ -17211,7 +19256,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2.8\r\nPage 4 of 7 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit2_2_8_q6"
+                  "question_id": "appc_unit2_2_8_q6",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 7,
@@ -17219,22 +19266,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The effective spring constant is less than because the force exerted by the combination is the same as\r\nexerted by any individual spring and the stretched distance is the sum of each of the spring\u2019s individual\r\nstretch."
+                      "text": "The effective spring constant is less than because the force exerted by the combination is the same as\r\nexerted by any individual spring and the stretched distance is the sum of each of the spring’s individual\r\nstretch."
                     },
                     {
                       "letter": "B",
-                      "text": "The effective spring constant is less than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring\u2019s\r\nindividual stretch."
+                      "text": "The effective spring constant is less than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring’s\r\nindividual stretch."
                     },
                     {
                       "letter": "C",
-                      "text": "The effective spring constant is more than because the force exerted by the combination is the same\r\nas exerted by any individual spring and the stretched distance is the sum of each of the spring\u2019s\r\nindividual stretch."
+                      "text": "The effective spring constant is more than because the force exerted by the combination is the same\r\nas exerted by any individual spring and the stretched distance is the sum of each of the spring’s\r\nindividual stretch."
                     },
                     {
                       "letter": "D",
-                      "text": "The effective spring constant is more than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring\u2019s\r\nindividual stretch."
+                      "text": "The effective spring constant is more than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring’s\r\nindividual stretch."
                     }
                   ],
-                  "question_id": "appc_unit2_2_8_q7"
+                  "question_id": "appc_unit2_2_8_q7",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 8,
@@ -17257,7 +19306,9 @@ window.EXAM_DATA = {
                       "text": "It is greater than . Each spring exerts a force equal to the weight of the supported object which\r\neffectively decreases the spring constant of the system."
                     }
                   ],
-                  "question_id": "appc_unit2_2_8_q8"
+                  "question_id": "appc_unit2_2_8_q8",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 9,
@@ -17280,7 +19331,9 @@ window.EXAM_DATA = {
                       "text": "because in Scenario both springs stretch by the same amount."
                     }
                   ],
-                  "question_id": "appc_unit2_2_8_q9"
+                  "question_id": "appc_unit2_2_8_q9",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 }
               ]
             },
@@ -17312,7 +19365,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_9_q1"
+                  "question_id": "appc_unit2_2_9_q1",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 2,
@@ -17335,7 +19390,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit2_2_9_q2"
+                  "question_id": "appc_unit2_2_9_q2",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 3,
@@ -17358,7 +19415,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit2_2_9_q3"
+                  "question_id": "appc_unit2_2_9_q3",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 4,
@@ -17381,7 +19440,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_9_q4"
+                  "question_id": "appc_unit2_2_9_q4",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 5,
@@ -17404,7 +19465,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2.9\r\nAP Physics C: Mechanics Page 3 of 6"
                     }
                   ],
-                  "question_id": "appc_unit2_2_9_q5"
+                  "question_id": "appc_unit2_2_9_q5",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 6,
@@ -17424,10 +19487,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "The object will not reach its terminal velocity before reaching the ground because the weight of the\r\nobject increases as the object approaches Earth\u2019s surface."
+                      "text": "The object will not reach its terminal velocity before reaching the ground because the weight of the\r\nobject increases as the object approaches Earth’s surface."
                     }
                   ],
-                  "question_id": "appc_unit2_2_9_q6"
+                  "question_id": "appc_unit2_2_9_q6",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 7,
@@ -17450,7 +19515,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit2_2_9_q7"
+                  "question_id": "appc_unit2_2_9_q7",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 8,
@@ -17466,14 +19533,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "Yes, because Newton\u2019s second law indicates that acceleration is inversely proportional to mass."
+                      "text": "Yes, because Newton’s second law indicates that acceleration is inversely proportional to mass."
                     },
                     {
                       "letter": "D",
                       "text": "Yes, because the weight of the object is proportional to its mass, while the resistive force is independent\r\nof its mass."
                     }
                   ],
-                  "question_id": "appc_unit2_2_9_q8"
+                  "question_id": "appc_unit2_2_9_q8",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -17496,7 +19565,9 @@ window.EXAM_DATA = {
                       "text": "The ball takes more time to fall. The ball travels the same distance up and down, but the ball moves at a\r\nslow constant velocity on the way down and decelerates on the way up."
                     }
                   ],
-                  "question_id": "appc_unit2_2_9_q9"
+                  "question_id": "appc_unit2_2_9_q9",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 }
               ]
             },
@@ -17528,7 +19599,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_10_q1"
+                  "question_id": "appc_unit2_2_10_q1",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -17551,7 +19624,9 @@ window.EXAM_DATA = {
                       "text": "AP PHYSICS C: MECHANICS Scoring Guide\r\n2.10\r\nAP Physics C: Mechanics Page 1 of 6"
                     }
                   ],
-                  "question_id": "appc_unit2_2_10_q2"
+                  "question_id": "appc_unit2_2_10_q2",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 3,
@@ -17574,7 +19649,9 @@ window.EXAM_DATA = {
                       "text": "Block is more likely to slide off because it has more mass than Block ."
                     }
                   ],
-                  "question_id": "appc_unit2_2_10_q3"
+                  "question_id": "appc_unit2_2_10_q3",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 4,
@@ -17597,7 +19674,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2.10\r\nPage 2 of 6 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit2_2_10_q4"
+                  "question_id": "appc_unit2_2_10_q4",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 5,
@@ -17620,7 +19699,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_10_q5"
+                  "question_id": "appc_unit2_2_10_q5",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -17643,7 +19724,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_2_10_q6"
+                  "question_id": "appc_unit2_2_10_q6",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 7,
@@ -17655,18 +19738,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Car . The car\u2019s acceleration is the vector sum of both tangential and centripetal accelerations."
+                      "text": "Car . The car’s acceleration is the vector sum of both tangential and centripetal accelerations."
                     },
                     {
                       "letter": "C",
-                      "text": "Car . The centripetal acceleration of Car is less than that Car \u2019s because Car is slowing down."
+                      "text": "Car . The centripetal acceleration of Car is less than that Car ’s because Car is slowing down."
                     },
                     {
                       "letter": "D",
                       "text": "Car . The centripetal acceleration of Car is partially canceled by its tangential deceleration."
                     }
                   ],
-                  "question_id": "appc_unit2_2_10_q7"
+                  "question_id": "appc_unit2_2_10_q7",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 8,
@@ -17689,7 +19774,9 @@ window.EXAM_DATA = {
                       "text": "The force of the bucket on the water and the weight of the water balance the centripetal force on the\r\nwater."
                     }
                   ],
-                  "question_id": "appc_unit2_2_10_q8"
+                  "question_id": "appc_unit2_2_10_q8",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 9,
@@ -17712,7 +19799,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2.10\r\nAP Physics C: Mechanics Page 5 of 6"
                     }
                   ],
-                  "question_id": "appc_unit2_2_10_q9"
+                  "question_id": "appc_unit2_2_10_q9",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 }
               ]
             },
@@ -17745,7 +19834,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 1 from official review materials."
+                  "explanation": "Mid-Term Review Question 1 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -17769,7 +19860,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 2 from official review materials."
+                  "explanation": "Mid-Term Review Question 2 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 3,
@@ -17793,7 +19886,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 3 from official review materials."
+                  "explanation": "Mid-Term Review Question 3 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 4,
@@ -17817,7 +19912,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 4 from official review materials."
+                  "explanation": "Mid-Term Review Question 4 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 5,
@@ -17841,7 +19938,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 5 from official review materials."
+                  "explanation": "Mid-Term Review Question 5 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -17865,7 +19964,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 6 from official review materials."
+                  "explanation": "Mid-Term Review Question 6 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 7,
@@ -17889,7 +19990,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 7 from official review materials."
+                  "explanation": "Mid-Term Review Question 7 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -17913,7 +20016,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 8 from official review materials."
+                  "explanation": "Mid-Term Review Question 8 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -17937,7 +20042,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "D",
-                  "explanation": "Mid-Term Review Question 9 from official review materials."
+                  "explanation": "Mid-Term Review Question 9 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 10,
@@ -17961,7 +20068,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 10 from official review materials."
+                  "explanation": "Mid-Term Review Question 10 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 11,
@@ -17985,7 +20094,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 11 from official review materials."
+                  "explanation": "Mid-Term Review Question 11 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 12,
@@ -18009,7 +20120,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 12 from official review materials."
+                  "explanation": "Mid-Term Review Question 12 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 13,
@@ -18033,7 +20146,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 13 from official review materials."
+                  "explanation": "Mid-Term Review Question 13 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 14,
@@ -18057,7 +20172,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "A",
-                  "explanation": "Mid-Term Review Question 14 from official review materials."
+                  "explanation": "Mid-Term Review Question 14 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 15,
@@ -18081,7 +20198,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "correct_answer": "B",
-                  "explanation": "Mid-Term Review Question 15 from official review materials."
+                  "explanation": "Mid-Term Review Question 15 from official review materials.",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 }
               ]
             },
@@ -18113,7 +20232,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q1"
+                  "question_id": "appc_unit2_unit_2_progress_check_q1",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 2,
@@ -18136,7 +20257,9 @@ window.EXAM_DATA = {
                       "text": "D\r\nScoring Guide\r\nUnit 2 Progress Check: MCQ\r\nPage 4 of 27 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q2"
+                  "question_id": "appc_unit2_unit_2_progress_check_q2",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 3,
@@ -18159,7 +20282,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q3"
+                  "question_id": "appc_unit2_unit_2_progress_check_q3",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 4,
@@ -18182,7 +20307,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q4"
+                  "question_id": "appc_unit2_unit_2_progress_check_q4",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 5,
@@ -18205,7 +20332,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q5"
+                  "question_id": "appc_unit2_unit_2_progress_check_q5",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 6,
@@ -18228,7 +20357,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q6"
+                  "question_id": "appc_unit2_unit_2_progress_check_q6",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 7,
@@ -18251,7 +20382,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 7 of 27"
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q7"
+                  "question_id": "appc_unit2_unit_2_progress_check_q7",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 8,
@@ -18274,7 +20407,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q8"
+                  "question_id": "appc_unit2_unit_2_progress_check_q8",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 9,
@@ -18297,7 +20432,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q9"
+                  "question_id": "appc_unit2_unit_2_progress_check_q9",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 10,
@@ -18320,7 +20457,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 9 of 27"
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q10"
+                  "question_id": "appc_unit2_unit_2_progress_check_q10",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 11,
@@ -18343,7 +20482,9 @@ window.EXAM_DATA = {
                       "text": "The sum of the force vectors has components in both the -direction and the -direction."
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q11"
+                  "question_id": "appc_unit2_unit_2_progress_check_q11",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 },
                 {
                   "number": 12,
@@ -18366,7 +20507,9 @@ window.EXAM_DATA = {
                       "text": "Neither situation"
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q12"
+                  "question_id": "appc_unit2_unit_2_progress_check_q12",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 13,
@@ -18389,7 +20532,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 2 Progress Check: MCQ\r\nPage 12 of 27 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q13"
+                  "question_id": "appc_unit2_unit_2_progress_check_q13",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 14,
@@ -18412,7 +20557,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q14"
+                  "question_id": "appc_unit2_unit_2_progress_check_q14",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 15,
@@ -18435,7 +20582,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q15"
+                  "question_id": "appc_unit2_unit_2_progress_check_q15",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 16,
@@ -18459,7 +20608,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q16",
-                  "correct_answer": "D"
+                  "correct_answer": "D",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 17,
@@ -18483,7 +20634,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q17",
-                  "correct_answer": "B"
+                  "correct_answer": "B",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 18,
@@ -18507,7 +20660,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q18",
-                  "correct_answer": "D"
+                  "correct_answer": "D",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 19,
@@ -18531,7 +20686,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q19",
-                  "correct_answer": "A"
+                  "correct_answer": "A",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 20,
@@ -18555,7 +20712,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q20",
-                  "correct_answer": "A"
+                  "correct_answer": "A",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 21,
@@ -18579,7 +20738,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q21",
-                  "correct_answer": "B"
+                  "correct_answer": "B",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 22,
@@ -18603,7 +20764,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q22",
-                  "correct_answer": "B"
+                  "correct_answer": "B",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 23,
@@ -18627,7 +20790,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q23",
-                  "correct_answer": "A"
+                  "correct_answer": "A",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 24,
@@ -18651,7 +20816,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q24",
-                  "correct_answer": "C"
+                  "correct_answer": "C",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 25,
@@ -18675,7 +20842,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q25",
-                  "correct_answer": "A"
+                  "correct_answer": "A",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 26,
@@ -18699,7 +20868,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q26",
-                  "correct_answer": "A"
+                  "correct_answer": "A",
+                  "concept": "fbd",
+                  "concept_label": "Free-Body Diagrams"
                 },
                 {
                   "number": 27,
@@ -18723,7 +20894,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q27",
-                  "correct_answer": "B"
+                  "correct_answer": "B",
+                  "concept": "kinematics_2d",
+                  "concept_label": "2D Kinematics & Projectiles"
                 },
                 {
                   "number": 28,
@@ -18747,7 +20920,9 @@ window.EXAM_DATA = {
                     }
                   ],
                   "question_id": "appc_unit2_unit_2_progress_check_q28",
-                  "correct_answer": "C"
+                  "correct_answer": "C",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 29,
@@ -18770,7 +20945,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q29"
+                  "question_id": "appc_unit2_unit_2_progress_check_q29",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 },
                 {
                   "number": 30,
@@ -18793,7 +20970,9 @@ window.EXAM_DATA = {
                       "text": ", because the tangential acceleration is caused by non-zero components of the gravitational and\r\nnormal forces."
                     }
                   ],
-                  "question_id": "appc_unit2_unit_2_progress_check_q30"
+                  "question_id": "appc_unit2_unit_2_progress_check_q30",
+                  "concept": "newton_2d",
+                  "concept_label": "Newton's Second Law"
                 }
               ]
             }
@@ -18830,7 +21009,9 @@ window.EXAM_DATA = {
                       "text": "It cannot be determined from a graph of force as a function of displacement."
                     }
                   ],
-                  "question_id": "appc_unit3_3_1_q1"
+                  "question_id": "appc_unit3_3_1_q1",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 2,
@@ -18853,7 +21034,9 @@ window.EXAM_DATA = {
                       "text": "AP PHYSICS C: MECHANICS Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 1 of 6"
                     }
                   ],
-                  "question_id": "appc_unit3_3_1_q2"
+                  "question_id": "appc_unit3_3_1_q2",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 3,
@@ -18876,7 +21059,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_1_q3"
+                  "question_id": "appc_unit3_3_1_q3",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 4,
@@ -18899,7 +21084,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_1_q4"
+                  "question_id": "appc_unit3_3_1_q4",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 5,
@@ -18922,7 +21109,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_1_q5"
+                  "question_id": "appc_unit3_3_1_q5",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 6,
@@ -18945,7 +21134,9 @@ window.EXAM_DATA = {
                       "text": "is negative and the object slows down"
                     }
                   ],
-                  "question_id": "appc_unit3_3_1_q6"
+                  "question_id": "appc_unit3_3_1_q6",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 7,
@@ -18968,7 +21159,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1\r\nPage 4 of 6 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit3_3_1_q7"
+                  "question_id": "appc_unit3_3_1_q7",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 8,
@@ -18991,7 +21184,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_1_q8"
+                  "question_id": "appc_unit3_3_1_q8",
+                  "concept": "work",
+                  "concept_label": "Work"
                 },
                 {
                   "number": 9,
@@ -19014,7 +21209,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energy increases when and decreases when ."
                     }
                   ],
-                  "question_id": "appc_unit3_3_1_q9"
+                  "question_id": "appc_unit3_3_1_q9",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 }
               ]
             },
@@ -19046,7 +21243,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energy of the object remains constant for the first seconds and then decreases to zero over\r\nthe next seconds."
                     }
                   ],
-                  "question_id": "appc_unit3_3_2_q1"
+                  "question_id": "appc_unit3_3_2_q1",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 2,
@@ -19069,7 +21268,9 @@ window.EXAM_DATA = {
                       "text": "The relationship between and cannot be determined without knowing the masses of the blocks."
                     }
                   ],
-                  "question_id": "appc_unit3_3_2_q2"
+                  "question_id": "appc_unit3_3_2_q2",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 3,
@@ -19077,11 +21278,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Group because the slope of an object\u2019s kinetic energy graph is proportional to its acceleration."
+                      "text": "Group because the slope of an object’s kinetic energy graph is proportional to its acceleration."
                     },
                     {
                       "letter": "B",
-                      "text": "Group because the object\u2019s speed is increasing at a decreasing rate, so its kinetic energy is also\r\nincreasing at a decreasing rate."
+                      "text": "Group because the object’s speed is increasing at a decreasing rate, so its kinetic energy is also\r\nincreasing at a decreasing rate."
                     },
                     {
                       "letter": "C",
@@ -19092,7 +21293,9 @@ window.EXAM_DATA = {
                       "text": "Group because as the object falls it will approach a terminal speed which is where the speed reaches a\r\nhorizontal asymptote."
                     }
                   ],
-                  "question_id": "appc_unit3_3_2_q3"
+                  "question_id": "appc_unit3_3_2_q3",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 4,
@@ -19115,7 +21318,9 @@ window.EXAM_DATA = {
                       "text": "All three objects have the same kinetic energy\r\nScoring Guide\r\n1\r\nAP Physics C: Mechanics Page 3 of 8"
                     }
                   ],
-                  "question_id": "appc_unit3_3_2_q4"
+                  "question_id": "appc_unit3_3_2_q4",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 5,
@@ -19138,7 +21343,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_2_q5"
+                  "question_id": "appc_unit3_3_2_q5",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 6,
@@ -19161,7 +21368,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energy is greatest at and ."
                     }
                   ],
-                  "question_id": "appc_unit3_3_2_q6"
+                  "question_id": "appc_unit3_3_2_q6",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 7,
@@ -19184,7 +21393,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "appc_unit3_3_2_q7"
+                  "question_id": "appc_unit3_3_2_q7",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 8,
@@ -19207,7 +21418,9 @@ window.EXAM_DATA = {
                       "text": "The claim is false. The block speeds up for its entire motion down the plane."
                     }
                   ],
-                  "question_id": "appc_unit3_3_2_q8"
+                  "question_id": "appc_unit3_3_2_q8",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 9,
@@ -19219,7 +21432,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": ", because half of the block\u2019s kinetic energy is converted into gravitational potential energy."
+                      "text": ", because half of the block’s kinetic energy is converted into gravitational potential energy."
                     },
                     {
                       "letter": "C",
@@ -19230,7 +21443,9 @@ window.EXAM_DATA = {
                       "text": ", because kinetic energy is proportional to velocity squared.\r\nScoring Guide\r\n1\r\nAP Physics C: Mechanics Page 7 of 8"
                     }
                   ],
-                  "question_id": "appc_unit3_3_2_q9"
+                  "question_id": "appc_unit3_3_2_q9",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 }
               ]
             },
@@ -19262,7 +21477,9 @@ window.EXAM_DATA = {
                       "text": "The object will move toward Planet and the gravitational potential energy of the system will increase."
                     }
                   ],
-                  "question_id": "appc_unit3_3_3_q1"
+                  "question_id": "appc_unit3_3_3_q1",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 2,
@@ -19285,7 +21502,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_3_q2"
+                  "question_id": "appc_unit3_3_3_q2",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 3,
@@ -19308,7 +21527,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1\r\nPage 2 of 8 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit3_3_3_q3"
+                  "question_id": "appc_unit3_3_3_q3",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 4,
@@ -19331,7 +21552,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 3 of 8"
                     }
                   ],
-                  "question_id": "appc_unit3_3_3_q4"
+                  "question_id": "appc_unit3_3_3_q4",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 5,
@@ -19354,7 +21577,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_3_q5"
+                  "question_id": "appc_unit3_3_3_q5",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 6,
@@ -19377,7 +21602,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_3_q6"
+                  "question_id": "appc_unit3_3_3_q6",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 7,
@@ -19400,7 +21627,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_3_q7"
+                  "question_id": "appc_unit3_3_3_q7",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 8,
@@ -19423,7 +21652,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_3_q8"
+                  "question_id": "appc_unit3_3_3_q8",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 9,
@@ -19446,7 +21677,9 @@ window.EXAM_DATA = {
                       "text": "The acceleration of the movable object will be positive in the region between and ."
                     }
                   ],
-                  "question_id": "appc_unit3_3_3_q9"
+                  "question_id": "appc_unit3_3_3_q9",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 }
               ]
             },
@@ -19478,7 +21711,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_4_q1"
+                  "question_id": "appc_unit3_3_4_q1",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 2,
@@ -19501,7 +21736,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1\r\nPage 2 of 9 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit3_3_4_q2"
+                  "question_id": "appc_unit3_3_4_q2",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 3,
@@ -19524,7 +21761,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_4_q3"
+                  "question_id": "appc_unit3_3_4_q3",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 4,
@@ -19547,7 +21786,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1\r\nPage 4 of 9 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit3_3_4_q4"
+                  "question_id": "appc_unit3_3_4_q4",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 5,
@@ -19570,7 +21811,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_4_q5"
+                  "question_id": "appc_unit3_3_4_q5",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 6,
@@ -19593,7 +21836,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit3_3_4_q6"
+                  "question_id": "appc_unit3_3_4_q6",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 7,
@@ -19616,7 +21861,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit3_3_4_q7"
+                  "question_id": "appc_unit3_3_4_q7",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 8,
@@ -19639,7 +21886,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_4_q8"
+                  "question_id": "appc_unit3_3_4_q8",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 9,
@@ -19662,7 +21911,9 @@ window.EXAM_DATA = {
                       "text": "The power is positive, then zero then negative."
                     }
                   ],
-                  "question_id": "appc_unit3_3_4_q9"
+                  "question_id": "appc_unit3_3_4_q9",
+                  "concept": "power",
+                  "concept_label": "Power"
                 }
               ]
             },
@@ -19694,7 +21945,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_5_q1"
+                  "question_id": "appc_unit3_3_5_q1",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 2,
@@ -19717,7 +21970,9 @@ window.EXAM_DATA = {
                       "text": "In the block-Earth system, the total energy remains constant because energy is always conserved."
                     }
                   ],
-                  "question_id": "appc_unit3_3_5_q2"
+                  "question_id": "appc_unit3_3_5_q2",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 3,
@@ -19740,7 +21995,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_5_q3"
+                  "question_id": "appc_unit3_3_5_q3",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 4,
@@ -19763,7 +22020,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit3_3_5_q4"
+                  "question_id": "appc_unit3_3_5_q4",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 5,
@@ -19786,7 +22045,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit3_3_5_q5"
+                  "question_id": "appc_unit3_3_5_q5",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 6,
@@ -19809,7 +22070,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_3_5_q6"
+                  "question_id": "appc_unit3_3_5_q6",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 7,
@@ -19832,7 +22095,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energy of each block is always equal to the gravitational potential energy for that\r\nblock-Earth system."
                     }
                   ],
-                  "question_id": "appc_unit3_3_5_q7"
+                  "question_id": "appc_unit3_3_5_q7",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 8,
@@ -19855,7 +22120,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 7 of 8"
                     }
                   ],
-                  "question_id": "appc_unit3_3_5_q8"
+                  "question_id": "appc_unit3_3_5_q8",
+                  "concept": "power",
+                  "concept_label": "Power"
                 },
                 {
                   "number": 9,
@@ -19878,7 +22145,9 @@ window.EXAM_DATA = {
                       "text": ", because increasing the angle at which the block leaves the incline increases the amount\r\nof work the incline does on the block."
                     }
                   ],
-                  "question_id": "appc_unit3_3_5_q9"
+                  "question_id": "appc_unit3_3_5_q9",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 }
               ]
             },
@@ -19910,7 +22179,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q1"
+                  "question_id": "appc_unit3_unit_3_progress_check_q1",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 2,
@@ -19933,7 +22204,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q2"
+                  "question_id": "appc_unit3_unit_3_progress_check_q2",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 3,
@@ -19956,7 +22229,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q3"
+                  "question_id": "appc_unit3_unit_3_progress_check_q3",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 4,
@@ -19979,7 +22254,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q4"
+                  "question_id": "appc_unit3_unit_3_progress_check_q4",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 5,
@@ -20002,7 +22279,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 3 of 13"
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q5"
+                  "question_id": "appc_unit3_unit_3_progress_check_q5",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 6,
@@ -20025,7 +22304,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q6"
+                  "question_id": "appc_unit3_unit_3_progress_check_q6",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 7,
@@ -20048,7 +22329,9 @@ window.EXAM_DATA = {
                       "text": "All three observers measure the kinetic energy of the object to be the same."
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q7"
+                  "question_id": "appc_unit3_unit_3_progress_check_q7",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 8,
@@ -20071,7 +22354,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q8"
+                  "question_id": "appc_unit3_unit_3_progress_check_q8",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 9,
@@ -20094,7 +22379,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 3 Progress Check: MCQ\r\nPage 6 of 13 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q9"
+                  "question_id": "appc_unit3_unit_3_progress_check_q9",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 10,
@@ -20102,7 +22389,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "and are the same because the direction of velocity does not affect an object\u2019s kinetic energy."
+                      "text": "and are the same because the direction of velocity does not affect an object’s kinetic energy."
                     },
                     {
                       "letter": "B",
@@ -20117,7 +22404,9 @@ window.EXAM_DATA = {
                       "text": "and are different because the object is moving with a constant acceleration between and ."
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q10"
+                  "question_id": "appc_unit3_unit_3_progress_check_q10",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 11,
@@ -20140,7 +22429,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q11"
+                  "question_id": "appc_unit3_unit_3_progress_check_q11",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 12,
@@ -20163,7 +22454,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q12"
+                  "question_id": "appc_unit3_unit_3_progress_check_q12",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 13,
@@ -20186,7 +22479,9 @@ window.EXAM_DATA = {
                       "text": "The comparison cannot be made without knowing the relative values of the block masses and spring\r\nconstants of the springs."
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q13"
+                  "question_id": "appc_unit3_unit_3_progress_check_q13",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 14,
@@ -20209,7 +22504,9 @@ window.EXAM_DATA = {
                       "text": "The directions of the force and velocity are neither parallel nor perpendicular to each other."
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q14"
+                  "question_id": "appc_unit3_unit_3_progress_check_q14",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 15,
@@ -20232,7 +22529,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q15"
+                  "question_id": "appc_unit3_unit_3_progress_check_q15",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 16,
@@ -20255,7 +22554,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q16"
+                  "question_id": "appc_unit3_unit_3_progress_check_q16",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 17,
@@ -20278,7 +22579,9 @@ window.EXAM_DATA = {
                       "text": "The block-Earth system. The component of the force exerted by the ramp's surface on the block\r\nperpendicular to the ramp dissipates energy, reducing the mechanical energy of the system."
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q17"
+                  "question_id": "appc_unit3_unit_3_progress_check_q17",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 18,
@@ -20286,7 +22589,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The claim is correct. At , the slope of the velocity curve for Object \u2019s is greater than the\r\nslope of the velocity curve for Object ."
+                      "text": "The claim is correct. At , the slope of the velocity curve for Object ’s is greater than the\r\nslope of the velocity curve for Object ."
                     },
                     {
                       "letter": "B",
@@ -20301,7 +22604,9 @@ window.EXAM_DATA = {
                       "text": "The claim is incorrect. The area under the force-time graph for Object from to is less\r\nthan the area for Object ."
                     }
                   ],
-                  "question_id": "appc_unit3_unit_3_progress_check_q18"
+                  "question_id": "appc_unit3_unit_3_progress_check_q18",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 }
               ]
             }
@@ -20338,7 +22643,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_1_q1"
+                  "question_id": "appc_unit4_4_1_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -20361,7 +22668,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_1_q2"
+                  "question_id": "appc_unit4_4_1_q2",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -20384,7 +22693,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_1_q3"
+                  "question_id": "appc_unit4_4_1_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -20407,7 +22718,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_1_q4"
+                  "question_id": "appc_unit4_4_1_q4",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -20430,7 +22743,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_1_q5"
+                  "question_id": "appc_unit4_4_1_q5",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -20453,7 +22768,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 3 of 6"
                     }
                   ],
-                  "question_id": "appc_unit4_4_1_q6"
+                  "question_id": "appc_unit4_4_1_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -20476,7 +22793,9 @@ window.EXAM_DATA = {
                       "text": "It could be greater than, equal to, or less than the speed of Object depending on the directions of the\r\nmomenta."
                     }
                   ],
-                  "question_id": "appc_unit4_4_1_q7"
+                  "question_id": "appc_unit4_4_1_q7",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -20499,7 +22818,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_1_q8"
+                  "question_id": "appc_unit4_4_1_q8",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -20522,7 +22843,9 @@ window.EXAM_DATA = {
                       "text": "The answer cannot be determined without knowing the cart's mass and the mass of water that leaks\r\nthrough the hole each second."
                     }
                   ],
-                  "question_id": "appc_unit4_4_1_q9"
+                  "question_id": "appc_unit4_4_1_q9",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 }
               ]
             },
@@ -20539,7 +22862,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Both students have the same final speed because the student-chair system and the ball\ufffestudent-chair system have the same mass and experience impulses of the same magnitude."
+                      "text": "Both students have the same final speed because the student-chair system and the ball￾student-chair system have the same mass and experience impulses of the same magnitude."
                     },
                     {
                       "letter": "B",
@@ -20554,7 +22877,9 @@ window.EXAM_DATA = {
                       "text": "The student has a greater final speed because the ball transfers all of its momentum to the student\r\nwhen it is caught."
                     }
                   ],
-                  "question_id": "appc_unit4_4_2_q1"
+                  "question_id": "appc_unit4_4_2_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -20577,7 +22902,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_2_q2"
+                  "question_id": "appc_unit4_4_2_q2",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -20600,7 +22927,9 @@ window.EXAM_DATA = {
                       "text": "D\r\nScoring Guide\r\n2\r\nPage 2 of 8 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit4_4_2_q3"
+                  "question_id": "appc_unit4_4_2_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -20623,7 +22952,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_2_q4"
+                  "question_id": "appc_unit4_4_2_q4",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -20646,7 +22977,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit4_4_2_q5"
+                  "question_id": "appc_unit4_4_2_q5",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -20669,7 +23002,9 @@ window.EXAM_DATA = {
                       "text": "No, because the force is not constant and therefore the change in momentum cannot be determined."
                     }
                   ],
-                  "question_id": "appc_unit4_4_2_q6"
+                  "question_id": "appc_unit4_4_2_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -20692,7 +23027,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_2_q7"
+                  "question_id": "appc_unit4_4_2_q7",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -20715,7 +23052,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_2_q8"
+                  "question_id": "appc_unit4_4_2_q8",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -20738,7 +23077,9 @@ window.EXAM_DATA = {
                       "text": "The launcher will move at an increasing acceleration because the mass of the system of the launcher and\r\nremaining water is decreasing, and the system experiences the same impulse during any time interval of\r\nlength .\r\nScoring Guide\r\n2\r\nAP Physics C: Mechanics Page 7 of 8"
                     }
                   ],
-                  "question_id": "appc_unit4_4_2_q9"
+                  "question_id": "appc_unit4_4_2_q9",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 }
               ]
             },
@@ -20770,7 +23111,9 @@ window.EXAM_DATA = {
                       "text": "The speed of the center of mass is the same in all three scenarios."
                     }
                   ],
-                  "question_id": "appc_unit4_4_3_q1"
+                  "question_id": "appc_unit4_4_3_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -20793,7 +23136,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit4_4_3_q2"
+                  "question_id": "appc_unit4_4_3_q2",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -20816,7 +23161,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_3_q3"
+                  "question_id": "appc_unit4_4_3_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -20839,7 +23186,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_3_q4"
+                  "question_id": "appc_unit4_4_3_q4",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -20862,7 +23211,9 @@ window.EXAM_DATA = {
                       "text": "The line would not change."
                     }
                   ],
-                  "question_id": "appc_unit4_4_3_q5"
+                  "question_id": "appc_unit4_4_3_q5",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 6,
@@ -20885,7 +23236,9 @@ window.EXAM_DATA = {
                       "text": "The combined objects' direction of motion, if any, cannot be determined without knowing the ratio of\r\nthe speeds of the objects before the collision.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 5 of 8"
                     }
                   ],
-                  "question_id": "appc_unit4_4_3_q6"
+                  "question_id": "appc_unit4_4_3_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -20908,7 +23261,9 @@ window.EXAM_DATA = {
                       "text": "The momentum of the object is not constant, and the magnitude of the relative velocity between\r\nthe objects is different before and after the collision."
                     }
                   ],
-                  "question_id": "appc_unit4_4_3_q7"
+                  "question_id": "appc_unit4_4_3_q7",
+                  "concept": "relative_motion",
+                  "concept_label": "Relative Motion & Reference Frames"
                 },
                 {
                   "number": 8,
@@ -20931,7 +23286,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit4_4_3_q8"
+                  "question_id": "appc_unit4_4_3_q8",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -20954,7 +23311,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_3_q9"
+                  "question_id": "appc_unit4_4_3_q9",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 }
               ]
             },
@@ -20986,7 +23345,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_4_q1"
+                  "question_id": "appc_unit4_4_4_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -21009,7 +23370,9 @@ window.EXAM_DATA = {
                       "text": "At positions , , and"
                     }
                   ],
-                  "question_id": "appc_unit4_4_4_q2"
+                  "question_id": "appc_unit4_4_4_q2",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -21032,7 +23395,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_4_q3"
+                  "question_id": "appc_unit4_4_4_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -21055,7 +23420,9 @@ window.EXAM_DATA = {
                       "text": "Immediately after Collision . When the carts stick together, Cart transfers more energy to Cart\r\nthan when the carts bounce off of one another.\r\nScoring Guide\r\n4\r\nAP Physics C: Mechanics Page 3 of 8"
                     }
                   ],
-                  "question_id": "appc_unit4_4_4_q4"
+                  "question_id": "appc_unit4_4_4_q4",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 5,
@@ -21078,7 +23445,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_4_q5"
+                  "question_id": "appc_unit4_4_4_q5",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -21101,7 +23470,9 @@ window.EXAM_DATA = {
                       "text": "No, because the collision can be elastic for many different values of the final speed of Object .\r\nScoring Guide\r\n4\r\nPage 4 of 8 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit4_4_4_q6"
+                  "question_id": "appc_unit4_4_4_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -21124,7 +23495,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_4_q7"
+                  "question_id": "appc_unit4_4_4_q7",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -21147,7 +23520,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_4_q8"
+                  "question_id": "appc_unit4_4_4_q8",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -21170,7 +23545,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_4_4_q9"
+                  "question_id": "appc_unit4_4_4_q9",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 }
               ]
             },
@@ -21202,7 +23579,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q1"
+                  "question_id": "appc_unit4_unit_4_progress_check_q1",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -21225,7 +23604,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q2"
+                  "question_id": "appc_unit4_unit_4_progress_check_q2",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -21248,7 +23629,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q3"
+                  "question_id": "appc_unit4_unit_4_progress_check_q3",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -21271,7 +23654,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q4"
+                  "question_id": "appc_unit4_unit_4_progress_check_q4",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -21294,7 +23679,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q5"
+                  "question_id": "appc_unit4_unit_4_progress_check_q5",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -21317,7 +23704,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 4 Progress Check: MCQ\r\nPage 4 of 14 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q6"
+                  "question_id": "appc_unit4_unit_4_progress_check_q6",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -21340,7 +23729,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q7"
+                  "question_id": "appc_unit4_unit_4_progress_check_q7",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -21363,7 +23754,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q8"
+                  "question_id": "appc_unit4_unit_4_progress_check_q8",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -21371,22 +23764,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The cart\u2019s momentum changes direction at exactly one instant."
+                      "text": "The cart’s momentum changes direction at exactly one instant."
                     },
                     {
                       "letter": "B",
-                      "text": "The cart\u2019s momentum changes direction at exactly two different instants."
+                      "text": "The cart’s momentum changes direction at exactly two different instants."
                     },
                     {
                       "letter": "C",
-                      "text": "The cart\u2019s momentum is constant."
+                      "text": "The cart’s momentum is constant."
                     },
                     {
                       "letter": "D",
-                      "text": "The cart\u2019s momentum is not constant and does not change directions at any point in this interval."
+                      "text": "The cart’s momentum is not constant and does not change directions at any point in this interval."
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q9"
+                  "question_id": "appc_unit4_unit_4_progress_check_q9",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 10,
@@ -21409,7 +23804,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q10"
+                  "question_id": "appc_unit4_unit_4_progress_check_q10",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 11,
@@ -21432,7 +23829,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q11"
+                  "question_id": "appc_unit4_unit_4_progress_check_q11",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 12,
@@ -21455,7 +23854,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q12"
+                  "question_id": "appc_unit4_unit_4_progress_check_q12",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 13,
@@ -21478,7 +23879,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 4 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 9 of 14"
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q13"
+                  "question_id": "appc_unit4_unit_4_progress_check_q13",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 14,
@@ -21501,7 +23904,9 @@ window.EXAM_DATA = {
                       "text": "No relationship can be determined since the mass is unknown."
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q14"
+                  "question_id": "appc_unit4_unit_4_progress_check_q14",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 15,
@@ -21524,7 +23929,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q15"
+                  "question_id": "appc_unit4_unit_4_progress_check_q15",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 16,
@@ -21547,7 +23954,9 @@ window.EXAM_DATA = {
                       "text": ", because there is a net external force acting on the system."
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q16"
+                  "question_id": "appc_unit4_unit_4_progress_check_q16",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 },
                 {
                   "number": 17,
@@ -21555,7 +23964,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Object because its momentum is greater in magnitude than Object \u2019s momentum at all times shown."
+                      "text": "Object because its momentum is greater in magnitude than Object ’s momentum at all times shown."
                     },
                     {
                       "letter": "B",
@@ -21567,10 +23976,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Both objects have the same net force because the slope of each object\u2019s momentum versus time graph is\r\nthe same."
+                      "text": "Both objects have the same net force because the slope of each object’s momentum versus time graph is\r\nthe same."
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q17"
+                  "question_id": "appc_unit4_unit_4_progress_check_q17",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 18,
@@ -21593,7 +24004,9 @@ window.EXAM_DATA = {
                       "text": "The collision is not elastic because the kinetic energy of the two-object system before the collision is not\r\nequal to the kinetic energy of the system after the collision."
                     }
                   ],
-                  "question_id": "appc_unit4_unit_4_progress_check_q18"
+                  "question_id": "appc_unit4_unit_4_progress_check_q18",
+                  "concept": "momentum",
+                  "concept_label": "Momentum & Impulse"
                 }
               ]
             }
@@ -21630,7 +24043,9 @@ window.EXAM_DATA = {
                       "text": "counterclockwise"
                     }
                   ],
-                  "question_id": "appc_unit5_5_1_q1"
+                  "question_id": "appc_unit5_5_1_q1",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 2,
@@ -21653,7 +24068,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_1_q2"
+                  "question_id": "appc_unit5_5_1_q2",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 3,
@@ -21676,7 +24093,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_1_q3"
+                  "question_id": "appc_unit5_5_1_q3",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 4,
@@ -21699,7 +24118,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_1_q4"
+                  "question_id": "appc_unit5_5_1_q4",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 5,
@@ -21722,7 +24143,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_1_q5"
+                  "question_id": "appc_unit5_5_1_q5",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 6,
@@ -21745,7 +24168,9 @@ window.EXAM_DATA = {
                       "text": "Evaluate the integral . Divide the result by ."
                     }
                   ],
-                  "question_id": "appc_unit5_5_1_q6"
+                  "question_id": "appc_unit5_5_1_q6",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 7,
@@ -21768,7 +24193,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit5_5_1_q7"
+                  "question_id": "appc_unit5_5_1_q7",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 8,
@@ -21791,7 +24218,9 @@ window.EXAM_DATA = {
                       "text": "It is decreasing in magnitude."
                     }
                   ],
-                  "question_id": "appc_unit5_5_1_q8"
+                  "question_id": "appc_unit5_5_1_q8",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 9,
@@ -21814,7 +24243,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_1_q9"
+                  "question_id": "appc_unit5_5_1_q9",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 }
               ]
             },
@@ -21835,18 +24266,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "It has magnitude and is directed tangent to the coin\u2019s circular path."
+                      "text": "It has magnitude and is directed tangent to the coin’s circular path."
                     },
                     {
                       "letter": "C",
-                      "text": "It has magnitude . It is initially directed toward the center of the platform, with an\r\nincreasing component tangent to the coin\u2019s circular path."
+                      "text": "It has magnitude . It is initially directed toward the center of the platform, with an\r\nincreasing component tangent to the coin’s circular path."
                     },
                     {
                       "letter": "D",
-                      "text": "It has magnitude . It is initially tangent to the coin\u2019s circular path, with an increasing\r\ncomponent directed toward the center of the platform."
+                      "text": "It has magnitude . It is initially tangent to the coin’s circular path, with an increasing\r\ncomponent directed toward the center of the platform."
                     }
                   ],
-                  "question_id": "appc_unit5_5_2_q1"
+                  "question_id": "appc_unit5_5_2_q1",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 2,
@@ -21869,7 +24302,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_2_q2"
+                  "question_id": "appc_unit5_5_2_q2",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 3,
@@ -21892,7 +24327,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_2_q3"
+                  "question_id": "appc_unit5_5_2_q3",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 4,
@@ -21915,7 +24352,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_2_q4"
+                  "question_id": "appc_unit5_5_2_q4",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 5,
@@ -21938,7 +24377,9 @@ window.EXAM_DATA = {
                       "text": "The angular speeds are different, and the linear speeds are the same."
                     }
                   ],
-                  "question_id": "appc_unit5_5_2_q5"
+                  "question_id": "appc_unit5_5_2_q5",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 6,
@@ -21961,7 +24402,9 @@ window.EXAM_DATA = {
                       "text": "Divide the given rotation rate by the given radius.\r\nScoring Guide\r\n2\r\nAP Physics C: Mechanics Page 3 of 6"
                     }
                   ],
-                  "question_id": "appc_unit5_5_2_q6"
+                  "question_id": "appc_unit5_5_2_q6",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 7,
@@ -21984,7 +24427,9 @@ window.EXAM_DATA = {
                       "text": ", both counterclockwise"
                     }
                   ],
-                  "question_id": "appc_unit5_5_2_q7"
+                  "question_id": "appc_unit5_5_2_q7",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 8,
@@ -22007,7 +24452,9 @@ window.EXAM_DATA = {
                       "text": "The linear speeds are different, and the angular speeds are the same."
                     }
                   ],
-                  "question_id": "appc_unit5_5_2_q8"
+                  "question_id": "appc_unit5_5_2_q8",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 9,
@@ -22030,7 +24477,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit5_5_2_q9"
+                  "question_id": "appc_unit5_5_2_q9",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 }
               ]
             },
@@ -22062,7 +24511,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_3_q1"
+                  "question_id": "appc_unit5_5_3_q1",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 2,
@@ -22085,7 +24536,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_3_q2"
+                  "question_id": "appc_unit5_5_3_q2",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 3,
@@ -22108,7 +24561,9 @@ window.EXAM_DATA = {
                       "text": "Point . The lever arm is longer when the rope is attached to Point ."
                     }
                   ],
-                  "question_id": "appc_unit5_5_3_q3"
+                  "question_id": "appc_unit5_5_3_q3",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 4,
@@ -22131,7 +24586,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_3_q4"
+                  "question_id": "appc_unit5_5_3_q4",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 5,
@@ -22154,7 +24611,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "appc_unit5_5_3_q5"
+                  "question_id": "appc_unit5_5_3_q5",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 6,
@@ -22177,7 +24636,9 @@ window.EXAM_DATA = {
                       "text": "Both students are correct. The perpendicular distance is equivalent to ."
                     }
                   ],
-                  "question_id": "appc_unit5_5_3_q6"
+                  "question_id": "appc_unit5_5_3_q6",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 7,
@@ -22200,7 +24661,9 @@ window.EXAM_DATA = {
                       "text": ", , and"
                     }
                   ],
-                  "question_id": "appc_unit5_5_3_q7"
+                  "question_id": "appc_unit5_5_3_q7",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 8,
@@ -22223,7 +24686,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_3_q8"
+                  "question_id": "appc_unit5_5_3_q8",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 9,
@@ -22246,7 +24711,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_3_q9"
+                  "question_id": "appc_unit5_5_3_q9",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 }
               ]
             },
@@ -22278,7 +24745,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_4_q1"
+                  "question_id": "appc_unit5_5_4_q1",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 2,
@@ -22301,7 +24770,9 @@ window.EXAM_DATA = {
                       "text": "The rotational inertia cannot be compared without knowing the mass and size of the cube."
                     }
                   ],
-                  "question_id": "appc_unit5_5_4_q2"
+                  "question_id": "appc_unit5_5_4_q2",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 3,
@@ -22324,7 +24795,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_4_q3"
+                  "question_id": "appc_unit5_5_4_q3",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 4,
@@ -22347,7 +24820,9 @@ window.EXAM_DATA = {
                       "text": "All three systems have the same rotational inertia."
                     }
                   ],
-                  "question_id": "appc_unit5_5_4_q4"
+                  "question_id": "appc_unit5_5_4_q4",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 5,
@@ -22370,7 +24845,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_4_q5"
+                  "question_id": "appc_unit5_5_4_q5",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 6,
@@ -22393,7 +24870,9 @@ window.EXAM_DATA = {
                       "text": "Rods , , and have the same rotational inertia."
                     }
                   ],
-                  "question_id": "appc_unit5_5_4_q6"
+                  "question_id": "appc_unit5_5_4_q6",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 7,
@@ -22416,7 +24895,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_4_q7"
+                  "question_id": "appc_unit5_5_4_q7",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 8,
@@ -22439,7 +24920,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_4_q8"
+                  "question_id": "appc_unit5_5_4_q8",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 },
                 {
                   "number": 9,
@@ -22462,7 +24945,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_4_q9"
+                  "question_id": "appc_unit5_5_4_q9",
+                  "concept": "moment_inertia",
+                  "concept_label": "Rotational Inertia"
                 }
               ]
             },
@@ -22494,7 +24979,9 @@ window.EXAM_DATA = {
                       "text": "The bar is not in rotational equilibrium but is in translational equilibrium."
                     }
                   ],
-                  "question_id": "appc_unit5_5_5_q1"
+                  "question_id": "appc_unit5_5_5_q1",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 2,
@@ -22517,7 +25004,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_5_q2"
+                  "question_id": "appc_unit5_5_5_q2",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 3,
@@ -22540,7 +25029,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_5_q3"
+                  "question_id": "appc_unit5_5_5_q3",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 4,
@@ -22563,7 +25054,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_5_q4"
+                  "question_id": "appc_unit5_5_5_q4",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 5,
@@ -22586,7 +25079,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_5_q5"
+                  "question_id": "appc_unit5_5_5_q5",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 6,
@@ -22609,7 +25104,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_5_q6"
+                  "question_id": "appc_unit5_5_5_q6",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 7,
@@ -22632,7 +25129,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_5_q7"
+                  "question_id": "appc_unit5_5_5_q7",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 8,
@@ -22655,7 +25154,9 @@ window.EXAM_DATA = {
                       "text": "The board rotates counterclockwise at first, then clockwise to return to its initial orientation."
                     }
                   ],
-                  "question_id": "appc_unit5_5_5_q8"
+                  "question_id": "appc_unit5_5_5_q8",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 9,
@@ -22678,7 +25179,9 @@ window.EXAM_DATA = {
                       "text": "At no time between and seconds is the angular velocity of the disk constant."
                     }
                   ],
-                  "question_id": "appc_unit5_5_5_q9"
+                  "question_id": "appc_unit5_5_5_q9",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 }
               ]
             },
@@ -22710,7 +25213,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_6_q1"
+                  "question_id": "appc_unit5_5_6_q1",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 2,
@@ -22733,7 +25238,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_6_q2"
+                  "question_id": "appc_unit5_5_6_q2",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 3,
@@ -22756,7 +25263,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_6_q3"
+                  "question_id": "appc_unit5_5_6_q3",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 4,
@@ -22779,7 +25288,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_6_q4"
+                  "question_id": "appc_unit5_5_6_q4",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 5,
@@ -22802,7 +25313,9 @@ window.EXAM_DATA = {
                       "text": ". The angular acceleration cannot be zero because the distances from the center of mass to the\r\npoint at which each force is exerted are different."
                     }
                   ],
-                  "question_id": "appc_unit5_5_6_q5"
+                  "question_id": "appc_unit5_5_6_q5",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 6,
@@ -22825,7 +25338,9 @@ window.EXAM_DATA = {
                       "text": "It decreases. The angular speed value decreases as time increases."
                     }
                   ],
-                  "question_id": "appc_unit5_5_6_q6"
+                  "question_id": "appc_unit5_5_6_q6",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 7,
@@ -22848,7 +25363,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_6_q7"
+                  "question_id": "appc_unit5_5_6_q7",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 8,
@@ -22871,7 +25388,9 @@ window.EXAM_DATA = {
                       "text": "Different. The larger-radius pulley spins more slowly for a given linear speed of the string."
                     }
                   ],
-                  "question_id": "appc_unit5_5_6_q8"
+                  "question_id": "appc_unit5_5_6_q8",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 9,
@@ -22894,7 +25413,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_5_6_q9"
+                  "question_id": "appc_unit5_5_6_q9",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 }
               ]
             },
@@ -22926,7 +25447,9 @@ window.EXAM_DATA = {
                       "text": "radians"
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q1"
+                  "question_id": "appc_unit5_unit_5_progress_check_q1",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 2,
@@ -22949,7 +25472,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q2"
+                  "question_id": "appc_unit5_unit_5_progress_check_q2",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 3,
@@ -22972,7 +25497,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q3"
+                  "question_id": "appc_unit5_unit_5_progress_check_q3",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 4,
@@ -22995,7 +25522,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q4"
+                  "question_id": "appc_unit5_unit_5_progress_check_q4",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 5,
@@ -23018,7 +25547,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q5"
+                  "question_id": "appc_unit5_unit_5_progress_check_q5",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 6,
@@ -23041,7 +25572,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q6"
+                  "question_id": "appc_unit5_unit_5_progress_check_q6",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 7,
@@ -23064,7 +25597,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q7"
+                  "question_id": "appc_unit5_unit_5_progress_check_q7",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 8,
@@ -23087,7 +25622,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q8"
+                  "question_id": "appc_unit5_unit_5_progress_check_q8",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 9,
@@ -23110,7 +25647,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q9"
+                  "question_id": "appc_unit5_unit_5_progress_check_q9",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 10,
@@ -23133,7 +25672,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 5 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 9 of 16"
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q10"
+                  "question_id": "appc_unit5_unit_5_progress_check_q10",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 11,
@@ -23156,7 +25697,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 5 Progress Check: MCQ\r\nPage 10 of 16 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q11"
+                  "question_id": "appc_unit5_unit_5_progress_check_q11",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 12,
@@ -23179,7 +25722,9 @@ window.EXAM_DATA = {
                       "text": "A relationship cannot be determined for in terms of and ."
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q12"
+                  "question_id": "appc_unit5_unit_5_progress_check_q12",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 13,
@@ -23202,7 +25747,9 @@ window.EXAM_DATA = {
                       "text": "Objects and"
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q13"
+                  "question_id": "appc_unit5_unit_5_progress_check_q13",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 14,
@@ -23225,7 +25772,9 @@ window.EXAM_DATA = {
                       "text": "seconds\r\nScoring Guide\r\nUnit 5 Progress Check: MCQ\r\nPage 12 of 16 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q14"
+                  "question_id": "appc_unit5_unit_5_progress_check_q14",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 15,
@@ -23248,7 +25797,9 @@ window.EXAM_DATA = {
                       "text": "The disk rotates through an angle less than before stopping."
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q15"
+                  "question_id": "appc_unit5_unit_5_progress_check_q15",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 16,
@@ -23271,7 +25822,9 @@ window.EXAM_DATA = {
                       "text": ", because is directed along the length of the rod."
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q16"
+                  "question_id": "appc_unit5_unit_5_progress_check_q16",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 17,
@@ -23294,7 +25847,9 @@ window.EXAM_DATA = {
                       "text": ", because and are the same distance from the pivot, and contributes a torque in the\r\nsame direction as ."
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q17"
+                  "question_id": "appc_unit5_unit_5_progress_check_q17",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 18,
@@ -23317,7 +25872,9 @@ window.EXAM_DATA = {
                       "text": "Counterclockwise. The force is greater than the sum of the two forces."
                     }
                   ],
-                  "question_id": "appc_unit5_unit_5_progress_check_q18"
+                  "question_id": "appc_unit5_unit_5_progress_check_q18",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 }
               ]
             }
@@ -23354,7 +25911,9 @@ window.EXAM_DATA = {
                       "text": ". The force of gravity exerted on the solid cylinder is less than the force of gravity exerted on\r\nthe hollow cylinder."
                     }
                   ],
-                  "question_id": "appc_unit6_6_1_q1"
+                  "question_id": "appc_unit6_6_1_q1",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 2,
@@ -23377,7 +25936,9 @@ window.EXAM_DATA = {
                       "text": "It cannot be determined when the rotational kinetic energy is greater without additional information."
                     }
                   ],
-                  "question_id": "appc_unit6_6_1_q2"
+                  "question_id": "appc_unit6_6_1_q2",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 3,
@@ -23400,7 +25961,9 @@ window.EXAM_DATA = {
                       "text": "It is less than . The initial rotational kinetic energy does not get converted to gravitational potential\r\nenergy."
                     }
                   ],
-                  "question_id": "appc_unit6_6_1_q3"
+                  "question_id": "appc_unit6_6_1_q3",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 4,
@@ -23423,7 +25986,9 @@ window.EXAM_DATA = {
                       "text": "The rotational kinetic energy is greater than the translational kinetic energy."
                     }
                   ],
-                  "question_id": "appc_unit6_6_1_q4"
+                  "question_id": "appc_unit6_6_1_q4",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 5,
@@ -23431,7 +25996,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "is zero. The velocity of the disk\u2019s center of mass is zero."
+                      "text": "is zero. The velocity of the disk’s center of mass is zero."
                     },
                     {
                       "letter": "B",
@@ -23439,14 +26004,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "is greater than zero. The disk\u2019s mass and rotational inertia are both greater than zero."
+                      "text": "is greater than zero. The disk’s mass and rotational inertia are both greater than zero."
                     },
                     {
                       "letter": "D",
-                      "text": "is greater than zero. Except for the disk\u2019s center, all parts of the disk are moving."
+                      "text": "is greater than zero. Except for the disk’s center, all parts of the disk are moving."
                     }
                   ],
-                  "question_id": "appc_unit6_6_1_q5"
+                  "question_id": "appc_unit6_6_1_q5",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 6,
@@ -23469,7 +26036,9 @@ window.EXAM_DATA = {
                       "text": "It cannot be determined which disk has the most total kinetic energy without more information on ,\r\n, and the radius of the disks."
                     }
                   ],
-                  "question_id": "appc_unit6_6_1_q6"
+                  "question_id": "appc_unit6_6_1_q6",
+                  "concept": "energy_kinetic",
+                  "concept_label": "Kinetic Energy"
                 },
                 {
                   "number": 7,
@@ -23492,7 +26061,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "appc_unit6_6_1_q7"
+                  "question_id": "appc_unit6_6_1_q7",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 8,
@@ -23515,7 +26086,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n1\r\nAP Physics C: Mechanics Page 5 of 7"
                     }
                   ],
-                  "question_id": "appc_unit6_6_1_q8"
+                  "question_id": "appc_unit6_6_1_q8",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 9,
@@ -23538,7 +26111,9 @@ window.EXAM_DATA = {
                       "text": ", but it cannot be determined how compares without more information about\r\nand .\r\nScoring Guide\r\n1\r\nPage 6 of 7 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit6_6_1_q9"
+                  "question_id": "appc_unit6_6_1_q9",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 }
               ]
             },
@@ -23570,7 +26145,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energy transfer cannot be compared without knowing the rotational inertia and initial\r\nangular speed of the disk."
                     }
                   ],
-                  "question_id": "appc_unit6_6_2_q1"
+                  "question_id": "appc_unit6_6_2_q1",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 2,
@@ -23593,7 +26170,9 @@ window.EXAM_DATA = {
                       "text": "The decrease in rotational kinetic energy cannot be compared without knowing whether the torque\r\nincreases at a greater rate during the first or the last rotation"
                     }
                   ],
-                  "question_id": "appc_unit6_6_2_q2"
+                  "question_id": "appc_unit6_6_2_q2",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 3,
@@ -23605,18 +26184,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Divide by the slope of the \u2010 graph."
+                      "text": "Divide by the slope of the ‐ graph."
                     },
                     {
                       "letter": "C",
-                      "text": "Determine the area under the \u2010 graph."
+                      "text": "Determine the area under the ‐ graph."
                     },
                     {
                       "letter": "D",
-                      "text": "Multiply the area under the \u2010 graph by ."
+                      "text": "Multiply the area under the ‐ graph by ."
                     }
                   ],
-                  "question_id": "appc_unit6_6_2_q3"
+                  "question_id": "appc_unit6_6_2_q3",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 4,
@@ -23639,7 +26220,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_2_q4"
+                  "question_id": "appc_unit6_6_2_q4",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 5,
@@ -23662,7 +26245,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_2_q5"
+                  "question_id": "appc_unit6_6_2_q5",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 6,
@@ -23685,7 +26270,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_2_q6"
+                  "question_id": "appc_unit6_6_2_q6",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 7,
@@ -23708,7 +26295,9 @@ window.EXAM_DATA = {
                       "text": "The total work is negative. The rotational kinetic energy is a maximum when ."
                     }
                   ],
-                  "question_id": "appc_unit6_6_2_q7"
+                  "question_id": "appc_unit6_6_2_q7",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 8,
@@ -23731,7 +26320,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "appc_unit6_6_2_q8"
+                  "question_id": "appc_unit6_6_2_q8",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 9,
@@ -23754,7 +26345,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_2_q9"
+                  "question_id": "appc_unit6_6_2_q9",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 }
               ]
             },
@@ -23771,7 +26364,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "is greater than . The bar\u2019s angular momentum changes by a greater amount in Collision ."
+                      "text": "is greater than . The bar’s angular momentum changes by a greater amount in Collision ."
                     },
                     {
                       "letter": "B",
@@ -23786,7 +26379,9 @@ window.EXAM_DATA = {
                       "text": "and are equal. There is no external torque exerted on either bar-disk system about the pivot."
                     }
                   ],
-                  "question_id": "appc_unit6_6_3_q1"
+                  "question_id": "appc_unit6_6_3_q1",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -23809,7 +26404,9 @@ window.EXAM_DATA = {
                       "text": "to seconds"
                     }
                   ],
-                  "question_id": "appc_unit6_6_3_q2"
+                  "question_id": "appc_unit6_6_3_q2",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -23821,7 +26418,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "The cylinder. The torque has the same sign as the cylinder\u2019s angular velocity."
+                      "text": "The cylinder. The torque has the same sign as the cylinder’s angular velocity."
                     },
                     {
                       "letter": "C",
@@ -23829,10 +26426,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "The sphere. The torque has the opposite sign to the sphere\u2019s angular velocity."
+                      "text": "The sphere. The torque has the opposite sign to the sphere’s angular velocity."
                     }
                   ],
-                  "question_id": "appc_unit6_6_3_q3"
+                  "question_id": "appc_unit6_6_3_q3",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -23844,7 +26443,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Counterclockwise. When an object\u2019s rotational motion is slowing down, the angular impulse has the\r\nopposite direction as the torque."
+                      "text": "Counterclockwise. When an object’s rotational motion is slowing down, the angular impulse has the\r\nopposite direction as the torque."
                     },
                     {
                       "letter": "C",
@@ -23852,10 +26451,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Clockwise. When an object\u2019s rotational motion is slowing down, the angular impulse has the same\r\ndirection as the angular displacement.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 3 of 8"
+                      "text": "Clockwise. When an object’s rotational motion is slowing down, the angular impulse has the same\r\ndirection as the angular displacement.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 3 of 8"
                     }
                   ],
-                  "question_id": "appc_unit6_6_3_q4"
+                  "question_id": "appc_unit6_6_3_q4",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -23878,7 +26479,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_3_q5"
+                  "question_id": "appc_unit6_6_3_q5",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -23901,7 +26504,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_3_q6"
+                  "question_id": "appc_unit6_6_3_q6",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -23924,7 +26529,9 @@ window.EXAM_DATA = {
                       "text": "Between and seconds"
                     }
                   ],
-                  "question_id": "appc_unit6_6_3_q7"
+                  "question_id": "appc_unit6_6_3_q7",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -23947,7 +26554,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_3_q8"
+                  "question_id": "appc_unit6_6_3_q8",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -23970,7 +26579,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_3_q9"
+                  "question_id": "appc_unit6_6_3_q9",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 }
               ]
             },
@@ -24002,7 +26613,9 @@ window.EXAM_DATA = {
                       "text": "Because the gravitational potential energy of the disks-Earth system is lower at than at ."
                     }
                   ],
-                  "question_id": "appc_unit6_6_4_q1"
+                  "question_id": "appc_unit6_6_4_q1",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 },
                 {
                   "number": 2,
@@ -24025,7 +26638,9 @@ window.EXAM_DATA = {
                       "text": "There is no system involving just the students and the platform for which angular momentum is\r\nconstant."
                     }
                   ],
-                  "question_id": "appc_unit6_6_4_q2"
+                  "question_id": "appc_unit6_6_4_q2",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -24048,7 +26663,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_4_q3"
+                  "question_id": "appc_unit6_6_4_q3",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -24064,14 +26681,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "The rest of the bicycle rotates clockwise because there is an external torque exerted on the bicycle\ufffecyclist system."
+                      "text": "The rest of the bicycle rotates clockwise because there is an external torque exerted on the bicycle￾cyclist system."
                     },
                     {
                       "letter": "D",
                       "text": "The rest of the bicycle rotates clockwise because the decrease in clockwise rotation of the wheels is\r\nbalanced by an increase in clockwise rotation of the bicycle."
                     }
                   ],
-                  "question_id": "appc_unit6_6_4_q4"
+                  "question_id": "appc_unit6_6_4_q4",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 5,
@@ -24094,7 +26713,9 @@ window.EXAM_DATA = {
                       "text": "is the same because the axle does not exert a torque on the system. is different because the\r\nforce exerted by the clay on the wheel is a net force on the system."
                     }
                   ],
-                  "question_id": "appc_unit6_6_4_q5"
+                  "question_id": "appc_unit6_6_4_q5",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -24117,7 +26738,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_4_q6"
+                  "question_id": "appc_unit6_6_4_q6",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -24140,7 +26763,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_4_q7"
+                  "question_id": "appc_unit6_6_4_q7",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -24148,22 +26773,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The skater\u2019s angular speed is increasing in magnitude."
+                      "text": "The skater’s angular speed is increasing in magnitude."
                     },
                     {
                       "letter": "B",
-                      "text": "The skater\u2019s angular speed is decreasing in magnitude."
+                      "text": "The skater’s angular speed is decreasing in magnitude."
                     },
                     {
                       "letter": "C",
-                      "text": "The skater\u2019s angular momentum is increasing in magnitude."
+                      "text": "The skater’s angular momentum is increasing in magnitude."
                     },
                     {
                       "letter": "D",
-                      "text": "The skater\u2019s angular momentum is decreasing in magnitude."
+                      "text": "The skater’s angular momentum is decreasing in magnitude."
                     }
                   ],
-                  "question_id": "appc_unit6_6_4_q8"
+                  "question_id": "appc_unit6_6_4_q8",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -24186,7 +26813,9 @@ window.EXAM_DATA = {
                       "text": "The angular momenta are not necessarily equal in magnitude. The kinetic energies are not necessarily\r\nequal."
                     }
                   ],
-                  "question_id": "appc_unit6_6_4_q9"
+                  "question_id": "appc_unit6_6_4_q9",
+                  "concept": "vectors",
+                  "concept_label": "Vectors & Components"
                 }
               ]
             },
@@ -24218,7 +26847,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_5_q1"
+                  "question_id": "appc_unit6_6_5_q1",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -24226,22 +26857,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Wheel is more massive and on average, its mass is distributed closer to the wheel\u2019s center."
+                      "text": "Wheel is more massive and on average, its mass is distributed closer to the wheel’s center."
                     },
                     {
                       "letter": "B",
-                      "text": "Wheel is more massive and on average, its mass is distributed farther from the wheel\u2019s center."
+                      "text": "Wheel is more massive and on average, its mass is distributed farther from the wheel’s center."
                     },
                     {
                       "letter": "C",
-                      "text": "Wheel is less massive and on average, its mass is distributed closer to the wheel\u2019s center."
+                      "text": "Wheel is less massive and on average, its mass is distributed closer to the wheel’s center."
                     },
                     {
                       "letter": "D",
-                      "text": "Wheel is less massive and on average, its mass is distributed farther from the wheel\u2019s center."
+                      "text": "Wheel is less massive and on average, its mass is distributed farther from the wheel’s center."
                     }
                   ],
-                  "question_id": "appc_unit6_6_5_q2"
+                  "question_id": "appc_unit6_6_5_q2",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -24264,7 +26897,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_5_q3"
+                  "question_id": "appc_unit6_6_5_q3",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -24287,7 +26922,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_5_q4"
+                  "question_id": "appc_unit6_6_5_q4",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -24310,7 +26947,9 @@ window.EXAM_DATA = {
                       "text": "There is a nonzero force of kinetic friction exerted on the sphere that dissipates mechanical energy."
                     }
                   ],
-                  "question_id": "appc_unit6_6_5_q5"
+                  "question_id": "appc_unit6_6_5_q5",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 6,
@@ -24333,7 +26972,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_5_q6"
+                  "question_id": "appc_unit6_6_5_q6",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -24356,7 +26997,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_5_q7"
+                  "question_id": "appc_unit6_6_5_q7",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -24379,7 +27022,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n5\r\nAP Physics C: Mechanics Page 7 of 8"
                     }
                   ],
-                  "question_id": "appc_unit6_6_5_q8"
+                  "question_id": "appc_unit6_6_5_q8",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -24402,7 +27047,9 @@ window.EXAM_DATA = {
                       "text": "The translational acceleration of a point on the outside surface of the cylinder"
                     }
                   ],
-                  "question_id": "appc_unit6_6_5_q9"
+                  "question_id": "appc_unit6_6_5_q9",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 }
               ]
             },
@@ -24427,14 +27074,16 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "has a maximum magnitude when the asteroids are at points and . These are the locations where\r\nthe asteroids\u2019 speeds are greatest."
+                      "text": "has a maximum magnitude when the asteroids are at points and . These are the locations where\r\nthe asteroids’ speeds are greatest."
                     },
                     {
                       "letter": "D",
                       "text": "has a maximum magnitude when the asteroids are at points and . These locations are where the\r\nasteroids are the closest to the star."
                     }
                   ],
-                  "question_id": "appc_unit6_6_6_q1"
+                  "question_id": "appc_unit6_6_6_q1",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 2,
@@ -24457,7 +27106,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_6_q2"
+                  "question_id": "appc_unit6_6_6_q2",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 3,
@@ -24480,7 +27131,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_6_q3"
+                  "question_id": "appc_unit6_6_6_q3",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 4,
@@ -24503,7 +27156,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_6_q4"
+                  "question_id": "appc_unit6_6_6_q4",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 5,
@@ -24511,11 +27166,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The satellite\u2019s angular momentum has a nonzero magnitude."
+                      "text": "The satellite’s angular momentum has a nonzero magnitude."
                     },
                     {
                       "letter": "B",
-                      "text": "The satellite\u2019s angular momentum has the same direction throughout the orbit."
+                      "text": "The satellite’s angular momentum has the same direction throughout the orbit."
                     },
                     {
                       "letter": "C",
@@ -24526,7 +27181,9 @@ window.EXAM_DATA = {
                       "text": "The gravitational forces that the satellite and the planet exert on each other are opposite in direction.\r\nScoring Guide\r\n6\r\nPage 4 of 7 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit6_6_6_q5"
+                  "question_id": "appc_unit6_6_6_q5",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -24549,7 +27206,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_6_q6"
+                  "question_id": "appc_unit6_6_6_q6",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 7,
@@ -24572,7 +27231,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_6_q7"
+                  "question_id": "appc_unit6_6_6_q7",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 },
                 {
                   "number": 8,
@@ -24595,7 +27256,9 @@ window.EXAM_DATA = {
                       "text": "is the same. The thrusters are fired in a direction that does not change the translational speed of the\r\nspaceship."
                     }
                   ],
-                  "question_id": "appc_unit6_6_6_q8"
+                  "question_id": "appc_unit6_6_6_q8",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -24618,7 +27281,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_6_6_q9"
+                  "question_id": "appc_unit6_6_6_q9",
+                  "concept": "circular",
+                  "concept_label": "Circular Motion"
                 }
               ]
             },
@@ -24650,7 +27315,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q1"
+                  "question_id": "appc_unit6_unit_6_progress_check_q1",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 2,
@@ -24673,7 +27340,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q2"
+                  "question_id": "appc_unit6_unit_6_progress_check_q2",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 3,
@@ -24696,7 +27365,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 2 of 17 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q3"
+                  "question_id": "appc_unit6_unit_6_progress_check_q3",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 4,
@@ -24719,7 +27390,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\nUnit 6 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 3 of 17"
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q4"
+                  "question_id": "appc_unit6_unit_6_progress_check_q4",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 5,
@@ -24742,7 +27415,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q5"
+                  "question_id": "appc_unit6_unit_6_progress_check_q5",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 6,
@@ -24765,7 +27440,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q6"
+                  "question_id": "appc_unit6_unit_6_progress_check_q6",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 7,
@@ -24788,7 +27465,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q7"
+                  "question_id": "appc_unit6_unit_6_progress_check_q7",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 8,
@@ -24811,7 +27490,9 @@ window.EXAM_DATA = {
                       "text": "Cases and\r\nScoring Guide\r\nUnit 6 Progress Check: MCQ\r\nAP Physics C: Mechanics Page 7 of 17"
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q8"
+                  "question_id": "appc_unit6_unit_6_progress_check_q8",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 9,
@@ -24834,7 +27515,9 @@ window.EXAM_DATA = {
                       "text": "cannot be compared for the positions shown because angular momentum is undefined for an object\r\nmoving in a straight line."
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q9"
+                  "question_id": "appc_unit6_unit_6_progress_check_q9",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 10,
@@ -24857,7 +27540,9 @@ window.EXAM_DATA = {
                       "text": "The frictional force initially increases until the cylinder reaches its maximum speed, and then decreases."
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q10"
+                  "question_id": "appc_unit6_unit_6_progress_check_q10",
+                  "concept": "friction",
+                  "concept_label": "Friction"
                 },
                 {
                   "number": 11,
@@ -24880,7 +27565,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q11"
+                  "question_id": "appc_unit6_unit_6_progress_check_q11",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 12,
@@ -24903,7 +27590,9 @@ window.EXAM_DATA = {
                       "text": "The kinetic energies of the objects cannot be compared, since the thin disk has rotational kinetic energy\r\nand the small cylinder has translational kinetic energy."
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q12"
+                  "question_id": "appc_unit6_unit_6_progress_check_q12",
+                  "concept": "rot_energy",
+                  "concept_label": "Rotational Energy"
                 },
                 {
                   "number": 13,
@@ -24926,7 +27615,9 @@ window.EXAM_DATA = {
                       "text": "There are no two labeled points with the same amount of rotational kinetic energy."
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q13"
+                  "question_id": "appc_unit6_unit_6_progress_check_q13",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 14,
@@ -24949,7 +27640,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q14"
+                  "question_id": "appc_unit6_unit_6_progress_check_q14",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 15,
@@ -24972,7 +27665,9 @@ window.EXAM_DATA = {
                       "text": ". The value of changes by less than it does during ."
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q15"
+                  "question_id": "appc_unit6_unit_6_progress_check_q15",
+                  "concept": "graph_analysis",
+                  "concept_label": "Graph & Data Analysis"
                 },
                 {
                   "number": 16,
@@ -24995,7 +27690,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q16"
+                  "question_id": "appc_unit6_unit_6_progress_check_q16",
+                  "concept": "ang_momentum",
+                  "concept_label": "Angular Momentum & Impulse"
                 },
                 {
                   "number": 17,
@@ -25018,7 +27715,9 @@ window.EXAM_DATA = {
                       "text": "The rotation of the system after the collision cannot be determined because translational motion and\r\nrotational motion are independent motions."
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q17"
+                  "question_id": "appc_unit6_unit_6_progress_check_q17",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 18,
@@ -25026,7 +27725,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "It decreases because the satellite\u2019s speed decreases."
+                      "text": "It decreases because the satellite’s speed decreases."
                     },
                     {
                       "letter": "B",
@@ -25041,7 +27740,9 @@ window.EXAM_DATA = {
                       "text": "It remains the same because the satellite is always traveling counterclockwise.\r\nScoring Guide\r\nUnit 6 Progress Check: MCQ\r\nPage 16 of 17 AP Physics C: Mechanics"
                     }
                   ],
-                  "question_id": "appc_unit6_unit_6_progress_check_q18"
+                  "question_id": "appc_unit6_unit_6_progress_check_q18",
+                  "concept": "energy_potential",
+                  "concept_label": "Potential Energy"
                 }
               ]
             }
@@ -25078,7 +27779,9 @@ window.EXAM_DATA = {
                       "text": "The new equilibrium position cannot be determined without more information about how much the\r\nspring constant and initial spring compression were changed."
                     }
                   ],
-                  "question_id": "appc_unit7_7_1_q1"
+                  "question_id": "appc_unit7_7_1_q1",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 2,
@@ -25101,7 +27804,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_1_q2"
+                  "question_id": "appc_unit7_7_1_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -25121,10 +27826,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "No. The net force on the ball is in the same direction as the ball\u2019s displacement from equilibrium."
+                      "text": "No. The net force on the ball is in the same direction as the ball’s displacement from equilibrium."
                     }
                   ],
-                  "question_id": "appc_unit7_7_1_q3"
+                  "question_id": "appc_unit7_7_1_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -25144,10 +27851,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "There is an equilibrium position and a restoring force in both directions from equilibrium, but the\r\nrestoring force is not proportional to the cart\u2019s displacement from equilibrium."
+                      "text": "There is an equilibrium position and a restoring force in both directions from equilibrium, but the\r\nrestoring force is not proportional to the cart’s displacement from equilibrium."
                     }
                   ],
-                  "question_id": "appc_unit7_7_1_q4"
+                  "question_id": "appc_unit7_7_1_q4",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 5,
@@ -25167,10 +27876,12 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "No. The net force is not in the opposite direction from the object\u2019s displacement from equilibrium."
+                      "text": "No. The net force is not in the opposite direction from the object’s displacement from equilibrium."
                     }
                   ],
-                  "question_id": "appc_unit7_7_1_q5"
+                  "question_id": "appc_unit7_7_1_q5",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 6,
@@ -25193,7 +27904,9 @@ window.EXAM_DATA = {
                       "text": "The cart oscillates about a point other than Point , but not in simple harmonic motion."
                     }
                   ],
-                  "question_id": "appc_unit7_7_1_q6"
+                  "question_id": "appc_unit7_7_1_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -25216,7 +27929,9 @@ window.EXAM_DATA = {
                       "text": "It increases at first and then decreases."
                     }
                   ],
-                  "question_id": "appc_unit7_7_1_q7"
+                  "question_id": "appc_unit7_7_1_q7",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 8,
@@ -25239,7 +27954,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit7_7_1_q8"
+                  "question_id": "appc_unit7_7_1_q8",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 9,
@@ -25262,7 +27979,9 @@ window.EXAM_DATA = {
                       "text": "There is not an equilibrium position within the tunnel, and the net force is not a restoring force."
                     }
                   ],
-                  "question_id": "appc_unit7_7_1_q9"
+                  "question_id": "appc_unit7_7_1_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 }
               ]
             },
@@ -25294,7 +28013,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_2_q1"
+                  "question_id": "appc_unit7_7_2_q1",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 2,
@@ -25317,7 +28038,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_2_q2"
+                  "question_id": "appc_unit7_7_2_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -25340,7 +28063,9 @@ window.EXAM_DATA = {
                       "text": "It increases steadily from the initial frequency while the car is accelerating."
                     }
                   ],
-                  "question_id": "appc_unit7_7_2_q3"
+                  "question_id": "appc_unit7_7_2_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -25363,7 +28088,9 @@ window.EXAM_DATA = {
                       "text": "The spring constant must still be determined in order to determine the ratio."
                     }
                   ],
-                  "question_id": "appc_unit7_7_2_q4"
+                  "question_id": "appc_unit7_7_2_q4",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 5,
@@ -25386,7 +28113,9 @@ window.EXAM_DATA = {
                       "text": "Scoring Guide\r\n2\r\nAP Physics C: Mechanics Page 5 of 9"
                     }
                   ],
-                  "question_id": "appc_unit7_7_2_q5"
+                  "question_id": "appc_unit7_7_2_q5",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 6,
@@ -25409,7 +28138,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_2_q6"
+                  "question_id": "appc_unit7_7_2_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -25432,7 +28163,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_2_q7"
+                  "question_id": "appc_unit7_7_2_q7",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 8,
@@ -25455,7 +28188,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_2_q8"
+                  "question_id": "appc_unit7_7_2_q8",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 9,
@@ -25478,7 +28213,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_2_q9"
+                  "question_id": "appc_unit7_7_2_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 }
               ]
             },
@@ -25510,7 +28247,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit7_7_3_q1"
+                  "question_id": "appc_unit7_7_3_q1",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 2,
@@ -25533,7 +28272,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_3_q2"
+                  "question_id": "appc_unit7_7_3_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -25556,7 +28297,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_3_q3"
+                  "question_id": "appc_unit7_7_3_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -25579,7 +28322,9 @@ window.EXAM_DATA = {
                       "text": "The equation is the same.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 3 of 7"
                     }
                   ],
-                  "question_id": "appc_unit7_7_3_q4"
+                  "question_id": "appc_unit7_7_3_q4",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 5,
@@ -25602,7 +28347,9 @@ window.EXAM_DATA = {
                       "text": "Both the angular speed and the magnitude of the angular acceleration are maximum at , , and ."
                     }
                   ],
-                  "question_id": "appc_unit7_7_3_q5"
+                  "question_id": "appc_unit7_7_3_q5",
+                  "concept": "rotation",
+                  "concept_label": "Rotational Kinematics"
                 },
                 {
                   "number": 6,
@@ -25625,7 +28372,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_3_q6"
+                  "question_id": "appc_unit7_7_3_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -25648,7 +28397,9 @@ window.EXAM_DATA = {
                       "text": "The block is at its maximum displacement to the right of the equilibrium position. It is instantaneously at\r\nrest, so there is no direction for the velocity."
                     }
                   ],
-                  "question_id": "appc_unit7_7_3_q7"
+                  "question_id": "appc_unit7_7_3_q7",
+                  "concept": "kinematics_1d",
+                  "concept_label": "1D Kinematics"
                 },
                 {
                   "number": 8,
@@ -25656,22 +28407,24 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The object\u2019s displacement from equilibrium and its velocity are both in the positive direction."
+                      "text": "The object’s displacement from equilibrium and its velocity are both in the positive direction."
                     },
                     {
                       "letter": "B",
-                      "text": "The object\u2019s displacement from equilibrium and its velocity are both in the negative direction."
+                      "text": "The object’s displacement from equilibrium and its velocity are both in the negative direction."
                     },
                     {
                       "letter": "C",
-                      "text": "The object\u2019s displacement from equilibrium is in the positive direction, and its velocity is in the negative\r\ndirection."
+                      "text": "The object’s displacement from equilibrium is in the positive direction, and its velocity is in the negative\r\ndirection."
                     },
                     {
                       "letter": "D",
-                      "text": "The object\u2019s displacement from equilibrium is in the negative direction, and its velocity is in the positive\r\ndirection."
+                      "text": "The object’s displacement from equilibrium is in the negative direction, and its velocity is in the positive\r\ndirection."
                     }
                   ],
-                  "question_id": "appc_unit7_7_3_q8"
+                  "question_id": "appc_unit7_7_3_q8",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 9,
@@ -25694,7 +28447,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_3_q9"
+                  "question_id": "appc_unit7_7_3_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 }
               ]
             },
@@ -25726,7 +28481,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_4_q1"
+                  "question_id": "appc_unit7_7_4_q1",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 2,
@@ -25749,7 +28506,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit7_7_4_q2"
+                  "question_id": "appc_unit7_7_4_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -25772,7 +28531,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_4_q3"
+                  "question_id": "appc_unit7_7_4_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -25795,7 +28556,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_4_q4"
+                  "question_id": "appc_unit7_7_4_q4",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 5,
@@ -25818,7 +28581,9 @@ window.EXAM_DATA = {
                       "text": "D"
                     }
                   ],
-                  "question_id": "appc_unit7_7_4_q5"
+                  "question_id": "appc_unit7_7_4_q5",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 6,
@@ -25841,7 +28606,9 @@ window.EXAM_DATA = {
                       "text": "No. The period of oscillation is different for the two systems.\r\nScoring Guide\r\n4\r\nAP Physics C: Mechanics Page 5 of 8"
                     }
                   ],
-                  "question_id": "appc_unit7_7_4_q6"
+                  "question_id": "appc_unit7_7_4_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -25853,18 +28620,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Yes. Most of the system\u2019s total mechanical energy is in the form of potential energy, which is true\r\nwhenever the object\u2019s distance from equilibrium is a maximum."
+                      "text": "Yes. Most of the system’s total mechanical energy is in the form of potential energy, which is true\r\nwhenever the object’s distance from equilibrium is a maximum."
                     },
                     {
                       "letter": "C",
-                      "text": "No. The system still has kinetic energy that must be completely converted to potential energy when the\r\nobject\u2019s distance from equilibrium is a maximum."
+                      "text": "No. The system still has kinetic energy that must be completely converted to potential energy when the\r\nobject’s distance from equilibrium is a maximum."
                     },
                     {
                       "letter": "D",
-                      "text": "No. When the kinetic energy is less than half of the system\u2019s total mechanical energy, the object is\r\napproaching the equilibrium position."
+                      "text": "No. When the kinetic energy is less than half of the system’s total mechanical energy, the object is\r\napproaching the equilibrium position."
                     }
                   ],
-                  "question_id": "appc_unit7_7_4_q7"
+                  "question_id": "appc_unit7_7_4_q7",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 8,
@@ -25876,7 +28645,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "It is closer to the surface. The potential energy of the rock-moon system is proportional to the square of\r\nthe rock\u2019s distance from the center."
+                      "text": "It is closer to the surface. The potential energy of the rock-moon system is proportional to the square of\r\nthe rock’s distance from the center."
                     },
                     {
                       "letter": "C",
@@ -25887,7 +28656,9 @@ window.EXAM_DATA = {
                       "text": "It is closer to the center. The gravitational force on the rock is inversely proportional to the square of the\r\ndistance from the center."
                     }
                   ],
-                  "question_id": "appc_unit7_7_4_q8"
+                  "question_id": "appc_unit7_7_4_q8",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 9,
@@ -25910,7 +28681,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_4_q9"
+                  "question_id": "appc_unit7_7_4_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 }
               ]
             },
@@ -25942,7 +28715,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_5_q1"
+                  "question_id": "appc_unit7_7_5_q1",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 2,
@@ -25965,7 +28740,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_5_q2"
+                  "question_id": "appc_unit7_7_5_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -25988,7 +28765,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_5_q3"
+                  "question_id": "appc_unit7_7_5_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -26011,7 +28790,9 @@ window.EXAM_DATA = {
                       "text": "It is twice as much."
                     }
                   ],
-                  "question_id": "appc_unit7_7_5_q4"
+                  "question_id": "appc_unit7_7_5_q4",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 5,
@@ -26034,7 +28815,9 @@ window.EXAM_DATA = {
                       "text": "Decreasing the mass of the rod to ."
                     }
                   ],
-                  "question_id": "appc_unit7_7_5_q5"
+                  "question_id": "appc_unit7_7_5_q5",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 },
                 {
                   "number": 6,
@@ -26057,7 +28840,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_5_q6"
+                  "question_id": "appc_unit7_7_5_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -26080,7 +28865,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_5_q7"
+                  "question_id": "appc_unit7_7_5_q7",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 8,
@@ -26103,7 +28890,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_7_5_q8"
+                  "question_id": "appc_unit7_7_5_q8",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 9,
@@ -26126,7 +28915,9 @@ window.EXAM_DATA = {
                       "text": ", , and ."
                     }
                   ],
-                  "question_id": "appc_unit7_7_5_q9"
+                  "question_id": "appc_unit7_7_5_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 }
               ]
             },
@@ -26158,7 +28949,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q1"
+                  "question_id": "appc_unit7_unit_7_progress_check_q1",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 2,
@@ -26181,7 +28974,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q2"
+                  "question_id": "appc_unit7_unit_7_progress_check_q2",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 3,
@@ -26204,7 +28999,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q3"
+                  "question_id": "appc_unit7_unit_7_progress_check_q3",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 4,
@@ -26227,7 +29024,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q4"
+                  "question_id": "appc_unit7_unit_7_progress_check_q4",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 5,
@@ -26250,7 +29049,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q5"
+                  "question_id": "appc_unit7_unit_7_progress_check_q5",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 6,
@@ -26273,7 +29074,9 @@ window.EXAM_DATA = {
                       "text": "None of the tracks"
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q6"
+                  "question_id": "appc_unit7_unit_7_progress_check_q6",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 7,
@@ -26296,7 +29099,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q7"
+                  "question_id": "appc_unit7_unit_7_progress_check_q7",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 8,
@@ -26319,7 +29124,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q8"
+                  "question_id": "appc_unit7_unit_7_progress_check_q8",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 9,
@@ -26342,7 +29149,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q9"
+                  "question_id": "appc_unit7_unit_7_progress_check_q9",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 10,
@@ -26365,7 +29174,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q10"
+                  "question_id": "appc_unit7_unit_7_progress_check_q10",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 11,
@@ -26377,18 +29188,20 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Yes. The force exerted on Object O is in the opposite direction of Object O\u2019s displacement from\r\nequilibrium."
+                      "text": "Yes. The force exerted on Object O is in the opposite direction of Object O’s displacement from\r\nequilibrium."
                     },
                     {
                       "letter": "C",
-                      "text": "No. The force exerted on Object O is not proportional to Object O\u2019s displacement from equilibrium."
+                      "text": "No. The force exerted on Object O is not proportional to Object O’s displacement from equilibrium."
                     },
                     {
                       "letter": "D",
                       "text": "No. The total mechanical energy of the system does not remain constant while Object O is in motion."
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q11"
+                  "question_id": "appc_unit7_unit_7_progress_check_q11",
+                  "concept": "energy_conservation",
+                  "concept_label": "Conservation of Energy"
                 },
                 {
                   "number": 12,
@@ -26411,7 +29224,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q12"
+                  "question_id": "appc_unit7_unit_7_progress_check_q12",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 13,
@@ -26434,7 +29249,9 @@ window.EXAM_DATA = {
                       "text": "and"
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q13"
+                  "question_id": "appc_unit7_unit_7_progress_check_q13",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 14,
@@ -26457,7 +29274,9 @@ window.EXAM_DATA = {
                       "text": "Yes. In the second trial, the spring exerts twice the amount of force over half the distance as in the first\r\ntrial when moving the box from its maximum displacement to the equilibrium position."
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q14"
+                  "question_id": "appc_unit7_unit_7_progress_check_q14",
+                  "concept": "spring",
+                  "concept_label": "Springs & Elasticity"
                 },
                 {
                   "number": 15,
@@ -26480,7 +29299,9 @@ window.EXAM_DATA = {
                       "text": "is less than , and is still equal to ."
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q15"
+                  "question_id": "appc_unit7_unit_7_progress_check_q15",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 16,
@@ -26503,7 +29324,9 @@ window.EXAM_DATA = {
                       "text": "Both the period and the amplitude of the motion remain the same."
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q16"
+                  "question_id": "appc_unit7_unit_7_progress_check_q16",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 17,
@@ -26526,7 +29349,9 @@ window.EXAM_DATA = {
                       "text": ""
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q17"
+                  "question_id": "appc_unit7_unit_7_progress_check_q17",
+                  "concept": "oscillations",
+                  "concept_label": "Oscillations & SHM"
                 },
                 {
                   "number": 18,
@@ -26549,7 +29374,9 @@ window.EXAM_DATA = {
                       "text": "is greater than . The ratio of the restoring torque of to is greater than the ratio of the\r\nrotational inertia of to at the same angular displacements."
                     }
                   ],
-                  "question_id": "appc_unit7_unit_7_progress_check_q18"
+                  "question_id": "appc_unit7_unit_7_progress_check_q18",
+                  "concept": "torque",
+                  "concept_label": "Torque & Equilibrium"
                 }
               ]
             }

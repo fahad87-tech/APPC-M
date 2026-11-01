@@ -586,7 +586,7 @@ def prune_unrenderable(db, assets_dir=None):
                     card = q.get("card_image") or ""
                     has_card = False
                     if card:
-                        fname = card.split("/")[-1].split("\\")[-1]
+                        fname = card.split("/")[-1].split("\\")[-1].split("?")[0]
                         has_card = fname.lower() in missing_files
                     has_prompt = bool((q.get("prompt") or "").strip())
                     if not has_card and not has_prompt:
