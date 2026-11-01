@@ -14,8 +14,9 @@ and integrates them cleanly into exams.json and exams_bundle.js.
 import os
 import re
 import json
+import argparse
 import pypdfium2 as pdfium
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INPUT_DIR = os.path.join(BASE_DIR, "input pdf")
@@ -27,6 +28,77 @@ BUNDLE_PATH = os.path.join(DATA_DIR, "exams_bundle.js")
 os.makedirs(CARDS_DIR, exist_ok=True)
 
 CACHE_VERSION = "20261030_v1"
+UNIT1_CARD_VERSION = "20261101_v2"
+
+
+def card_font(size):
+    for name in ("arial.ttf", "DejaVuSans.ttf"):
+        try:
+            return ImageFont.truetype(name, size)
+        except OSError:
+            continue
+    raise RuntimeError("A TrueType font (Arial or DejaVu Sans) is required")
+
+
+def repair_unit1_card(slug, qnum, page, page_img, box, scale):
+    """Repair source-specific layout defects without changing answer choices."""
+    x0, y0, x1, y1 = box
+    width = x1 - x0
+    card = page_img.crop(box).convert("RGB")
+    if slug == "app1_unit1_midterm_review" and qnum == 3:
+        header = page_img.crop((x0, y0, x1, int(177 * scale))).convert("RGB")
+        images = [obj.get_bitmap().to_pil().convert("RGB") for obj in page.get_objects()
+                  if obj.type == pdfium.raw.FPDF_PAGEOBJ_IMAGE][1:5]
+        result = Image.new("RGB", (width, header.height + 4 * 485), "white")
+        result.paste(header, (0, 0))
+        draw = ImageDraw.Draw(result)
+        font = card_font(25)
+        for i, image in enumerate(images):
+            image.thumbnail((900, 430), Image.Resampling.LANCZOS)
+            top = header.height + i * 485
+            draw.text((90, top + 8), f"{chr(97 + i)})", font=font, fill="black")
+            result.paste(image, (135, top))
+        return result.crop((0, 0, width, header.height + 4 * 485 - 25))
+    if slug != "appc_unit1_midterm_review":
+        return card
+    if qnum == 1:
+        return page_img.crop((x0, y0, x1, int(465 * scale))).convert("RGB")
+    if qnum == 2:
+        draw = ImageDraw.Draw(card)
+        draw.rectangle((int(77 * scale) - x0, int(32 * scale) - y0,
+                        width - 20, int(103 * scale) - y0), fill="white")
+        font = card_font(21)
+        for y, line in [(35, "A ball is thrown at 10 m/s at an angle of 45 degrees above the horizontal."),
+                        (53, "Ignoring air resistance, the time needed for the ball to return to the"),
+                        (71, "ground at its launch height is most nearly:")]:
+            draw.text((int(80 * scale) - x0, int(y * scale) - y0), line, font=font, fill="black")
+        return card
+    if qnum == 5:
+        header = page_img.crop((x0, y0, x1, int(48 * scale))).convert("RGB")
+        ImageDraw.Draw(header).rectangle((int(78 * scale) - x0, 0, width, header.height), fill="white")
+        diagram = next(obj.get_bitmap().to_pil().convert("RGB") for obj in page.get_objects()
+                       if obj.type == pdfium.raw.FPDF_PAGEOBJ_IMAGE)
+        diagram.thumbnail((1000, 1000), Image.Resampling.LANCZOS)
+        rest = page_img.crop((x0, int(226 * scale), x1, y1)).convert("RGB")
+        result = Image.new("RGB", (width, header.height + diagram.height + 25 + rest.height), "white")
+        result.paste(header, (0, 0))
+        result.paste(diagram, ((width - diagram.width) // 2, header.height))
+        result.paste(rest, (0, header.height + diagram.height + 25))
+        return result
+    if qnum == 6:
+        card = page_img.crop((x0, y0, x1, int(636 * scale))).convert("RGB")
+        draw = ImageDraw.Draw(card)
+        for top in (569, 593):
+            draw.rectangle((int(333 * scale) - x0, int(top * scale) - y0,
+                            int(347 * scale) - x0, int((top + 12) * scale) - y0), fill="white")
+        draw.rectangle((int(267 * scale) - x0, int(514 * scale) - y0,
+                        int(275 * scale) - x0, int(526 * scale) - y0), fill="white")
+        draw.text((int(268 * scale) - x0, int(512 * scale) - y0), "D",
+                  font=card_font(20), fill="black")
+        return card
+    if qnum == 17:
+        return page_img.crop((x0, y0, x1, int(760 * scale))).convert("RGB")
+    return card
 
 def assessment_sort_key(a):
     title = a.get("title", "")
@@ -195,11 +267,16 @@ def process_review_pdf(review_info):
             # Ensure valid box
             if y1 > y0 + 10:
                 card_filename = f"{slug}_q{qnum}.png"
-                card_rel_path = f"assets/cards/{card_filename}?v={CACHE_VERSION}"
+                repaired = ((slug == "app1_unit1_midterm_review" and qnum == 3) or
+                            (slug == "appc_unit1_midterm_review" and qnum in (1, 2, 5, 6, 17)))
+                version = UNIT1_CARD_VERSION if repaired else CACHE_VERSION
+                card_rel_path = f"assets/cards/{card_filename}?v={version}"
                 card_abs_path = os.path.join(CARDS_DIR, card_filename)
 
                 # Special enhancement for Q13 in APPC Unit 2 Midterm Review (tiny embedded 14pt image stem)
-                if slug == "appc_unit2_midterm_review" and qnum == 13:
+                if repaired:
+                    repair_unit1_card(slug, qnum, page, page_img, (x0, y0, x1, y1), scale).save(card_abs_path, optimize=True)
+                elif slug == "appc_unit2_midterm_review" and qnum == 13:
                     base_q13 = page_img.crop((x0, y0, x1, y1))
                     native_img = None
                     for obj in page.get_objects():
@@ -262,6 +339,10 @@ def process_review_pdf(review_info):
     }
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--review", action="append", choices=[r["slug"] for r in REVIEWS],
+                        help="Regenerate only the specified review; may be repeated.")
+    args = parser.parse_args()
     print("==================================================")
     print("INGESTING MID-TERM REVIEW EXAMS")
     print("==================================================")
@@ -272,6 +353,8 @@ def main():
     total_added = 0
     
     for rev in REVIEWS:
+        if args.review and rev["slug"] not in args.review:
+            continue
         print(f"\nProcessing: {rev['title']} ...")
         assess_obj = process_review_pdf(rev)
         if not assess_obj or not assess_obj["questions"]:

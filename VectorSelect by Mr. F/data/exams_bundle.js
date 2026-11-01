@@ -1203,7 +1203,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/app1_unit1_midterm_review_q3.png?v=20261030_v1",
+                  "card_image": "assets/cards/app1_unit1_midterm_review_q3.png?v=20261101_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14644,7 +14644,7 @@ window.EXAM_DATA = {
               "questions": [
                 {
                   "number": 1,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q1.png?v=20261030_v1",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q1.png?v=20261101_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14668,7 +14668,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 2,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q2.png?v=20261030_v1",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q2.png?v=20261101_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14748,7 +14748,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 5,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q5.png?v=20261030_v1",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q5.png?v=20261101_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -14772,7 +14772,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 6,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q6.png?v=20261030_v1",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q6.png?v=20261101_v2",
                   "choices": [
                     {
                       "letter": "A",
@@ -15064,7 +15064,7 @@ window.EXAM_DATA = {
                 },
                 {
                   "number": 17,
-                  "card_image": "assets/cards/appc_unit1_midterm_review_q17.png?v=20261030_v1",
+                  "card_image": "assets/cards/appc_unit1_midterm_review_q17.png?v=20261101_v2",
                   "choices": [
                     {
                       "letter": "A",
