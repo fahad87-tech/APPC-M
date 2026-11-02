@@ -320,14 +320,20 @@ def process_review_pdf(review_info):
             choices = [{"letter": l, "text": ""} for l in choice_letters]
             
             correct_ans = ans_keys.get(qnum, "A")
+            is_multi = "," in correct_ans or len(correct_ans.split(",")) > 1
             
-            questions.append({
+            q_data = {
                 "number": qnum,
                 "card_image": card_rel_path,
                 "choices": choices,
                 "correct_answer": correct_ans,
                 "explanation": f"Mid-Term Review Question {qnum} from official review materials."
-            })
+            }
+            if is_multi:
+                q_data["multi_select"] = True
+                q_data["expected_choices"] = len([c.strip() for c in correct_ans.split(",") if c.strip()])
+            
+            questions.append(q_data)
             
     # Sort questions by number
     questions.sort(key=lambda x: x["number"])

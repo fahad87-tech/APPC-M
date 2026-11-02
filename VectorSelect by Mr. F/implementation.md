@@ -1902,3 +1902,65 @@ Ingested and audited the 22-question AP Physics 1 Quarter 1 Exam as a cumulative
 - `data/exams.json` & `data/exams_bundle.js`: Updated with 22-question assessment metadata in APP1 Unit 2.
 - `data/answer_keys.json` & `data/answer_keys.js`: Offline enclave keys populated with official Scoring Guide explanations.
 - `data/supabase_seed.sql`: Appended SQL upsert statement for cloud database synchronization.
+
+
+---
+
+## 29. Multi-Select Answer Support for Unit 1 & Unit 2 Assessments
+
+### A. Background & Pedagogical Requirement
+In the AP Physics 1 curriculum, multi-select questions (typically requiring students to select exactly two answers) appear on official AP assessments and Midterm Reviews (for example, **Unit 2 Mid-Term Review MCQ Part 1** `app1_unit2_midterm_review_1`, Questions 1, 2, and 8, where official keys are `A,D`, `B,D`, and `B,D`).
+
+Previously, the student portal strictly enforced a single radio-style selection (`studentAnswers[realIdx]` held a single character like `"A"`). Clicking a new option immediately overwrote the previous choice, making it impossible for students to select multiple choices or receive credit for multi-select questions. In addition, the live teacher telemetry, question review modes, concept diagnostics, and AP classroom modal were hard-coded for single-letter strict equality (`studentAns === correctAns`), which prevented proper scoring and analysis of multi-answer questions.
+
+### B. Architecture & Data Model Enhancements
+1. **Multi-Select Question Identification**:
+   A question is dynamically classified as multi-select across all units if any of the following conditions are met:
+   - `q.multi_select === true`
+   - `q.correct_answer` contains a comma (e.g., `"A,D"`)
+   - The question prompt or explanation matches `/select\s+(?:two|2|all)/i`
+2. **Choice Capacity Detection**:
+   `getExpectedChoiceCount(q, realIdx)` evaluates `q.expected_choices` (if specified), splits comma-separated `q.correct_answer`, or defaults to `2` when multi-select is detected.
+3. **Data Ingestion Script Resilience**:
+   Updated `scripts/ingest_midterm_reviews.py` to automatically detect multi-letter keys (`',' in ans or len(ans) > 1`) and persist `multi_select: True` and `expected_choices: len(letters)` in `exams.json` and `exams_bundle.js`.
+
+### C. Student Portal Implementation (`index.html`)
+1. **Core Normalization & Comparison Helpers**:
+   - `normalizeAnswer(ans)`: Trims, uppercases, sorts, and joins choices with commas (e.g., `"D, A"` $\to$ `"A,D"`).
+   - `parseAnswerLetters(ans)`: Splits comma-separated strings into a clean array of uppercase letters (e.g., `"A,D"` $\to$ `["A", "D"]`).
+   - `isAnswerCorrect(studentAns, correctAns)`: Normalizes both operands before comparison, enabling order-agnostic evaluation (`"D,A"` is correctly recognized as `"A,D"`).
+2. **Interactive Selection Toggle & FIFO Sliding Window**:
+   - Clicking a choice button toggles that letter on or off.
+   - If the student attempts to select more than the expected number of options (e.g. clicking a 3rd option when 2 are required), the oldest selection is dropped in a FIFO sliding window while keeping the new choice.
+   - If all choices are unselected, `delete studentAnswers[realIdx]` cleanly clears the answer.
+3. **Visual Cues & Multi-Select Badges**:
+   - Question header displays a bold badge: `[✦ MULTI-SELECT] Select 2 answers: (X of 2 selected)`.
+   - All currently selected choices are visually highlighted simultaneously with `.choice-selected` active border and glow.
+4. **Answer Lock & Gamified Pacing Gate**:
+   - `lockCurrentAnswer()`: If a student attempts to lock an answer with fewer than the expected choices (e.g. only 1 selected), a helpful alert notifies them: `"This is a multi-select question requiring 2 answers. You have selected 1. Please select 2 choices before locking in."`
+   - In gamified live mode, auto-locking is deferred until the student has selected all required choices.
+5. **Dual-Answer Feedback & Particle Bursts**:
+   - When answers are revealed or discussed, all correct options are highlighted in emerald green (`.choice-correct`).
+   - Incorrect student choices are highlighted in coral red (`.choice-wrong`), while unselected distractors are dimmed (`.choice-dimmed`).
+   - Confetti particle bursts trigger when all correct options are selected.
+6. **Scoring, Review & Remediation**:
+   - Exam scoring (`finishAndGradeExam`), student review grid (`showReviewView`), concept mastery buckets (`computeConceptBreakdown`), and missed-question retry remediation (`startRemediationQuiz`) all utilize `isAnswerCorrect`.
+
+### D. Teacher Live Assessment Dashboard (`teacher.html`)
+1. **Multi-Answer Live Distribution Bars**:
+   - `parseAnswerLetters(a.selected_letter)`: Splits student multi-select submissions so that each selected choice increments the corresponding option bar count (A, B, C, D).
+   - `correctLetters.includes(letter)`: Highlights all correct answer bars with emerald green `✓ CORRECT` badges during live discussion.
+2. **AP Classroom Telemetry Modal**:
+   - Student telemetry rows correctly display multi-letter selections (e.g. `"A, D"`).
+   - Individual accuracy status is evaluated via `isAnswerCorrect(chosenLetter, correctLetter)`.
+3. **Analytics & Hardest Questions**:
+   - Updated distractor analysis and hardest question aggregations to support multi-select answers.
+
+### E. Verification & Test Suite
+Created `scripts/test_multi_select.js` to automatically verify:
+1. Normalization edge cases (whitespace, lowercase, reverse order, empty strings).
+2. Parsing strings into distinct choice arrays.
+3. Order-independent answer grading (`"D,A"` vs `"A,D"`).
+4. Automated question detection on Unit 2 Mid-Term Review 1 Questions 1, 2, and 8.
+5. Multi-select toggle and FIFO capacity shifting.
+6. Verified with zero regressions across `_syntax_check.js`, `_runtime_check.js`, and `test_stepper_and_student_paced.js`.

@@ -1729,6 +1729,33 @@
     let lastPublishedTimerRemaining = null;
     let lcTimerPaused = false;
     let isAnswerRevealed = false;
+
+    // ============================================================================
+    // MULTI-SELECT & NORMALIZATION HELPERS
+    // ============================================================================
+    function normalizeAnswer(ans) {
+      if (!ans) return "";
+      return String(ans)
+        .split(",")
+        .map(s => s.trim().toUpperCase())
+        .filter(Boolean)
+        .sort()
+        .join(",");
+    }
+
+    function parseAnswerLetters(ans) {
+      if (!ans) return [];
+      return String(ans)
+        .split(",")
+        .map(s => s.trim().toUpperCase())
+        .filter(Boolean);
+    }
+
+    function isAnswerCorrect(studentAns, correctAns) {
+      const normS = normalizeAnswer(studentAns);
+      const normC = normalizeAnswer(correctAns);
+      return Boolean(normS && normC && normS === normC);
+    }
     // Teacher-only UI state must be keyed by question. The answer rows are
     // already persisted per question in Supabase; this cache keeps navigation
     // from making discussion/reveal state appear to belong to another question.
@@ -3069,7 +3096,7 @@
         const qStats = quiz.questions.map((q, qIdx) => {
           let correctCount = 0;
           subs.forEach(s => {
-            if (s.answers && s.answers[qIdx] === q.correct_answer) correctCount++;
+            if (s.answers && isAnswerCorrect(s.answers[qIdx], q.correct_answer)) correctCount++;
           });
           const acc = ((correctCount / subs.length) * 100).toFixed(0);
           return { questionNum: qIdx + 1, accuracy: parseFloat(acc), cardImage: q.card_image };
@@ -3128,7 +3155,7 @@
           const chosen = s.answers[qIdx];
           if (chosen === undefined || chosen === null || chosen === "") return;
           stats.total++;
-          if (chosen === q.correct_answer) stats.correctCount++;
+          if (isAnswerCorrect(chosen, q.correct_answer)) stats.correctCount++;
           else stats.distractor[chosen] = (stats.distractor[chosen] || 0) + 1;
         });
 
@@ -3191,7 +3218,7 @@
           if (chosen === undefined) return;
           if (!perStudent[key]) perStudent[key] = { right: 0, total: 0 };
           perStudent[key].total++;
-          if (chosen === q.correct_answer) perStudent[key].right++;
+          if (isAnswerCorrect(chosen, q.correct_answer)) perStudent[key].right++;
         });
 
         const scored = Object.entries(perStudent)
@@ -4607,13 +4634,20 @@
       const counts = { A: 0, B: 0, C: 0, D: 0, NO_ANSWER: 0 };
       let answeredCount = 0;
 
+      const correctLetters = parseAnswerLetters(correctLetter);
       dedupedAnswers.forEach(a => {
         const rawLetter = a.selected_letter;
         const isAnswered = rawLetter && rawLetter !== 'null' && rawLetter !== 'undefined' && String(rawLetter).trim() !== '';
         if (isAnswered) {
-          const letter = String(rawLetter).toUpperCase();
-          if (counts[letter] !== undefined) {
-            counts[letter]++;
+          const letters = parseAnswerLetters(rawLetter);
+          let counted = false;
+          letters.forEach(letter => {
+            if (counts[letter] !== undefined) {
+              counts[letter]++;
+              counted = true;
+            }
+          });
+          if (counted) {
             answeredCount++;
           }
         } else {
@@ -4628,7 +4662,7 @@
         ["A", "B", "C", "D"].forEach(letter => {
           const count = counts[letter];
           const pct = totalAnswers > 0 ? Math.round((count / totalAnswers) * 100) : 0;
-          const isCorrect = letter === correctLetter;
+          const isCorrect = correctLetters.includes(letter);
 
           let barColor, labelColor, badgeHtml = '';
           if (isAnswerRevealed) {
@@ -4754,6 +4788,12 @@
         const isAnswered = rawLetter && rawLetter !== 'null' && rawLetter !== 'undefined' && String(rawLetter).trim() !== '';
         const chosenLetter = isAnswered ? String(rawLetter).toUpperCase() : null;
 
+        const isRight = isAnswerCorrect(chosenLetter, correctLetter);
+        const letters = parseAnswerLetters(chosenLetter);
+        letters.forEach(l => {
+          if (choiceCounts[l] !== undefined) choiceCounts[l]++;
+        });
+
         if (!isAnswered) {
           blankCount++;
           choiceCounts.BLANK++;
@@ -4763,9 +4803,8 @@
             chosen: 'None',
             isCorrect: false
           });
-        } else if (chosenLetter === correctLetter) {
+        } else if (isRight) {
           rightCount++;
-          if (choiceCounts[chosenLetter] !== undefined) choiceCounts[chosenLetter]++;
           studentItems.push({
             name: displayName,
             status: 'RIGHT',
@@ -4774,7 +4813,6 @@
           });
         } else {
           wrongCount++;
-          if (choiceCounts[chosenLetter] !== undefined) choiceCounts[chosenLetter]++;
           studentItems.push({
             name: displayName,
             status: 'WRONG',

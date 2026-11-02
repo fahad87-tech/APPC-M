@@ -1427,6 +1427,62 @@
     }
 
     // ============================================================================
+    // MULTI-SELECT & NORMALIZATION HELPERS
+    // ============================================================================
+    function normalizeAnswer(ans) {
+      if (!ans) return "";
+      return String(ans)
+        .split(",")
+        .map(s => s.trim().toUpperCase())
+        .filter(Boolean)
+        .sort()
+        .join(",");
+    }
+
+    function parseAnswerLetters(ans) {
+      if (!ans) return [];
+      return String(ans)
+        .split(",")
+        .map(s => s.trim().toUpperCase())
+        .filter(Boolean);
+    }
+
+    function isAnswerCorrect(studentAns, correctAns) {
+      const normS = normalizeAnswer(studentAns);
+      const normC = normalizeAnswer(correctAns);
+      return Boolean(normS && normC && normS === normC);
+    }
+
+    function isQuestionMultiSelect(q, realIdx) {
+      if (!q && typeof currentQuiz !== "undefined" && currentQuiz && currentQuiz.questions && typeof realIdx === "number") {
+        q = currentQuiz.questions[realIdx];
+      }
+      if (!q) return false;
+      if (q.multi_select === true) return true;
+      const key = String(q.correct_answer || "");
+      if (key.includes(",")) return true;
+      const promptText = (q.prompt || "") + " " + (q.explanation || "");
+      if (/select\s+(?:two|2|all)/i.test(promptText)) return true;
+      return false;
+    }
+
+    function getExpectedChoiceCount(q, realIdx) {
+      if (!q && typeof currentQuiz !== "undefined" && currentQuiz && currentQuiz.questions && typeof realIdx === "number") {
+        q = currentQuiz.questions[realIdx];
+      }
+      if (!q) return 1;
+      if (q.expected_choices && typeof q.expected_choices === "number") return q.expected_choices;
+      const key = String(q.correct_answer || "");
+      if (key.includes(",")) {
+        const parts = key.split(",").map(s => s.trim()).filter(Boolean);
+        if (parts.length > 1) return parts.length;
+      }
+      const promptText = (q.prompt || "") + " " + (q.explanation || "");
+      if (/select\s+(?:two|2)/i.test(promptText)) return 2;
+      return isQuestionMultiSelect(q, realIdx) ? 2 : 1;
+    }
+
+    // ============================================================================
     // UI FEEDBACK SYSTEM — Toasts, Ripples, Particle Bursts
     // ============================================================================
 
@@ -2629,7 +2685,8 @@
       const qNum = currentQuestionIdx + 1;
 
       // Update student missed questions set
-      if (!studentAnswer || studentAnswer !== correctAnswer) {
+      const isCorrect = isAnswerCorrect(studentAnswer, correctAnswer);
+      if (!studentAnswer || !isCorrect) {
         studentMissedQuestions.add(realIdx);
       } else {
         studentMissedQuestions.delete(realIdx);
@@ -2656,7 +2713,7 @@
           </div>
           ${explanation ? `<div class="text-sm text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-800">${explanation}</div>` : ''}
         `;
-      } else if (studentAnswer === correctAnswer) {
+      } else if (isCorrect) {
         feedbackPanel.className = "verdict-card mt-4 p-5 rounded-2xl border border-lime-500/45 bg-lime-500/10 space-y-3 enter";
         statusEl.className = "text-xs font-bold text-lime-400";
         statusEl.textContent = "Correct";
@@ -2691,7 +2748,7 @@
         discussionFeedbackShownForQuestion[realIdx] = true;
         if (!studentAnswer) {
           showToast("Time Expired", `Q${qNum} — correct answer was Option ${correctAnswer}`, "brass", 3200);
-        } else if (studentAnswer === correctAnswer) {
+        } else if (isCorrect) {
           showToast("Correct!", `Q${qNum} — you nailed it!`, "lime", 3400);
         } else {
           showToast("Incorrect", `Q${qNum} — the correct answer was Option ${correctAnswer}`, "coral", 3400);
@@ -2699,20 +2756,22 @@
       }
 
       // Highlight correct answer and wrong choice on the choice buttons
+      const correctLetters = parseAnswerLetters(correctAnswer);
+      const studentLetters = parseAnswerLetters(studentAnswer);
       const buttons = document.querySelectorAll("#q-choices-container .choice-btn");
       buttons.forEach(btn => {
         const letter = (btn.dataset.letter || "").trim() || (btn.textContent.trim().match(/^[A-D]/) ? btn.textContent.trim().match(/^[A-D]/)[0] : "");
         btn.disabled = true;
         btn.style.pointerEvents = "none";
         btn.classList.remove("choice-selected", "ring-indigo-400", "ring-2", "ring-4");
-        if (letter && letter === correctAnswer) {
+        if (letter && correctLetters.includes(letter)) {
           btn.classList.remove("choice-wrong", "choice-dimmed");
           btn.classList.add("choice-correct");
           btn.style.opacity = "1";
-          if (studentAnswer === correctAnswer) {
+          if (isCorrect) {
             burstParticles(btn);
           }
-        } else if (studentAnswer && letter === studentAnswer) {
+        } else if (studentLetters.includes(letter)) {
           btn.classList.remove("choice-correct", "choice-dimmed");
           btn.classList.add("choice-wrong");
           btn.style.opacity = "1";
@@ -2763,7 +2822,7 @@
         if (isExamLocked || isExamSubmitted) {
           const studentAns = studentAnswers[idx];
           const correctAns = getQuestionCorrectAnswer(idx) || (currentQuiz && currentQuiz.questions[idx] && currentQuiz.questions[idx].correct_answer);
-          const isCorrect = Boolean(studentAns && correctAns && studentAns === correctAns);
+          const isCorrect = Boolean(studentAns && correctAns && isAnswerCorrect(studentAns, correctAns));
           if (isCurrent) {
             classes += isCorrect 
               ? "ring-2 ring-emerald-400 bg-emerald-600/40 text-emerald-200 border-2 border-emerald-400 font-black shadow-lg shadow-emerald-500/30 "
@@ -2992,13 +3051,21 @@
       const choicesBox = document.getElementById("q-choices-container");
       choicesBox.innerHTML = "";
       const selected = studentAnswers[realIdx];
+      const isMulti = isQuestionMultiSelect(q, realIdx);
+      const expectedCount = isMulti ? getExpectedChoiceCount(q, realIdx) : 1;
+      const selectedLetters = parseAnswerLetters(selected);
       const isRevealed = isCurrentQuestionEvaluationRevealed();
       const revealedKey = isRevealed ? getQuestionCorrectAnswer(realIdx) : null;
+      const revealedLetters = parseAnswerLetters(revealedKey);
 
       if (q.card_image) {
         const label = document.createElement("p");
         label.className = "text-sm md:text-base text-chalk/70 font-black mb-4 uppercase tracking-widest text-center";
-        label.textContent = "Select your answer:";
+        if (isMulti) {
+          label.innerHTML = `<span class="px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-black mr-2">✦ MULTI-SELECT</span> Select ${expectedCount} answers: <span class="text-copper-400 font-bold">(${selectedLetters.length} of ${expectedCount} selected)</span>`;
+        } else {
+          label.textContent = "Select your answer:";
+        }
         choicesBox.appendChild(label);
 
         const row = document.createElement("div");
@@ -3006,12 +3073,12 @@
 
         const showAnswerFeedback = isRevealed || ((isExamLocked || isExamSubmitted) && Boolean(revealedKey));
         q.choices.forEach(c => {
-          const isSelected = selected === c.letter;
+          const isSelected = selectedLetters.includes(c.letter);
           let btnCls = "";
           let disabled = false;
           if (showAnswerFeedback && revealedKey) {
             disabled = true;
-            if (c.letter === revealedKey) {
+            if (revealedLetters.includes(c.letter)) {
               btnCls = "choice-correct";
             } else if (isSelected) {
               btnCls = "choice-wrong";
@@ -3045,15 +3112,21 @@
         choicesBox.appendChild(row);
       } else {
         // Fallback full-text buttons
+        if (isMulti) {
+          const multiLabel = document.createElement("div");
+          multiLabel.className = "text-center mb-2";
+          multiLabel.innerHTML = `<span class="px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-black mr-2">✦ MULTI-SELECT</span> Select ${expectedCount} answers: <span class="text-copper-400 font-bold">(${selectedLetters.length} of ${expectedCount} selected)</span>`;
+          choicesBox.appendChild(multiLabel);
+        }
         const showAnswerFeedback = isRevealed || ((isExamLocked || isExamSubmitted) && Boolean(revealedKey));
         choicesBox.className = "space-y-3 pt-2";
         q.choices.forEach(c => {
-          const isSelected = selected === c.letter;
+          const isSelected = selectedLetters.includes(c.letter);
           let btnCls = "";
           let disabled = false;
           if (showAnswerFeedback && revealedKey) {
             disabled = true;
-            if (c.letter === revealedKey) {
+            if (revealedLetters.includes(c.letter)) {
               btnCls = "choice-correct";
             } else if (isSelected) {
               btnCls = "choice-wrong";
@@ -3108,7 +3181,7 @@
         const hasMissedPrior = hasPreviousIncorrectQuestion();
         const revealedKey = getQuestionCorrectAnswer(realIdx);
         const isEvaluated = Boolean(revealedKey);
-        const isCorrect = isEvaluated && (selected === revealedKey);
+        const isCorrect = isEvaluated && isAnswerCorrect(selected, revealedKey);
         const recoveryDone = !!recoveryAttemptedForQuestion[realIdx];
         const isSim = activeRecoveryChallenge ? (activeRecoveryChallenge.format === 'sim') : true;
 
@@ -3361,16 +3434,48 @@
       if (isGamifiedSession && gamifiedScoredQuestions.has(realIdx)) return;
 
       if (window.GameArena) window.GameArena.SoundFX.click();
+
+      const q = currentQuiz && currentQuiz.questions && currentQuiz.questions[realIdx];
+      const isMulti = isQuestionMultiSelect(q, realIdx);
+      const expectedCount = isMulti ? getExpectedChoiceCount(q, realIdx) : 1;
       const wasSelected = studentAnswers[realIdx];
-      studentAnswers[realIdx] = letter;
+
+      if (isMulti) {
+        let curLetters = parseAnswerLetters(studentAnswers[realIdx]);
+        const existsIdx = curLetters.indexOf(letter);
+        if (existsIdx >= 0) {
+          curLetters.splice(existsIdx, 1);
+        } else {
+          if (curLetters.length >= expectedCount) {
+            curLetters.shift();
+          }
+          curLetters.push(letter);
+        }
+        curLetters.sort();
+        if (curLetters.length > 0) {
+          studentAnswers[realIdx] = curLetters.join(",");
+        } else {
+          delete studentAnswers[realIdx];
+        }
+      } else {
+        studentAnswers[realIdx] = letter;
+      }
       
       if (isGamifiedSession) {
+        const selectedLetters = parseAnswerLetters(studentAnswers[realIdx]);
+        if (isMulti && selectedLetters.length < expectedCount) {
+          syncStudentLiveAnswer(false);
+          renderCurrentQuestion();
+          showToast(`Selected (${selectedLetters.length}/${expectedCount})`, `Select ${expectedCount} choices to submit`, "copper", 1500);
+          return;
+        }
+
         gamifiedScoredQuestions.add(realIdx);
         studentLockedAnswers[realIdx] = { manual: true, locked_at: new Date().toISOString() };
         syncStudentLiveAnswer(true);
 
-        const correct = getQuestionCorrectAnswer(realIdx) || (currentQuiz && currentQuiz.questions[realIdx] && currentQuiz.questions[realIdx].correct_answer);
-        const isRight = Boolean(correct && letter === correct);
+        const correct = getQuestionCorrectAnswer(realIdx) || (q && q.correct_answer);
+        const isRight = isAnswerCorrect(studentAnswers[realIdx], correct);
 
         renderCurrentQuestion();
         onStudentAnswerLockedInGamified(isRight);
@@ -3381,17 +3486,29 @@
       renderCurrentQuestion();
 
       const qNum = currentQuestionIdx + 1;
-      if (quizMode === "student_led") {
-        if (wasSelected && wasSelected !== letter) {
-          showToast(`Answer changed to Option ${letter}`, `Question ${qNum} updated`, "plum", 1500);
+      const curAnswer = studentAnswers[realIdx];
+      if (isMulti) {
+        const curLetters = parseAnswerLetters(curAnswer);
+        if (curLetters.length === 0) {
+          showToast("Selection Cleared", `Question ${qNum}`, "plum", 1400);
+        } else if (curLetters.length < expectedCount) {
+          showToast(`Option ${letter} toggled (${curLetters.length}/${expectedCount})`, `Question ${qNum}: Select ${expectedCount} choices`, "plum", 1500);
         } else {
-          showToast(`Option ${letter} selected`, `Question ${qNum}`, "plum", 1500);
+          showToast(`Options ${curLetters.join(" & ")} selected`, `Question ${qNum}: Ready`, "plum", 1800);
         }
       } else {
-        if (wasSelected && wasSelected !== letter) {
-          showToast(`Answer changed to ${letter}`, `Question ${qNum} updated`, "plum", 2000);
+        if (quizMode === "student_led") {
+          if (wasSelected && wasSelected !== letter) {
+            showToast(`Answer changed to Option ${letter}`, `Question ${qNum} updated`, "plum", 1500);
+          } else {
+            showToast(`Option ${letter} selected`, `Question ${qNum}`, "plum", 1500);
+          }
         } else {
-          showToast(`Option ${letter} selected`, `Question ${qNum} (Click Lock to finalize)`, "copper", 2000);
+          if (wasSelected && wasSelected !== letter) {
+            showToast(`Answer changed to ${letter}`, `Question ${qNum} updated`, "plum", 2000);
+          } else {
+            showToast(`Option ${letter} selected`, `Question ${qNum} (Click Lock to finalize)`, "copper", 2000);
+          }
         }
       }
     }
@@ -3451,8 +3568,17 @@
 
     function lockCurrentAnswer() {
       const realIdx = questionOrder[currentQuestionIdx];
-      if (!studentAnswers[realIdx]) {
+      const q = currentQuiz && currentQuiz.questions && currentQuiz.questions[realIdx];
+      const isMulti = isQuestionMultiSelect(q, realIdx);
+      const expectedCount = isMulti ? getExpectedChoiceCount(q, realIdx) : 1;
+      const currentSelected = parseAnswerLetters(studentAnswers[realIdx]);
+
+      if (currentSelected.length === 0) {
         alert("Please select an answer choice before locking in.");
+        return;
+      }
+      if (isMulti && currentSelected.length < expectedCount) {
+        alert(`This is a multi-select question requiring ${expectedCount} answers. You have selected ${currentSelected.length}. Please select ${expectedCount} choices before locking in.`);
         return;
       }
       studentLockedAnswers[realIdx] = { manual: true, locked_at: new Date().toISOString() };
@@ -3478,7 +3604,7 @@
       // Gamified Progress Hook
       if (isGamifiedSession) {
         const correct = getQuestionCorrectAnswer(realIdx) || (currentQuiz && currentQuiz.questions[realIdx] && currentQuiz.questions[realIdx].correct_answer);
-        const isRight = Boolean(studentAnswers[realIdx] && correct && studentAnswers[realIdx] === correct);
+        const isRight = isAnswerCorrect(studentAnswers[realIdx], correct);
         onStudentAnswerLockedInGamified(isRight);
       }
 
@@ -3514,7 +3640,7 @@
       const q = currentQuiz && currentQuiz.questions && currentQuiz.questions[realIdx];
       const correctAns = getQuestionCorrectAnswer(realIdx);
       const studentAns = studentAnswers[realIdx];
-      const isCorrect = Boolean(studentAns && correctAns && studentAns === correctAns);
+      const isCorrect = Boolean(studentAns && correctAns && isAnswerCorrect(studentAns, correctAns));
 
       if (!isCorrect) {
         studentMissedQuestions.add(realIdx);
@@ -3546,7 +3672,7 @@
       const hasAnswer = raw && raw !== 'null' && raw !== 'undefined' && String(raw).trim() !== '';
       const letter = hasAnswer ? String(raw).trim().toUpperCase() : null;
       const correctAns = getQuestionCorrectAnswer(realIdx);
-      const isCorrect = Boolean(letter && correctAns && letter === correctAns);
+      const isCorrect = Boolean(letter && correctAns && isAnswerCorrect(letter, correctAns));
 
       const totalQuestions = (currentQuiz && currentQuiz.questions) ? currentQuiz.questions.length : 10;
       const elapsed = Math.max(1, (Date.now() - questionStartTime) / 1000);
@@ -4051,7 +4177,7 @@
         if (studentAnswers[curReal] && !gamifiedScoredQuestions.has(curReal)) {
           gamifiedScoredQuestions.add(curReal);
           const correct = getQuestionCorrectAnswer(curReal) || (currentQuiz && currentQuiz.questions[curReal] && currentQuiz.questions[curReal].correct_answer);
-          const isRight = Boolean(studentAnswers[curReal] && correct && studentAnswers[curReal] === correct);
+          const isRight = Boolean(studentAnswers[curReal] && correct && isAnswerCorrect(studentAnswers[curReal], correct));
           onStudentAnswerLockedInGamified(isRight);
         }
       }
@@ -4456,7 +4582,7 @@
         let retryScore = 0;
         currentQuiz.questions.forEach((q, idx) => {
           const correct = getQuestionCorrectAnswer(idx) || q.correct_answer;
-          if (studentAnswers[idx] && studentAnswers[idx] === correct) retryScore++;
+          if (studentAnswers[idx] && isAnswerCorrect(studentAnswers[idx], correct)) retryScore++;
         });
         const retryTotal = currentQuiz.questions.length;
         showToast(
@@ -4493,7 +4619,7 @@
       let score = 0;
       currentQuiz.questions.forEach((q, idx) => {
         const correct = getQuestionCorrectAnswer(idx) || q.correct_answer;
-        if (studentAnswers[idx] && studentAnswers[idx] === correct) {
+        if (studentAnswers[idx] && isAnswerCorrect(studentAnswers[idx], correct)) {
           score++;
         }
       });
@@ -4717,7 +4843,7 @@
       currentQuiz.questions.forEach((q, idx) => {
         const studentAns = studentAnswers[idx];
         const correctAns = getQuestionCorrectAnswer(idx) || q.correct_answer;
-        const isCorrect = Boolean(studentAns && correctAns && studentAns === correctAns);
+        const isCorrect = Boolean(studentAns && correctAns && isAnswerCorrect(studentAns, correctAns));
         const card = document.createElement("div");
         card.className = `bg-slate-900/90 border rounded-3xl p-6 space-y-4 shadow-xl ${
           isCorrect ? "border-emerald-500/30" : "border-rose-500/30"
@@ -4797,7 +4923,7 @@
 
         const chosen = studentAnswers[idx];
         if (chosen !== undefined) b.answered++;
-        if (chosen && chosen === q.correct_answer) b.correct++;
+        if (chosen && isAnswerCorrect(chosen, q.correct_answer)) b.correct++;
         else b.missed.push(idx);
       });
 
@@ -4929,7 +5055,7 @@
       const missedIdx = [];
       currentQuiz.questions.forEach((q, idx) => {
         const chosen = studentAnswers[idx];
-        if (!chosen || chosen !== q.correct_answer) missedIdx.push(idx);
+        if (!chosen || !isAnswerCorrect(chosen, q.correct_answer)) missedIdx.push(idx);
       });
 
       if (!missedIdx.length) {
