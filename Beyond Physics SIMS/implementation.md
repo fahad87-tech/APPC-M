@@ -180,3 +180,93 @@ node_modules/
    - Added automatic 10-revolution stop trigger with synchronized Web Audio audio feedback and precision digital stopwatch.
    - Integrated PBKDF2 SHA-256 password protection gate (`SIM_AUTH`, `beyondphysics`, 100,000 iterations).
    - Added author badge (`by Mr. F`), return navigation, and synchronized dashboard card in `index.html` with `Simulation 🔒` tag.
+
+10. **Newton's Shell Theorem: The Geometric dA Proof (`circular motion/Newton's Shell Theorem.html`)**:
+   - Built a comprehensive interactive laboratory focused strictly on the intuitive geometric cone-projection proof of Newton's Shell Theorem, eliminating tedious algebraic/trigonometric integrals ($[s - (r^2-R^2)/s] = 0$).
+   - Derived and demonstrated the physical area-to-distance relation:
+     $$dA \propto r^2 \implies dm = \sigma dA \propto r^2$$
+     Combined with Newton's Universal Inverse-Square Law:
+     $$dF = \frac{G m dm}{r^2} \propto \frac{r^2}{r^2} = \text{constant}$$
+     Proving that opposing cones subtending solid angle $d\Omega$ always produce equal-magnitude, opposite-direction gravitational pulls:
+     $$d\vec{F}_1 + d\vec{F}_2 = \mathbf{0} \implies \vec{F}_{\text{net}} = \mathbf{0} \quad (\vec{g}_{\text{inside}} = \mathbf{0})$$
+   - Integrated high-fidelity direct manipulation: students can drag the test mass $P$ anywhere inside the spherical cavity or adjust position with fine-tuning presets (`Center`, `Midway 0.5R`, `Near Wall 0.82R`, `Extreme Edge 0.94R`, `Outside Shell 1.5R`).
+   - Integrated interactive cone angle rotation handle on the shell perimeter, with adjustable beam aperture/solid angle $d\Omega \in [3^\circ, 35^\circ]$.
+   - Built an interactive **Mechanical Balance Scale Widget** in the canvas viewport that dynamically balances opposing pulls ($dF_1$ vs $dF_2$) and displays green status pill `⚖️ BALANCED (0.000 N)`.
+   - Added 5 interactive modes:
+     - **Single Cone Pair (Core Proof)**: Focus on opposing patches $dA_1$ and $dA_2$, distance brackets $r_1, r_2$, and equal-and-opposite force arrows.
+     - **360° Sweep**: Continuous automatic rotation sweeping across all angles to prove $F_{\text{net}} = 0$ at all orientations.
+     - **All Cones (Full Shell)**: 16 opposing cone pairs simultaneously tessellating the sphere, demonstrating complete pairwise cancellation.
+     - **Field Vector Map**: Full interior/exterior gravitational field grid showing $\vec{g} = \mathbf{0}$ inside and $1/r^2$ inward field outside.
+     - **Zero-g Float Sandbox**: Physical particle simulation with velocity integration and elastic wall reflections, demonstrating true zero-g floating ($a = 0$).
+   - Added **"What If?" Gravity Power Law Sandbox ($F \propto 1/r^n$)**:
+     - Allows students to test other power laws: $n = 1$ (center pull), $n = 2$ (exact balance / zero gravity), and $n = 3$ (wall pull), demonstrating why $1/r^2$ is uniquely required for the shell theorem.
+   - Synchronized live telemetry readouts: $r_1, r_2, r_2/r_1, dA_1, dA_2, dA_2/dA_1 = (r_2/r_1)^2, dF_1, dF_2$, and $F_{\text{net}} = 0.0000\text{ N}$.
+   - **Visual Overhaul & Clutter Removal**:
+     - Eliminated all overlapping canvas text and collision artifacts: $r_1, r_2$, patch masses $dM_1, dM_2$, and mass $m$ labels are rendered within dedicated pill badges with perpendicular 24px clearance offsets, preventing line and vector collisions.
+     - Stripped out all dense numerical tables, tilt angle $\alpha$ cosines, and algebraic formulas. Replaced with dynamic visual proportion comparison tracks ($r_1$ vs $r_2$ and $dA_1$ vs $dA_2$) and an interactive mechanical balance scale demonstrating why opposing pulls are 100% equal.
+   - Secured with PBKDF2 SHA-256 classroom password gate (`beyondphysics`), `pageshow` protection, author badge `by Mr. F`, and added to the Circular Motion section in `index.html`.
+
+11. **Newton's Shell Theorem: Piecewise Gravitational Force $F_g(r)$ & Live Telemetry Engine**:
+   - **Analytical Piecewise Gravity Formulation**:
+     For a spherical shell of inner radius $R_{\text{in}}$, outer radius $R_{\text{out}}$, and uniform density, the gravitational force $F_g(r)$ experienced by a test mass $m$ as it moves across all three space regions is analytically modeled:
+     - **Region 1: Cavity ($r < R_{\text{in}}$)**:
+       $$F_g(r) = 0.000\text{ N} \quad (\vec{g} = \mathbf{0})$$
+       Opposing cone pairs subtending solid angle $d\Omega$ intercept areas $dA_1, dA_2 \propto r^2$. Combined with Newton's inverse-square gravity ($1/r^2$), the opposing gravitational forces cancel identically: $d\vec{F}_1 + d\vec{F}_2 = \mathbf{0}$.
+     - **Region 2: Shell Wall ($R_{\text{in}} \le r \le R_{\text{out}}$)**:
+       By the shell theorem, all outer spherical layers ($r' > r$) cancel to zero net force. Only the enclosed shell volume beneath radius $r$ pulls inward:
+       $$V_{\text{enc}}(r) = \frac{4}{3}\pi (r^3 - R_{\text{in}}^3), \quad V_{\text{total}} = \frac{4}{3}\pi (R_{\text{out}}^3 - R_{\text{in}}^3)$$
+       $$F_g(r) = F_{\text{surface}} \cdot \frac{R_{\text{out}}^2}{r^2} \cdot \frac{r^3 - R_{\text{in}}^3}{R_{\text{out}}^3 - R_{\text{in}}^3} \quad (\text{Directed toward center } O)$$
+       - At $r = R_{\text{in}}$: $F_g = 0.000\text{ N}$ (continuous transition from cavity).
+       - At $r = R_{\text{out}}$: $F_g = F_{\text{surface}} = 10.000\text{ N}$ (peak force at surface).
+     - **Region 3: Outside Space ($r > R_{\text{out}}$)**:
+       The entire shell acts as though all mass $M$ were concentrated at the center $O$:
+       $$F_g(r) = F_{\text{surface}} \cdot \left(\frac{R_{\text{out}}}{r}\right)^2 \propto \frac{1}{r^2} \quad (\text{Directed toward center } O)$$
+   - **Live Telemetry & Interactive Graph System**:
+     - Integrated a dedicated high-DPI canvas graph (`fgGraphCanvas`) rendering the continuous theoretical $F_g(r)$ curve across $r \in [0, 1.6 R_{\text{out}}]$.
+     - 3 color-coded background bands:
+       - Emerald Green: Cavity ($0$ to $R_{\text{in}}$, $F_g = 0$)
+       - Amber Gold: Inside Wall ($R_{\text{in}}$ to $R_{\text{out}}$, rising force)
+       - Cyan Sky: Outside Space ($r > R_{\text{out}}$, $1/r^2$ decay)
+     - A real-time glowing tracker bead glides smoothly along the curve in 60fps as the student drags mass $m$ anywhere across cavity, wall, or outer space.
+     - Live LED digital readout displaying $F_g$ to 3 decimal places with responsive color transitions (`cavity`, `wall`, `outside`).
+   - **On-Canvas Vector Visualization**:
+     - Inside Cavity: Displays balanced opposing light cones, $r_1, r_2$ distance brackets, $dM_1, dM_2$ badges, and equal-and-opposite force vectors $\vec{F}_1, \vec{F}_2$ with a glowing central zero-g halo ring $\odot$.
+     - Inside Wall: Displays active enclosed shell boundary arc, dashed center chord, glowing amber inward force vector, and pill badge `F_g = X.XX N (Inward)`.
+     - Outside Shell: Displays dashed center line to $O$, glowing blue central force vector, and pill badge `F_g = X.XX N (∝ 1/r²)`.
+   - **Replication Guide for Another IDE**:
+     1. Copy `circular motion/Newton's Shell Theorem.html` into the target workspace.
+     2. Ensure KaTeX CDN scripts (`katex.min.js`, `katex.min.css`, `auto-render.min.js`) are accessible or bundled locally for offline execution.
+     3. Canvas contexts utilize `window.devicePixelRatio` scaling via `ctx.setTransform(dpr, 0, 0, dpr, 0, 0)` for razor-sharp antialiasing on High-DPI screens.
+     4. Drag handling uses normalized coordinates `mx = (clientX - cx) / scale`, `my = (cy - clientY) / scale` with touch event compatibility (`touchstart`, `touchmove`, `touchend`).
+
+   - **Direct-Manipulation Click & Drag Stability Engine**:
+     - **Elimination of Displacement Jumps (`dragOffset`)**:
+       Previously, when clicking the mass $m$, missing offset preservation caused the center of the mass to snap abruptly to the cursor coordinate upon `onMove`, making the mass appear to jump or move away from the user.
+       Implemented relative cursor lock:
+       $$\Delta x_{\text{offset}} = p_x - x_m, \quad \Delta y_{\text{offset}} = p_y - y_m$$
+       $$x_m'(t) = p_x(t) - \Delta x_{\text{offset}}, \quad y_m'(t) = p_y(t) - \Delta y_{\text{offset}}$$
+       Guaranteeing zero displacement on click and 1:1 smooth translation while dragging.
+     - **Compound Bounding-Box & Proximity Hit Testing**:
+       Expanded the hit detector beyond a simple radial circle to encompass a generous 36px radius plus the bounding box of the mass marker's labels ($m$ and the zero-g pill `F_net`).
+     - **Removal of Accidental Click Teleportation**:
+       Eliminated fallback `else` teleportation on arbitrary canvas clicks. Clicking outside interactive handles no longer displaces the mass.
+     - **ResizeObserver Dimension Synchronization**:
+       Added a native `ResizeObserver` on `shellCanvas`, ensuring that `cx = 0.50 W`, `cy = 0.50 H`, and `scale` remain synchronized with real-time DOM layout shifts (such as KaTeX deferred font/math rendering), preventing coordinate offsets between visual elements and pointer events.
+
+   - **Canvas Stage Expansion & Dimension Collapse Safeguards**:
+     - **Elimination of Cyclic Collapse Loop**:
+       Identified an issue where attaching `ResizeObserver` directly to a canvas with CSS percentage sizing inside flex containers caused a cyclic dependency loop during canvas attribute updates (`canvas.width`/`height`), collapsing the rendering context to border-box dimensions (2x2px).
+       Fixed by:
+       1. Transitioning `.canvas-stage` from CSS `aspect-ratio` to an explicit, expansive viewport: `height: 540px; min-height: 480px`.
+       2. Layering `canvas#shellCanvas` with `position: absolute; inset: 0; width: 100% !important; height: 100% !important`, decoupling internal bitmap dimensions from parent layout calculations.
+       3. Re-targeting `ResizeObserver` to the parent stage element (`this.canvas.parentElement`), debounced with `requestAnimationFrame` and an explicit `contentRect.width > 50` threshold guard.
+     - **Expansive Immersive Scale**:
+       Removed the artificial `175px` radius scale cap. Upgraded `scale` to `Math.min(width * 0.42, height * 0.44)`, expanding the shell diameter to ~460px for high readability, spacious cone geometry, and effortless tactile interaction on modern desktop and laptop screens.
+
+
+12. **Stunt Studio: Will the Block Make It? (`circular motion/Will the Block Make It.html`)**:
+   - Added interactive vertical loop-the-loop and projectile launch inquiry simulation (`StuntPhysics`).
+   - Modeled release from rest on a smooth ramp $y = x^2/(2a)$ ($a = 2$) transitioning into a vertical circular loop of center-of-mass radius $R$ and horizontal launch runway ($H = 1.6R$).
+   - Derived exact normal force $N/(mg) = 2(h/R - 1 + \cos\theta) + \cos\theta$ and critical detachment angle $\theta_{\text{end}} = \arccos\left(\frac{2 - 2h/R}{3}\right)$ for $h < 2.5R$, transitioning seamlessly into parabolic free-fall until track re-contact.
+   - Included interactive draggable SVG measurement rulers (`0.1R` ticks), signed potential/kinetic/total energy bar charts and time-series plots, 5E inquiry scaffold, trial table, and zero-dependency client-side `.docx` report exporter.
+   - Added dashboard card to the Circular Motion section in `index.html` and pushed to GitHub (`origin/main`).
