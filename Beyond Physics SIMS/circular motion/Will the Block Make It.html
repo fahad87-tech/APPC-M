@@ -3,6 +3,97 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Stunt Studio · Will the Block Make It?</title>
+<script>
+  const SIM_AUTH = { hash: "11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d", salt: "371b341008c326c55780b3fab691c8c0", iterations: 100000 };
+  document.documentElement.classList.add("password-locked");
+
+  async function pbkdf2Verify(password, storedHash, salt, iterations) {
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey("raw", enc.encode(password), { name: "PBKDF2" }, false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: enc.encode(salt), iterations: iterations, hash: "SHA-256" }, key, 256);
+    const hex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
+    return hex === storedHash;
+  }
+
+  function requestPassword(title, message) {
+    return new Promise(resolve => {
+      const existingGate = document.getElementById("password-gate");
+      if (existingGate) existingGate.remove();
+      const gate = document.createElement("div");
+      gate.id = "password-gate";
+      gate.innerHTML = `<div id="password-gate-card"><div id="password-gate-title">${title}</div><div id="password-gate-message">${message}</div><input id="password-gate-input" type="password" autocomplete="current-password"><div id="password-gate-actions"><button id="password-gate-cancel" class="password-gate-button" type="button">Cancel</button><button id="password-gate-submit" class="password-gate-button" type="button">Unlock</button></div></div>`;
+      document.body.appendChild(gate);
+      const input = document.getElementById("password-gate-input");
+      const finish = value => { gate.remove(); resolve(value); };
+      document.getElementById("password-gate-cancel").addEventListener("click", () => finish(null));
+      document.getElementById("password-gate-submit").addEventListener("click", () => finish(input.value));
+      input.addEventListener("keydown", event => { if (event.key === "Enter") finish(input.value); if (event.key === "Escape") finish(null); });
+      window.requestAnimationFrame(() => input.focus());
+    });
+  }
+
+  async function verifyPageAccess() {
+    const userInput = await requestPassword("Simulation Access", "Classroom password required for this simulation:");
+    if (userInput === null) { window.location.href = "../index.html"; return; }
+    if (await pbkdf2Verify(userInput, SIM_AUTH.hash, SIM_AUTH.salt, SIM_AUTH.iterations)) {
+      document.documentElement.classList.remove("password-locked");
+    } else {
+      alert("Incorrect password. Access denied.");
+      window.location.href = "../index.html";
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", verifyPageAccess, { once: true });
+  } else {
+    verifyPageAccess();
+  }
+
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      document.documentElement.classList.add("password-locked");
+      verifyPageAccess();
+    }
+  });
+</script>
+<style id="password-gate-styles">
+  html.password-locked body { overflow: hidden; }
+  html.password-locked body > * { visibility: hidden; }
+  html.password-locked body > #password-gate { visibility: visible; }
+  #password-gate {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 9, 18, 0.88);
+    padding: 24px;
+    z-index: 9999;
+  }
+  html.password-locked #password-gate { display: flex; visibility: visible; }
+  #password-gate-card {
+    width: min(100%, 420px);
+    background: #101625;
+    border: 1px solid rgba(100,181,246,0.28);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    color: #e7edf7;
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+  #password-gate-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  #password-gate-message { font-size: 14px; color: rgba(255,255,255,0.72); margin-bottom: 16px; line-height: 1.5; }
+  #password-gate-input {
+    width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(100,181,246,0.35);
+    background: rgba(255,255,255,0.05); color: #fff; font-size: 16px; outline: none; margin-bottom: 16px;
+    box-sizing: border-box;
+  }
+  #password-gate-input:focus { border-color: #64b5f6; box-shadow: 0 0 0 3px rgba(100,181,246,0.16); }
+  #password-gate-actions { display: flex; justify-content: flex-end; gap: 10px; }
+  .password-gate-button { border: none; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  #password-gate-cancel { background: rgba(255,255,255,0.08); color: #d9e2f2; }
+  #password-gate-submit { background: #64b5f6; color: #08101c; }
+</style>
 <style>
 :root{color-scheme:dark;--bg:#080e19;--panel:#111d2d;--line:#2a3b50;--text:#eff6ff;--muted:#b0c2d5;--cyan:#5fe0ef;--amber:#ffc777;--purple:#c5adff;--green:#7be3b4;--pink:#ff91a5}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 10% 0%,#16394b99,transparent 50%),var(--bg);color:var(--text);font:16px/1.5 'Segoe UI',Arial,sans-serif}main{max-width:1680px;padding:28px 32px 48px;margin:auto}header{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:22px}.eyebrow{font-size:13px;letter-spacing:.16em;font-weight:750;color:var(--cyan);margin-bottom:8px}h1{font-size:clamp(28px,3vw,43px);line-height:1.12;letter-spacing:-.04em;margin:0 0 10px}h2{font-size:20px;line-height:1.25;margin:0}h3{font-size:18px;line-height:1.35;margin:0 0 12px}p{margin:8px 0 12px}.intro{color:var(--muted);max-width:950px;margin-bottom:0}.studio-logo{border:1px solid #426575;border-radius:10px;width:72px;height:72px;display:grid;place-items:center;flex-shrink:0;position:relative;color:var(--cyan);font-size:29px;box-shadow:0 0 40px #5fe0ef13}.studio-logo:after{content:'';position:absolute;border:1px solid #426575;border-radius:10px;inset:9px;transform:rotate(-30deg) scaleX(.55)}button,input,textarea{font:inherit}button{border:1px solid #3d526b;background:#1a2a3d;border-radius:10px;color:var(--text);padding:10px 16px;cursor:pointer;font-weight:650;transition:background .15s,transform .15s}button:hover{background:#2a4056}button:active{transform:translateY(1px)}button.primary{background:var(--cyan);color:#08212b;border-color:var(--cyan);box-shadow:0 4px 24px #5fe0ef18}button.primary:hover{background:#a0f2f9}button:disabled{opacity:.38;cursor:default}button:focus-visible,input:focus-visible,summary:focus-visible,textarea:focus-visible{outline:3px solid var(--amber);outline-offset:4px}input[type=number]{width:86px;background:#091422;color:var(--text);padding:9px;border:1px solid #465e76;border-radius:8px;font-variant-numeric:tabular-nums}input[type=range]{accent-color:var(--cyan);width:170px;max-width:100%}input[type=checkbox]{width:18px;height:18px;accent-color:var(--cyan);flex-shrink:0}label{display:inline-flex;align-items:center;gap:7px}.toolbar{display:flex;flex-wrap:wrap;gap:18px 30px;align-items:center;justify-content:space-between;background:linear-gradient(120deg,#142638,#101b2b);border:1px solid var(--line);border-radius:16px;padding:17px 20px;margin-bottom:16px}.actions,.height-control,.playback{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.height-control{gap:14px}.playback{gap:16px;font-size:14px}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:18px;align-items:start}.stage-card,.inquiry,.evidence-card,.trials-card,.model{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}.stage-top{display:flex;gap:16px;justify-content:space-between;align-items:center;padding:13px 18px;border-bottom:1px solid var(--line);font-size:14px;min-height:60px}#status{font-weight:650;color:var(--amber)}.phase-chip{white-space:nowrap;font-size:12px;letter-spacing:.06em;text-transform:uppercase;border-radius:20px;background:#5fe0ef13;color:var(--cyan);padding:5px 11px}.scene-wrap{background:radial-gradient(ellipse at 36% 42%,#19344866,transparent 70%),#0a1422;overflow-x:auto}#scene{width:100%;min-width:780px;display:block}#scene text{font:20px 'Segoe UI',Arial,sans-serif;fill:#bbcee1;paint-order:stroke;stroke:#0c1827;stroke-width:4px;stroke-linejoin:round}#scene .small{font-size:20px}.scene-foot{display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;padding:10px 18px;color:var(--muted);font-size:13px;border-top:1px solid var(--line)}.contact-key{color:var(--amber)}.transport{display:flex;align-items:center;gap:14px;padding:10px 18px;background:#0d1828;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}#scrub{flex:1;width:auto;min-width:70px}#clock{min-width:58px;text-align:right;font-variant-numeric:tabular-nums}.reveals{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0}.toggle{padding:7px 11px;border:1px solid var(--line);border-radius:9px;background:#101d2c;color:var(--muted);font-size:14px;cursor:pointer}.toggle:has(input:checked){border-color:#438594;color:var(--text);background:#173540}.note{font-size:13px;color:var(--muted)}.inquiry{padding:18px;background:linear-gradient(155deg,#172b3b,#111c2c)}.inquiry-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.label{font-size:12px;letter-spacing:.1em;font-weight:750;color:var(--cyan);text-transform:uppercase}.steps{display:grid;gap:6px;margin-bottom:19px}.step{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid transparent;background:transparent;color:var(--muted);padding:8px 10px;font-size:14px;font-weight:500}.step span:first-child{display:grid;place-items:center;width:26px;height:26px;border-radius:10px;background:#293d50;font-size:12px;color:var(--muted);flex-shrink:0}.step[aria-selected=true]{border-color:#3e7785;background:#173f4d;color:var(--text)}.step[aria-selected=true] span:first-child{background:var(--cyan);color:#08212b}.step strong{font-weight:650}.inquiry h3{color:var(--text)}.question{font-size:18px;line-height:1.45;color:#eef8ff}.task{color:var(--muted);font-size:14px;line-height:1.6}.task li{margin:8px 0}.task ul{padding-left:20px;margin:8px 0 14px}.talk{border-left:2px solid var(--amber);padding-left:12px;color:#e3cfad;font-size:14px;margin:16px 0}.response-label{font-size:13px;color:var(--muted)}textarea{width:100%;min-height:90px;resize:vertical;border:1px solid #3b536a;border-radius:9px;padding:10px;background:#0b1827;color:var(--text);margin-top:7px;font-size:15px}.inquiry-nav{display:flex;justify-content:space-between;margin-top:12px;gap:8px}.inquiry-nav button{padding:7px 12px;font-size:14px}.reading{padding:11px 16px;background:#132536;border-left:3px solid var(--cyan);border-radius:0 8px 8px 0;margin:12px 0;font-variant-numeric:tabular-nums;font-size:15px}.reading small{display:block;color:var(--muted);font-size:13px;margin-top:4px}.energy-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:16px 0}.energy-grid:has(.evidence-card[hidden]){grid-template-columns:1fr}.evidence-card{padding:17px 18px}.card-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:5px}.unit{font-size:13px;color:var(--muted)}.chart{width:100%;display:block;overflow:visible}.chart text{font:var(--chart-font,14px) 'Segoe UI',Arial,sans-serif;fill:#b8c9dd}.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:9px}.legend span{display:inline-flex;align-items:center;gap:7px}.swatch{width:19px;height:3px;background:var(--cyan);display:inline-block}.swatch.k{background:var(--amber)}.swatch.e{background:var(--purple)}.charts-note{margin:12px 0 0;color:var(--muted);font-size:13px}.trials-card{margin-top:22px}.section-head{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:16px 18px}.section-head button{font-size:13px;padding:6px 11px}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{padding:12px 18px;text-align:left;border-top:1px solid var(--line)}th{font-weight:600;color:var(--muted);background:#142438}td{font-variant-numeric:tabular-nums}.outcome-fail{color:var(--amber)}.outcome-pass{color:var(--green)}details.model{margin-top:20px;padding:17px 20px}summary{cursor:pointer;color:var(--cyan);font-weight:650}details[open] summary{margin-bottom:18px}.equation{font:22px/1.6 Cambria,Georgia,serif;color:#d1f3f8;padding:10px 15px;background:#091a27;border-radius:8px;margin:15px 0}.model p{max-width:950px}.model .note{margin-bottom:0}[hidden]{display:none!important}@media(min-width:1600px){.workspace{grid-template-columns:minmax(0,1fr) 330px}}@media(max-width:1120px){.workspace{grid-template-columns:minmax(0,1fr)}.inquiry{display:grid;grid-template-columns:240px minmax(0,1fr);gap:0 22px}.inquiry-title{grid-column:1/-1}.steps{grid-row:2/5;margin:0}.inquiry-nav{grid-column:2}.toolbar{gap:15px}.energy-grid{grid-template-columns:1fr 1fr}.studio-logo{display:none}}@media(max-width:740px){main{padding:18px 12px 30px}.toolbar{padding:14px;gap:15px}.height-control{width:100%}.height-control input[type=range]{flex:1;width:100px}.playback{font-size:13px}.workspace{gap:14px}.energy-grid{grid-template-columns:1fr}.inquiry{display:block}.steps{display:flex;flex-wrap:wrap;margin-bottom:15px}.step{padding:6px;font-size:12px;gap:5px}.step span:first-child{width:22px;height:22px}.step em{display:none}.phase-chip{font-size:12px}.stage-top{padding:10px 12px;font-size:13px}.transport{padding:10px 12px}.scene-foot{font-size:12px}.scene-foot span:last-child{display:none}.evidence-card{padding:15px}.card-top{flex-wrap:wrap}.toggle{font-size:13px}.legend{gap:12px}}

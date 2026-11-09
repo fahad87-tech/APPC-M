@@ -270,3 +270,4 @@ node_modules/
    - Derived exact normal force $N/(mg) = 2(h/R - 1 + \cos\theta) + \cos\theta$ and critical detachment angle $\theta_{\text{end}} = \arccos\left(\frac{2 - 2h/R}{3}\right)$ for $h < 2.5R$, transitioning seamlessly into parabolic free-fall until track re-contact.
    - Included interactive draggable SVG measurement rulers (`0.1R` ticks), signed potential/kinetic/total energy bar charts and time-series plots, 5E inquiry scaffold, trial table, and zero-dependency client-side `.docx` report exporter.
    - Added dashboard card to the Circular Motion section in `index.html` and pushed to GitHub (`origin/main`).
+   - Integrated PBKDF2 SHA-256 classroom password gate (`beyondphysics`, `100,000` iterations) with `pageshow` bfcache protection and updated the card badge to `Simulation 🔒` in `index.html`.
