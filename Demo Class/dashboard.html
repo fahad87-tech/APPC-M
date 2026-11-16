@@ -1,0 +1,1824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mission Control • Scene 42 Teacher Command Telemetry</title>
+  
+  <!-- Supabase JS Client & Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+  // CLASSROOM SESSION RESET & RESTART LOGIC
+  async function confirmResetLabSession() {
+    let code = prompt("⚠️ DANGER: RESTART LAB FOR NEW CLASS SESSION\n\nThis will wipe all entered student data, clear all student portals back to the Check-In screen, and reset the leaderboard.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
+    if (code !== "9999") {
+      if (code !== null) alert("Incorrect PIN. Reset aborted.");
+      return;
+    }
+
+    let timestamp = Date.now();
+
+    // 1. BroadcastChannel reset to all connected student screens
+    try {
+      if (channel) {
+        channel.postMessage({
+          type: "RESET_ALL_STATIONS",
+          timestamp: timestamp
+        });
+      }
+    } catch(e) {
+      console.warn("BroadcastChannel reset notice:", e);
+    }
+
+    // 2. localStorage reset trigger
+    localStorage.setItem("stunt_classroom_reset_trigger", timestamp.toString());
+    localStorage.removeItem("stunt_target_revealed");
+
+    // 3. Supabase reset if connected
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("classroom_control").update({
+          lab_started: false,
+          target_range_revealed: false,
+          reset_session_ms: timestamp,
+          updated_at: new Date().toISOString()
+        }).eq("id", "global");
+
+        await supabaseClient.from("station_submissions").delete().neq("station_id", "");
+      } catch(e) {
+        console.warn("Supabase reset notice:", e);
+      }
+    }
+
+    // 4. Reset local stations state
+    Object.keys(stations).forEach(key => {
+      stations[key].status = 'not_started';
+      stations[key].progress = 0;
+      stations[key].step = 1;
+      stations[key].slope = null;
+      stations[key].intercept = null;
+      stations[key].calc_h = null;
+      stations[key].actual_X = null;
+      stations[key].delta = null;
+      stations[key].accuracy_pct = null;
+      stations[key].q1 = "";
+      stations[key].q2 = "";
+      stations[key].grade = undefined;
+      stations[key].feedback = "";
+    });
+
+    // Reset UI buttons
+    let btnStart = document.getElementById("btnStartLab");
+    if (btnStart) {
+      btnStart.style.background = "";
+      btnStart.innerHTML = "🚀 Officially Start Lab!";
+    }
+    let btnRev = document.getElementById("btnRevealRange");
+    if (btnRev) {
+      btnRev.innerHTML = "🎯 Reveal Target Range";
+      btnRev.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
+    }
+
+    renderLeaderboard();
+    if (document.getElementById("gradingView").classList.contains("active")) {
+      renderGradingQueue();
+    }
+
+    alert("✅ Lab session reset! All connected student portals have been cleared for the new class session.");
+  }
+
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js">
+  // CLASSROOM SESSION RESET & RESTART LOGIC
+  async function confirmResetLabSession() {
+    let code = prompt("⚠️ DANGER: RESTART LAB FOR NEW CLASS SESSION\n\nThis will wipe all entered student data, clear all student portals back to the Check-In screen, and reset the leaderboard.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
+    if (code !== "9999") {
+      if (code !== null) alert("Incorrect PIN. Reset aborted.");
+      return;
+    }
+
+    let timestamp = Date.now();
+
+    // 1. BroadcastChannel reset to all connected student screens
+    try {
+      if (channel) {
+        channel.postMessage({
+          type: "RESET_ALL_STATIONS",
+          timestamp: timestamp
+        });
+      }
+    } catch(e) {
+      console.warn("BroadcastChannel reset notice:", e);
+    }
+
+    // 2. localStorage reset trigger
+    localStorage.setItem("stunt_classroom_reset_trigger", timestamp.toString());
+    localStorage.removeItem("stunt_target_revealed");
+
+    // 3. Supabase reset if connected
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("classroom_control").update({
+          lab_started: false,
+          target_range_revealed: false,
+          reset_session_ms: timestamp,
+          updated_at: new Date().toISOString()
+        }).eq("id", "global");
+
+        await supabaseClient.from("station_submissions").delete().neq("station_id", "");
+      } catch(e) {
+        console.warn("Supabase reset notice:", e);
+      }
+    }
+
+    // 4. Reset local stations state
+    Object.keys(stations).forEach(key => {
+      stations[key].status = 'not_started';
+      stations[key].progress = 0;
+      stations[key].step = 1;
+      stations[key].slope = null;
+      stations[key].intercept = null;
+      stations[key].calc_h = null;
+      stations[key].actual_X = null;
+      stations[key].delta = null;
+      stations[key].accuracy_pct = null;
+      stations[key].q1 = "";
+      stations[key].q2 = "";
+      stations[key].grade = undefined;
+      stations[key].feedback = "";
+    });
+
+    // Reset UI buttons
+    let btnStart = document.getElementById("btnStartLab");
+    if (btnStart) {
+      btnStart.style.background = "";
+      btnStart.innerHTML = "🚀 Officially Start Lab!";
+    }
+    let btnRev = document.getElementById("btnRevealRange");
+    if (btnRev) {
+      btnRev.innerHTML = "🎯 Reveal Target Range";
+      btnRev.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
+    }
+
+    renderLeaderboard();
+    if (document.getElementById("gradingView").classList.contains("active")) {
+      renderGradingQueue();
+    }
+
+    alert("✅ Lab session reset! All connected student portals have been cleared for the new class session.");
+  }
+
+</script>
+
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --card-bg-alt: #F1F5F9;
+      --card-border: #E2E8F0;
+      --card-border-hover: #CBD5E1;
+      --text: #0F172A;
+      --text-muted: #475569;
+      --text-dim: #64748B;
+      --cyan: #0284C7;
+      --cyan-light: #E0F2FE;
+      --emerald: #059669;
+      --gold: #D97706;
+      --gold-light: #FEF3C7;
+      --crimson: #DC2626;
+      --violet: #7C3AED;
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "SF Mono", Consolas, "Courier New", monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      background-image: none;
+      color: var(--text);
+      font-family: var(--font-main);
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 24px;
+    }
+
+    /* TOP COMMAND BAR */
+    .top-command-bar {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .command-brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand-pill {
+      background: #D97706;
+      color: #0F172A;
+      font-weight: 800;
+      font-size: 12.5px;
+      padding: 4px 12px;
+      border-radius: 6px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .command-brand h1 {
+      font-size: 28px;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: -0.02em;
+    }
+
+    .view-switcher {
+      display: flex;
+      background: #F8FAFC;
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      gap: 4px;
+    }
+
+    .view-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 700;
+      padding: 8px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .view-btn.active {
+      background: #2563EB;
+      color: #0F172A;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .action-triggers {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-action {
+      background: #E11D48;
+      color: white;
+      font-weight: 800;
+      font-size: 15px;
+      border: 1px solid #F43F5E;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: #BE123C;
+      transform: translateY(-1px);
+    }
+
+    .btn-reveal {
+      background: #D97706;
+      color: white;
+      font-weight: 800;
+      font-size: 15px;
+      border: 1px solid #F59E0B;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .btn-reveal:hover {
+      background: #B45309;
+      transform: translateY(-1px);
+    }
+
+    .btn-privacy {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1.5px solid var(--emerald);
+      color: var(--emerald);
+      font-weight: 800;
+      font-size: 15px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-privacy.revealed {
+      background: #FEF3C7;
+      border-color: var(--gold);
+      color: #FBBF24;
+    }
+
+    .btn-roster {
+      background: #F1F5F9;
+      border: 1px solid var(--card-border);
+      color: #CBD5E1;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-roster:hover {
+      background: #2D3748;
+      color: #0F172A;
+    }
+
+    .btn-roster.active {
+      background: #2563EB;
+      border-color: #3B82F6;
+      color: #0F172A;
+    }
+
+    .btn-start-lab {
+      background: #059669;
+      color: white;
+      font-weight: 800;
+      font-size: 15px;
+      border: 1px solid #10B981;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s;
+    }
+
+    .btn-start-lab:hover {
+      background: #047857;
+      transform: translateY(-1px);
+    }
+
+    .crew-roster-box {
+      background: #F8FAFC;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.3s ease;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .roster-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13.5px;
+      font-weight: 800;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 6px;
+    }
+
+    .roster-members-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px 14px;
+      font-size: 13.5px;
+    }
+
+    .roster-slot {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .roster-slot .role-lbl {
+      color: var(--text-muted);
+      font-size: 11.5px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    .roster-slot .name-val {
+      font-weight: 800;
+      color: #0F172A;
+    }
+
+    .roster-slot .empty-val {
+      color: #64748B;
+      font-style: italic;
+      font-size: 12.5px;
+    }
+
+    /* VIEW PANELS */
+    .view-panel {
+      display: none;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .view-panel.active {
+      display: flex;
+    }
+
+    /* LEADERBOARD VIEW */
+    .stations-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .stations-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .station-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      position: relative;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      transition: all 0.25s ease;
+    }
+
+    @keyframes pulse-amber {
+      0%, 100% {
+        border-color: #D97706;
+        box-shadow: 0 0 8px rgba(217, 119, 6, 0.3);
+      }
+      50% {
+        border-color: #F59E0B;
+        box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+      }
+    }
+
+    .station-card.alert-border {
+      animation: pulse-amber 1.8s infinite ease-in-out;
+    }
+
+    .station-card.ready-border {
+      border-color: var(--emerald);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+    }
+
+    .station-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .station-title-box {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .rank-badge {
+      font-size: 26px;
+    }
+
+    .station-name {
+      font-size: 22px;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: -0.01em;
+    }
+
+    .pin-badge {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--cyan);
+      background: rgba(0, 240, 255, 0.1);
+      border: 1px solid var(--cyan);
+      padding: 3px 8px;
+      border-radius: 5px;
+      margin-left: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .pin-badge.revealed {
+      background: rgba(251, 191, 36, 0.2);
+      border-color: var(--gold);
+      color: var(--gold);
+      font-weight: 800;
+      box-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
+    }
+
+    .pin-badge.locked {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.18);
+      color: #94A3B8;
+    }
+
+    .val-chip {
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 5px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      text-transform: uppercase;
+    }
+
+    .val-chip.cyan {
+      background: #EFF6FF;
+      border: 1.5px solid #BFDBFE;
+      color: #1D4ED8;
+      box-shadow: none;
+    }
+
+    .val-chip.slate {
+      background: #F1F5F9;
+      border: 1.5px solid #CBD5E1;
+      color: #475569;
+    }
+
+    .val-chip.gold {
+      background: #FEF3C7;
+      border: 1.5px solid #FCD34D;
+      color: #B45309;
+      box-shadow: none;
+    }
+
+    .status-tag {
+      font-size: 14px;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .tag-calibrating { background: rgba(0, 240, 255, 0.15); color: var(--cyan); border: 1.5px solid var(--cyan); }
+    .tag-inspection { background: rgba(245, 158, 11, 0.2); color: var(--gold); border: 1.5px solid var(--gold); }
+    .tag-ready { background: rgba(16, 185, 129, 0.2); color: var(--emerald); border: 1.5px solid var(--emerald); }
+    .tag-complete { background: rgba(168, 85, 247, 0.2); color: var(--violet); border: 1.5px solid var(--violet); }
+
+    /* CARD PROGRESS */
+    .telemetry-progress-bar {
+      width: 100%;
+      height: 12px;
+      background: #E2E8F0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .telemetry-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--emerald));
+      border-radius: 6px;
+      transition: width 0.4s ease;
+      box-shadow: none;
+    }
+
+    /* CARD METRICS ROW */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      background: #F8FAFC; border: 1px solid #E2E8F0;
+      padding: 16px;
+      border-radius: 10px;
+    }
+
+    .metric-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      text-align: center;
+    }
+
+    .metric-cell .label {
+      font-size: 13px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    .metric-cell .val {
+      font-family: var(--font-mono);
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--cyan);
+    }
+
+    .metric-cell .val.gold { color: var(--gold); }
+    .metric-cell .val.emerald { color: var(--emerald); }
+
+    .card-footer-action {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 10px;
+      border-top: 1px solid #E2E8F0;
+    }
+
+    .btn-approve {
+      background: var(--gold);
+      color: #000;
+      font-weight: 900;
+      font-size: 14.5px;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+    }
+
+    /* 30% HAIRCUT WALL */
+    .multi-graph-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 16px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .comparison-svg-box {
+      width: 100%;
+      height: 460px;
+      background: #FFFFFF;
+      border-radius: 12px;
+      border: 2px solid #334155;
+      position: relative;
+    }
+
+    /* REVEAL CEREMONY MODAL */
+    .reveal-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(5, 8, 17, 0.97);
+      backdrop-filter: blur(25px);
+      z-index: 99999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .reveal-modal.active {
+      display: flex;
+    }
+
+    .reveal-content {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+      align-items: center;
+    }
+
+    .reveal-title {
+      font-size: 44px;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      animation: glow-pulse 2s infinite;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { text-shadow: 0 0 25px rgba(245, 158, 11, 0.6); }
+      50% { text-shadow: 0 0 45px rgba(245, 158, 11, 0.95); }
+    }
+
+    .results-podium {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      width: 100%;
+      margin-top: 14px;
+    }
+
+    .podium-card {
+      background: rgba(11, 18, 36, 0.95);
+      border: 2.5px solid var(--gold);
+      border-radius: 14px;
+      padding: 26px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 0 25px rgba(245, 158, 11, 0.25);
+    }
+
+    .podium-card.winner {
+      border-color: #FBBF24;
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.25) 0%, rgba(11, 18, 36, 0.98) 100%);
+      transform: scale(1.06);
+      box-shadow: 0 0 40px rgba(245, 158, 11, 0.5);
+    }
+
+    .podium-rank { font-size: 36px; }
+    .podium-name { font-size: 17px; font-weight: 900; color: #fff; }
+    .podium-acc { font-family: var(--font-mono); font-size: 32px; font-weight: 900; color: var(--gold); }
+    .podium-delta { font-size: 14px; color: var(--text-muted); }
+
+    .all-winners-banner {
+      background: rgba(16, 185, 129, 0.2);
+      border: 2px solid var(--emerald);
+      padding: 18px 30px;
+      border-radius: 10px;
+      margin-top: 12px;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--emerald);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP COMMAND BAR -->
+  <div class="top-command-bar">
+    <div class="command-brand">
+      <span class="brand-pill">Command Telemetry</span>
+      <h1>Scene 42: Teacher Master Cockpit</h1>
+    </div>
+
+    <!-- VIEW SWITCHER -->
+    <div class="view-switcher">
+      <button class="view-btn active" onclick="switchView('leaderboardView')">📊 Live Leaderboard</button>
+      <button class="view-btn" onclick="switchView('multiGraphView')">📈 30% Haircut Wall</button>
+      <button class="view-btn" onclick="switchView('gradingView')">📝 Submission Queue</button>
+    </div>
+
+    <!-- HIGH-OCTANE ACTIONS -->
+    <div class="action-triggers">
+      <button class="btn-roster" id="btnRosterToggle" onclick="toggleRosterPins()" title="Reveal station PINs and who has joined the lab on the front projector before starting">
+        🔑 Reveal Station PINs & Roster
+      </button>
+
+      <button class="btn-start-lab" id="btnStartLab" onclick="officiallyStartLab()" title="Officially commence the lab session across all connected student screens">
+        🚀 Officially Start Lab!
+      </button>
+
+      <button class="btn-action" id="btnRevealRange" onclick="toggleRevealTargetRange()" style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); border-color: #F59E0B; color: #FFFFFF; font-weight: 800;" title="Broadcast the surprise target landing range (X* = 0.900 m) to all student stations for reverse engineering">
+        🎯 Reveal Target Range
+      </button>
+
+      <button class="btn-privacy" id="btnPrivacyToggle" onclick="togglePrivacyMode()" title="Mask sensitive slope and target height values when projecting to classroom">
+        📽️ Projector Privacy: ON
+      </button>
+
+      <button class="btn-action" onclick="broadcastCountdown()">
+        🎬 Initiate Stunt Countdown!
+      </button>
+
+      <button class="btn-reveal" onclick="openRevealCeremony()">
+        🏆 Reveal Contract Winners!
+      </button>
+
+      <button class="btn-action" id="btnResetLab" onclick="confirmResetLabSession()" style="background: #991B1B; border-color: #DC2626; color: #FFFFFF; font-weight: 800;" title="Reset all student stations, wipe input data, and start fresh for a new class session">
+        🔄 Reset Lab Session
+      </button>
+    </div>
+  </div>
+
+  <!-- VIEW 1: LIVE LEADERBOARD & PROGRESS GRID -->
+  <div class="view-panel active" id="leaderboardView">
+    <div class="stations-grid" id="stationsGrid">
+      <!-- Injected via JS -->
+    </div>
+  </div>
+
+  <!-- VIEW 2: MULTI-GRAPH SUPERIMPOSITION WALL -->
+  <div class="view-panel" id="multiGraphView">
+    <div class="multi-graph-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 style="font-size: 24px; font-weight: 900; color: #0F172A; margin-bottom: 4px;">The 30% Haircut Wall • Whole-Class Linear Convergence</h2>
+          <p style="font-size: 15px; color: var(--text-muted);">
+            Comparing each station's empirical calibration slope $v^2 = ah + b$ against the ideal frictionless line ($2g = 19.6\text{ m/s}^2$).
+          </p>
+        </div>
+        <div style="display: flex; gap: 16px; font-size: 15px; font-family: var(--font-mono); font-weight: 700;">
+          <span style="color: #334155; font-weight: 800;">⚪ Ideal: 2g = 19.6</span>
+          <span style="color: var(--cyan);">🔵 Station 1</span>
+          <span style="color: var(--emerald);">🟢 Station 2</span>
+          <span style="color: var(--gold);">🟡 Station 3</span>
+          <span style="color: var(--violet);">🟣 Station 4</span>
+        </div>
+      </div>
+
+      <div class="comparison-svg-box">
+        <svg id="multiGraphSvg" style="width: 100%; height: 100%;" viewBox="0 0 850 460"></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIEW 3: GRADING QUEUE -->
+  <div class="view-panel" id="gradingView">
+    <div class="multi-graph-card">
+      <h2 style="font-size: 24px; font-weight: 900; color: #0F172A; margin-bottom: 4px;">Student Submission & Scoring Queue</h2>
+      <p style="font-size: 15px; color: var(--text-muted);">
+        Review submitted reflection answers, verify one-take impact tolerance, and return scores.
+      </p>
+
+      <div id="gradingQueueList" style="display: flex; flex-direction: column; gap: 16px; margin-top: 14px;">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- GRAND FINALE REVEAL CEREMONY OVERLAY -->
+  <div class="reveal-modal" id="revealModal">
+    <div class="reveal-content">
+      <div style="font-size: 15px; letter-spacing: 0.18em; color: var(--text-muted); text-transform: uppercase;">
+        Scene 42 Production Wrap • Final Acceptance Telemetry
+      </div>
+      <h1 class="reveal-title">🎬 STUNT CONTRACT AWARD CEREMONY</h1>
+
+      <div class="results-podium" id="podiumGrid">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div class="all-winners-banner">
+        🎉 DAVE LIVES! ALL 4 CREWS WIN THE STUNT CONTRACT! ZERO MEDICAL BILLS! 🎉
+      </div>
+
+      <button class="btn-action" style="background: #334155; margin-top: 20px; font-size: 16px;" onclick="closeRevealCeremony()">
+        Close Award Ceremony
+      </button>
+    </div>
+  </div>
+
+<script>
+  // SUPABASE CONFIGURATION
+  const SUPABASE_URL = "https://amwoqeyyenrsthxeqzxt.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_8OezNDxuO2pWGTYAqKgd5Q_L-HwGQLc";
+
+  let supabaseClient = null;
+  try {
+    if (SUPABASE_URL !== "https://YOUR_PROJECT_ID.supabase.co") {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  } catch(e) { console.warn("Supabase not configured, using local mock data.", e); }
+
+  let stations = {
+    station_1: {
+      name: "Station 1: Speed Demons",
+      pin: "1111",
+      rank: "🥇",
+      progress: 85,
+      slope: 13.14,
+      intercept: 0.194,
+      calc_h: 37.6,
+      actual_X: 0.892,
+      delta: 0.8,
+      accuracy_pct: 99.1,
+      status: "ready_for_drop",
+      crew: { releaser: "Marcus Vance", measurer: "Elena Rostova", scribe: "Aisha Khan", checker: "Leo Chen" },
+      q1: "Ideal 19.6 m/s² slope ignored rotation; our empirical line accounts for Dave's 30% rotational energy haircut.",
+      q2: "Dave rolls without slipping, so static friction converts translational energy into rotational kinetic energy without heat."
+    },
+    station_2: {
+      name: "Station 2: Vector Vanguard",
+      pin: "2222",
+      rank: "🥈",
+      progress: 100,
+      slope: 13.82,
+      intercept: -0.110,
+      calc_h: 38.0,
+      actual_X: 0.904,
+      delta: 0.4,
+      accuracy_pct: 99.6,
+      status: "stunt_complete",
+      crew: { releaser: "Chloe Bennett", measurer: "Devon Miller", scribe: "Maya Patel", checker: "Sam Rivera" },
+      q1: "Textbook equations assume point masses; our sphere has rotational inertia that stores energy.",
+      q2: "The track is cold because no sliding occurs. The 28.6% went into spin."
+    },
+    station_3: {
+      name: "Station 3: Quantum Riders",
+      pin: "3333",
+      rank: "🥉",
+      progress: 60,
+      slope: 13.45,
+      intercept: 0.082,
+      calc_h: 37.8,
+      actual_X: null,
+      delta: null,
+      accuracy_pct: null,
+      status: "calibrating",
+      crew: { releaser: "Julian Hayes", measurer: "Zara Novak", scribe: "", checker: "" },
+      q1: "",
+      q2: ""
+    },
+    station_4: {
+      name: "Station 4: Apex Phoenix",
+      pin: "4444",
+      rank: "4th",
+      progress: 75,
+      slope: 12.98,
+      intercept: 0.210,
+      calc_h: 38.2,
+      actual_X: null,
+      delta: null,
+      accuracy_pct: null,
+      status: "awaiting_inspection",
+      crew: { releaser: "Lucas Scott", measurer: "", scribe: "", checker: "" },
+      q1: "",
+      q2: ""
+    }
+  };
+
+  // PROJECTOR PRIVACY MODE & ROSTER CHECK-IN TELEMETRY
+  let isProjectorPrivacyMode = true; // Default TRUE: Prevents copying from the front screen
+  let isRosterPinRevealMode = false;  // Toggle for revealing station PINs and check-in roster
+  let isLabStarted = false;          // Tracks whether instructor officially began session
+  let revealedCards = {};            // Tracks per-card inspection reveals
+
+  function init() {
+    renderLeaderboard();
+
+    if (localStorage.getItem("stunt_target_revealed") === "true") {
+      let rBtn = document.getElementById("btnRevealRange");
+      if (rBtn) {
+        rBtn.style.background = "#059669";
+        rBtn.style.borderColor = "#10B981";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+      }
+    }
+
+    renderMultiGraph();
+    renderGradingQueue();
+    fetchInitialSubmissions();
+    setupRealtime();
+  }
+
+  function toggleRosterPins() {
+    isRosterPinRevealMode = !isRosterPinRevealMode;
+    let btn = document.getElementById("btnRosterToggle");
+    if (btn) {
+      if (isRosterPinRevealMode) {
+        btn.className = "btn-roster active";
+        btn.innerHTML = "🔒 Hide PINs & Roster";
+      } else {
+        btn.className = "btn-roster";
+        btn.innerHTML = "🔑 Reveal Station PINs & Roster";
+      }
+    }
+    renderLeaderboard();
+
+    if (localStorage.getItem("stunt_target_revealed") === "true") {
+      let rBtn = document.getElementById("btnRevealRange");
+      if (rBtn) {
+        rBtn.style.background = "#059669";
+        rBtn.style.borderColor = "#10B981";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+      }
+    }
+
+  }
+
+  
+  async function toggleRevealTargetRange() {
+    let btn = document.getElementById("btnRevealRange");
+    let isCurrentlyRevealed = localStorage.getItem("stunt_target_revealed") === "true";
+
+    if (!isCurrentlyRevealed) {
+      if (!confirm("🎯 SURPRISE REVEAL: Broadcast the Scene 42 contracted target landing range (X* = 0.900 m) to all student stations right now?")) {
+        return;
+      }
+      localStorage.setItem("stunt_target_revealed", "true");
+      if (btn) {
+        btn.style.background = "#059669";
+        btn.style.borderColor = "#10B981";
+        btn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+      }
+
+      // 1. BroadcastChannel for instant local cross-tab sync
+      try {
+        let channel = new BroadcastChannel("stunt_classroom_sync");
+        channel.postMessage({ type: "TARGET_RANGE_REVEALED", range: "0.900" });
+      } catch(e) {
+        console.warn("BroadcastChannel error:", e);
+      }
+
+      // 2. Supabase classroom_control sync
+      if (supabaseClient) {
+        try {
+          await supabaseClient.from("classroom_control").update({
+            target_range_revealed: true,
+            target_x_m: 0.900,
+            updated_at: new Date().toISOString()
+          }).eq("id", "global");
+        } catch(e) {
+          console.warn("Supabase target reveal error:", e);
+        }
+      }
+
+      if (typeof confetti === "function") {
+        confetti({ particleCount: 160, spread: 90, origin: { y: 0.4 } });
+      }
+      alert("🎬 DIRECTOR'S SURPRISE TARGET RANGE REVEALED!\n\nX* = 0.900 m (90.0 cm) has been broadcasted to all student stations. Students can now perform reverse-engineering!");
+    } else {
+      if (confirm("Reset target range back to Classified (Hidden)?")) {
+        localStorage.removeItem("stunt_target_revealed");
+        if (btn) {
+          btn.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
+          btn.style.borderColor = "#F59E0B";
+          btn.innerHTML = "🎯 Reveal Target Range";
+        }
+        if (supabaseClient) {
+          try {
+            await supabaseClient.from("classroom_control").update({
+              target_range_revealed: false,
+              updated_at: new Date().toISOString()
+            }).eq("id", "global");
+          } catch(e) {}
+        }
+        alert("Target range status reset to Classified.");
+      }
+    }
+  }
+
+  async function officiallyStartLab() {
+    isLabStarted = true;
+    let btn = document.getElementById("btnStartLab");
+    if (btn) {
+      btn.style.background = "linear-gradient(135deg, #10B981 0%, #059669 100%)";
+      btn.innerHTML = "✅ Lab In Session";
+    }
+
+    if (supabaseClient) {
+      try {
+        await supabaseClient
+          .from("classroom_control")
+          .update({
+            lab_started: true,
+            started_at_ms: Date.now(),
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", "global");
+      } catch(e) {
+        console.warn("Supabase start lab notice:", e);
+      }
+    }
+
+    alert("🚀 SCENE 42 STUNT LAB OFFICIALLY STARTED!\n\nAll stations are active and telemetry recording is rolling.");
+    renderLeaderboard();
+
+    if (localStorage.getItem("stunt_target_revealed") === "true") {
+      let rBtn = document.getElementById("btnRevealRange");
+      if (rBtn) {
+        rBtn.style.background = "#059669";
+        rBtn.style.borderColor = "#10B981";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+      }
+    }
+
+  }
+
+  function togglePrivacyMode() {
+    isProjectorPrivacyMode = !isProjectorPrivacyMode;
+    let btn = document.getElementById("btnPrivacyToggle");
+    if (btn) {
+      if (isProjectorPrivacyMode) {
+        btn.className = "btn-privacy";
+        btn.innerHTML = "📽️ Projector Privacy: ON";
+      } else {
+        btn.className = "btn-privacy revealed";
+        btn.innerHTML = "👁️ Teacher Mode: REVEAL ALL";
+      }
+    }
+    renderLeaderboard();
+
+    if (localStorage.getItem("stunt_target_revealed") === "true") {
+      let rBtn = document.getElementById("btnRevealRange");
+      if (rBtn) {
+        rBtn.style.background = "#059669";
+        rBtn.style.borderColor = "#10B981";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+      }
+    }
+
+  }
+
+  function toggleCardPrivacy(stationKey) {
+    revealedCards[stationKey] = !revealedCards[stationKey];
+    renderLeaderboard();
+
+    if (localStorage.getItem("stunt_target_revealed") === "true") {
+      let rBtn = document.getElementById("btnRevealRange");
+      if (rBtn) {
+        rBtn.style.background = "#059669";
+        rBtn.style.borderColor = "#10B981";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+      }
+    }
+
+  }
+
+  async function fetchInitialSubmissions() {
+    if (!supabaseClient) return;
+    try {
+      const { data, error } = await supabaseClient
+        .from("station_submissions")
+        .select("*");
+      
+      if (error) {
+        console.warn("Supabase fetch notice:", error.message);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        data.forEach(rec => {
+          if (stations[rec.station_id]) {
+            let st = stations[rec.station_id];
+            if (rec.group_name && rec.group_name !== 'Unnamed Crew') st.name = rec.group_name;
+            if (rec.progress_pct !== null && !isNaN(rec.progress_pct)) st.progress = Number(rec.progress_pct);
+            if (rec.slope !== null && !isNaN(rec.slope)) st.slope = Number(rec.slope);
+            if (rec.intercept !== null && !isNaN(rec.intercept)) st.intercept = Number(rec.intercept);
+            if (rec.calc_h !== null && !isNaN(rec.calc_h)) st.calc_h = Number(rec.calc_h) * 100;
+            if (rec.actual_X !== null && !isNaN(rec.actual_X)) st.actual_X = Number(rec.actual_X);
+            if (rec.delta !== null && !isNaN(rec.delta)) st.delta = Number(rec.delta);
+            if (rec.accuracy_pct !== null && !isNaN(rec.accuracy_pct)) st.accuracy_pct = Number(rec.accuracy_pct);
+            if (rec.stunt_status) st.status = rec.stunt_status;
+            if (rec.exit_answers) {
+              st.q1 = rec.exit_answers.q1 || "";
+              st.q2 = rec.exit_answers.q2 || "";
+            }
+            if (rec.teacher_grade !== null && !isNaN(rec.teacher_grade)) st.grade = Number(rec.teacher_grade);
+            if (rec.teacher_feedback) st.feedback = rec.teacher_feedback;
+            if (rec.full_payload && rec.full_payload.crew) st.crew = rec.full_payload.crew;
+          }
+        });
+        renderLeaderboard();
+
+    if (localStorage.getItem("stunt_target_revealed") === "true") {
+      let rBtn = document.getElementById("btnRevealRange");
+      if (rBtn) {
+        rBtn.style.background = "#059669";
+        rBtn.style.borderColor = "#10B981";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+      }
+    }
+
+        renderMultiGraph();
+        renderGradingQueue();
+      }
+    } catch(e) {
+      console.warn("Hydration error:", e);
+    }
+  }
+
+  function switchView(viewId) {
+    document.querySelectorAll(".view-panel").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+    
+    document.getElementById(viewId).classList.add("active");
+    event.currentTarget.classList.add("active");
+
+    if (viewId === 'multiGraphView') renderMultiGraph();
+    if (viewId === 'gradingView') renderGradingQueue();
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function renderLeaderboard() {
+    let container = document.getElementById("stationsGrid");
+    container.innerHTML = "";
+
+    let sortedKeys = Object.keys(stations).sort((a, b) => stations[b].progress - stations[a].progress);
+
+    sortedKeys.forEach((key, idx) => {
+      let st = stations[key];
+      let rankEmoji = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : "🏁";
+      let borderClass = st.status === 'awaiting_inspection' ? 'alert-border' : (st.progress === 100 ? 'ready-border' : '');
+
+      let statusBadge = "";
+      if (st.status === 'calibrating') statusBadge = `<span class="status-tag tag-calibrating">🟡 Calibrating</span>`;
+      else if (st.status === 'awaiting_inspection') statusBadge = `<span class="status-tag tag-inspection">🟠 Clamp Inspection</span>`;
+      else if (st.status === 'ready_for_drop') statusBadge = `<span class="status-tag tag-ready">🟢 Ready for Drop</span>`;
+      else statusBadge = `<span class="status-tag tag-complete">🏆 Stunt Verified</span>`;
+
+      // PRIVACY MASKING LOGIC FOR CLASSROOM PROJECTOR
+      let isMasked = isProjectorPrivacyMode && !revealedCards[key];
+
+      const emblems = {
+        station_1: "⚡",
+        station_2: "🎯",
+        station_3: "⚛️",
+        station_4: "🔥"
+      };
+      let emblem = emblems[key] || "🛸";
+
+      let slopeDisplay = isMasked
+        ? `<span class="val-chip cyan">CALIBRATED 🔒</span>`
+        : `<span class="val">${st.slope ? st.slope.toFixed(2) : '--'}</span>`;
+
+      let interceptDisplay = isMasked
+        ? `<span class="val-chip slate">SECURED 🔒</span>`
+        : `<span class="val">${st.intercept !== null && !isNaN(st.intercept) ? (st.intercept >= 0 ? '+' : '') + Number(st.intercept).toFixed(3) : '--'}</span>`;
+
+      let targetHDisplay = isMasked
+        ? `<span class="val-chip gold">CLASSIFIED 🎯</span>`
+        : `<span class="val gold">${st.calc_h ? st.calc_h.toFixed(1) + ' cm' : '--'}</span>`;
+
+      let pinDisplay = isRosterPinRevealMode ? `🔑 PIN: ${st.pin}` : (isMasked ? `🔒 PIN PROTECTED` : `PIN: ${st.pin}`);
+      let pinBadgeClass = isRosterPinRevealMode ? `pin-badge revealed` : (isMasked ? `pin-badge locked` : `pin-badge`);
+
+      let card = document.createElement("div");
+      card.className = `station-card ${borderClass}`;
+      card.innerHTML = `
+        <div class="station-header">
+          <div class="station-title-box">
+            <span class="rank-badge">${rankEmoji}</span>
+            <span class="station-name">${emblem} ${st.name}</span>
+            <span class="${pinBadgeClass}" title="Physical Station Passcode">${pinDisplay}</span>
+          </div>
+          ${statusBadge}
+        </div>
+
+        <div style="display: flex; justify-content: space-between; font-size: 15px; color: var(--text-muted); font-weight: 700;">
+          <span>Worksheet Progress</span>
+          <span style="font-family: var(--font-mono); color: var(--cyan); font-size: 17px;">${st.progress}%</span>
+        </div>
+
+        <div class="telemetry-progress-bar">
+          <div class="telemetry-progress-fill" style="width: ${st.progress}%;"></div>
+        </div>
+
+        ${isRosterPinRevealMode ? `
+        <div class="crew-roster-box" style="margin-bottom: 12px;">
+          <div class="roster-header-row">
+            <span style="color: #0F172A;">👥 Station Crew Check-In</span>
+            <span style="color: ${(st.crew && (st.crew.releaser || st.crew.measurer || st.crew.scribe || st.crew.checker)) ? 'var(--emerald)' : 'var(--text-muted)'}; font-weight: 800;">
+              ${(st.crew ? [st.crew.releaser, st.crew.measurer, st.crew.scribe, st.crew.checker].filter(n => n && n.trim().length > 0).length : 0)} / 4 Joined
+            </span>
+          </div>
+          <div class="roster-members-grid">
+            <div style="color: ${st.crew && st.crew.releaser ? 'var(--emerald)' : 'var(--text-muted)'};">
+              <strong>Releaser:</strong> ${st.crew && st.crew.releaser ? '✓ ' + escapeHtml(st.crew.releaser) : '— Waiting —'}
+            </div>
+            <div style="color: ${st.crew && st.crew.measurer ? 'var(--emerald)' : 'var(--text-muted)'};">
+              <strong>Measurer:</strong> ${st.crew && st.crew.measurer ? '✓ ' + escapeHtml(st.crew.measurer) : '— Waiting —'}
+            </div>
+            <div style="color: ${st.crew && st.crew.scribe ? 'var(--emerald)' : 'var(--text-muted)'};">
+              <strong>Data Scribe:</strong> ${st.crew && st.crew.scribe ? '✓ ' + escapeHtml(st.crew.scribe) : '— Waiting —'}
+            </div>
+            <div style="color: ${st.crew && st.crew.checker ? 'var(--emerald)' : 'var(--text-muted)'};">
+              <strong>Quality Checker:</strong> ${st.crew && st.crew.checker ? '✓ ' + escapeHtml(st.crew.checker) : '— Waiting —'}
+            </div>
+          </div>
+        </div>
+        ` : ''}
+
+        <div class="metrics-row" style="cursor: pointer;" onclick="toggleCardPrivacy('${key}')" title="Click to toggle privacy mask for this station">
+          <div class="metric-cell">
+            <span class="label">Slope (a)</span>
+            ${slopeDisplay}
+          </div>
+          <div class="metric-cell">
+            <span class="label">Intercept (b)</span>
+            ${interceptDisplay}
+          </div>
+          <div class="metric-cell">
+            <span class="label">Target h*</span>
+            ${targetHDisplay}
+          </div>
+        </div>
+
+        <div class="card-footer-action">
+          <div style="font-size: 14.5px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+            ${st.accuracy_pct !== null && !isNaN(st.accuracy_pct)
+              ? `Accuracy: <strong style="color: var(--emerald); font-size: 17px;">${st.accuracy_pct.toFixed(1)}%</strong> (δ = ${st.delta !== null ? st.delta.toFixed(1) : '0.0'} cm)`
+              : 'Empirical Calibration in progress...'}
+            <span style="font-size: 12px; color: var(--gold); cursor: pointer;" onclick="toggleCardPrivacy('${key}')">
+              ${isMasked ? '👁️ Peek' : '🔒 Mask'}
+            </span>
+          </div>
+
+          ${st.status === 'awaiting_inspection' ? `<button class="btn-approve" onclick="approveInspection('${key}')">✅ Approve Clamp</button>` : ''}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  async function approveInspection(stationKey) {
+    stations[stationKey].status = 'ready_for_drop';
+    renderLeaderboard();
+
+    if (localStorage.getItem("stunt_target_revealed") === "true") {
+      let rBtn = document.getElementById("btnRevealRange");
+      if (rBtn) {
+        rBtn.style.background = "#059669";
+        rBtn.style.borderColor = "#10B981";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+      }
+    }
+
+    if (supabaseClient) {
+      const { error } = await supabaseClient
+        .from("station_submissions")
+        .update({
+          stunt_status: 'ready_for_drop',
+          inspection_approved: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('station_id', stationKey);
+
+      if (error) {
+        console.error("Approval save error:", error);
+        alert("⚠️ Failed to update database approval: " + error.message);
+        return;
+      }
+    }
+    alert(`✅ Authorized Clamp Height for ${stations[stationKey].name}!\n\nStation is officially cleared for the live stunt drop.`);
+  }
+
+  function renderMultiGraph() {
+    let svg = document.getElementById("multiGraphSvg");
+    if (!svg) return;
+    let w = 850, h = 460;
+    let padL = 75, padR = 40, padT = 40, padB = 60;
+
+    let mapX = val => padL + (val / 0.45) * (w - padL - padR);
+    let mapY = val => (h - padB) - (val / 9.0) * (h - padT - padB);
+
+    let html = `
+      <line x1="${padL}" y1="${h - padB}" x2="${w - padR}" y2="${h - padB}" stroke="#64748B" stroke-width="2.5" />
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${h - padB}" stroke="#64748B" stroke-width="2.5" />
+      
+      <text x="${w - padR}" y="${h - padB + 40}" fill="#94A3B8" font-size="15" font-weight="700" text-anchor="end">Release Height h (m)</text>
+      <text x="${padL}" y="${padT - 15}" fill="#94A3B8" font-size="15" font-weight="700" text-anchor="start">Exit Speed Squared v² (m²/s²)</text>
+    `;
+
+    for (let th = 0.05; th <= 0.40; th += 0.05) {
+      let gx = mapX(th);
+      html += `
+        <line x1="${gx}" y1="${padT}" x2="${gx}" y2="${h - padB}" stroke="rgba(255,255,255,0.08)" />
+        <text x="${gx}" y="${h - padB + 22}" fill="#64748B" font-size="13" text-anchor="middle">${th.toFixed(2)}</text>
+      `;
+    }
+
+    for (let tv = 2; tv <= 8; tv += 2) {
+      let gy = mapY(tv);
+      html += `
+        <line x1="${padL}" y1="${gy}" x2="${w - padR}" y2="${gy}" stroke="rgba(255,255,255,0.08)" />
+        <text x="${padL - 14}" y="${gy + 6}" fill="#64748B" font-size="14" text-anchor="end">${tv}</text>
+      `;
+    }
+
+    // Ideal Line (2g = 19.6 m/s²)
+    html += `
+      <line x1="${mapX(0)}" y1="${mapY(0)}" x2="${mapX(0.40)}" y2="${mapY(19.6 * 0.40)}" 
+            stroke="#94A3B8" stroke-width="2.5" stroke-dasharray="8,5" />
+      <text x="${mapX(0.36)}" y="${mapY(19.6 * 0.36) - 14}" fill="#94A3B8" font-size="14" font-weight="700">Ideal 2g (19.6)</text>
+    `;
+
+    const colors = {
+      station_1: "#00F0FF",
+      station_2: "#10B981",
+      station_3: "#F59E0B",
+      station_4: "#A855F7"
+    };
+
+    Object.keys(stations).forEach(key => {
+      let st = stations[key];
+      let col = colors[key];
+      if (st.slope && st.slope > 0) {
+        let lx1 = 0.05, ly1 = st.slope * lx1 + (st.intercept || 0);
+        let lx2 = 0.42, ly2 = st.slope * lx2 + (st.intercept || 0);
+
+        html += `
+          <line x1="${mapX(lx1)}" y1="${mapY(ly1)}" x2="${mapX(lx2)}" y2="${mapY(ly2)}" 
+                stroke="${col}" stroke-width="4" stroke-linecap="round" />
+          <text x="${mapX(lx2) + 8}" y="${mapY(ly2) + 6}" fill="${col}" font-size="14" font-weight="900">a=${st.slope.toFixed(2)}</text>
+        `;
+      }
+    });
+
+    svg.innerHTML = html;
+  }
+
+    function renderGradingQueue() {
+    let container = document.getElementById("gradingQueueList");
+    if (!container) return;
+    container.innerHTML = "";
+
+    const stationColors = {
+      station_1: "#2563EB",
+      station_2: "#059669",
+      station_3: "#D97706",
+      station_4: "#7C3AED"
+    };
+
+    const stationEmblems = {
+      station_1: "⚡",
+      station_2: "🎯",
+      station_3: "⚛️",
+      station_4: "🔥"
+    };
+
+    Object.keys(stations).forEach(key => {
+      let st = stations[key];
+      let color = stationColors[key] || "#2563EB";
+      let emblem = stationEmblems[key] || "📍";
+      let isVerified = st.accuracy_pct !== null && !isNaN(st.accuracy_pct);
+      
+      let crewNames = [];
+      if (st.crew) {
+        if (st.crew.releaser) crewNames.push(`Releaser: ${st.crew.releaser}`);
+        if (st.crew.measurer) crewNames.push(`Measurer: ${st.crew.measurer}`);
+        if (st.crew.scribe) crewNames.push(`Scribe: ${st.crew.scribe}`);
+        if (st.crew.checker) crewNames.push(`Checker: ${st.crew.checker}`);
+      }
+      let crewStr = crewNames.length > 0 ? crewNames.join(" • ") : "No crew names logged yet";
+
+      let statusBadge = isVerified
+        ? `<span style="background: #ECFDF5; border: 2px solid #10B981; color: #065F46; font-size: 14.5px; font-weight: 800; padding: 5px 14px; border-radius: 20px; font-family: var(--font-mono);">
+            🎯 Accuracy: ${st.accuracy_pct.toFixed(1)}% (Δ = ${st.delta !== undefined && st.delta !== null ? (st.delta * 100).toFixed(1) + ' cm' : '0.0 cm'})
+          </span>`
+        : `<span style="background: #FFFBEB; border: 2px solid #F59E0B; color: #92400E; font-size: 14px; font-weight: 800; padding: 5px 14px; border-radius: 20px;">
+            ⏱️ Working on Lab • Step ${st.step || 1} of 6
+          </span>`;
+
+      let row = document.createElement("div");
+      row.style.background = "#FFFFFF";
+      row.style.border = "2px solid #CBD5E1";
+      row.style.borderLeft = `7px solid ${color}`;
+      row.style.borderRadius = "12px";
+      row.style.padding = "22px";
+      row.style.boxShadow = "0 2px 10px rgba(15, 23, 42, 0.05)";
+      row.style.display = "flex";
+      row.style.flexDirection = "column";
+      row.style.gap = "14px";
+
+      row.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; border-bottom: 1.5px solid #E2E8F0; padding-bottom: 14px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 22px;">${emblem}</span>
+              <strong style="color: #0F172A; font-size: 20px; font-weight: 900;">${st.name}</strong>
+              <span style="background: #F1F5F9; color: #475569; font-size: 13px; font-weight: 800; padding: 2px 8px; border-radius: 6px; border: 1px solid #CBD5E1;">PIN: ${st.pin}</span>
+            </div>
+            <div style="color: #64748B; font-size: 13.5px; font-weight: 600; margin-top: 4px;">
+              👥 Crew: ${crewStr}
+            </div>
+          </div>
+          <div>${statusBadge}</div>
+        </div>
+
+        <!-- TELEMETRY SNAPSHOT -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 10px 14px;">
+            <div style="font-size: 12px; font-weight: 800; color: #64748B; text-transform: uppercase;">Calibration Slope (a)</div>
+            <div style="font-size: 17px; font-weight: 900; color: #0F172A; font-family: var(--font-mono); margin-top: 2px;">
+              ${st.slope !== undefined && st.slope !== null ? Number(st.slope).toFixed(2) + ' m/s²' : 'Pending'}
+            </div>
+          </div>
+          <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 10px 14px;">
+            <div style="font-size: 12px; font-weight: 800; color: #64748B; text-transform: uppercase;">Predicted Release (h*)</div>
+            <div style="font-size: 17px; font-weight: 900; color: #D97706; font-family: var(--font-mono); margin-top: 2px;">
+              ${st.calc_h !== undefined && st.calc_h !== null ? Number(st.calc_h).toFixed(3) + ' m' : 'Pending'}
+            </div>
+          </div>
+          <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 10px 14px;">
+            <div style="font-size: 12px; font-weight: 800; color: #64748B; text-transform: uppercase;">Live Landing Range (X)</div>
+            <div style="font-size: 17px; font-weight: 900; color: #059669; font-family: var(--font-mono); margin-top: 2px;">
+              ${st.actual_X !== undefined && st.actual_X !== null ? Number(st.actual_X).toFixed(3) + ' m' : 'Pending'}
+            </div>
+          </div>
+          <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 10px 14px;">
+            <div style="font-size: 12px; font-weight: 800; color: #64748B; text-transform: uppercase;">Progress Status</div>
+            <div style="font-size: 17px; font-weight: 900; color: #2563EB; margin-top: 2px;">
+              ${st.progress || 0}% Complete
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 6 PHYSICAL REASONING RESPONSES -->
+        <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 16px;">
+          <div style="font-size: 13px; font-weight: 900; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
+            📝 Student Physics Reflection Answers:
+          </div>
+          
+          <div style="margin-bottom: 10px;">
+            <span style="font-size: 13.5px; font-weight: 800; color: #475569;">Q1 (Why Slope a < 2g? Rotational Energy partition):</span>
+            <div style="font-size: 15px; color: #0F172A; font-weight: 600; line-height: 1.5; background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;">
+              ${st.q1 && st.q1.trim() ? st.q1 : '<span style="color: #94A3B8; font-style: italic;">No answer submitted yet for Q1</span>'}
+            </div>
+          </div>
+
+          <div>
+            <span style="font-size: 13.5px; font-weight: 800; color: #475569;">Q2 (Cold Track Energy Loss & Dissipation):</span>
+            <div style="font-size: 15px; color: #0F172A; font-weight: 600; line-height: 1.5; background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;">
+              ${st.q2 && st.q2.trim() ? st.q2 : '<span style="color: #94A3B8; font-style: italic;">No answer submitted yet for Q2</span>'}
+            </div>
+          </div>
+        </div>
+
+        <!-- GRADING & RETURN FORM -->
+        <div style="background: #F1F5F9; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center;">
+          <div style="font-size: 15px; font-weight: 900; color: #0F172A;">
+            🏅 Assign Official Grade:
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <input type="number" min="0" max="100" id="grade_score_${key}" placeholder="Score" 
+                   style="width: 100px; padding: 8px 10px; font-size: 16px; font-weight: 900; color: #0F172A; background: #FFFFFF; border: 2px solid #CBD5E1; border-radius: 6px; text-align: center;" 
+                   value="${st.grade !== undefined && st.grade !== null ? st.grade : 100}" />
+            <span style="font-weight: 800; color: #475569;">/ 100</span>
+          </div>
+          <input type="text" id="grade_feedback_${key}" placeholder="Teacher Feedback / Stunt Master Badge" 
+                 style="flex: 1; min-width: 250px; padding: 8px 14px; font-size: 15px; font-weight: 600; color: #0F172A; background: #FFFFFF; border: 2px solid #CBD5E1; border-radius: 6px;" 
+                 value="${st.feedback || 'Master Stunt Physics Certified! Excellent physical calibration.'}" />
+          <button class="btn-approve" 
+                  style="background: #059669; hover: #047857; color: #FFFFFF; font-weight: 800; font-size: 15px; padding: 9px 20px; border-radius: 6px; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(5,150,105,0.25);" 
+                  onclick="submitGrade('${key}')">
+            ✅ Return Grade
+          </button>
+        </div>
+      `;
+      container.appendChild(row);
+    });
+  }
+
+  async function submitGrade(stationKey) {
+    let scoreInput = document.getElementById(`grade_score_${stationKey}`);
+    let feedbackInput = document.getElementById(`grade_feedback_${stationKey}`);
+    let score = scoreInput ? parseFloat(scoreInput.value) : 100;
+    let feedback = feedbackInput ? feedbackInput.value.trim() : "Excellent calibration work!";
+
+    stations[stationKey].grade = score;
+    stations[stationKey].feedback = feedback;
+
+    if (supabaseClient) {
+      const { error } = await supabaseClient
+        .from("station_submissions")
+        .update({
+          teacher_grade: score,
+          teacher_feedback: feedback,
+          graded_at: new Date().toISOString()
+        })
+        .eq("station_id", stationKey);
+
+      if (error) {
+        console.error("Grading save error:", error);
+        alert("⚠️ Failed to save grade to database: " + error.message);
+        return;
+      }
+    }
+
+    confetti({ particleCount: 70, spread: 60 });
+    alert(`🎉 Official Grade (${score}/100) returned to ${stations[stationKey].name}!`);
+    renderGradingQueue();
+  }
+
+  // GLOBAL BROADCAST COUNTDOWN WITH PRECISE SERVER TIMESTAMP
+  async function broadcastCountdown() {
+    if (confirm("Initiate Global 'Quiet on the Set' 5-Second Stunt Countdown across all student stations?")) {
+      let targetMs = Date.now() + 5000;
+      if (supabaseClient) {
+        const { error } = await supabaseClient.from("classroom_control").update({
+          countdown_active: true,
+          countdown_target_ms: targetMs,
+          updated_at: new Date().toISOString()
+        }).eq('id', 'global');
+
+        if (error) console.warn("Countdown broadcast error:", error.message);
+      }
+      confetti({ particleCount: 160, spread: 90, origin: { y: 0.4 } });
+      alert("🎬 'QUIET ON THE SET' Synchronized Countdown Broadcasted!");
+    }
+  }
+
+  // GRAND FINALE AWARD CEREMONY (NO RESULT FABRICATION)
+  function openRevealCeremony() {
+    let podium = document.getElementById("podiumGrid");
+    podium.innerHTML = "";
+
+    // ONLY rank stations that actually completed their flight verification!
+    let verifiedStations = [];
+    let pendingStations = [];
+
+    Object.keys(stations).forEach(key => {
+      let st = stations[key];
+      if (st.accuracy_pct !== null && !isNaN(st.accuracy_pct)) {
+        verifiedStations.push(st);
+      } else {
+        pendingStations.push(st);
+      }
+    });
+
+    verifiedStations.sort((a, b) => b.accuracy_pct - a.accuracy_pct);
+
+    let rankIdx = 1;
+    verifiedStations.forEach(st => {
+      let isWinner = rankIdx === 1;
+      let card = document.createElement("div");
+      card.className = `podium-card ${isWinner ? 'winner' : ''}`;
+      card.innerHTML = `
+        <div class="podium-rank">${rankIdx === 1 ? '🏆 1st' : rankIdx === 2 ? '🥈 2nd' : rankIdx === 3 ? '🥉 3rd' : '🎖️ 4th'}</div>
+        <div class="podium-name">${st.name}</div>
+        <div class="podium-acc">${st.accuracy_pct.toFixed(1)}%</div>
+        <div class="podium-delta">Miss: δ = ${st.delta !== null && !isNaN(st.delta) ? st.delta.toFixed(1) : '0.0'} cm</div>
+        ${isWinner ? '<span style="font-size: 13px; color: var(--gold); font-weight: 800;">LEAD STUNT CONTRACT</span>' : '<span style="font-size: 13px; color: var(--emerald); font-weight: 700;">APPROVED CONTRACT</span>'}
+      `;
+      podium.appendChild(card);
+      rankIdx++;
+    });
+
+    // Display honest pending status for stations still working
+    pendingStations.forEach(st => {
+      let card = document.createElement("div");
+      card.className = "podium-card";
+      card.style.opacity = "0.75";
+      card.innerHTML = `
+        <div class="podium-rank">⏱️</div>
+        <div class="podium-name">${st.name}</div>
+        <div class="podium-acc" style="font-size: 20px; color: var(--text-muted); margin: 8px 0;">IN PROGRESS</div>
+        <div class="podium-delta">Awaiting Live Stunt Drop</div>
+        <span style="font-size: 13px; color: var(--gold); font-weight: 700;">CALIBRATING</span>
+      `;
+      podium.appendChild(card);
+    });
+
+    document.getElementById("revealModal").classList.add("active");
+    confetti({ particleCount: 220, spread: 100, origin: { y: 0.5 } });
+  }
+
+  function closeRevealCeremony() {
+    document.getElementById("revealModal").classList.remove("active");
+  }
+
+  // REALTIME SUBSCRIPTION (SAFE NUMERICAL HANDLING)
+  function setupRealtime() {
+    if (!supabaseClient) return;
+
+    supabaseClient
+      .channel("public:station_submissions")
+      .on("postgres_changes", { event: "*", schema: "public", table: "station_submissions" }, payload => {
+        let rec = payload.new;
+        if (rec && stations[rec.station_id]) {
+          let st = stations[rec.station_id];
+          if (rec.group_name && rec.group_name !== 'Unnamed Crew') st.name = rec.group_name;
+          if (rec.progress_pct !== null && !isNaN(rec.progress_pct)) st.progress = Number(rec.progress_pct);
+          if (rec.slope !== null && !isNaN(rec.slope)) st.slope = Number(rec.slope);
+          if (rec.intercept !== null && !isNaN(rec.intercept)) st.intercept = Number(rec.intercept);
+          if (rec.calc_h !== null && !isNaN(rec.calc_h)) st.calc_h = Number(rec.calc_h) * 100;
+          if (rec.actual_X !== null && !isNaN(rec.actual_X)) st.actual_X = Number(rec.actual_X);
+          if (rec.delta !== null && !isNaN(rec.delta)) st.delta = Number(rec.delta);
+          if (rec.accuracy_pct !== null && !isNaN(rec.accuracy_pct)) st.accuracy_pct = Number(rec.accuracy_pct);
+          if (rec.stunt_status) st.status = rec.stunt_status;
+          if (rec.exit_answers) {
+            st.q1 = rec.exit_answers.q1 || "";
+            st.q2 = rec.exit_answers.q2 || "";
+          }
+          if (rec.teacher_grade !== null && !isNaN(rec.teacher_grade)) st.grade = Number(rec.teacher_grade);
+          if (rec.teacher_feedback) st.feedback = rec.teacher_feedback;
+
+          renderLeaderboard();
+
+    if (localStorage.getItem("stunt_target_revealed") === "true") {
+      let rBtn = document.getElementById("btnRevealRange");
+      if (rBtn) {
+        rBtn.style.background = "#059669";
+        rBtn.style.borderColor = "#10B981";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+      }
+    }
+
+          renderMultiGraph();
+          renderGradingQueue();
+        }
+      })
+      .subscribe();
+  }
+
+  window.addEventListener("DOMContentLoaded", init);
+
+  // CLASSROOM SESSION RESET & RESTART LOGIC
+  async function confirmResetLabSession() {
+    let code = prompt("⚠️ DANGER: RESTART LAB FOR NEW CLASS SESSION\n\nThis will wipe all entered student data, clear all student portals back to the Check-In screen, and reset the leaderboard.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
+    if (code !== "9999") {
+      if (code !== null) alert("Incorrect PIN. Reset aborted.");
+      return;
+    }
+
+    let timestamp = Date.now();
+
+    // 1. BroadcastChannel reset to all connected student screens
+    try {
+      if (channel) {
+        channel.postMessage({
+          type: "RESET_ALL_STATIONS",
+          timestamp: timestamp
+        });
+      }
+    } catch(e) {
+      console.warn("BroadcastChannel reset notice:", e);
+    }
+
+    // 2. localStorage reset trigger
+    localStorage.setItem("stunt_classroom_reset_trigger", timestamp.toString());
+    localStorage.removeItem("stunt_target_revealed");
+
+    // 3. Supabase reset if connected
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("classroom_control").update({
+          lab_started: false,
+          target_range_revealed: false,
+          reset_session_ms: timestamp,
+          updated_at: new Date().toISOString()
+        }).eq("id", "global");
+
+        await supabaseClient.from("station_submissions").delete().neq("station_id", "");
+      } catch(e) {
+        console.warn("Supabase reset notice:", e);
+      }
+    }
+
+    // 4. Reset local stations state
+    Object.keys(stations).forEach(key => {
+      stations[key].status = 'not_started';
+      stations[key].progress = 0;
+      stations[key].step = 1;
+      stations[key].slope = null;
+      stations[key].intercept = null;
+      stations[key].calc_h = null;
+      stations[key].actual_X = null;
+      stations[key].delta = null;
+      stations[key].accuracy_pct = null;
+      stations[key].q1 = "";
+      stations[key].q2 = "";
+      stations[key].grade = undefined;
+      stations[key].feedback = "";
+    });
+
+    // Reset UI buttons
+    let btnStart = document.getElementById("btnStartLab");
+    if (btnStart) {
+      btnStart.style.background = "";
+      btnStart.innerHTML = "🚀 Officially Start Lab!";
+    }
+    let btnRev = document.getElementById("btnRevealRange");
+    if (btnRev) {
+      btnRev.innerHTML = "🎯 Reveal Target Range";
+      btnRev.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
+    }
+
+    renderLeaderboard();
+    if (document.getElementById("gradingView").classList.contains("active")) {
+      renderGradingQueue();
+    }
+
+    alert("✅ Lab session reset! All connected student portals have been cleared for the new class session.");
+  }
+
+</script>
+
+</body>
+</html>

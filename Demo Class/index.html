@@ -1,0 +1,4982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LAB: Scene 42 Stunt Calibration • Official Lab Sheet</title>
+  
+  <!-- Supabase JS Client & Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --card-bg-alt: #F1F5F9;
+      --card-border: #E2E8F0;
+      --card-border-hover: #CBD5E1;
+      --text: #0F172A;
+      --text-muted: #475569;
+      --text-dim: #64748B;
+      --cyan: #0284C7;
+      --cyan-light: #E0F2FE;
+      --emerald: #059669;
+      --gold: #D97706;
+      --gold-light: #FEF3C7;
+      --crimson: #DC2626;
+      --violet: #7C3AED;
+      --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "SF Mono", Consolas, "Courier New", monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      background-image: none;
+      color: var(--text);
+      font-family: var(--font-main);
+      font-size: 18px;
+      line-height: 1.65;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 80px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+    }
+
+    /* STATION LOCK MODAL / CHECK-IN */
+    .station-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(20px);
+      z-index: 100000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .station-modal-card {
+      background: var(--card-bg);
+      border: 1.5px solid #CBD5E1;
+      border-radius: 14px;
+      padding: 36px 32px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-10px); }
+      40%, 80% { transform: translateX(10px); }
+    }
+
+    .shake-error {
+      animation: shake 0.4s ease-in-out;
+      border-color: var(--crimson) !important;
+      box-shadow: 0 0 20px rgba(225, 29, 72, 0.5) !important;
+    }
+
+    .station-modal-card h2 {
+      font-size: 26px;
+      font-weight: 900;
+      color: #0F172A !important;
+    }
+
+    /* TOP LAB HEADER */
+    .lab-header-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .top-meta-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px solid #E2E8F0;
+      padding-bottom: 16px;
+      gap: 14px;
+    }
+
+    .lab-title-group h1 {
+      font-size: 26px;
+      font-weight: 900;
+      color: #0F172A !important;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .tag-course {
+      background: #2563EB;
+      color: #FFFFFF;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .station-badge-locked {
+      background: #EFF6FF;
+      border: 1.5px solid #BFDBFE;
+      color: #1D4ED8;
+      font-size: 15px;
+      font-weight: 800;
+      padding: 8px 16px;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-unlock-station {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+
+    .crew-inputs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    label.field-lbl {
+      font-size: 14.5px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #1E293B;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="text"], input[type="number"], select, textarea {
+      background: #FFFFFF;
+      border: 2px solid #94A3B8;
+      color: #0F172A;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: 18px;
+      font-family: inherit;
+      outline: none;
+      width: 100%;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    
+    /* SECTION 3 AXIS CONFIGURATION PANEL & PRESET CHIPS */
+    .axis-config-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 18px;
+      margin: 16px 0;
+    }
+
+    .axis-input-card {
+      background: #F8FAFC;
+      border: 2px solid #CBD5E1;
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      transition: all 0.25s ease;
+    }
+
+    .axis-input-card.y-axis {
+      border-left: 5px solid var(--cyan);
+    }
+
+    .axis-input-card.x-axis {
+      border-left: 5px solid var(--gold);
+    }
+
+    .axis-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .axis-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .axis-direction-icon {
+      font-size: 18px;
+    }
+
+    .axis-badge {
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .axis-badge.cyan {
+      background: rgba(0, 240, 255, 0.15);
+      color: var(--cyan);
+      border: 1px solid rgba(0, 240, 255, 0.35);
+    }
+
+    .axis-badge.gold {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(251, 191, 36, 0.35);
+    }
+
+    .axis-field-box input {
+      font-size: 18px;
+      font-weight: 700;
+      color: #0F172A;
+      background: #FFFFFF;
+      border: 1.5px solid #CBD5E1;
+      padding: 12px 14px;
+      border-radius: 8px;
+      width: 100%;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .axis-input-card.y-axis .axis-field-box input:focus {
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+    }
+
+    .axis-input-card.x-axis .axis-field-box input:focus {
+      border-color: #D97706;
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.18);
+    }
+
+    .axis-field-box input::placeholder {
+      color: rgba(148, 163, 184, 0.7);
+      font-weight: 500;
+      font-size: 15px;
+    }
+
+    .quick-chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+      margin-top: 4px;
+    }
+
+    .chip-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-right: 2px;
+    }
+
+    .axis-preset-chip {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      color: #334155;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .axis-preset-chip:hover {
+      background: #F1F5F9;
+      color: #0F172A;
+      border-color: #94A3B8;
+      transform: translateY(-1px);
+    }
+
+    .axis-input-card.y-axis .axis-preset-chip.active {
+      background: rgba(59, 130, 246, 0.18);
+      border-color: #3B82F6;
+      color: #60A5FA;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .axis-input-card.x-axis .axis-preset-chip.active {
+      background: rgba(217, 119, 6, 0.18);
+      border-color: #D97706;
+      color: #FBBF24;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    /* DAVE AVATAR & PROGRESS HUD */
+    .hud-hero {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px 26px;
+      display: grid;
+      grid-template-columns: 105px 1fr;
+      gap: 22px;
+      align-items: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    .dave-orb {
+      width: 95px;
+      height: 95px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #FFFFFF 0%, #94A3B8 55%, #0F172A 100%);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: float-dave 3.5s ease-in-out infinite;
+    }
+
+    @keyframes float-dave {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .dave-strap {
+      position: absolute;
+      top: 9px;
+      width: 78px;
+      height: 12px;
+      background: var(--gold);
+      border-radius: 6px 6px 0 0;
+    }
+
+    .dave-shades {
+      position: absolute;
+      top: 32px;
+      width: 66px;
+      height: 19px;
+      background: #000;
+      border-radius: 4px;
+      border-bottom: 2px solid #3B82F6;
+    }
+
+    .hud-speech {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .dave-bubble {
+      background: #F8FAFC;
+      color: #1E293B !important;
+      border: 1px solid #E2E8F0;
+      border-left: 4px solid #0284C7;
+      color: #1E293B;
+      padding: 14px 18px;
+      border-radius: 0 8px 8px 0;
+      font-size: 17.5px;
+      line-height: 1.5;
+      color: #E2E8F0;
+    }
+
+    .dave-bubble strong {
+      color: #60A5FA;
+      font-size: 18.5px;
+    }
+
+    .progress-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 14%;
+      background: linear-gradient(90deg, #3B82F6, #10B981);
+      transition: width 0.4s ease;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .progress-pct {
+      font-family: var(--font-mono);
+      font-size: 17px;
+      font-weight: 800;
+      color: #60A5FA;
+      min-width: 55px;
+    }
+
+    /* MISSION OBJECTIVE & STUNT CONTRACT BRIEFING CARD */
+    .mission-briefing-card {
+      background: #FFFFFF;
+      border: 2px solid #D97706;
+      border-radius: 12px;
+      padding: 22px 26px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 4px 16px rgba(217, 119, 6, 0.12);
+    }
+    .mission-badge-strip {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .mission-kicker {
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      color: #38BDF8;
+      text-transform: uppercase;
+      background: #FEF3C7;
+      color: #B45309;
+      border: 1px solid #FCD34D;
+      padding: 4px 12px;
+      border-radius: 6px;
+    }
+    .contract-trophy {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: var(--gold);
+      background: #ECFDF5;
+      color: #047857;
+      border: 1px solid #A7F3D0;
+      padding: 4px 12px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .mission-title {
+      font-size: 21px;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    .mission-narrative {
+      font-size: 15.5px;
+      color: #334155;
+      line-height: 1.6;
+      margin: 0;
+    }
+    .mission-narrative strong {
+      color: #0F172A;
+    }
+    .mission-objectives-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 4px;
+    }
+    @media (max-width: 860px) {
+      .mission-objectives-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .obj-step {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 14px;
+      color: #334155;
+      line-height: 1.45;
+    }
+    .obj-step strong {
+      color: #0F172A;
+      font-weight: 800;
+    }
+    .obj-num {
+      width: 26px;
+      height: 26px;
+      background: #D97706;
+      border: 1.5px solid #B45309;
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 900;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* SECTION CARDS & ACCORDION FLOW */
+    .section-card {
+      background: #FFFFFF;
+      border: 2px solid #CBD5E1;
+      border-radius: 14px;
+      padding: 28px 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .section-card.locked {
+      max-height: 90px;
+      overflow: hidden;
+      opacity: 0.5;
+      border-color: rgba(255, 255, 255, 0.1);
+      user-select: none;
+    }
+
+    .section-card.locked .section-body {
+      display: none;
+    }
+
+    .section-card.locked .lock-indicator {
+      display: inline-flex;
+    }
+
+    .lock-indicator {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      color: var(--gold);
+      font-weight: 800;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      padding: 6px 14px;
+      border-radius: 6px;
+    }
+
+    .section-card.unlocked {
+      max-height: 4500px;
+      opacity: 1;
+      border-color: #94A3B8;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2.5px solid #CBD5E1;
+      padding-bottom: 16px;
+      margin-bottom: 4px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #0F172A;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.01em;
+    }
+
+    .section-num {
+      background: #1E3A8A;
+      border: 1px solid #1E3A8A;
+      color: #FFFFFF;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 900;
+      padding: 5px 12px;
+      border-radius: 6px;
+    }
+
+    .section-body {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* SECTION 1: CANVAS FBD WITH FAT DOT */
+    .fbd-lol-container {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 24px;
+      background: #F8FAFC;
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .fbd-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .canvas-fat-dot-wrap {
+      width: 260px;
+      height: 260px;
+      background: #FFFFFF;
+      border: 2px solid #CBD5E1;
+      border-radius: 12px;
+      position: relative;
+      touch-action: none;
+      cursor: crosshair;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    canvas#fbdCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .fbd-tools {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .btn-fbd-tool {
+      flex: 1;
+      background: #FFFFFF;
+      border: 2px solid #94A3B8;
+      color: #0F172A;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 8px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: all 0.2s;
+    }
+
+    .btn-fbd-tool:hover {
+      background: #EFF6FF;
+      border-color: #2563EB;
+      color: #1D4ED8;
+    }
+
+    /* LOL BUILDER */
+    .lol-builder {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .lol-panels {
+      display: grid;
+      grid-template-columns: 1fr 130px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .lol-grid-card {
+      background: #FFFFFF;
+      border: 2px solid #CBD5E1;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+
+    .lol-grid-card-title {
+      font-size: 15px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #0F172A;
+      text-align: center;
+    }
+
+    .bars-draw-area {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-end;
+      height: 155px;
+      border-bottom: 2.5px solid #64748B;
+      padding-bottom: 6px;
+      gap: 10px;
+    }
+
+    .bar-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .bar-stack {
+      width: 34px;
+      height: 130px;
+      background: #F8FAFC;
+      border: 2px dashed #64748B;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 2px;
+      padding: 2px;
+      cursor: pointer;
+    }
+
+    .cell-box {
+      flex: 1;
+      border-radius: 2px;
+      background: transparent;
+      transition: background 0.15s;
+    }
+
+    .cell-box.fill-green { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+    .cell-box.fill-red { background: var(--crimson); box-shadow: 0 0 8px var(--crimson); }
+    .cell-box.fill-gold { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+
+    .bar-label {
+      font-size: 15px;
+      font-weight: 900;
+      color: #0F172A !important;
+      font-family: var(--font-mono);
+    }
+
+    .system-circle-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .system-circle {
+      width: 128px;
+      height: 128px;
+      border-radius: 50%;
+      border: 3px solid #0284C7;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 8px;
+      gap: 5px;
+      text-align: center;
+      background: #F0F9FF;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      box-sizing: border-box;
+      position: relative;
+    }
+
+    .system-circle input {
+      width: 86px !important;
+      max-width: 86px !important;
+      height: 26px !important;
+      min-height: 26px !important;
+      font-size: 13px !important;
+      font-weight: 800 !important;
+      padding: 2px 6px !important;
+      border-radius: 6px !important;
+      border: 1.5px solid #94A3B8 !important;
+      background: #FFFFFF !important;
+      color: #0F172A !important;
+      text-align: center !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+      outline: none !important;
+      transition: all 0.2s ease;
+    }
+
+    .system-circle input:focus {
+      border-color: #2563EB !important;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+    }
+
+    .system-circle input:focus {
+      border-color: var(--cyan) !important;
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.5) !important;
+      background: rgba(11, 18, 36, 0.98) !important;
+    }
+
+    /* DATA POINT MARKERS & HOVER TOOLTIPS */
+    .data-point-marker {
+      cursor: pointer;
+    }
+    .data-point-marker .data-point-halo {
+      transition: r 0.2s ease, fill 0.2s ease;
+    }
+    .data-point-marker:hover .data-point-halo {
+      r: 22px;
+      fill: rgba(0, 240, 255, 0.45);
+    }
+    .data-point-marker .data-point-dot {
+      transition: r 0.2s ease, fill 0.2s ease;
+    }
+    .data-point-marker:hover .data-point-dot {
+      r: 9.5px;
+      fill: #38BDF8;
+    }
+    .data-point-marker .coord-tooltip {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s ease-in-out, transform 0.18s ease-in-out;
+      transform: translateY(3px);
+    }
+    .data-point-marker:hover .coord-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* SECTION 2: TEST TABLE (SPEED & AUTO-SQUARE V2) */
+    table.worksheet-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 17px;
+      border: 2px solid #94A3B8;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    table.worksheet-table th, table.worksheet-table td {
+      padding: 12px 14px;
+      text-align: center;
+      border-bottom: 1px solid #CBD5E1;
+      border-right: 1px solid #CBD5E1;
+      color: #0F172A;
+    }
+
+    table.worksheet-table th:last-child, table.worksheet-table td:last-child {
+      border-right: none;
+    }
+
+    table.worksheet-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.worksheet-table th {
+      background: #F1F5F9;
+      color: #0F172A;
+      font-weight: 900;
+      font-size: 13.5px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 2px solid #94A3B8;
+    }
+
+    table.worksheet-table tbody tr:nth-child(even) td {
+      background: #F8FAFC;
+    }
+
+    table.worksheet-table tbody tr:hover td {
+      background: #EFF6FF;
+    }
+
+    table.worksheet-table input {
+      width: 100%;
+      max-width: 125px;
+      text-align: center;
+      padding: 8px 10px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #0F172A;
+      background: #FFFFFF;
+      border: 2px solid #94A3B8;
+      border-radius: 6px;
+    }
+
+    table.worksheet-table input:focus {
+      border-color: #2563EB;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    .auto-squared-cell {
+      font-family: var(--font-mono);
+      font-size: 19px;
+      font-weight: 900;
+      color: #1E40AF;
+      background: #EFF6FF;
+      border: 2px solid #3B82F6;
+      border-radius: 6px;
+      padding: 6px 14px;
+      display: inline-block;
+      min-width: 80px;
+    }
+
+    /* SECTION 3: GRAPH PAPER CANVAS (INTERACTIVE RULER & ZERO HINTS) */
+    .graph-paper-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    .graph-instructions-box {
+      background: #EFF6FF;
+      border-left: 4px solid #2563EB;
+      padding: 12px 18px;
+      border-radius: 0 8px 8px 0;
+      font-size: 15.5px;
+      line-height: 1.5;
+      color: #1E293B;
+    }
+
+    .graph-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      background: #F8FAFC;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #E2E8F0;
+    }
+
+    .graph-toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-graph-tool {
+      background: #FFFFFF;
+      border: 1.5px solid #CBD5E1;
+      color: #334155;
+      font-size: 14.5px;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-graph-tool:hover {
+      background: #2563EB;
+      border-color: #3B82F6;
+      color: #FFFFFF;
+    }
+
+    .btn-graph-tool.active {
+      background: #2563EB;
+      color: #FFFFFF;
+      border-color: #60A5FA;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-graph-tool.danger:hover {
+      background: rgba(225, 29, 72, 0.2);
+      border-color: var(--crimson);
+      color: var(--crimson);
+    }
+
+    .graph-status-badge {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #FBBF24;
+    }
+
+    .canvas-container {
+      width: 100%;
+      height: 460px;
+      background: #FFFFFF;
+      border: 1.5px solid #CBD5E1;
+      border-radius: 10px;
+      position: relative;
+      touch-action: none;
+      user-select: none;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .equation-telemetry-card {
+      background: #F8FAFC;
+      border: 1.5px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .equation-telemetry-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .eq-big-formula {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 900;
+      color: #0F172A;
+    }
+
+    .slope-triangle-details {
+      font-size: 14.5px;
+      color: #94A3B8;
+      font-family: var(--font-mono);
+    }
+
+    /* SECTION 4 & 5 CALCULATIONS */
+    .calc-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      padding: 16px 20px;
+      border-radius: 8px;
+    }
+
+    .inline-input-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .inline-math-box {
+      width: 120px;
+      display: inline-block;
+      text-align: center;
+      padding: 8px 12px;
+      font-size: 18px;
+      background: #181D28;
+      border: 1.5px solid var(--card-border);
+      color: #FFFFFF;
+      border-radius: 6px;
+    }
+
+    .inversion-work-area {
+      background: #FFFBEB;
+      border: 2.5px solid #D97706;
+      border-radius: 10px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.1);
+    }
+
+    /* BUTTONS */
+    .btn-next-step {
+      background: #2563EB;
+      color: #FFFFFF;
+      font-size: 17px;
+      font-weight: 800;
+      padding: 12px 26px;
+      border: 1px solid #3B82F6;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      align-self: flex-end;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .btn-next-step:hover {
+      background: #1D4ED8;
+      border-color: #60A5FA;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit-lab {
+      background: #059669;
+      color: #FFFFFF;
+      font-size: 18px;
+      font-weight: 800;
+      padding: 14px 30px;
+      border: 1px solid #10B981;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-submit-lab:hover {
+      background: #047857;
+      border-color: #34D399;
+      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
+      transform: translateY(-1px);
+    }
+
+    /* 2x2 SYMMETRICAL APPARATUS SPECIFICATIONS GRID */
+    .apparatus-specs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 768px) {
+      .apparatus-specs-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .spec-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 105px;
+      justify-content: flex-start;
+      box-sizing: border-box;
+    }
+    .spec-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #E2E8F0;
+      padding-bottom: 8px;
+    }
+    .spec-icon { font-size: 18px; }
+    .spec-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #94A3B8;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .spec-content {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+      justify-content: center;
+    }
+    .spec-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 15px;
+    }
+    .spec-label {
+      color: #475569;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .spec-val {
+      font-family: var(--font-mono);
+      font-weight: 800;
+      font-size: 16px;
+      white-space: nowrap;
+    }
+    .spec-val.cyan { color: #0284C7; font-weight: 900; }
+    .spec-val.gold { color: #D97706; font-weight: 900; }
+    .spec-val.emerald { color: #059669; font-weight: 900; }
+    .spec-val.white { color: #0F172A; font-weight: 900; }
+    .spec-val small { font-size: 12px; opacity: 0.85; font-weight: 600; margin-left: 4px; }
+    .spec-subtext {
+      font-size: 13px;
+      color: #94A3B8;
+      line-height: 1.4;
+      font-style: italic;
+    }
+
+    /* MATERIALS & APPARATUS KIT */
+    .apparatus-materials-panel {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .materials-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #E2E8F0;
+      padding-bottom: 8px;
+    }
+    .materials-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      color: #38BDF8;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .materials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+    .material-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .material-icon {
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .material-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .material-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: #0F172A;
+    }
+    .material-role {
+      font-size: 12px;
+      color: #94A3B8;
+      line-height: 1.35;
+    }
+
+    .schematic-wrap {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1.5px solid #94A3B8;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+    .btn-toggle-schematic {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: #38BDF8;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-toggle-schematic:hover {
+      background: rgba(56, 189, 248, 0.25);
+      border-color: #38BDF8;
+    }
+
+    /* FULLSCREEN COUNTDOWN OVERLAY */
+    .fullscreen-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(6, 9, 19, 0.97);
+      backdrop-filter: blur(20px);
+      z-index: 99999;
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .fullscreen-overlay.active {
+      display: flex;
+    }
+
+    .countdown-text {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--gold);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .countdown-big-num {
+      font-size: 180px;
+      font-family: var(--font-mono);
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 50px var(--cyan);
+    }
+  
+  /* =========================================================
+     COMPREHENSIVE ACADEMIC AP PHYSICS LAB REPORT PRINT STYLES
+     ========================================================= */
+  @media print {
+    @page {
+      size: letter portrait;
+      margin: 0 !important;
+    }
+    
+    * {
+      animation: none !important;
+      transition: none !important;
+      box-sizing: border-box !important;
+    }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #FFFFFF !important;
+      color: #0F172A !important;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+      font-size: 13.5px !important;
+      line-height: 1.4 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body > canvas {
+      display: none !important;
+    }
+
+    .container {
+      max-width: 100% !important;
+      padding: 10mm 14mm !important;
+      margin: 0 auto !important;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* SCREEN-ONLY CLUTTER PURGE                                     */
+    /* ------------------------------------------------------------- */
+    .sticky-progress,
+    .station-modal-overlay,
+    .fullscreen-overlay,
+    .btn-fbd-tool,
+    .btn-graph-tool,
+    .btn-next-step,
+    .btn-export-pdf,
+    .btn-submit-lab,
+    .btn-unlock-station,
+    .lock-banner,
+    .target-locked-state,
+    #targetRangeLockedState,
+    #daveSpeechBubble,
+    .hud-hero,
+    .mission-briefing-card,
+    audio,
+    button,
+    .save-indicator,
+    .axis-preset-chip,
+    .btn-toggle-schematic,
+    .apparatus-materials-panel,
+    .lock-indicator,
+    .lock-badge,
+    .graph-instructions-box,
+    .graph-toolbar,
+    .fbd-tools,
+    #btnToggleSchematic,
+    #pinErrorBanner,
+    #btnDownloadCert,
+    .spec-subtext,
+    .fbd-box p,
+    .lol-builder p,
+    #daveDialogue,
+    .dave-orb,
+    .spec-header,
+    .quick-chip-row,
+    .axis-header,
+    .btn-check-reveal,
+    #btnClampCheck {
+      display: none !important;
+    }
+
+    /* ------------------------------------------------------------- */
+    /* UNIVERSAL SECTION CARDS & UNROLLING                           */
+    /* ------------------------------------------------------------- */
+    .lab-header-card,
+    .section-card {
+      display: block !important;
+      opacity: 1 !important;
+      max-height: none !important;
+      overflow: visible !important;
+      border: 1.5px solid #CBD5E1 !important;
+      border-radius: 8px !important;
+      background: #FFFFFF !important;
+      box-shadow: none !important;
+      margin-bottom: 12px !important;
+      padding: 12px 16px !important;
+    }
+
+    .section-card.locked {
+      max-height: none !important;
+      overflow: visible !important;
+      opacity: 1 !important;
+    }
+
+    .section-card .section-body,
+    .section-card.locked .section-body {
+      display: block !important;
+      opacity: 1 !important;
+      transform: none !important;
+      visibility: visible !important;
+      max-height: none !important;
+      overflow: visible !important;
+    }
+
+    .section-header-row {
+      margin-bottom: 8px !important;
+    }
+
+    .section-title {
+      font-size: 16px !important;
+      font-weight: 900 !important;
+      color: #0F172A !important;
+      border-bottom: 1.5px solid #E2E8F0 !important;
+      padding-bottom: 5px !important;
+      margin-bottom: 8px !important;
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    }
+
+    .section-num {
+      font-size: 13px !important;
+      padding: 3px 8px !important;
+      background: #0284C7 !important;
+      color: #FFFFFF !important;
+      border-radius: 4px !important;
+      font-weight: 800 !important;
+    }
+
+    .field-lbl {
+      font-size: 13px !important;
+      font-weight: 800 !important;
+      color: #334155 !important;
+      margin-bottom: 3px !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.03em !important;
+    }
+
+    input, textarea, select {
+      border: 1.5px solid #94A3B8 !important;
+      background: #FFFFFF !important;
+      color: #0F172A !important;
+      font-size: 13.5px !important;
+      font-weight: 700 !important;
+      padding: 5px 8px !important;
+      border-radius: 5px !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+
+    textarea {
+      resize: none !important;
+      line-height: 1.35 !important;
+    }
+
+    /* ============================================================= */
+    /* PAGE 1: HEADER & COMPLETE APPARATUS SETUP REFERENCE           */
+    /* ============================================================= */
+    .lab-header-card {
+      border: 2px solid #0F172A !important;
+      margin-bottom: 12px !important;
+      padding: 14px 18px !important;
+    }
+
+    .top-meta-row {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      margin-bottom: 8px !important;
+    }
+
+    .lab-title-group h1 {
+      font-size: 20px !important;
+      font-weight: 900 !important;
+      color: #0F172A !important;
+      margin: 0 !important;
+      line-height: 1.2 !important;
+    }
+
+    .tag-course {
+      font-size: 13px !important;
+      padding: 3px 8px !important;
+      background: #0284C7 !important;
+      color: #FFFFFF !important;
+      border-radius: 4px !important;
+      font-weight: 800 !important;
+    }
+
+    .station-badge-locked {
+      font-size: 14px !important;
+      font-weight: 800 !important;
+      color: #0F172A !important;
+      background: #F1F5F9 !important;
+      border: 1.5px solid #CBD5E1 !important;
+      padding: 4px 12px !important;
+      border-radius: 6px !important;
+    }
+
+    .crew-inputs-grid {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 10px !important;
+      margin-top: 6px !important;
+    }
+
+    .crew-inputs-grid input {
+      height: 34px !important;
+      font-size: 13.5px !important;
+      padding: 4px 8px !important;
+    }
+
+    /* Apparatus Card */
+    #sec_apparatus {
+      margin-bottom: 0 !important;
+      padding: 16px 20px !important;
+      page-break-after: always !important;
+      break-after: page !important;
+    }
+
+    #sec_apparatus .section-title {
+      font-size: 17px !important;
+      margin-bottom: 12px !important;
+      padding-bottom: 6px !important;
+    }
+
+    #apparatusCardBody {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+    }
+
+    .apparatus-specs-grid {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px 16px !important;
+      margin-bottom: 6px !important;
+    }
+
+    .spec-card {
+      min-height: 0 !important;
+      height: auto !important;
+      padding: 8px 12px !important;
+      background: #F8FAFC !important;
+      border: 1.5px solid #E2E8F0 !important;
+      border-radius: 6px !important;
+    }
+
+    .spec-item {
+      font-size: 13px !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+      white-space: nowrap !important;
+      gap: 10px !important;
+    }
+
+    .spec-label {
+      font-size: 13px !important;
+      font-weight: 800 !important;
+    }
+
+    .spec-val {
+      font-size: 14px !important;
+      font-weight: 900 !important;
+    }
+
+    .spec-val.cyan { color: #0284C7 !important; }
+    .spec-val.gold { color: #D97706 !important; }
+    .spec-val.white { color: #0F172A !important; }
+    .spec-val.emerald { color: #059669 !important; }
+
+    .schematic-wrap {
+      margin: 6px 0 0 0 !important;
+      padding: 8px !important;
+      border: 1.5px solid #E2E8F0 !important;
+      border-radius: 6px !important;
+      background: #FFFFFF !important;
+    }
+
+    .schematic-wrap svg {
+      max-height: 250px !important;
+      height: 240px !important;
+      width: 100% !important;
+      display: block !important;
+    }
+
+    /* ============================================================= */
+    /* PAGE 2: SECTION 1 (PREDICTIONS: FBD + LOL DIAGRAM)           */
+    /* ============================================================= */
+    #sec_1 {
+      page-break-after: always !important;
+      break-after: page !important;
+      margin-bottom: 0 !important;
+      padding: 16px 20px !important;
+    }
+
+    #sec_1 .section-title {
+      font-size: 17px !important;
+      margin-bottom: 12px !important;
+    }
+
+    .fbd-lol-container {
+      display: grid !important;
+      grid-template-columns: 180px 1fr !important;
+      gap: 16px !important;
+      margin-bottom: 14px !important;
+      align-items: center !important;
+      background: #F8FAFC !important;
+      padding: 12px 14px !important;
+      border: 1.5px solid #E2E8F0 !important;
+      border-radius: 8px !important;
+    }
+
+    .fbd-box {
+      padding: 0 !important;
+      text-align: center !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+
+    .fbd-box > div:first-child {
+      font-size: 13.5px !important;
+      font-weight: 900 !important;
+      color: #0F172A !important;
+    }
+
+    .canvas-fat-dot-wrap {
+      width: 160px !important;
+      height: 160px !important;
+      margin: 0 auto !important;
+      border: 2px solid #CBD5E1 !important;
+      border-radius: 8px !important;
+      background: #FFFFFF !important;
+    }
+
+    .canvas-fat-dot-wrap canvas {
+      width: 160px !important;
+      height: 160px !important;
+      display: block !important;
+    }
+
+    .lol-builder {
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 6px !important;
+      min-width: 0 !important;
+    }
+
+    .lol-builder > div:first-child {
+      font-size: 13.5px !important;
+      font-weight: 900 !important;
+      text-align: center !important;
+      color: #0F172A !important;
+    }
+
+    .lol-panels {
+      display: grid !important;
+      grid-template-columns: 140px 75px 185px !important;
+      gap: 8px !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .lol-grid-card {
+      padding: 8px 10px !important;
+      border: 1.5px solid #CBD5E1 !important;
+      border-radius: 6px !important;
+      background: #FFFFFF !important;
+      box-sizing: border-box !important;
+    }
+
+    .lol-grid-card-title {
+      font-size: 12.5px !important;
+      font-weight: 900 !important;
+      text-align: center !important;
+      margin-bottom: 6px !important;
+      white-space: nowrap !important;
+    }
+
+    .bars-draw-area {
+      height: 85px !important;
+      display: flex !important;
+      justify-content: center !important;
+      gap: 8px !important;
+    }
+
+    .bar-column {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+    }
+
+    .bar-label {
+      font-size: 13px !important;
+      font-weight: 900 !important;
+      margin-top: 4px !important;
+    }
+
+    .bar-stack {
+      height: 70px !important;
+      width: 20px !important;
+      display: flex !important;
+      flex-direction: column-reverse !important;
+      border: 1.5px solid #94A3B8 !important;
+      border-radius: 3px !important;
+      background: #F8FAFC !important;
+      overflow: hidden !important;
+    }
+
+    .cell-box {
+      height: 14px !important;
+      border-bottom: 1px solid #CBD5E1 !important;
+    }
+
+    .cell-box.active {
+      background: #10B981 !important;
+    }
+
+    .system-circle-box {
+      padding: 0 !important;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      gap: 6px !important;
+    }
+
+    .system-circle {
+      width: 70px !important;
+      height: 70px !important;
+      border: 2px solid #0284C7 !important;
+      border-radius: 50% !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+      background: #FFFFFF !important;
+      overflow: hidden !important;
+      padding: 2px !important;
+    }
+
+    .system-circle input {
+      background: transparent !important;
+      border: none !important;
+      border-bottom: 1px dashed #CBD5E1 !important;
+      height: 15px !important;
+      width: 46px !important;
+      font-size: 10.5px !important;
+      text-align: center !important;
+      padding: 0 !important;
+      margin: 1px 0 !important;
+    }
+
+    #sec_1 .section-body > div:last-child {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 10px !important;
+      margin-top: 12px !important;
+    }
+
+    #sec_1 textarea {
+      height: 50px !important;
+      font-size: 13.5px !important;
+    }
+
+    /* ============================================================= */
+    /* PAGE 3: SECTION 2 (TABLE) & SECTION 3 (MILLIMETER GRAPH)      */
+    /* ============================================================= */
+    #sec_2 {
+      margin-bottom: 8px !important;
+      padding: 8px 14px !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    #sec_2 .section-header-row {
+      margin-bottom: 4px !important;
+    }
+
+    #sec_2 .section-title {
+      margin-bottom: 4px !important;
+      padding-bottom: 3px !important;
+    }
+
+    #sec_2 p {
+      font-size: 12.5px !important;
+      margin: 2px 0 4px 0 !important;
+      color: #475569 !important;
+    }
+
+    .worksheet-table {
+      width: 100% !important;
+      border-collapse: collapse !important;
+      margin: 2px 0 !important;
+    }
+
+    .worksheet-table th, .worksheet-table td {
+      padding: 3px 6px !important;
+      font-size: 12.5px !important;
+      border: 1.5px solid #0F172A !important;
+      text-align: center !important;
+    }
+
+    .worksheet-table th {
+      background: #F1F5F9 !important;
+      font-weight: 900 !important;
+    }
+
+    .worksheet-table input {
+      font-size: 13px !important;
+      padding: 2px 4px !important;
+      height: 24px !important;
+      width: 90% !important;
+      text-align: center !important;
+    }
+
+    .auto-squared-cell {
+      font-size: 13.5px !important;
+      font-weight: 900 !important;
+      color: #0284C7 !important;
+    }
+
+    #sec_3 {
+      page-break-after: always !important;
+      break-after: page !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+      margin-bottom: 0 !important;
+      padding: 8px 14px !important;
+    }
+
+    #sec_3 .section-header-row {
+      margin-bottom: 4px !important;
+    }
+
+    #sec_3 .section-title {
+      margin-bottom: 4px !important;
+      padding-bottom: 3px !important;
+    }
+
+    .axis-config-panel {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+      margin-bottom: 4px !important;
+    }
+
+    .axis-input-card {
+      padding: 3px 6px !important;
+      border: 1px solid #CBD5E1 !important;
+      background: #F8FAFC !important;
+      border-radius: 4px !important;
+    }
+
+    .axis-field-box input {
+      height: 24px !important;
+      font-size: 12.5px !important;
+      padding: 2px 6px !important;
+    }
+
+    .canvas-container {
+      height: 200px !important;
+      max-height: 200px !important;
+      margin: 3px 0 !important;
+      padding: 0 !important;
+      border: 1.5px solid #CBD5E1 !important;
+      border-radius: 6px !important;
+      background: #FFFFFF !important;
+    }
+
+    #studentGraphSvg {
+      height: 200px !important;
+      max-height: 200px !important;
+      width: 100% !important;
+      display: block !important;
+    }
+
+    .equation-telemetry-card {
+      background: #F8FAFC !important;
+      border: 1.5px solid #CBD5E1 !important;
+      padding: 5px 8px !important;
+      margin-top: 4px !important;
+      margin-bottom: 4px !important;
+      border-radius: 5px !important;
+    }
+
+    .equation-telemetry-top {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
+    }
+
+    .eq-big-formula {
+      font-size: 14px !important;
+      font-weight: 900 !important;
+      color: #0284C7 !important;
+    }
+
+    .slope-triangle-details {
+      font-size: 11.5px !important;
+      color: #475569 !important;
+      margin-top: 2px !important;
+    }
+
+    /* Calibrated line parameters row */
+    #sec_3 .section-body > div:last-child {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 8px !important;
+    }
+
+    #sec_3 .section-body > div:last-child input {
+      height: 24px !important;
+      font-size: 12.5px !important;
+    }
+
+    /* ============================================================= */
+    /* PAGE 4: SECTION 4 & SECTION 5 (ENERGY & TARGET INVERSION)     */
+    /* ============================================================= */
+    #sec_4, #sec_5 {
+      margin-bottom: 14px !important;
+      padding: 14px 18px !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    #sec_5 {
+      page-break-after: always !important;
+      break-after: page !important;
+      margin-bottom: 0 !important;
+    }
+
+    /* Section 4: Energy Check */
+    .energy-formula-card {
+      font-size: 13px !important;
+      background: #F8FAFC !important;
+      border: 1.5px solid #CBD5E1 !important;
+      padding: 8px 12px !important;
+      margin-bottom: 8px !important;
+    }
+
+    #sec_4 p {
+      font-size: 13px !important;
+      margin: 4px 0 8px 0 !important;
+      line-height: 1.4 !important;
+    }
+
+    .calc-row {
+      margin-top: 6px !important;
+      font-size: 13.5px !important;
+    }
+
+    .inline-input-group input {
+      height: 28px !important;
+      font-size: 13.5px !important;
+      width: 60px !important;
+    }
+
+    #sec_4 textarea {
+      height: 55px !important;
+      font-size: 13.5px !important;
+      margin-top: 6px !important;
+    }
+
+    /* Section 5: Target Inversion */
+    #targetRangeUnlockedState {
+      display: block !important;
+      background: #ECFDF5 !important;
+      border: 1.5px solid #059669 !important;
+      padding: 10px 14px !important;
+      margin-bottom: 10px !important;
+      border-radius: 6px !important;
+    }
+
+    #targetRangeUnlockedState div {
+      font-size: 14px !important;
+      line-height: 1.3 !important;
+    }
+
+    #sec_5 .inversion-work-area > div:nth-child(3) {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr !important;
+      gap: 12px !important;
+      margin-top: 8px !important;
+    }
+
+    #inversionV2Req, #inversionCalcH {
+      height: 32px !important;
+      font-size: 13.5px !important;
+    }
+
+    #inversionWorkText {
+      height: 60px !important;
+      font-size: 13.5px !important;
+      margin-top: 6px !important;
+    }
+
+    #sec_5 .inversion-work-area > div:last-child {
+      margin-top: 8px !important;
+    }
+
+    #safeRangeStatus {
+      font-size: 13.5px !important;
+    }
+
+    /* ============================================================= */
+    /* PAGE 5: SECTION 6 & SECTION 7 (VERIFY & EXIT REFLECTION)      */
+    /* ============================================================= */
+    #sec_6, #sec_7 {
+      margin-bottom: 14px !important;
+      padding: 14px 18px !important;
+      page-break-inside: avoid !important;
+      break-inside: avoid !important;
+    }
+
+    #sec_7 {
+      margin-bottom: 0 !important;
+    }
+
+    /* Section 6: Verification */
+    #sec_6 .section-body > div:first-child {
+      display: grid !important;
+      grid-template-columns: repeat(5, 1fr) !important;
+      gap: 8px !important;
+    }
+
+    #sec_6 .field-lbl {
+      font-size: 12px !important;
+    }
+
+    #sec_6 input {
+      height: 30px !important;
+      font-size: 13px !important;
+      padding: 4px 6px !important;
+    }
+
+    #stuntSuccessBanner {
+      display: block !important;
+      background: #ECFDF5 !important;
+      border: 1.5px solid #059669 !important;
+      padding: 8px 12px !important;
+      margin-top: 10px !important;
+      text-align: center !important;
+      border-radius: 6px !important;
+    }
+
+    #stuntSuccessBanner h3 {
+      font-size: 15px !important;
+      color: #059669 !important;
+      margin: 0 !important;
+    }
+
+    #stuntSuccessBanner p {
+      font-size: 12.5px !important;
+      color: #334155 !important;
+      margin: 2px 0 0 0 !important;
+    }
+
+    /* Section 7: Exit Answers & Instructor Evaluation */
+    #officialGradeCard {
+      display: block !important;
+      background: #ECFDF5 !important;
+      border: 2px solid #059669 !important;
+      padding: 12px 16px !important;
+      margin-bottom: 12px !important;
+      border-radius: 8px !important;
+      text-align: center !important;
+    }
+
+    #officialGradeCard div {
+      font-size: 12.5px !important;
+    }
+
+    #officialGradeCard h3 {
+      font-size: 18px !important;
+      margin: 4px 0 !important;
+      color: #059669 !important;
+    }
+
+    #gradeFeedbackDisplay {
+      font-size: 13px !important;
+      color: #334155 !important;
+      margin: 0 !important;
+    }
+
+    #exitStudentName {
+      height: 32px !important;
+      font-size: 13.5px !important;
+    }
+
+    #sec_7 .section-body > div {
+      gap: 10px !important;
+    }
+
+    #sec_7 textarea {
+      height: 55px !important;
+      font-size: 13.5px !important;
+    }
+  }
+
+  .print-only-header {
+    display: none;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- STATION LOCK CHECK-IN MODAL (SAFEGUARD AGAINST WRONG STATIONS) -->
+<div class="station-modal-overlay" id="stationModal">
+  <div class="station-modal-card" id="stationModalCard">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+      <span style="font-size: 26px;">🛰️</span>
+      <span style="font-size: 13px; font-weight: 900; color: var(--cyan); letter-spacing: 0.16em; text-transform: uppercase;">
+        Apparatus Telemetry Check-in
+      </span>
+    </div>
+    <h2 style="font-size: 26px; font-weight: 900; color: #0F172A; margin-top: -6px;">Calibrate Bench Station</h2>
+    <p style="font-size: 16px; color: var(--text-muted); line-height: 1.55;">
+      Each station is locked to its own physical track apparatus. Enter the 4-digit security PIN physically engraved on your station clamp block:
+    </p>
+
+    <div style="text-align: left;">
+      <label class="field-lbl">Station Selection:</label>
+      <select id="modalStationSelect">
+        <option value="station_1">⚡ Station 1: Speed Demons</option>
+        <option value="station_2">🎯 Station 2: Vector Vanguard</option>
+        <option value="station_3">⚛️ Station 3: Quantum Riders</option>
+        <option value="station_4">🔥 Station 4: Apex Phoenix</option>
+      </select>
+    </div>
+
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; margin: 6px 0; text-align: center;">
+      <label class="field-lbl" style="text-align: center; margin-bottom: 0;">Station Security PIN:</label>
+      <input type="password" id="modalStationPin" maxlength="4" inputmode="numeric" placeholder="••••" style="font-size: 34px; text-align: center; letter-spacing: 0.4em; width: 220px; padding: 12px 14px; border-radius: 12px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; box-shadow: 0 1px 3px rgba(0,0,0,0.06); outline: none;" />
+      <span style="font-size: 13.5px; color: var(--text-muted);">🔑 Enter the 4-digit PIN found on your physical lab station bench block</span>
+      <div id="pinErrorBanner" style="display: none; color: var(--crimson); font-size: 14.5px; font-weight: 800; background: rgba(244, 63, 94, 0.15); border: 1px solid var(--crimson); padding: 8px 16px; border-radius: 8px;">
+        ⚠️ Incorrect PIN for selected station! Check your bench block.
+      </div>
+    </div>
+
+    <button class="btn-next-step" style="width: 100%; justify-content: center; font-size: 17px; padding: 14px;" onclick="verifyAndLockStation()">
+      🔒 Verify PIN & Lock Station
+    </button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LAB SHEET HEADER -->
+  <div class="lab-header-card">
+    <div class="top-meta-row">
+      <div class="lab-title-group">
+        <span class="tag-course">AP Physics 1</span>
+        <h1>LAB: Stunt Calibration • Official Lab Sheet</h1>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <div class="save-indicator" id="saveIndicator" style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: #059669; background: #ECFDF5; border: 1.5px solid #10B981; padding: 5px 12px; border-radius: 20px;">
+          <span>💾</span> <span id="saveStatusTxt">Auto-Saved</span>
+        </div>
+        <button type="button" class="btn-export-pdf" onclick="exportWorksheetAsPdf()" style="background: #2563EB; color: white; border: none; padding: 7px 16px; border-radius: 6px; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(37,99,235,0.25);" title="Print or save complete lab worksheet as PDF">
+          <span>📄</span> Export PDF
+        </button>
+        <div class="station-badge-locked" id="activeStationDisplay">
+          🔒 <span id="stationDisplayTxt">Station 1: Speed Demons</span>
+          <button class="btn-unlock-station" onclick="promptSwitchStation()" title="Requires Teacher PIN">Switch</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="crew-inputs-grid">
+      <div>
+        <label class="field-lbl">Releaser:</label>
+        <input type="text" id="crewReleaser" placeholder="Student Name" oninput="saveAndSync()" />
+      </div>
+      <div>
+        <label class="field-lbl">Measurer:</label>
+        <input type="text" id="crewMeasurer" placeholder="Student Name" oninput="saveAndSync()" />
+      </div>
+      <div>
+        <label class="field-lbl">Data Scribe:</label>
+        <input type="text" id="crewScribe" placeholder="Student Name" oninput="saveAndSync()" />
+      </div>
+      <div>
+        <label class="field-lbl">Quality Checker:</label>
+        <input type="text" id="crewChecker" placeholder="Student Name" oninput="saveAndSync()" />
+      </div>
+    </div>
+  </div>
+
+  <!-- DAVE AVATAR & PROGRESS HUD -->
+  <div class="hud-hero">
+    <div class="dave-orb">
+      <div class="dave-strap"></div>
+      <div class="dave-shades"></div>
+    </div>
+
+    <div class="hud-speech">
+      <div class="dave-bubble" id="daveDialogue">
+        <strong>Dave:</strong> "Welcome crew! 4 stations are competing for the Lead Stunt Physics Coordinator contract on Scene 42. Calibrate your track, calculate the exact release height <i>h</i>*, and hit the Director's surprise target range when revealed!"
+      </div>
+
+      <div class="progress-wrap">
+        <div class="progress-bar">
+          <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <span class="progress-pct" id="progressPct">14%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MISSION OBJECTIVE & STUNT CONTRACT BRIEFING -->
+  <div class="mission-briefing-card">
+    <div class="mission-badge-strip">
+      <span class="mission-kicker">🎬 Hollywood Action Sequence • Scene 42</span>
+      <span class="contract-trophy">🏆 Lead Stunt Physics Coordinator Contract</span>
+    </div>
+    <div class="mission-body">
+      <h2 class="mission-title">The Challenge: 4 Station Crews • One Take • Zero Guesswork</h2>
+      <p class="mission-narrative" style="margin-top: 8px;">
+        Dave's film studio is executing a high-stakes practical action stunt: an inverted vertical loop exit into an airborne projectile flight. <strong>All 4 station crews are competing for the exclusive Lead Stunt Physics Coordinator contract.</strong> The Director will test your calculated release height with a single, unassisted live drop — the crew with the closest landing margin to the target mark wins the contract!
+      </p>
+      <div class="mission-objectives-grid">
+        <div class="obj-step">
+          <span class="obj-num">1</span>
+          <div>
+            <strong>Calibrate Your Station:</strong> Run 4 trial launches across different release heights <i>h</i> and measure ranges <i>X</i>. Plot your group's empirical <i>v</i>² vs. <i>h</i> calibration line.
+          </div>
+        </div>
+        <div class="obj-step">
+          <span class="obj-num">2</span>
+          <div>
+            <strong>Solve the Inversion:</strong> The Director will broadcast a <strong>surprise classified landing range <i>X</i>*</strong> right before your team begins reverse engineering. Algebraically backward-invert your calibration line to determine required <strong><i>h</i>*</strong>!
+          </div>
+        </div>
+        <div class="obj-step">
+          <span class="obj-num">3</span>
+          <div>
+            <strong>The Live Filming Take:</strong> Your team gets exactly <strong>ONE live drop</strong> at your predicted <i>h</i>*. The station whose carbon landing impact is closest to the target line (|<i>X</i><sub>actual</sub> − <i>X</i>*| closest to 0) wins the contract!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- APPARATUS BENCH TELEMETRY & SIDE-VIEW SCHEMATIC CARD -->
+  <!-- ============================================================== -->
+  <div class="section-card unlocked" id="sec_apparatus" style="border-color: var(--card-border); box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+    <div class="section-header-row">
+      <div class="section-title">
+        <span class="section-num">📐 Setup Reference</span> Apparatus Specifications, Materials &amp; Measurement Datums
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="background: rgba(16, 185, 129, 0.15); border: 1.5px solid var(--emerald); color: var(--emerald); font-size: 12.5px; font-weight: 800; padding: 4px 12px; border-radius: 20px;">
+          ✓ Bench Calibrated
+        </span>
+        <button id="btnToggleSchematic" class="btn-toggle-schematic" onclick="toggleApparatusCard()">
+          ▲ Hide Reference
+        </button>
+      </div>
+    </div>
+
+    <div id="apparatusCardBody" style="display: flex; flex-direction: column; gap: 18px;">
+      <!-- 2x2 SYMMETRICAL APPARATUS SPECIFICATIONS GRID -->
+      <div class="apparatus-specs-grid">
+        <!-- TOP-LEFT: REPORTED DIMENSIONS -->
+        <div class="spec-card">
+          <div class="spec-header">
+            <span class="spec-icon">📏</span>
+            <span class="spec-title">Reported Dimensions</span>
+          </div>
+          <div class="spec-content">
+            <div class="spec-item">
+              <span class="spec-label">Loop Diameter (2r):</span>
+              <span class="spec-val cyan">18.4 cm <small>(0.184 m)</small></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOP-RIGHT: WOODEN PLATFORM -->
+        <div class="spec-card">
+          <div class="spec-header">
+            <span class="spec-icon">🪵</span>
+            <span class="spec-title">Wooden Platform</span>
+          </div>
+          <div class="spec-content">
+            <div class="spec-item">
+              <span class="spec-label">Elevation Under Loop:</span>
+              <span class="spec-val gold">3.6 – 3.7 cm</span>
+            </div>
+            <div class="spec-subtext">
+              Riser block placed strictly under loop section
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM-LEFT: CHECKED RELEASE LIMIT -->
+        <div class="spec-card">
+          <div class="spec-header">
+            <span class="spec-icon">🛡️</span>
+            <span class="spec-title">Checked Release Limit</span>
+          </div>
+          <div class="spec-content">
+            <div class="spec-item" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+              <span class="spec-label">Max Safe Release Height <i>h</i>:</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" step="0.001" id="maxSafeH" placeholder="e.g. 0.435" style="width: 120px; text-align: center; font-size: 16px; padding: 4px 8px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="saveAndSync()" />
+                <span style="font-weight: 800; color: #E2E8F0; font-size: 15px;">m</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM-RIGHT: STATION CONSTANTS -->
+        <div class="spec-card">
+          <div class="spec-header">
+            <span class="spec-icon">⚙️</span>
+            <span class="spec-title">Station Constants</span>
+          </div>
+          <div class="spec-content">
+            <div class="spec-item">
+              <span class="spec-label">Track Exit Alignment:</span>
+              <span class="spec-val white">Level Horizontal</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Table Drop Height <i>H</i>:</span>
+              <span class="spec-val emerald" style="font-size: 13.5px;">Measure at Station (Meter Stick)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATION MATERIALS & APPARATUS KIT -->
+      <div class="apparatus-materials-panel">
+        <div class="materials-title-row">
+          <div class="materials-title">
+            <span>🧰</span> Required Station Materials &amp; Apparatus Kit
+          </div>
+          <span style="font-size: 12.5px; color: #94A3B8; font-weight: 600;">Check your physical bench before testing</span>
+        </div>
+        <div class="materials-grid">
+          <div class="material-item">
+            <span class="material-icon">🎢</span>
+            <div class="material-info">
+              <span class="material-name">Stunt Track Apparatus</span>
+              <span class="material-role">Curved ramp, 18.4 cm loop, runway &amp; riser block</span>
+            </div>
+          </div>
+          <div class="material-item">
+            <span class="material-icon">🎱</span>
+            <div class="material-info">
+              <span class="material-name">Solid Steel Ball</span>
+              <span class="material-role">Spherical projectile released from rest</span>
+            </div>
+          </div>
+          <div class="material-item">
+            <span class="material-icon">🪢</span>
+            <div class="material-info">
+              <span class="material-name">Plumb Line &amp; Bob</span>
+              <span class="material-role">Establishes X = 0 launch origin directly on floor</span>
+            </div>
+          </div>
+          <div class="material-item">
+            <span class="material-icon">📏</span>
+            <div class="material-info">
+              <span class="material-name">Ruler &amp; Tape Measure</span>
+              <span class="material-role">Measures release height h, drop H, &amp; range X</span>
+            </div>
+          </div>
+          <div class="material-item">
+            <span class="material-icon">📋</span>
+            <div class="material-info">
+              <span class="material-name">Carbon Paper &amp; Target</span>
+              <span class="material-role">Records ball impact marks on floor</span>
+            </div>
+          </div>
+          <div class="material-item">
+            <span class="material-icon">🪑</span>
+            <div class="material-info">
+              <span class="material-name">Lab Desk &amp; C-Clamp</span>
+              <span class="material-role">Level bench surface supporting stunt track</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCHEMATIC DIAGRAM: CLEAN PDF DRAFTING SCHEMATIC -->
+      <div class="schematic-wrap">
+        <svg class="apparatus-diagram" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 215" role="img" aria-label="Side view schematic of stunt setup showing release height h, drop height H, horizontal range X, and wooden platform on table" style="display:block;width:100%;height:auto;">
+          <defs>
+            <marker id="arr-vel-clean" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 1 2 L 8 5 L 1 8 z" fill="#2563EB"/>
+            </marker>
+            <pattern id="table-hatch-clean" width="8" height="8" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="0" x2="0" y2="8" stroke="#CBD5E1" stroke-width="1.2"/>
+            </pattern>
+          </defs>
+
+          <!-- Canvas Border & Title Strip -->
+          <rect x="0" y="0" width="680" height="215" rx="3" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1"/>
+          <rect x="0" y="0" width="680" height="26" rx="3" fill="#F8FAFC" stroke="#94A3B8" stroke-width="0.8"/>
+          <text x="14" y="18" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#0F172A" letter-spacing="0.04em" text-anchor="start">APPARATUS SCHEMATIC: SIDE VIEW &amp; MEASUREMENT DATUMS</text>
+
+          <!-- ================= BASELINE FLOOR (y = 175) ================= -->
+          <line x1="10" y1="175" x2="670" y2="175" stroke="#1E293B" stroke-width="2" stroke-linecap="round"/>
+          <!-- Floor hatch ticks -->
+          <path d="M 15 175 l -5 5 M 45 175 l -5 5 M 75 175 l -5 5 M 105 175 l -5 5 M 135 175 l -5 5 M 165 175 l -5 5 M 195 175 l -5 5 M 225 175 l -5 5 M 255 175 l -5 5 M 285 175 l -5 5 M 315 175 l -5 5 M 345 175 l -5 5 M 375 175 l -5 5 M 405 175 l -5 5 M 435 175 l -5 5 M 465 175 l -5 5 M 495 175 l -5 5 M 525 175 l -5 5 M 555 175 l -5 5 M 585 175 l -5 5 M 615 175 l -5 5 M 645 175 l -5 5" stroke="#94A3B8" stroke-width="0.9"/>
+          <text x="670" y="193" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="600" fill="#475569" text-anchor="end">Floor Level (y = 0)</text>
+
+          <!-- ================= LAB TABLE (Top at y = 130, Legs down to y = 175) ================= -->
+          <rect x="112" y="137" width="12" height="38" fill="#F1F5F9" stroke="#475569" stroke-width="1.2"/>
+          <rect x="112" y="137" width="12" height="38" fill="url(#table-hatch-clean)"/>
+          <rect x="248" y="137" width="12" height="38" fill="#F1F5F9" stroke="#475569" stroke-width="1.2"/>
+          <rect x="248" y="137" width="12" height="38" fill="url(#table-hatch-clean)"/>
+          <!-- Tabletop Solid Slab -->
+          <rect x="88" y="130" width="272" height="7" rx="1" fill="#E2E8F0" stroke="#334155" stroke-width="1.3"/>
+          <rect x="140" y="142" width="70" height="15" rx="3" fill="#FFFFFF" stroke="#94A3B8" stroke-width="0.8"/>
+          <text x="175" y="153" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#475569" text-anchor="middle">Lab Table</text>
+
+          <!-- ================= WOODEN PLATFORM (STRICTLY UNDER LOOP: x = 185 to 295, y = 117 to 130) ================= -->
+          <rect x="185" y="117" width="110" height="13" rx="2" fill="#FEF3C7" stroke="#B45309" stroke-width="1.3"/>
+          <line x1="188" y1="123" x2="292" y2="123" stroke="#FDE68A" stroke-width="1.0" stroke-dasharray="10,4,15,4"/>
+          <text x="240" y="126.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="700" fill="#92400E" text-anchor="middle">Wooden Riser (3.6–3.7 cm)</text>
+
+          <!-- Platform Height Dimension Bracket -->
+          <line x1="174" y1="117" x2="174" y2="130" stroke="#B45309" stroke-width="1.3"/>
+          <polygon points="174,117 171.5,121 176.5,121" fill="#B45309"/>
+          <polygon points="174,130 171.5,126 176.5,126" fill="#B45309"/>
+          <text x="169" y="125.5" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="8.5" font-weight="700" fill="#B45309" text-anchor="end">3.7 cm</text>
+
+          <!-- ================= APPARATUS TRACK (MATHEMATICALLY CONTINUOUS & TANGENT) ================= -->
+          <!-- Support Stand under Ramp -->
+          <rect x="102" y="38" width="5" height="92" fill="#64748B" stroke="#334155" stroke-width="1"/>
+          <rect x="98" y="127" width="13" height="3" fill="#334155"/>
+
+          <!-- CONTINUOUS RAMP -->
+          <path d="M 105 38 C 125 90, 175 117, 240 117" fill="none" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>
+
+          <!-- CENTRIPETAL LOOP -->
+          <circle cx="240" cy="91" r="26" fill="none" stroke="#0F172A" stroke-width="3"/>
+
+          <!-- Circulation arrow on loop apex -->
+          <path d="M 235 65 A 26 26 0 0 1 247 66" fill="none" stroke="#2563EB" stroke-width="2.2" marker-end="url(#arr-vel-clean)"/>
+
+          <!-- HORIZONTAL RUNWAY -->
+          <line x1="240" y1="117" x2="375" y2="117" stroke="#0F172A" stroke-width="3" stroke-linecap="round"/>
+
+          <!-- Loop Diameter Annotation -->
+          <line x1="240" y1="65" x2="240" y2="117" stroke="#64748B" stroke-width="0.9" stroke-dasharray="2.5,2.5"/>
+          <circle cx="240" cy="91" r="2" fill="#64748B"/>
+          <polyline points="240,91 262,68 275,68" fill="none" stroke="#64748B" stroke-width="0.9"/>
+          <rect x="275" y="58" width="126" height="20" rx="3" fill="#FFFFFF" stroke="#94A3B8" stroke-width="0.8"/>
+          <text x="338" y="72" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#0F172A" text-anchor="middle">Loop diameter 18.4 cm</text>
+
+          <!-- ================= RELEASE POINT & BALL ================= -->
+          <circle cx="105" cy="38" r="5" fill="#D97706" stroke="#0F172A" stroke-width="1.3"/>
+          <line x1="111" y1="38" x2="118" y2="38" stroke="#94A3B8" stroke-width="1"/>
+          <rect x="118" y="28" width="114" height="20" rx="3" fill="#FFFFFF" stroke="#94A3B8" stroke-width="0.8"/>
+          <text x="175" y="42" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#0F172A" text-anchor="middle">Release Point (h)</text>
+
+          <!-- ================= TRACK EXIT & LAUNCH VELOCITY ================= -->
+          <circle cx="375" cy="117" r="4.5" fill="#2563EB" stroke="#0F172A" stroke-width="1.2"/>
+          <line x1="381" y1="117" x2="415" y2="117" stroke="#2563EB" stroke-width="2.2" marker-end="url(#arr-vel-clean)"/>
+          <rect x="382" y="95" width="50" height="18" rx="3" fill="#FFFFFF" stroke="#2563EB" stroke-width="0.9"/>
+          <text x="407" y="108" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#2563EB" text-anchor="middle">Exit v</text>
+
+          <!-- ================= PLUMB LINE ================= -->
+          <line x1="375" y1="120" x2="375" y2="175" stroke="#DC2626" stroke-width="1.4" stroke-dasharray="3.5,2.5"/>
+          <circle cx="375" cy="175" r="2.5" fill="#DC2626"/>
+          <rect x="270" y="146" width="98" height="20" rx="3" fill="#FFFFFF" stroke="#DC2626" stroke-width="0.9"/>
+          <text x="319" y="160" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#B91C1C" text-anchor="middle">Plumb Line (X = 0)</text>
+
+          <!-- ================= PROJECTILE FLIGHT PARABOLA ================= -->
+          <path d="M 375 117 Q 470 117 565 175" fill="none" stroke="#2563EB" stroke-width="2" stroke-dasharray="5,4"/>
+          <circle cx="565" cy="175" r="4.5" fill="#2563EB" stroke="#0F172A" stroke-width="1.2"/>
+
+          <!-- Carbon Paper & Target Pad on Floor -->
+          <rect x="530" y="172" width="70" height="3" fill="#1E293B" stroke="#0F172A" stroke-width="0.8"/>
+          <rect x="525" y="175" width="80" height="2" fill="#FFFFFF" stroke="#94A3B8" stroke-width="0.5"/>
+          <rect x="515" y="142" width="124" height="20" rx="3" fill="#FFFFFF" stroke="#475569" stroke-width="0.8"/>
+          <text x="577" y="156" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#334155" text-anchor="middle">Carbon Paper Target</text>
+
+          <!-- ================= DIMENSION LINES (h, H, X - NO NUMERICAL SPOILERS) ================= -->
+          <!-- 1. Height h: vertical release height above exit level -->
+          <line x1="38" y1="38" x2="99" y2="38" stroke="#64748B" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <line x1="38" y1="117" x2="95" y2="117" stroke="#64748B" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <line x1="42" y1="46" x2="42" y2="109" stroke="#334155" stroke-width="1.4"/>
+          <polygon points="42,38 38.5,47 45.5,47" fill="#334155"/>
+          <polygon points="42,117 38.5,108 45.5,108" fill="#334155"/>
+          <rect x="30" y="69" width="24" height="18" fill="#FFFFFF" stroke="#94A3B8" stroke-width="0.5"/>
+          <text x="42" y="83" font-family="'Times New Roman', Times, serif" font-size="14" font-weight="bold" font-style="italic" fill="#0F172A" text-anchor="middle">h</text>
+
+          <!-- 2. Drop Height H: vertical drop from exit level to floor (NO HARDCODED VALUE) -->
+          <line x1="375" y1="117" x2="455" y2="117" stroke="#64748B" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <line x1="375" y1="175" x2="455" y2="175" stroke="#64748B" stroke-width="0.8" stroke-dasharray="3,3"/>
+          <line x1="448" y1="125" x2="448" y2="167" stroke="#334155" stroke-width="1.4"/>
+          <polygon points="448,117 444.5,126 451.5,126" fill="#334155"/>
+          <polygon points="448,175 444.5,166 451.5,166" fill="#334155"/>
+          <rect x="436" y="137" width="24" height="18" fill="#FFFFFF" stroke="#94A3B8" stroke-width="0.5"/>
+          <text x="448" y="151" font-family="'Times New Roman', Times, serif" font-size="14" font-weight="bold" font-style="italic" fill="#0F172A" text-anchor="middle">H</text>
+
+          <!-- 3. Horizontal Range X: along floor from plumb line to impact mark -->
+          <line x1="375" y1="175" x2="375" y2="201" stroke="#64748B" stroke-width="0.8" stroke-dasharray="2,2"/>
+          <line x1="565" y1="175" x2="565" y2="201" stroke="#64748B" stroke-width="0.8" stroke-dasharray="2,2"/>
+          <line x1="383" y1="196" x2="557" y2="196" stroke="#334155" stroke-width="1.4"/>
+          <polygon points="375,196 384,192.5 384,199.5" fill="#334155"/>
+          <polygon points="565,196 556,192.5 556,199.5" fill="#334155"/>
+          <rect x="458" y="187" width="24" height="18" fill="#FFFFFF" stroke="#94A3B8" stroke-width="0.5"/>
+          <text x="470" y="201" font-family="'Times New Roman', Times, serif" font-size="14" font-weight="bold" font-style="italic" fill="#0F172A" text-anchor="middle">X</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="section-card unlocked" id="sec_1">
+    <div class="section-header-row">
+      <div class="section-title">
+        <span class="section-num">Section 1</span> Predict Before Rehearsal: Forces & LOL Energy Chart
+      </div>
+      <span class="lock-indicator">🔒 Locked</span>
+    </div>
+
+    <div class="section-body">
+      <div class="fbd-lol-container">
+        <!-- CANVAS FBD (THE FAT DOT DRAWING ENGINE) -->
+        <div class="fbd-box">
+          <div style="font-size: 15.5px; font-weight: 900; color: #0F172A; text-align: center;">
+            FREE-BODY DIAGRAM AT APEX
+          </div>
+          <p style="font-size: 13.5px; color: var(--text-muted); text-align: center;">
+            Click the <strong>fat dot</strong> and drag downward to draw force vectors (<i>F</i><sub>g</sub>, <i>F</i><sub>N</sub>).
+          </p>
+
+          <div class="canvas-fat-dot-wrap">
+            <canvas id="fbdCanvas" width="260" height="260"></canvas>
+          </div>
+
+          <div class="fbd-tools">
+            <button class="btn-fbd-tool" onclick="clearFbdCanvas()">↺ Clear Arrows</button>
+            <button class="btn-fbd-tool" onclick="addApexVector('Fg (mg)')">+ Add Fg</button>
+            <button class="btn-fbd-tool" onclick="addApexVector('Fn (Normal)')">+ Add Fn</button>
+          </div>
+        </div>
+
+        <!-- INTERACTIVE LOL ENERGY DIAGRAM BUILDER -->
+        <div class="lol-builder">
+          <div style="font-size: 15.5px; font-weight: 900; color: #0F172A;">
+            CONSTRUCT LOL ENERGY CHART
+          </div>
+          <p style="font-size: 13.5px; color: var(--text-muted);">
+            Click each vertical stack to draw your bars (0 to 5 bars).
+          </p>
+
+          <div class="lol-panels">
+            <!-- INITIAL STATE BARS -->
+            <div class="lol-grid-card">
+              <div class="lol-grid-card-title">Initial Release (h)</div>
+              <div class="bars-draw-area">
+                <div class="bar-column">
+                  <div class="bar-stack" id="stack_ki" onclick="cycleBar('ki')">
+                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
+                  </div>
+                  <span class="bar-label">Ki</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-stack" id="stack_ugi" onclick="cycleBar('ugi')">
+                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
+                  </div>
+                  <span class="bar-label">Ugi</span>
+                </div>
+              </div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--emerald); text-align: center;" id="initialTotalLbl">Total: 0 bars</div>
+            </div>
+
+            <!-- SYSTEM "O" CIRCLE -->
+            <div class="system-circle-box">
+              <div class="system-circle">
+                <input type="text" id="sysObj1" placeholder="" oninput="saveAndSync()" />
+                <input type="text" id="sysObj2" placeholder="" oninput="saveAndSync()" />
+                <input type="text" id="sysObj3" placeholder="" oninput="saveAndSync()" />
+              </div>
+              <span style="font-size: 12px; color: var(--text-muted);">W_ext = 0</span>
+            </div>
+
+            <!-- FINAL APEX BARS -->
+            <div class="lol-grid-card">
+              <div class="lol-grid-card-title">Apex Reality (y=2r)</div>
+              <div class="bars-draw-area">
+                <div class="bar-column">
+                  <div class="bar-stack" id="stack_ugf" onclick="cycleBar('ugf')">
+                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
+                  </div>
+                  <span class="bar-label">Ugf</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-stack" id="stack_kf" onclick="cycleBar('kf')">
+                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
+                  </div>
+                  <span class="bar-label">Ktrans</span>
+                </div>
+                <div class="bar-column">
+                  <div class="bar-stack" id="stack_diss" onclick="cycleBar('diss')">
+                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
+                  </div>
+                  <span class="bar-label">Ediss</span>
+                </div>
+              </div>
+              <div style="font-size: 13px; font-weight: 700; color: var(--gold); text-align: center;" id="apexTotalLbl">Total: 0 bars</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREDICTION QUESTIONS -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+        <div>
+          <label class="field-lbl">Teacher's Test Height h (m):</label>
+          <input type="number" step="0.01" id="teacherTestH" placeholder="Enter height in metres" oninput="saveAndSync()" />
+        </div>
+
+        <div>
+          <label class="field-lbl">Prediction for Ball:</label>
+          <select id="predChoice" onchange="saveAndSync()">
+            <option value="">-- Choose Prediction --</option>
+            <option value="complete">Complete the Loop</option>
+            <option value="leave">Leave the Track (Fall / Detach)</option>
+          </select>
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <label class="field-lbl">Explain Your Physical Prediction:</label>
+          <textarea id="predExplain" rows="2" placeholder="Explain your physical reasoning..." oninput="saveAndSync()"></textarea>
+        </div>
+
+        <div style="grid-column: 1 / -1;">
+          <label class="field-lbl">Observed Rehearsal Result:</label>
+          <input type="text" id="obsResult" placeholder="Describe the physical observation during the demo drop..." oninput="saveAndSync()" />
+        </div>
+      </div>
+
+      <button class="btn-next-step" onclick="unlockSection(2)">
+        Complete Section 1 ➔ Unlock Section 2 (Calibration Sprint)
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SECTION 2: TEST FOUR HEIGHTS, FOUR LAUNCHES (SPEED & AUTO V2) -->
+  <!-- ============================================================== -->
+  <div class="section-card locked" id="sec_2">
+    <div class="section-header-row">
+      <div class="section-title">
+        <span class="section-num">Section 2</span> Test: Four Heights, Four Launches (5-Min Sprint)
+      </div>
+      <span class="lock-indicator">🔒 Locked</span>
+    </div>
+
+    <div class="section-body">
+      <p style="color: var(--text-muted); font-size: 17px;">
+        Use four different marked release heights. Measure landing range <i>X</i> on floor from plumb line. Write your calculated launch speed <i>v</i>; the last column will automatically square it (<i>v</i>²)!
+      </p>
+
+      <table class="worksheet-table">
+        <thead>
+          <tr>
+            <th>Launch</th>
+            <th>Release Setting</th>
+            <th>Release Height h (m)</th>
+            <th>Landing Range X (m)</th>
+            <th>Exit Speed v (m/s)</th>
+            <th>Auto-Squared v² (m²/s²)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td>A · Lowest</td>
+            <td><input type="number" step="0.001" id="tbl_h_0" placeholder="e.g. 0.100" oninput="onSpeedInput(0)" onchange="onSpeedInput(0)" /></td>
+            <td><input type="number" step="0.001" id="tbl_x_0" placeholder="e.g. 0.380" oninput="onSpeedInput(0)" onchange="onSpeedInput(0)" /></td>
+            <td><input type="number" step="0.01" id="tbl_v_0" placeholder="Speed v" oninput="onSpeedInput(0)" onchange="onSpeedInput(0)" /></td>
+            <td><span class="auto-squared-cell" id="tbl_v2_cell_0">--</span></td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td>B · Mid-Low</td>
+            <td><input type="number" step="0.001" id="tbl_h_1" placeholder="e.g. 0.150" oninput="onSpeedInput(1)" onchange="onSpeedInput(1)" /></td>
+            <td><input type="number" step="0.001" id="tbl_x_1" placeholder="e.g. 0.480" oninput="onSpeedInput(1)" onchange="onSpeedInput(1)" /></td>
+            <td><input type="number" step="0.01" id="tbl_v_1" placeholder="Speed v" oninput="onSpeedInput(1)" onchange="onSpeedInput(1)" /></td>
+            <td><span class="auto-squared-cell" id="tbl_v2_cell_1">--</span></td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td>C · Mid-High</td>
+            <td><input type="number" step="0.001" id="tbl_h_2" placeholder="e.g. 0.200" oninput="onSpeedInput(2)" onchange="onSpeedInput(2)" /></td>
+            <td><input type="number" step="0.001" id="tbl_x_2" placeholder="e.g. 0.580" oninput="onSpeedInput(2)" onchange="onSpeedInput(2)" /></td>
+            <td><input type="number" step="0.01" id="tbl_v_2" placeholder="Speed v" oninput="onSpeedInput(2)" onchange="onSpeedInput(2)" /></td>
+            <td><span class="auto-squared-cell" id="tbl_v2_cell_2">--</span></td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td>D · Highest</td>
+            <td><input type="number" step="0.001" id="tbl_h_3" placeholder="e.g. 0.250" oninput="onSpeedInput(3)" onchange="onSpeedInput(3)" /></td>
+            <td><input type="number" step="0.001" id="tbl_x_3" placeholder="e.g. 0.670" oninput="onSpeedInput(3)" onchange="onSpeedInput(3)" /></td>
+            <td><input type="number" step="0.01" id="tbl_v_3" placeholder="Speed v" oninput="onSpeedInput(3)" onchange="onSpeedInput(3)" /></td>
+            <td><span class="auto-squared-cell" id="tbl_v2_cell_3">--</span></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 14.5px; color: var(--emerald); font-weight: 700; gap: 8px;">
+        <span>✓ Live Graph Telemetry: Plotted points immediately sync to Section 3 millimeter grid!</span>
+        <span style="color: #94A3B8; font-size: 13.5px; font-weight: 600;">📏 Table Launch Height <i>H</i>: Measure at your station &nbsp;•&nbsp; <i>t</i><sub>flight</sub> = &radic;(2<i>H</i>/<i>g</i>)</span>
+      </div>
+
+      <button class="btn-next-step" onclick="unlockSection(3)">
+        Complete Section 2 ➔ Unlock Section 3 (Calibration Graph)
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SECTION 3: CALIBRATION GRAPH (PHYSICAL BEST-FIT RULER) -->
+  <!-- ============================================================== -->
+  <div class="section-card locked" id="sec_3">
+    <div class="section-header-row">
+      <div class="section-title">
+        <span class="section-num">Section 3</span> Graph: What Pattern Do Your Measurements Show?
+      </div>
+      <span class="lock-indicator">🔒 Locked</span>
+    </div>
+
+    <div class="section-body">
+      <div class="graph-paper-wrap">
+        <div class="graph-instructions-box">
+          <strong>📐 AP Physics 1 Best-Fit Line Protocol:</strong>
+          Only your data points from Section 2 are plotted initially. Use the interactive ruler tools below to physically draw and manipulate your best-fit line:
+          <ul style="margin: 6px 0 0 20px; font-size: 14.5px;">
+            <li><strong>Tilt / Pivot / Elongate:</strong> Drag <strong>Handle A</strong> or <strong>Handle B</strong> to adjust the slope and stretch the segment.</li>
+            <li><strong>Pan / Move:</strong> Drag anywhere along the line body to shift it up or down without changing its slope!</li>
+            <li><strong>AP Best-Fit Standard:</strong> Do NOT connect dots or force through (0,0). Balance points equally above and below.</li>
+          </ul>
+        </div>
+
+        <!-- AXIS IDENTIFICATION & LINEARIZATION CONTROLS -->
+        <div class="axis-config-panel">
+          <div class="axis-input-card y-axis">
+            <div class="axis-header">
+              <div class="axis-title-group">
+                <span class="axis-direction-icon">↕️</span>
+                <label class="field-lbl" style="margin: 0;">Vertical Axis Label (Y-Axis)</label>
+              </div>
+              <span class="axis-badge cyan">Dependent Variable · Linearized</span>
+            </div>
+            <div class="axis-field-box">
+              <input type="text" id="yAxisLabel" placeholder="Select or type dependent variable (unit)..." oninput="updatePresetChips(); renderStudentGraph(); saveAndSync();" />
+            </div>
+            <div class="quick-chip-row">
+              <span class="chip-hint">AP Standard Options:</span>
+              <button type="button" class="axis-preset-chip" onclick="setAxisPreset('y', 'Exit Speed Squared v² (m²/s²)')">⚡ Exit Speed Squared v² (m²/s²)</button>
+              <button type="button" class="axis-preset-chip" onclick="setAxisPreset('y', 'Exit Speed v (m/s)')">Exit Speed v (m/s)</button>
+              <button type="button" class="axis-preset-chip" onclick="setAxisPreset('y', 'Landing Range X (m)')">Landing Range X (m)</button>
+            </div>
+          </div>
+
+          <div class="axis-input-card x-axis">
+            <div class="axis-header">
+              <div class="axis-title-group">
+                <span class="axis-direction-icon">↔️</span>
+                <label class="field-lbl" style="margin: 0;">Horizontal Axis Label (X-Axis)</label>
+              </div>
+              <span class="axis-badge gold">Independent Variable · Manipulated</span>
+            </div>
+            <div class="axis-field-box">
+              <input type="text" id="xAxisLabel" placeholder="Select or type independent variable (unit)..." oninput="updatePresetChips(); renderStudentGraph(); saveAndSync();" />
+            </div>
+            <div class="quick-chip-row">
+              <span class="chip-hint">AP Standard Options:</span>
+              <button type="button" class="axis-preset-chip" onclick="setAxisPreset('x', 'Release Height h (m)')">📏 Release Height h (m)</button>
+              <button type="button" class="axis-preset-chip" onclick="setAxisPreset('x', 'Table Height H (m)')">Table Height H (m)</button>
+              <button type="button" class="axis-preset-chip" onclick="setAxisPreset('x', 'Release Height Squared h² (m²)')">Release Height Squared h² (m²)</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRAPH TOOLBAR -->
+        <div class="graph-toolbar">
+          <div class="graph-toolbar-group">
+            <button type="button" class="btn-graph-tool" onclick="placeBestFitLine()">📐 Place / Center Line</button>
+            <button type="button" class="btn-graph-tool active" id="btnToggleExtend" onclick="toggleExtendLine()">↔️ Extend Across Grid</button>
+            <button type="button" class="btn-graph-tool" onclick="resetBestFitLine()">↺ Reset Handles</button>
+            <button type="button" class="btn-graph-tool danger" onclick="deleteBestFitLine()">🗑️ Delete Line</button>
+          </div>
+          <div class="graph-status-badge" id="graphStatusBadge">
+            📍 Points plotted from Section 2
+          </div>
+        </div>
+
+        <!-- INTERACTIVE SVG GRAPH CANVAS -->
+        <div class="canvas-container">
+          <svg id="studentGraphSvg" style="width: 100%; height: 100%; display: block;" viewBox="0 0 780 460"></svg>
+        </div>
+
+        <!-- LIVE EQUATION & SLOPE TRIANGLE TELEMETRY -->
+        <div class="equation-telemetry-card">
+          <div class="equation-telemetry-top">
+            <div class="eq-big-formula" id="graphEquationDisplay">
+              y = ax + b &nbsp;⟹&nbsp; Awaiting line placement...
+            </div>
+            <div style="font-size: 13.5px; color: var(--emerald); font-weight: 800;">
+              ✓ Calculated from Hand-Drawn Line
+            </div>
+          </div>
+          <div class="slope-triangle-details" id="slopeReadoutDetails">
+            Drag Handle A and Handle B or pan the line to calibrate empirical parameters.
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+          <div>
+            <label class="field-lbl">Calibrated Line Parameters (Live Synced):</label>
+            <div style="display: flex; gap: 12px;">
+              <div style="flex: 1;">
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 700;">SLOPE a (m/s²):</span>
+                <input type="number" step="0.01" id="calcSlopeA" placeholder="Slope a" oninput="onManualEquationInput()" />
+              </div>
+              <div style="flex: 1;">
+                <span style="font-size: 12px; color: var(--text-muted); font-weight: 700;">INTERCEPT b (m²/s²):</span>
+                <input type="number" step="0.001" id="calcInterceptB" placeholder="Intercept b" oninput="onManualEquationInput()" />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label class="field-lbl">Compared with ideal 2g = 19.6 m/s², our measured slope is:</label>
+            <select id="slopeComparison" onchange="saveAndSync()">
+              <option value="">-- Select Comparison --</option>
+              <option value="smaller">Smaller (Energy Deficit / Rotational Inertia)</option>
+              <option value="similar">Similar</option>
+              <option value="larger">Larger</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-next-step" onclick="unlockSection(4)">
+        Complete Section 3 ➔ Unlock Section 4 (Energy Check)
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SECTION 4: ENERGY CHECK (COMPARING SLOPE TO CONSERVATION) -->
+  <!-- ============================================================== -->
+  <div class="section-card locked" id="sec_4">
+    <div class="section-header-row">
+      <div class="section-title">
+        <span class="section-num">Section 4</span> Energy Check: Comparing Slope to Ideal Conservation
+      </div>
+      <span class="lock-indicator">🔒 Locked</span>
+    </div>
+
+    <div class="section-body">
+      <p style="color: var(--text-muted); font-size: 17px;">
+        In ideal physics (zero energy loss): <i>mgh</i> = ½<i>mv</i>² ⟹ <i>v</i>² = (2<i>g</i>)<i>h</i>. The ideal slope is 2<i>g</i> = 19.6 m/s².
+      </p>
+
+      <div class="calc-row">
+        <span>Energy Retained (%): (Measured <i>a</i> / 19.6) × 100% = </span>
+        <span class="inline-input-group">
+          <input type="number" step="0.1" class="inline-math-box" id="energyRetainedPct" placeholder="" oninput="saveAndSync()" />
+          <span style="font-weight: 900; color: #0F172A;">%</span>
+        </span>
+      </div>
+
+      <div class="calc-row">
+        <span>Energy Gap (Fee): 100% − Energy Retained % = </span>
+        <span class="inline-input-group">
+          <input type="number" step="0.1" class="inline-math-box" id="energyGapPct" placeholder="" oninput="saveAndSync()" />
+          <span style="font-weight: 900; color: #0F172A;">% Missing Energy</span>
+        </span>
+      </div>
+
+      <div>
+        <label class="field-lbl">Does this energy gap mean energy was destroyed, or did it go somewhere else? Discuss with your partner:</label>
+        <textarea id="energyGapExplain" rows="2" placeholder="Explain your physical reasoning..." oninput="saveAndSync()"></textarea>
+      </div>
+
+      <button class="btn-next-step" onclick="unlockSection(5)">
+        Complete Section 4 ➔ Unlock Section 5 (Backward Inversion)
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SECTION 5: FINAL TARGET & INVERSION (SUBSTITUTION WORK) -->
+  <!-- ============================================================== -->
+  <div class="section-card locked" id="sec_5">
+    <div class="section-header-row">
+      <div class="section-title">
+        <span class="section-num">Section 5</span> Final Target: Which Release Height Will Your Group Use?
+      </div>
+      <span class="lock-indicator">🔒 Locked</span>
+    </div>
+
+    <div class="section-body">
+      <div class="inversion-work-area">
+        <!-- 1. CLASSIFIED LOCKED STATE (BEFORE TEACHER BROADCAST) -->
+        <div id="targetRangeLockedState" style="background: #FFFBEB; border: 2.5px dashed #D97706; border-radius: 10px; padding: 22px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+          <div style="font-size: 34px; line-height: 1;">🎬 🔒</div>
+          <div style="font-size: 19px; font-weight: 900; color: #78350F; letter-spacing: -0.01em;">
+            DIRECTOR'S TARGET LANDING RANGE: CLASSIFIED
+          </div>
+          <p style="font-size: 15px; color: #92400E; max-width: 620px; line-height: 1.5; margin: 0; font-weight: 600;">
+            The Director has locked the Scene 42 stunt landing target range in the studio safe to prevent guesswork. Complete your Section 3 calibration curve and Section 4 energy audit first. When calibration is complete, your instructor will broadcast the <strong>surprise target range</strong> live from the Master Cockpit!
+          </p>
+          <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
+            <span style="font-size: 13.5px; color: #B45309; font-weight: 700;">📡 Listening for instructor broadcast...</span>
+            <button type="button" class="btn-check-reveal" onclick="checkTargetRangeReveal(true)" style="background: #FFFFFF; border: 1.5px solid #D97706; color: #B45309; font-weight: 800; font-size: 13px; padding: 6px 14px; border-radius: 6px; cursor: pointer;">
+              🔄 Check Broadcast
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. REVEALED STATE (AFTER TEACHER BROADCAST) -->
+        <div id="targetRangeUnlockedState" style="display: none; background: #ECFDF5; border: 2.5px solid #059669; border-radius: 10px; padding: 18px 22px; animation: fadeIn 0.4s ease-out;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="font-size: 30px;">🎯</span>
+              <div>
+                <div style="font-size: 12.5px; font-weight: 900; text-transform: uppercase; color: #047857; letter-spacing: 0.06em;">Director Broadcast • Stunt Range Revealed</div>
+                <div style="font-size: 22px; font-weight: 900; color: #064E3B; letter-spacing: -0.01em;">Contracted Landing Target: <i>X</i>* = 0.900 m <span style="font-size: 16px; font-weight: 700; color: #059669;">(90.0 cm)</span></div>
+              </div>
+            </div>
+            <span style="background: #059669; color: #FFFFFF; font-weight: 900; font-size: 13px; padding: 5px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
+              ✓ Revealed by Instructor
+            </span>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px;">
+          <div>
+            <label class="field-lbl">Step 1: Required Exit Speed Squared v*²:</label>
+            <input type="number" step="0.001" id="inversionV2Req" placeholder="Locked — Awaiting teacher target range broadcast" disabled style="background: #F8FAFC; border: 2px solid #CBD5E1; color: #64748B;" oninput="saveAndSync()" />
+          </div>
+
+          <div>
+            <label class="field-lbl">Step 2: Predicted Release Height h* (m):</label>
+            <input type="number" step="0.001" id="inversionCalcH" placeholder="Locked — Awaiting teacher target range broadcast" disabled style="background: #F8FAFC; border: 2px solid #CBD5E1; color: #64748B;" oninput="saveAndSync()" />
+          </div>
+        </div>
+
+        <div>
+          <label class="field-lbl">Show Your Backward Inversion Substitution Work Below:</label>
+          <textarea id="inversionWorkText" rows="2" placeholder="Write out your algebraic substitution..." oninput="saveAndSync()"></textarea>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px;">
+          <span style="font-size: 16px; color: var(--gold); font-weight: 800;">
+            Safe Range Check (28.0 cm ≤ h* ≤ 44.0 cm): <strong id="safeRangeStatus">Awaiting calculation...</strong>
+          </span>
+
+          <button class="btn-next-step" style="background: var(--gold);" id="btnClampCheck" onclick="requestClampCheck()">
+            🔒 Request Teacher Stop-Block Check
+          </button>
+        </div>
+      </div>
+
+      <button class="btn-next-step" onclick="unlockSection(6)">
+        Complete Section 5 ➔ Unlock Section 6 (Live Stunt Verification)
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SECTION 6: ONE TAKE: LIVE STUNT VERIFICATION -->
+  <!-- ============================================================== -->
+  <div class="section-card locked" id="sec_6">
+    <div class="section-header-row">
+      <div class="section-title">
+        <span class="section-num">Section 6</span> One Take: Live Stunt Verification Protocol
+      </div>
+      <span class="lock-indicator">🔒 Locked</span>
+    </div>
+
+    <div class="section-body">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+        <div>
+          <label class="field-lbl">1. Target Line X* (m):</label>
+          <input type="number" step="0.001" id="targetXDisplay" value="0.900" readonly style="color: var(--gold); font-weight: 800;" />
+        </div>
+
+        <div>
+          <label class="field-lbl">2. Clamped h* (m):</label>
+          <input type="number" step="0.001" id="clampedH" placeholder="e.g. 0.376" oninput="saveAndSync()" />
+        </div>
+
+        <div>
+          <label class="field-lbl">3. Actual Landing X (m):</label>
+          <input type="number" step="0.001" id="actualLandingX" placeholder="e.g. 0.892" oninput="calcStuntResults()" />
+        </div>
+
+        <div>
+          <label class="field-lbl">4. Deviation δ (cm):</label>
+          <input type="number" step="0.1" id="deviationDelta" placeholder="|Xact - X*|" oninput="saveAndSync()" />
+        </div>
+
+        <div>
+          <label class="field-lbl">5. Percentage Error (%):</label>
+          <input type="number" step="0.1" id="percentErrorVal" placeholder="%" oninput="saveAndSync()" />
+        </div>
+      </div>
+
+      <div id="stuntSuccessBanner" style="display: none; background: rgba(16, 185, 129, 0.2); border: 2px solid var(--emerald); padding: 18px; border-radius: 10px; text-align: center;">
+        <h3 style="color: var(--emerald); font-size: 22px; margin-bottom: 6px;">🎬 STUNT VERIFIED! DAVE LIVES!</h3>
+        <p style="font-size: 16.5px; color: #E2E8F0;">Landing impact is within the teacher acceptance band (δ ≤ 1.2 cm).</p>
+      </div>
+
+      <button class="btn-next-step" onclick="unlockSection(7)">
+        Complete Section 6 ➔ Unlock Section 7 (Work Alone Reflection)
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- SECTION 7: MY EXIT ANSWER (WORK ALONE) -->
+  <!-- ============================================================== -->
+  <div class="section-card locked" id="sec_7">
+    <div class="section-header-row">
+      <div class="section-title">
+        <span class="section-num">Section 7</span> My Exit Answer: Work Alone
+      </div>
+      <span class="lock-indicator">🔒 Locked</span>
+    </div>
+
+    <div class="section-body">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- OFFICIAL RETURNED GRADE & FEEDBACK CARD -->
+        <div id="officialGradeCard" style="display: none; background: rgba(16, 185, 129, 0.15); border: 2px solid var(--emerald); border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);">
+          <div style="font-size: 13px; font-weight: 900; color: var(--emerald); letter-spacing: 0.15em; text-transform: uppercase;">
+            Official Instructor Assessment
+          </div>
+          <h3 style="color: #0F172A; font-size: 26px; font-weight: 900; margin: 6px 0;">
+            🏆 SCORE: <span id="gradeScoreDisplay" style="color: var(--emerald);">100 / 100</span>
+          </h3>
+          <p id="gradeFeedbackDisplay" style="font-size: 17px; color: #E2E8F0; font-style: italic;">
+            "Master Stunt Calibration! Completed with physical accuracy."
+          </p>
+        </div>
+
+        <div>
+          <label class="field-lbl">Student Name (Independent):</label>
+          <input type="text" id="exitStudentName" placeholder="Your Full Name" oninput="saveAndSync()" />
+        </div>
+
+        <div>
+          <label class="field-lbl">1. Why did we use our calibrated best-fit line (y = ax + b) rather than the ideal formula to set h*?</label>
+          <textarea id="exitQ1" rows="2" placeholder="Write your independent physical explanation..." oninput="saveAndSync()"></textarea>
+        </div>
+
+        <div>
+          <label class="field-lbl">2. What does our 28–30% slope deficit prove about mechanical energy in this rolling loop system?</label>
+          <textarea id="exitQ2" rows="2" placeholder="Explain where the energy went and why..." oninput="saveAndSync()"></textarea>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-top: 12px;">
+          
+          <button type="button" class="btn-export-pdf" onclick="exportWorksheetAsPdf()" style="background: #2563EB; color: white; border: none; padding: 12px 22px; border-radius: 8px; font-weight: 800; font-size: 15px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;" title="Export your completed lab answers as a PDF">
+            <span>📄</span> Export Lab Report as PDF
+          </button>
+
+          <button class="btn-submit-lab" onclick="submitWorksheet()">
+            📝 Submit Completed Lab Sheet for Scoring
+          </button>
+
+          <button class="btn-next-step" id="btnDownloadCert" style="display: none; background: var(--gold);" onclick="window.print()">
+            🏆 Print / Save Official Stunt Certificate
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FULLSCREEN SYNCHRONIZED COUNTDOWN OVERLAY -->
+<div class="fullscreen-overlay" id="syncCountdownOverlay">
+  <div class="countdown-text">🎬 QUIET ON THE SET • CAMERAS ROLLING</div>
+  <div class="countdown-big-num" id="countdownBigNum">5</div>
+</div>
+
+<script>
+  // SUPABASE CONFIG
+  const SUPABASE_URL = "https://amwoqeyyenrsthxeqzxt.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_8OezNDxuO2pWGTYAqKgd5Q_L-HwGQLc";
+
+  let supabaseClient = null;
+  try {
+    if (SUPABASE_URL !== "https://YOUR_PROJECT_ID.supabase.co") {
+      supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  } catch(e) { console.warn("Supabase local mode", e); }
+
+  // STATION SAFEGUARDS & PASSCODES
+  const STATION_PINS = {
+    station_1: "1111",
+    station_2: "2222",
+    station_3: "3333",
+    station_4: "4444"
+  };
+  const TEACHER_MASTER_PIN = "9999";
+
+  let currentStation = localStorage.getItem("stunt_locked_station") || null;
+
+  let worksheetState = {
+    unlockedStep: 1,
+    fbdVectors: [], // [{name: 'Fg', dx: 0, dy: 60}, ...]
+    lol: { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 },
+    tablePoints: [
+      { h: null, x: null, v: null, v2: null },
+      { h: null, x: null, v: null, v2: null },
+      { h: null, x: null, v: null, v2: null },
+      { h: null, x: null, v: null, v2: null }
+    ],
+    status: 'in_progress',
+    progress: 14
+  };
+
+  function init() {
+    checkStationLock();
+    initFbdCanvas();
+    renderLolBars();
+    initStudentGraphEvents();
+    syncTablePointsFromDom();
+    updateLineEquationAndInputs();
+    renderStudentGraph();
+    restoreWorksheetState();
+    listenToStationUpdates();
+      checkTargetRangeReveal(false);
+    listenToClassroomControl();
+  }
+
+  // STATION LOCK / SAFEGUARD
+  function checkStationLock() {
+    if (!currentStation) {
+      document.getElementById("stationModal").style.display = "flex";
+    } else {
+      document.getElementById("stationModal").style.display = "none";
+      updateStationBadge();
+    }
+  }
+
+  function verifyAndLockStation() {
+    let sel = document.getElementById("modalStationSelect").value;
+    let pinInput = document.getElementById("modalStationPin");
+    let pin = pinInput.value.trim();
+    let errBanner = document.getElementById("pinErrorBanner");
+    let modalEl = document.getElementById("stationModalCard");
+
+    if (pin === STATION_PINS[sel] || pin === TEACHER_MASTER_PIN) {
+      currentStation = sel;
+      localStorage.setItem("stunt_locked_station", currentStation);
+      document.getElementById("stationModal").style.display = "none";
+      if (errBanner) errBanner.style.display = "none";
+      if (modalEl) modalEl.classList.remove("shake-error");
+      updateStationBadge();
+      restoreWorksheetState();
+      listenToStationUpdates();
+      checkTargetRangeReveal(false);
+    } else {
+      if (errBanner) errBanner.style.display = "block";
+      if (modalEl) {
+        modalEl.classList.remove("shake-error");
+        void modalEl.offsetWidth; // trigger reflow
+        modalEl.classList.add("shake-error");
+      }
+      pinInput.value = "";
+      pinInput.focus();
+    }
+  }
+
+  function promptSwitchStation() {
+    let code = prompt("Enter Teacher Master PIN to unlock and switch station:");
+    if (code === TEACHER_MASTER_PIN) {
+      localStorage.removeItem("stunt_locked_station");
+      currentStation = null;
+      let errBanner = document.getElementById("pinErrorBanner");
+      if (errBanner) errBanner.style.display = "none";
+      let pinInput = document.getElementById("modalStationPin");
+      if (pinInput) pinInput.value = "";
+      document.getElementById("stationModal").style.display = "flex";
+    } else {
+      alert("Unauthorized! Only the instructor can unlock this device.");
+    }
+  }
+
+  function updateStationBadge() {
+    const names = {
+      station_1: "⚡ Station 1: Speed Demons",
+      station_2: "🎯 Station 2: Vector Vanguard",
+      station_3: "⚛️ Station 3: Quantum Riders",
+      station_4: "🔥 Station 4: Apex Phoenix"
+    };
+    document.getElementById("stationDisplayTxt").textContent = names[currentStation] || currentStation;
+  }
+
+  // ==========================================
+  // CANVAS FBD WITH THE "FAT DOT"
+  // ==========================================
+  let canvas, ctx;
+  let isDragging = false;
+  let startX = 130, startY = 130; // Center fat dot coordinates
+  let currentEndX = 130, currentEndY = 130;
+
+  function initFbdCanvas() {
+    canvas = document.getElementById("fbdCanvas");
+    ctx = canvas.getContext("2d");
+    drawFbd();
+
+    canvas.addEventListener("mousedown", onFbdStart);
+    canvas.addEventListener("mousemove", onFbdMove);
+    window.addEventListener("mouseup", onFbdEnd);
+
+    canvas.addEventListener("touchstart", onFbdTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", onFbdTouchMove, { passive: false });
+    window.addEventListener("touchend", onFbdTouchEnd);
+  }
+
+  function drawFbd() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Subtle background grid
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.06)";
+    ctx.lineWidth = 1;
+    for (let x = 20; x < canvas.width; x += 20) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 20; y < canvas.height; y += 20) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    // THE FAT DOT (Center of Mass at Apex)
+    ctx.beginPath();
+    ctx.arc(130, 130, 14, 0, 2 * Math.PI);
+    ctx.fillStyle = "#0F172A";
+    ctx.fill();
+    ctx.strokeStyle = "#2563EB";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    ctx.fillStyle = "#64748B";
+    ctx.font = "bold 11px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("APEX DOT", 130, 160);
+
+    // Draw existing arrows
+    worksheetState.fbdVectors.forEach(v => {
+      drawArrow(130, 130, 130 + v.dx, 130 + v.dy, v.color || "#00F0FF", v.name);
+    });
+
+    // Draw active dragging arrow
+    if (isDragging) {
+      drawArrow(130, 130, currentEndX, currentEndY, "#F59E0B", "Drawing...");
+    }
+  }
+
+  function drawArrow(fromx, fromy, tox, toy, color, label) {
+    let headlen = 12;
+    let dx = tox - fromx;
+    let dy = toy - fromy;
+    let angle = Math.atan2(dy, dx);
+    let length = Math.sqrt(dx*dx + dy*dy);
+    if (length < 15) return;
+
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 4;
+
+    ctx.beginPath();
+    ctx.moveTo(fromx, fromy);
+    ctx.lineTo(tox, toy);
+    ctx.stroke();
+
+    // Arrowhead
+    ctx.beginPath();
+    ctx.moveTo(tox, toy);
+    ctx.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+
+    // Label
+    if (label) {
+      ctx.font = "bold 14px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(label, tox + (dx > 0 ? 18 : -18), toy + (dy > 0 ? 18 : -10));
+    }
+  }
+
+  function onFbdStart(e) {
+    let rect = canvas.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    if (Math.hypot(x - 130, y - 130) < 30) {
+      isDragging = true;
+      currentEndX = x; currentEndY = y;
+    }
+  }
+
+  function onFbdMove(e) {
+    if (!isDragging) return;
+    let rect = canvas.getBoundingClientRect();
+    currentEndX = e.clientX - rect.left;
+    currentEndY = e.clientY - rect.top;
+    drawFbd();
+  }
+
+  function onFbdEnd() {
+    if (!isDragging) return;
+    isDragging = false;
+    let dx = currentEndX - 130;
+    let dy = currentEndY - 130;
+    if (Math.hypot(dx, dy) > 25) {
+      let label = prompt("Label this force vector (e.g. Fg, Fn):", dy > 0 ? "Fg" : "Fn") || "F";
+      worksheetState.fbdVectors.push({ name: label, dx, dy, color: dy > 0 ? "#00F0FF" : "#F43F5E" });
+      saveAndSync();
+    }
+    drawFbd();
+  }
+
+  function onFbdTouchStart(e) {
+    e.preventDefault();
+    let touch = e.touches[0];
+    let rect = canvas.getBoundingClientRect();
+    let x = touch.clientX - rect.left;
+    let y = touch.clientY - rect.top;
+    if (Math.hypot(x - 130, y - 130) < 35) {
+      isDragging = true;
+      currentEndX = x; currentEndY = y;
+    }
+  }
+  function onFbdTouchMove(e) {
+    if (!isDragging) return;
+    e.preventDefault();
+    let touch = e.touches[0];
+    let rect = canvas.getBoundingClientRect();
+    currentEndX = touch.clientX - rect.left;
+    currentEndY = touch.clientY - rect.top;
+    drawFbd();
+  }
+  function onFbdTouchEnd(e) {
+    onFbdEnd();
+  }
+
+  function clearFbdCanvas() {
+    worksheetState.fbdVectors = [];
+    drawFbd();
+    saveAndSync();
+  }
+
+  function addApexVector(name) {
+    let isDown = true;
+    worksheetState.fbdVectors.push({
+      name: name,
+      dx: 0,
+      dy: name.includes("Fg") ? 65 : 100,
+      color: name.includes("Fg") ? "#00F0FF" : "#F59E0B"
+    });
+    drawFbd();
+    saveAndSync();
+  }
+
+  // ==========================================
+  // LOL ENERGY BAR BUILDER
+  // ==========================================
+  function cycleBar(barKey) {
+    worksheetState.lol[barKey] = (worksheetState.lol[barKey] + 1) % 6;
+    renderLolBars();
+    saveAndSync();
+  }
+
+  function renderLolBars() {
+    const barKeys = ['ki', 'ugi', 'ugf', 'kf', 'diss'];
+    barKeys.forEach(k => {
+      let count = worksheetState.lol[k];
+      let stack = document.getElementById(`stack_${k}`);
+      let cells = stack.querySelectorAll(".cell-box");
+      cells.forEach((cell, idx) => {
+        cell.className = "cell-box";
+        if (idx < count) {
+          if (k.startsWith('u')) cell.classList.add("fill-green");
+          else if (k.startsWith('k')) cell.classList.add("fill-red");
+          else cell.classList.add("fill-gold");
+        }
+      });
+    });
+
+    let initialTot = worksheetState.lol.ki + worksheetState.lol.ugi;
+    let apexTot = worksheetState.lol.ugf + worksheetState.lol.kf + worksheetState.lol.diss;
+
+    document.getElementById("initialTotalLbl").textContent = `Total: ${initialTot} bars`;
+    document.getElementById("apexTotalLbl").textContent = `Total: ${apexTot} bars`;
+  }
+
+  // ==========================================
+  // SECTION 2: SYNCHRONIZATION ENGINE & AUTO-SQUARE
+  // ==========================================
+  function syncTablePointsFromDom() {
+    const T_FLIGHT = 0.3971;
+    let points = [];
+
+    for (let i = 0; i < 4; i++) {
+      let hEl = document.getElementById(`tbl_h_${i}`);
+      let xEl = document.getElementById(`tbl_x_${i}`);
+      let vEl = document.getElementById(`tbl_v_${i}`);
+      let v2Cell = document.getElementById(`tbl_v2_cell_${i}`);
+
+      let h = hEl ? parseFloat(hEl.value) : NaN;
+      let x = xEl ? parseFloat(xEl.value) : NaN;
+      let v = vEl ? parseFloat(vEl.value) : NaN;
+
+      // Auto-convert centimeters to meters if student enters cm (e.g. 10 cm -> 0.10 m, 38 cm -> 0.38 m)
+      if (!isNaN(h) && h > 1.0) {
+        h = h / 100.0;
+        if (hEl && document.activeElement !== hEl) hEl.value = h.toFixed(3);
+      }
+      if (!isNaN(x) && x > 2.0) {
+        x = x / 100.0;
+        if (xEl && document.activeElement !== xEl) xEl.value = x.toFixed(3);
+      }
+
+      // If Landing Range X is entered but speed v is blank, auto-compute v = X / 0.3971
+      if ((isNaN(v) || v <= 0) && !isNaN(x) && x > 0) {
+        v = x / T_FLIGHT;
+        if (vEl && !vEl.value) vEl.value = v.toFixed(2);
+      } else if (!isNaN(v) && v > 0 && (isNaN(x) || x <= 0)) {
+        x = v * T_FLIGHT;
+        if (xEl && !xEl.value) xEl.value = x.toFixed(3);
+      }
+
+      // Compute v^2
+      let v2 = null;
+      if (!isNaN(v) && v > 0) {
+        v2 = v * v;
+        if (v2Cell) v2Cell.textContent = v2.toFixed(2);
+      } else if (v2Cell && (isNaN(v) || v <= 0)) {
+        v2Cell.textContent = "--";
+      }
+
+      let pt = {
+        h: (!isNaN(h) && h > 0) ? h : null,
+        x: (!isNaN(x) && x > 0) ? x : null,
+        v: (!isNaN(v) && v > 0) ? v : null,
+        v2: v2
+      };
+
+      if (!worksheetState.tablePoints) worksheetState.tablePoints = [];
+      worksheetState.tablePoints[i] = pt;
+      points.push(pt);
+    }
+
+    return points;
+  }
+
+  function syncAndRenderGraph() {
+    syncTablePointsFromDom();
+    renderStudentGraph();
+    updateLineEquationAndInputs();
+    saveAndSync();
+  }
+
+  function onSpeedInput(rowIdx) {
+    syncTablePointsFromDom();
+    renderStudentGraph();
+    saveAndSync();
+  }
+
+  
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function setAxisPreset(axis, val) {
+    if (axis === 'y') {
+      let inp = document.getElementById("yAxisLabel");
+      if (inp) inp.value = val;
+    } else if (axis === 'x') {
+      let inp = document.getElementById("xAxisLabel");
+      if (inp) inp.value = val;
+    }
+    updatePresetChips();
+    renderStudentGraph();
+    saveAndSync();
+  }
+
+  function updatePresetChips() {
+    let yVal = document.getElementById("yAxisLabel") ? document.getElementById("yAxisLabel").value.trim() : "";
+    let xVal = document.getElementById("xAxisLabel") ? document.getElementById("xAxisLabel").value.trim() : "";
+    document.querySelectorAll(".axis-preset-chip").forEach(btn => {
+      let txt = btn.textContent.trim().replace(/^⚡\s*|^📏\s*/, '');
+      if (txt === yVal || btn.textContent.trim() === yVal || txt === xVal || btn.textContent.trim() === xVal) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+  }
+
+  // ==========================================
+  // SECTION 3: INTERACTIVE BEST-FIT RULER & GRAPH
+  // ==========================================
+  const GRAPH_CFG = {
+    w: 780,
+    h: 460,
+    padL: 95,
+    padR: 40,
+    padT: 40,
+    padB: 75,
+    xMax: 0.50, // default baseline
+    yMax: 8.0   // default baseline
+  };
+
+  let currentGraphScale = {
+    xMax: 0.50,
+    yMax: 8.0
+  };
+
+  let graphLine = {
+    active: false,
+    hA: 0.10, v2A: 1.40,
+    hB: 0.35, v2B: 4.80,
+    extendToEdges: true
+  };
+
+  let graphDrag = {
+    mode: null, // 'handleA', 'handleB', 'lineBody'
+    startPos: { x: 0, y: 0 },
+    initialLine: { hA: 0, v2A: 0, hB: 0, v2B: 0 }
+  };
+
+  function updateActiveScale(validPts) {
+    let maxX = 0.50;
+    let maxY = 8.0;
+    if (validPts && validPts.length > 0) {
+      validPts.forEach(p => {
+        if (p.h > maxX - 0.05) {
+          maxX = Math.max(maxX, Math.ceil((p.h + 0.08) * 20) / 20);
+        }
+        if (p.v2 > maxY - 1.0) {
+          maxY = Math.max(maxY, Math.ceil(p.v2 + 1.5));
+        }
+      });
+    }
+    if (graphLine.active) {
+      if (graphLine.hA > maxX) maxX = Math.ceil((graphLine.hA + 0.05) * 20) / 20;
+      if (graphLine.hB > maxX) maxX = Math.ceil((graphLine.hB + 0.05) * 20) / 20;
+      if (graphLine.v2A > maxY) maxY = Math.ceil(graphLine.v2A + 1.0);
+      if (graphLine.v2B > maxY) maxY = Math.ceil(graphLine.v2B + 1.0);
+    }
+    currentGraphScale.xMax = maxX;
+    currentGraphScale.yMax = maxY;
+    return currentGraphScale;
+  }
+
+  function mapX(hVal) {
+    let innerW = GRAPH_CFG.w - GRAPH_CFG.padL - GRAPH_CFG.padR;
+    return GRAPH_CFG.padL + (hVal / currentGraphScale.xMax) * innerW;
+  }
+
+  function mapY(v2Val) {
+    let innerH = GRAPH_CFG.h - GRAPH_CFG.padT - GRAPH_CFG.padB;
+    return (GRAPH_CFG.h - GRAPH_CFG.padB) - (v2Val / currentGraphScale.yMax) * innerH;
+  }
+
+  function invMapX(px) {
+    let innerW = GRAPH_CFG.w - GRAPH_CFG.padL - GRAPH_CFG.padR;
+    let ratio = (px - GRAPH_CFG.padL) / innerW;
+    return Math.max(0, Math.min(currentGraphScale.xMax, ratio * currentGraphScale.xMax));
+  }
+
+  function invMapY(py) {
+    let innerH = GRAPH_CFG.h - GRAPH_CFG.padT - GRAPH_CFG.padB;
+    let ratio = ((GRAPH_CFG.h - GRAPH_CFG.padB) - py) / innerH;
+    return Math.max(0, Math.min(currentGraphScale.yMax, ratio * currentGraphScale.yMax));
+  }
+
+  function getSvgCoords(e) {
+    let svg = document.getElementById("studentGraphSvg");
+    let pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    let p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return { x: p.x, y: p.y };
+  }
+
+  function initStudentGraphEvents() {
+    let svg = document.getElementById("studentGraphSvg");
+    if (!svg) return;
+
+    svg.addEventListener("pointerdown", onGraphPointerDown);
+    svg.addEventListener("pointermove", onGraphPointerMove);
+    svg.addEventListener("pointerup", onGraphPointerUp);
+    svg.addEventListener("pointercancel", onGraphPointerUp);
+  }
+
+  function onGraphPointerDown(e) {
+    let svg = document.getElementById("studentGraphSvg");
+    let pos = getSvgCoords(e);
+    let target = e.target;
+    let targetId = target.id || "";
+    let targetClass = (target.getAttribute && target.getAttribute("class")) || "";
+    let parentClass = (target.parentElement && target.parentElement.getAttribute && target.parentElement.getAttribute("class")) || "";
+
+    if (targetId === "graphHandleA" || targetClass.includes("handle-a") || parentClass.includes("handle-a")) {
+      graphDrag.mode = "handleA";
+    } else if (targetId === "graphHandleB" || targetClass.includes("handle-b") || parentClass.includes("handle-b")) {
+      graphDrag.mode = "handleB";
+    } else if (targetId === "graphLineBodyHit" || targetClass.includes("line-hit") || parentClass.includes("line-hit")) {
+      graphDrag.mode = "lineBody";
+      graphDrag.startPos = pos;
+      graphDrag.initialLine = { ...graphLine };
+    } else {
+      // If no line is active, clicking or dragging directly on the grid places/draws a line!
+      if (!graphLine.active) {
+        let ch = invMapX(pos.x);
+        let cv = invMapY(pos.y);
+        graphLine.hA = ch;
+        graphLine.v2A = cv;
+        graphLine.hB = Math.min(currentGraphScale.xMax, ch + 0.15);
+        graphLine.v2B = Math.min(currentGraphScale.yMax, cv + 2.0);
+        graphLine.active = true;
+        graphDrag.mode = "handleB";
+        updateLineEquationAndInputs();
+        renderStudentGraph();
+      } else {
+        return;
+      }
+    }
+
+    try { svg.setPointerCapture(e.pointerId); } catch(err) {}
+    e.preventDefault();
+  }
+
+  function onGraphPointerMove(e) {
+    if (!graphDrag.mode) return;
+    let pos = getSvgCoords(e);
+
+    if (graphDrag.mode === "handleA") {
+      graphLine.hA = invMapX(pos.x);
+      graphLine.v2A = invMapY(pos.y);
+      updateLineEquationAndInputs();
+      renderStudentGraph();
+    } else if (graphDrag.mode === "handleB") {
+      graphLine.hB = invMapX(pos.x);
+      graphLine.v2B = invMapY(pos.y);
+      updateLineEquationAndInputs();
+      renderStudentGraph();
+    } else if (graphDrag.mode === "lineBody") {
+      // 2D Smooth Pan of the entire line without altering its slope
+      let dx = pos.x - graphDrag.startPos.x;
+      let dy = pos.y - graphDrag.startPos.y;
+
+      let innerW = GRAPH_CFG.w - GRAPH_CFG.padL - GRAPH_CFG.padR;
+      let innerH = GRAPH_CFG.h - GRAPH_CFG.padT - GRAPH_CFG.padB;
+      let dh = (dx / innerW) * currentGraphScale.xMax;
+      let dv2 = -(dy / innerH) * currentGraphScale.yMax;
+
+      let initA = graphDrag.initialLine.hA;
+      let initB = graphDrag.initialLine.hB;
+      let minH = Math.min(initA, initB);
+      let maxH = Math.max(initA, initB);
+
+      let clampedDh = dh;
+      if (minH + clampedDh < 0) clampedDh = -minH;
+      if (maxH + clampedDh > currentGraphScale.xMax) clampedDh = currentGraphScale.xMax - maxH;
+
+      let initV2A = graphDrag.initialLine.v2A;
+      let initV2B = graphDrag.initialLine.v2B;
+      let minV2 = Math.min(initV2A, initV2B);
+      let maxV2 = Math.max(initV2A, initV2B);
+
+      let clampedDv2 = dv2;
+      if (minV2 + clampedDv2 < 0) clampedDv2 = -minV2;
+      if (maxV2 + clampedDv2 > currentGraphScale.yMax) clampedDv2 = currentGraphScale.yMax - maxV2;
+
+      graphLine.hA = initA + clampedDh;
+      graphLine.hB = initB + clampedDh;
+      graphLine.v2A = initV2A + clampedDv2;
+      graphLine.v2B = initV2B + clampedDv2;
+
+      updateLineEquationAndInputs();
+      renderStudentGraph();
+    }
+  }
+
+  function onGraphPointerUp(e) {
+    if (graphDrag.mode) {
+      try {
+        let svg = document.getElementById("studentGraphSvg");
+        svg.releasePointerCapture(e.pointerId);
+      } catch(err) {}
+      graphDrag.mode = null;
+      updateLineEquationAndInputs();
+      renderStudentGraph();
+      saveAndSync();
+    }
+  }
+
+  function updateLineEquationAndInputs() {
+    if (!graphLine.active) {
+      document.getElementById("calcSlopeA").value = "";
+      document.getElementById("calcInterceptB").value = "";
+      let eqEl = document.getElementById("graphEquationDisplay");
+      if (eqEl) eqEl.innerHTML = `y = ax + b &nbsp;⟹&nbsp; <span style="color: var(--text-muted); font-size: 18px;">Click "Place / Center Line" to draw ruler</span>`;
+      let detailEl = document.getElementById("slopeReadoutDetails");
+      if (detailEl) detailEl.textContent = "Line inactive: Only Section 2 data points are plotted.";
+      let badge = document.getElementById("graphStatusBadge");
+      if (badge) badge.textContent = "📍 Points Plotted (No Line Active)";
+      return;
+    }
+
+    let dh = graphLine.hB - graphLine.hA;
+    let dv2 = graphLine.v2B - graphLine.v2A;
+    if (Math.abs(dh) < 0.0005) {
+      dh = dh < 0 ? -0.0005 : 0.0005;
+    }
+    let a = dv2 / dh;
+    let b = graphLine.v2A - a * graphLine.hA;
+
+    document.getElementById("calcSlopeA").value = a.toFixed(2);
+    document.getElementById("calcInterceptB").value = b.toFixed(3);
+
+    let sign = b >= 0 ? "+" : "−";
+    let absB = Math.abs(b).toFixed(3);
+    let eqEl = document.getElementById("graphEquationDisplay");
+    if (eqEl) {
+      eqEl.innerHTML = `
+        <span style="color: var(--emerald); font-weight: 900;">y = a·x + b</span>
+        &nbsp;⟹&nbsp;
+        <span>v² = <strong style="color: var(--cyan);">${a.toFixed(2)}</strong> · h ${sign} <strong style="color: var(--gold);">${absB}</strong></span>
+      `;
+    }
+
+    let detailEl = document.getElementById("slopeReadoutDetails");
+    if (detailEl) {
+      detailEl.innerHTML = `
+        <span><strong>Handle A:</strong> (${graphLine.hA.toFixed(3)} m, ${graphLine.v2A.toFixed(2)} m²/s²)</span> &nbsp;|&nbsp;
+        <span><strong>Handle B:</strong> (${graphLine.hB.toFixed(3)} m, ${graphLine.v2B.toFixed(2)} m²/s²)</span> &nbsp;|&nbsp;
+        <span><strong>Slope a = Δy/Δx:</strong> ${(dv2).toFixed(2)} / ${(dh).toFixed(3)} = <strong style="color: var(--cyan);">${a.toFixed(2)} m/s²</strong></span>
+      `;
+    }
+
+    let badge = document.getElementById("graphStatusBadge");
+    if (badge) {
+      badge.textContent = `⚡ Calibrated: a = ${a.toFixed(2)} m/s² | b = ${b.toFixed(3)} m²/s²`;
+    }
+  }
+
+  function onManualEquationInput() {
+    let a = parseFloat(document.getElementById("calcSlopeA").value);
+    let b = parseFloat(document.getElementById("calcInterceptB").value);
+    if (!isNaN(a)) {
+      b = isNaN(b) ? 0 : b;
+      graphLine.active = true;
+      graphLine.hA = 0.10;
+      graphLine.v2A = Math.max(0, Math.min(GRAPH_CFG.yMax, a * 0.10 + b));
+      graphLine.hB = 0.35;
+      graphLine.v2B = Math.max(0, Math.min(GRAPH_CFG.yMax, a * 0.35 + b));
+      renderStudentGraph();
+      saveAndSync();
+    }
+  }
+
+  function placeBestFitLine() {
+    let validPts = worksheetState.tablePoints ? worksheetState.tablePoints.filter(p => p && p.h !== null && p.v2 !== null) : [];
+    updateActiveScale(validPts);
+
+    if (validPts.length >= 2) {
+      validPts.sort((p1, p2) => p1.h - p2.h);
+      let pFirst = validPts[0];
+      let pLast = validPts[validPts.length - 1];
+      graphLine.hA = Math.max(0.04, pFirst.h - 0.02);
+      graphLine.v2A = Math.max(0.2, pFirst.v2 - 0.2);
+      graphLine.hB = Math.min(currentGraphScale.xMax, pLast.h + 0.02);
+      graphLine.v2B = Math.min(currentGraphScale.yMax, pLast.v2 + 0.2);
+    } else {
+      graphLine.hA = 0.10;
+      graphLine.v2A = 1.40;
+      graphLine.hB = 0.35;
+      graphLine.v2B = 4.80;
+    }
+    graphLine.active = true;
+    updateLineEquationAndInputs();
+    renderStudentGraph();
+    saveAndSync();
+  }
+
+  function deleteBestFitLine() {
+    graphLine.active = false;
+    updateLineEquationAndInputs();
+    renderStudentGraph();
+    saveAndSync();
+  }
+
+  function resetBestFitLine() {
+    graphLine.hA = 0.10;
+    graphLine.v2A = 1.40;
+    graphLine.hB = 0.35;
+    graphLine.v2B = 4.80;
+    graphLine.active = true;
+    updateLineEquationAndInputs();
+    renderStudentGraph();
+    saveAndSync();
+  }
+
+  function toggleExtendLine() {
+    graphLine.extendToEdges = !graphLine.extendToEdges;
+    let btn = document.getElementById("btnToggleExtend");
+    if (btn) {
+      if (graphLine.extendToEdges) btn.classList.add("active");
+      else btn.classList.remove("active");
+    }
+    renderStudentGraph();
+  }
+
+  function renderStudentGraph() {
+    let svg = document.getElementById("studentGraphSvg");
+    if (!svg) return;
+
+    // 1. SYNC DIRECTLY FROM DOM INPUTS
+    let allPts = syncTablePointsFromDom();
+    let validPts = allPts.filter(p => typeof p.h === 'number' && !isNaN(p.h) && p.h > 0 && typeof p.v2 === 'number' && !isNaN(p.v2) && p.v2 > 0);
+
+    // 2. DYNAMIC GRID BOUNDS SO NO POINT IS EVER OFF-SCREEN OR CROWDED
+    updateActiveScale(validPts);
+    let currentXMax = currentGraphScale.xMax;
+    let currentYMax = currentGraphScale.yMax;
+
+    let w = GRAPH_CFG.w, h = GRAPH_CFG.h;
+    let padL = GRAPH_CFG.padL, padR = GRAPH_CFG.padR;
+    let padT = GRAPH_CFG.padT, padB = GRAPH_CFG.padB;
+
+    let yLbl = document.getElementById("yAxisLabel") ? document.getElementById("yAxisLabel").value.trim() : "";
+    let xLbl = document.getElementById("xAxisLabel") ? document.getElementById("xAxisLabel").value.trim() : "";
+
+    function dynMapX(hVal) { return mapX(hVal); }
+    function dynMapY(v2Val) { return mapY(v2Val); }
+
+    let html = "";
+
+    // 3. AP PHYSICS LAB MILLIMETER GRID
+    // Minor grid lines
+    let xMinorStep = currentXMax <= 0.5 ? 0.01 : 0.02;
+    for (let th = xMinorStep; th <= currentXMax; th += xMinorStep) {
+      let gx = dynMapX(th);
+      html += `<line x1="${gx}" y1="${padT}" x2="${gx}" y2="${h - padB}" stroke="rgba(0,0,0,0.05)" stroke-width="1" />`;
+    }
+    let yMinorStep = currentYMax <= 10.0 ? 0.25 : 0.5;
+    for (let tv = yMinorStep; tv <= currentYMax; tv += yMinorStep) {
+      let gy = dynMapY(tv);
+      html += `<line x1="${padL}" y1="${gy}" x2="${w - padR}" y2="${gy}" stroke="rgba(0,0,0,0.05)" stroke-width="1" />`;
+    }
+
+    // Major grid lines & X ticks (every 0.05 m or 0.1 m)
+    let xMajorStep = currentXMax <= 0.5 ? 0.05 : 0.10;
+    for (let th = xMajorStep; th <= currentXMax; th += xMajorStep) {
+      let gx = dynMapX(th);
+      html += `
+        <line x1="${gx}" y1="${padT}" x2="${gx}" y2="${h - padB}" stroke="rgba(0,0,0,0.12)" stroke-width="1.2" />
+        <line x1="${gx}" y1="${h - padB}" x2="${gx}" y2="${h - padB + 6}" stroke="#94A3B8" stroke-width="1.8" />
+        <text x="${gx}" y="${h - padB + 22}" fill="#475569" font-size="12" font-family="var(--font-mono)" font-weight="700" text-anchor="middle">${th.toFixed(2)}</text>
+      `;
+    }
+
+    // Major grid lines & Y ticks (every 1.0 m^2/s^2)
+    let yMajorStep = currentYMax <= 10.0 ? 1.0 : 2.0;
+    for (let tv = yMajorStep; tv <= currentYMax; tv += yMajorStep) {
+      let gy = dynMapY(tv);
+      html += `
+        <line x1="${padL}" y1="${gy}" x2="${w - padR}" y2="${gy}" stroke="rgba(0,0,0,0.12)" stroke-width="1.2" />
+        <line x1="${padL - 6}" y1="${gy}" x2="${padL}" y2="${gy}" stroke="#94A3B8" stroke-width="1.8" />
+        <text x="${padL - 12}" y="${gy + 4}" fill="#475569" font-size="12" font-family="var(--font-mono)" font-weight="700" text-anchor="end">${tv.toFixed(0)}</text>
+      `;
+    }
+
+    // 4. COORDINATE AXES (SOLID BORDERS)
+    html += `
+      <line x1="${padL}" y1="${h - padB}" x2="${w - padR}" y2="${h - padB}" stroke="#0F172A" stroke-width="2.5" />
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${h - padB}" stroke="#0F172A" stroke-width="2.5" />
+      <text x="${padL - 10}" y="${h - padB + 20}" fill="#0F172A" font-size="12" font-family="var(--font-mono)" text-anchor="end">0</text>
+    `;
+
+    // 5. DYNAMIC AXIS LABELS
+    if (xLbl) {
+      html += `<text x="${(w + padL)/2}" y="${h - padB + 50}" fill="#D97706" font-size="16" font-weight="900" text-anchor="middle" style="letter-spacing: 0.03em;">${escapeHtml(xLbl)}</text>`;
+    } else {
+      html += `<text x="${(w + padL)/2}" y="${h - padB + 50}" fill="#64748B" font-size="13.5" font-weight="700" text-anchor="middle">[ Select or Type X-Axis Label Above ]</text>`;
+    }
+
+    if (yLbl) {
+      html += `<text x="${padL - 60}" y="${(h + padT)/2}" fill="#0284C7" font-size="16" font-weight="900" text-anchor="middle" transform="rotate(-90 ${padL - 60} ${(h + padT)/2})" style="letter-spacing: 0.03em;">${escapeHtml(yLbl)}</text>`;
+    } else {
+      html += `<text x="${padL - 60}" y="${(h + padT)/2}" fill="#64748B" font-size="13.5" font-weight="700" text-anchor="middle" transform="rotate(-90 ${padL - 60} ${(h + padT)/2})">[ Select or Type Y-Axis Label Above ]</text>`;
+    }
+
+    // 6. PLOT DATA POINTS FROM SECTION 2
+    if (validPts.length === 0) {
+      html += `
+        <rect x="${padL + 40}" y="${(h + padT)/2 - 28}" width="${w - padL - padR - 80}" height="44" rx="8" fill="#FEF2F2" stroke="#DC2626" stroke-width="1.5" />
+        <text x="${(w + padL)/2}" y="${(h + padT)/2 - 1}" fill="#991B1B" font-size="14" font-weight="800" text-anchor="middle">
+          📌 No points plotted yet — Enter Release Height h and Landing Range X in Section 2 table above!
+        </text>
+      `;
+    } else {
+      validPts.forEach((p, idx) => {
+        let px = dynMapX(p.h);
+        let py = dynMapY(p.v2);
+
+        let labelText = `L${idx+1}: (${p.h.toFixed(2)}, ${p.v2.toFixed(2)})`;
+        let boxW = 140; // generous width so coordinates never overflow
+        let boxH = 26;
+        let boxX = px - boxW / 2;
+        let boxY = py - 36;
+
+        // Boundary clamping inside the SVG canvas grid
+        if (boxX < padL + 4) boxX = padL + 4;
+        if (boxX + boxW > w - padR - 4) boxX = w - padR - 4 - boxW;
+        let textY = boxY + 17;
+        if (boxY < padT + 4) {
+          boxY = py + 16;
+          textY = boxY + 17;
+        }
+
+        html += `
+          <g class="data-point-marker" pointer-events="all">
+            <circle class="data-point-halo" cx="${px}" cy="${py}" r="16" fill="rgba(37, 99, 235, 0.15)" />
+            <circle class="data-point-dot" cx="${px}" cy="${py}" r="7.5" fill="#2563EB" stroke="#FFFFFF" stroke-width="2.5" />
+            <g class="coord-tooltip">
+              <rect x="${boxX}" y="${boxY}" width="${boxW}" height="${boxH}" rx="6" fill="#FFFFFF" stroke="#2563EB" stroke-width="1.3" filter="drop-shadow(0 4px 10px rgba(0,0,0,0.65))" />
+              <text x="${boxX + boxW / 2}" y="${textY}" fill="#0F172A" font-size="12" font-family="var(--font-mono)" font-weight="900" text-anchor="middle">${labelText}</text>
+            </g>
+          </g>
+        `;
+      });
+    }
+
+    // 7. RULER LINE & STATUS HINTS
+    if (!graphLine.active) {
+      if (validPts.length >= 2) {
+        html += `
+          <rect x="${padL + 20}" y="${padT + 10}" width="${w - padL - padR - 40}" height="28" rx="6" fill="rgba(245, 158, 11, 0.15)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1" />
+          <text x="${(w + padL)/2}" y="${padT + 28}" fill="#FCD34D" font-size="13.5" font-weight="800" text-anchor="middle">
+            💡 ${validPts.length} of 4 points plotted! Click "📐 Place / Center Line" above to draw your best-fit line
+          </text>
+        `;
+      } else if (validPts.length === 1) {
+        html += `
+          <rect x="${padL + 20}" y="${padT + 10}" width="${w - padL - padR - 40}" height="28" rx="6" fill="rgba(0, 240, 255, 0.15)" stroke="rgba(0, 240, 255, 0.4)" stroke-width="1" />
+          <text x="${(w + padL)/2}" y="${padT + 28}" fill="#38BDF8" font-size="13.5" font-weight="800" text-anchor="middle">
+            📍 1 data point plotted (${validPts[0].h.toFixed(2)} m, ${validPts[0].v2.toFixed(2)} m²/s²). Enter remaining launches in Section 2.
+          </text>
+        `;
+      }
+    } else {
+      let dh = graphLine.hB - graphLine.hA;
+      let dv2 = graphLine.v2B - graphLine.v2A;
+      if (Math.abs(dh) < 0.0005) dh = dh < 0 ? -0.0005 : 0.0005;
+      let a = dv2 / dh;
+      let b = graphLine.v2A - a * graphLine.hA;
+
+      let ax = dynMapX(graphLine.hA);
+      let ay = dynMapY(graphLine.v2A);
+      let bx = dynMapX(graphLine.hB);
+      let by = dynMapY(graphLine.v2B);
+
+      // EXTENDED RULER LINE ACROSS GRID
+      if (graphLine.extendToEdges) {
+        let x1 = 0, y1 = b;
+        if (y1 < 0) { y1 = 0; x1 = -b / a; }
+        else if (y1 > currentYMax) { y1 = currentYMax; x1 = (currentYMax - b) / a; }
+
+        let x2 = currentXMax, y2 = a * currentXMax + b;
+        if (y2 > currentYMax) { y2 = currentYMax; x2 = (currentYMax - b) / a; }
+        else if (y2 < 0) { y2 = 0; x2 = -b / a; }
+
+        if (x1 <= currentXMax && x2 >= 0) {
+          html += `
+            <line x1="${dynMapX(x1)}" y1="${dynMapY(y1)}" x2="${dynMapX(x2)}" y2="${dynMapY(y2)}" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+          `;
+
+          // Vertical intercept indicator
+          if (b >= 0 && b <= currentYMax) {
+            html += `
+              <circle cx="${dynMapX(0)}" cy="${dynMapY(b)}" r="6" fill="#F59E0B" stroke="#FFFFFF" stroke-width="1.8" />
+              <text x="${dynMapX(0) + 10}" y="${dynMapY(b) - 8}" fill="#F59E0B" font-size="12" font-family="var(--font-mono)" font-weight="900">Intercept b = ${b.toFixed(3)}</text>
+            `;
+          }
+        }
+      }
+
+      // ACTIVE SEGMENT BETWEEN HANDLES
+      html += `
+        <line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#00F0FF" stroke-width="4.5" stroke-linecap="round" />
+        <line id="graphLineBodyHit" class="line-hit" x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="transparent" stroke-width="34" cursor="grab" />
+      `;
+
+      // HANDLE A
+      html += `
+        <g class="handle-a-group">
+          <circle class="handle-a" cx="${ax}" cy="${ay}" r="20" fill="rgba(0, 240, 255, 0.25)" cursor="grab" />
+          <circle id="graphHandleA" class="handle-a" cx="${ax}" cy="${ay}" r="11" fill="#FFFFFF" stroke="#059669" stroke-width="3.5" cursor="grab" />
+          <circle class="handle-a" cx="${ax}" cy="${ay}" r="3.5" fill="#FFFFFF" pointer-events="none" />
+          <rect x="${ax - 46}" y="${ay - 34}" width="92" height="20" rx="4" fill="rgba(8, 13, 26, 0.88)" stroke="#00F0FF" stroke-width="1.2" pointer-events="none" />
+          <text x="${ax}" y="${ay - 20}" fill="#00F0FF" font-size="11.5" font-family="var(--font-mono)" font-weight="900" text-anchor="middle" pointer-events="none">HANDLE A</text>
+        </g>
+      `;
+
+      // HANDLE B
+      html += `
+        <g class="handle-b-group">
+          <circle class="handle-b" cx="${bx}" cy="${by}" r="20" fill="rgba(245, 158, 11, 0.25)" cursor="grab" />
+          <circle id="graphHandleB" class="handle-b" cx="${bx}" cy="${by}" r="11" fill="#FFFFFF" stroke="#D97706" stroke-width="3.5" cursor="grab" />
+          <circle class="handle-b" cx="${bx}" cy="${by}" r="3.5" fill="#FFFFFF" pointer-events="none" />
+          <rect x="${bx - 46}" y="${by - 34}" width="92" height="20" rx="4" fill="rgba(8, 13, 26, 0.88)" stroke="#F59E0B" stroke-width="1.2" pointer-events="none" />
+          <text x="${bx}" y="${by - 20}" fill="#F59E0B" font-size="11.5" font-family="var(--font-mono)" font-weight="900" text-anchor="middle" pointer-events="none">HANDLE B</text>
+        </g>
+      `;
+    }
+
+    svg.innerHTML = html;
+
+    // 8. UPDATE GRAPH TOOLBAR STATUS BADGE
+    let badge = document.getElementById("graphStatusBadge");
+    if (badge) {
+      if (validPts.length === 4) {
+        badge.innerHTML = "✅ All 4 points plotted from Section 2";
+        badge.style.color = "var(--emerald)";
+        badge.style.borderColor = "var(--emerald)";
+      } else if (validPts.length > 0) {
+        badge.innerHTML = `📍 ${validPts.length} of 4 points plotted from Section 2`;
+        badge.style.color = "var(--cyan)";
+        badge.style.borderColor = "var(--cyan)";
+      } else {
+        badge.innerHTML = "⚠️ Awaiting data from Section 2 table";
+        badge.style.color = "var(--gold)";
+        badge.style.borderColor = "var(--gold)";
+      }
+    }
+  }
+
+  function toggleApparatusCard() {
+    let body = document.getElementById("apparatusCardBody");
+    let btn = document.getElementById("btnToggleSchematic");
+    if (!body) return;
+    if (body.style.display === "none") {
+      body.style.display = "flex";
+      if (btn) btn.innerHTML = "▲ Hide Schematic";
+    } else {
+      body.style.display = "none";
+      if (btn) btn.innerHTML = "▼ Show Schematic";
+    }
+  }
+
+  // ==========================================
+  // PROGRESSIVE DROPDOWN UNLOCKING & GATES
+  // ==========================================
+  function unlockSection(stepNum) {
+    // ENFORCE TEACHER GATE BEFORE LIVE DROP (SECTION 6)
+    if (stepNum === 6 && !worksheetState.inspectionApproved) {
+      alert("⚠️ Stop-Block Inspection Required!\n\nYour instructor must verify Dave on your physical stop-block clamp on the apparatus and click 'Approve Clamp' on the Teacher Cockpit before you can unlock Section 6 for the live drop.");
+      return;
+    }
+
+    if (stepNum > worksheetState.unlockedStep) {
+      worksheetState.unlockedStep = stepNum;
+    }
+
+    let targetCard = document.getElementById(`sec_${stepNum}`);
+    if (targetCard) {
+      targetCard.classList.remove('locked');
+      targetCard.classList.add('unlocked');
+      
+      setTimeout(() => {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+
+    if (stepNum === 3) {
+      syncTablePointsFromDom();
+      updateLineEquationAndInputs();
+      renderStudentGraph();
+    }
+
+    updateProgress();
+    saveAndSync();
+  }
+
+  function calcStuntResults() {
+    let xAct = parseFloat(document.getElementById("actualLandingX").value);
+    if (!isNaN(xAct) && xAct > 0) {
+      let deltaCm = Math.abs(xAct - 0.900) * 100;
+      let pctErr = (deltaCm / 90.0) * 100;
+
+      document.getElementById("deviationDelta").value = deltaCm.toFixed(1);
+      document.getElementById("percentErrorVal").value = pctErr.toFixed(1);
+
+      if (deltaCm <= 1.2) {
+        document.getElementById("stuntSuccessBanner").style.display = "block";
+        confetti({ particleCount: 90, spread: 70 });
+      } else {
+        document.getElementById("stuntSuccessBanner").style.display = "none";
+      }
+    }
+    saveAndSync();
+  }
+
+  function requestClampCheck() {
+    let btn = document.getElementById("btnClampCheck");
+    btn.textContent = "⏳ Teacher Checking Clamp...";
+    btn.style.background = "#1E293B";
+    btn.style.color = "var(--gold)";
+    worksheetState.status = "awaiting_inspection";
+    worksheetState.inspectionRequested = true;
+    saveAndSync();
+    alert("Clamp inspection requested! Keep Dave resting against the stop-block while your instructor verifies on the Command Dashboard.");
+  }
+
+  async function submitWorksheet() {
+    worksheetState.status = "submitted";
+    await saveAndSync();
+    document.getElementById("btnDownloadCert").style.display = "inline-flex";
+    confetti({ particleCount: 160, spread: 90 });
+    alert("🎉 Lab sheet submitted for scoring!");
+  }
+
+  // ==========================================
+  // COMPLETE STATE PACKING & PERSISTENCE
+  // ==========================================
+  function packWorksheetState() {
+    return {
+      unlockedStep: worksheetState.unlockedStep,
+      progress: worksheetState.progress,
+      status: worksheetState.status,
+      inspectionRequested: worksheetState.inspectionRequested || false,
+      inspectionApproved: worksheetState.inspectionApproved || false,
+      crew: {
+        releaser: document.getElementById("crewReleaser") ? document.getElementById("crewReleaser").value : "",
+        measurer: document.getElementById("crewMeasurer") ? document.getElementById("crewMeasurer").value : "",
+        scribe: document.getElementById("crewScribe") ? document.getElementById("crewScribe").value : "",
+        checker: document.getElementById("crewChecker") ? document.getElementById("crewChecker").value : ""
+      },
+      checkedReleaseLimit: document.getElementById("maxSafeH") ? document.getElementById("maxSafeH").value : "",
+      fbdVectors: worksheetState.fbdVectors || [],
+      lol: worksheetState.lol || { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 },
+      sysObjs: {
+        obj1: document.getElementById("sysObj1") ? document.getElementById("sysObj1").value : "",
+        obj2: document.getElementById("sysObj2") ? document.getElementById("sysObj2").value : "",
+        obj3: document.getElementById("sysObj3") ? document.getElementById("sysObj3").value : ""
+      },
+      predictions: {
+        testH: document.getElementById("teacherTestH") ? document.getElementById("teacherTestH").value : "",
+        predChoice: document.getElementById("predChoice") ? document.getElementById("predChoice").value : "",
+        predExplain: document.getElementById("predExplain") ? document.getElementById("predExplain").value : "",
+        obsResult: document.getElementById("obsResult") ? document.getElementById("obsResult").value : ""
+      },
+      tablePoints: worksheetState.tablePoints || [],
+      graphLabels: {
+        yAxis: document.getElementById("yAxisLabel") ? document.getElementById("yAxisLabel").value : "",
+        xAxis: document.getElementById("xAxisLabel") ? document.getElementById("xAxisLabel").value : ""
+      },
+      graphLine: graphLine || { active: false, hA: 0.10, v2A: 1.40, hB: 0.35, v2B: 4.80, extendToEdges: true },
+      calibratedParams: {
+        slopeA: document.getElementById("calcSlopeA") ? document.getElementById("calcSlopeA").value : "",
+        interceptB: document.getElementById("calcInterceptB") ? document.getElementById("calcInterceptB").value : "",
+        comparison: document.getElementById("slopeComparison") ? document.getElementById("slopeComparison").value : ""
+      },
+      energyCheck: {
+        retainedPct: document.getElementById("energyRetainedPct") ? document.getElementById("energyRetainedPct").value : "",
+        gapPct: document.getElementById("energyGapPct") ? document.getElementById("energyGapPct").value : "",
+        explanation: document.getElementById("energyGapExplain") ? document.getElementById("energyGapExplain").value : ""
+      },
+      inversion: {
+        v2Req: document.getElementById("inversionV2Req") ? document.getElementById("inversionV2Req").value : "",
+        calcH: document.getElementById("inversionCalcH") ? document.getElementById("inversionCalcH").value : "",
+        workText: document.getElementById("inversionWorkText") ? document.getElementById("inversionWorkText").value : ""
+      },
+      stunt: {
+        clampedH: document.getElementById("clampedH") ? document.getElementById("clampedH").value : "",
+        actualX: document.getElementById("actualLandingX") ? document.getElementById("actualLandingX").value : "",
+        delta: document.getElementById("deviationDelta") ? document.getElementById("deviationDelta").value : "",
+        pctError: document.getElementById("percentErrorVal") ? document.getElementById("percentErrorVal").value : ""
+      },
+      exitWork: {
+        studentName: document.getElementById("exitStudentName") ? document.getElementById("exitStudentName").value : "",
+        q1: document.getElementById("exitQ1") ? document.getElementById("exitQ1").value : "",
+        q2: document.getElementById("exitQ2") ? document.getElementById("exitQ2").value : ""
+      }
+    };
+  }
+
+  // ==========================================
+  // SUPABASE REALTIME SYNC & LOCAL PERSISTENCE
+  // ==========================================
+  async function saveAndSync() {
+    updateProgress();
+    if (!currentStation) return;
+
+    let fullState = packWorksheetState();
+
+    updateSaveIndicator("saving");
+
+    // 1. SAVE TO LOCAL STORAGE (RESILIENT TO RELOADS & ACCIDENTAL CLOSURE)
+    try {
+      localStorage.setItem("stunt_lab_state_" + currentStation, JSON.stringify(fullState));
+      // Continuous rolling backup copy
+      localStorage.setItem("stunt_backup_" + currentStation, JSON.stringify(fullState));
+    } catch(err) {
+      console.warn("localStorage write err", err);
+    }
+
+    // BROADCAST PEER SYNC TO FELLOW STATION MEMBERS (INTRA-GROUP COLLABORATION)
+    try {
+      if (targetSyncChannel) {
+        targetSyncChannel.postMessage({
+          type: "PEER_SYNC_STATION_DATA",
+          station_id: currentStation,
+          state: fullState,
+          sender_id: myClientSessionId,
+          timestamp: Date.now()
+        });
+      }
+    } catch(e) {}
+
+    setTimeout(() => updateSaveIndicator("saved"), 350);
+
+    // 2. SAVE TO SUPABASE (SAFE NUMERICAL ZERO HANDLING)
+    if (!supabaseClient) return;
+
+    let slopeVal = parseFloat(fullState.calibratedParams.slopeA);
+    let interceptVal = parseFloat(fullState.calibratedParams.interceptB);
+    let calcHVal = parseFloat(fullState.inversion.calcH);
+    let actXVal = parseFloat(fullState.stunt.actualX);
+    let deltaVal = parseFloat(fullState.stunt.delta);
+    let pctErrVal = parseFloat(fullState.stunt.pctError);
+
+    let payload = {
+      station_id: currentStation,
+      progress_pct: fullState.progress,
+      current_step: fullState.unlockedStep,
+      slope: !isNaN(slopeVal) ? slopeVal : 0,
+      intercept: !isNaN(interceptVal) ? interceptVal : 0,
+      calc_h: !isNaN(calcHVal) ? calcHVal : 0,
+      actual_X: !isNaN(actXVal) ? actXVal : null,
+      delta: !isNaN(deltaVal) ? deltaVal : null, // Preserves exact 0.0 cm deviation!
+      accuracy_pct: !isNaN(pctErrVal) ? Math.max(0, 100 - pctErrVal) : null,
+      stunt_status: fullState.status,
+      exit_answers: {
+        studentName: fullState.exitWork.studentName,
+        q1: fullState.exitWork.q1,
+        q2: fullState.exitWork.q2
+      },
+      full_payload: fullState,
+      updated_at: new Date().toISOString()
+    };
+
+    try {
+      const { error } = await supabaseClient.from("station_submissions").upsert(payload);
+      if (error) {
+        console.warn("Supabase upsert warning:", error.message);
+      }
+    } catch(e) {
+      console.warn("Sync err", e);
+    }
+  }
+
+  // ==========================================
+  // RESTORE WORKSHEET STATE ON RELOAD
+  // ==========================================
+  
+  // ==========================================
+  // SURPRISE TARGET RANGE REVEAL SYNC
+  // ==========================================
+  let isTargetRangeRevealed = false;
+  const targetSyncChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel('stunt_classroom_sync') : null;
+
+  const myClientSessionId = "sess_" + Math.random().toString(36).substring(2, 9) + "_" + Date.now();
+
+  if (targetSyncChannel) {
+    targetSyncChannel.onmessage = (msg) => {
+      let data = msg.data;
+      if (!data) return;
+
+      if (data.type === 'TARGET_RANGE_REVEALED') {
+        applyTargetRangeReveal(true);
+      } else if (data.type === 'RESET_ALL_STATIONS') {
+        executeSessionReset();
+      } else if (data.type === 'PEER_SYNC_STATION_DATA') {
+        if (data.station_id === currentStation && data.sender_id !== myClientSessionId) {
+          applyPeerSyncData(data.state);
+        }
+      }
+    };
+  }
+
+  // Cross-tab storage event listener for classroom reset or target reveal
+  window.addEventListener("storage", (e) => {
+    if (e.key === "stunt_classroom_reset_trigger") {
+      executeSessionReset();
+    } else if (e.key === "stunt_target_revealed" && e.newValue === "true") {
+      applyTargetRangeReveal(false);
+    }
+  });
+
+  async function checkTargetRangeReveal(userTriggered) {
+    // 1. Check local storage
+    if (localStorage.getItem('stunt_target_revealed') === 'true') {
+      applyTargetRangeReveal(false);
+      return;
+    }
+    // 2. Check Supabase classroom_control
+    if (supabaseClient) {
+      supabaseClient.from('classroom_control').select('target_range_revealed, target_x_m').eq('id', 'global').single().then(({ data, error }) => {
+        if (data && data.target_range_revealed) {
+          applyTargetRangeReveal(true);
+        } else if (userTriggered) {
+          alert('🔒 The Director has not revealed the target range yet! Complete calibration and await your teacher\'s live broadcast.');
+        }
+      });
+    } else if (userTriggered) {
+      alert('🔒 Standalone Mode: Target range will unlock when revealed on the Teacher Master Cockpit.');
+    }
+  }
+
+  window.applyTargetRangeReveal = applyTargetRangeReveal;
+  window.checkTargetRangeReveal = checkTargetRangeReveal;
+  function applyTargetRangeReveal(withConfetti) {
+    isTargetRangeRevealed = true;
+    localStorage.setItem('stunt_target_revealed', 'true');
+    
+    let lockedBanner = document.getElementById('targetRangeLockedState');
+    let unlockedBanner = document.getElementById('targetRangeUnlockedState');
+    if (lockedBanner) lockedBanner.style.display = 'none';
+    if (unlockedBanner) unlockedBanner.style.display = 'block';
+
+    let v2Input = document.getElementById('inversionV2Req');
+    let hInput = document.getElementById('inversionCalcH');
+    if (v2Input) {
+      v2Input.disabled = false;
+      v2Input.placeholder = 'e.g. 5.10';
+      v2Input.style.background = '#FFFFFF';
+      v2Input.style.borderColor = '#94A3B8';
+      v2Input.style.color = '#0F172A';
+    }
+    if (hInput) {
+      hInput.disabled = false;
+      hInput.placeholder = 'e.g. 0.370';
+      hInput.style.background = '#FFFFFF';
+      hInput.style.borderColor = '#94A3B8';
+      hInput.style.color = '#0F172A';
+    }
+
+    let daveSpeech = document.getElementById('daveSpeechTxt');
+    if (daveSpeech) {
+      daveSpeech.innerHTML = '🎬 <strong>DIRECTOR TARGET REVEALED!</strong> Target range is locked at <strong>X* = 0.900 m</strong>! Backward-invert your calibration line to calculate exact release height <i>h</i>*!';
+    }
+
+    if (withConfetti && typeof confetti === 'function') {
+      confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+    }
+  }
+
+  async function restoreWorksheetState() {
+    if (!currentStation) return;
+
+    let saved = null;
+    try {
+      let raw = localStorage.getItem("stunt_lab_state_" + currentStation);
+      if (raw) saved = JSON.parse(raw);
+    } catch(e) {
+      console.warn("localStorage parse err", e);
+    }
+
+    // If Supabase is connected, check remote full_payload
+    if (supabaseClient) {
+      try {
+        const { data, error } = await supabaseClient
+          .from("station_submissions")
+          .select("*")
+          .eq("station_id", currentStation)
+          .single();
+
+        if (data) {
+          if (data.inspection_approved) {
+            worksheetState.inspectionApproved = true;
+            let btn = document.getElementById("btnClampCheck");
+            if (btn) {
+              btn.textContent = "✅ Stop-Block Approved by Instructor!";
+              btn.style.background = "var(--emerald)";
+              btn.style.color = "#000";
+            }
+          }
+
+          if (data.teacher_grade !== null && !isNaN(data.teacher_grade)) {
+            displayTeacherGrade(data.teacher_grade, data.teacher_feedback);
+          }
+
+          if (data.full_payload && Object.keys(data.full_payload).length > 0) {
+            saved = data.full_payload;
+          }
+        }
+      } catch(e) {
+        console.warn("Remote hydration err", e);
+      }
+    }
+
+    if (!saved) return;
+
+    // RESTORE CREW NAMES
+    if (saved.crew) {
+      if (saved.crew.releaser) document.getElementById("crewReleaser").value = saved.crew.releaser;
+      if (saved.crew.measurer) document.getElementById("crewMeasurer").value = saved.crew.measurer;
+      if (saved.crew.scribe) document.getElementById("crewScribe").value = saved.crew.scribe;
+      if (saved.crew.checker) document.getElementById("crewChecker").value = saved.crew.checker;
+    }
+
+    // RESTORE CHECKED RELEASE LIMIT
+    if (saved.checkedReleaseLimit && document.getElementById("maxSafeH")) {
+      document.getElementById("maxSafeH").value = saved.checkedReleaseLimit;
+    }
+
+    // RESTORE FBD VECTORS
+    if (saved.fbdVectors && Array.isArray(saved.fbdVectors)) {
+      worksheetState.fbdVectors = saved.fbdVectors;
+      drawFbd();
+    }
+
+    // RESTORE LOL BARS
+    if (saved.lol) {
+      worksheetState.lol = saved.lol;
+      renderLolBars();
+    }
+
+    // RESTORE SYSTEM OBJECTS
+    if (saved.sysObjs) {
+      if (saved.sysObjs.obj1) document.getElementById("sysObj1").value = saved.sysObjs.obj1;
+      if (saved.sysObjs.obj2) document.getElementById("sysObj2").value = saved.sysObjs.obj2;
+      if (saved.sysObjs.obj3) document.getElementById("sysObj3").value = saved.sysObjs.obj3;
+    }
+
+    // RESTORE PREDICTIONS
+    if (saved.predictions) {
+      if (saved.predictions.testH) document.getElementById("teacherTestH").value = saved.predictions.testH;
+      if (saved.predictions.predChoice) document.getElementById("predChoice").value = saved.predictions.predChoice;
+      if (saved.predictions.predExplain) document.getElementById("predExplain").value = saved.predictions.predExplain;
+      if (saved.predictions.obsResult) document.getElementById("obsResult").value = saved.predictions.obsResult;
+    }
+
+    // RESTORE TABLE POINTS
+    if (saved.tablePoints && Array.isArray(saved.tablePoints)) {
+      worksheetState.tablePoints = saved.tablePoints;
+      saved.tablePoints.forEach((p, idx) => {
+        if (p.h !== null) document.getElementById(`tbl_h_${idx}`).value = p.h;
+        if (p.x !== null) document.getElementById(`tbl_x_${idx}`).value = p.x;
+        if (p.v !== null) document.getElementById(`tbl_v_${idx}`).value = p.v;
+        if (p.v2 !== null) document.getElementById(`tbl_v2_cell_${idx}`).textContent = Number(p.v2).toFixed(2);
+      });
+    }
+
+    // RESTORE GRAPH LABELS & RULER LINE
+    if (saved.graphLabels) {
+      if (saved.graphLabels.yAxis) document.getElementById("yAxisLabel").value = saved.graphLabels.yAxis;
+      if (saved.graphLabels.xAxis) document.getElementById("xAxisLabel").value = saved.graphLabels.xAxis;
+    }
+    if (saved.graphLine) {
+      graphLine = saved.graphLine;
+    }
+    if (saved.calibratedParams) {
+      if (saved.calibratedParams.slopeA) document.getElementById("calcSlopeA").value = saved.calibratedParams.slopeA;
+      if (saved.calibratedParams.interceptB) document.getElementById("calcInterceptB").value = saved.calibratedParams.interceptB;
+      if (saved.calibratedParams.comparison) document.getElementById("slopeComparison").value = saved.calibratedParams.comparison;
+    }
+    updateLineEquationAndInputs();
+    renderStudentGraph();
+
+    // RESTORE ENERGY CHECK
+    if (saved.energyCheck) {
+      if (saved.energyCheck.retainedPct) document.getElementById("energyRetainedPct").value = saved.energyCheck.retainedPct;
+      if (saved.energyCheck.gapPct) document.getElementById("energyGapPct").value = saved.energyCheck.gapPct;
+      if (saved.energyCheck.explanation) document.getElementById("energyGapExplain").value = saved.energyCheck.explanation;
+    }
+
+    // RESTORE INVERSION
+    if (saved.inversion) {
+      if (saved.inversion.v2Req) document.getElementById("inversionV2Req").value = saved.inversion.v2Req;
+      if (saved.inversion.calcH) document.getElementById("inversionCalcH").value = saved.inversion.calcH;
+      if (saved.inversion.workText) document.getElementById("inversionWorkText").value = saved.inversion.workText;
+    }
+
+    // RESTORE LIVE STUNT
+    if (saved.stunt) {
+      if (saved.stunt.clampedH) document.getElementById("clampedH").value = saved.stunt.clampedH;
+      if (saved.stunt.actualX) document.getElementById("actualLandingX").value = saved.stunt.actualX;
+      if (saved.stunt.delta !== undefined && saved.stunt.delta !== "") document.getElementById("deviationDelta").value = saved.stunt.delta;
+      if (saved.stunt.pctError !== undefined && saved.stunt.pctError !== "") document.getElementById("percentErrorVal").value = saved.stunt.pctError;
+      if (parseFloat(saved.stunt.delta) <= 1.2) {
+        document.getElementById("stuntSuccessBanner").style.display = "block";
+      }
+    }
+
+    // RESTORE EXIT WORK
+    if (saved.exitWork) {
+      if (saved.exitWork.studentName) document.getElementById("exitStudentName").value = saved.exitWork.studentName;
+      if (saved.exitWork.q1) document.getElementById("exitQ1").value = saved.exitWork.q1;
+      if (saved.exitWork.q2) document.getElementById("exitQ2").value = saved.exitWork.q2;
+    }
+
+    // RESTORE STEP & PROGRESS
+    if (saved.unlockedStep && saved.unlockedStep > 1) {
+      worksheetState.unlockedStep = saved.unlockedStep;
+      for (let s = 2; s <= saved.unlockedStep; s++) {
+        let card = document.getElementById(`sec_${s}`);
+        if (card) {
+          card.classList.remove('locked');
+          card.classList.add('unlocked');
+        }
+      }
+    }
+    updateProgress();
+  }
+
+  // ==========================================
+  // REALTIME LISTENERS: TEACHER GATES & GRADES
+  // ==========================================
+  function listenToStationUpdates() {
+    if (!supabaseClient || !currentStation) return;
+
+    supabaseClient
+      .channel("public:station_" + currentStation)
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "station_submissions",
+        filter: "station_id=eq." + currentStation
+      }, payload => {
+        let rec = payload.new;
+        if (!rec) return;
+
+        // Teacher Gate: Clamp Approval
+        if (rec.inspection_approved && !worksheetState.inspectionApproved) {
+          worksheetState.inspectionApproved = true;
+          let btn = document.getElementById("btnClampCheck");
+          if (btn) {
+            btn.textContent = "✅ Stop-Block Approved by Instructor!";
+            btn.style.background = "var(--emerald)";
+            btn.style.color = "#000";
+          }
+          alert("🎉 Stop-Block Approved by Instructor! You are now authorized to unlock Section 6 and perform the Live Stunt Drop.");
+          unlockSection(6);
+          confetti({ particleCount: 120, spread: 80 });
+        }
+
+        // Teacher Grade Returned
+        if (rec.teacher_grade !== null && !isNaN(rec.teacher_grade)) {
+          displayTeacherGrade(rec.teacher_grade, rec.teacher_feedback);
+          confetti({ particleCount: 150, spread: 90 });
+        }
+      })
+      .subscribe();
+  }
+
+  function displayTeacherGrade(score, feedback) {
+    let card = document.getElementById("officialGradeCard");
+    let scoreEl = document.getElementById("gradeScoreDisplay");
+    let feedEl = document.getElementById("gradeFeedbackDisplay");
+    if (card && scoreEl && feedEl) {
+      scoreEl.textContent = `${score} / 100`;
+      feedEl.textContent = feedback ? `"${feedback}"` : "Master Stunt Calibration! Completed with distinction.";
+      card.style.display = "block";
+    }
+  }
+
+  function updateProgress() {
+    let pct = Math.round((worksheetState.unlockedStep / 7) * 100);
+    worksheetState.progress = Math.min(100, pct);
+    document.getElementById("progressFill").style.width = `${worksheetState.progress}%`;
+    document.getElementById("progressPct").textContent = `${worksheetState.progress}%`;
+
+    let hCalc = parseFloat(document.getElementById("inversionCalcH").value);
+    if (!isNaN(hCalc)) {
+      if (hCalc >= 0.28 && hCalc <= 0.44) {
+        document.getElementById("safeRangeStatus").textContent = "SAFE (28–44 cm) 🟢";
+        document.getElementById("safeRangeStatus").style.color = "var(--emerald)";
+      } else {
+        document.getElementById("safeRangeStatus").textContent = "WARNING: OUT OF SAFE RANGE 🔴";
+        document.getElementById("safeRangeStatus").style.color = "var(--crimson)";
+      }
+    }
+  }
+
+  function listenToClassroomControl() {
+    if (!supabaseClient) return;
+
+    supabaseClient
+      .channel("public:classroom_control")
+      .on("postgres_changes", { event: "*", schema: "public", table: "classroom_control" }, payload => {
+        let rec = payload.new;
+        if (rec && rec.lab_started) {
+          let bubble = document.getElementById("daveSpeechTxt");
+          if (bubble) {
+            bubble.innerHTML = "🎬 <strong>CAMERA ROLLING!</strong> The instructor has officially started the lab session! Calibrate your track and prepare for the drop!";
+          }
+        }
+        if (rec && rec.countdown_active) {
+          let targetMs = rec.countdown_target_ms || (Date.now() + 5000);
+          triggerSynchronizedCountdown(targetMs);
+        }
+      })
+      .subscribe();
+  }
+
+  function triggerSynchronizedCountdown(targetMs) {
+    let overlay = document.getElementById("syncCountdownOverlay");
+    let num = document.getElementById("countdownBigNum");
+    overlay.classList.add("active");
+
+    let timer = setInterval(() => {
+      let remainMs = targetMs - Date.now();
+      let c = Math.ceil(remainMs / 1000);
+
+      if (c > 0) {
+        num.textContent = c;
+      } else if (c === 0 || remainMs > -1200) {
+        num.textContent = "ACTION!";
+        num.style.color = "var(--emerald)";
+      } else {
+        clearInterval(timer);
+        setTimeout(() => {
+          overlay.classList.remove("active");
+          num.style.color = "#fff";
+        }, 800);
+      }
+    }, 100);
+  }
+
+  
+  // =========================================================
+  // ZERO DATA-LOSS GUARANTEE & INTRA-GROUP PEER SYNCHRONIZATION
+  // =========================================================
+
+  function updateSaveIndicator(status) {
+    let ind = document.getElementById("saveIndicator");
+    let txt = document.getElementById("saveStatusTxt");
+    if (!ind || !txt) return;
+
+    if (status === "saving") {
+      ind.style.background = "#EFF6FF";
+      ind.style.borderColor = "#3B82F6";
+      ind.style.color = "#1D4ED8";
+      txt.textContent = "Syncing...";
+    } else if (status === "saved") {
+      ind.style.background = "#ECFDF5";
+      ind.style.borderColor = "#10B981";
+      ind.style.color = "#059669";
+      txt.textContent = "Auto-Saved";
+    }
+  }
+
+  function applyPeerSyncData(peerState) {
+    if (!peerState) return;
+
+    // Helper to safely set input only if NOT actively focused by the local student
+    function safeSet(id, val) {
+      let el = document.getElementById(id);
+      if (el && document.activeElement !== el && val !== undefined && val !== null) {
+        if (el.value !== val) el.value = val;
+      }
+    }
+
+    // Restore crew names
+    if (peerState.crew) {
+      safeSet("crewReleaser", peerState.crew.releaser);
+      safeSet("crewMeasurer", peerState.crew.measurer);
+      safeSet("crewScribe", peerState.crew.scribe);
+      safeSet("crewChecker", peerState.crew.checker);
+    }
+
+    // Checked release limit
+    if (peerState.checkedReleaseLimit) {
+      safeSet("maxSafeH", peerState.checkedReleaseLimit);
+    }
+
+    // Section 1 predictions
+    if (peerState.predictions) {
+      safeSet("teacherTestH", peerState.predictions.testH);
+      safeSet("predChoice", peerState.predictions.predChoice);
+      safeSet("predExplain", peerState.predictions.predExplain);
+      safeSet("obsResult", peerState.predictions.obsResult);
+    }
+
+    // Section 2 Table points
+    if (peerState.tablePoints && Array.isArray(peerState.tablePoints)) {
+      worksheetState.tablePoints = peerState.tablePoints;
+      peerState.tablePoints.forEach((p, idx) => {
+        if (p.h !== null) safeSet(`tbl_h_${idx}`, p.h);
+        if (p.x !== null) safeSet(`tbl_x_${idx}`, p.x);
+        if (p.v !== null) safeSet(`tbl_v_${idx}`, p.v);
+        if (p.v2 !== null) {
+          let c = document.getElementById(`tbl_v2_cell_${idx}`);
+          if (c) c.textContent = Number(p.v2).toFixed(2);
+        }
+      });
+    }
+
+    // Section 3 Graph
+    if (peerState.graphLabels) {
+      safeSet("yAxisLabel", peerState.graphLabels.yAxis);
+      safeSet("xAxisLabel", peerState.graphLabels.xAxis);
+    }
+    if (peerState.calibratedParams) {
+      safeSet("calcSlopeA", peerState.calibratedParams.slopeA);
+      safeSet("calcInterceptB", peerState.calibratedParams.interceptB);
+      safeSet("slopeComparison", peerState.calibratedParams.comparison);
+    }
+
+    // Section 4 Energy check
+    if (peerState.energyCheck) {
+      safeSet("energyRetainedPct", peerState.energyCheck.retainedPct);
+      safeSet("energyGapPct", peerState.energyCheck.gapPct);
+      safeSet("energyGapExplain", peerState.energyCheck.explanation);
+    }
+
+    // Section 5 Inversion
+    if (peerState.inversion) {
+      safeSet("inversionV2Req", peerState.inversion.v2Req);
+      safeSet("inversionCalcH", peerState.inversion.calcH);
+      safeSet("inversionWorkText", peerState.inversion.workText);
+    }
+
+    // Section 6 Live stunt
+    if (peerState.stunt) {
+      safeSet("clampedH", peerState.stunt.clampedH);
+      safeSet("actualLandingX", peerState.stunt.actualX);
+      safeSet("landingDelta", peerState.stunt.delta);
+      safeSet("stuntPctError", peerState.stunt.pctError);
+    }
+
+    // Exit work
+    if (peerState.exitWork) {
+      safeSet("exitStudentName", peerState.exitWork.studentName);
+      safeSet("exitQ1", peerState.exitWork.q1);
+      safeSet("exitQ2", peerState.exitWork.q2);
+    }
+
+    // Unlocked steps
+    if (peerState.unlockedStep && peerState.unlockedStep > worksheetState.unlockedStep) {
+      unlockSection(peerState.unlockedStep);
+    }
+
+    updateProgress();
+  }
+
+  // COMPLETE CLASSROOM SESSION RESET (TRIGGERED BY INSTRUCTOR FOR NEW PERIOD)
+  function executeSessionReset() {
+    if (currentStation) {
+      // 1. SAFETY NET: Take an emergency backup snapshot before clearing
+      try {
+        let existing = localStorage.getItem("stunt_lab_state_" + currentStation);
+        if (existing) {
+          localStorage.setItem("stunt_emergency_backup_" + currentStation + "_" + Date.now(), existing);
+        }
+      } catch(e) {}
+
+      // 2. Wipe station-specific state
+      localStorage.removeItem("stunt_lab_state_" + currentStation);
+      localStorage.removeItem("stunt_locked_station");
+    }
+
+    localStorage.removeItem("stunt_target_revealed");
+    currentStation = null;
+
+    // 3. Clear all inputs and textareas
+    document.querySelectorAll("input[type='text'], input[type='number'], textarea").forEach(el => {
+      if (el.id !== "targetXDisplay") el.value = "";
+    });
+    document.querySelectorAll("select").forEach(el => {
+      if (el.id !== "modalStationSelect") el.selectedIndex = 0;
+    });
+
+    // 4. Clear table auto-squared cells
+    for (let i = 0; i < 4; i++) {
+      let c = document.getElementById(`tbl_v2_cell_${i}`);
+      if (c) c.textContent = "--";
+    }
+
+    // 5. Clear FBD Canvas
+    clearFbdCanvas();
+
+    // 6. Reset LOL Chart
+    worksheetState.lol = { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 };
+    renderLolBars();
+
+    // 7. Reset Graph
+    resetBestFitLine();
+
+    // 8. Re-lock sections 2-6
+    for (let s = 2; s <= 6; s++) {
+      let card = document.getElementById(`sec${s}`);
+      if (card) {
+        card.classList.add("locked");
+        card.classList.remove("unlocked");
+      }
+    }
+    worksheetState.unlockedStep = 1;
+    worksheetState.progress = 0;
+    worksheetState.status = "in_progress";
+    worksheetState.inspectionRequested = false;
+    worksheetState.inspectionApproved = false;
+
+    // 9. Re-show Station Check-In Modal
+    let modal = document.getElementById("stationModal");
+    if (modal) modal.style.display = "flex";
+
+    let pinInput = document.getElementById("modalStationPin");
+    if (pinInput) pinInput.value = "";
+
+    // 10. Re-hide target range
+    let lockedBanner = document.getElementById("targetRangeLockedState");
+    let unlockedCard = document.getElementById("targetRangeUnlockedState");
+    if (lockedBanner) lockedBanner.style.display = "block";
+    if (unlockedCard) unlockedCard.style.display = "none";
+
+    alert("🔄 Lab session has been reset by the instructor for a new class session. Please select your station and enter your PIN.");
+  }
+
+  // =========================================================
+  // ACADEMIC LAB REPORT EXPORT (PDF / PRINT)
+  // =========================================================
+  function exportWorksheetAsPdf() {
+    // Populate Print Header Data
+    let stName = document.getElementById("stationDisplayTxt") ? document.getElementById("stationDisplayTxt").textContent : (currentStation || "Station 1");
+    let printStEl = document.getElementById("printStationName");
+    if (printStEl) printStEl.textContent = stName;
+
+    let printDateEl = document.getElementById("printDate");
+    if (printDateEl) {
+      let now = new Date();
+      printDateEl.textContent = "Date: " + now.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+
+    let r = document.getElementById("crewReleaser") ? document.getElementById("crewReleaser").value.trim() : "";
+    let m = document.getElementById("crewMeasurer") ? document.getElementById("crewMeasurer").value.trim() : "";
+    let s = document.getElementById("crewScribe") ? document.getElementById("crewScribe").value.trim() : "";
+    let c = document.getElementById("crewChecker") ? document.getElementById("crewChecker").value.trim() : "";
+
+    if (document.getElementById("printCrewReleaser")) document.getElementById("printCrewReleaser").textContent = r || "Unassigned";
+    if (document.getElementById("printCrewMeasurer")) document.getElementById("printCrewMeasurer").textContent = m || "Unassigned";
+    if (document.getElementById("printCrewScribe")) document.getElementById("printCrewScribe").textContent = s || "Unassigned";
+    if (document.getElementById("printCrewChecker")) document.getElementById("printCrewChecker").textContent = c || "Unassigned";
+
+    // Ensure state is 100% saved before printing
+    saveAndSync();
+
+    // Trigger Native Print / PDF dialog
+    window.print();
+  }
+
+  // Global Input & Change Auto-Save Event Listeners (Zero Data-Loss)
+  document.addEventListener("input", (e) => {
+    if (e.target.matches("input, textarea, select")) {
+      saveAndSync();
+    }
+  });
+
+  document.addEventListener("change", (e) => {
+    if (e.target.matches("input, textarea, select")) {
+      saveAndSync();
+    }
+  });
+
+  window.addEventListener("beforeunload", () => {
+    saveAndSync();
+  });
+
+  // Rolling 5-second resilient background backup heartbeat
+  setInterval(() => {
+    if (currentStation) {
+      saveAndSync();
+    }
+  }, 5000);
+
+  window.addEventListener("DOMContentLoaded", init);
+</script>
+
+</body>
+</html>
