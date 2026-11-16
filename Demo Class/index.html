@@ -3251,6 +3251,7 @@
       if (modalEl) modalEl.classList.remove("shake-error");
       updateStationBadge();
       restoreWorksheetState();
+      saveAndSync();
       listenToStationUpdates();
       checkTargetRangeReveal(false);
     } else {
@@ -4330,14 +4331,22 @@
     let deltaVal = parseFloat(fullState.stunt.delta);
     let pctErrVal = parseFloat(fullState.stunt.pctError);
 
+    let crewNames = [
+      fullState.crew.releaser,
+      fullState.crew.measurer,
+      fullState.crew.scribe,
+      fullState.crew.checker
+    ].filter(n => n && n.trim()).join(", ");
+
     let payload = {
       station_id: currentStation,
+      crew_members: crewNames,
       progress_pct: fullState.progress,
       current_step: fullState.unlockedStep,
       slope: !isNaN(slopeVal) ? slopeVal : 0,
       intercept: !isNaN(interceptVal) ? interceptVal : 0,
       calc_h: !isNaN(calcHVal) ? calcHVal : 0,
-      actual_X: !isNaN(actXVal) ? actXVal : null,
+      actual_x: !isNaN(actXVal) ? actXVal : null,
       delta: !isNaN(deltaVal) ? deltaVal : null, // Preserves exact 0.0 cm deviation!
       accuracy_pct: !isNaN(pctErrVal) ? Math.max(0, 100 - pctErrVal) : null,
       stunt_status: fullState.status,

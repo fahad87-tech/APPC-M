@@ -6,168 +6,8 @@
   <title>Mission Control • Scene 42 Teacher Command Telemetry</title>
   
   <!-- Supabase JS Client & Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-  // CLASSROOM SESSION RESET & RESTART LOGIC
-  async function confirmResetLabSession() {
-    let code = prompt("⚠️ DANGER: RESTART LAB FOR NEW CLASS SESSION\n\nThis will wipe all entered student data, clear all student portals back to the Check-In screen, and reset the leaderboard.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
-    if (code !== "9999") {
-      if (code !== null) alert("Incorrect PIN. Reset aborted.");
-      return;
-    }
-
-    let timestamp = Date.now();
-
-    // 1. BroadcastChannel reset to all connected student screens
-    try {
-      if (channel) {
-        channel.postMessage({
-          type: "RESET_ALL_STATIONS",
-          timestamp: timestamp
-        });
-      }
-    } catch(e) {
-      console.warn("BroadcastChannel reset notice:", e);
-    }
-
-    // 2. localStorage reset trigger
-    localStorage.setItem("stunt_classroom_reset_trigger", timestamp.toString());
-    localStorage.removeItem("stunt_target_revealed");
-
-    // 3. Supabase reset if connected
-    if (supabaseClient) {
-      try {
-        await supabaseClient.from("classroom_control").update({
-          lab_started: false,
-          target_range_revealed: false,
-          reset_session_ms: timestamp,
-          updated_at: new Date().toISOString()
-        }).eq("id", "global");
-
-        await supabaseClient.from("station_submissions").delete().neq("station_id", "");
-      } catch(e) {
-        console.warn("Supabase reset notice:", e);
-      }
-    }
-
-    // 4. Reset local stations state
-    Object.keys(stations).forEach(key => {
-      stations[key].status = 'not_started';
-      stations[key].progress = 0;
-      stations[key].step = 1;
-      stations[key].slope = null;
-      stations[key].intercept = null;
-      stations[key].calc_h = null;
-      stations[key].actual_X = null;
-      stations[key].delta = null;
-      stations[key].accuracy_pct = null;
-      stations[key].q1 = "";
-      stations[key].q2 = "";
-      stations[key].grade = undefined;
-      stations[key].feedback = "";
-    });
-
-    // Reset UI buttons
-    let btnStart = document.getElementById("btnStartLab");
-    if (btnStart) {
-      btnStart.style.background = "";
-      btnStart.innerHTML = "🚀 Officially Start Lab!";
-    }
-    let btnRev = document.getElementById("btnRevealRange");
-    if (btnRev) {
-      btnRev.innerHTML = "🎯 Reveal Target Range";
-      btnRev.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
-    }
-
-    renderLeaderboard();
-    if (document.getElementById("gradingView").classList.contains("active")) {
-      renderGradingQueue();
-    }
-
-    alert("✅ Lab session reset! All connected student portals have been cleared for the new class session.");
-  }
-
-</script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js">
-  // CLASSROOM SESSION RESET & RESTART LOGIC
-  async function confirmResetLabSession() {
-    let code = prompt("⚠️ DANGER: RESTART LAB FOR NEW CLASS SESSION\n\nThis will wipe all entered student data, clear all student portals back to the Check-In screen, and reset the leaderboard.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
-    if (code !== "9999") {
-      if (code !== null) alert("Incorrect PIN. Reset aborted.");
-      return;
-    }
-
-    let timestamp = Date.now();
-
-    // 1. BroadcastChannel reset to all connected student screens
-    try {
-      if (channel) {
-        channel.postMessage({
-          type: "RESET_ALL_STATIONS",
-          timestamp: timestamp
-        });
-      }
-    } catch(e) {
-      console.warn("BroadcastChannel reset notice:", e);
-    }
-
-    // 2. localStorage reset trigger
-    localStorage.setItem("stunt_classroom_reset_trigger", timestamp.toString());
-    localStorage.removeItem("stunt_target_revealed");
-
-    // 3. Supabase reset if connected
-    if (supabaseClient) {
-      try {
-        await supabaseClient.from("classroom_control").update({
-          lab_started: false,
-          target_range_revealed: false,
-          reset_session_ms: timestamp,
-          updated_at: new Date().toISOString()
-        }).eq("id", "global");
-
-        await supabaseClient.from("station_submissions").delete().neq("station_id", "");
-      } catch(e) {
-        console.warn("Supabase reset notice:", e);
-      }
-    }
-
-    // 4. Reset local stations state
-    Object.keys(stations).forEach(key => {
-      stations[key].status = 'not_started';
-      stations[key].progress = 0;
-      stations[key].step = 1;
-      stations[key].slope = null;
-      stations[key].intercept = null;
-      stations[key].calc_h = null;
-      stations[key].actual_X = null;
-      stations[key].delta = null;
-      stations[key].accuracy_pct = null;
-      stations[key].q1 = "";
-      stations[key].q2 = "";
-      stations[key].grade = undefined;
-      stations[key].feedback = "";
-    });
-
-    // Reset UI buttons
-    let btnStart = document.getElementById("btnStartLab");
-    if (btnStart) {
-      btnStart.style.background = "";
-      btnStart.innerHTML = "🚀 Officially Start Lab!";
-    }
-    let btnRev = document.getElementById("btnRevealRange");
-    if (btnRev) {
-      btnRev.innerHTML = "🎯 Reveal Target Range";
-      btnRev.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
-    }
-
-    renderLeaderboard();
-    if (document.getElementById("gradingView").classList.contains("active")) {
-      renderGradingQueue();
-    }
-
-    alert("✅ Lab session reset! All connected student portals have been cleared for the new class session.");
-  }
-
-</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
   <style>
     :root {
@@ -906,47 +746,50 @@
       name: "Station 1: Speed Demons",
       pin: "1111",
       rank: "🥇",
-      progress: 85,
-      slope: 13.14,
-      intercept: 0.194,
-      calc_h: 37.6,
-      actual_X: 0.892,
-      delta: 0.8,
-      accuracy_pct: 99.1,
-      status: "ready_for_drop",
-      crew: { releaser: "Marcus Vance", measurer: "Elena Rostova", scribe: "Aisha Khan", checker: "Leo Chen" },
-      q1: "Ideal 19.6 m/s² slope ignored rotation; our empirical line accounts for Dave's 30% rotational energy haircut.",
-      q2: "Dave rolls without slipping, so static friction converts translational energy into rotational kinetic energy without heat."
+      progress: 0,
+      slope: null,
+      intercept: null,
+      calc_h: null,
+      actual_x: null,
+      actual_X: null,
+      delta: null,
+      accuracy_pct: null,
+      status: "calibrating",
+      crew: { releaser: "", measurer: "", scribe: "", checker: "" },
+      q1: "",
+      q2: ""
     },
     station_2: {
       name: "Station 2: Vector Vanguard",
       pin: "2222",
       rank: "🥈",
-      progress: 100,
-      slope: 13.82,
-      intercept: -0.110,
-      calc_h: 38.0,
-      actual_X: 0.904,
-      delta: 0.4,
-      accuracy_pct: 99.6,
-      status: "stunt_complete",
-      crew: { releaser: "Chloe Bennett", measurer: "Devon Miller", scribe: "Maya Patel", checker: "Sam Rivera" },
-      q1: "Textbook equations assume point masses; our sphere has rotational inertia that stores energy.",
-      q2: "The track is cold because no sliding occurs. The 28.6% went into spin."
+      progress: 0,
+      slope: null,
+      intercept: null,
+      calc_h: null,
+      actual_x: null,
+      actual_X: null,
+      delta: null,
+      accuracy_pct: null,
+      status: "calibrating",
+      crew: { releaser: "", measurer: "", scribe: "", checker: "" },
+      q1: "",
+      q2: ""
     },
     station_3: {
       name: "Station 3: Quantum Riders",
       pin: "3333",
       rank: "🥉",
-      progress: 60,
-      slope: 13.45,
-      intercept: 0.082,
-      calc_h: 37.8,
+      progress: 0,
+      slope: null,
+      intercept: null,
+      calc_h: null,
+      actual_x: null,
       actual_X: null,
       delta: null,
       accuracy_pct: null,
       status: "calibrating",
-      crew: { releaser: "Julian Hayes", measurer: "Zara Novak", scribe: "", checker: "" },
+      crew: { releaser: "", measurer: "", scribe: "", checker: "" },
       q1: "",
       q2: ""
     },
@@ -954,15 +797,16 @@
       name: "Station 4: Apex Phoenix",
       pin: "4444",
       rank: "4th",
-      progress: 75,
-      slope: 12.98,
-      intercept: 0.210,
-      calc_h: 38.2,
+      progress: 0,
+      slope: null,
+      intercept: null,
+      calc_h: null,
+      actual_x: null,
       actual_X: null,
       delta: null,
       accuracy_pct: null,
-      status: "awaiting_inspection",
-      crew: { releaser: "Lucas Scott", measurer: "", scribe: "", checker: "" },
+      status: "calibrating",
+      crew: { releaser: "", measurer: "", scribe: "", checker: "" },
       q1: "",
       q2: ""
     }
@@ -1174,20 +1018,33 @@
             let st = stations[rec.station_id];
             if (rec.group_name && rec.group_name !== 'Unnamed Crew') st.name = rec.group_name;
             if (rec.progress_pct !== null && !isNaN(rec.progress_pct)) st.progress = Number(rec.progress_pct);
-            if (rec.slope !== null && !isNaN(rec.slope)) st.slope = Number(rec.slope);
-            if (rec.intercept !== null && !isNaN(rec.intercept)) st.intercept = Number(rec.intercept);
-            if (rec.calc_h !== null && !isNaN(rec.calc_h)) st.calc_h = Number(rec.calc_h) * 100;
-            if (rec.actual_X !== null && !isNaN(rec.actual_X)) st.actual_X = Number(rec.actual_X);
-            if (rec.delta !== null && !isNaN(rec.delta)) st.delta = Number(rec.delta);
-            if (rec.accuracy_pct !== null && !isNaN(rec.accuracy_pct)) st.accuracy_pct = Number(rec.accuracy_pct);
-            if (rec.stunt_status) st.status = rec.stunt_status;
+            if (rec.current_step !== null && !isNaN(rec.current_step)) st.step = Number(rec.current_step);
+            if (rec.slope !== null && !isNaN(rec.slope) && Number(rec.slope) !== 0) st.slope = Number(rec.slope);
+            if (rec.intercept !== null && !isNaN(rec.intercept) && Number(rec.intercept) !== 0) st.intercept = Number(rec.intercept);
+            if (rec.calc_h !== null && !isNaN(rec.calc_h) && Number(rec.calc_h) !== 0) st.calc_h = Number(rec.calc_h);
+            let actX = (rec.actual_x !== undefined && rec.actual_x !== null) ? rec.actual_x : rec.actual_X;
+            st.actual_x = (actX !== null && actX !== undefined && !isNaN(actX)) ? Number(actX) : null;
+            st.actual_X = st.actual_x;
+            st.delta = (rec.delta !== null && !isNaN(rec.delta)) ? Number(rec.delta) : null;
+            st.accuracy_pct = (rec.accuracy_pct !== null && !isNaN(rec.accuracy_pct)) ? Number(rec.accuracy_pct) : null;
+            st.status = rec.stunt_status || "calibrating";
             if (rec.exit_answers) {
               st.q1 = rec.exit_answers.q1 || "";
               st.q2 = rec.exit_answers.q2 || "";
             }
             if (rec.teacher_grade !== null && !isNaN(rec.teacher_grade)) st.grade = Number(rec.teacher_grade);
             if (rec.teacher_feedback) st.feedback = rec.teacher_feedback;
-            if (rec.full_payload && rec.full_payload.crew) st.crew = rec.full_payload.crew;
+            if (rec.full_payload && rec.full_payload.crew) {
+              st.crew = rec.full_payload.crew;
+            } else if (rec.crew_members) {
+              let parts = rec.crew_members.split(",").map(p => p.trim());
+              st.crew = {
+                releaser: parts[0] || "",
+                measurer: parts[1] || "",
+                scribe: parts[2] || "",
+                checker: parts[3] || ""
+              };
+            }
           }
         });
         renderLeaderboard();
@@ -1263,7 +1120,7 @@
 
       let targetHDisplay = isMasked
         ? `<span class="val-chip gold">CLASSIFIED 🎯</span>`
-        : `<span class="val gold">${st.calc_h ? st.calc_h.toFixed(1) + ' cm' : '--'}</span>`;
+        : `<span class="val gold">${st.calc_h ? (st.calc_h <= 1.0 ? (st.calc_h * 100).toFixed(1) + ' cm' : Number(st.calc_h).toFixed(1) + ' cm') : '--'}</span>`;
 
       let pinDisplay = isRosterPinRevealMode ? `🔑 PIN: ${st.pin}` : (isMasked ? `🔒 PIN PROTECTED` : `PIN: ${st.pin}`);
       let pinBadgeClass = isRosterPinRevealMode ? `pin-badge revealed` : (isMasked ? `pin-badge locked` : `pin-badge`);
@@ -1705,12 +1562,15 @@
           let st = stations[rec.station_id];
           if (rec.group_name && rec.group_name !== 'Unnamed Crew') st.name = rec.group_name;
           if (rec.progress_pct !== null && !isNaN(rec.progress_pct)) st.progress = Number(rec.progress_pct);
-          if (rec.slope !== null && !isNaN(rec.slope)) st.slope = Number(rec.slope);
-          if (rec.intercept !== null && !isNaN(rec.intercept)) st.intercept = Number(rec.intercept);
-          if (rec.calc_h !== null && !isNaN(rec.calc_h)) st.calc_h = Number(rec.calc_h) * 100;
-          if (rec.actual_X !== null && !isNaN(rec.actual_X)) st.actual_X = Number(rec.actual_X);
-          if (rec.delta !== null && !isNaN(rec.delta)) st.delta = Number(rec.delta);
-          if (rec.accuracy_pct !== null && !isNaN(rec.accuracy_pct)) st.accuracy_pct = Number(rec.accuracy_pct);
+          if (rec.current_step !== null && !isNaN(rec.current_step)) st.step = Number(rec.current_step);
+          if (rec.slope !== null && !isNaN(rec.slope) && Number(rec.slope) !== 0) st.slope = Number(rec.slope);
+          if (rec.intercept !== null && !isNaN(rec.intercept) && Number(rec.intercept) !== 0) st.intercept = Number(rec.intercept);
+          if (rec.calc_h !== null && !isNaN(rec.calc_h) && Number(rec.calc_h) !== 0) st.calc_h = Number(rec.calc_h);
+          let actX = (rec.actual_x !== undefined && rec.actual_x !== null) ? rec.actual_x : rec.actual_X;
+          st.actual_x = (actX !== null && actX !== undefined && !isNaN(actX)) ? Number(actX) : null;
+          st.actual_X = st.actual_x;
+          st.delta = (rec.delta !== null && !isNaN(rec.delta)) ? Number(rec.delta) : null;
+          st.accuracy_pct = (rec.accuracy_pct !== null && !isNaN(rec.accuracy_pct)) ? Number(rec.accuracy_pct) : null;
           if (rec.stunt_status) st.status = rec.stunt_status;
           if (rec.exit_answers) {
             st.q1 = rec.exit_answers.q1 || "";
@@ -1718,17 +1578,28 @@
           }
           if (rec.teacher_grade !== null && !isNaN(rec.teacher_grade)) st.grade = Number(rec.teacher_grade);
           if (rec.teacher_feedback) st.feedback = rec.teacher_feedback;
+          if (rec.full_payload && rec.full_payload.crew) {
+            st.crew = rec.full_payload.crew;
+          } else if (rec.crew_members) {
+            let parts = rec.crew_members.split(",").map(p => p.trim());
+            st.crew = {
+              releaser: parts[0] || "",
+              measurer: parts[1] || "",
+              scribe: parts[2] || "",
+              checker: parts[3] || ""
+            };
+          }
 
           renderLeaderboard();
 
-    if (localStorage.getItem("stunt_target_revealed") === "true") {
-      let rBtn = document.getElementById("btnRevealRange");
-      if (rBtn) {
-        rBtn.style.background = "#059669";
-        rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
-      }
-    }
+          if (localStorage.getItem("stunt_target_revealed") === "true") {
+            let rBtn = document.getElementById("btnRevealRange");
+            if (rBtn) {
+              rBtn.style.background = "#059669";
+              rBtn.style.borderColor = "#10B981";
+              rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+            }
+          }
 
           renderMultiGraph();
           renderGradingQueue();
@@ -1775,7 +1646,26 @@
           updated_at: new Date().toISOString()
         }).eq("id", "global");
 
-        await supabaseClient.from("station_submissions").delete().neq("station_id", "");
+        await supabaseClient.from("station_submissions").update({
+          crew_members: "",
+          progress_pct: 0,
+          current_step: 1,
+          points: [],
+          slope: 0,
+          intercept: 0,
+          calc_h: 0,
+          actual_x: null,
+          delta: null,
+          accuracy_pct: null,
+          stunt_status: "calibrating",
+          inspection_approved: false,
+          teacher_grade: null,
+          teacher_feedback: "",
+          graded_at: null,
+          exit_answers: {},
+          full_payload: {},
+          updated_at: new Date().toISOString()
+        }).neq("station_id", "");
       } catch(e) {
         console.warn("Supabase reset notice:", e);
       }
@@ -1783,18 +1673,20 @@
 
     // 4. Reset local stations state
     Object.keys(stations).forEach(key => {
-      stations[key].status = 'not_started';
+      stations[key].status = 'calibrating';
       stations[key].progress = 0;
       stations[key].step = 1;
       stations[key].slope = null;
       stations[key].intercept = null;
       stations[key].calc_h = null;
+      stations[key].actual_x = null;
       stations[key].actual_X = null;
       stations[key].delta = null;
       stations[key].accuracy_pct = null;
+      stations[key].crew = { releaser: "", measurer: "", scribe: "", checker: "" };
       stations[key].q1 = "";
       stations[key].q2 = "";
-      stations[key].grade = undefined;
+      stations[key].grade = null;
       stations[key].feedback = "";
     });
 
