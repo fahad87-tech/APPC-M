@@ -528,6 +528,37 @@
       box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
     }
 
+    /* TEACHER COMMAND AUTHORIZATION OVERLAY */
+    .teacher-auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(16px);
+      z-index: 100000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+    .teacher-auth-card {
+      background: #FFFFFF;
+      border: 2px solid #CBD5E1;
+      border-radius: 20px;
+      padding: 38px 42px;
+      max-width: 480px;
+      width: 100%;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: modalPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalPopIn {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
     /* 30% HAIRCUT WALL */
     .multi-graph-card {
       background: var(--card-bg);
@@ -636,10 +667,48 @@
 </head>
 <body>
 
+  <!-- TEACHER LOGIN & COMMAND AUTHORIZATION MODAL -->
+  <div class="teacher-auth-overlay" id="teacherAuthModal" style="display: none;">
+    <div class="teacher-auth-card">
+      <div style="font-size: 40px; margin-bottom: 6px;">🎬</div>
+      <h2 style="font-size: 26px; font-weight: 900; color: #0F172A; margin: 0 0 6px 0;">Teacher Mission Control</h2>
+      <div style="font-size: 15px; color: #64748B; font-weight: 600; margin-bottom: 22px; text-align: center;">
+        AP Physics 1 • Stunt Calibration Lab Command Center
+      </div>
+
+      <div style="background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 12px; padding: 14px 18px; margin-bottom: 22px; width: 100%; box-sizing: border-box; text-align: left;">
+        <div style="font-size: 14px; font-weight: 900; color: #1E40AF; display: flex; align-items: center; gap: 6px;">
+          🛡️ Student Lock Active
+        </div>
+        <div style="font-size: 13.5px; color: #2563EB; font-weight: 600; margin-top: 4px; line-height: 1.45;">
+          Student portals cannot log in until you authorize this cockpit. Logging in automatically generates randomized 4-digit PINs for all lab stations and unlocks student check-ins.
+        </div>
+      </div>
+
+      <div style="width: 100%; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px;">
+        <label style="font-size: 13.5px; font-weight: 800; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; text-align: left;">Instructor Master PIN</label>
+        <input type="password" id="teacherMasterPinInput" maxlength="4" placeholder="••••" onkeydown="if(event.key==='Enter') submitTeacherLogin()"
+               style="width: 100%; box-sizing: border-box; font-size: 34px; text-align: center; letter-spacing: 0.4em; padding: 12px 16px; border-radius: 12px; border: 2px solid #CBD5E1; color: #0F172A; font-weight: 900; outline: none; background: #FFFFFF;" />
+        <div id="teacherAuthError" style="display: none; color: #DC2626; font-size: 14px; font-weight: 800; text-align: center; margin-top: 4px;">
+          ⚠️ Incorrect PIN! Enter Master PIN (9999) to unlock.
+        </div>
+      </div>
+
+      <button onclick="submitTeacherLogin()" style="width: 100%; background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%); color: #FFFFFF; font-size: 17px; font-weight: 900; padding: 14px 20px; border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35); display: flex; align-items: center; justify-content: center; gap: 8px;">
+        🚀 Authorize & Launch Mission Control
+      </button>
+    </div>
+  </div>
+
   <!-- TOP COMMAND BAR -->
   <div class="top-command-bar">
     <div class="command-brand">
-      <span class="brand-pill">Command Telemetry</span>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="brand-pill">Command Telemetry</span>
+        <span id="teacherAuthStatusPill" style="background: #ECFDF5; border: 1.5px solid #10B981; color: #065F46; font-size: 13px; font-weight: 800; padding: 2px 10px; border-radius: 20px;">
+          🟢 Instructor Authorized
+        </span>
+      </div>
       <h1>Scene 42: Teacher Master Cockpit</h1>
     </div>
 
@@ -654,6 +723,10 @@
     <div class="action-triggers">
       <button class="btn-roster" id="btnRosterToggle" onclick="toggleRosterPins()" title="Reveal station PINs and who has joined the lab on the front projector before starting">
         🔑 Reveal Station PINs & Roster
+      </button>
+
+      <button class="btn-action" id="btnRollPins" onclick="rollNewRandomPins()" style="background: #4F46E5; border-color: #6366F1; color: #FFFFFF; font-weight: 800;" title="Regenerate random 4-digit security PINs for all lab stations">
+        🎲 Re-Roll Random PINs
       </button>
 
       <button class="btn-start-lab" id="btnStartLab" onclick="officiallyStartLab()" title="Officially commence the lab session across all connected student screens">
@@ -674,6 +747,10 @@
 
       <button class="btn-reveal" onclick="openRevealCeremony()">
         🏆 Reveal Contract Winners!
+      </button>
+
+      <button class="btn-action" id="btnLockCockpit" onclick="lockTeacherCockpit()" style="background: #334155; border-color: #475569; color: #F1F5F9; font-weight: 800;" title="Lock Mission Control and sign out">
+        🔒 Lock Cockpit
       </button>
 
       <button class="btn-action" id="btnResetLab" onclick="confirmResetLabSession()" style="background: #991B1B; border-color: #DC2626; color: #FFFFFF; font-weight: 800;" title="Reset all student stations, wipe input data, and start fresh for a new class session">
@@ -762,10 +839,17 @@
     }
   } catch(e) { console.warn("Supabase not configured, using local mock data.", e); }
 
+  const TEACHER_MASTER_PIN = "9999";
+  let isTeacherAuthorized = false;
+
+  function generateRandomPin() {
+    return Math.floor(1000 + Math.random() * 9000).toString();
+  }
+
   let stations = {
     station_1: {
       name: "Station 1: Speed Demons",
-      pin: "1111",
+      pin: generateRandomPin(),
       rank: "🥇",
       progress: 0,
       slope: null,
@@ -782,7 +866,7 @@
     },
     station_2: {
       name: "Station 2: Vector Vanguard",
-      pin: "2222",
+      pin: generateRandomPin(),
       rank: "🥈",
       progress: 0,
       slope: null,
@@ -799,7 +883,7 @@
     },
     station_3: {
       name: "Station 3: Quantum Riders",
-      pin: "3333",
+      pin: generateRandomPin(),
       rank: "🥉",
       progress: 0,
       slope: null,
@@ -816,7 +900,7 @@
     },
     station_4: {
       name: "Station 4: Apex Phoenix",
-      pin: "4444",
+      pin: generateRandomPin(),
       rank: "4th",
       progress: 0,
       slope: null,
@@ -840,6 +924,199 @@
   let revealedCards = {};            // Tracks per-card inspection reveals
   const classroomChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel("stunt_classroom_sync") : null;
 
+  function checkTeacherAuth() {
+    if (sessionStorage.getItem("stunt_teacher_auth") === "true") {
+      isTeacherAuthorized = true;
+      let modal = document.getElementById("teacherAuthModal");
+      if (modal) modal.style.display = "none";
+      updateTeacherAuthStatusUI(true);
+      return true;
+    } else {
+      isTeacherAuthorized = false;
+      let modal = document.getElementById("teacherAuthModal");
+      if (modal) {
+        modal.style.display = "flex";
+        let pinIn = document.getElementById("teacherMasterPinInput");
+        if (pinIn) setTimeout(() => pinIn.focus(), 200);
+      }
+      updateTeacherAuthStatusUI(false);
+      return false;
+    }
+  }
+
+  function updateTeacherAuthStatusUI(authorized) {
+    let pill = document.getElementById("teacherAuthStatusPill");
+    if (pill) {
+      if (authorized) {
+        pill.innerHTML = "🟢 Instructor Authorized";
+        pill.style.background = "#ECFDF5";
+        pill.style.borderColor = "#10B981";
+        pill.style.color = "#065F46";
+      } else {
+        pill.innerHTML = "🔒 Mission Control Locked";
+        pill.style.background = "#FEF2F2";
+        pill.style.borderColor = "#F87171";
+        pill.style.color = "#991B1B";
+      }
+    }
+  }
+
+  async function submitTeacherLogin() {
+    let pinInput = document.getElementById("teacherMasterPinInput");
+    let err = document.getElementById("teacherAuthError");
+    let pin = pinInput ? pinInput.value.trim() : "";
+
+    if (pin === TEACHER_MASTER_PIN) {
+      if (err) err.style.display = "none";
+      sessionStorage.setItem("stunt_teacher_auth", "true");
+      isTeacherAuthorized = true;
+      let modal = document.getElementById("teacherAuthModal");
+      if (modal) modal.style.display = "none";
+      updateTeacherAuthStatusUI(true);
+
+      // Save authorized state and broadcast random PINs to classroom
+      await onTeacherAuthorizedSession();
+    } else {
+      if (err) err.style.display = "block";
+      if (pinInput) {
+        pinInput.value = "";
+        pinInput.focus();
+      }
+    }
+  }
+
+  async function onTeacherAuthorizedSession() {
+    // Generate fresh random PINs if any station has legacy default or empty PIN
+    Object.keys(stations).forEach(key => {
+      if (!stations[key].pin || stations[key].pin === "1111" || stations[key].pin === "2222" || stations[key].pin === "3333" || stations[key].pin === "4444") {
+        stations[key].pin = generateRandomPin();
+      }
+    });
+
+    isLabStarted = true;
+    let btnStart = document.getElementById("btnStartLab");
+    if (btnStart) {
+      btnStart.style.background = "linear-gradient(135deg, #10B981 0%, #059669 100%)";
+      btnStart.innerHTML = "✅ Lab In Session";
+    }
+
+    await syncPinsToClassroom();
+    renderLeaderboard();
+    renderGradingQueue();
+  }
+
+  async function syncPinsToClassroom() {
+    let pinMap = {
+      station_1: stations.station_1.pin,
+      station_2: stations.station_2.pin,
+      station_3: stations.station_3.pin,
+      station_4: stations.station_4.pin
+    };
+
+    // 1. Supabase classroom_control update
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("classroom_control").update({
+          lab_started: true,
+          started_at_ms: Date.now(),
+          updated_at: new Date().toISOString()
+        }).eq("id", "global");
+      } catch(e) {
+        console.warn("Supabase classroom_control pin sync notice:", e);
+      }
+
+      // Update station_submissions with active PINs and teacher_online
+      for (let stKey of Object.keys(stations)) {
+        try {
+          await supabaseClient.from("station_submissions").update({
+            full_payload: {
+              pin: stations[stKey].pin,
+              teacher_online: isTeacherAuthorized,
+              updated_at_ms: Date.now()
+            }
+          }).eq("station_id", stKey);
+        } catch(e) {
+          console.warn(`Supabase pin sync notice for ${stKey}:`, e);
+        }
+      }
+    }
+
+    // 2. BroadcastChannel
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({
+          type: "TEACHER_LOGGED_IN",
+          teacher_online: isTeacherAuthorized,
+          pins: pinMap,
+          timestamp: Date.now()
+        });
+      } catch(e) {}
+    }
+
+    // 3. LocalStorage
+    try {
+      localStorage.setItem("stunt_teacher_online", isTeacherAuthorized ? "true" : "false");
+      localStorage.setItem("stunt_active_pins", JSON.stringify(pinMap));
+    } catch(e) {}
+  }
+
+  async function rollNewRandomPins() {
+    if (!confirm("🎲 RE-ROLL STATION PINs?\n\nThis will generate fresh randomized 4-digit security PINs for all 4 lab stations and broadcast them immediately.\n\nProceed?")) {
+      return;
+    }
+
+    Object.keys(stations).forEach(key => {
+      stations[key].pin = generateRandomPin();
+    });
+
+    await syncPinsToClassroom();
+    renderLeaderboard();
+    renderGradingQueue();
+
+    let pinSummary = Object.keys(stations).map(k => `${stations[k].name}: ${stations[k].pin}`).join("\n");
+    alert("🎲 NEW RANDOM STATION PINs GENERATED & SYNCED!\n\n" + pinSummary + "\n\nClick 'Reveal Station PINs & Roster' to display them on the classroom projector.");
+  }
+
+  async function lockTeacherCockpit() {
+    if (!confirm("🔒 LOCK MISSION CONTROL?\n\nThis will lock the Teacher Cockpit and prevent students from entering until you log back in.\n\nLock now?")) {
+      return;
+    }
+    sessionStorage.removeItem("stunt_teacher_auth");
+    isTeacherAuthorized = false;
+
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("classroom_control").update({
+          lab_started: false,
+          updated_at: new Date().toISOString()
+        }).eq("id", "global");
+
+        for (let stKey of Object.keys(stations)) {
+          await supabaseClient.from("station_submissions").update({
+            full_payload: {
+              pin: stations[stKey].pin,
+              teacher_online: false,
+              updated_at_ms: Date.now()
+            }
+          }).eq("station_id", stKey);
+        }
+      } catch(e) {}
+    }
+
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({
+          type: "TEACHER_LOGGED_OUT",
+          teacher_online: false,
+          timestamp: Date.now()
+        });
+      } catch(e) {}
+    }
+
+    localStorage.setItem("stunt_teacher_online", "false");
+    checkTeacherAuth();
+  }
+
   function init() {
     renderLeaderboard();
 
@@ -856,6 +1133,7 @@
     renderGradingQueue();
     fetchInitialSubmissions();
     setupRealtime();
+    checkTeacherAuth();
   }
 
   function toggleRosterPins() {
@@ -1039,6 +1317,9 @@
         data.forEach(rec => {
           if (stations[rec.station_id]) {
             let st = stations[rec.station_id];
+            if (rec.full_payload && rec.full_payload.pin) {
+              st.pin = rec.full_payload.pin.toString();
+            }
             if (rec.group_name && rec.group_name !== 'Unnamed Crew') st.name = rec.group_name;
             if (rec.progress_pct !== null && !isNaN(rec.progress_pct)) st.progress = Number(rec.progress_pct);
             if (rec.current_step !== null && !isNaN(rec.current_step)) st.step = Number(rec.current_step);
@@ -1592,6 +1873,9 @@
         let rec = payload.new;
         if (rec && stations[rec.station_id]) {
           let st = stations[rec.station_id];
+          if (rec.full_payload && rec.full_payload.pin) {
+            st.pin = rec.full_payload.pin.toString();
+          }
           if (rec.group_name && rec.group_name !== 'Unnamed Crew') st.name = rec.group_name;
           if (rec.progress_pct !== null && !isNaN(rec.progress_pct)) st.progress = Number(rec.progress_pct);
           if (rec.current_step !== null && !isNaN(rec.current_step)) st.step = Number(rec.current_step);
@@ -1646,11 +1930,13 @@
   async function confirmResetIndividualStation(stationKey) {
     let st = stations[stationKey];
     let stName = st ? st.name : stationKey;
-    if (!confirm(`⚠️ RESET ${stName.toUpperCase()}?\n\nThis will completely wipe all entered data, graph calibration, crew check-ins, and calculations back to blank for ${stName}.\n\nOther stations will NOT be affected.\n\nProceed with individual station reset?`)) {
+    if (!confirm(`⚠️ RESET ${stName.toUpperCase()}?\n\nThis will completely wipe all entered data, graph calibration, crew check-ins, and calculations back to blank for ${stName}.\n\nA fresh randomized PIN will be assigned to this station.\n\nOther stations will NOT be affected.\n\nProceed with individual station reset?`)) {
       return;
     }
 
     let timestamp = Date.now();
+    let newPin = generateRandomPin();
+    if (stations[stationKey]) stations[stationKey].pin = newPin;
 
     // 1. Cross-tab BroadcastChannel notification targeted to this station
     if (classroomChannel) {
@@ -1658,6 +1944,7 @@
         classroomChannel.postMessage({
           type: "RESET_INDIVIDUAL_STATION",
           station_id: stationKey,
+          new_pin: newPin,
           timestamp: timestamp
         });
       } catch(e) {
@@ -1670,6 +1957,9 @@
       localStorage.setItem("stunt_reset_trigger_" + stationKey, timestamp.toString());
       localStorage.removeItem("stunt_lab_state_" + stationKey);
       localStorage.removeItem("stunt_locked_station");
+      let activePins = JSON.parse(localStorage.getItem("stunt_active_pins") || "{}");
+      activePins[stationKey] = newPin;
+      localStorage.setItem("stunt_active_pins", JSON.stringify(activePins));
     } catch(e) {}
 
     // 3. Supabase Database Update for this specific station
@@ -1692,7 +1982,7 @@
           teacher_feedback: "",
           graded_at: null,
           exit_answers: {},
-          full_payload: { reset_timestamp: timestamp },
+          full_payload: { reset_timestamp: timestamp, pin: newPin, teacher_online: isTeacherAuthorized },
           updated_at: new Date().toISOString()
         }).eq("station_id", stationKey);
       } catch(e) {
@@ -1727,12 +2017,12 @@
       renderGradingQueue();
     }
 
-    alert(`✅ ${stName} has been reset to blank!`);
+    alert(`✅ ${stName} has been reset to blank!\n\nNew Station PIN: ${newPin}`);
   }
 
   // GLOBAL CLASSROOM SESSION RESET & RESTART LOGIC (ALL STATIONS)
   async function confirmResetLabSession() {
-    let code = prompt("⚠️ DANGER: RESTART LAB FOR ALL GROUPS\n\nThis will wipe all entered student data across ALL stations, clear all student portals back to the Check-In screen, and reset the leaderboard.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
+    let code = prompt("⚠️ DANGER: RESTART LAB FOR ALL GROUPS\n\nThis will wipe all entered student data across ALL stations, clear all student portals back to the Check-In screen, and generate fresh randomized PINs for all groups.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
     if (code !== "9999") {
       if (code !== null) alert("Incorrect PIN. Reset aborted.");
       return;
@@ -1740,11 +2030,21 @@
 
     let timestamp = Date.now();
 
+    // Generate fresh randomized PINs for each group
+    let newPinMap = {};
+    Object.keys(stations).forEach(key => {
+      let p = generateRandomPin();
+      stations[key].pin = p;
+      newPinMap[key] = p;
+    });
+
     // 1. BroadcastChannel reset to all connected student screens
     if (classroomChannel) {
       try {
         classroomChannel.postMessage({
           type: "RESET_ALL_STATIONS",
+          pins: newPinMap,
+          teacher_online: isTeacherAuthorized,
           timestamp: timestamp
         });
       } catch(e) {
@@ -1754,40 +2054,43 @@
 
     // 2. localStorage reset trigger
     localStorage.setItem("stunt_classroom_reset_trigger", timestamp.toString());
+    localStorage.setItem("stunt_active_pins", JSON.stringify(newPinMap));
     localStorage.removeItem("stunt_target_revealed");
     revealedCards = {};
-    isLabStarted = false;
+    isLabStarted = true;
 
     // 3. Supabase reset if connected
     if (supabaseClient) {
       try {
         await supabaseClient.from("classroom_control").update({
-          lab_started: false,
+          lab_started: true,
           target_range_revealed: false,
           reset_session_ms: timestamp,
           updated_at: new Date().toISOString()
         }).eq("id", "global");
 
-        await supabaseClient.from("station_submissions").update({
-          crew_members: "",
-          progress_pct: 0,
-          current_step: 1,
-          points: [],
-          slope: 0,
-          intercept: 0,
-          calc_h: 0,
-          actual_x: null,
-          delta: null,
-          accuracy_pct: null,
-          stunt_status: "calibrating",
-          inspection_approved: false,
-          teacher_grade: null,
-          teacher_feedback: "",
-          graded_at: null,
-          exit_answers: {},
-          full_payload: { reset_timestamp: timestamp },
-          updated_at: new Date().toISOString()
-        }).neq("station_id", "");
+        for (let key of Object.keys(stations)) {
+          await supabaseClient.from("station_submissions").update({
+            crew_members: "",
+            progress_pct: 0,
+            current_step: 1,
+            points: [],
+            slope: 0,
+            intercept: 0,
+            calc_h: 0,
+            actual_x: null,
+            delta: null,
+            accuracy_pct: null,
+            stunt_status: "calibrating",
+            inspection_approved: false,
+            teacher_grade: null,
+            teacher_feedback: "",
+            graded_at: null,
+            exit_answers: {},
+            full_payload: { reset_timestamp: timestamp, pin: stations[key].pin, teacher_online: true },
+            updated_at: new Date().toISOString()
+          }).eq("station_id", key);
+        }
       } catch(e) {
         console.warn("Supabase reset notice:", e);
       }
@@ -1815,8 +2118,8 @@
     // Reset UI buttons
     let btnStart = document.getElementById("btnStartLab");
     if (btnStart) {
-      btnStart.style.background = "";
-      btnStart.innerHTML = "🚀 Officially Start Lab!";
+      btnStart.style.background = "linear-gradient(135deg, #10B981 0%, #059669 100%)";
+      btnStart.innerHTML = "✅ Lab In Session";
     }
     let btnRev = document.getElementById("btnRevealRange");
     if (btnRev) {
@@ -1830,7 +2133,8 @@
       renderGradingQueue();
     }
 
-    alert("✅ Complete lab session reset! All connected student portals have been cleared for all groups.");
+    let pinSummary = Object.keys(stations).map(k => `${stations[k].name}: ${stations[k].pin}`).join("\n");
+    alert("✅ Complete lab session reset!\n\nAll student portals have been cleared for all groups, and fresh random PINs have been generated:\n\n" + pinSummary);
   }
 
 </script>

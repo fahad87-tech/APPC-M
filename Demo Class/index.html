@@ -2206,6 +2206,24 @@
       Each station is locked to its own physical track apparatus. Enter the 4-digit security PIN physically engraved on your station clamp block:
     </p>
 
+    <!-- INSTRUCTOR SESSION GATE BANNER -->
+    <div id="teacherSessionGateBanner" style="margin-bottom: 14px; border-radius: 12px; transition: all 0.3s ease;">
+      <div id="teacherOfflineNotice" style="display: flex; align-items: center; gap: 10px; background: #FEF2F2; border: 1.5px solid #FECACA; color: #991B1B; padding: 10px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-align: left;">
+        <span style="font-size: 22px;">⏳</span>
+        <div>
+          <div style="font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;">Awaiting Instructor Mission Launch</div>
+          <div style="font-size: 12px; color: #B91C1C; font-weight: 500; margin-top: 2px;">Your teacher has not opened the lab session yet. Station check-in is currently locked.</div>
+        </div>
+      </div>
+      <div id="teacherOnlineNotice" style="display: none; align-items: center; gap: 10px; background: #ECFDF5; border: 1.5px solid #A7F3D0; color: #065F46; padding: 10px 14px; border-radius: 10px; font-size: 13.5px; font-weight: 700; text-align: left;">
+        <span style="font-size: 22px;">🟢</span>
+        <div>
+          <div style="font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase;">Instructor Online • Session Active</div>
+          <div style="font-size: 12px; color: #047857; font-weight: 500; margin-top: 2px;">Enter your station's 4-digit security PIN to calibrate and join.</div>
+        </div>
+      </div>
+    </div>
+
     <div style="text-align: left;">
       <label class="field-lbl">Station Selection:</label>
       <select id="modalStationSelect">
@@ -2225,7 +2243,7 @@
       </div>
     </div>
 
-    <button class="btn-next-step" style="width: 100%; justify-content: center; font-size: 17px; padding: 14px;" onclick="verifyAndLockStation()">
+    <button class="btn-next-step" id="btnVerifyStation" style="width: 100%; justify-content: center; font-size: 17px; padding: 14px;" onclick="verifyAndLockStation()">
       🔒 Verify PIN & Lock Station
     </button>
   </div>
@@ -3196,13 +3214,26 @@
   } catch(e) { console.warn("Supabase local mode", e); }
 
   // STATION SAFEGUARDS & PASSCODES
-  const STATION_PINS = {
+  const DEFAULT_STATION_PINS = {
     station_1: "1111",
     station_2: "2222",
     station_3: "3333",
     station_4: "4444"
   };
+  let dynamicStationPins = Object.assign({}, DEFAULT_STATION_PINS);
   const TEACHER_MASTER_PIN = "9999";
+  let isTeacherOnline = false;
+
+  // Restore cached teacher status and random PINs from localStorage if present
+  try {
+    let storedTeacher = localStorage.getItem("stunt_teacher_online");
+    if (storedTeacher === "true") isTeacherOnline = true;
+    let storedPins = localStorage.getItem("stunt_active_pins");
+    if (storedPins) {
+      let parsed = JSON.parse(storedPins);
+      if (parsed) Object.assign(dynamicStationPins, parsed);
+    }
+  } catch(e) {}
 
   let currentStation = localStorage.getItem("stunt_locked_station") || null;
 
@@ -3221,6 +3252,7 @@
   };
 
   function init() {
+    updateTeacherStatusInModal(isTeacherOnline);
     checkStationLock();
     initFbdCanvas();
     renderLolBars();
@@ -3230,14 +3262,99 @@
     renderStudentGraph();
     restoreWorksheetState();
     listenToStationUpdates();
-      checkTargetRangeReveal(false);
+    checkTargetRangeReveal(false);
     listenToClassroomControl();
+    listenToGlobalStationPins();
+    checkInitialTeacherAndPins();
+  }
+
+  function updateTeacherStatusInModal(online) {
+    isTeacherOnline = !!online;
+    let offEl = document.getElementById("teacherOfflineNotice");
+    let onEl = document.getElementById("teacherOnlineNotice");
+    let pinInput = document.getElementById("modalStationPin");
+    let btnVerify = document.getElementById("btnVerifyStation");
+
+    if (offEl) offEl.style.display = isTeacherOnline ? "none" : "flex";
+    if (onEl) onEl.style.display = isTeacherOnline ? "flex" : "none";
+    if (pinInput) {
+      pinInput.disabled = !isTeacherOnline;
+      pinInput.placeholder = isTeacherOnline ? "••••" : "LOCKED";
+      pinInput.style.opacity = isTeacherOnline ? "1" : "0.55";
+      pinInput.style.cursor = isTeacherOnline ? "text" : "not-allowed";
+    }
+    if (btnVerify) {
+      btnVerify.disabled = !isTeacherOnline;
+      btnVerify.style.opacity = isTeacherOnline ? "1" : "0.55";
+      btnVerify.style.cursor = isTeacherOnline ? "pointer" : "not-allowed";
+    }
+  }
+
+  async function checkInitialTeacherAndPins() {
+    updateTeacherStatusInModal(isTeacherOnline);
+
+    if (!supabaseClient) return;
+
+    try {
+      // 1. Fetch classroom control status from Supabase
+      const { data: ctrl, error: ctrlErr } = await supabaseClient
+        .from("classroom_control")
+        .select("lab_started")
+        .eq("id", "global")
+        .single();
+      if (!ctrlErr && ctrl) {
+        isTeacherOnline = !!ctrl.lab_started;
+        updateTeacherStatusInModal(isTeacherOnline);
+      }
+
+      // 2. Fetch station submissions for active dynamic PINs
+      const { data: subs, error: subsErr } = await supabaseClient
+        .from("station_submissions")
+        .select("station_id, full_payload");
+      if (!subsErr && Array.isArray(subs)) {
+        subs.forEach(row => {
+          if (row.station_id && row.full_payload) {
+            if (row.full_payload.pin) {
+              dynamicStationPins[row.station_id] = row.full_payload.pin.toString();
+            }
+            if (row.full_payload.teacher_online !== undefined) {
+              isTeacherOnline = !!row.full_payload.teacher_online;
+              updateTeacherStatusInModal(isTeacherOnline);
+            }
+          }
+        });
+      }
+    } catch(e) {
+      console.warn("Notice checking initial teacher status and PINs:", e);
+    }
+  }
+
+  function listenToGlobalStationPins() {
+    if (!supabaseClient) return;
+    supabaseClient
+      .channel("public:station_pins_global")
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "station_submissions"
+      }, payload => {
+        let rec = payload.new;
+        if (!rec) return;
+        if (rec.station_id && rec.full_payload && rec.full_payload.pin) {
+          dynamicStationPins[rec.station_id] = rec.full_payload.pin.toString();
+        }
+        if (rec.full_payload && rec.full_payload.teacher_online !== undefined) {
+          updateTeacherStatusInModal(rec.full_payload.teacher_online);
+        }
+      })
+      .subscribe();
   }
 
   // STATION LOCK / SAFEGUARD
   function checkStationLock() {
     if (!currentStation) {
       document.getElementById("stationModal").style.display = "flex";
+      updateTeacherStatusInModal(isTeacherOnline);
     } else {
       document.getElementById("stationModal").style.display = "none";
       updateStationBadge();
@@ -3251,7 +3368,23 @@
     let errBanner = document.getElementById("pinErrorBanner");
     let modalEl = document.getElementById("stationModalCard");
 
-    if (pin === STATION_PINS[sel] || pin === TEACHER_MASTER_PIN) {
+    // 1. HARD GATE: Teacher must be online
+    if (!isTeacherOnline) {
+      if (errBanner) {
+        errBanner.textContent = "⏳ Wait for your instructor to launch the session before entering!";
+        errBanner.style.display = "block";
+      }
+      if (modalEl) {
+        modalEl.classList.remove("shake-error");
+        void modalEl.offsetWidth;
+        modalEl.classList.add("shake-error");
+      }
+      return;
+    }
+
+    // 2. Validate PIN against dynamic random PIN or Teacher Master PIN
+    let expectedPin = dynamicStationPins[sel] || DEFAULT_STATION_PINS[sel];
+    if (pin === expectedPin || pin === TEACHER_MASTER_PIN) {
       currentStation = sel;
       localStorage.setItem("stunt_locked_station", currentStation);
       document.getElementById("stationModal").style.display = "none";
@@ -3263,7 +3396,10 @@
       listenToStationUpdates();
       checkTargetRangeReveal(false);
     } else {
-      if (errBanner) errBanner.style.display = "block";
+      if (errBanner) {
+        errBanner.textContent = "⚠️ Incorrect PIN for selected station! Check your bench block or ask instructor.";
+        errBanner.style.display = "block";
+      }
       if (modalEl) {
         modalEl.classList.remove("shake-error");
         void modalEl.offsetWidth; // trigger reflow
@@ -3283,6 +3419,7 @@
       if (errBanner) errBanner.style.display = "none";
       let pinInput = document.getElementById("modalStationPin");
       if (pinInput) pinInput.value = "";
+      updateTeacherStatusInModal(isTeacherOnline);
       document.getElementById("stationModal").style.display = "flex";
     } else {
       alert("Unauthorized! Only the instructor can unlock this device.");
@@ -4394,11 +4531,22 @@
       let data = msg.data;
       if (!data) return;
 
-      if (data.type === 'TARGET_RANGE_REVEALED') {
+      if (data.type === 'TEACHER_LOGGED_IN') {
+        if (data.pins) Object.assign(dynamicStationPins, data.pins);
+        updateTeacherStatusInModal(true);
+      } else if (data.type === 'TEACHER_LOGGED_OUT') {
+        updateTeacherStatusInModal(false);
+      } else if (data.type === 'STATION_PINS_UPDATED') {
+        if (data.pins) Object.assign(dynamicStationPins, data.pins);
+      } else if (data.type === 'TARGET_RANGE_REVEALED') {
         applyTargetRangeReveal(true);
       } else if (data.type === 'RESET_ALL_STATIONS') {
+        if (data.pins) Object.assign(dynamicStationPins, data.pins);
         executeSessionReset("Lab session has been reset by the instructor for a new class session.");
       } else if (data.type === 'RESET_INDIVIDUAL_STATION') {
+        if (data.new_pin && data.station_id) {
+          dynamicStationPins[data.station_id] = data.new_pin;
+        }
         if (data.station_id === currentStation) {
           executeSessionReset("Your station was reset by your instructor.");
         }
@@ -4412,7 +4560,14 @@
 
   // Cross-tab storage event listener for classroom reset or target reveal
   window.addEventListener("storage", (e) => {
-    if (e.key === "stunt_classroom_reset_trigger") {
+    if (e.key === "stunt_teacher_online") {
+      updateTeacherStatusInModal(e.newValue === "true");
+    } else if (e.key === "stunt_active_pins") {
+      try {
+        let p = JSON.parse(e.newValue);
+        if (p) Object.assign(dynamicStationPins, p);
+      } catch(err) {}
+    } else if (e.key === "stunt_classroom_reset_trigger") {
       executeSessionReset("Lab session has been reset by the instructor for a new class session.");
     } else if (currentStation && e.key === ("stunt_reset_trigger_" + currentStation)) {
       executeSessionReset("Your station was reset by your instructor.");
@@ -4737,10 +4892,13 @@
           }
         }
 
-        if (rec.lab_started) {
-          let bubble = document.getElementById("daveSpeechTxt");
-          if (bubble) {
-            bubble.innerHTML = "🎬 <strong>CAMERA ROLLING!</strong> The instructor has officially started the lab session! Calibrate your track and prepare for the drop!";
+        if (rec.lab_started !== undefined) {
+          updateTeacherStatusInModal(rec.lab_started);
+          if (rec.lab_started) {
+            let bubble = document.getElementById("daveSpeechTxt");
+            if (bubble) {
+              bubble.innerHTML = "🎬 <strong>CAMERA ROLLING!</strong> The instructor has officially started the lab session! Calibrate your track and prepare for the drop!";
+            }
           }
         }
         if (rec.countdown_active) {
@@ -5028,6 +5186,7 @@
     if (pinInput) pinInput.value = "";
     let pinErr = document.getElementById("pinErrorBanner");
     if (pinErr) pinErr.style.display = "none";
+    updateTeacherStatusInModal(isTeacherOnline);
 
     alert("🔄 " + (msg || "Lab session has been reset by the instructor. Please select your station and enter your PIN."));
   }
