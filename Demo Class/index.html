@@ -2763,14 +2763,14 @@
   <div class="section-card locked" id="sec_2">
     <div class="section-header-row">
       <div class="section-title">
-        <span class="section-num">Section 2</span> Test: Four Heights, Four Launches (5-Min Sprint)
+        <span class="section-num">Section 2</span> Test: Calibration Practice Launches (4 or 5 Launches)
       </div>
       <span class="lock-indicator">🔒 Locked</span>
     </div>
 
     <div class="section-body">
       <p style="color: var(--text-muted); font-size: 17px;">
-        Use four different marked release heights. Measure landing range <i>X</i> on floor from plumb line. Write your calculated launch speed <i>v</i>; the last column will automatically square it (<i>v</i>²)!
+        Test 4 to 5 different marked release heights. Measure landing range <i>X</i> on the floor from the plumb line. Write your calculated launch speed <i>v</i>; the last column automatically squares it (<i>v</i>²)! <i>(Due to timed lab sprint constraints, completing 4 valid launches is fully accepted).</i>
       </p>
 
       <table class="worksheet-table">
@@ -2811,11 +2811,19 @@
           </tr>
           <tr>
             <td><strong>4</strong></td>
-            <td>D · Highest</td>
+            <td>D · High</td>
             <td><input type="number" step="0.001" id="tbl_h_3" placeholder="" oninput="onSpeedInput(3)" onchange="onSpeedInput(3)" /></td>
             <td><input type="number" step="0.001" id="tbl_x_3" placeholder="" oninput="onSpeedInput(3)" onchange="onSpeedInput(3)" /></td>
             <td><input type="number" step="0.01" id="tbl_v_3" placeholder="" oninput="onSpeedInput(3)" onchange="onSpeedInput(3)" /></td>
             <td><span class="auto-squared-cell" id="tbl_v2_cell_3">--</span></td>
+          </tr>
+          <tr>
+            <td><strong>5</strong></td>
+            <td>E · Max Ramp <small style="color: var(--cyan); font-weight: 700;">(5th Point)</small></td>
+            <td><input type="number" step="0.001" id="tbl_h_4" placeholder="" oninput="onSpeedInput(4)" onchange="onSpeedInput(4)" /></td>
+            <td><input type="number" step="0.001" id="tbl_x_4" placeholder="" oninput="onSpeedInput(4)" onchange="onSpeedInput(4)" /></td>
+            <td><input type="number" step="0.01" id="tbl_v_4" placeholder="" oninput="onSpeedInput(4)" onchange="onSpeedInput(4)" /></td>
+            <td><span class="auto-squared-cell" id="tbl_v2_cell_4">--</span></td>
           </tr>
         </tbody>
       </table>
@@ -3041,7 +3049,7 @@
               <span style="font-size: 30px;">🎯</span>
               <div>
                 <div style="font-size: 12.5px; font-weight: 900; text-transform: uppercase; color: #047857; letter-spacing: 0.06em;">Director Broadcast • Stunt Range Revealed</div>
-                <div style="font-size: 22px; font-weight: 900; color: #064E3B; letter-spacing: -0.01em;">Contracted Landing Target: <i>X</i>* = 0.900 m <span style="font-size: 16px; font-weight: 700; color: #059669;">(90.0 cm)</span></div>
+                <div id="targetRangeBannerTxt" style="font-size: 22px; font-weight: 900; color: #064E3B; letter-spacing: -0.01em;">Contracted Landing Target: <i>X</i>* = 0.780 m <span style="font-size: 16px; font-weight: 700; color: #059669;">(78.0 cm)</span></div>
               </div>
             </div>
             <span style="background: #059669; color: #FFFFFF; font-weight: 900; font-size: 13px; padding: 5px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;">
@@ -3068,8 +3076,8 @@
         </div>
 
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px;">
-          <span style="font-size: 16px; color: var(--gold); font-weight: 800;">
-            Safe Range Check (28.0 cm ≤ h* ≤ 44.0 cm): <strong id="safeRangeStatus">Awaiting calculation...</strong>
+          <span style="font-size: 15px; color: var(--gold); font-weight: 800;">
+            Safe Range Check (<i>h</i>* ≥ 2.5<i>R</i> [23.0 cm] &amp; ≤ Ramp Limit [58.5 cm]): <strong id="safeRangeStatus">Awaiting calculation...</strong>
           </span>
 
           <button class="btn-next-step" style="background: var(--gold);" id="btnClampCheck" onclick="requestClampCheck()">
@@ -3099,7 +3107,7 @@
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
         <div>
           <label class="field-lbl">1. Target Line X* (m):</label>
-          <input type="number" step="0.001" id="targetXDisplay" value="0.900" readonly style="color: var(--gold); font-weight: 800;" />
+          <input type="number" step="0.001" id="targetXDisplay" value="0.780" readonly style="color: var(--gold); font-weight: 800;" />
         </div>
 
         <div>
@@ -3242,6 +3250,7 @@
     fbdVectors: [], // [{name: 'Fg', dx: 0, dy: 60}, ...]
     lol: { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 },
     tablePoints: [
+      { h: null, x: null, v: null, v2: null },
       { h: null, x: null, v: null, v2: null },
       { h: null, x: null, v: null, v2: null },
       { h: null, x: null, v: null, v2: null },
@@ -3641,7 +3650,7 @@
     const T_FLIGHT = 0.3971;
     let points = [];
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       let hEl = document.getElementById(`tbl_h_${i}`);
       let xEl = document.getElementById(`tbl_x_${i}`);
       let vEl = document.getElementById(`tbl_v_${i}`);
@@ -4331,8 +4340,9 @@
   function calcStuntResults() {
     let xAct = parseFloat(document.getElementById("actualLandingX").value);
     if (!isNaN(xAct) && xAct > 0) {
-      let deltaCm = Math.abs(xAct - 0.900) * 100;
-      let pctErr = (deltaCm / 90.0) * 100;
+      let targetXVal = parseFloat(document.getElementById("targetXDisplay").value) || 0.780;
+      let deltaCm = Math.abs(xAct - targetXVal) * 100;
+      let pctErr = (deltaCm / (targetXVal * 100.0)) * 100;
 
       document.getElementById("deviationDelta").value = deltaCm.toFixed(1);
       document.getElementById("percentErrorVal").value = pctErr.toFixed(1);
@@ -4598,14 +4608,24 @@
 
   window.applyTargetRangeReveal = applyTargetRangeReveal;
   window.checkTargetRangeReveal = checkTargetRangeReveal;
-  function applyTargetRangeReveal(withConfetti) {
+  function applyTargetRangeReveal(withConfetti, rangeVal) {
     isTargetRangeRevealed = true;
     localStorage.setItem('stunt_target_revealed', 'true');
+    let xTarget = (rangeVal && rangeVal !== "0.900") ? rangeVal : "0.780";
+    let xTargetCm = (parseFloat(xTarget) * 100).toFixed(1).replace(/\.0$/, '');
     
     let lockedBanner = document.getElementById('targetRangeLockedState');
     let unlockedBanner = document.getElementById('targetRangeUnlockedState');
     if (lockedBanner) lockedBanner.style.display = 'none';
     if (unlockedBanner) unlockedBanner.style.display = 'block';
+
+    let bannerTxt = document.getElementById('targetRangeBannerTxt');
+    if (bannerTxt) {
+      bannerTxt.innerHTML = `🎯 DIRECT TARGET REVEALED: <strong>X* = ${xTarget} m (${xTargetCm} cm)</strong> &nbsp;|&nbsp; Floor drop <i>H</i> = 0.773 m`;
+    }
+
+    let targetDisplay = document.getElementById('targetXDisplay');
+    if (targetDisplay) targetDisplay.value = xTarget;
 
     let v2Input = document.getElementById('inversionV2Req');
     let hInput = document.getElementById('inversionCalcH');
@@ -4626,7 +4646,7 @@
 
     let daveSpeech = document.getElementById('daveSpeechTxt');
     if (daveSpeech) {
-      daveSpeech.innerHTML = '🎬 <strong>DIRECTOR TARGET REVEALED!</strong> Target range is locked at <strong>X* = 0.900 m</strong>! Backward-invert your calibration line to calculate exact release height <i>h</i>*!';
+      daveSpeech.innerHTML = `🎬 <strong>DIRECTOR TARGET REVEALED!</strong> Target range is locked at <strong>X* = ${xTarget} m (${xTargetCm} cm)</strong>! Backward-invert your calibration line to calculate exact release height <i>h</i>*!`;
     }
 
     if (withConfetti && typeof confetti === 'function') {
@@ -4724,10 +4744,14 @@
     if (saved.tablePoints && Array.isArray(saved.tablePoints)) {
       worksheetState.tablePoints = saved.tablePoints;
       saved.tablePoints.forEach((p, idx) => {
-        if (p.h !== null) document.getElementById(`tbl_h_${idx}`).value = p.h;
-        if (p.x !== null) document.getElementById(`tbl_x_${idx}`).value = p.x;
-        if (p.v !== null) document.getElementById(`tbl_v_${idx}`).value = p.v;
-        if (p.v2 !== null) document.getElementById(`tbl_v2_cell_${idx}`).textContent = Number(p.v2).toFixed(2);
+        let hEl = document.getElementById(`tbl_h_${idx}`);
+        let xEl = document.getElementById(`tbl_x_${idx}`);
+        let vEl = document.getElementById(`tbl_v_${idx}`);
+        let v2El = document.getElementById(`tbl_v2_cell_${idx}`);
+        if (hEl && p.h !== null) hEl.value = p.h;
+        if (xEl && p.x !== null) xEl.value = p.x;
+        if (vEl && p.v !== null) vEl.value = p.v;
+        if (v2El && p.v2 !== null) v2El.textContent = Number(p.v2).toFixed(2);
       });
     }
 
@@ -4864,12 +4888,23 @@
 
     let hCalc = parseFloat(document.getElementById("inversionCalcH").value);
     if (!isNaN(hCalc)) {
-      if (hCalc >= 0.28 && hCalc <= 0.44) {
-        document.getElementById("safeRangeStatus").textContent = "SAFE (28–44 cm) 🟢";
-        document.getElementById("safeRangeStatus").style.color = "var(--emerald)";
-      } else {
-        document.getElementById("safeRangeStatus").textContent = "WARNING: OUT OF SAFE RANGE 🔴";
-        document.getElementById("safeRangeStatus").style.color = "var(--crimson)";
+      let minSafe = 0.230; // 2.5 R loop apex clearance limit (23.0 cm)
+      let maxSafe = 0.585; // Apparatus physical ramp limit (58.5 cm)
+      let maxInput = parseFloat(document.getElementById("maxSafeH") ? document.getElementById("maxSafeH").value : "");
+      if (!isNaN(maxInput) && maxInput > 0.30) maxSafe = maxInput > 1.0 ? maxInput / 100.0 : maxInput;
+
+      let statusEl = document.getElementById("safeRangeStatus");
+      if (statusEl) {
+        if (hCalc < minSafe) {
+          statusEl.textContent = "CRITICAL: BELOW 2.5 R (< 23.0 cm) 🔴";
+          statusEl.style.color = "var(--crimson)";
+        } else if (hCalc > maxSafe) {
+          statusEl.textContent = `WARNING: EXCEEDS RAMP LIMIT (> ${(maxSafe * 100).toFixed(1)} cm) 🔴`;
+          statusEl.style.color = "var(--crimson)";
+        } else {
+          statusEl.textContent = `SAFE (23.0–${(maxSafe * 100).toFixed(1)} cm) 🟢`;
+          statusEl.style.color = "var(--emerald)";
+        }
       }
     }
   }
@@ -5088,15 +5123,18 @@
     });
 
     // 6. Clear table auto-squared cells & points
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 5; i++) {
       let hIn = document.getElementById(`tbl_h_${i}`);
       if (hIn) hIn.value = "";
       let xIn = document.getElementById(`tbl_x_${i}`);
       if (xIn) xIn.value = "";
+      let vIn = document.getElementById(`tbl_v_${i}`);
+      if (vIn) vIn.value = "";
       let c = document.getElementById(`tbl_v2_cell_${i}`);
       if (c) c.textContent = "--";
     }
     worksheetState.tablePoints = [
+      { h: null, x: null, v: null, v2: null },
       { h: null, x: null, v: null, v2: null },
       { h: null, x: null, v: null, v2: null },
       { h: null, x: null, v: null, v2: null },

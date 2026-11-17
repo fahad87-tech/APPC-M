@@ -733,7 +733,7 @@
         🚀 Officially Start Lab!
       </button>
 
-      <button class="btn-action" id="btnRevealRange" onclick="toggleRevealTargetRange()" style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); border-color: #F59E0B; color: #FFFFFF; font-weight: 800;" title="Broadcast the surprise target landing range (X* = 0.900 m) to all student stations for reverse engineering">
+      <button class="btn-action" id="btnRevealRange" onclick="toggleRevealTargetRange()" style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); border-color: #F59E0B; color: #FFFFFF; font-weight: 800;" title="Broadcast the surprise target landing range (X* = 0.780 m) to all student stations for reverse engineering">
         🎯 Reveal Target Range
       </button>
 
@@ -1125,7 +1125,7 @@
       if (rBtn) {
         rBtn.style.background = "#059669";
         rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
       }
     }
 
@@ -1155,7 +1155,7 @@
       if (rBtn) {
         rBtn.style.background = "#059669";
         rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
       }
     }
 
@@ -1167,20 +1167,20 @@
     let isCurrentlyRevealed = localStorage.getItem("stunt_target_revealed") === "true";
 
     if (!isCurrentlyRevealed) {
-      if (!confirm("🎯 SURPRISE REVEAL: Broadcast the Scene 42 contracted target landing range (X* = 0.900 m) to all student stations right now?")) {
+      if (!confirm("🎯 SURPRISE REVEAL: Broadcast the Scene 42 contracted target landing range (X* = 0.780 m) to all student stations right now?")) {
         return;
       }
       localStorage.setItem("stunt_target_revealed", "true");
       if (btn) {
         btn.style.background = "#059669";
         btn.style.borderColor = "#10B981";
-        btn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+        btn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
       }
 
       // 1. BroadcastChannel for instant local cross-tab sync
       if (classroomChannel) {
         try {
-          classroomChannel.postMessage({ type: "TARGET_RANGE_REVEALED", range: "0.900" });
+          classroomChannel.postMessage({ type: "TARGET_RANGE_REVEALED", range: "0.780" });
         } catch(e) {
           console.warn("BroadcastChannel error:", e);
         }
@@ -1191,7 +1191,7 @@
         try {
           await supabaseClient.from("classroom_control").update({
             target_range_revealed: true,
-            target_x_m: 0.900,
+            target_x_m: 0.780,
             updated_at: new Date().toISOString()
           }).eq("id", "global");
         } catch(e) {
@@ -1202,7 +1202,7 @@
       if (typeof confetti === "function") {
         confetti({ particleCount: 160, spread: 90, origin: { y: 0.4 } });
       }
-      alert("🎬 DIRECTOR'S SURPRISE TARGET RANGE REVEALED!\n\nX* = 0.900 m (90.0 cm) has been broadcasted to all student stations. Students can now perform reverse-engineering!");
+      alert("🎬 DIRECTOR'S SURPRISE TARGET RANGE REVEALED!\n\nX* = 0.780 m (78.0 cm) has been broadcasted to all student stations. Students can now perform reverse-engineering!");
     } else {
       if (confirm("Reset target range back to Classified (Hidden)?")) {
         localStorage.removeItem("stunt_target_revealed");
@@ -1255,7 +1255,7 @@
       if (rBtn) {
         rBtn.style.background = "#059669";
         rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
       }
     }
 
@@ -1280,7 +1280,7 @@
       if (rBtn) {
         rBtn.style.background = "#059669";
         rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
       }
     }
 
@@ -1295,7 +1295,7 @@
       if (rBtn) {
         rBtn.style.background = "#059669";
         rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
       }
     }
 
@@ -1358,7 +1358,7 @@
       if (rBtn) {
         rBtn.style.background = "#059669";
         rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
       }
     }
 
@@ -1519,7 +1519,7 @@
       if (rBtn) {
         rBtn.style.background = "#059669";
         rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
       }
     }
 
@@ -1913,7 +1913,7 @@
             if (rBtn) {
               rBtn.style.background = "#059669";
               rBtn.style.borderColor = "#10B981";
-              rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.900 m)";
+              rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
             }
           }
 
