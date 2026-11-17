@@ -2093,4 +2093,45 @@ Per instructor instruction (*"do not provide both of this to students...let them
 - Validated with Node.js script syntax checks (`node --check`), confirming 0 syntax errors.
 - Synchronized to canonical repository `D:\HW FIx\AP Physics 1\05_Labs\LABS\Lab4_Stunt_Calibration\` and GitHub tracking repository `C:\Users\fahad\Documents\GitHub\APPC-M\Demo Class\`.
 
+---
+
+## 57. Student Percentage Error Formula, Teacher Sprint Timer Engine & Center Focus Projection Mode
+
+### 1. Requirements & Core Purpose
+1. **Student Percentage Error Formula (`index.html`):**
+   - *User Instruction:* *"this formula needs to be shown on student portal"*
+   - *Action:* Displayed the mathematical formula in Section 6 directly beside the input header:
+     `5. Percentage Error (%): (|X_actual − X*| / X*) × 100%`
+2. **Teacher Sprint Timer Engine Fix (`dashboard.html`):**
+   - *User Instruction:* *"start sprint button does not run the timer on teacher portal"*
+   - *Problem:* The sprint timer bar HTML existed, but the JavaScript orchestration functions (`toggleSprintTimer`, `setSprintPreset`, `adjustSprintTimer`, `resetSprintTimer`, `broadcastSprintTimer`, `initSprintTimer`) were not defined in `<script>`, throwing `ReferenceError: toggleSprintTimer is not defined`.
+   - *Action:* Implemented complete timer state management, millisecond-accurate interval countdowns, auto-chime sound alert on completion, preset switching (10m, 15m, 20m, ±1m), and multi-tier synchronization (`localStorage`, `BroadcastChannel`, and Supabase `classroom_control`).
+3. **Whole-Classroom Center Focus Projection Mode (`dashboard.html`):**
+   - *User Instruction:* *"add a button where i click it and time and it's window gets bigger and goes to the center of this panel.....clicking it again brings it back to the original view....."*
+   - *Action:* Added `⛶ Focus Mode` / `🗗 Inline View` toggle button with full-viewport dimmed backdrop. When activated, the timer bar transitions smoothly to the center of the screen as an enlarged modal card with an $80\text{px}$ digital clock, ideal for classroom smartboard / projector visibility. Clicking `🗗 Inline View` or pressing `Escape` returns the timer inline.
+
+### 2. Implementation Summary
+- **Student Portal (`index.html`):**
+  - Section 6 Field 5 header updated:
+    ```html
+    <label class="field-lbl">5. Percentage Error (%): <span style="font-weight: 700; color: #0284C7; font-size: 13.5px; text-transform: none;">(|<i>X</i><sub>actual</sub> − <i>X</i>*| / <i>X</i>*) &times; 100%</span></label>
+    ```
+- **Teacher Cockpit (`dashboard.html`):**
+  - Added `<div id="sprintBackdrop" class="sprint-backdrop" onclick="toggleSprintFocusMode()"></div>`.
+  - Added `<button id="btnSprintFocus" class="sprint-btn-preset" onclick="toggleSprintFocusMode()">⛶ Focus Mode</button>`.
+  - Added CSS classes `.sprint-backdrop`, `.sprint-backdrop.active`, `.sprint-timer-bar.sprint-focus-mode`, and animation `@keyframes sprintFocusPop`.
+  - Added JavaScript timer functions: `toggleSprintTimer()`, `setSprintPreset(mins)`, `adjustSprintTimer(delta)`, `resetSprintTimer()`, `broadcastSprintTimer()`, `toggleSprintFocusMode()`, `playSprintChime()`, and `initSprintTimer()`.
+  - Hooked `initSprintTimer()` into `init()`.
+
+### 3. Verification & Deployment
+- Validated via automated Playwright test (`test_sprint_and_formula.py`):
+  - Verified timer started and counted down from `15:00` $\to$ `14:58`.
+  - Verified button state toggled from `▶ Start Sprint` $\to$ `⏸ Pause Sprint`.
+  - Verified focus mode opened centered modal with `80px` clock (`qa_sprint_focus_mode.png`).
+  - Verified toggle returned cleanly to inline view (`qa_sprint_inline_view.png`).
+  - Verified Section 6 Percentage Error formula rendered on student portal (`qa_student_sec6_pct_err.png`).
+- Node.js syntax check passed with 0 errors across all embedded scripts.
+- Synchronized to canonical repository `D:\HW FIx\AP Physics 1\05_Labs\LABS\Lab4_Stunt_Calibration\` and GitHub tracking repository `C:\Users\fahad\Documents\GitHub\APPC-M\Demo Class\`.
+
+
 

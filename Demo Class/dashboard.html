@@ -652,6 +652,88 @@
       transition: all 0.2s;
     }
 
+        /* SPRINT FOCUS / THEATER PROJECTION MODE */
+    .sprint-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 9998;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .sprint-backdrop.active {
+      display: block;
+    }
+
+    .sprint-timer-bar.sprint-focus-mode {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      width: 90%;
+      max-width: 740px;
+      margin: 0;
+      background: #FFFFFF;
+      border: 3px solid #3B82F6;
+      border-radius: 20px;
+      padding: 36px 40px;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.45);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 22px;
+      animation: sprintFocusPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes sprintFocusPop {
+      0% { transform: translate(-50%, -46%) scale(0.92); opacity: 0; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    }
+
+    .sprint-timer-bar.sprint-focus-mode .sprint-timer-info {
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sprint-timer-bar.sprint-focus-mode .sprint-badge {
+      font-size: 14px;
+      padding: 6px 18px;
+    }
+
+    .sprint-timer-bar.sprint-focus-mode .sprint-digital-clock {
+      font-size: 80px;
+      padding: 12px 40px;
+      min-width: 290px;
+      border-width: 3.5px;
+      border-radius: 16px;
+      margin: 8px 0;
+      box-shadow: inset 0 4px 10px rgba(0,0,0,0.06);
+    }
+
+    .sprint-timer-bar.sprint-focus-mode .sprint-controls {
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .sprint-timer-bar.sprint-focus-mode .sprint-btn-preset {
+      font-size: 15px;
+      padding: 8px 18px;
+    }
+
+    .sprint-timer-bar.sprint-focus-mode .sprint-btn-action {
+      font-size: 18px;
+      padding: 12px 30px;
+      border-radius: 10px;
+    }
+
     .sprint-btn-action:hover {
       filter: brightness(1.1);
       transform: translateY(-1px);
@@ -964,6 +1046,9 @@
     </div>
   </div>
 
+  <!-- BACKDROP FOR SPRINT FOCUS MODE -->
+  <div id="sprintBackdrop" class="sprint-backdrop" onclick="toggleSprintFocusMode()"></div>
+
   <!-- CLASSROOM CALIBRATION SPRINT PACING BAR (SECTIONS 1-4) -->
   <div class="sprint-timer-bar" id="classroomSprintBar">
     <div class="sprint-timer-info">
@@ -990,6 +1075,9 @@
       </button>
       <button class="sprint-btn-preset" onclick="resetSprintTimer()" title="Reset timer to preset duration">
         ↺ Reset
+      </button>
+      <button id="btnSprintFocus" class="sprint-btn-preset" onclick="toggleSprintFocusMode()" title="Toggle enlarged presentation timer in the center of panel for whole-class projection">
+        ⛶ Focus Mode
       </button>
     </div>
   </div>
@@ -1350,6 +1438,7 @@
 
     localStorage.setItem("stunt_teacher_online", "false");
     checkTeacherAuth();
+    initSprintTimer();
   }
 
   function init() {
@@ -1369,6 +1458,7 @@
     fetchInitialSubmissions();
     setupRealtime();
     checkTeacherAuth();
+    initSprintTimer();
   }
 
   function toggleRosterPins() {
@@ -2390,6 +2480,225 @@
 
     let pinSummary = Object.keys(stations).map(k => `${stations[k].name}: ${stations[k].pin}`).join("\n");
     alert("✅ Complete lab session reset!\n\nAll student portals have been cleared for all groups, and fresh random PINs have been generated:\n\n" + pinSummary);
+  }
+
+
+  // ==============================================================
+  // CLASSROOM PACING SPRINT TIMER ENGINE
+  // ==============================================================
+  let sprintPresetMins = 15;
+  let sprintRemainingSec = 15 * 60;
+  let sprintIsRunning = false;
+  let sprintIntervalId = null;
+  let sprintEndMs = null;
+  let isSprintFocusMode = false;
+
+  function formatTimeMS(sec) {
+    let m = Math.floor(sec / 60);
+    let s = sec % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
+
+  function updateSprintTimerDisplay() {
+    let clock = document.getElementById("sprintTimerClock");
+    if (!clock) return;
+    clock.textContent = formatTimeMS(sprintRemainingSec);
+
+    // Style adjustments based on time remaining
+    if (sprintRemainingSec <= 60 && sprintRemainingSec > 0) {
+      clock.classList.remove("warning");
+      clock.classList.add("urgent");
+    } else if (sprintRemainingSec <= 180 && sprintRemainingSec > 0) {
+      clock.classList.remove("urgent");
+      clock.classList.add("warning");
+    } else {
+      clock.classList.remove("urgent", "warning");
+    }
+  }
+
+  function toggleSprintTimer() {
+    let btn = document.getElementById("btnToggleSprint");
+    if (sprintIsRunning) {
+      // PAUSE TIMER
+      sprintIsRunning = false;
+      if (sprintIntervalId) {
+        clearInterval(sprintIntervalId);
+        sprintIntervalId = null;
+      }
+      sprintEndMs = null;
+      if (btn) {
+        btn.innerHTML = "▶ Resume Sprint";
+        btn.style.background = "linear-gradient(135deg, #0284C7 0%, #0369A1 100%)";
+      }
+    } else {
+      // START / RESUME TIMER
+      if (sprintRemainingSec <= 0) {
+        sprintRemainingSec = sprintPresetMins * 60;
+      }
+      sprintIsRunning = true;
+      sprintEndMs = Date.now() + sprintRemainingSec * 1000;
+      if (btn) {
+        btn.innerHTML = "⏸ Pause Sprint";
+        btn.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
+      }
+
+      sprintIntervalId = setInterval(() => {
+        if (!sprintIsRunning) return;
+        sprintRemainingSec = Math.max(0, Math.round((sprintEndMs - Date.now()) / 1000));
+        updateSprintTimerDisplay();
+
+        if (sprintRemainingSec <= 0) {
+          clearInterval(sprintIntervalId);
+          sprintIntervalId = null;
+          sprintIsRunning = false;
+          sprintEndMs = null;
+          if (btn) {
+            btn.innerHTML = "▶ Start Sprint";
+            btn.style.background = "linear-gradient(135deg, #059669 0%, #047857 100%)";
+          }
+          playSprintChime();
+        }
+        broadcastSprintTimer();
+      }, 1000);
+    }
+
+    updateSprintTimerDisplay();
+    broadcastSprintTimer();
+  }
+
+  function setSprintPreset(mins) {
+    sprintPresetMins = mins;
+    if (!sprintIsRunning) {
+      sprintRemainingSec = mins * 60;
+      updateSprintTimerDisplay();
+    }
+    // Update preset button active states
+    [10, 15, 20].forEach(m => {
+      let b = document.getElementById(`preset${m}Btn`);
+      if (b) {
+        if (m === mins) b.classList.add("active");
+        else b.classList.remove("active");
+      }
+    });
+    broadcastSprintTimer();
+  }
+
+  function adjustSprintTimer(deltaMins) {
+    sprintRemainingSec = Math.max(0, sprintRemainingSec + deltaMins * 60);
+    if (sprintIsRunning && sprintEndMs) {
+      sprintEndMs += deltaMins * 60 * 1000;
+    }
+    updateSprintTimerDisplay();
+    broadcastSprintTimer();
+  }
+
+  function resetSprintTimer() {
+    sprintIsRunning = false;
+    if (sprintIntervalId) {
+      clearInterval(sprintIntervalId);
+      sprintIntervalId = null;
+    }
+    sprintRemainingSec = sprintPresetMins * 60;
+    sprintEndMs = null;
+    let btn = document.getElementById("btnToggleSprint");
+    if (btn) {
+      btn.innerHTML = "▶ Start Sprint";
+      btn.style.background = "linear-gradient(135deg, #059669 0%, #047857 100%)";
+    }
+    updateSprintTimerDisplay();
+    broadcastSprintTimer();
+  }
+
+  function broadcastSprintTimer() {
+    let payload = {
+      remaining: sprintRemainingSec,
+      running: sprintIsRunning,
+      endMs: sprintEndMs,
+      preset: sprintPresetMins,
+      timestamp: Date.now()
+    };
+
+    // 1. LocalStorage
+    try {
+      localStorage.setItem("stunt_sprint_timer", JSON.stringify(payload));
+    } catch(e) {}
+
+    // 2. BroadcastChannel
+    try {
+      let ch = new BroadcastChannel("stunt_classroom_sync");
+      ch.postMessage({ type: "SPRINT_TIMER_SYNC", timer: payload });
+      ch.close();
+    } catch(e) {}
+
+    // 3. Supabase Cloud Sync
+    if (supabaseClient) {
+      supabaseClient
+        .from("classroom_control")
+        .update({ sprint_timer: payload })
+        .eq("id", "global")
+        .then(() => {})
+        .catch(err => console.warn("Sprint timer cloud sync notice:", err));
+    }
+  }
+
+  function toggleSprintFocusMode() {
+    let bar = document.getElementById("classroomSprintBar");
+    let backdrop = document.getElementById("sprintBackdrop");
+    let btn = document.getElementById("btnSprintFocus");
+    if (!bar) return;
+
+    isSprintFocusMode = !isSprintFocusMode;
+    if (isSprintFocusMode) {
+      bar.classList.add("sprint-focus-mode");
+      if (backdrop) backdrop.classList.add("active");
+      if (btn) btn.innerHTML = "🗗 Inline View";
+    } else {
+      bar.classList.remove("sprint-focus-mode");
+      if (backdrop) backdrop.classList.remove("active");
+      if (btn) btn.innerHTML = "⛶ Focus Mode";
+    }
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isSprintFocusMode) {
+      toggleSprintFocusMode();
+    }
+  });
+
+  function playSprintChime() {
+    try {
+      let ctx = new (window.AudioContext || window.webkitAudioContext)();
+      let osc = ctx.createOscillator();
+      let gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.8);
+    } catch(e) {}
+  }
+
+  function initSprintTimer() {
+    try {
+      let savedTimer = localStorage.getItem("stunt_sprint_timer");
+      if (savedTimer) {
+        let t = JSON.parse(savedTimer);
+        if (t) {
+          sprintPresetMins = t.preset || 15;
+          if (t.running && t.endMs && t.endMs > Date.now()) {
+            sprintRemainingSec = Math.max(0, Math.round((t.endMs - Date.now()) / 1000));
+            toggleSprintTimer();
+          } else {
+            sprintRemainingSec = t.remaining !== undefined ? t.remaining : sprintPresetMins * 60;
+            updateSprintTimerDisplay();
+          }
+        }
+      }
+    } catch(e) {}
   }
 
 </script>
