@@ -507,6 +507,27 @@
       box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
     }
 
+    .btn-reset-station-mini {
+      background: #FEE2E2;
+      color: #991B1B;
+      border: 1.5px solid #FCA5A5;
+      font-weight: 800;
+      font-size: 13.5px;
+      padding: 7px 13px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+    .btn-reset-station-mini:hover {
+      background: #DC2626;
+      color: #FFFFFF;
+      border-color: #B91C1C;
+      box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+    }
+
     /* 30% HAIRCUT WALL */
     .multi-graph-card {
       background: var(--card-bg);
@@ -817,6 +838,7 @@
   let isRosterPinRevealMode = false;  // Toggle for revealing station PINs and check-in roster
   let isLabStarted = false;          // Tracks whether instructor officially began session
   let revealedCards = {};            // Tracks per-card inspection reveals
+  const classroomChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel("stunt_classroom_sync") : null;
 
   function init() {
     renderLeaderboard();
@@ -878,11 +900,12 @@
       }
 
       // 1. BroadcastChannel for instant local cross-tab sync
-      try {
-        let channel = new BroadcastChannel("stunt_classroom_sync");
-        channel.postMessage({ type: "TARGET_RANGE_REVEALED", range: "0.900" });
-      } catch(e) {
-        console.warn("BroadcastChannel error:", e);
+      if (classroomChannel) {
+        try {
+          classroomChannel.postMessage({ type: "TARGET_RANGE_REVEALED", range: "0.900" });
+        } catch(e) {
+          console.warn("BroadcastChannel error:", e);
+        }
       }
 
       // 2. Supabase classroom_control sync
@@ -1196,7 +1219,10 @@
             </span>
           </div>
 
-          ${st.status === 'awaiting_inspection' ? `<button class="btn-approve" onclick="approveInspection('${key}')">✅ Approve Clamp</button>` : ''}
+          <div style="display: flex; gap: 8px; align-items: center;">
+            ${st.status === 'awaiting_inspection' ? `<button class="btn-approve" onclick="approveInspection('${key}')">✅ Approve Clamp</button>` : ''}
+            <button class="btn-reset-station-mini" onclick="confirmResetIndividualStation('${key}')" title="Reset this station back to blank">↺ Reset</button>
+          </div>
         </div>
       `;
       container.appendChild(card);
@@ -1436,6 +1462,12 @@
                   onclick="submitGrade('${key}')">
             ✅ Return Grade
           </button>
+          <button class="btn-reset-station-mini" 
+                  style="background: #FEE2E2; color: #991B1B; border: 1.5px solid #FCA5A5; font-weight: 800; font-size: 14px; padding: 9px 16px; border-radius: 6px; cursor: pointer;" 
+                  onclick="confirmResetIndividualStation('${key}')"
+                  title="Reset this station back to blank">
+            ↺ Reset Station
+          </button>
         </div>
       `;
       container.appendChild(row);
@@ -1610,9 +1642,97 @@
 
   window.addEventListener("DOMContentLoaded", init);
 
-  // CLASSROOM SESSION RESET & RESTART LOGIC
+  // INDIVIDUAL STATION RESET LOGIC
+  async function confirmResetIndividualStation(stationKey) {
+    let st = stations[stationKey];
+    let stName = st ? st.name : stationKey;
+    if (!confirm(`⚠️ RESET ${stName.toUpperCase()}?\n\nThis will completely wipe all entered data, graph calibration, crew check-ins, and calculations back to blank for ${stName}.\n\nOther stations will NOT be affected.\n\nProceed with individual station reset?`)) {
+      return;
+    }
+
+    let timestamp = Date.now();
+
+    // 1. Cross-tab BroadcastChannel notification targeted to this station
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({
+          type: "RESET_INDIVIDUAL_STATION",
+          station_id: stationKey,
+          timestamp: timestamp
+        });
+      } catch(e) {
+        console.warn("BroadcastChannel individual reset notice:", e);
+      }
+    }
+
+    // 2. localStorage trigger for cross-tab sync if on same browser
+    try {
+      localStorage.setItem("stunt_reset_trigger_" + stationKey, timestamp.toString());
+      localStorage.removeItem("stunt_lab_state_" + stationKey);
+      localStorage.removeItem("stunt_locked_station");
+    } catch(e) {}
+
+    // 3. Supabase Database Update for this specific station
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("station_submissions").update({
+          crew_members: "",
+          progress_pct: 0,
+          current_step: 1,
+          points: [],
+          slope: 0,
+          intercept: 0,
+          calc_h: 0,
+          actual_x: null,
+          delta: null,
+          accuracy_pct: null,
+          stunt_status: "calibrating",
+          inspection_approved: false,
+          teacher_grade: null,
+          teacher_feedback: "",
+          graded_at: null,
+          exit_answers: {},
+          full_payload: { reset_timestamp: timestamp },
+          updated_at: new Date().toISOString()
+        }).eq("station_id", stationKey);
+      } catch(e) {
+        console.warn("Supabase station reset notice:", e);
+      }
+    }
+
+    // 4. Reset in-memory state for this station
+    if (stations[stationKey]) {
+      stations[stationKey].status = 'calibrating';
+      stations[stationKey].progress = 0;
+      stations[stationKey].step = 1;
+      stations[stationKey].slope = null;
+      stations[stationKey].intercept = null;
+      stations[stationKey].calc_h = null;
+      stations[stationKey].actual_x = null;
+      stations[stationKey].actual_X = null;
+      stations[stationKey].delta = null;
+      stations[stationKey].accuracy_pct = null;
+      stations[stationKey].crew = { releaser: "", measurer: "", scribe: "", checker: "" };
+      stations[stationKey].q1 = "";
+      stations[stationKey].q2 = "";
+      stations[stationKey].grade = null;
+      stations[stationKey].feedback = "";
+    }
+
+    delete revealedCards[stationKey];
+
+    renderLeaderboard();
+    renderMultiGraph();
+    if (document.getElementById("gradingView") && document.getElementById("gradingView").classList.contains("active")) {
+      renderGradingQueue();
+    }
+
+    alert(`✅ ${stName} has been reset to blank!`);
+  }
+
+  // GLOBAL CLASSROOM SESSION RESET & RESTART LOGIC (ALL STATIONS)
   async function confirmResetLabSession() {
-    let code = prompt("⚠️ DANGER: RESTART LAB FOR NEW CLASS SESSION\n\nThis will wipe all entered student data, clear all student portals back to the Check-In screen, and reset the leaderboard.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
+    let code = prompt("⚠️ DANGER: RESTART LAB FOR ALL GROUPS\n\nThis will wipe all entered student data across ALL stations, clear all student portals back to the Check-In screen, and reset the leaderboard.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
     if (code !== "9999") {
       if (code !== null) alert("Incorrect PIN. Reset aborted.");
       return;
@@ -1621,20 +1741,22 @@
     let timestamp = Date.now();
 
     // 1. BroadcastChannel reset to all connected student screens
-    try {
-      if (channel) {
-        channel.postMessage({
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({
           type: "RESET_ALL_STATIONS",
           timestamp: timestamp
         });
+      } catch(e) {
+        console.warn("BroadcastChannel reset notice:", e);
       }
-    } catch(e) {
-      console.warn("BroadcastChannel reset notice:", e);
     }
 
     // 2. localStorage reset trigger
     localStorage.setItem("stunt_classroom_reset_trigger", timestamp.toString());
     localStorage.removeItem("stunt_target_revealed");
+    revealedCards = {};
+    isLabStarted = false;
 
     // 3. Supabase reset if connected
     if (supabaseClient) {
@@ -1663,7 +1785,7 @@
           teacher_feedback: "",
           graded_at: null,
           exit_answers: {},
-          full_payload: {},
+          full_payload: { reset_timestamp: timestamp },
           updated_at: new Date().toISOString()
         }).neq("station_id", "");
       } catch(e) {
@@ -1703,11 +1825,12 @@
     }
 
     renderLeaderboard();
-    if (document.getElementById("gradingView").classList.contains("active")) {
+    renderMultiGraph();
+    if (document.getElementById("gradingView") && document.getElementById("gradingView").classList.contains("active")) {
       renderGradingQueue();
     }
 
-    alert("✅ Lab session reset! All connected student portals have been cleared for the new class session.");
+    alert("✅ Complete lab session reset! All connected student portals have been cleared for all groups.");
   }
 
 </script>

@@ -4397,7 +4397,11 @@
       if (data.type === 'TARGET_RANGE_REVEALED') {
         applyTargetRangeReveal(true);
       } else if (data.type === 'RESET_ALL_STATIONS') {
-        executeSessionReset();
+        executeSessionReset("Lab session has been reset by the instructor for a new class session.");
+      } else if (data.type === 'RESET_INDIVIDUAL_STATION') {
+        if (data.station_id === currentStation) {
+          executeSessionReset("Your station was reset by your instructor.");
+        }
       } else if (data.type === 'PEER_SYNC_STATION_DATA') {
         if (data.station_id === currentStation && data.sender_id !== myClientSessionId) {
           applyPeerSyncData(data.state);
@@ -4409,7 +4413,9 @@
   // Cross-tab storage event listener for classroom reset or target reveal
   window.addEventListener("storage", (e) => {
     if (e.key === "stunt_classroom_reset_trigger") {
-      executeSessionReset();
+      executeSessionReset("Lab session has been reset by the instructor for a new class session.");
+    } else if (currentStation && e.key === ("stunt_reset_trigger_" + currentStation)) {
+      executeSessionReset("Your station was reset by your instructor.");
     } else if (e.key === "stunt_target_revealed" && e.newValue === "true") {
       applyTargetRangeReveal(false);
     }
@@ -4649,6 +4655,16 @@
         let rec = payload.new;
         if (!rec) return;
 
+        // Check if this station was individually reset by instructor
+        if (rec.full_payload && rec.full_payload.reset_timestamp) {
+          let lastReset = localStorage.getItem("stunt_last_handled_reset_" + currentStation);
+          if (!lastReset || Number(lastReset) < Number(rec.full_payload.reset_timestamp)) {
+            localStorage.setItem("stunt_last_handled_reset_" + currentStation, rec.full_payload.reset_timestamp.toString());
+            executeSessionReset("Your station was reset by your instructor.");
+            return;
+          }
+        }
+
         // Teacher Gate: Clamp Approval
         if (rec.inspection_approved && !worksheetState.inspectionApproved) {
           worksheetState.inspectionApproved = true;
@@ -4710,13 +4726,24 @@
       .channel("public:classroom_control")
       .on("postgres_changes", { event: "*", schema: "public", table: "classroom_control" }, payload => {
         let rec = payload.new;
-        if (rec && rec.lab_started) {
+        if (!rec) return;
+
+        if (rec.reset_session_ms) {
+          let lastReset = localStorage.getItem("stunt_last_handled_global_reset");
+          if (!lastReset || Number(lastReset) < Number(rec.reset_session_ms)) {
+            localStorage.setItem("stunt_last_handled_global_reset", rec.reset_session_ms.toString());
+            executeSessionReset("Lab session has been reset by the instructor for a new class session.");
+            return;
+          }
+        }
+
+        if (rec.lab_started) {
           let bubble = document.getElementById("daveSpeechTxt");
           if (bubble) {
             bubble.innerHTML = "🎬 <strong>CAMERA ROLLING!</strong> The instructor has officially started the lab session! Calibrate your track and prepare for the drop!";
           }
         }
-        if (rec && rec.countdown_active) {
+        if (rec.countdown_active) {
           let targetMs = rec.countdown_target_ms || (Date.now() + 5000);
           triggerSynchronizedCountdown(targetMs);
         }
@@ -4865,8 +4892,8 @@
     updateProgress();
   }
 
-  // COMPLETE CLASSROOM SESSION RESET (TRIGGERED BY INSTRUCTOR FOR NEW PERIOD)
-  function executeSessionReset() {
+  // COMPLETE CLASSROOM SESSION RESET (TRIGGERED BY INSTRUCTOR FOR ALL OR SINGLE STATION)
+  function executeSessionReset(msg) {
     if (currentStation) {
       // 1. SAFETY NET: Take an emergency backup snapshot before clearing
       try {
@@ -4884,7 +4911,17 @@
     localStorage.removeItem("stunt_target_revealed");
     currentStation = null;
 
-    // 3. Clear all inputs and textareas
+    // 3. Reset station display text
+    let stDisp = document.getElementById("stationDisplayTxt");
+    if (stDisp) stDisp.textContent = "Select Station";
+
+    // 4. Clear all crew name inputs
+    ["crewReleaser", "crewMeasurer", "crewScribe", "crewChecker"].forEach(id => {
+      let el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+
+    // 5. Clear all inputs and textareas
     document.querySelectorAll("input[type='text'], input[type='number'], textarea").forEach(el => {
       if (el.id !== "targetXDisplay") el.value = "";
     });
@@ -4892,50 +4929,107 @@
       if (el.id !== "modalStationSelect") el.selectedIndex = 0;
     });
 
-    // 4. Clear table auto-squared cells
+    // 6. Clear table auto-squared cells & points
     for (let i = 0; i < 4; i++) {
+      let hIn = document.getElementById(`tbl_h_${i}`);
+      if (hIn) hIn.value = "";
+      let xIn = document.getElementById(`tbl_x_${i}`);
+      if (xIn) xIn.value = "";
       let c = document.getElementById(`tbl_v2_cell_${i}`);
       if (c) c.textContent = "--";
     }
+    worksheetState.tablePoints = [
+      { h: null, x: null, v: null, v2: null },
+      { h: null, x: null, v: null, v2: null },
+      { h: null, x: null, v: null, v2: null },
+      { h: null, x: null, v: null, v2: null }
+    ];
 
-    // 5. Clear FBD Canvas
+    // 7. Clear FBD Canvas
     clearFbdCanvas();
 
-    // 6. Reset LOL Chart
+    // 8. Reset LOL Chart
     worksheetState.lol = { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 };
     renderLolBars();
 
-    // 7. Reset Graph
-    resetBestFitLine();
+    // 9. Reset Graph & Line
+    graphLine.active = false;
+    graphLine.hA = 0.10;
+    graphLine.v2A = 1.40;
+    graphLine.hB = 0.35;
+    graphLine.v2B = 4.80;
+    let gSlope = document.getElementById("graphCalcSlope");
+    if (gSlope) gSlope.value = "";
+    let gInt = document.getElementById("graphCalcIntercept");
+    if (gInt) gInt.value = "";
+    let gEq = document.getElementById("graphCalcEquation");
+    if (gEq) gEq.value = "";
+    let s4Slope = document.getElementById("sec4SlopeInput");
+    if (s4Slope) s4Slope.value = "";
+    let s4Int = document.getElementById("sec4InterceptInput");
+    if (s4Int) s4Int.value = "";
+    renderStudentGraph();
 
-    // 8. Re-lock sections 2-6
-    for (let s = 2; s <= 6; s++) {
-      let card = document.getElementById(`sec${s}`);
+    // 10. Re-lock sections 2-7 and unlock section 1
+    for (let s = 2; s <= 7; s++) {
+      let card = document.getElementById(`sec_${s}`);
       if (card) {
         card.classList.add("locked");
         card.classList.remove("unlocked");
       }
     }
+    let sec1 = document.getElementById("sec_1");
+    if (sec1) {
+      sec1.classList.remove("locked");
+      sec1.classList.add("unlocked");
+    }
+
+    // 11. Reset worksheetState
     worksheetState.unlockedStep = 1;
     worksheetState.progress = 0;
     worksheetState.status = "in_progress";
     worksheetState.inspectionRequested = false;
     worksheetState.inspectionApproved = false;
+    worksheetState.crew = { releaser: "", measurer: "", scribe: "", checker: "" };
+    worksheetState.calibPoints = [];
+    worksheetState.linearSlope = 0;
+    worksheetState.linearIntercept = 0;
+    worksheetState.calcH = 0;
+    worksheetState.actualX = null;
+    worksheetState.officialGrade = null;
+    worksheetState.officialFeedback = "";
 
-    // 9. Re-show Station Check-In Modal
-    let modal = document.getElementById("stationModal");
-    if (modal) modal.style.display = "flex";
+    // 12. Reset buttons and banners
+    let btnClamp = document.getElementById("btnClampCheck");
+    if (btnClamp) {
+      btnClamp.textContent = "🔒 Request Stop-Block Inspection";
+      btnClamp.style.background = "";
+      btnClamp.style.color = "";
+    }
+    let successBanner = document.getElementById("stuntSuccessBanner");
+    if (successBanner) successBanner.style.display = "none";
+    let gradeCard = document.getElementById("officialGradeCard");
+    if (gradeCard) gradeCard.style.display = "none";
 
-    let pinInput = document.getElementById("modalStationPin");
-    if (pinInput) pinInput.value = "";
-
-    // 10. Re-hide target range
+    // 13. Re-hide target range
     let lockedBanner = document.getElementById("targetRangeLockedState");
     let unlockedCard = document.getElementById("targetRangeUnlockedState");
     if (lockedBanner) lockedBanner.style.display = "block";
     if (unlockedCard) unlockedCard.style.display = "none";
 
-    alert("🔄 Lab session has been reset by the instructor for a new class session. Please select your station and enter your PIN.");
+    // 14. Update progress bar
+    updateProgress();
+
+    // 15. Re-show Station Check-In Modal
+    let modal = document.getElementById("stationModal");
+    if (modal) modal.style.display = "flex";
+
+    let pinInput = document.getElementById("modalStationPin");
+    if (pinInput) pinInput.value = "";
+    let pinErr = document.getElementById("pinErrorBanner");
+    if (pinErr) pinErr.style.display = "none";
+
+    alert("🔄 " + (msg || "Lab session has been reset by the instructor. Please select your station and enter your PIN."));
   }
 
   // =========================================================
