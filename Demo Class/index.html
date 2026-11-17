@@ -2362,6 +2362,10 @@
               <span class="spec-label">Loop Diameter (2r):</span>
               <span class="spec-val cyan">18.4 cm <small>(0.184 m)</small></span>
             </div>
+            <div class="spec-item" style="margin-top: 4px;">
+              <span class="spec-label">Max Ramp Height:</span>
+              <span class="spec-val cyan">46.8 cm <small>(0.468 m)</small></span>
+            </div>
           </div>
         </div>
 
@@ -2407,18 +2411,22 @@
           </div>
           <div class="spec-content">
             <div class="spec-item">
+              <span class="spec-label">Table Drop Height <i>H</i>:</span>
+              <span class="spec-val emerald">0.773 m <small>(77.3 cm)</small></span>
+            </div>
+            <div class="spec-item" style="margin-top: 4px;">
               <span class="spec-label">Track Exit Alignment:</span>
               <span class="spec-val white">Level Horizontal</span>
-            </div>
-            <div class="spec-item">
-              <span class="spec-label">Table Drop Height <i>H</i>:</span>
-              <span class="spec-val emerald" style="font-size: 13.5px;">Measure at Station (Meter Stick)</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- STATION MATERIALS & APPARATUS KIT -->
+      <!-- SAFETY PROTOCOL (DIRECT FROM STUDENT REFERENCE SHEET) -->
+      <div class="safety-banner" style="background: rgba(245, 158, 11, 0.1); border: 1.5px solid #F59E0B; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 700; color: #0F172A;">
+        <span style="font-size: 18px;">⚠️</span>
+        <span><strong>Safety Protocol:</strong> Clear landing area. No pushing the ball. Retrieve only when the ball comes to rest.</span>
+      </div>
       <div class="apparatus-materials-panel">
         <div class="materials-title-row">
           <div class="materials-title">
@@ -3026,18 +3034,18 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px;">
           <div>
-            <label class="field-lbl">Step 1: Required Exit Speed Squared v*²:</label>
+            <label class="field-lbl">Step 1: Required Exit Speed Squared <i>v</i>*² = <i>g</i>(<i>X</i>*)² / (2<i>H</i>):</label>
             <input type="number" step="0.001" id="inversionV2Req" placeholder="Locked — Awaiting teacher target range broadcast" disabled style="background: #F8FAFC; border: 2px solid #CBD5E1; color: #64748B;" oninput="saveAndSync()" />
           </div>
 
           <div>
-            <label class="field-lbl">Step 2: Predicted Release Height h* (m):</label>
+            <label class="field-lbl">Step 2: Predicted Release Height <i>h</i>* = (<i>v</i>*² − <i>b</i>) / <i>a</i>:</label>
             <input type="number" step="0.001" id="inversionCalcH" placeholder="Locked — Awaiting teacher target range broadcast" disabled style="background: #F8FAFC; border: 2px solid #CBD5E1; color: #64748B;" oninput="saveAndSync()" />
           </div>
         </div>
 
         <div>
-          <label class="field-lbl">Show Your Backward Inversion Substitution Work Below:</label>
+          <label class="field-lbl">Show Your Backward Inversion Substitution Work Below (Use <i>g</i> = 9.8 m/s², <i>H</i> = 0.773 m):</label>
           <textarea id="inversionWorkText" rows="2" placeholder="Write out your algebraic substitution..." oninput="saveAndSync()"></textarea>
         </div>
 
@@ -3127,7 +3135,7 @@
             Official Instructor Assessment
           </div>
           <h3 style="color: #0F172A; font-size: 26px; font-weight: 900; margin: 6px 0;">
-            🏆 SCORE: <span id="gradeScoreDisplay" style="color: var(--emerald);">100 / 100</span>
+            🏆 SCORE: <span id="gradeScoreDisplay" style="color: var(--emerald);">20 / 20 pts (100%)</span>
           </h3>
           <p id="gradeFeedbackDisplay" style="font-size: 17px; color: #E2E8F0; font-style: italic;">
             "Master Stunt Calibration! Completed with physical accuracy."
@@ -4669,7 +4677,9 @@
     let scoreEl = document.getElementById("gradeScoreDisplay");
     let feedEl = document.getElementById("gradeFeedbackDisplay");
     if (card && scoreEl && feedEl) {
-      scoreEl.textContent = `${score} / 100`;
+      let pts = Number(score) <= 20 ? Number(score) : Math.round((Number(score) / 100) * 20);
+      let pct = Number(score) <= 20 ? Math.round((Number(score) / 20) * 100) : Number(score);
+      scoreEl.textContent = `${pts} / 20 pts (${pct}%)`;
       feedEl.textContent = feedback ? `"${feedback}"` : "Master Stunt Calibration! Completed with distinction.";
       card.style.display = "block";
     }
