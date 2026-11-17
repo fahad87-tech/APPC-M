@@ -1983,3 +1983,72 @@ Per instructor instruction (*"do not provide both of this to students...let them
 
 ### 5. Git Commit & Deployment
 - Synced to `origin/main` repository (`https://github.com/fahad87-tech/APPC-M.git`).
+
+---
+
+## 54. On-Slide Physics Question Integration (Slides 1–14) in Presentation Deck
+
+### 1. User Feedback & Resolution
+- **User Clarification:** *"where are the questions i do not see them on the slide"*.
+- **Diagnosis:** Questions were previously added to the teacher narrative script ([AP1_Stunt_Calibration_Classroom_Script.md](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_Stunt_Calibration_Classroom_Script.md)), but were not directly typeset onto the visual cards of the PowerPoint presentation ([AP1_U3S5_Stunt_Calibration_Deck.pptx](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Deck.pptx)).
+- **Action Taken:** Developed and executed [apply_slide_questions.py](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/.build/apply_slide_questions.py) to directly inject and format dedicated, high-contrast, amber-accented physics question headers onto every slide leading up to the lab experiment (Slides 1 through 14).
+
+### 2. Design Pattern & Typography Standards
+- **Header:** $32\text{pt}$ Bold, Dark Navy (`#0F172A`).
+- **Question Banner / Callout:** $28\text{pt}$ Bold, Amber (`#D97706` / `#F59E0B`), prefixed with `❓ `.
+- **Conceptual Content:** $26\text{--}28\text{pt}$ Bold, Dark Navy (`#0F172A`), bulleted with tight line spacing.
+- **Slide 11 (LOL Energy Ledger):** Added a dedicated centered rounded question banner (`TextBox LOL Question`, $864 \times 32\text{ pt}$) at $y = 108\text{ pt}$:
+  `❓ Physics Question: Where did the missing kinetic energy go? (Friction & Rotational Spin!)` in $20\text{pt}$ Bold Gold over Dark Navy fill with Amber border.
+
+### 3. Summary of On-Slide Questions (Slides 1–14)
+1. **Slide 01:** `❓ Does higher release mean more speed?`
+2. **Slide 02:** `❓ Does mass affect drop height?`
+3. **Slide 03:** `❓ What must we increase to fly farther?`
+4. **Slide 04:** `❓ What force dropped to zero when string went limp?`
+5. **Slide 05:** `❓ Which way does track push Dave at the top?`
+6. **Slide 06:** `❓ At minimum speed to stay on track, what is Fn?`
+7. **Slide 07:** `❓ What energy does Dave have at release vs exit?`
+8. **Slide 08:** `❓ Where do h, H & X begin & end?`
+9. **Slide 09:** `❓ Why must the Releaser release with zero push?`
+10. **Slide 10:** `❓ Textbook says h = 2.5r clears loop. Did it work?`
+11. **Slide 11:** `❓ Where did missing kinetic energy go? (Friction & Spin!)`
+12. **Slide 12:** `❓ Where does horizontal flight start on floor?`
+13. **Slide 13:** `❓ In an ideal world, what is slope of v² vs h?`
+14. **Slide 14:** `❓ Does horizontal speed change during flight?`
+
+### 4. Verification & Pixel Audit
+- Re-exported Slides 1 through 14 at $1920 \times 1080$ via PowerPoint COM into `qa_deck_slides/`.
+- Automated Python bounding-box audit verified `dark pixels in danger zone = 0` across all slides.
+
+---
+
+## 55. Conversion of Slope Comparison to Open Student Text Input (`index.html`)
+
+### 1. Pedagogical Rationale & Problem
+- **Previous Implementation:** Section 3 (Empirical Calibration Curve) previously contained a `<select id="slopeComparison">` dropdown with predefined options:
+  - `-- Select Comparison --`
+  - `Smaller (Energy Deficit / Rotational Inertia)`
+  - `Similar`
+  - `Larger`
+- **Spoon-Feeding Issue:** The dropdown text explicitly disclosed the underlying physics mechanism (*"Energy Deficit / Rotational Inertia"*), undermining the inquiry-based nature of Section 4 (Energy Check) where students are supposed to discover and reason why energy is lost.
+- **User Request:** *"let them write here. smaller, bigger or similar"*
+
+### 2. Implementation Details
+1. **Interactive Text Field:** Replaced `<select id="slopeComparison">` with a full-width, clean `<input type="text">`:
+   ```html
+   <div>
+     <label class="field-lbl">Compared with ideal 2<i>g</i> = 19.6 m/s², our measured slope is (smaller, bigger, or similar):</label>
+     <input type="text" id="slopeComparison" placeholder="smaller, bigger, or similar" oninput="saveAndSync()" />
+   </div>
+   ```
+2. **Seamless State & Real-Time Sync Compatibility:**
+   - Retained `#slopeComparison` element ID.
+   - Preserved `oninput="saveAndSync()"` to trigger immediate debounced state persistence.
+   - `packWorksheetState()` captures `comparison: document.getElementById("slopeComparison").value`.
+   - `restoreWorksheetState()` populates `document.getElementById("slopeComparison").value = saved.calibratedParams.comparison`.
+   - `safeSet("slopeComparison", peerState.calibratedParams.comparison)` continues to live-sync peer edits across chromebooks without disrupting the active typing element.
+
+### 3. Verification & Deployment
+- Validated with Node.js script syntax checks (`node --check`), confirming zero parse errors.
+- Synchronized to canonical repository `D:\HW FIx\AP Physics 1\05_Labs\LABS\Lab4_Stunt_Calibration\index.html` and mirror `C:\Users\fahad\Documents\GitHub\APPC-M\Demo Class\index.html`.
+

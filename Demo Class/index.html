@@ -3038,13 +3038,8 @@
           </div>
 
           <div>
-            <label class="field-lbl">Compared with ideal 2g = 19.6 m/s², our measured slope is:</label>
-            <select id="slopeComparison" onchange="saveAndSync()">
-              <option value="">-- Select Comparison --</option>
-              <option value="smaller">Smaller (Energy Deficit / Rotational Inertia)</option>
-              <option value="similar">Similar</option>
-              <option value="larger">Larger</option>
-            </select>
+            <label class="field-lbl">Compared with ideal 2<i>g</i> = 19.6 m/s², our measured slope is (smaller, bigger, or similar):</label>
+            <input type="text" id="slopeComparison" placeholder="smaller, bigger, or similar" oninput="saveAndSync()" />
           </div>
         </div>
       </div>
