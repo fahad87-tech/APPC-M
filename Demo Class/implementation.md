@@ -2052,3 +2052,45 @@ Per instructor instruction (*"do not provide both of this to students...let them
 - Validated with Node.js script syntax checks (`node --check`), confirming zero parse errors.
 - Synchronized to canonical repository `D:\HW FIx\AP Physics 1\05_Labs\LABS\Lab4_Stunt_Calibration\index.html` and mirror `C:\Users\fahad\Documents\GitHub\APPC-M\Demo Class\index.html`.
 
+---
+
+## 56. Complete Equation Scaffolding Removal, Spec Cards Typography & Materials Repositioning (`index.html`)
+
+### 1. Pedagogical Rationale & User Requirements
+1. **Section 5 Equation Scaffolding Removal:**
+   - *User Instruction:* *"this scaffolding needs to eb removed......students need to know the equations by themselves!"*
+   - *Problem:* Section 5 previously displayed an "AP Masterclass Protocol" callout box that explicitly provided the formulas `h* = (v*² − b) / a`, and the input field headers explicitly displayed `= g(X*)² / (2H)` and `= (v*² − b) / a`, along with `(Use g = 9.8 m/s², H = 0.773 m)` in the substitution prompt.
+   - *Action:* Completely removed all formula spoilers and guidance boxes. Students must independently derive and recall kinematic projectile equations and invert their empirical linear regression model.
+2. **Apparatus Specifications Typography Upgrade:**
+   - *User Instruction:* *"font height needs to be increases slightly and bold the headings"*
+   - *Problem:* Spec card titles (`REPORTED DIMENSIONS`, `WOODEN PLATFORM`, `CHECKED RELEASE LIMIT`, `STATION CONSTANTS`) were rendered in faint `#94A3B8` gray, and card inner contents had compact font sizes (`13px`).
+   - *Action:* Converted headings to high-contrast dark navy (`#0F172A`, `font-weight: 900`, `font-size: 15px`), increased card padding (`14px 18px`), increased font height/size of labels to `15px`, values to `16.5px`, and inputs to `16px` (`height: 34px`).
+3. **Materials Kit Repositioning:**
+   - *User Instruction:* *"required station materials box should be right after challange"*
+   - *Action:* Relocated `.apparatus-materials-panel` directly beneath the Hollywood Challenge Mission Briefing (`.mission-briefing-card`) and before `#sec_apparatus`, allowing students to verify their physical bench kit before examining track datums.
+
+### 2. Implementation Summary
+- **Section 5 Changes:**
+  - Removed `<!-- AP Masterclass Dual-Check Protocol Callout -->` block.
+  - Step 1: Changed label to `Step 1: Required Exit Speed Squared <i>v</i>*² (m²/s²):`.
+  - Step 2: Changed label to `Step 2: Predicted Release Height <i>h</i>* (m):`.
+  - Substitution: Changed label to `Show Your Backward Inversion Substitution Work Below:`.
+  - JavaScript: Removed hardcoded `H = 0.773 m` from `#targetRangeBannerTxt` and removed formula spoiler from `#daveSpeechTxt`.
+- **Typography & CSS Changes:**
+  - `.spec-title`: `font-size: 15px !important; font-weight: 900 !important; color: #0F172A !important; letter-spacing: 0.05em !important; text-transform: uppercase !important;`
+  - `.spec-card`: `padding: 14px 18px !important; border: 1.5px solid #CBD5E1 !important; border-radius: 8px !important;`
+  - `.spec-item`: `font-size: 15px !important; line-height: 1.55 !important;`
+  - `.spec-label`: `font-size: 15px !important; font-weight: 800 !important; color: #1E293B !important;`
+  - `.spec-val`: `font-size: 16.5px !important; font-weight: 900 !important;`
+  - Sub-labels & instructions: `font-size: 13px !important; font-weight: 600 !important; line-height: 1.4 !important; color: #475569 !important;`
+  - Inputs (`#measuredMaxRampH`, `#maxSafeH`, `#measuredDropH`): `height: 34px; font-size: 16px; padding: 4px 8px; border: 2px solid #CBD5E1;`
+- **DOM Placement:**
+  - Placed `.apparatus-materials-panel` between `.mission-briefing-card` and `#sec_apparatus`.
+  - Updated `#sec_apparatus` header title to `<span class="section-num">📐 Setup Reference</span> Apparatus Specifications &amp; Measurement Datums`.
+
+### 3. Verification & Deployment
+- Validated with Playwright browser screenshot tests (`qa_spec_cards.png`, `qa_materials_panel.png`, and `qa_unscaffolded_sec5.png`), confirming flawless visual layout and zero formula leakage.
+- Validated with Node.js script syntax checks (`node --check`), confirming 0 syntax errors.
+- Synchronized to canonical repository `D:\HW FIx\AP Physics 1\05_Labs\LABS\Lab4_Stunt_Calibration\` and GitHub tracking repository `C:\Users\fahad\Documents\GitHub\APPC-M\Demo Class\`.
+
+

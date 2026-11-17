@@ -1241,10 +1241,10 @@
     }
     .spec-icon { font-size: 18px; }
     .spec-title {
-      font-size: 13px;
-      font-weight: 800;
-      color: #94A3B8;
-      letter-spacing: 0.06em;
+      font-size: 15px;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
     }
     .spec-content {
@@ -1660,14 +1660,37 @@
     .spec-card {
       min-height: 0 !important;
       height: auto !important;
-      padding: 8px 12px !important;
+      padding: 14px 18px !important;
       background: #F8FAFC !important;
-      border: 1.5px solid #E2E8F0 !important;
-      border-radius: 6px !important;
+      border: 1.5px solid #CBD5E1 !important;
+      border-radius: 8px !important;
+      gap: 10px !important;
+    }
+
+    .spec-header {
+      display: flex !important;
+      align-items: center !important;
+      gap: 10px !important;
+      border-bottom: 1.5px solid #CBD5E1 !important;
+      padding-bottom: 8px !important;
+      margin-bottom: 6px !important;
+    }
+
+    .spec-icon {
+      font-size: 20px !important;
+    }
+
+    .spec-title {
+      font-size: 15px !important;
+      font-weight: 900 !important;
+      color: #0F172A !important;
+      letter-spacing: 0.05em !important;
+      text-transform: uppercase !important;
     }
 
     .spec-item {
-      font-size: 13px !important;
+      font-size: 15px !important;
+      line-height: 1.55 !important;
       display: flex !important;
       justify-content: space-between !important;
       align-items: center !important;
@@ -1676,13 +1699,21 @@
     }
 
     .spec-label {
-      font-size: 13px !important;
+      font-size: 15px !important;
       font-weight: 800 !important;
+      color: #1E293B !important;
     }
 
     .spec-val {
-      font-size: 14px !important;
+      font-size: 16.5px !important;
       font-weight: 900 !important;
+    }
+
+    .spec-subtext {
+      font-size: 13.5px !important;
+      color: #475569 !important;
+      line-height: 1.45 !important;
+      font-style: italic !important;
     }
 
     .spec-val.cyan { color: #0284C7 !important; }
@@ -2410,12 +2441,68 @@
   </div>
 
   <!-- ============================================================== -->
+  <!-- REQUIRED STATION MATERIALS & APPARATUS KIT (RIGHT AFTER CHALLENGE) -->
+  <!-- ============================================================== -->
+  <div class="apparatus-materials-panel" style="margin-bottom: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 2px solid #CBD5E1;">
+    <div class="materials-title-row">
+      <div class="materials-title" style="font-size: 15px; font-weight: 900; color: #0284C7;">
+        <span>🧰</span> Required Station Materials &amp; Apparatus Kit
+      </div>
+      <span style="font-size: 13px; color: #64748B; font-weight: 700;">Check your physical bench before testing</span>
+    </div>
+    <div class="materials-grid">
+      <div class="material-item">
+        <span class="material-icon">🎢</span>
+        <div class="material-info">
+          <span class="material-name">Stunt Track Apparatus</span>
+          <span class="material-role">Curved ramp, 18.4 cm loop, runway &amp; riser block</span>
+        </div>
+      </div>
+      <div class="material-item">
+        <span class="material-icon">🎱</span>
+        <div class="material-info">
+          <span class="material-name">Solid Steel Ball</span>
+          <span class="material-role">Spherical projectile released from rest</span>
+        </div>
+      </div>
+      <div class="material-item">
+        <span class="material-icon">🪢</span>
+        <div class="material-info">
+          <span class="material-name">Plumb Line &amp; Bob</span>
+          <span class="material-role">Establishes X = 0 launch origin directly on floor</span>
+        </div>
+      </div>
+      <div class="material-item">
+        <span class="material-icon">📏</span>
+        <div class="material-info">
+          <span class="material-name">Ruler &amp; Tape Measure</span>
+          <span class="material-role">Measures release height h, drop H, &amp; range X</span>
+        </div>
+      </div>
+      <div class="material-item">
+        <span class="material-icon">📋</span>
+        <div class="material-info">
+          <span class="material-name">Carbon Paper &amp; Target</span>
+          <span class="material-role">Records ball impact marks on floor</span>
+        </div>
+      </div>
+      <div class="material-item">
+        <span class="material-icon">🪑</span>
+        <div class="material-info">
+          <span class="material-name">Lab Desk &amp; C-Clamp</span>
+          <span class="material-role">Level bench surface supporting stunt track</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
   <!-- APPARATUS BENCH TELEMETRY & SIDE-VIEW SCHEMATIC CARD -->
   <!-- ============================================================== -->
   <div class="section-card unlocked" id="sec_apparatus" style="border-color: var(--card-border); box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
     <div class="section-header-row">
       <div class="section-title">
-        <span class="section-num">📐 Setup Reference</span> Apparatus Specifications, Materials &amp; Measurement Datums
+        <span class="section-num">📐 Setup Reference</span> Apparatus Specifications &amp; Measurement Datums
       </div>
       <div style="display: flex; align-items: center; gap: 10px;">
         <span style="background: rgba(16, 185, 129, 0.15); border: 1.5px solid var(--emerald); color: var(--emerald); font-size: 12.5px; font-weight: 800; padding: 4px 12px; border-radius: 20px;">
@@ -2438,17 +2525,17 @@
           </div>
           <div class="spec-content">
             <div class="spec-item">
-              <span class="spec-label">Loop Diameter (2r):</span>
-              <span class="spec-val cyan">18.4 cm <small>(0.184 m)</small></span>
+              <span class="spec-label">Loop Diameter (2<i>r</i>):</span>
+              <span class="spec-val cyan">18.4 cm <small style="font-size: 13.5px; font-weight: 700;">(0.184 m)</small></span>
             </div>
-            <div class="spec-item" style="flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 4px;">
+            <div class="spec-item" style="flex-direction: column; align-items: flex-start; gap: 6px; margin-top: 6px;">
               <span class="spec-label">Measured Max Ramp Height <i>h</i><sub>ramp,max</sub>:</span>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <input type="number" step="0.001" id="measuredMaxRampH" placeholder="" style="width: 105px; text-align: center; font-size: 15px; padding: 3px 6px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="onMaxRampHChange()" />
-                <span style="font-weight: 800; color: #0284C7; font-size: 13.5px;">m</span>
-                <span id="maxRamp_cm_badge" style="background: rgba(2, 132, 199, 0.15); color: #075985; padding: 2px 7px; border-radius: 4px; font-size: 12px; font-weight: 800;">-- cm</span>
+                <input type="number" step="0.001" id="measuredMaxRampH" placeholder="" style="width: 110px; height: 34px; text-align: center; font-size: 16px; padding: 4px 8px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="onMaxRampHChange()" />
+                <span style="font-weight: 800; color: #0284C7; font-size: 14.5px;">m</span>
+                <span id="maxRamp_cm_badge" style="background: rgba(2, 132, 199, 0.15); color: #075985; padding: 3px 8px; border-radius: 4px; font-size: 13px; font-weight: 800;">-- cm</span>
               </div>
-              <div style="font-size: 11.5px; color: #64748B; font-weight: 600;">
+              <div style="font-size: 13px; color: #475569; font-weight: 600; line-height: 1.4; margin-top: 2px;">
                 Measure vertical height from wooden riser to highest stop on ramp
               </div>
             </div>
@@ -2466,7 +2553,7 @@
               <span class="spec-label">Elevation Under Loop:</span>
               <span class="spec-val gold">3.6 – 3.7 cm</span>
             </div>
-            <div class="spec-subtext">
+            <div class="spec-subtext" style="font-size: 13.5px; color: #475569; line-height: 1.45; margin-top: 6px;">
               Riser block placed strictly under loop section
             </div>
           </div>
@@ -2482,8 +2569,8 @@
             <div class="spec-item" style="flex-direction: column; align-items: flex-start; gap: 6px;">
               <span class="spec-label">Max Safe Release Height <i>h</i>:</span>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <input type="number" step="0.001" id="maxSafeH" placeholder="" style="width: 120px; text-align: center; font-size: 16px; padding: 4px 8px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="saveAndSync()" />
-                <span style="font-weight: 800; color: #E2E8F0; font-size: 15px;">m</span>
+                <input type="number" step="0.001" id="maxSafeH" placeholder="" style="width: 120px; height: 34px; text-align: center; font-size: 16px; padding: 4px 8px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="saveAndSync()" />
+                <span style="font-weight: 800; color: #0F172A; font-size: 15px;">m</span>
               </div>
             </div>
           </div>
@@ -2496,20 +2583,20 @@
             <span class="spec-title">Station Constants</span>
           </div>
           <div class="spec-content">
-            <div class="spec-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+            <div class="spec-item" style="flex-direction: column; align-items: flex-start; gap: 6px;">
               <span class="spec-label">Table Drop Height <i>H</i> (Exit to Floor):</span>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <input type="number" step="0.001" id="measuredDropH" placeholder="" style="width: 105px; text-align: center; font-size: 15px; padding: 3px 6px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="onDropHChange()" />
-                <span style="font-weight: 800; color: #059669; font-size: 13.5px;">m</span>
-                <span id="dropH_cm_badge" style="background: rgba(16, 185, 129, 0.15); color: #065F46; padding: 2px 7px; border-radius: 4px; font-size: 12px; font-weight: 800;">-- cm</span>
+                <input type="number" step="0.001" id="measuredDropH" placeholder="" style="width: 110px; height: 34px; text-align: center; font-size: 16px; padding: 4px 8px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="onDropHChange()" />
+                <span style="font-weight: 800; color: #059669; font-size: 14.5px;">m</span>
+                <span id="dropH_cm_badge" style="background: rgba(16, 185, 129, 0.15); color: #065F46; padding: 3px 8px; border-radius: 4px; font-size: 13px; font-weight: 800;">-- cm</span>
               </div>
-              <div style="font-size: 11.5px; color: #64748B; font-weight: 600;">
-                Flight Time <i>t</i><sub>flight</sub> = &radic;(2<i>H</i>/<i>g</i>) = <strong id="spec_t_flight_val" style="color: #0284C7; font-family: var(--font-mono);">-- s</strong>
+              <div style="font-size: 13px; color: #475569; font-weight: 600; line-height: 1.4; margin-top: 2px;">
+                Flight Time <i>t</i><sub>flight</sub> = &radic;(2<i>H</i>/<i>g</i>) = <strong id="spec_t_flight_val" style="color: #0284C7; font-family: var(--font-mono); font-size: 14px;">-- s</strong>
               </div>
             </div>
-            <div class="spec-item" style="margin-top: 4px;">
+            <div class="spec-item" style="margin-top: 6px;">
               <span class="spec-label">Track Exit Alignment:</span>
-              <span class="spec-val white">Level Horizontal</span>
+              <span class="spec-val white" style="font-size: 15px;">Level Horizontal</span>
             </div>
           </div>
         </div>
@@ -2520,59 +2607,6 @@
         <span style="font-size: 18px;">⚠️</span>
         <span><strong>Safety Protocol:</strong> Clear landing area. No pushing the ball. Retrieve only when the ball comes to rest.</span>
       </div>
-      <div class="apparatus-materials-panel">
-        <div class="materials-title-row">
-          <div class="materials-title">
-            <span>🧰</span> Required Station Materials &amp; Apparatus Kit
-          </div>
-          <span style="font-size: 12.5px; color: #94A3B8; font-weight: 600;">Check your physical bench before testing</span>
-        </div>
-        <div class="materials-grid">
-          <div class="material-item">
-            <span class="material-icon">🎢</span>
-            <div class="material-info">
-              <span class="material-name">Stunt Track Apparatus</span>
-              <span class="material-role">Curved ramp, 18.4 cm loop, runway &amp; riser block</span>
-            </div>
-          </div>
-          <div class="material-item">
-            <span class="material-icon">🎱</span>
-            <div class="material-info">
-              <span class="material-name">Solid Steel Ball</span>
-              <span class="material-role">Spherical projectile released from rest</span>
-            </div>
-          </div>
-          <div class="material-item">
-            <span class="material-icon">🪢</span>
-            <div class="material-info">
-              <span class="material-name">Plumb Line &amp; Bob</span>
-              <span class="material-role">Establishes X = 0 launch origin directly on floor</span>
-            </div>
-          </div>
-          <div class="material-item">
-            <span class="material-icon">📏</span>
-            <div class="material-info">
-              <span class="material-name">Ruler &amp; Tape Measure</span>
-              <span class="material-role">Measures release height h, drop H, &amp; range X</span>
-            </div>
-          </div>
-          <div class="material-item">
-            <span class="material-icon">📋</span>
-            <div class="material-info">
-              <span class="material-name">Carbon Paper &amp; Target</span>
-              <span class="material-role">Records ball impact marks on floor</span>
-            </div>
-          </div>
-          <div class="material-item">
-            <span class="material-icon">🪑</span>
-            <div class="material-info">
-              <span class="material-name">Lab Desk &amp; C-Clamp</span>
-              <span class="material-role">Level bench surface supporting stunt track</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- SCHEMATIC DIAGRAM: CLEAN PDF DRAFTING SCHEMATIC -->
       <div class="schematic-wrap">
         <svg class="apparatus-diagram" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 215" role="img" aria-label="Side view schematic of stunt setup showing release height h, drop height H, horizontal range X, and wooden platform on table" style="display:block;width:100%;height:auto;">
@@ -3138,33 +3172,22 @@
             </span>
           </div>
 
-          <!-- AP Masterclass Dual-Check Protocol Callout -->
-          <div style="background: rgba(37, 99, 235, 0.06); border: 1.5px solid #3B82F6; border-radius: 8px; padding: 12px 16px; margin-top: 14px;">
-            <div style="font-weight: 800; color: #1D4ED8; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-              <span>📐</span> <strong>AP Masterclass Protocol: Graph Straightedge &amp; Equation Dual-Check</strong>
-            </div>
-            <p style="margin: 6px 0 0 0; font-size: 13px; color: #1E293B; line-height: 1.5;">
-              <strong>1. Visual Graph Reading:</strong> Find your calculated <i>v</i>*² on the vertical axis of your Section 3 graph, trace horizontally across to your best-fit line, and drop straight down to read <i>h</i>* on the horizontal axis.<br>
-              <strong>2. Algebraic Inversion:</strong> Compute <i>h</i>* = (<i>v</i>*² − <i>b</i>) / <i>a</i> in Step 2 below using your calibrated parameters.<br>
-              <strong>3. Cross-Check:</strong> If your visual ruler reading and algebraic formula match within <strong>&plusmn;2 mm (&plusmn;0.002 m)</strong>, you can clamp Dave with 100% confidence!
-            </p>
-          </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px;">
           <div>
-            <label class="field-lbl">Step 1: Required Exit Speed Squared <i>v</i>*² = <i>g</i>(<i>X</i>*)² / (2<i>H</i>):</label>
+            <label class="field-lbl">Step 1: Required Exit Speed Squared <i>v</i>*² (m²/s²):</label>
             <input type="number" step="0.001" id="inversionV2Req" placeholder="Locked — Awaiting teacher target range broadcast" disabled style="background: #F8FAFC; border: 2px solid #CBD5E1; color: #64748B;" oninput="saveAndSync()" />
           </div>
 
           <div>
-            <label class="field-lbl">Step 2: Predicted Release Height <i>h</i>* = (<i>v</i>*² − <i>b</i>) / <i>a</i>:</label>
+            <label class="field-lbl">Step 2: Predicted Release Height <i>h</i>* (m):</label>
             <input type="number" step="0.001" id="inversionCalcH" placeholder="Locked — Awaiting teacher target range broadcast" disabled style="background: #F8FAFC; border: 2px solid #CBD5E1; color: #64748B;" oninput="saveAndSync()" />
           </div>
         </div>
 
         <div>
-          <label class="field-lbl">Show Your Backward Inversion Substitution Work Below (Use <i>g</i> = 9.8 m/s², <i>H</i> = 0.773 m):</label>
+          <label class="field-lbl">Show Your Backward Inversion Substitution Work Below:</label>
           <textarea id="inversionWorkText" rows="2" placeholder="Write out your algebraic substitution..." oninput="saveAndSync()"></textarea>
         </div>
 
@@ -4903,7 +4926,7 @@
 
     let bannerTxt = document.getElementById('targetRangeBannerTxt');
     if (bannerTxt) {
-      bannerTxt.innerHTML = `🎯 DIRECT TARGET REVEALED: <strong>X* = ${xTarget} m (${xTargetCm} cm)</strong> &nbsp;|&nbsp; Floor drop <i>H</i> = 0.773 m`;
+      bannerTxt.innerHTML = `🎯 DIRECT TARGET REVEALED: <strong>X* = ${xTarget} m (${xTargetCm} cm)</strong>`;
     }
 
     let targetDisplay = document.getElementById('targetXDisplay');
@@ -4928,7 +4951,7 @@
 
     let daveSpeech = document.getElementById('daveSpeechTxt');
     if (daveSpeech) {
-      daveSpeech.innerHTML = `🎬 <strong>DIRECTOR TARGET REVEALED: X* = ${xTarget} m (${xTargetCm} cm)!</strong> Read <i>h</i>* visually off your Section 3 graph with a straightedge, then compute <i>h</i>* = (<i>v</i>*² − <i>b</i>) / <i>a</i> to verify they match within &plusmn;2 mm!`;
+      daveSpeech.innerHTML = `🎬 <strong>DIRECTOR TARGET REVEALED: X* = ${xTarget} m (${xTargetCm} cm)!</strong> Determine the required exit speed and predicted release height <i>h</i>*!`;
     }
 
     if (withConfetti && typeof confetti === 'function') {
