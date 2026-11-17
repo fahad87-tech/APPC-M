@@ -645,6 +645,38 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    
+  /* STUDENT SPRINT PACING HUD */
+  .student-sprint-hud {
+    background: #EFF6FF;
+    border: 1.5px solid #BFDBFE;
+    border-radius: 10px;
+    padding: 10px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+    transition: all 0.3s ease;
+  }
+  .student-sprint-hud.warning {
+    background: #FFFBEB;
+    border-color: #FCD34D;
+  }
+  .student-sprint-hud.warning #studentSprintTimerClock {
+    color: #D97706 !important;
+    border-color: #F59E0B !important;
+  }
+  .student-sprint-hud.urgent {
+    background: #FEF2F2;
+    border-color: #FCA5A5;
+  }
+  .student-sprint-hud.urgent #studentSprintTimerClock {
+    color: #DC2626 !important;
+    border-color: #EF4444 !important;
+  }
+
     /* SECTION 1: CANVAS FBD WITH FAT DOT */
     .fbd-lol-container {
       display: grid;
@@ -2251,6 +2283,30 @@
 
 <div class="container">
 
+  <!-- CLASSROOM SPRINT TIMER HUD (NON-INTRUSIVE PACING REMINDER) -->
+  <div id="studentSprintHUD" class="student-sprint-hud" style="display: flex;">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 22px;">⏱️</span>
+      <div style="display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <strong id="studentSprintStage" style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #1E40AF;">
+            Calibration Sprint (Sections 1–4):
+          </strong>
+          <span id="studentSprintTimerClock" style="font-family: var(--font-mono); font-size: 18px; font-weight: 900; color: #0F172A; background: #FFFFFF; border: 1.5px solid #93C5FD; padding: 1px 8px; border-radius: 6px;">
+            15:00
+          </span>
+          <span id="studentSprintStatus" style="font-size: 12.5px; font-weight: 700; color: #475569;">Remaining</span>
+        </div>
+        <span style="font-size: 11.5px; color: #64748B; font-weight: 600;">
+          Pacing guideline before instructor reveals target range &amp; checks Stop-Block clamp
+        </span>
+      </div>
+    </div>
+    <button type="button" onclick="toggleStudentSprintHUD()" style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 4px; font-size: 13px; font-weight: 800; color: #64748B; cursor: pointer; padding: 3px 8px;" title="Minimize / Expand timer banner">
+      −
+    </button>
+  </div>
+
   <!-- LAB SHEET HEADER -->
   <div class="lab-header-card">
     <div class="top-meta-row">
@@ -2380,9 +2436,16 @@
               <span class="spec-label">Loop Diameter (2r):</span>
               <span class="spec-val cyan">18.4 cm <small>(0.184 m)</small></span>
             </div>
-            <div class="spec-item" style="margin-top: 4px;">
-              <span class="spec-label">Max Ramp Height:</span>
-              <span class="spec-val cyan">46.8 cm <small>(0.468 m)</small></span>
+            <div class="spec-item" style="flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 4px;">
+              <span class="spec-label">Measured Max Ramp Height <i>h</i><sub>ramp,max</sub>:</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" step="0.001" id="measuredMaxRampH" placeholder="e.g. 0.620" value="0.620" style="width: 105px; text-align: center; font-size: 15px; padding: 3px 6px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="onMaxRampHChange()" />
+                <span style="font-weight: 800; color: #0284C7; font-size: 13.5px;">m</span>
+                <span id="maxRamp_cm_badge" style="background: rgba(2, 132, 199, 0.15); color: #075985; padding: 2px 7px; border-radius: 4px; font-size: 12px; font-weight: 800;">62.0 cm</span>
+              </div>
+              <div style="font-size: 11.5px; color: #64748B; font-weight: 600;">
+                Measure vertical height from wooden riser to highest stop on ramp
+              </div>
             </div>
           </div>
         </div>
@@ -2428,9 +2491,16 @@
             <span class="spec-title">Station Constants</span>
           </div>
           <div class="spec-content">
-            <div class="spec-item">
-              <span class="spec-label">Table Drop Height <i>H</i>:</span>
-              <span class="spec-val emerald">0.773 m <small>(77.3 cm)</small></span>
+            <div class="spec-item" style="flex-direction: column; align-items: flex-start; gap: 4px;">
+              <span class="spec-label">Table Drop Height <i>H</i> (Exit to Floor):</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <input type="number" step="0.001" id="measuredDropH" value="0.773" style="width: 105px; text-align: center; font-size: 15px; padding: 3px 6px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="onDropHChange()" />
+                <span style="font-weight: 800; color: #059669; font-size: 13.5px;">m</span>
+                <span id="dropH_cm_badge" style="background: rgba(16, 185, 129, 0.15); color: #065F46; padding: 2px 7px; border-radius: 4px; font-size: 12px; font-weight: 800;">77.3 cm</span>
+              </div>
+              <div style="font-size: 11.5px; color: #64748B; font-weight: 600;">
+                Flight Time <i>t</i><sub>flight</sub> = &radic;(2<i>H</i>/<i>g</i>) = <strong id="spec_t_flight_val" style="color: #0284C7; font-family: var(--font-mono);">0.3972 s</strong>
+              </div>
             </div>
             <div class="spec-item" style="margin-top: 4px;">
               <span class="spec-label">Track Exit Alignment:</span>
@@ -2721,6 +2791,8 @@
               <div style="font-size: 13px; font-weight: 700; color: var(--gold); text-align: center;" id="apexTotalLbl">Total: 0 bars</div>
             </div>
           </div>
+          <div id="lolGuidanceHint" style="margin-top: 10px; font-size: 13px; font-weight: 700; color: #1E40AF; background: #EFF6FF; border: 1.5px solid #BFDBFE; border-radius: 8px; padding: 8px 12px; text-align: center; display: none;">
+          </div>
         </div>
       </div>
 
@@ -2776,19 +2848,21 @@
       <table class="worksheet-table">
         <thead>
           <tr>
-            <th>Launch</th>
-            <th>Release Setting</th>
-            <th>Release Height h (m)</th>
-            <th>Landing Range X (m)</th>
-            <th>Exit Speed v (m/s)</th>
-            <th>Auto-Squared v² (m²/s²)</th>
+            <th style="width: 7%;">Launch</th>
+            <th style="width: 17%;">Release Setting</th>
+            <th style="width: 17%;">Raw Table Height <i>h</i><sub>raw</sub> (cm)</th>
+            <th style="width: 17%;">Corrected <i>h</i> (m)</th>
+            <th style="width: 14%;">Landing Range <i>X</i> (m)</th>
+            <th style="width: 14%;">Exit Speed <i>v</i> (m/s)</th>
+            <th style="width: 14%;">Auto-Squared <i>v</i>² (m²/s²)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td><strong>1</strong></td>
             <td>A · Lowest</td>
-            <td><input type="number" step="0.001" id="tbl_h_0" placeholder="" oninput="onSpeedInput(0)" onchange="onSpeedInput(0)" /></td>
+            <td><input type="number" step="0.1" id="tbl_hraw_0" placeholder="e.g. 41.0" oninput="onRawHeightInput(0)" onchange="onRawHeightInput(0)" /></td>
+            <td><input type="number" step="0.001" id="tbl_h_0" placeholder="e.g. 0.373" oninput="onCorrectedHeightInput(0)" onchange="onCorrectedHeightInput(0)" /></td>
             <td><input type="number" step="0.001" id="tbl_x_0" placeholder="" oninput="onSpeedInput(0)" onchange="onSpeedInput(0)" /></td>
             <td><input type="number" step="0.01" id="tbl_v_0" placeholder="" oninput="onSpeedInput(0)" onchange="onSpeedInput(0)" /></td>
             <td><span class="auto-squared-cell" id="tbl_v2_cell_0">--</span></td>
@@ -2796,7 +2870,8 @@
           <tr>
             <td><strong>2</strong></td>
             <td>B · Mid-Low</td>
-            <td><input type="number" step="0.001" id="tbl_h_1" placeholder="" oninput="onSpeedInput(1)" onchange="onSpeedInput(1)" /></td>
+            <td><input type="number" step="0.1" id="tbl_hraw_1" placeholder="e.g. 46.0" oninput="onRawHeightInput(1)" onchange="onRawHeightInput(1)" /></td>
+            <td><input type="number" step="0.001" id="tbl_h_1" placeholder="e.g. 0.423" oninput="onCorrectedHeightInput(1)" onchange="onCorrectedHeightInput(1)" /></td>
             <td><input type="number" step="0.001" id="tbl_x_1" placeholder="" oninput="onSpeedInput(1)" onchange="onSpeedInput(1)" /></td>
             <td><input type="number" step="0.01" id="tbl_v_1" placeholder="" oninput="onSpeedInput(1)" onchange="onSpeedInput(1)" /></td>
             <td><span class="auto-squared-cell" id="tbl_v2_cell_1">--</span></td>
@@ -2804,7 +2879,8 @@
           <tr>
             <td><strong>3</strong></td>
             <td>C · Mid-High</td>
-            <td><input type="number" step="0.001" id="tbl_h_2" placeholder="" oninput="onSpeedInput(2)" onchange="onSpeedInput(2)" /></td>
+            <td><input type="number" step="0.1" id="tbl_hraw_2" placeholder="e.g. 50.0" oninput="onRawHeightInput(2)" onchange="onRawHeightInput(2)" /></td>
+            <td><input type="number" step="0.001" id="tbl_h_2" placeholder="e.g. 0.463" oninput="onCorrectedHeightInput(2)" onchange="onCorrectedHeightInput(2)" /></td>
             <td><input type="number" step="0.001" id="tbl_x_2" placeholder="" oninput="onSpeedInput(2)" onchange="onSpeedInput(2)" /></td>
             <td><input type="number" step="0.01" id="tbl_v_2" placeholder="" oninput="onSpeedInput(2)" onchange="onSpeedInput(2)" /></td>
             <td><span class="auto-squared-cell" id="tbl_v2_cell_2">--</span></td>
@@ -2812,7 +2888,8 @@
           <tr>
             <td><strong>4</strong></td>
             <td>D · High</td>
-            <td><input type="number" step="0.001" id="tbl_h_3" placeholder="" oninput="onSpeedInput(3)" onchange="onSpeedInput(3)" /></td>
+            <td><input type="number" step="0.1" id="tbl_hraw_3" placeholder="e.g. 55.0" oninput="onRawHeightInput(3)" onchange="onRawHeightInput(3)" /></td>
+            <td><input type="number" step="0.001" id="tbl_h_3" placeholder="e.g. 0.513" oninput="onCorrectedHeightInput(3)" onchange="onCorrectedHeightInput(3)" /></td>
             <td><input type="number" step="0.001" id="tbl_x_3" placeholder="" oninput="onSpeedInput(3)" onchange="onSpeedInput(3)" /></td>
             <td><input type="number" step="0.01" id="tbl_v_3" placeholder="" oninput="onSpeedInput(3)" onchange="onSpeedInput(3)" /></td>
             <td><span class="auto-squared-cell" id="tbl_v2_cell_3">--</span></td>
@@ -2820,7 +2897,8 @@
           <tr>
             <td><strong>5</strong></td>
             <td>E · Max Ramp <small style="color: var(--cyan); font-weight: 700;">(5th Point)</small></td>
-            <td><input type="number" step="0.001" id="tbl_h_4" placeholder="" oninput="onSpeedInput(4)" onchange="onSpeedInput(4)" /></td>
+            <td><input type="number" step="0.1" id="tbl_hraw_4" placeholder="e.g. 62.0" oninput="onRawHeightInput(4)" onchange="onRawHeightInput(4)" /></td>
+            <td><input type="number" step="0.001" id="tbl_h_4" placeholder="e.g. 0.583" oninput="onCorrectedHeightInput(4)" onchange="onCorrectedHeightInput(4)" /></td>
             <td><input type="number" step="0.001" id="tbl_x_4" placeholder="" oninput="onSpeedInput(4)" onchange="onSpeedInput(4)" /></td>
             <td><input type="number" step="0.01" id="tbl_v_4" placeholder="" oninput="onSpeedInput(4)" onchange="onSpeedInput(4)" /></td>
             <td><span class="auto-squared-cell" id="tbl_v2_cell_4">--</span></td>
@@ -2828,9 +2906,13 @@
         </tbody>
       </table>
 
-      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 14.5px; color: var(--emerald); font-weight: 700; gap: 8px;">
-        <span>✓ Live Graph Telemetry: Plotted points immediately sync to Section 3 millimeter grid!</span>
-        <span style="color: #94A3B8; font-size: 13.5px; font-weight: 600;">📏 Table Launch Height <i>H</i>: Measure at your station &nbsp;•&nbsp; <i>t</i><sub>flight</sub> = &radic;(2<i>H</i>/<i>g</i>)</span>
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 14px; color: var(--emerald); font-weight: 700; gap: 8px;">
+        <span>✓ Live Graph Telemetry: Corrected <i>h</i> immediately syncs to Section 3 millimeter grid!</span>
+        <span style="color: #64748B; font-size: 13.5px; font-weight: 600;">
+          📏 Table Launch Drop <i>H</i>: <span id="sec2_display_H" style="color: #059669; font-weight: 800;">0.773 m</span> &nbsp;|&nbsp; 
+          <i>t</i><sub>flight</sub> = <span id="sec2_display_t" style="color: #0284C7; font-weight: 800;">0.3972 s</span> &nbsp;|&nbsp; 
+          Riser Offset = 3.7 cm [<i>h</i> = (<i>h</i><sub>raw</sub> − 3.7)/100]
+        </span>
       </div>
 
       <button class="btn-next-step" onclick="unlockSection(3)">
@@ -3273,6 +3355,7 @@
   };
 
   function init() {
+    initStudentSprintHUD();
     updateTeacherStatusInModal(isTeacherOnline);
     checkStationLock();
     initFbdCanvas();
@@ -3653,36 +3736,157 @@
 
     document.getElementById("initialTotalLbl").textContent = `Total: ${initialTot} bars`;
     document.getElementById("apexTotalLbl").textContent = `Total: ${apexTot} bars`;
+
+    let hintEl = document.getElementById("lolGuidanceHint");
+    if (hintEl) {
+      if (worksheetState.lol.ki > 0) {
+        hintEl.style.display = "block";
+        hintEl.style.background = "#FEF2F2";
+        hintEl.style.borderColor = "#FCA5A5";
+        hintEl.style.color = "#DC2626";
+        hintEl.innerHTML = "💡 <strong>Check Initial State:</strong> The ball is held stationary before release (<i>v</i><sub>i</sub> = 0 ⟹ <i>K</i><sub>i</sub> = 0). All 5 bars at <i>h</i> = 2.5<i>R</i> must be <strong>Gravitational Potential Energy (<i>U</i><sub>gi</sub>)</strong>!";
+      } else if (initialTot > 0 && initialTot !== apexTot) {
+        hintEl.style.display = "block";
+        hintEl.style.background = "#FFFBEB";
+        hintEl.style.borderColor = "#FCD34D";
+        hintEl.style.color = "#D97706";
+        hintEl.innerHTML = `⚠️ <strong>Conservation of Energy Ledger:</strong> Total bars at Initial Release (${initialTot} bars) must exactly match Total bars at Apex Reality (${apexTot} bars) when <i>W</i><sub>ext</sub> = 0!`;
+      } else if (initialTot === 5 && apexTot === 5 && worksheetState.lol.ugi === 5 && worksheetState.lol.ugf === 4) {
+        hintEl.style.display = "block";
+        hintEl.style.background = "#ECFDF5";
+        hintEl.style.borderColor = "#A7F3D0";
+        hintEl.style.color = "#047857";
+        hintEl.innerHTML = "✅ <strong>Physical Energy Accounting Match!</strong> 5 bars initial <i>U</i><sub>gi</sub>. At the apex (<i>y</i> = 2<i>R</i>), climbing the loop takes 4 bars (<i>U</i><sub>gf</sub> = 4). In reality, friction &amp; rotational energy partition into <i>E</i><sub>diss</sub>, leaving insufficient <i>K</i><sub>trans</sub> (< 1 bar) to complete the loop!";
+      } else {
+        hintEl.style.display = "none";
+      }
+    }
   }
 
   // ==========================================
-  // SECTION 2: SYNCHRONIZATION ENGINE & AUTO-SQUARE
+  // SECTION 2: SYNCHRONIZATION ENGINE & AUTO-SQUARE (WITH PHYSICAL DATUM CORRECTION)
   // ==========================================
+  const WOODEN_RISER_OFFSET_CM = 3.7; // 3.7 cm wooden riser under loop
+
+  function getDropH() {
+    let el = document.getElementById("measuredDropH");
+    let val = el ? parseFloat(el.value) : NaN;
+    return (!isNaN(val) && val > 0.20) ? (val > 2.0 ? val / 100.0 : val) : 0.773;
+  }
+
+  function getTFlight() {
+    return Math.sqrt((2.0 * getDropH()) / 9.80);
+  }
+
+  function getMaxRampH() {
+    let el = document.getElementById("measuredMaxRampH");
+    let val = el ? parseFloat(el.value) : NaN;
+    return (!isNaN(val) && val > 0.10) ? (val > 1.5 ? val / 100.0 : val) : 0.620;
+  }
+
+  function onDropHChange(shouldSync = true) {
+    let H = getDropH();
+    let tFlight = getTFlight();
+
+    let badge = document.getElementById("dropH_cm_badge");
+    if (badge) badge.textContent = (H * 100).toFixed(1) + " cm";
+
+    let tFlightDisp = document.getElementById("spec_t_flight_val");
+    if (tFlightDisp) tFlightDisp.textContent = tFlight.toFixed(4) + " s";
+
+    let sec2H = document.getElementById("sec2_display_H");
+    if (sec2H) sec2H.textContent = H.toFixed(3) + " m";
+
+    let sec2T = document.getElementById("sec2_display_t");
+    if (sec2T) sec2T.textContent = tFlight.toFixed(4) + " s";
+
+    // Update Section 5 prompt labels if revealed
+    let bannerTxt = document.getElementById('targetRangeBannerTxt');
+    let xTarget = document.getElementById('targetXDisplay') ? document.getElementById('targetXDisplay').value : "0.780";
+    if (bannerTxt && isTargetRangeRevealed) {
+      let xTargetCm = (parseFloat(xTarget) * 100).toFixed(1).replace(/\.0$/, '');
+      bannerTxt.innerHTML = `🎯 DIRECT TARGET REVEALED: <strong>X* = ${xTarget} m (${xTargetCm} cm)</strong> &nbsp;|&nbsp; Station Floor Drop <i>H</i> = ${H.toFixed(3)} m (${(H*100).toFixed(1)} cm)`;
+    }
+
+    syncAndRenderGraph();
+    if (shouldSync) saveAndSync();
+  }
+
+  function onMaxRampHChange(shouldSync = true) {
+    let maxH = getMaxRampH();
+    let badge = document.getElementById("maxRamp_cm_badge");
+    if (badge) badge.textContent = (maxH * 100).toFixed(1) + " cm";
+
+    syncAndRenderGraph();
+    if (shouldSync) saveAndSync();
+  }
+
+  function onRawHeightInput(rowIdx) {
+    let rawEl = document.getElementById(`tbl_hraw_${rowIdx}`);
+    let hEl = document.getElementById(`tbl_h_${rowIdx}`);
+    if (rawEl && hEl) {
+      let rawVal = parseFloat(rawEl.value);
+      if (!isNaN(rawVal)) {
+        // Auto-compute corrected h in meters: h = (h_raw - 3.7) / 100
+        let corrH = (rawVal - WOODEN_RISER_OFFSET_CM) / 100.0;
+        hEl.value = (corrH > 0) ? corrH.toFixed(3) : "0.000";
+      }
+    }
+    syncAndRenderGraph();
+  }
+
+  function onCorrectedHeightInput(rowIdx) {
+    let rawEl = document.getElementById(`tbl_hraw_${rowIdx}`);
+    let hEl = document.getElementById(`tbl_h_${rowIdx}`);
+    if (hEl && rawEl) {
+      let hVal = parseFloat(hEl.value);
+      if (!isNaN(hVal)) {
+        if (hVal > 1.0) { // Student typed in cm e.g. 37.3 cm
+          hVal = hVal / 100.0;
+          if (document.activeElement !== hEl) hEl.value = hVal.toFixed(3);
+        }
+        // Back-compute raw tabletop cm: h_raw = h*100 + 3.7
+        let rawVal = (hVal * 100.0) + WOODEN_RISER_OFFSET_CM;
+        rawEl.value = rawVal.toFixed(1);
+      }
+    }
+    syncAndRenderGraph();
+  }
+
   function syncTablePointsFromDom() {
-    const T_FLIGHT = 0.3971;
+    const T_FLIGHT = getTFlight();
     let points = [];
 
     for (let i = 0; i < 5; i++) {
+      let rawEl = document.getElementById(`tbl_hraw_${i}`);
       let hEl = document.getElementById(`tbl_h_${i}`);
       let xEl = document.getElementById(`tbl_x_${i}`);
       let vEl = document.getElementById(`tbl_v_${i}`);
       let v2Cell = document.getElementById(`tbl_v2_cell_${i}`);
 
+      let rawVal = rawEl ? parseFloat(rawEl.value) : NaN;
       let h = hEl ? parseFloat(hEl.value) : NaN;
       let x = xEl ? parseFloat(xEl.value) : NaN;
       let v = vEl ? parseFloat(vEl.value) : NaN;
 
-      // Auto-convert centimeters to meters if student enters cm (e.g. 10 cm -> 0.10 m, 38 cm -> 0.38 m)
+      // Ensure h is in meters
       if (!isNaN(h) && h > 1.0) {
         h = h / 100.0;
         if (hEl && document.activeElement !== hEl) hEl.value = h.toFixed(3);
       }
+      // Ensure x is in meters
       if (!isNaN(x) && x > 2.0) {
         x = x / 100.0;
         if (xEl && document.activeElement !== xEl) xEl.value = x.toFixed(3);
       }
 
-      // If Landing Range X is entered but speed v is blank, auto-compute v = X / 0.3971
+      // If raw is entered but h is blank, compute h
+      if (!isNaN(rawVal) && (isNaN(h) || h <= 0)) {
+        h = (rawVal - WOODEN_RISER_OFFSET_CM) / 100.0;
+        if (hEl) hEl.value = (h > 0) ? h.toFixed(3) : "0.000";
+      }
+
+      // Auto-compute exit speed v from measured landing range X: v = X / t_flight
       if ((isNaN(v) || v <= 0) && !isNaN(x) && x > 0) {
         v = x / T_FLIGHT;
         if (vEl && !vEl.value) vEl.value = v.toFixed(2);
@@ -3701,6 +3905,7 @@
       }
 
       let pt = {
+        h_raw: (!isNaN(rawVal) && rawVal > 0) ? rawVal : null,
         h: (!isNaN(h) && h > 0) ? h : null,
         x: (!isNaN(x) && x > 0) ? x : null,
         v: (!isNaN(v) && v > 0) ? v : null,
@@ -4398,6 +4603,8 @@
       status: worksheetState.status,
       inspectionRequested: worksheetState.inspectionRequested || false,
       inspectionApproved: worksheetState.inspectionApproved || false,
+      dropH: document.getElementById("measuredDropH") ? document.getElementById("measuredDropH").value : "0.773",
+      maxRampH: document.getElementById("measuredMaxRampH") ? document.getElementById("measuredMaxRampH").value : "0.620",
       crew: {
         releaser: document.getElementById("crewReleaser") ? document.getElementById("crewReleaser").value : "",
         measurer: document.getElementById("crewMeasurer") ? document.getElementById("crewMeasurer").value : "",
@@ -4560,6 +4767,8 @@
         updateTeacherStatusInModal(false);
       } else if (data.type === 'STATION_PINS_UPDATED') {
         if (data.pins) Object.assign(dynamicStationPins, data.pins);
+      } else if (data.type === 'SPRINT_TIMER_SYNC') {
+        updateStudentSprintTimerHUD(data);
       } else if (data.type === 'TARGET_RANGE_REVEALED') {
         applyTargetRangeReveal(true);
       } else if (data.type === 'RESET_ALL_STATIONS') {
@@ -4588,6 +4797,11 @@
       try {
         let p = JSON.parse(e.newValue);
         if (p) Object.assign(dynamicStationPins, p);
+      } catch(err) {}
+    } else if (e.key === "stunt_sprint_timer") {
+      try {
+        let p = JSON.parse(e.newValue);
+        if (p) updateStudentSprintTimerHUD(p);
       } catch(err) {}
     } else if (e.key === "stunt_classroom_reset_trigger") {
       executeSessionReset("Lab session has been reset by the instructor for a new class session.");
@@ -4619,6 +4833,75 @@
   }
 
   window.applyTargetRangeReveal = applyTargetRangeReveal;
+
+  // ==========================================
+  // STUDENT CALIBRATION SPRINT PACING HUD
+  // ==========================================
+  let isStudentSprintHudMinimized = false;
+
+  function toggleStudentSprintHUD() {
+    isStudentSprintHudMinimized = !isStudentSprintHudMinimized;
+    let hud = document.getElementById("studentSprintHUD");
+    if (hud) {
+      let btn = hud.querySelector("button");
+      if (isStudentSprintHudMinimized) {
+        hud.style.padding = "4px 12px";
+        let sub = hud.querySelector(".hud-sub");
+        if (sub) sub.style.display = "none";
+        if (btn) btn.textContent = "+";
+      } else {
+        hud.style.padding = "10px 16px";
+        let sub = hud.querySelector(".hud-sub");
+        if (sub) sub.style.display = "block";
+        if (btn) btn.textContent = "−";
+      }
+    }
+  }
+
+  function updateStudentSprintTimerHUD(data) {
+    if (!data) return;
+    let clockEl = document.getElementById("studentSprintTimerClock");
+    let statusEl = document.getElementById("studentSprintStatus");
+    let stageEl = document.getElementById("studentSprintStage");
+    let hud = document.getElementById("studentSprintHUD");
+    if (!clockEl || !hud) return;
+
+    let sec = data.remaining;
+    if (data.running && data.endMs) {
+      sec = Math.max(0, Math.round((data.endMs - Date.now()) / 1000));
+    }
+
+    let m = Math.floor(sec / 60);
+    let s = sec % 60;
+    clockEl.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+
+    hud.classList.remove("warning", "urgent");
+    if (sec <= 60 && sec > 0) {
+      hud.classList.add("urgent");
+      if (statusEl) statusEl.textContent = "Sprint Ending Soon!";
+    } else if (sec <= 180 && sec > 0) {
+      hud.classList.add("warning");
+      if (statusEl) statusEl.textContent = "Wrap Up Graph!";
+    } else if (sec === 0) {
+      hud.classList.add("warning");
+      clockEl.textContent = "00:00";
+      if (stageEl) stageEl.textContent = "Calibration Sprint Complete:";
+      if (statusEl) statusEl.textContent = "Ready for Clamp Inspection!";
+    } else {
+      if (statusEl) statusEl.textContent = data.running ? "Remaining" : "Paused";
+    }
+  }
+
+  function initStudentSprintHUD() {
+    try {
+      let saved = localStorage.getItem("stunt_sprint_timer");
+      if (saved) {
+        let p = JSON.parse(saved);
+        if (p) updateStudentSprintTimerHUD(p);
+      }
+    } catch(e) {}
+  }
+
   window.checkTargetRangeReveal = checkTargetRangeReveal;
   function applyTargetRangeReveal(withConfetti, rangeVal) {
     isTargetRangeRevealed = true;
@@ -4752,14 +5035,32 @@
       if (saved.predictions.obsResult) document.getElementById("obsResult").value = saved.predictions.obsResult;
     }
 
-    // RESTORE TABLE POINTS
+    // RESTORE TABLE DROP H & MAX RAMP
+    if (saved.dropH && document.getElementById("measuredDropH")) {
+      document.getElementById("measuredDropH").value = saved.dropH;
+      onDropHChange(false);
+    }
+    if (saved.maxRampH && document.getElementById("measuredMaxRampH")) {
+      document.getElementById("measuredMaxRampH").value = saved.maxRampH;
+      onMaxRampHChange(false);
+    }
+
+    // RESTORE TABLE POINTS (INCLUDING RAW TABLE HEIGHT & CORRECTED H)
     if (saved.tablePoints && Array.isArray(saved.tablePoints)) {
       worksheetState.tablePoints = saved.tablePoints;
       saved.tablePoints.forEach((p, idx) => {
+        let rawEl = document.getElementById(`tbl_hraw_${idx}`);
         let hEl = document.getElementById(`tbl_h_${idx}`);
         let xEl = document.getElementById(`tbl_x_${idx}`);
         let vEl = document.getElementById(`tbl_v_${idx}`);
         let v2El = document.getElementById(`tbl_v2_cell_${idx}`);
+
+        if (rawEl && p.h_raw !== undefined && p.h_raw !== null) {
+          rawEl.value = p.h_raw;
+        } else if (rawEl && p.h !== null && !isNaN(p.h)) {
+          rawEl.value = ((parseFloat(p.h) * 100.0) + WOODEN_RISER_OFFSET_CM).toFixed(1);
+        }
+
         if (hEl && p.h !== null) hEl.value = p.h;
         if (xEl && p.x !== null) xEl.value = p.x;
         if (vEl && p.v !== null) vEl.value = p.v;
@@ -5136,6 +5437,8 @@
 
     // 6. Clear table auto-squared cells & points
     for (let i = 0; i < 5; i++) {
+      let rawIn = document.getElementById(`tbl_hraw_${i}`);
+      if (rawIn) rawIn.value = "";
       let hIn = document.getElementById(`tbl_h_${i}`);
       if (hIn) hIn.value = "";
       let xIn = document.getElementById(`tbl_x_${i}`);
