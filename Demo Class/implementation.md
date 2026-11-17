@@ -1902,3 +1902,84 @@ This sprint synchronizes the student portal (`index.html`) directly with the off
 ### 8. Verification & Deployment
 - Validated JavaScript AST syntax on both `index.html` and `dashboard.html` with zero syntax errors.
 - Synced to GitHub repository `https://github.com/fahad87-tech/APPC-M.git`.
+
+---
+
+## 53. Classroom Script Simplification & Physics-Only Question Refinement
+
+### 1. User Feedback & Design Objective
+- **User Instruction:** *"keep questions small and only about physics.......keep script simple and easy for students to understand"*.
+- **Pedagogical Shift:**
+  - Removed meta-narrative / Hollywood logistics questions (e.g. film union rules, stunt budget/contracts).
+  - Replaced with direct, single-sentence conceptual physics checks (forces, normal force direction, detachment boundary, mass cancellation, energy transformations, reference height datums, projectile horizontal velocity constancy).
+  - Streamlined teacher explanations into simple, high-impact English suitable for all learners (including ESL students) during a brisk 43-minute demonstration lesson.
+
+### 2. Refined Physics Questions (Slides 1–14 Pre-Experiment)
+- **Slide 01:** *"If we release Dave from higher up the ramp, what happens to his speed at the bottom?"* $\to$ Speed increases ($U_g \to K$).
+- **Slide 02:** *"If we replace Dave with a heavier steel ball that has double the mass, do we need a higher release height, lower, or the exact same?"* $\to$ Same height ($m$ cancels).
+- **Slide 03:** *"To make the ball land further away on the floor, what must we increase at the edge of the table?"* $\to$ Horizontal exit speed ($X = v_x t$).
+- **Slide 04:** *"When the bucket slows down at the top and the string goes limp, which force dropped to zero: gravity or normal force?"* $\to$ Normal force / tension ($F_N \to 0$).
+- **Slide 05:** *"When the ball is upside down at the top of the loop, which direction does the track push it: up or down?"* $\to$ Downward toward the circle center.
+- **Slide 06:** *"At the slowest possible speed where the ball barely touches the track without falling, what is the normal force?"* $\to$ $F_N = 0 \implies v_{crit} = \sqrt{gr}$.
+- **Slide 07:** *"What type of energy does the ball have at the very top of the ramp before we let it go?"* $\to$ Gravitational potential energy ($mgh$).
+- **Slide 08:** *"To calculate potential energy correctly, should we measure release height $h$ from the tabletop, or from the exit track level?"* $\to$ From exit track level ($\Delta y$).
+- **Slide 09:** *"Why must the Releaser release the ball with zero push?"* $\to$ Pushing adds initial kinetic energy ($v_0 > 0$).
+- **Slide 10:** *"The textbook said $h = 2.5r$ would work. When the ball crashed, did it gain energy or lose energy on the way up?"* $\to$ Lost mechanical energy to friction and spin.
+- **Slide 11:** *"Energy cannot be created or destroyed. Where did that missing 0.5 bar of kinetic energy go?"* $\to$ Thermal dissipation and rotational spin.
+- **Slide 12:** *"Where does horizontal projectile flight begin: at the front table leg, or directly below the plumb bob?"* $\to$ Directly below the plumb bob ($X = 0$).
+- **Slide 13:** *"Because our real track loses energy, will our graph's slope be greater than 19.6, or less than 19.6?"* $\to$ Less than 19.6 ($a < 2g$).
+- **Slide 14:** *"While the ball is flying through the air, does its horizontal speed speed up, slow down, or stay constant?"* $\to$ Stays constant ($a_x = 0$).
+
+### 3. File Updates
+- Completely re-written: [`AP1_Stunt_Calibration_Classroom_Script.md`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_Stunt_Calibration_Classroom_Script.md).
+
+---
+
+## 53. Station Group Icon Symmetry, Pure Blank Scaffolding (Zero Spoilers), and Lowercase $h$ Table Column
+
+### 1. Architectural & Visual Scope
+This update addresses mission control card symmetry on `dashboard.html` and eliminates all inadvertent numerical spoilers / answer scaffolding from the student portal (`index.html`), ensuring students determine all experimental parameters independently.
+
+### 2. Teacher Mission Control Group Icon Symmetry (`dashboard.html`)
+- **Problem Identified:**
+  - Station 1 and Station 2 titles wrapped onto two lines (`Speed 
+ Demons` and `Vector 
+ Vanguard`), while Station 3 and Station 4 remained on a single line.
+  - The rank badge (`🥇`, `🥈`) and group emblem (`⚡`, `🎯`, `⚛️`, `🔥`) were loosely nested inside the flex title box. When Station 1 and 2 wrapped, the rank medals were vertically centered halfway down the two-line height, creating a misaligned, asymmetrical appearance.
+  - Emoji widths varied across the OS font (e.g. `⚡` is narrow, `⚛️` has a built-in purple square on Windows).
+- **Solution Implemented:**
+  - **Standardized Symmetrical Station Avatar:** Replaced loose emojis with a uniform, fixed $44\text{ px} \times 44\text{ px}$ rounded avatar box (`.station-avatar`) with color-coded theme borders and subtle background fills:
+    - Station 1: Cyan border (`#38BDF8`) with `⚡`
+    - Station 2: Emerald border (`#34D399`) with `🎯`
+    - Station 3: Violet border (`#A78BFA`) with `⚛️`
+    - Station 4: Amber border (`#FBBF24`) with `🔥`
+  - **Single-Line Title Alignment:** Applied `white-space: nowrap;` and `font-size: 20px;` to `.station-name`, preventing awkward line breaks.
+  - **Integrated Rank Pill:** Moved rank indicators (`🥇 #1`, `🥈 #2`, etc.) into a dedicated `.rank-pill` cleanly aligned alongside the PIN badge.
+  - All 4 station cards are now 100% horizontally and vertically symmetrical.
+
+### 3. Pure Blank Scaffolding & Zero Spoilers (`index.html`)
+Per instructor instruction (*"do not provide both of this to students...let them determine themselve. remove the scaffolding for students under LOL diagram. raw table height and corrected height should not be given. apart from riser offset, nothing should be given"*):
+- **Measured Max Ramp Height ($h_{\text{ramp,max}}$):**
+  - Removed placeholder `e.g. 0.620` and pre-filled value `0.620`.
+  - Input field `#measuredMaxRampH` is completely blank (`placeholder=""`).
+  - Badge starts at `-- cm` until measured and typed by students.
+- **Table Drop Height ($H$):**
+  - Removed pre-filled value `0.773` and pre-filled badge `77.3 cm`.
+  - Input field `#measuredDropH` is completely blank (`placeholder=""`).
+  - Flight time starts at `-- s` until students measure $H$ at their physical station.
+  - Section 2 note banner displays `-- m` and `-- s` until $H$ is entered.
+- **LOL Energy Diagram Guidance Removed:**
+  - Completely removed the `#lolGuidanceHint` callout box and code under the LOL diagram.
+  - No answer reveals or hints appear; students construct and justify their energy allocation independently.
+- **Section 2 Table Placeholders Cleared:**
+  - Removed all numerical placeholders (`e.g. 41.0`, `e.g. 0.373`, `e.g. 46.0`, etc.) across all 5 rows.
+  - All inputs are completely blank (`placeholder=""`).
+  - The physical apparatus constant (**Wooden Riser Offset = 3.7 cm**) remains the only provided apparatus reference.
+
+### 4. Table Header Lowercase $h$ (`index.html`)
+- **Problem:** CSS `text-transform: uppercase;` in `table.worksheet-table th` was forcing lowercase release height $h$ to uppercase `CORRECTED H`, causing confusion with floor drop height $H$.
+- **Fix:** Changed CSS to `text-transform: none;` and added `table.worksheet-table th i { text-transform: none !important; font-style: italic; }`.
+- Table header now cleanly displays lowercase italic variables: **Corrected <i>h</i> (m)**, **Raw Table Height <i>h</i><sub>raw</sub> (cm)**, **Exit Speed <i>v</i> (m/s)**.
+
+### 5. Git Commit & Deployment
+- Synced to `origin/main` repository (`https://github.com/fahad87-tech/APPC-M.git`).

@@ -346,24 +346,93 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      min-height: 48px;
     }
 
     .station-title-box {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
     }
 
-    .rank-badge {
-      font-size: 26px;
+    /* STANDARDIZED SYMMETRICAL STATION AVATAR */
+    .station-avatar {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+    }
+
+    .station-avatar.station_1 {
+      background: rgba(2, 132, 199, 0.12);
+      border: 1.5px solid #38BDF8;
+    }
+
+    .station-avatar.station_2 {
+      background: rgba(16, 185, 129, 0.12);
+      border: 1.5px solid #34D399;
+    }
+
+    .station-avatar.station_3 {
+      background: rgba(139, 92, 246, 0.12);
+      border: 1.5px solid #A78BFA;
+    }
+
+    .station-avatar.station_4 {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1.5px solid #FBBF24;
+    }
+
+    .station-name-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .station-name-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .station-name {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 900;
       color: #0F172A;
       letter-spacing: -0.01em;
+      white-space: nowrap;
     }
+
+    .rank-pill {
+      font-size: 12px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      color: #475569;
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+
+    .rank-pill.rank-1 { background: #FEF3C7; border-color: #FCD34D; color: #92400E; }
+    .rank-pill.rank-2 { background: #F1F5F9; border-color: #CBD5E1; color: #334155; }
+    .rank-pill.rank-3 { background: #FFEDD5; border-color: #FDBA74; color: #9A3412; }
+    .rank-pill.rank-4 { background: #F1F5F9; border-color: #E2E8F0; color: #64748B; }
 
     .pin-badge {
       font-family: var(--font-mono);
@@ -373,8 +442,9 @@
       border: 1px solid var(--cyan);
       padding: 3px 8px;
       border-radius: 5px;
-      margin-left: 6px;
+      margin-left: 2px;
       letter-spacing: 0.04em;
+      white-space: nowrap;
     }
 
     .pin-badge.revealed {
@@ -1599,9 +1669,16 @@
       card.innerHTML = `
         <div class="station-header">
           <div class="station-title-box">
-            <span class="rank-badge">${rankEmoji}</span>
-            <span class="station-name">${emblem} ${st.name}</span>
-            <span class="${pinBadgeClass}" title="Physical Station Passcode">${pinDisplay}</span>
+            <div class="station-avatar ${key}" title="Station Group Icon">
+              ${emblem}
+            </div>
+            <div class="station-name-wrap">
+              <div class="station-name-row">
+                <span class="station-name">${st.name}</span>
+                <span class="${pinBadgeClass}" title="Physical Station Passcode">${pinDisplay}</span>
+                <span class="rank-pill rank-${idx+1}">${rankEmoji} #${idx+1}</span>
+              </div>
+            </div>
           </div>
           ${statusBadge}
         </div>
