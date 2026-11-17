@@ -3056,6 +3056,18 @@
               ✓ Revealed by Instructor
             </span>
           </div>
+
+          <!-- AP Masterclass Dual-Check Protocol Callout -->
+          <div style="background: rgba(37, 99, 235, 0.06); border: 1.5px solid #3B82F6; border-radius: 8px; padding: 12px 16px; margin-top: 14px;">
+            <div style="font-weight: 800; color: #1D4ED8; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+              <span>📐</span> <strong>AP Masterclass Protocol: Graph Straightedge &amp; Equation Dual-Check</strong>
+            </div>
+            <p style="margin: 6px 0 0 0; font-size: 13px; color: #1E293B; line-height: 1.5;">
+              <strong>1. Visual Graph Reading:</strong> Find your calculated <i>v</i>*² on the vertical axis of your Section 3 graph, trace horizontally across to your best-fit line, and drop straight down to read <i>h</i>* on the horizontal axis.<br>
+              <strong>2. Algebraic Inversion:</strong> Compute <i>h</i>* = (<i>v</i>*² − <i>b</i>) / <i>a</i> in Step 2 below using your calibrated parameters.<br>
+              <strong>3. Cross-Check:</strong> If your visual ruler reading and algebraic formula match within <strong>&plusmn;2 mm (&plusmn;0.002 m)</strong>, you can clamp Dave with 100% confidence!
+            </p>
+          </div>
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 4px;">
@@ -4646,7 +4658,7 @@
 
     let daveSpeech = document.getElementById('daveSpeechTxt');
     if (daveSpeech) {
-      daveSpeech.innerHTML = `🎬 <strong>DIRECTOR TARGET REVEALED!</strong> Target range is locked at <strong>X* = ${xTarget} m (${xTargetCm} cm)</strong>! Backward-invert your calibration line to calculate exact release height <i>h</i>*!`;
+      daveSpeech.innerHTML = `🎬 <strong>DIRECTOR TARGET REVEALED: X* = ${xTarget} m (${xTargetCm} cm)!</strong> Read <i>h</i>* visually off your Section 3 graph with a straightedge, then compute <i>h</i>* = (<i>v</i>*² − <i>b</i>) / <i>a</i> to verify they match within &plusmn;2 mm!`;
     }
 
     if (withConfetti && typeof confetti === 'function') {
