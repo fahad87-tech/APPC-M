@@ -739,6 +739,274 @@
       transform: translateY(-1px);
     }
 
+    /* ==============================================================
+       STATION PINs FOCUS / WHOLE-CLASS PROJECTION MODE
+       ============================================================== */
+    .pins-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(6px);
+      z-index: 9998;
+      animation: fadeIn 0.25s ease-out;
+    }
+    .pins-backdrop.active {
+      display: block;
+    }
+
+    .pins-focus-modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      width: 94%;
+      max-width: 1100px;
+      max-height: 90vh;
+      overflow-y: auto;
+      margin: 0;
+      background: #FFFFFF;
+      border: 3px solid #6366F1;
+      border-radius: 24px;
+      padding: 30px 36px;
+      box-shadow: 0 25px 70px rgba(15, 23, 42, 0.55);
+      flex-direction: column;
+      gap: 20px;
+      animation: sprintFocusPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .pins-focus-modal.active {
+      display: flex;
+    }
+
+    .pins-focus-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      border-bottom: 2px solid #E2E8F0;
+      padding-bottom: 16px;
+    }
+
+    .pins-focus-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pins-focus-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #EEF2FF;
+      color: #4F46E5;
+      font-size: 11.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      width: fit-content;
+      border: 1px solid #C7D2FE;
+    }
+
+    .pins-focus-title {
+      font-size: 24px;
+      font-weight: 900;
+      color: #0F172A;
+      margin: 0;
+      line-height: 1.2;
+    }
+
+    .pins-focus-subtitle {
+      font-size: 13.5px;
+      color: #64748B;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .pins-focus-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .pins-focus-btn {
+      font-size: 13px;
+      font-weight: 800;
+      padding: 9px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .pins-focus-btn.roll {
+      background: #4F46E5;
+      color: #FFFFFF;
+      border: 1.5px solid #6366F1;
+    }
+    .pins-focus-btn.roll:hover {
+      background: #4338CA;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    }
+
+    .pins-focus-btn.close {
+      background: #F1F5F9;
+      color: #334155;
+      border: 1.5px solid #CBD5E1;
+    }
+    .pins-focus-btn.close:hover {
+      background: #E2E8F0;
+      color: #0F172A;
+    }
+
+    .pins-focus-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 18px;
+    }
+
+    .pin-focus-card {
+      background: #F8FAFC;
+      border: 2px solid #E2E8F0;
+      border-radius: 18px;
+      padding: 22px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+      transition: all 0.2s;
+    }
+    .pin-focus-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .pin-focus-card.alpha { border-top: 6px solid #0284C7; }
+    .pin-focus-card.beta  { border-top: 6px solid #4F46E5; }
+    .pin-focus-card.gamma { border-top: 6px solid #D97706; }
+    .pin-focus-card.delta { border-top: 6px solid #059669; }
+
+    .pin-focus-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+      justify-content: flex-start;
+    }
+
+    .pin-focus-card-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .pin-focus-card.alpha .pin-focus-card-avatar { background: #E0F2FE; color: #0284C7; }
+    .pin-focus-card.beta  .pin-focus-card-avatar { background: #EEF2FF; color: #4F46E5; }
+    .pin-focus-card.gamma .pin-focus-card-avatar { background: #FEF3C7; color: #D97706; }
+    .pin-focus-card.delta .pin-focus-card-avatar { background: #D1FAE5; color: #059669; }
+
+    .pin-focus-card-name {
+      font-size: 15px;
+      font-weight: 900;
+      color: #0F172A;
+      text-align: left;
+    }
+    .pin-focus-card-track {
+      font-size: 11px;
+      color: #64748B;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: left;
+    }
+
+    .pin-focus-code-box {
+      width: 100%;
+      background: #FFFFFF;
+      border: 2px dashed #94A3B8;
+      border-radius: 14px;
+      padding: 14px 10px;
+      margin: 8px 0 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .pin-focus-card.alpha .pin-focus-code-box { border-color: #38BDF8; background: #F0F9FF; }
+    .pin-focus-card.beta  .pin-focus-code-box { border-color: #818CF8; background: #EEF2FF; }
+    .pin-focus-card.gamma .pin-focus-code-box { border-color: #FBBF24; background: #FFFBEB; }
+    .pin-focus-card.delta .pin-focus-code-box { border-color: #34D399; background: #ECFDF5; }
+
+    .pin-focus-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #64748B;
+      margin-bottom: 2px;
+    }
+
+    .pin-focus-digits {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      font-size: 50px;
+      font-weight: 900;
+      letter-spacing: 6px;
+      color: #0F172A;
+      line-height: 1.1;
+      padding-left: 6px;
+    }
+
+    .pin-focus-roster-summary {
+      width: 100%;
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      text-align: left;
+    }
+
+    .pin-focus-roster-count {
+      font-size: 11.5px;
+      font-weight: 800;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #334155;
+      white-space: nowrap;
+      gap: 4px;
+    }
+
+    .pin-focus-crew-names {
+      font-size: 11.5px;
+      color: #64748B;
+      font-weight: 600;
+      line-height: 1.4;
+      max-height: 56px;
+      overflow-y: auto;
+    }
+
     /* CARD METRICS ROW */
     .metrics-row {
       display: grid;
@@ -1049,6 +1317,30 @@
   <!-- BACKDROP FOR SPRINT FOCUS MODE -->
   <div id="sprintBackdrop" class="sprint-backdrop" onclick="toggleSprintFocusMode()"></div>
 
+  <!-- BACKDROP & MODAL FOR STATION PINs FOCUS PROJECTION MODE -->
+  <div id="pinsBackdrop" class="pins-backdrop" onclick="toggleRosterPins()"></div>
+
+  <div id="pinsFocusModal" class="pins-focus-modal" role="dialog" aria-modal="true" aria-label="Classroom Station Security PINs & Roster Projection">
+    <div class="pins-focus-header">
+      <div class="pins-focus-title-group">
+        <span class="pins-focus-badge">🔑 Whole-Class Projector View</span>
+        <h2 class="pins-focus-title">Classroom Station PINs &amp; Crew Roster</h2>
+        <p class="pins-focus-subtitle">Students: locate your assigned lab track below and enter your 4-digit PIN on your station screen.</p>
+      </div>
+      <div class="pins-focus-actions">
+        <button class="pins-focus-btn roll" onclick="rollNewRandomPins()" title="Generate fresh random PINs for all stations">
+          🎲 Re-Roll PINs
+        </button>
+        <button class="pins-focus-btn close" onclick="toggleRosterPins()" title="Close PIN focus mode and return to cockpit view">
+          ✕ Close View (Esc)
+        </button>
+      </div>
+    </div>
+    <div class="pins-focus-grid" id="pinsFocusGrid">
+      <!-- Injected dynamically via renderPinsFocusGrid() -->
+    </div>
+  </div>
+
   <!-- CLASSROOM CALIBRATION SPRINT PACING BAR (SECTIONS 1-4) -->
   <div class="sprint-timer-bar" id="classroomSprintBar">
     <div class="sprint-timer-info">
@@ -1326,6 +1618,7 @@
     await syncPinsToClassroom();
     renderLeaderboard();
     renderGradingQueue();
+    if (isPinsFocusMode) renderPinsFocusGrid();
   }
 
   async function syncPinsToClassroom() {
@@ -1461,18 +1754,33 @@
     initSprintTimer();
   }
 
+  let isPinsFocusMode = false;
+
   function toggleRosterPins() {
-    isRosterPinRevealMode = !isRosterPinRevealMode;
+    isPinsFocusMode = !isPinsFocusMode;
+    isRosterPinRevealMode = isPinsFocusMode;
+
+    let modal = document.getElementById("pinsFocusModal");
+    let backdrop = document.getElementById("pinsBackdrop");
     let btn = document.getElementById("btnRosterToggle");
-    if (btn) {
-      if (isRosterPinRevealMode) {
+
+    if (isPinsFocusMode) {
+      renderPinsFocusGrid();
+      if (modal) modal.classList.add("active");
+      if (backdrop) backdrop.classList.add("active");
+      if (btn) {
         btn.className = "btn-roster active";
-        btn.innerHTML = "🔒 Hide PINs & Roster";
-      } else {
+        btn.innerHTML = "🔒 Hide Station PINs (Focus)";
+      }
+    } else {
+      if (modal) modal.classList.remove("active");
+      if (backdrop) backdrop.classList.remove("active");
+      if (btn) {
         btn.className = "btn-roster";
         btn.innerHTML = "🔑 Reveal Station PINs & Roster";
       }
     }
+
     renderLeaderboard();
 
     if (localStorage.getItem("stunt_target_revealed") === "true") {
@@ -1483,7 +1791,69 @@
         rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
       }
     }
+  }
 
+  function renderPinsFocusGrid() {
+    let grid = document.getElementById("pinsFocusGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    const stationColors = {
+      station_1: "alpha",
+      station_2: "beta",
+      station_3: "gamma",
+      station_4: "delta"
+    };
+
+    const stationEmblems = {
+      station_1: "α",
+      station_2: "β",
+      station_3: "γ",
+      station_4: "δ"
+    };
+
+    Object.keys(stations).forEach(key => {
+      let st = stations[key];
+      let colorClass = stationColors[key] || "alpha";
+      let emblem = stationEmblems[key] || "★";
+
+      let crewList = st.crew ? [st.crew.releaser, st.crew.measurer, st.crew.scribe, st.crew.checker].filter(n => n && n.trim().length > 0) : [];
+      let crewCount = crewList.length;
+
+      let memberDetails = [];
+      if (st.crew && st.crew.releaser) memberDetails.push("<b>Releaser:</b> " + escapeHtml(st.crew.releaser));
+      if (st.crew && st.crew.measurer) memberDetails.push("<b>Measurer:</b> " + escapeHtml(st.crew.measurer));
+      if (st.crew && st.crew.scribe)   memberDetails.push("<b>Scribe:</b> " + escapeHtml(st.crew.scribe));
+      if (st.crew && st.crew.checker)  memberDetails.push("<b>Checker:</b> " + escapeHtml(st.crew.checker));
+
+      let card = document.createElement("div");
+      card.className = `pin-focus-card ${colorClass}`;
+      card.innerHTML = `
+        <div class="pin-focus-card-header">
+          <div class="pin-focus-card-avatar">${emblem}</div>
+          <div>
+            <div class="pin-focus-card-name">${escapeHtml(st.name)}</div>
+            <div class="pin-focus-card-track">${escapeHtml(st.track || "Bench Station")}</div>
+          </div>
+        </div>
+
+        <div class="pin-focus-code-box">
+          <span class="pin-focus-label">Station Security PIN</span>
+          <span class="pin-focus-digits">${st.pin}</span>
+        </div>
+
+        <div class="pin-focus-roster-summary">
+          <div class="pin-focus-roster-count">
+            <span>👥 Crew Check-In</span>
+            <span style="color: ${crewCount > 0 ? '#059669' : '#64748B'}; font-weight: 900;">${crewCount} / 4 Joined</span>
+          </div>
+          <div class="pin-focus-crew-names">
+            ${memberDetails.length > 0 ? memberDetails.join("<br>") : "<span style='color: #94A3B8; font-style: italic;'>Waiting for crew check-in...</span>"}
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
   }
 
   
@@ -2660,8 +3030,9 @@
   }
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && isSprintFocusMode) {
-      toggleSprintFocusMode();
+    if (e.key === "Escape") {
+      if (isSprintFocusMode) toggleSprintFocusMode();
+      if (isPinsFocusMode) toggleRosterPins();
     }
   });
 

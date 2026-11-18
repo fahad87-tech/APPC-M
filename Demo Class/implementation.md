@@ -2135,3 +2135,375 @@ Per instructor instruction (*"do not provide both of this to students...let them
 
 
 
+
+
+## 58. Deck Pedagogical Re-Architecture: Measurable Objectives, Dual-Layer Reveal Sequences (Slides 5, 6, 7), Ideal-Only Inquiry Hypotheses (Slide 13), and Teacher Key Calibration Alignment (Slides 21, 22)
+
+### 1. Requirements & Core Purpose
+1. **Explain Mystery Fee Discrepancy (Slide 11 vs Real Demo / Teacher Keys):**
+   - *User Question:* *"explain how how the mystery fee is only 10 percent here and on the real demo (check keys) that it is higher just answer the question"*
+   - *Physical Explanation:* Slide 11's LOL diagram is an introductory 5-bar pedagogical toy model ($U_g = 5.0\text{ bars} \to U_g = 4.0\text{ bars}, K = 0.5\text{ bar}, E_{\text{diss}} = 0.5\text{ bar} = 10\%$) using small integers for quick mental math. In the actual physics experiment, rolling a solid sphere locks $\frac{2}{7} \approx 28.6\%$ into rotational kinetic energy ($I = \frac{2}{5}mr^2$, $\omega = v/r$), dropping translational slope from $19.6$ to $14.0\text{ m/s}^2$. On the physical apparatus (Track 1 & 2), two-rail pinch friction and track flex dissipate another $\sim 26.4\%$, resulting in a total mechanical deficit of $55.0\%$ (measured slope $a \approx 8.81\text{ m/s}^2$).
+2. **Slide 1 Measurable Learning Objectives:**
+   - *User Instruction:* *"except for the last one they all seem boring objectives....write down measureable objectives."*
+   - *Action:* Replaced passive conceptual bullets with 3 active, rigorous, measurable AP Physics 1 science practices while keeping the final inverted prediction target:
+     - `• 1. Quantify: Measure flight range X to calculate launch speed vx = X·√(g/2H)`
+     - `• 2. Model: Linearize v² vs. h to extract track efficiency & energy dissipation`
+     - `• 3. Invert: Predict release height h* to hit target on Take 1!`
+   - Formatted with $28\text{pt}$ Bold Pure White header, $23\text{pt}$ Gold question, and $20\text{pt}$ Bold Pure White bullets with generous breathing room above the card border.
+3. **Slide 5 Apex Force Reveal Sequence:**
+   - *User Instruction:* *"slide 5 is revealing forces on the first picture, they need to show picture ask question and then reveal forces dude WTF!!"*
+   - *Action:* Decoupled the labeled diagram. Replaced the base photo with `deck_slide05_clean_base.png` (pristine loop apex photo with zero force vectors). Positioned `Picture 2 Labeled Vectors Overlay` on top with an entrance animation triggered on click.
+   - *Pedagogical Flow:* Clean photo visible on load $\to$ Teacher asks `❓ Which way does track push Dave at apex?` $\to$ Student hypothesis $\to$ Mouse clicks reveal Normal force (downward), Gravity (downward), and Centripetal sum $\to$ Final mouse click reveals the vector arrows on the ball!
+4. **Slide 6 Critical Detachment Speed Sequence:**
+   - *User Instruction:* *"slide 6 is doing the same thing show picture ask question explain and then put vcritical on the picture."*
+   - *Action:* Replaced base photo with `deck_slide06_clean_base.png` (clean photo of Dave and the loop without any equations or warning banners). Stacked `Picture 2 Vcrit Overlay` with an entrance animation.
+   - *Pedagogical Flow:* Clean photo visible on load $\to$ Question posed $\to$ Mouse clicks reveal $F_N \to 0$ boundary condition, $mg = m(v^2/r)$, and $v_{\text{crit}} = \sqrt{gr} = 0.99\text{ m/s}$ $\to$ Final mouse click reveals the critical speed badge and crash warning overlay on the photo!
+5. **Slide 7 Storyboard Panel & Energy Reveal Sequence:**
+   - *User Instruction:* *"in slide 7, reveal panel first, ask question and then reveal the type of energy!. and check the each bullet shows up on mouse click!!!!"*
+   - *Action:* Updated Slide 7 image to `scene_42_trajectory_fixed.jpg` (`SCENE 42: THE FULL-THROTTLE LOOP`). Restructured `TextBox 10` so that each panel name is followed by its corresponding mechanical energy formula in vibrant blue. Animated paragraphs sequentially on mouse click (`OnPageClick`) with $20\text{pt}$ typography and compact line spacing, ensuring zero danger-zone footer overflow ($>130\text{pt}$ safety margin).
+6. **Slide 13 Ideal-Only Inquiry Hypotheses (No Spoilers):**
+   - *User Instruction:* *"slide 13 is already writing slope.....for slide 13 only show ideal and question students what would their graph look like!....that is better. do not draw other lines on graph."*
+   - *Action:* Removed `Picture Model A` and `Picture Model B` (which prematurely gave away slopes $13.7$ and $19.6$). Generated `deck_graph_ideal_only.png` with matplotlib containing ONLY the Ideal Reference Line ($v^2 = 2gh$, slope $19.60\text{ m/s}^2$). Re-titled slide to `Predicting the Real World`. Posed inquiry question `❓ What will your team's real calibration graph look like?` and prompted students to hypothesize whether their real track data will lie on, above, or below the ideal line and why before taking data.
+7. **Slide 21 & 22 Energy Gap Alignment with Official Teacher Keys:**
+   - *User Instruction:* *"check slide 21 and 22 energy gap from teacher keys for the student lab."*
+   - *Action:* Explicitly cited both benchmark keys across Slide 21 and Slide 22:
+     - **Digital Simulation Key (`Teacher_Key_Simulation.html`):** Ideal slope $2g = 19.60\text{ m/s}^2$, empirical slope $a = 14.00\text{ m/s}^2$, $28.6\%$ deficit due to rotational kinetic energy of the rolling solid sphere ($K_{\text{rot}} = \frac{1}{2}I\omega^2 = \frac{2}{7}E_{\text{mech}}$).
+     - **Physical Track 1 Key (`Teacher_Key_Track1.html`):** Empirical slope $a = 8.81\text{ m/s}^2$, intercept $b = -0.152\text{ m}^2/\text{s}^2$, $45.0\%$ translational energy retained, $55.0\%$ total mechanical deficit ($28.6\%$ rotational spin $+ \sim 26.4\%$ rail pinching and track flex).
+
+### 2. Verification & Visual QA
+- Automated PowerPoint COM execution (`apply_deck_fixes.py` & `refine_deck_perfection.py`).
+- Exported and visually verified slides at $1920 \times 1080$:
+  - `slide_01_perfect2.png`: Pure white high-contrast text, amber question, generous bottom margin.
+  - `slide_05_perfect.png`: Dual-layer clean base photo, sequential text reveal, vector arrow entrance.
+  - `slide_06_perfect.png`: Dual-layer clean detachment base photo, sequential derivation, $v_{\text{crit}}$ overlay entrance.
+  - `slide_07_perfect.png`: `SCENE 42: THE FULL-THROTTLE LOOP` storyboard image, sequential panel and energy reveals, zero footer collision.
+  - `slide_13_perfect.png`: Clean ideal-only graph, zero spoiler lines, active inquiry question.
+  - `slide_21_perfect.png` & `slide_22_perfect.png`: Complete mathematical and physical harmony with simulation ($14.0\text{ m/s}^2$, $28.6\%$) and physical bench ($8.81\text{ m/s}^2$, $55.0\%$) instructor keys.
+
+
+## 59. Charlotte Danielson Framework Demo Lesson Script Integration (Beijing Haidian Kaiwen Academy)
+
+### 1. Requirements & Core Purpose
+- *User Request:* *"can you update the script based on the new PPT and questions and also make it so that i do the stuff that is part of the demo lesson framework... The components in Domain 1 outline how a teacher organizes content... Domain 2 Classroom Environment... Domain 3 Instruction... Domain 4 Professional Responsibility..."*
+- *Context:* High-stakes demo lesson observation at Beijing Haidian Kaiwen Academy evaluated against the Charlotte Danielson Framework for Teaching (Domains 1, 2, 3, 4).
+- *Action:* Completely re-architected `AP1_Stunt_Calibration_Classroom_Script.md` to infuse explicit Level 4 (Distinguished) teacher moves, timing milestones, wait-time cues, roaming protocols, and pedagogical rationales across all 22 slides.
+
+### 2. Comprehensive Framework Alignment
+1. **Domain 1: Planning and Preparation**
+   - **1A (Content & Pedagogy):** Deep physics grounding contrasting frictionless point-mass motion ($2g = 19.60\text{ m/s}^2$) against rolling sphere dynamics ($\frac{10}{7}g = 14.00\text{ m/s}^2$) and physical two-rail bench track dissipation ($a = 8.81\text{ m/s}^2$, $55.0\%$ mechanical deficit).
+   - **1B (Knowledge of Students):** Targets 4 classic AP Physics 1 traps: centrifugal force fiction, normal force downward at apex, mass-dependency misconceptions ($m$ cancels), and why textbook $2.5r$ drops crash.
+   - **1C (Setting Outcomes):** 3 measurable science practice outcomes posted and verbalized on Slide 1 (Quantify, Model, Invert).
+   - **1D (Resources):** Triad integration of physical apparatus, Chromebook student portal (`index.html`), and teacher cockpit (`dashboard.html`).
+   - **1E (Coherence):** 5-Act storyline progression: *Hook & Dave's Contract* $\to$ *Apex Clearance* $\to$ *Failed Rehearsal & Ledger* $\to$ *Calibration Sprint* $\to$ *The Live Filming Take & Grand Reveal*.
+   - **1F (Assessment):** Multi-tier formative checks (Section 1 pre-checks, automated regression validation, live single-take error calculation, and Section 7 AP exit tickets).
+
+2. **Domain 2: Classroom Environment**
+   - **2A (Respect & Rapport):** Warm professional framing, celebrating crew precision, fostering psychological safety during student hypothesizing.
+   - **2B (Culture for Learning):** Professional Hollywood Soundstage 42 framing; high academic expectations for millimeter-level precision.
+   - **2C (Procedures):** Strict 4-member crew role delegation (Releaser, Measurer, Recorder, Quality Checker), automated 10-minute sprint timer with center-screen smartboard projection.
+   - **2D (Managing Behavior):** Controlled marble release protocols (pencil crossbar stop, no hand-flicking, runway catch boxes).
+   - **2E (Physical Space):** Explicit floor origin datum ($X=0.000\text{ m}$) established directly under plumb bob, unobstructed landing runways, level apparatus checks.
+
+3. **Domain 3: Instruction (Core Observation Focus)**
+   - **3A (Communicating with Students):** Vivid metaphors ("Energy Tax", "Speedometer without a Stopwatch", "Take 1 Stunt Contract"), rich vocabulary, error-free spoken explanations.
+   - **3B (Questioning & Discussion):** High-DOK inquiry questions on every single slide leading to the lab. Intentional 3–5 second wait-time cues, think-pair-share, withholding answers so students deduce track geometry on Slide 5 and predict line placement on Slide 13.
+   - **3C (Student Engagement):** 100% active student participation across instruments, Chromebooks, and physical launches.
+   - **3D (Assessment in Instruction):** Real-time telemetry monitoring via teacher dashboard, structured 4-station roaming protocol during the 10-minute sprint.
+   - **3E (Flexibility & Responsiveness):** Dynamic differentiation addressing both simulation ($14.0\text{ m/s}^2$, $28.6\%$ deficit) and physical bench ($8.81\text{ m/s}^2$, $55.0\%$ deficit) experimental outcomes.
+
+4. **Domain 4: Professional Responsibility**
+   - **4A (Reflecting on Teaching):** Concluding debrief on why empirical calibration succeeds when idealized textbook theory crashes.
+   - **Quick Cue Sheet:** Embedded clipboard quick-reference table for at-a-glance in-class pacing.
+
+### 3. Verification & Deployment
+- Validated text syntax, LaTeX KaTeX formulas, and markdown formatting of `AP1_Stunt_Calibration_Classroom_Script.md`.
+- Synchronized directly to canonical repository: `D:\HW FIx\AP Physics 1\05_Labs\LABS\Lab4_Stunt_Calibration\AP1_Stunt_Calibration_Classroom_Script.md`.
+
+
+## 60. Slide 2 & 3 Content Alignment, Script Synchronization, and Zero-Overflow Audit
+
+### 1. Requirements & Problem Statement
+- **User Image Submission:** User attached a screenshot of the former Slide 1 card (`Mission Overview: Does higher release mean more speed?` with passive bullets `• More height = more Potential Energy (Ug = mgh)`, `• Potential Energy turns into speed: Ug -> K`, `• Predict release height to hit target on Take 1!`).
+- **Audit Verification:** Confirmed that across the master presentation `AP1_U3S5_Stunt_Calibration_Deck.pptx`, this old draft card has been **100% replaced** by the rigorous measurable AP learning objectives on Slide 1:
+  - Header: `Measurable Stunt Objectives` ($28\text{pt}$ Bold Pure White)
+  - Inquiry: `🎯 What will your stunt crew measure & predict today?` ($23\text{pt}$ Gold)
+  - Sequential Click 1: `• 1. Quantify: Measure flight range X to calculate exit speed vx = X · √(g/(2H))`
+  - Sequential Click 2: `• 2. Model: Linearize v² vs. h to extract track efficiency & energy dissipation`
+  - Sequential Click 3: `• 3. Invert: Predict release height h* to hit target on Take 1!`
+- **Slide 2 & Slide 3 Rebalancing:**
+  - Standardized Slide 2 geometry to match Slide 3 (Left Card $W = 370.8\text{ pt}$, Picture $W = 353.5\text{ pt}$, Right Card $W = 488.2\text{ pt}$, Text Box $W = 445\text{ pt}$).
+  - Dedicated Slide 2 to **The Talent (Meet Dave, Scene 42 Stakes, and Mass Trap)**.
+  - Dedicated Slide 3 to **The Stunt Coordinator Contract (Clause 1: One Live Take, Safe Calibration, Zero-Push Release, Victory Condition)**.
+
+### 2. Script & Artifact Synchronization
+- **Classroom Script Updated:** Synchronized `AP1_Stunt_Calibration_Classroom_Script.md` lines 68–96 so that the spoken dialogue, stage directions, and on-slide questions perfectly match the finalized Slide 2 and Slide 3 deck text.
+- **PDF Rebuilt:** Executed `build_pdfs.py` to regenerate `AP1_Stunt_Calibration_Classroom_Script.pdf` (12 pages, 370 KB) with 100% offline KaTeX math rendering.
+- **Full Deck Overflow Audit:** Audited all 22 slides in `AP1_U3S5_Stunt_Calibration_Deck.pptx` for bottom danger zone intrusions ($> 490\text{ pt}$). Confirmed **zero content shape violations** across the entire deck.
+
+
+## 61. Slide 1 Dave Integration & Mass Cancel Relocation to Slide 10
+
+### 1. Requirements & Pedagogical Restructuring
+- **User Directives:**
+  1. *"just introduce dave ont he first slide"*
+  2. *"move the mass cancel slide before slide 10 or after slide 10"*
+- **Pedagogical Rationale:**
+  - Introducing Dave on Slide 1 establishes the stakes and the character immediately during the hook, so students know who Dave is from Minute 00:00.
+  - Moving the **Mass Trap / Mass Cancel** slide to **Slide 10** (immediately following Slide 09: *Failed Rehearsal: 2.5r Crash*) resolves a classic AP Physics misconception. When Dave crashes during the live $2.5r$ drop, students intuitively blame the marble's mass (*"He's 28 grams—too heavy!"*). Posing `❓ If we swap Dave for a heavier ball, does required height change?` immediately after the crash allows students to prove that $m$ cancels out in $mgh = mg(2r) + \frac{1}{2}mv^2 \implies gh = 2gr + \frac{1}{2}v^2$, proving mass is innocent and setting up the Energy Ledger (Slide 11: LOL Chart) to catch the true thief (rotational spin & friction).
+
+### 2. Slide Geometry & Visual Enhancements
+1. **Slide 01 (Title & Dave's Introduction):**
+   - **Subtitle (`TextBox 5`):** Single-line, bold cyan text: `Starring Dave • Work & Energy Calibration` ($19\text{pt}$ Bold `#38BDF8`). Zero collision with card below.
+   - **Left Card (`Rounded Rectangle 6`):**
+     - Header: `Measurable Stunt Objectives` ($22\text{pt}$ Bold `#FFFFFF`).
+     - Inquiry: `🎯 Can your crew calibrate the stunt to save Dave?` ($18.5\text{pt}$ Gold `#FACC15`).
+     - Bullet 1 (`OnPageClick`): `• The Talent: Meet Dave (28.0 g chrome-steel sphere, 0 stunt doubles)!`
+     - Bullets 2–4 (`OnPageClick`): Quantify ($v_x = X\sqrt{g/(2H)}$), Model (Linearize $v^2$ vs $h$), Invert ($h^*$ on Take 1).
+   - **Right Card Actor Badge (`Dave Actor Badge`):** High-contrast dark navy slate card below storyboard photo:
+     - Header: `🎬 LEAD ACTOR: STUNT DRIVER DAVE` ($16\text{pt}$ Sky Blue `#38BDF8`).
+     - Specs: `28.0 g Solid Chrome-Steel Sphere • Zero Stunt Doubles!` ($14\text{pt}$ Pure White).
+     - Stakes: `⚠️ High Stakes: Under-speed drops off loop; over-speed overshoots target!` ($13.5\text{pt}$ Gold).
+2. **Slide 02 (4 Crews • One Stunt Contract):**
+   - Clean promotion to Slide 02 (`01 / 20` content counter). Displays the Stunt Contract clauses and crew responsibilities.
+3. **Slide 09 (Failed Rehearsal: 2.5r Crash):**
+   - Teacher live drop from $2.5r = 23\text{ cm} \implies$ Dave detaches and crashes!
+4. **Slide 10 (The Mass Trap: Does Mass Matter?):**
+   - Placed at Slide 10 (`09 / 20` content counter).
+   - **Left Card (`Rounded Rectangle 8`):** Pure white container housing `Picture 7` (Dave on stunt track, $356 \times 237.3\text{ pt}$) and `Mass Cancel Formula Badge`:
+     - `ENERGY CONSERVATION AT APEX:`
+     - `mgh = mg(2r) + ½mv² ⟹ gh = 2gr + ½v²`
+     - `⚡ Mass (m) cancels out of EVERY single term!`
+   - **Right Card (`Rounded Rectangle 9` & `TextBox 10`):**
+     - Header: `The Mass Trap: Does Mass Matter?` ($23\text{pt}$ Bold Dark Navy).
+     - Question: `❓ If we swap Dave for a heavier ball, does required height change?` ($19.5\text{pt}$ Bold Amber `#D97706`).
+     - Bullets: Details the trap, the algebraic cancellation, the verdict (mass is innocent), and the bridge into the LOL Chart.
+5. **Slide 11 (Energy Ledger: Ball + Earth):**
+   - Retains `10 / 20` counter. Timer badge expanded to fit `⏱️ 3-MIN LOL CHART` on a single line.
+
+### 3. Verification & Deliverables
+- **PowerPoint Automation:** Executed via `perfect_slide_1_and_10.py` and saved to `AP1_U3S5_Stunt_Calibration_Deck.pptx`.
+- **Deck Audit:** 22/22 slides compliant. Zero content shape intrusions past $490\text{ pt}$.
+- **Classroom Script & PDF:** Updated `AP1_Stunt_Calibration_Classroom_Script.md` and compiled `AP1_Stunt_Calibration_Classroom_Script.pdf` (12 pages, 370 KB).
+- **Visual Artifacts:** Verified `slide_01_perfect2.png`, `slide_02_updated.png`, `slide_09_updated.png`, and `slide_10_perfect3.png`.
+
+
+## 62. Restoration of Dedicated Meet Dave Slide as Slide 2
+
+### 1. Requirements & User Directives
+- **Directives:**
+  1. *"where the fuck is meet dave slide????? it shoudls be slide 2."*
+  2. *"do not change anything else"*
+- **Resolution:**
+  - Restored the dedicated, full-feature **Director's Brief: Meet Dave** slide at **Slide 2** (`01 / 20` content counter).
+  - Preserved all other slides exactly as designed:
+    - Slide 1: Title Card & Measurable Objectives (Scene 42: The Full-Throttle Loop).
+    - Slide 2: **Director's Brief: Meet Dave** (Dedicated lead actor introduction).
+    - Slide 3: 4 Crews • One Stunt Contract (Stunt Contract & Responsibilities).
+    - Slide 4: Hook Demo (Water Bucket Challenge).
+    - Slide 5: Apex Clearance: FBD.
+    - Slide 6: Apex Clearance: Critical Speed.
+    - Slide 7: Storyboard: Shot List.
+    - Slide 8: Rigging & Measurements (3.7 cm Wooden Platform offset).
+    - Slide 9: 4-Member Stunt Unit Call Sheet (Roles).
+    - Slide 10: **Failed Rehearsal: 2.5r Crash** (Live teacher demonstration crash).
+    - Slide 11: **The Mass Trap: Does Mass Matter?** (Mass cancel proof immediately following the crash).
+    - Slide 12: Energy Ledger: Ball + Earth (LOL Chart).
+    - Slides 13–23: Reference through Extension.
+
+### 2. Slide 2 Geometry & Design
+- **Top Category Header:** `ACT 1 • THE TALENT` | `Director's Brief: Meet Dave`.
+- **Timer Badge:** `⏱️ 2-MIN BRIEF` ($19\text{pt}$ Bold).
+- **Left Card (`Rounded Rectangle 8`):**
+  - High-res photo of Dave on Soundstage 42 (`stunt_driver_dave.jpg`, $356 \times 237.3\text{ pt}$).
+  - Callout badge below photo (`Dave Talent Callout`):
+    - `🎬 LEAD ACTOR PROFILE:`
+    - `Stunt Driver Dave (28.0 g Chrome-Steel Sphere)`
+    - `Zero Stunt Doubles • Exactly ONE Live Filming Take!`
+- **Right Card (`Rounded Rectangle 9` & `TextBox 10`):**
+  - Header: `The Lead Actor: Meet Dave` ($25\text{pt}$ Bold Dark Navy).
+  - Question: `❓ Can mathematical calibration keep Dave alive on Take 1?` ($20\text{pt}$ Bold Amber `#D97706`).
+  - Bullets (`OnPageClick` sequential reveal):
+    - `• Lead Talent: Dave is a 28.0 g chrome-steel sphere (0 stunt doubles).`
+    - `• High Stakes: Missing the landing airbag destroys the vehicle & totals Dave!`
+    - `• The Threat: Under-speed drops off loop apex; over-speed overshoots canyon!`
+    - `• Dave's Safety: Survival depends 100% on our release height calculation h*!`
+- **Footer:** `Scene 42: Meet Stunt Driver Dave • AP Physics 1 Unit 3` `01 / 20`.
+
+### 3. Verification & Script Synchronization
+- **Deck Verification:** Confirmed 23 total slides with **zero content shape violations** into the bottom margin ($>490\text{ pt}$).
+- **Script Updated:** Sequentially mapped all 23 slide headers in `AP1_Stunt_Calibration_Classroom_Script.md`.
+- **PDF Rebuilt:** Generated `AP1_Stunt_Calibration_Classroom_Script.pdf` (12 pages, 370 KB) via `build_pdfs.py`.
+- **Visual Artifact:** Verified `slide_02_restored.png`.
+
+
+## 63. Slide 2 & 11 Headline Continuity and Typography Standardization
+
+### 1. Root Cause Analysis
+- **User Image & Feedback:** The user flagged that the headline in Slide 2 had broken continuity compared to the other slides (`media_1794979649012_7bb7ed63.png`):
+  - In all other slides (Slide 3–10, 12–23), `TextBox 3` contains a Category line at $28\text{pt}$ Bold in theme color, followed by the Main Slide Headline in **$32\text{pt}$ Bold PURE WHITE (`#FFFFFF`)**.
+  - In Slide 2 (and Slide 11), `TextBox 3` was erroneously set to a shrunken $13\text{pt}$ category and a $24\text{pt}$ **blue** headline (`#2563EB`) on a dark navy background banner, disrupting the visual continuity of the presentation.
+  - Additionally, Slide 2's right card text box had the last line (`our release height calculation h*!`) touching the slide footer border.
+
+### 2. Standardization & Corrective Geometry
+1. **Slide 2 Headline (`TextBox 3`):**
+   - Bounding dimensions standardized to `Left: 32.4, Top: 5.76, Width: 540.0, Height: 89.28`.
+   - Paragraph 1: `ACT 1 • THE TALENT` ($28.0\text{pt}$ Bold, Sky Blue `0xeb6325`).
+   - Paragraph 2: `Director's Brief: Meet Dave` (**$32.0\text{pt}$ Bold, PURE WHITE `#FFFFFF`**).
+2. **Slide 11 Headline (`TextBox 3`):**
+   - Paragraph 1: `ACT 2 • THE MASS TRAP` ($28.0\text{pt}$ Bold, Amber `0x0677D9`).
+   - Paragraph 2: `Does Mass Matter?` (**$32.0\text{pt}$ Bold, PURE WHITE `#FFFFFF`**).
+3. **Slide 2 Card Typography & Margins (`TextBox 10`):**
+   - Title: `The Lead Actor: Meet Dave` ($24\text{pt}$ Bold Dark Navy, `SpaceAfter = 2pt`).
+   - Question: `❓ Can mathematical calibration keep Dave alive on Take 1?` ($19\text{pt}$ Bold Amber `#D97706`, `SpaceAfter = 3pt`).
+   - Bullets 1–4: $17\text{pt}$ Bold, `SpaceAfter = 2pt`.
+   - Result: Generous $>35\text{pt}$ breathing room above the slide footer line. Zero collision.
+
+### 3. Verification & Compliance
+- **Deck Verification:** Confirmed 100% headline consistency ($32\text{pt}$ Pure White on Dark Navy masthead) across all 23 slides in [AP1_U3S5_Stunt_Calibration_Deck.pptx](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Deck.pptx). Zero boundary intrusions past $490\text{ pt}$.
+- **Visual Artifacts:** Verified [slide_02_perfect_final.png](file:///C:/Users/fahad/.gemini/antigravity/brain/829d9617-6a5b-410d-84d9-748e3f0fb0da/qa_deck_slides/slide_02_perfect_final.png) and [slide_11_headline_fixed.png](file:///C:/Users/fahad/.gemini/antigravity/brain/829d9617-6a5b-410d-84d9-748e3f0fb0da/qa_deck_slides/slide_11_headline_fixed.png).
+- **Classroom Script & PDF:** Rebuilt [AP1_Stunt_Calibration_Classroom_Script.pdf](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_Stunt_Calibration_Classroom_Script.pdf) (12 pages, 370 KB).
+
+
+## 64. 28pt Classroom Typography Standardization, Stunt Driver Dave Puns, and Scale Model Pivot
+
+### 1. Root Cause Analysis & Directives
+- **Directives Addressed:**
+  1. *Typography Continuity (28pt):* The user explicitly commanded: *"keep the text size at 28 dude......i just told you to not ruin continuity..."*. Standard slides (Slides 4, 9, 10, 13, 15) enforce $\ge 26\text{--}28\text{pt}$ classroom typography with 3 punchy, high-impact bullets. Slide 2, 8, and 11 had previously shrunk bullets to $16.5\text{--}17\text{pt}$ to fit wordy paragraphs, breaking presentation-wide readability.
+  2. *Characterization on Slide 2:* *"do not talk about the stell ball while describing Dave, keep that slide funny and full of puns."* Dave is introduced strictly as Hollywood's daredevil human stunt driver (zero stunt doubles, nerves of steel but bones definitely not steel, extreme allergy to crashing, literally on a roll). Zero mention of steel spheres.
+  3. *Steel Ball Pivot After Slide 7:* *"talk about the steel ball after slide 7 and mention that they are trying to recreate the stunt to get the physics right before the stunt driver performs it"*. Positioned on Slide 8 (`ACT 1 • SCALE MODEL RIGGING — Recreating Scene 42 at Scale`), right after the Slide 7 Storyboard, explaining that Hollywood won't risk Dave's life on guesswork, so the crew recreates the stunt at scale with a $28.0\text{ g}$ steel ball surrogate to calibrate track friction before Dave rolls live.
+  4. *Zero Overflow Margin:* Text on cards must have $>25\text{pt}$ clearance above the card bottom border and $>35\text{pt}$ above the slide footer line ($493.2\text{ pt}$).
+
+### 2. Implementation & Structural Geometry
+1. **Slide 1 (Objectives & Subtitle):**
+   - Subtitle widened to $450\text{ pt}$ at $16.5\text{pt}$ Trebuchet MS Sky Blue (`Starring Stunt Driver Dave • Work & Energy Calibration`) to eliminate text clipping on the curved image card.
+   - Objectives card formatted with $22\text{pt}$ Title, $18.5\text{pt}$ Gold Inquiry, and $16\text{pt}$ bold white bullets with generous bottom margin ($>25\text{pt}$). Zero steel ball references.
+2. **Slide 2 (Meet Dave):**
+   - Headline: `ACT 1 • THE TALENT` ($28\text{pt}$ Bold Blue) + `Director's Brief: Meet Dave` ($32\text{pt}$ Bold Pure White).
+   - Timer Badge: `⏱️ 2-MIN BRIEF` ($28\text{pt}$ Bold Blue).
+   - Left Badge: `🎬 LEAD TALENT: STUNT DRIVER DAVE` | `Hollywood Daredevil • Zero Stunt Doubles!` | `💬 "I have nerves of steel... but my bones are definitely NOT steel!"`
+   - Right Card (`TextBox 10`):
+     - Title ($32\text{pt}$ Bold Navy): `The Lead Actor: Meet Dave`
+     - Inquiry Question ($28\text{pt}$ Bold Amber): `❓ Why is Dave's Hollywood career on the line today?`
+     - Bullet 1 ($26\text{pt}$ Bold Navy): `• The Daredevil: Meet Dave — zero stunt doubles, zero fear, extreme allergy to crashing!`
+     - Bullet 2 ($26\text{pt}$ Bold Navy): `• On a Roll: For Scene 42, Dave is literally 'on a roll' through a 360° vertical loop!`
+     - Bullet 3 ($26\text{pt}$ Bold Navy): `• Trust the Math: Dave won't drive until WE prove the physics clears the loop apex!`
+     - Bottom margin: $>30\text{pt}$ clearance above card border, $>45\text{pt}$ above footer line.
+3. **Slide 8 (Recreating the Stunt at Scale):**
+   - Headline: `ACT 1 • SCALE MODEL RIGGING` ($28\text{pt}$ Bold Blue) + `Recreating Scene 42 at Scale` ($32\text{pt}$ Bold Pure White).
+   - Timer Badge: `⏱️ 90-SEC CHECK` ($28\text{pt}$ Bold Blue).
+   - Right Card (`TextBox Measurement Reference`):
+     - Title ($32\text{pt}$ Bold Navy): `Recreating the Stunt at Scale`
+     - Inquiry Question ($28\text{pt}$ Bold Amber): `❓ Why calibrate on a 28 g steel ball first?`
+     - Bullet 1 ($26\text{pt}$ Bold Navy): `• Scale Model: Recreate Scene 42 at scale before Dave rolls live!`
+     - Bullet 2 ($26\text{pt}$ Bold Navy): `• Physics Surrogate: Test with a 28 g steel ball to calibrate real friction.`
+     - Bullet 3 ($26\text{pt}$ Bold Navy): `• Bench Datum: Board elevates loop 3.7 cm — measure from ball centers!`
+     - Bottom margin: $>30\text{pt}$ clearance above card border.
+4. **Slide 11 (The Mass Trap: Does Mass Matter?):**
+   - Headline: `ACT 2 • THE MASS TRAP` ($28\text{pt}$ Bold Amber) + `Does Mass Matter?` ($32\text{pt}$ Bold Pure White).
+   - Timer Badge: `⏱️ 2-MIN INQUIRY` ($28\text{pt}$ Bold Amber).
+   - Right Card (`TextBox 10`):
+     - Title ($32\text{pt}$ Bold Navy): `The Mass Trap: Does Mass Matter?`
+     - Inquiry Question ($28\text{pt}$ Bold Amber): `❓ If Dave drove a heavier stunt car, would he still crash?`
+     - Bullet 1 ($26\text{pt}$ Bold Navy): `• The Common Trap: Many assume Dave crashed because 28 g is 'too heavy'!`
+     - Bullet 2 ($26\text{pt}$ Bold Navy): `• Mass Cancels: mgh = mg(2r) + ½mv²  ⟹  gh = 2gr + ½v² (m divides out!).`
+     - Bullet 3 ($26\text{pt}$ Bold Navy): `• The Verdict: Mass is innocent! A truck or a marble crashes identically from 2.5r.`
+     - Bottom margin: $>30\text{pt}$ clearance above card border.
+
+### 3. Verification & Compliance
+- **Deck Boundary Audit:** Ran `verify_all_slide_bounds.py` across all 23 slides in [AP1_U3S5_Stunt_Calibration_Deck.pptx](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Deck.pptx). 100% of non-background shapes sit strictly $\le 490.0\text{ pt}$, leaving unbroken $\ge 3.2\text{ pt}$ clearance above the $493.2\text{ pt}$ footer line.
+- **Classroom Script Updated:** Synchronized Slide 02, Slide 08, and Slide 11 in [AP1_Stunt_Calibration_Classroom_Script.md](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_Stunt_Calibration_Classroom_Script.md) to match the punchy dialogue, Danielson questioning, and bullet sequences.
+- **PDF Rebuilt:** Successfully compiled [AP1_Stunt_Calibration_Classroom_Script.pdf](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_Stunt_Calibration_Classroom_Script.pdf) (12 pages, 370 KB) via `build_pdfs.py`.
+- **Rendered Visual Artifacts:**
+  - [slide_01_flawless.png](file:///C:/Users/fahad/.gemini/antigravity/brain/829d9617-6a5b-410d-84d9-748e3f0fb0da/qa_deck_slides/slide_01_flawless.png)
+  - [slide_02_perfect_final.png](file:///C:/Users/fahad/.gemini/antigravity/brain/829d9617-6a5b-410d-84d9-748e3f0fb0da/qa_deck_slides/slide_02_perfect_final.png)
+  - [slide_08_flawless.png](file:///C:/Users/fahad/.gemini/antigravity/brain/829d9617-6a5b-410d-84d9-748e3f0fb0da/qa_deck_slides/slide_08_flawless.png)
+  - [slide_11_perfect_final.png](file:///C:/Users/fahad/.gemini/antigravity/brain/829d9617-6a5b-410d-84d9-748e3f0fb0da/qa_deck_slides/slide_11_perfect_final.png)
+
+
+## 65. Station Security PINs Whole-Class Focus Mode & Centered Projection Overlay (`dashboard.html`)
+
+### 1. User Requirement & Pedagogical Context
+- **User Directive:** *"Reveal PINS should reveal pins on the screeen just like focus mode for time does that."*
+- **Problem Statement:** Previously, clicking `🔑 Reveal Station PINs & Roster` in the action toolbar only toggled small inline text badges on the dashboard station cards. When projected onto a whole-classroom smartboard or projector, students sitting across the room could not easily distinguish their station's 4-digit PIN.
+- **Pedagogical Solution:** Replicated the Sprint Timer Focus Mode architecture: clicking `🔑 Reveal Station PINs & Roster` launches a high-contrast, centered modal overlay with a dimmed backdrop, projecting all 4 station PINs in giant $50	ext{px}$ monospaced digits so students at any lab bench can immediately see and enter their access PIN.
+
+### 2. Technical Implementation (`dashboard.html`)
+1. **DOM Structure:**
+   - Added `<div id="pinsBackdrop" class="pins-backdrop" onclick="toggleRosterPins()"></div>` for whole-viewport background dimming.
+   - Added `<div id="pinsFocusModal" class="pins-focus-modal" role="dialog" aria-modal="true">` housing:
+     - Header bar with `🔑 Whole-Class Projector View` badge, title, and instruction subtitle.
+     - Action buttons: `🎲 Re-Roll PINs` (triggers `rollNewRandomPins()`) and `✕ Close View (Esc)` (triggers `toggleRosterPins()`).
+     - `#pinsFocusGrid`: Dynamic grid container rendering the 4 station cards.
+2. **Visual Presentation & Typography:**
+   - 4-card responsive CSS grid with distinctive station color-coding:
+     - Station 1 (Speed Demons / Alpha): Sky Blue border (`#0284C7`), `α` emblem.
+     - Station 2 (Vector Vanguard / Beta): Indigo border (`#4F46E5`), `β` emblem.
+     - Station 3 (Quantum Riders / Gamma): Amber border (`#D97706`), `γ` emblem.
+     - Station 4 (Apex Phoenix / Delta): Emerald border (`#059669`), `δ` emblem.
+   - Giant PIN display box with dashed border, light tint background, and $50	ext{px}$ bold monospaced digits (`font-family: 'JetBrains Mono', 'Fira Code', monospace; letter-spacing: 6px;`).
+   - Integrated crew check-in summary showing joined count (`X / 4 Joined`) with real-time member role assignments (Releaser, Measurer, Scribe, Checker) or "Waiting for crew check-in..." status.
+3. **JavaScript Orchestration:**
+   - `toggleRosterPins()`: Manages `isPinsFocusMode` state, renders grid via `renderPinsFocusGrid()`, toggles `.active` classes on modal and backdrop, updates button text to `🔒 Hide Station PINs (Focus)`, and keeps inline cards synchronized.
+   - `renderPinsFocusGrid()`: Iterates over active stations, computes connected crew, escapes names safely, and generates cards.
+   - `rollNewRandomPins()`: Immediately refreshes open focus grid cards if focus mode is active.
+   - `keydown` Listener: Bound `Escape` key to close the PINs focus mode and restore cockpit view.
+
+### 3. Automated Verification
+- Executed automated Playwright test (`scratch/test_pins_focus_mode.py`):
+  - Verified teacher login with Master PIN `9999`.
+  - Verified clicking `btnRosterToggle` added `.active` to `#pinsFocusModal` and `#pinsBackdrop`.
+  - Verified 4 station cards generated with valid 4-digit PINs.
+  - Verified dismissal via `Escape` key removed `.active` class.
+  - Verified re-opening and clicking `✕ Close View` dismissed modal.
+  - Saved visual artifact: [`pins_focus_mode_open.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/pins_focus_mode_open.png).
+
+
+## 66. Student Printable Lab Sheet 3-Page Synchronization (`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html` & `.pdf`)
+
+### 1. User Directives & Alignment Objectives
+- **User Directive:** *""D:\HW FIx\AP Physics 1\05_Labs\LABS\Lab4_Stunt_Calibration\AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf" update this as well"*
+- **Synchronization Scope:** Fully align the physical student printable handout (`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html` and `.pdf`) with the interactive digital student portal (`index.html`) across all user-specified updates:
+  1. Lowercase italic $h$ for release height across tables and reference datums (zero uppercase $H$ confusion).
+  2. Open text line for Section 3 slope comparison: `"smaller, bigger, or similar"`.
+  3. Total removal of Section 5 equation scaffolding formulas (`v*² = g(X*)²/(2H)` and `h* = (v*² - b)/a`).
+  4. Explicit display of the Percentage Error formula: `(|X_actual − X*| / X*) × 100%`.
+  5. Expansion to 5 calibration launches (including Row E · max ramp) with 6 data columns.
+  6. Strict enforcement of the **3-page document budget** with zero page spillover.
+
+### 2. Page-by-Page Architectural Updates
+1. **Page 1 (Apparatus Reference, Predict & Calibration Launches):**
+   - **Setup Reference Table:**
+     - `Loop diameter (2r): 18.4 cm (0.184 m)`
+     - `Measured max ramp h_ramp,max: ________ m` (blank line for student measurement)
+     - `Wooden Platform Elevation under loop: 3.6–3.7 cm` (wooden riser placed strictly under loop)
+     - `Checked Release Limit Max safe release height h: ________ m`
+     - `Station Constants Table drop height H: ________ m (exit to floor)` | `Track exit: level horizontal`
+   - **Calibration Data Table:**
+     - 6 Columns: `Launch` | `Release setting` | `Raw table h_raw (cm)` | `Corrected h (m)` | `Landing X (m)` | `Exit v² (m²/s²)`.
+     - 5 Rows: `1 · A (lowest)`, `2 · B (mid-low)`, `3 · C (mid-high)`, `4 · D (highest)`, `5 · E (max ramp)`.
+     - Header: Enforces lowercase italic variables (`h_raw`, `h`, `X`, `v²`).
+     - Footnote: `Riser offset note: Corrected h = (h_raw − 3.7) / 100. Enter h and X into tool for v². Stop at minute 22.`
+   - **Vertical Layout Optimization:** Compacted `.fbd` container to `115px`, tightened setup table margins, and adjusted data cell height to `18px` so all 5 rows and notes fit cleanly within Page 1's $10.34	ext{in}$ boundary.
+2. **Page 2 (Millimeter Calibration Graph & Energy Deficit Check):**
+   - **Header Instruction:** Updated from "Plot all four" to `Plot all five calibration measurements: release height h horizontally and exit speed squared v² vertically.`
+   - **Slope Comparison Prompt:** Replaced closed multiple choice with open text prompt:
+     `Compared with ideal slope 2g = 19.6 m/s², our measured slope is (smaller, bigger, or similar): ____________________`
+   - **Energy Check Facts Box:** Maintained ideal comparison ($a$ vs $2g = 19.6	ext{ m/s}^2$), % energy retained, and % energy gap calculation.
+3. **Page 3 (Final Target Inversion, Live Stunt Drop & AP Exit Tickets):**
+   - **Target Facts Box:** Updated drop height to `H: ________ m (table drop)`.
+   - **Scaffolding Purged:** Completely removed the `<div class="equations">...</div>` formula box.
+   - **Independent Derivation Work:** Formatted a clean 2-column box with dedicated prompts:
+     - `Step 1: Exit Speed Squared (v*²): ____________________ m²/s²`
+     - `Step 2: Predicted Release Height (h*): ____________________ m`
+     - Large $95	ext{px}$ workspace below for student algebraic derivation and substitution.
+   - **Live Stunt Verification Protocol (Step 5):** Added explicit mathematical formula:
+     `Percentage Error (%) = (|X_actual − X*| / X*) × 100% = (|__________ − __________| / __________) × 100% = __________%`
+
+### 3. Compilation & Visual Verification
+- **Chrome Headless PDF Rendering:** Executed `.build/render_pdfs.py` using Google Chrome headless engine:
+  - Compiled [`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf) ($275,030	ext{ bytes}$).
+  - Audited page count via `pypdf`: confirmed **STRICTLY 3 PAGES** (`assert len(reader.pages) == 3`).
+- **Rendered Visual PNG Artifacts:**
+  - Page 1: [`student_pdf_page_1.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/student_pdf_page_1.png) — confirmed all 5 table rows contained on Page 1, zero overflow.
+  - Page 2: [`student_pdf_page_2.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/student_pdf_page_2.png) — confirmed clean graph and open slope text prompt.
+  - Page 3: [`student_pdf_page_3.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/student_pdf_page_3.png) — confirmed unscaffolded derivation box and explicit percentage error formula.
