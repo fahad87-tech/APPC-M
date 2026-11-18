@@ -2569,3 +2569,40 @@ Per instructor instruction (*"do not provide both of this to students...let them
 
 ### 3. Visual Artifact
 - Rendered 1080p slide export: [`slide_02_uninsurable.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/slide_02_uninsurable.png).
+
+
+## 69. Slide 5 Apex Dynamic Loop Realism & Student Portal Materials Kit Refinement
+
+### 1. User Directives & Scope
+1. **Slide 5 Apex Loop Realism & FBD:**
+   - User Directive: *"picture on slide 5 looks like ball is stuck because there are two surfaces.....fix that so the ball really likes it wants to pass the apex and then drraw free body diagram"* ([`media_1794983629049_0e045bad.jpg`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/.user_uploaded/media_1794983629049_0e045bad.jpg))
+   - Root Cause: Original photo had an inner shelf/notch pinching the chrome marble at 12 o'clock between two horizontal ledges, giving the impression of a ball stuck between two tracks rather than freely looping overhead.
+   - Physics Principle: At the inverted loop apex, the ball contacts a **single continuous overhead ribbon ceiling**. Both the track normal force $\vec{F}_N$ and gravitational force $\vec{F}_g = m\vec{g}$ act downward (inward towards the center of curvature), providing the necessary centripetal acceleration $\Sigma F_y = F_N + mg = m\frac{v^2}{r}$ to keep the ball on its circular path. There is 100% open air beneath the ball.
+2. **Student Portal Materials Card Removal:**
+   - User Directive: *"carry on and also remove that from student portal"* ([`media_1794989537040_4d5e0cca.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/.user_uploaded/media_1794989537040_4d5e0cca.png))
+   - Scope: Remove the `Lab Desk & C-Clamp` card from `.apparatus-materials-panel` in [`index.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/index.html).
+
+### 2. Slide 5 Visual Assets & FBD Generation
+- Generated a continuous stainless steel ribbon stunt loop apparatus with realistic motion trail sweeping into the apex:
+  - Clean Base: [`slide5_clean_base_final.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/slide5_clean_base_final.png) ($1039 \times 768	ext{ px}$, matching the $411.1 \times 303.8	ext{ pt}$ card aspect ratio).
+  - Labeled FBD Overlay: [`slide5_fbd_labeled_overlay_final.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/slide5_fbd_labeled_overlay_final.png).
+- Vector & Typography Elements:
+  - **Top Ceiling Banner:** Dark navy pill (`#0F172A`) with sky blue border (`#38BDF8`), centered text: `AP Physics 1 • Forces Acting at Inverted Loop Apex`.
+  - **Bottom Table Banner:** Dark navy pill with amber border (`#F59E0B`), text: `Newton's 2nd Law: ΣF_y = F_N + mg = m · (v² / r) ==> Both Forces Push Inward!`.
+  - **Horizontal Velocity $\vec{v}_{\text{apex}}$:** Amber gold arrow pointing horizontally left tangent to the track ceiling with badge `v_apex (Horizontal)`.
+  - **Gravity Force $\vec{F}_g = m\vec{g}$:** Emerald green arrow pointing straight down from the marble center of mass with badge `Fg = mg (Gravity) | Earth pulls DOWN`.
+  - **Track Normal Force $\vec{F}_N$:** Sky blue arrow pointing straight down from the track contact point at the ceiling with badge `FN (Track Normal) | Ceiling pushes DOWN`.
+  - **Loop Center Datum:** Vertical dotted centerline from marble down to $(518, 366)$ with white crosshair `+` and badge `Loop Center (r ≈ 10 cm)`.
+  - **Inward Net Centripetal Acceleration $\vec{a}_c = v^2/r$:** Purple dashed downward arrow with badge `a_c = v²/r (Net Force) | Points to Loop Center` clearly offset to the right with zero badge overlap.
+- Replaced image blobs for both `Picture 1 Clean Apex Base` and `Picture 2 Labeled Vectors Overlay` in [`AP1_U3S5_Stunt_Calibration_Deck.pptx`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Deck.pptx).
+- Exported and verified 1080p render: [`slide_05_verified.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/slide_05_verified.png).
+
+### 3. Student Portal Materials Panel Refinement (`index.html`)
+- Removed `Lab Desk & C-Clamp` material card from `.materials-grid` in [`index.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/index.html).
+- Remaining 5 station kit items:
+  1. 🎢 **Stunt Track Apparatus:** Curved ramp, 18.4 cm loop, runway & riser block
+  2. 🎱 **Solid Steel Ball:** Spherical projectile released from rest
+  3. 🪢 **Plumb Line & Bob:** Establishes X = 0 launch origin directly on floor
+  4. 📏 **Ruler & Tape Measure:** Measures release height h, drop H, & range X
+  5. 📋 **Carbon Paper & Target:** Records ball impact marks on floor
+- Layout automatically balances via CSS Grid: `grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px;`.
