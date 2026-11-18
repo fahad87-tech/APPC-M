@@ -2507,3 +2507,37 @@ Per instructor instruction (*"do not provide both of this to students...let them
   - Page 1: [`student_pdf_page_1.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/student_pdf_page_1.png) — confirmed all 5 table rows contained on Page 1, zero overflow.
   - Page 2: [`student_pdf_page_2.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/student_pdf_page_2.png) — confirmed clean graph and open slope text prompt.
   - Page 3: [`student_pdf_page_3.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/student_pdf_page_3.png) — confirmed unscaffolded derivation box and explicit percentage error formula.
+
+
+## 67. Student Printable Calibration Table Cell Vertical Space Expansion (`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html` & `.pdf`)
+
+### 1. User Requirement & Handwriting Ergonomics
+- **User Directive:** *"each cell should have a little more space vertically"* accompanied by a cropped screenshot of the 5-row calibration table on Page 1 ([`media_1794981685220_1e31394d.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/.user_uploaded/media_1794981685220_1e31394d.png)).
+- **Problem Statement:** In the previous pass to ensure zero page overflow, `.data td` had been styled with `height: 18px; padding: 1.5px 4px;`. While this fit comfortably on Page 1, the vertical cell height was slightly constrained for high school students writing empirical measurements (e.g. `41.0 cm`, `0.373 m`, `0.700 m`, `3.106 m²/s²`) by hand in pencil during a live laboratory sprint.
+- **Solution:** Measured available vertical whitespace on Page 1 ($101.5	ext{ CSS px}$ clearance above the footer). Expanded cell vertical height to `32px` with `padding: 5px 4px;` and header cells to `padding: 6px 4px;`, giving students ample vertical writing space while maintaining strict 3-page containment.
+
+### 2. CSS & Layout Details (`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html`)
+```css
+  .data th {
+    padding: 6px 4px;
+    font-size: 10.5pt;
+    text-align: center;
+  }
+  .data td {
+    height: 32px;
+    padding: 5px 4px;
+    font-size: 11pt;
+    text-align: center;
+  }
+  .data td.setting {
+    text-align: left;
+    background: #f8fafc;
+    font-weight: bold;
+  }
+```
+
+### 3. PDF Re-Compilation & Verification
+- Compiled via Google Chrome headless (`.build/render_pdfs.py`):
+  - File: [`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf) ($275,030	ext{ bytes}$).
+  - Page count verified with `pypdf`: **strictly 3 pages** (`assert len(reader.pages) == 3`).
+- Visual artifact generated: [`student_pdf_page_1.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/student_pdf_page_1.png). Confirmed clean vertical padding on all 5 table rows, balanced margins, and zero spillover onto Page 2.
