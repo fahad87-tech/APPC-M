@@ -778,9 +778,9 @@
       display: flex;
       justify-content: space-around;
       align-items: flex-end;
-      height: 155px;
+      height: 176px;
       border-bottom: 2.5px solid #64748B;
-      padding-bottom: 6px;
+      padding-bottom: 8px;
       gap: 10px;
     }
 
@@ -788,7 +788,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex: 1;
     }
 
@@ -817,10 +817,16 @@
     .cell-box.fill-gold { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
 
     .bar-label {
-      font-size: 15px;
+      font-size: 13.5px;
       font-weight: 900;
       color: #0F172A !important;
       font-family: var(--font-mono);
+      line-height: 1.15;
+      text-align: center;
+      min-height: 31px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .system-circle-box {
@@ -1208,13 +1214,13 @@
       transform: translateY(-1px);
     }
 
-    /* 2x2 SYMMETRICAL APPARATUS SPECIFICATIONS GRID */
+    /* 3-COLUMN SYMMETRICAL APPARATUS SPECIFICATIONS GRID */
     .apparatus-specs-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 16px;
     }
-    @media (max-width: 768px) {
+    @media (max-width: 920px) {
       .apparatus-specs-grid {
         grid-template-columns: 1fr;
       }
@@ -1652,8 +1658,8 @@
 
     .apparatus-specs-grid {
       display: grid !important;
-      grid-template-columns: 1fr 1fr !important;
-      gap: 8px 16px !important;
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 8px 12px !important;
       margin-bottom: 6px !important;
     }
 
@@ -1833,9 +1839,10 @@
     }
 
     .bars-draw-area {
-      height: 85px !important;
+      height: 102px !important;
       display: flex !important;
       justify-content: center !important;
+      align-items: flex-end !important;
       gap: 8px !important;
     }
 
@@ -1846,9 +1853,12 @@
     }
 
     .bar-label {
-      font-size: 13px !important;
+      font-size: 11px !important;
       font-weight: 900 !important;
-      margin-top: 4px !important;
+      margin-top: 3px !important;
+      line-height: 1.1 !important;
+      min-height: 24px !important;
+      text-align: center !important;
     }
 
     .bar-stack {
@@ -2552,24 +2562,7 @@
           </div>
         </div>
 
-        <!-- BOTTOM-LEFT: CHECKED RELEASE LIMIT -->
-        <div class="spec-card">
-          <div class="spec-header">
-            <span class="spec-icon">🛡️</span>
-            <span class="spec-title">Checked Release Limit</span>
-          </div>
-          <div class="spec-content">
-            <div class="spec-item" style="flex-direction: column; align-items: flex-start; gap: 6px;">
-              <span class="spec-label">Max Safe Release Height <i>h</i>:</span>
-              <div style="display: flex; align-items: center; gap: 8px;">
-                <input type="number" step="0.001" id="maxSafeH" placeholder="" style="width: 120px; height: 34px; text-align: center; font-size: 16px; padding: 4px 8px; border-radius: 6px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; font-family: var(--font-mono); font-weight: 800; outline: none;" oninput="saveAndSync()" />
-                <span style="font-weight: 800; color: #0F172A; font-size: 15px;">m</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- BOTTOM-RIGHT: STATION CONSTANTS -->
+        <!-- STATION CONSTANTS -->
         <div class="spec-card">
           <div class="spec-header">
             <span class="spec-icon">⚙️</span>
@@ -2730,7 +2723,8 @@
   <div class="section-card unlocked" id="sec_1">
     <div class="section-header-row">
       <div class="section-title">
-        <span class="section-num">Section 1</span> Predict Before Rehearsal: Forces & LOL Energy Chart
+        <span class="section-num">Section 1</span>
+        <span>Predict Before Rehearsal: Forces &amp; 2.5<i>R</i> LOL Energy Chart</span>
       </div>
       <span class="lock-indicator">🔒 Locked</span>
     </div>
@@ -2757,19 +2751,19 @@
           </div>
         </div>
 
-        <!-- INTERACTIVE LOL ENERGY DIAGRAM BUILDER -->
+        <!-- INTERACTIVE LOL ENERGY DIAGRAM BUILDER (AT 2.5R ONLY) -->
         <div class="lol-builder">
           <div style="font-size: 15.5px; font-weight: 900; color: #0F172A;">
-            CONSTRUCT LOL ENERGY CHART
+            CONSTRUCT LOL ENERGY CHART (AT <i>h</i> = 2.5<i>R</i> ONLY)
           </div>
           <p style="font-size: 13.5px; color: var(--text-muted);">
-            Click each vertical stack to draw your bars (0 to 5 bars).
+            Draw your energy bars strictly for a release from rest at <strong><i>h</i> = 2.5<i>R</i></strong> (click each vertical stack: 0 to 5 bars).
           </p>
 
           <div class="lol-panels">
             <!-- INITIAL STATE BARS -->
             <div class="lol-grid-card">
-              <div class="lol-grid-card-title">Initial Release (h)</div>
+              <div class="lol-grid-card-title">Initial Release (<span style="text-transform: none;"><i>h</i> = 2.5<i>R</i></span>)</div>
               <div class="bars-draw-area">
                 <div class="bar-column">
                   <div class="bar-stack" id="stack_ki" onclick="cycleBar('ki')">
@@ -2799,7 +2793,7 @@
 
             <!-- FINAL APEX BARS -->
             <div class="lol-grid-card">
-              <div class="lol-grid-card-title">Apex Reality (y=2r)</div>
+              <div class="lol-grid-card-title">Apex Reality (<span style="text-transform: none;"><i>y</i> = 2<i>R</i></span>)</div>
               <div class="bars-draw-area">
                 <div class="bar-column">
                   <div class="bar-stack" id="stack_ugf" onclick="cycleBar('ugf')">
@@ -2817,7 +2811,7 @@
                   <div class="bar-stack" id="stack_diss" onclick="cycleBar('diss')">
                     <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
                   </div>
-                  <span class="bar-label">Ediss</span>
+                  <span class="bar-label">Mystery<br>Energy</span>
                 </div>
               </div>
               <div style="font-size: 13px; font-weight: 700; color: var(--gold); text-align: center;" id="apexTotalLbl">Total: 0 bars</div>
@@ -2827,15 +2821,15 @@
         </div>
       </div>
 
-      <!-- PREDICTION QUESTIONS -->
+      <!-- PREDICTION QUESTIONS (AT h = 2.5R) -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
         <div>
-          <label class="field-lbl">Teacher's Test Height h (m):</label>
-          <input type="number" step="0.01" id="teacherTestH" placeholder="Enter height in metres" oninput="saveAndSync()" />
+          <label class="field-lbl">Test Height at <span style="text-transform: none;">2.5<i>R</i>, <i>h</i> (m)</span>:</label>
+          <input type="number" step="0.001" id="teacherTestH" placeholder="Enter 2.5R height in metres" oninput="saveAndSync()" />
         </div>
 
         <div>
-          <label class="field-lbl">Prediction for Ball:</label>
+          <label class="field-lbl">Prediction for Ball (at <span style="text-transform: none;"><i>h</i> = 2.5<i>R</i></span>):</label>
           <select id="predChoice" onchange="saveAndSync()">
             <option value="">-- Choose Prediction --</option>
             <option value="complete">Complete the Loop</option>
@@ -2849,8 +2843,28 @@
         </div>
 
         <div style="grid-column: 1 / -1;">
-          <label class="field-lbl">Observed Rehearsal Result:</label>
-          <input type="text" id="obsResult" placeholder="Describe the physical observation during the demo drop..." oninput="saveAndSync()" />
+          <label class="field-lbl">Observed Rehearsal Result (at <span style="text-transform: none;"><i>h</i> = 2.5<i>R</i></span>):</label>
+          <input type="text" id="obsResult" placeholder="Describe the physical observation during the 2.5R release..." oninput="saveAndSync()" />
+        </div>
+
+        <!-- EMPIRICAL SAFE APEX CLEARANCE HEIGHT (REPLACES TOP MAX SAFE HEIGHT) -->
+        <div style="grid-column: 1 / -1; background: #F0FDF4; border: 2px solid #10B981; border-radius: 10px; padding: 14px 18px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
+          <div style="flex: 1; min-width: 260px;">
+            <div style="font-size: 12.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #047857; margin-bottom: 4px;">
+              🛡️ Empirical Apex Clearance Check
+            </div>
+            <label for="safeApexH" style="font-size: 15px; font-weight: 800; color: #0F172A; line-height: 1.45; display: block; cursor: pointer;">
+              Find the safe release height <i>h</i><sub>safe</sub> where the ball moves through the apex instead of falling off or detaching from the apex:
+            </label>
+            <div style="font-size: 13px; color: #475569; font-weight: 600; margin-top: 3px;">
+              Record corrected vertical height <i>h</i> above exit level (every calibration launch in Section 2 must be at or above this safe height).
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <input type="number" step="0.001" id="safeApexH" placeholder="0.000" style="width: 120px; height: 40px; text-align: center; font-size: 17px; padding: 4px 10px; border-radius: 8px; background: #FFFFFF; border: 2px solid #059669; color: #0F172A; font-family: var(--font-mono); font-weight: 900; outline: none;" oninput="onSafeApexHChange()" />
+            <span style="font-weight: 900; color: #047857; font-size: 15.5px;">m</span>
+            <span id="safeApex_cm_badge" style="background: rgba(16, 185, 129, 0.18); color: #065F46; padding: 5px 10px; border-radius: 6px; font-size: 13.5px; font-weight: 800; font-family: var(--font-mono);">-- cm</span>
+          </div>
         </div>
       </div>
 
@@ -3186,7 +3200,7 @@
 
         <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-top: 10px;">
           <span style="font-size: 15px; color: var(--gold); font-weight: 800;">
-            Safe Range Check (<i>h</i>* ≥ 2.5<i>R</i> [23.0 cm] &amp; ≤ Ramp Limit [58.5 cm]): <strong id="safeRangeStatus">Awaiting calculation...</strong>
+            Safe Range Check (<i>h</i>* ≥ Safe Apex Height <i>h</i><sub>safe</sub> &amp; ≤ Ramp Limit): <strong id="safeRangeStatus">Awaiting calculation...</strong>
           </span>
 
           <button class="btn-next-step" style="background: var(--gold);" id="btnClampCheck" onclick="requestClampCheck()">
@@ -3821,6 +3835,24 @@
     if (badge) badge.textContent = !isNaN(maxH) ? (maxH * 100).toFixed(1) + " cm" : "-- cm";
 
     syncAndRenderGraph();
+    if (shouldSync) saveAndSync();
+  }
+
+  function getSafeApexH() {
+    let el = document.getElementById("safeApexH");
+    let val = el ? parseFloat(el.value) : NaN;
+    if (!isNaN(val) && val > 0.05) {
+      return (val > 1.5 ? val / 100.0 : val);
+    }
+    return NaN;
+  }
+
+  function onSafeApexHChange(shouldSync = true) {
+    let safeH = getSafeApexH();
+    let badge = document.getElementById("safeApex_cm_badge");
+    if (badge) badge.textContent = !isNaN(safeH) ? (safeH * 100).toFixed(1) + " cm" : "-- cm";
+
+    updateProgress();
     if (shouldSync) saveAndSync();
   }
 
@@ -4614,7 +4646,8 @@
         scribe: document.getElementById("crewScribe") ? document.getElementById("crewScribe").value : "",
         checker: document.getElementById("crewChecker") ? document.getElementById("crewChecker").value : ""
       },
-      checkedReleaseLimit: document.getElementById("maxSafeH") ? document.getElementById("maxSafeH").value : "",
+      safeApexH: document.getElementById("safeApexH") ? document.getElementById("safeApexH").value : "",
+      checkedReleaseLimit: document.getElementById("safeApexH") ? document.getElementById("safeApexH").value : "",
       fbdVectors: worksheetState.fbdVectors || [],
       lol: worksheetState.lol || { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 },
       sysObjs: {
@@ -5006,9 +5039,11 @@
       if (saved.crew.checker) document.getElementById("crewChecker").value = saved.crew.checker;
     }
 
-    // RESTORE CHECKED RELEASE LIMIT
-    if (saved.checkedReleaseLimit && document.getElementById("maxSafeH")) {
-      document.getElementById("maxSafeH").value = saved.checkedReleaseLimit;
+    // RESTORE EMPIRICAL SAFE APEX CLEARANCE HEIGHT
+    let savedSafeApex = saved.safeApexH || saved.checkedReleaseLimit;
+    if (savedSafeApex && document.getElementById("safeApexH")) {
+      document.getElementById("safeApexH").value = savedSafeApex;
+      onSafeApexHChange(false);
     }
 
     // RESTORE FBD VECTORS
@@ -5204,21 +5239,24 @@
 
     let hCalc = parseFloat(document.getElementById("inversionCalcH").value);
     if (!isNaN(hCalc)) {
-      let minSafe = 0.230; // 2.5 R loop apex clearance limit (23.0 cm)
+      let minSafe = 0.230; // Ideal 2.5 R loop apex limit (23.0 cm)
+      let empSafe = getSafeApexH();
+      if (!isNaN(empSafe) && empSafe > 0.15) minSafe = empSafe;
+
       let maxSafe = 0.585; // Apparatus physical ramp limit (58.5 cm)
-      let maxInput = parseFloat(document.getElementById("maxSafeH") ? document.getElementById("maxSafeH").value : "");
-      if (!isNaN(maxInput) && maxInput > 0.30) maxSafe = maxInput > 1.0 ? maxInput / 100.0 : maxInput;
+      let measMax = getMaxRampH();
+      if (!isNaN(measMax) && measMax > 0.30) maxSafe = measMax;
 
       let statusEl = document.getElementById("safeRangeStatus");
       if (statusEl) {
         if (hCalc < minSafe) {
-          statusEl.textContent = "CRITICAL: BELOW 2.5 R (< 23.0 cm) 🔴";
+          statusEl.textContent = `CRITICAL: BELOW SAFE APEX HEIGHT (< ${(minSafe * 100).toFixed(1)} cm) 🔴`;
           statusEl.style.color = "var(--crimson)";
         } else if (hCalc > maxSafe) {
           statusEl.textContent = `WARNING: EXCEEDS RAMP LIMIT (> ${(maxSafe * 100).toFixed(1)} cm) 🔴`;
           statusEl.style.color = "var(--crimson)";
         } else {
-          statusEl.textContent = `SAFE (23.0–${(maxSafe * 100).toFixed(1)} cm) 🟢`;
+          statusEl.textContent = `SAFE (${(minSafe * 100).toFixed(1)}–${(maxSafe * 100).toFixed(1)} cm) 🟢`;
           statusEl.style.color = "var(--emerald)";
         }
       }
@@ -5326,9 +5364,20 @@
       safeSet("crewChecker", peerState.crew.checker);
     }
 
-    // Checked release limit
-    if (peerState.checkedReleaseLimit) {
-      safeSet("maxSafeH", peerState.checkedReleaseLimit);
+    // Empirical safe apex clearance height & LOL chart
+    let peerSafeApex = peerState.safeApexH || peerState.checkedReleaseLimit;
+    if (peerSafeApex) {
+      safeSet("safeApexH", peerSafeApex);
+      onSafeApexHChange(false);
+    }
+    if (peerState.lol) {
+      worksheetState.lol = peerState.lol;
+      renderLolBars();
+    }
+    if (peerState.sysObjs) {
+      safeSet("sysObj1", peerState.sysObjs.obj1);
+      safeSet("sysObj2", peerState.sysObjs.obj2);
+      safeSet("sysObj3", peerState.sysObjs.obj3);
     }
 
     // Section 1 predictions
@@ -5462,9 +5511,15 @@
     // 7. Clear FBD Canvas
     clearFbdCanvas();
 
-    // 8. Reset LOL Chart
+    // 8. Reset LOL Chart & Safe Apex Badge
     worksheetState.lol = { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 };
     renderLolBars();
+    let safeBadge = document.getElementById("safeApex_cm_badge");
+    if (safeBadge) safeBadge.textContent = "-- cm";
+    let dropBadge = document.getElementById("dropH_cm_badge");
+    if (dropBadge) dropBadge.textContent = "-- cm";
+    let rampBadge = document.getElementById("maxRamp_cm_badge");
+    if (rampBadge) rampBadge.textContent = "-- cm";
 
     // 9. Reset Graph & Line
     graphLine.active = false;

@@ -1461,8 +1461,21 @@
     return Math.floor(1000 + Math.random() * 9000).toString();
   }
 
+  function makeEmptySection1() {
+    return {
+      safeApexH: "",
+      dropH: "",
+      maxRampH: "",
+      lol: { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 },
+      sysObjs: { obj1: "", obj2: "", obj3: "" },
+      fbdVectors: [],
+      predictions: { testH: "", predChoice: "", predExplain: "", obsResult: "" },
+      rawPayload: {}
+    };
+  }
+
   let stations = {
-    station_1: {
+    station_1: Object.assign({
       name: "Station 1: Speed Demons",
       pin: generateRandomPin(),
       rank: "🥇",
@@ -1478,8 +1491,8 @@
       crew: { releaser: "", measurer: "", scribe: "", checker: "" },
       q1: "",
       q2: ""
-    },
-    station_2: {
+    }, makeEmptySection1()),
+    station_2: Object.assign({
       name: "Station 2: Vector Vanguard",
       pin: generateRandomPin(),
       rank: "🥈",
@@ -1495,8 +1508,8 @@
       crew: { releaser: "", measurer: "", scribe: "", checker: "" },
       q1: "",
       q2: ""
-    },
-    station_3: {
+    }, makeEmptySection1()),
+    station_3: Object.assign({
       name: "Station 3: Quantum Riders",
       pin: generateRandomPin(),
       rank: "🥉",
@@ -1512,8 +1525,8 @@
       crew: { releaser: "", measurer: "", scribe: "", checker: "" },
       q1: "",
       q2: ""
-    },
-    station_4: {
+    }, makeEmptySection1()),
+    station_4: Object.assign({
       name: "Station 4: Apex Phoenix",
       pin: generateRandomPin(),
       rank: "4th",
@@ -1529,8 +1542,54 @@
       crew: { releaser: "", measurer: "", scribe: "", checker: "" },
       q1: "",
       q2: ""
-    }
+    }, makeEmptySection1())
   };
+
+  function hydrateStationFullPayload(st, fp) {
+    if (!st || !fp) return;
+    st.rawPayload = Object.assign({}, st.rawPayload || {}, fp);
+    if (fp.pin) st.pin = fp.pin.toString();
+    if (fp.crew) st.crew = fp.crew;
+    if (fp.dropH !== undefined) st.dropH = fp.dropH;
+    if (fp.maxRampH !== undefined) st.maxRampH = fp.maxRampH;
+    let safeH = fp.safeApexH !== undefined && fp.safeApexH !== "" ? fp.safeApexH : fp.checkedReleaseLimit;
+    if (safeH !== undefined) st.safeApexH = safeH;
+    if (fp.lol) st.lol = fp.lol;
+    if (fp.sysObjs) st.sysObjs = fp.sysObjs;
+    if (fp.fbdVectors && Array.isArray(fp.fbdVectors)) st.fbdVectors = fp.fbdVectors;
+    if (fp.predictions) st.predictions = fp.predictions;
+  }
+
+  function applyLocalStationState(stationKey, fullState) {
+    let st = stations[stationKey];
+    if (!st || !fullState) return;
+    hydrateStationFullPayload(st, fullState);
+    if (fullState.progress !== undefined && !isNaN(fullState.progress)) st.progress = Number(fullState.progress);
+    if (fullState.unlockedStep !== undefined && !isNaN(fullState.unlockedStep)) st.step = Number(fullState.unlockedStep);
+    if (fullState.status) st.status = fullState.status === "in_progress" ? "calibrating" : fullState.status;
+    if (fullState.calibratedParams) {
+      let sl = parseFloat(fullState.calibratedParams.slopeA);
+      let ic = parseFloat(fullState.calibratedParams.interceptB);
+      if (!isNaN(sl) && sl !== 0) st.slope = sl;
+      if (!isNaN(ic)) st.intercept = ic;
+    }
+    if (fullState.inversion) {
+      let ch = parseFloat(fullState.inversion.calcH);
+      if (!isNaN(ch) && ch !== 0) st.calc_h = ch;
+    }
+    if (fullState.stunt) {
+      let ax = parseFloat(fullState.stunt.actualX);
+      let dl = parseFloat(fullState.stunt.delta);
+      let pe = parseFloat(fullState.stunt.pctError);
+      if (!isNaN(ax)) { st.actual_x = ax; st.actual_X = ax; }
+      if (!isNaN(dl)) st.delta = dl;
+      if (!isNaN(pe)) st.accuracy_pct = Math.max(0, 100 - pe);
+    }
+    if (fullState.exitWork) {
+      st.q1 = fullState.exitWork.q1 || "";
+      st.q2 = fullState.exitWork.q2 || "";
+    }
+  }
 
   // PROJECTOR PRIVACY MODE & ROSTER CHECK-IN TELEMETRY
   let isProjectorPrivacyMode = true; // Default TRUE: Prevents copying from the front screen
@@ -1538,6 +1597,35 @@
   let isLabStarted = false;          // Tracks whether instructor officially began session
   let revealedCards = {};            // Tracks per-card inspection reveals
   const classroomChannel = (typeof BroadcastChannel !== 'undefined') ? new BroadcastChannel("stunt_classroom_sync") : null;
+
+  if (classroomChannel) {
+    classroomChannel.onmessage = (msg) => {
+      let data = msg.data;
+      if (!data) return;
+      if (data.type === "PEER_SYNC_STATION_DATA" && data.station_id && data.state) {
+        applyLocalStationState(data.station_id, data.state);
+        renderLeaderboard();
+        renderMultiGraph();
+        renderGradingQueue();
+        if (isPinsFocusMode) renderPinsFocusGrid();
+      }
+    };
+  }
+
+  window.addEventListener("storage", (e) => {
+    if (e.key && e.key.startsWith("stunt_lab_state_")) {
+      let stKey = e.key.replace("stunt_lab_state_", "");
+      if (stations[stKey] && e.newValue) {
+        try {
+          applyLocalStationState(stKey, JSON.parse(e.newValue));
+          renderLeaderboard();
+          renderMultiGraph();
+          renderGradingQueue();
+          if (isPinsFocusMode) renderPinsFocusGrid();
+        } catch(err) {}
+      }
+    }
+  });
 
   function checkTeacherAuth() {
     if (sessionStorage.getItem("stunt_teacher_auth") === "true") {
@@ -1645,11 +1733,11 @@
       for (let stKey of Object.keys(stations)) {
         try {
           await supabaseClient.from("station_submissions").update({
-            full_payload: {
+            full_payload: Object.assign({}, stations[stKey].rawPayload || {}, {
               pin: stations[stKey].pin,
               teacher_online: isTeacherAuthorized,
               updated_at_ms: Date.now()
-            }
+            })
           }).eq("station_id", stKey);
         } catch(e) {
           console.warn(`Supabase pin sync notice for ${stKey}:`, e);
@@ -1709,11 +1797,11 @@
 
         for (let stKey of Object.keys(stations)) {
           await supabaseClient.from("station_submissions").update({
-            full_payload: {
+            full_payload: Object.assign({}, stations[stKey].rawPayload || {}, {
               pin: stations[stKey].pin,
               teacher_online: false,
               updated_at_ms: Date.now()
-            }
+            })
           }).eq("station_id", stKey);
         }
       } catch(e) {}
@@ -1734,7 +1822,17 @@
     initSprintTimer();
   }
 
+  function hydrateLocalStorageStations() {
+    Object.keys(stations).forEach(stKey => {
+      try {
+        let raw = localStorage.getItem("stunt_lab_state_" + stKey);
+        if (raw) applyLocalStationState(stKey, JSON.parse(raw));
+      } catch(e) {}
+    });
+  }
+
   function init() {
+    hydrateLocalStorageStations();
     renderLeaderboard();
 
     if (localStorage.getItem("stunt_target_revealed") === "true") {
@@ -2012,8 +2110,8 @@
         data.forEach(rec => {
           if (stations[rec.station_id]) {
             let st = stations[rec.station_id];
-            if (rec.full_payload && rec.full_payload.pin) {
-              st.pin = rec.full_payload.pin.toString();
+            if (rec.full_payload) {
+              hydrateStationFullPayload(st, rec.full_payload);
             }
             if (rec.group_name && rec.group_name !== 'Unnamed Crew') st.name = rec.group_name;
             if (rec.progress_pct !== null && !isNaN(rec.progress_pct)) st.progress = Number(rec.progress_pct);
@@ -2033,9 +2131,7 @@
             }
             if (rec.teacher_grade !== null && !isNaN(rec.teacher_grade)) st.grade = Number(rec.teacher_grade);
             if (rec.teacher_feedback) st.feedback = rec.teacher_feedback;
-            if (rec.full_payload && rec.full_payload.crew) {
-              st.crew = rec.full_payload.crew;
-            } else if (rec.crew_members) {
+            if ((!rec.full_payload || !rec.full_payload.crew) && rec.crew_members) {
               let parts = rec.crew_members.split(",").map(p => p.trim());
               st.crew = {
                 releaser: parts[0] || "",
@@ -2093,10 +2189,10 @@
       let borderClass = st.status === 'awaiting_inspection' ? 'alert-border' : (st.progress === 100 ? 'ready-border' : '');
 
       let statusBadge = "";
-      if (st.status === 'calibrating') statusBadge = `<span class="status-tag tag-calibrating">🟡 Calibrating</span>`;
-      else if (st.status === 'awaiting_inspection') statusBadge = `<span class="status-tag tag-inspection">🟠 Clamp Inspection</span>`;
+      if (st.status === 'awaiting_inspection') statusBadge = `<span class="status-tag tag-inspection">🟠 Clamp Inspection</span>`;
       else if (st.status === 'ready_for_drop') statusBadge = `<span class="status-tag tag-ready">🟢 Ready for Drop</span>`;
-      else statusBadge = `<span class="status-tag tag-complete">🏆 Stunt Verified</span>`;
+      else if (st.status === 'submitted' || st.status === 'complete') statusBadge = `<span class="status-tag tag-complete">🏆 Stunt Verified</span>`;
+      else statusBadge = `<span class="status-tag tag-calibrating">🟡 Calibrating</span>`;
 
       // PRIVACY MASKING LOGIC FOR CLASSROOM PROJECTOR
       let isMasked = isProjectorPrivacyMode && !revealedCards[key];
@@ -2120,6 +2216,21 @@
       let targetHDisplay = isMasked
         ? `<span class="val-chip gold">CLASSIFIED 🎯</span>`
         : `<span class="val gold">${st.calc_h ? (st.calc_h <= 1.0 ? (st.calc_h * 100).toFixed(1) + ' cm' : Number(st.calc_h).toFixed(1) + ' cm') : '--'}</span>`;
+
+      let safeValNum = parseFloat(st.safeApexH);
+      let hasSafeApex = !isNaN(safeValNum) && safeValNum > 0;
+      let normSafeM = hasSafeApex ? (safeValNum > 1.5 ? safeValNum / 100.0 : safeValNum) : null;
+      let safeApexCardChip = hasSafeApex
+        ? (isMasked ? `<span class="val-chip cyan">LOGGED 🔒</span>` : `<strong style="color: #059669; font-family: var(--font-mono);">${(normSafeM * 100).toFixed(1)} cm (${normSafeM.toFixed(3)} m)</strong>`)
+        : `<span style="color: #94A3B8;">Pending</span>`;
+
+      let lolObj = st.lol || { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 };
+      let lolInitSum = (lolObj.ki || 0) + (lolObj.ugi || 0);
+      let lolApexSum = (lolObj.ugf || 0) + (lolObj.kf || 0) + (lolObj.diss || 0);
+      let hasLol = (lolInitSum + lolApexSum) > 0;
+      let lolCardChip = hasLol
+        ? (isMasked ? `<span class="val-chip slate">DRAWN ✓ 🔒</span>` : `<strong style="color: #0F172A; font-family: var(--font-mono);">Ki:${lolObj.ki||0} Ugi:${lolObj.ugi||0} ➔ Ugf:${lolObj.ugf||0} K:${lolObj.kf||0} Myst:${lolObj.diss||0}</strong>`)
+        : `<span style="color: #94A3B8;">Pending</span>`;
 
       let pinDisplay = isRosterPinRevealMode ? `🔑 PIN: ${st.pin}` : (isMasked ? `🔒 PIN PROTECTED` : `PIN: ${st.pin}`);
       let pinBadgeClass = isRosterPinRevealMode ? `pin-badge revealed` : (isMasked ? `pin-badge locked` : `pin-badge`);
@@ -2191,6 +2302,11 @@
             <span class="label">Target h*</span>
             ${targetHDisplay}
           </div>
+        </div>
+
+        <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 8px 12px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer;" onclick="toggleCardPrivacy('${key}')" title="Section 1: 2.5R LOL Chart & Safe Apex Clearance Height">
+          <span><strong>2.5<i>R</i> LOL:</strong> ${lolCardChip}</span>
+          <span><strong>Safe Apex <i>h</i><sub>safe</sub>:</strong> ${safeApexCardChip}</span>
         </div>
 
         <div class="card-footer-action">
@@ -2409,8 +2525,9 @@
             </div>
           </div>
           <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 10px 14px; grid-column: 1 / -1;">
-            <div style="font-size: 12px; font-weight: 800; color: #64748B; text-transform: uppercase;">Station Physical Geometry</div>
+            <div style="font-size: 12px; font-weight: 800; color: #64748B; text-transform: uppercase;">Station Physical Geometry &amp; Safe Apex Clearance</div>
             <div style="display: flex; gap: 20px; font-size: 14px; font-weight: 700; color: #0F172A; margin-top: 4px; flex-wrap: wrap;">
+              <span>Safe Apex Height <i>h</i><sub>safe</sub>: <strong style="color: #059669; font-family: var(--font-mono);">${st.safeApexH ? (parseFloat(st.safeApexH) > 1.5 ? (parseFloat(st.safeApexH)/100).toFixed(3) : parseFloat(st.safeApexH).toFixed(3)) + ' m (' + ((parseFloat(st.safeApexH) > 1.5 ? parseFloat(st.safeApexH) : parseFloat(st.safeApexH)*100)).toFixed(1) + ' cm)' : 'Pending'}</strong></span>
               <span>Table Exit Drop <i>H</i>: <strong style="color: #059669; font-family: var(--font-mono);">${st.dropH || '0.773'} m</strong></span>
               <span>Measured Max Ramp: <strong style="color: #0284C7; font-family: var(--font-mono);">${st.maxRampH ? st.maxRampH + ' m' : 'Default (0.620 m)'}</strong></span>
               <span>Flight Time <i>t</i><sub>flight</sub>: <strong style="color: #4F46E5; font-family: var(--font-mono);">${(Math.sqrt(2 * (parseFloat(st.dropH) || 0.773) / 9.80)).toFixed(3)} s</strong></span>
@@ -2418,23 +2535,82 @@
           </div>
         </div>
 
-        <!-- SECTION 6 PHYSICAL REASONING RESPONSES -->
+        <!-- SECTION 1: 2.5R LOL ENERGY CHART (MYSTERY ENERGY) & REHEARSAL TELEMETRY -->
+        <div style="background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 16px;">
+          <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div style="font-size: 13px; font-weight: 900; color: #0F172A; text-transform: uppercase; letter-spacing: 0.05em;">
+              ⚡ Section 1 Telemetry: 2.5<i>R</i> LOL Energy Chart &amp; Safe Apex Clearance
+            </div>
+            <span style="background: #ECFDF5; border: 1.5px solid #10B981; color: #065F46; font-size: 13px; font-weight: 800; padding: 3px 10px; border-radius: 14px; font-family: var(--font-mono);">
+              🛡️ Safe Apex <i>h</i><sub>safe</sub>: ${st.safeApexH ? (parseFloat(st.safeApexH) > 1.5 ? (parseFloat(st.safeApexH)/100).toFixed(3) : parseFloat(st.safeApexH).toFixed(3)) + ' m (' + ((parseFloat(st.safeApexH) > 1.5 ? parseFloat(st.safeApexH) : parseFloat(st.safeApexH)*100)).toFixed(1) + ' cm)' : 'Pending'}
+            </span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 12px;">
+            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; padding: 10px 12px;">
+              <div style="font-size: 12px; font-weight: 900; color: #059669; text-transform: uppercase; margin-bottom: 4px;">Initial Release (<span style="text-transform: none;"><i>h</i> = 2.5<i>R</i></span>)</div>
+              <div style="font-size: 14px; font-weight: 700; color: #0F172A; font-family: var(--font-mono);">
+                Ki: <strong>${(st.lol && st.lol.ki) || 0}</strong>/5 &nbsp;•&nbsp; Ugi: <strong>${(st.lol && st.lol.ugi) || 0}</strong>/5
+                <span style="color: #64748B; font-size: 12.5px;">(Tot: ${((st.lol && st.lol.ki) || 0) + ((st.lol && st.lol.ugi) || 0)})</span>
+              </div>
+            </div>
+
+            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; padding: 10px 12px;">
+              <div style="font-size: 12px; font-weight: 900; color: #0284C7; text-transform: uppercase; margin-bottom: 4px;">System Circle (<span style="text-transform: none;"><i>W</i><sub>ext</sub> = 0</span>)</div>
+              <div style="font-size: 14px; font-weight: 700; color: #0F172A;">
+                ${(st.sysObjs && [st.sysObjs.obj1, st.sysObjs.obj2, st.sysObjs.obj3].filter(x => x && x.trim()).map(escapeHtml).join(", ")) || '<span style="color: #94A3B8; font-style: italic;">Empty</span>'}
+              </div>
+            </div>
+
+            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; padding: 10px 12px;">
+              <div style="font-size: 12px; font-weight: 900; color: #D97706; text-transform: uppercase; margin-bottom: 4px;">Apex Reality (<span style="text-transform: none;"><i>y</i> = 2<i>R</i></span>)</div>
+              <div style="font-size: 14px; font-weight: 700; color: #0F172A; font-family: var(--font-mono);">
+                Ugf: <strong>${(st.lol && st.lol.ugf) || 0}</strong> • Ktrans: <strong>${(st.lol && st.lol.kf) || 0}</strong> • Mystery Energy: <strong style="color: #D97706;">${(st.lol && st.lol.diss) || 0}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; font-size: 13.5px;">
+            <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; padding: 8px 12px;">
+              <strong style="color: #475569;">2.5<i>R</i> Test Height &amp; Prediction:</strong>
+              <div style="color: #0F172A; font-weight: 700; margin-top: 2px;">
+                <i>h</i> = ${st.predictions && st.predictions.testH ? escapeHtml(st.predictions.testH) + ' m' : '<span style="color:#94A3B8;">Pending</span>'}
+                &nbsp;|&nbsp;
+                ${st.predictions && st.predictions.predChoice === 'complete' ? '<span style="color:#059669;">Complete the Loop</span>' : st.predictions && st.predictions.predChoice === 'leave' ? '<span style="color:#DC2626;">Leave the Track (Fall / Detach)</span>' : '<span style="color:#94A3B8;">No choice yet</span>'}
+              </div>
+            </div>
+            <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; padding: 8px 12px;">
+              <strong style="color: #475569;">Observed 2.5<i>R</i> Rehearsal Result:</strong>
+              <div style="color: #0F172A; font-weight: 600; margin-top: 2px;">
+                ${st.predictions && st.predictions.obsResult && st.predictions.obsResult.trim() ? escapeHtml(st.predictions.obsResult) : '<span style="color:#94A3B8; font-style: italic;">Pending observation</span>'}
+              </div>
+            </div>
+            <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; padding: 8px 12px; grid-column: 1 / -1;">
+              <strong style="color: #475569;">2.5<i>R</i> Prediction Explanation:</strong>
+              <div style="color: #0F172A; font-weight: 600; margin-top: 2px;">
+                ${st.predictions && st.predictions.predExplain && st.predictions.predExplain.trim() ? escapeHtml(st.predictions.predExplain) : '<span style="color:#94A3B8; font-style: italic;">No explanation submitted yet</span>'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 7 PHYSICAL REASONING RESPONSES -->
         <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 16px;">
           <div style="font-size: 13px; font-weight: 900; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">
             📝 Student Physics Reflection Answers:
           </div>
           
           <div style="margin-bottom: 10px;">
-            <span style="font-size: 13.5px; font-weight: 800; color: #475569;">Q1 (Why Slope a < 2g? Rotational Energy partition):</span>
+            <span style="font-size: 13.5px; font-weight: 800; color: #475569;">Q1 (Why Slope a < 2g? Calibrated Line vs Ideal Formula):</span>
             <div style="font-size: 15px; color: #0F172A; font-weight: 600; line-height: 1.5; background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;">
-              ${st.q1 && st.q1.trim() ? st.q1 : '<span style="color: #94A3B8; font-style: italic;">No answer submitted yet for Q1</span>'}
+              ${st.q1 && st.q1.trim() ? escapeHtml(st.q1) : '<span style="color: #94A3B8; font-style: italic;">No answer submitted yet for Q1</span>'}
             </div>
           </div>
 
           <div>
-            <span style="font-size: 13.5px; font-weight: 800; color: #475569;">Q2 (Cold Track Energy Loss & Dissipation):</span>
+            <span style="font-size: 13.5px; font-weight: 800; color: #475569;">Q2 (28–30% Slope Deficit &amp; Mystery Energy Partition):</span>
             <div style="font-size: 15px; color: #0F172A; font-weight: 600; line-height: 1.5; background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;">
-              ${st.q2 && st.q2.trim() ? st.q2 : '<span style="color: #94A3B8; font-style: italic;">No answer submitted yet for Q2</span>'}
+              ${st.q2 && st.q2.trim() ? escapeHtml(st.q2) : '<span style="color: #94A3B8; font-style: italic;">No answer submitted yet for Q2</span>'}
             </div>
           </div>
         </div>
@@ -2588,8 +2764,8 @@
         let rec = payload.new;
         if (rec && stations[rec.station_id]) {
           let st = stations[rec.station_id];
-          if (rec.full_payload && rec.full_payload.pin) {
-            st.pin = rec.full_payload.pin.toString();
+          if (rec.full_payload) {
+            hydrateStationFullPayload(st, rec.full_payload);
           }
           if (rec.group_name && rec.group_name !== 'Unnamed Crew') st.name = rec.group_name;
           if (rec.progress_pct !== null && !isNaN(rec.progress_pct)) st.progress = Number(rec.progress_pct);
@@ -2609,9 +2785,7 @@
           }
           if (rec.teacher_grade !== null && !isNaN(rec.teacher_grade)) st.grade = Number(rec.teacher_grade);
           if (rec.teacher_feedback) st.feedback = rec.teacher_feedback;
-          if (rec.full_payload && rec.full_payload.crew) {
-            st.crew = rec.full_payload.crew;
-          } else if (rec.crew_members) {
+          if ((!rec.full_payload || !rec.full_payload.crew) && rec.crew_members) {
             let parts = rec.crew_members.split(",").map(p => p.trim());
             st.crew = {
               releaser: parts[0] || "",
@@ -2722,6 +2896,7 @@
       stations[stationKey].q2 = "";
       stations[stationKey].grade = null;
       stations[stationKey].feedback = "";
+      Object.assign(stations[stationKey], makeEmptySection1());
     }
 
     delete revealedCards[stationKey];
@@ -2828,6 +3003,8 @@
       stations[key].q2 = "";
       stations[key].grade = null;
       stations[key].feedback = "";
+      Object.assign(stations[key], makeEmptySection1());
+      try { localStorage.removeItem("stunt_lab_state_" + key); } catch(e) {}
     });
 
     // Reset UI buttons

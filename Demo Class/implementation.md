@@ -2606,3 +2606,34 @@ Per instructor instruction (*"do not provide both of this to students...let them
   4. 📏 **Ruler & Tape Measure:** Measures release height h, drop H, & range X
   5. 📋 **Carbon Paper & Target:** Records ball impact marks on floor
 - Layout automatically balances via CSS Grid: `grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px;`.
+
+
+## 70. Section 1 LOL Diagram at 2.5R Only (`Mystery Energy`), Empirical Safe Apex Clearance Height, and Teacher Dashboard Live Sync
+
+### 1. User Directives & Scope
+1. **LOL Diagram at $h = 2.5R$ Only & Same Rehearsal Questions:**
+   - User Directive: *"for the LOL diagarm ask them to draw is at 2.5 R only and ask them the same questions. instead of max safe height at the beginning ask them right under the LOL diagram, find same height where the ball will move through the apex instead of falling off or detaching from the apex. do it for the student portal...sync with teacher dashboard."*
+2. **Rename `Ediss` to `Mystery Energy`:**
+   - User Directive: *"Also do not call it Ediss, call it mystery energy"*
+   - Pedagogical Rationale: In AP Physics 1, releasing a rolling solid sphere at the ideal frictionless point-particle threshold $h = 2.5R$ fails to clear the loop apex because initial gravitational potential energy partitions into both rotational kinetic energy $K_{\text{rot}}$ and thermal dissipation. Calling the third final bar **Mystery Energy** avoids prematurely spoiling rotational energy or conflating it solely with dissipated heat prior to Sections 4 & 7.
+
+### 2. Student Portal Updates (`index.html`)
+1. **Removed Top `Checked Release Limit` (`Max Safe Release Height h`) Card from `sec_apparatus`:**
+   - Removed `#maxSafeH` from `.apparatus-specs-grid` at the top of the portal.
+   - Updated `.apparatus-specs-grid` screen and `@media print` CSS from `1fr 1fr` to `repeat(3, 1fr)` so the remaining three setup cards (`Reported Dimensions`, `Wooden Platform`, `Station Constants`) form a balanced 3-column header row.
+2. **Updated Section 1 LOL Builder (`#sec_1`):**
+   - Header updated to `CONSTRUCT LOL ENERGY CHART (AT h = 2.5R ONLY)` with prompt specifying release from rest strictly at $h = 2.5R$.
+   - Left card header: `Initial Release (h = 2.5R)`; Right card header: `Apex Reality (y = 2R)`.
+   - Replaced `Ediss` bar label with `Mystery Energy` (`Mystery<br>Energy`) and adjusted `.bars-draw-area` (`height: 176px` screen / `102px` print) and `.bar-label` (`min-height: 31px`) so all three apex bar stacks (`Ugf`, `Ktrans`, `Mystery Energy`) align on an identical baseline.
+3. **Preserved Rehearsal Questions & Added Empirical Safe Apex Clearance Height Right Under the LOL Diagram:**
+   - Kept all four rehearsal questions framed at $h = 2.5R$ (`Test Height at 2.5R, h (m)`, `Prediction for Ball (at h = 2.5R)`, `Explain Your Physical Prediction`, `Observed Rehearsal Result (at h = 2.5R)`).
+   - Added the **Empirical Apex Clearance Check** banner right under the LOL diagram & rehearsal block (`#safeApexH` + live `#safeApex_cm_badge`), prompting students to find the safe release height $h_{\text{safe}}$ where the ball moves through the apex instead of falling off or detaching from the apex.
+   - Wired `getSafeApexH()` and `onSafeApexHChange()` into `packWorksheetState()`, `restoreWorksheetState()`, `applyPeerSyncData()`, `executeSessionReset()`, and Section 5's `updateProgress()` safety range check (`minSafe` dynamically uses empirical `safeApexH`, falling back to $2.5R = 0.230\text{ m}$).
+
+### 3. Teacher Dashboard Live Sync (`dashboard.html`)
+1. **Multi-Channel State Hydration (`hydrateStationFullPayload` & `applyLocalStationState`):**
+   - Unpacks `safeApexH`, `lol` (`ki`, `ugi`, `ugf`, `kf`, `diss` rendered strictly as **Mystery Energy**), `sysObjs`, `fbdVectors`, `predictions`, `dropH`, and `maxRampH` from Supabase (`fetchInitialSubmissions` + `setupRealtime`), `BroadcastChannel('stunt_classroom_sync')`, and `localStorage` (`stunt_lab_state_<station>`).
+   - Preserves existing student `rawPayload` fields during instructor PIN broadcasts (`syncPinsToClassroom` / `lockTeacherCockpit`) and clears Section 1 fields cleanly on individual or global station resets.
+2. **Cockpit Visualizations:**
+   - **Live Leaderboard Cards (`renderLeaderboard`):** Added a privacy-aware Section 1 strip displaying `2.5R LOL` status/bars and `Safe Apex h_safe` (masked under Projector Privacy Mode, live values when revealed).
+   - **Submission & Telemetry Queue (`renderGradingQueue`):** Added `Safe Apex Height h_safe` to Station Physical Geometry and a dedicated **Section 1 Telemetry: 2.5R LOL Energy Chart & Safe Apex Clearance** panel showing `Ki`, `Ugi`, System Circle objects, `Ugf`, `Ktrans`, **Mystery Energy**, all four $2.5R$ prediction/observation responses, and `h_safe`.
