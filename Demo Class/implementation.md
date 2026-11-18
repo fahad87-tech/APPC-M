@@ -2714,3 +2714,24 @@ Per instructor instruction (*"do not provide both of this to students...let them
 2. **Teacher Dashboard (`dashboard.html`):**
    - Updated Live Leaderboard cards to display `Safe Apex FBD` (`DRAWN ✓ 🔒` when masked, live vector list e.g. `Fg(↓)` when unmasked) alongside `Safe Apex h_safe`.
    - Streamlined the Submission Queue Section 1 Telemetry card to display `Safe Apex h_safe`, `Apex Free-Body Diagram (at Safe Height h_safe)`, and the $2.5R$ rehearsal prediction/observation responses without obsolete LOL/FBD#1 panels.
+
+
+## 73. Printable Student Handout Alignment (`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html` & `.pdf`)
+
+### 1. User Directive & Scope
+- **User Directive:** *"can you also update the student handout"*
+- **Objective:** Synchronize all 3 pages of the printable student lab handout ([`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html) and [`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf)) with the updated Student Portal (`index.html`), while strictly preserving the 3-page layout and 32px data table row heights.
+
+### 2. Handout Updates Across Pages 1–3
+1. **Page 1 — Setup Table & Safe Apex Clearance FBD:**
+   - Removed `Checked Release Limit | Max safe release height h` from the top setup table and replaced it with `Flight Time & Speed` ($t_{\text{flight}} = \sqrt{2H/g}$, $v = X / t_{\text{flight}}$).
+   - Updated the Section 1 block (`Predict before rehearsal & safe apex clearance FBD`) to include the $2.5R$ prediction/observation prompts, the highlighted **`Safe Apex Clearance Check`** (`Safe Apex Height h_safe = ____ m (____ cm)`), and the single **`Free-Body Diagram (at h_safe)`** grid on the right (with zero $2.5R$ LOL or $2.5R$ FBD duplication).
+   - Refined subscript/superscript typography (`sup, sub { font-size: 8.5pt; }`) for clean rendering of $h_{\text{safe}}$, $t_{\text{flight}}$, $h_{\text{ramp,max}}$, and $h_{\text{raw}}$.
+2. **Page 2 — Full `0.00–0.60 m` Graph Scale & Non-Spoiler Mystery Energy Prompt:**
+   - Expanded the graph coordinate grid from `0.00–0.45 m × 0–9 m²/s²` to **`0.00–0.60 m × 0–12 m²/s²`** (`0.05 m` and `2 m²/s²` major divisions) so physical bench launches up to $0.60\text{ m}$ plot without clipping.
+   - Replaced the `28–30%` spoiler sentence with the open inquiry prompt (`Where did the Mystery Energy go?`) and a lined response box.
+3. **Page 3 — Safe Clearance Range, Studio Acceptance Band & Exit Question 2:**
+   - Linked the tested range directly to `h_safe` (`h_safe = ____ m to h_ramp,max = ____ m`), updated the Studio Acceptance Band (`δ ≤ 2.0 cm`), and synchronized Exit Question 2 (`What does your station's measured slope deficit (compared to ideal 2g = 19.6 m/s²) prove about where the Mystery Energy went in this rolling loop system?`).
+
+### 3. Compilation & 3-Page Verification
+- Recompiled via Google Chrome headless to [`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf) (`317,886 bytes`), verified **strictly 3 pages** via `pypdf`, and visually audited via PyMuPDF renders (`handout_v3_page_1.png`, `handout_v3_page_2.png`, `handout_v3_page_3.png`).
