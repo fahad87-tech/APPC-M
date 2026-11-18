@@ -755,10 +755,10 @@
       background: #F0FDF4;
       border: 2px solid #10B981;
       border-radius: 12px;
-      padding: 16px 20px;
+      padding: 18px 22px;
       display: grid;
-      grid-template-columns: 1fr 265px;
-      gap: 20px;
+      grid-template-columns: 1fr 295px;
+      gap: 22px;
       align-items: center;
     }
 
@@ -2756,105 +2756,13 @@
     <div class="section-header-row">
       <div class="section-title">
         <span class="section-num">Section 1</span>
-        <span>Predict Before Rehearsal: Forces &amp; 2.5<i>R</i> LOL Energy Chart</span>
+        <span>Predict Before Rehearsal &amp; Safe Apex Clearance FBD</span>
       </div>
       <span class="lock-indicator">🔒 Locked</span>
     </div>
 
     <div class="section-body">
-      <div class="fbd-lol-container">
-        <!-- CANVAS FBD #1 (AT 2.5R / GENERAL APEX PREDICTION - NO DIRECTIONAL SPOILER) -->
-        <div class="fbd-box">
-          <div style="font-size: 15px; font-weight: 900; color: #0F172A; text-align: center;">
-            FREE-BODY DIAGRAM AT APEX (<i>h</i> = 2.5<i>R</i>)
-          </div>
-          <p style="font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.4;">
-            Select a force label below, then click the <strong>fat dot</strong> and drag in the direction that force acts at the apex.
-          </p>
-
-          <div class="canvas-fat-dot-wrap">
-            <canvas id="fbdCanvas" width="260" height="260"></canvas>
-          </div>
-
-          <div class="fbd-tools">
-            <button type="button" class="btn-fbd-tool active" id="fbd1_lbl_Fg" onclick="selectFbdLabel(1, 'Fg')">✏️ Fg</button>
-            <button type="button" class="btn-fbd-tool" id="fbd1_lbl_FN" onclick="selectFbdLabel(1, 'FN')">✏️ FN</button>
-            <button type="button" class="btn-fbd-tool" id="fbd1_lbl_Custom" onclick="selectFbdLabel(1, 'CUSTOM')">+ Label</button>
-            <button type="button" class="btn-fbd-tool" onclick="clearFbdCanvas(1)" title="Clear drawn arrows">↺ Clear</button>
-          </div>
-        </div>
-
-        <!-- INTERACTIVE LOL ENERGY DIAGRAM BUILDER (AT 2.5R ONLY) -->
-        <div class="lol-builder">
-          <div style="font-size: 15.5px; font-weight: 900; color: #0F172A;">
-            CONSTRUCT LOL ENERGY CHART (AT <i>h</i> = 2.5<i>R</i> ONLY)
-          </div>
-          <p style="font-size: 13.5px; color: var(--text-muted);">
-            Draw your energy bars strictly for a release from rest at <strong><i>h</i> = 2.5<i>R</i></strong> (click each vertical stack: 0 to 5 bars).
-          </p>
-
-          <div class="lol-panels">
-            <!-- INITIAL STATE BARS -->
-            <div class="lol-grid-card">
-              <div class="lol-grid-card-title">Initial Release (<span style="text-transform: none;"><i>h</i> = 2.5<i>R</i></span>)</div>
-              <div class="bars-draw-area">
-                <div class="bar-column">
-                  <div class="bar-stack" id="stack_ki" onclick="cycleBar('ki')">
-                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
-                  </div>
-                  <span class="bar-label">Ki</span>
-                </div>
-                <div class="bar-column">
-                  <div class="bar-stack" id="stack_ugi" onclick="cycleBar('ugi')">
-                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
-                  </div>
-                  <span class="bar-label">Ugi</span>
-                </div>
-              </div>
-              <div style="font-size: 13px; font-weight: 700; color: var(--emerald); text-align: center;" id="initialTotalLbl">Total: 0 bars</div>
-            </div>
-
-            <!-- SYSTEM "O" CIRCLE -->
-            <div class="system-circle-box">
-              <div class="system-circle">
-                <input type="text" id="sysObj1" placeholder="" oninput="saveAndSync()" />
-                <input type="text" id="sysObj2" placeholder="" oninput="saveAndSync()" />
-                <input type="text" id="sysObj3" placeholder="" oninput="saveAndSync()" />
-              </div>
-              <span style="font-size: 12px; color: var(--text-muted);">W_ext = 0</span>
-            </div>
-
-            <!-- FINAL APEX BARS -->
-            <div class="lol-grid-card">
-              <div class="lol-grid-card-title">Apex Reality (<span style="text-transform: none;"><i>y</i> = 2<i>R</i></span>)</div>
-              <div class="bars-draw-area">
-                <div class="bar-column">
-                  <div class="bar-stack" id="stack_ugf" onclick="cycleBar('ugf')">
-                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
-                  </div>
-                  <span class="bar-label">Ugf</span>
-                </div>
-                <div class="bar-column">
-                  <div class="bar-stack" id="stack_kf" onclick="cycleBar('kf')">
-                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
-                  </div>
-                  <span class="bar-label">Ktrans</span>
-                </div>
-                <div class="bar-column">
-                  <div class="bar-stack" id="stack_diss" onclick="cycleBar('diss')">
-                    <div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div><div class="cell-box"></div>
-                  </div>
-                  <span class="bar-label">Mystery<br>Energy</span>
-                </div>
-              </div>
-              <div style="font-size: 13px; font-weight: 700; color: var(--gold); text-align: center;" id="apexTotalLbl">Total: 0 bars</div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- PREDICTION QUESTIONS (AT h = 2.5R) -->
+      <!-- PREDICTION QUESTIONS (AT h = 2.5R) + SAFE HEIGHT FBD -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
         <div>
           <label class="field-lbl">Test Height at <span style="text-transform: none;">2.5<i>R</i>, <i>h</i> (m)</span>:</label>
@@ -2880,39 +2788,39 @@
           <input type="text" id="obsResult" placeholder="Describe the physical observation during the 2.5R release..." oninput="saveAndSync()" />
         </div>
 
-        <!-- EMPIRICAL SAFE APEX CLEARANCE HEIGHT + SECOND FBD AT PERFECT SAFE HEIGHT -->
+        <!-- EMPIRICAL SAFE APEX CLEARANCE HEIGHT + FREE-BODY DIAGRAM AT SAFE HEIGHT -->
         <div class="safe-apex-fbd-grid">
-          <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; flex-direction: column; gap: 14px;">
             <div>
               <div style="font-size: 12.5px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.06em; color: #047857; margin-bottom: 4px;">
-                🛡️ Empirical Apex Clearance Check &amp; Critical Apex FBD
+                🛡️ Empirical Apex Clearance Check &amp; Apex Free-Body Diagram
               </div>
-              <label for="safeApexH" style="font-size: 15.5px; font-weight: 800; color: #0F172A; line-height: 1.45; display: block; cursor: pointer;">
-                Find the minimum safe release height <i>h</i><sub>safe</sub> that is perfect for the ball passing smoothly through the loop apex instead of falling off or detaching:
+              <label for="safeApexH" style="font-size: 16px; font-weight: 800; color: #0F172A; line-height: 1.45; display: block; cursor: pointer;">
+                Find the minimum safe release height <i>h</i><sub>safe</sub> where the ball moves smoothly through the loop apex instead of falling off or detaching:
               </label>
-              <div style="font-size: 13px; color: #475569; font-weight: 600; margin-top: 4px; line-height: 1.45;">
-                Record the corrected vertical height <i>h</i> above exit level, then draw the <strong>second Free-Body Diagram</strong> on the right showing the force(s) acting on the ball at the apex at this exact perfect clearance height!
+              <div style="font-size: 13.5px; color: #475569; font-weight: 600; margin-top: 6px; line-height: 1.5;">
+                Record the corrected vertical height <i>h</i> above exit level, then draw the <strong>Free-Body Diagram</strong> on the right showing the force(s) acting on the ball at the apex for this safe clearance height!
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #FFFFFF; border: 1.5px solid #A7F3D0; border-radius: 10px; padding: 10px 14px; width: fit-content;">
-              <span style="font-size: 14px; font-weight: 800; color: #064E3B;">Perfect Safe Height <i>h</i><sub>safe</sub>:</span>
-              <input type="number" step="0.001" id="safeApexH" placeholder="0.000" style="width: 115px; height: 38px; text-align: center; font-size: 17px; padding: 4px 10px; border-radius: 8px; background: #F8FAFC; border: 2px solid #059669; color: #0F172A; font-family: var(--font-mono); font-weight: 900; outline: none;" oninput="onSafeApexHChange()" />
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #FFFFFF; border: 1.5px solid #A7F3D0; border-radius: 10px; padding: 12px 16px; width: fit-content;">
+              <span style="font-size: 14.5px; font-weight: 800; color: #064E3B;">Safe Apex Height <i>h</i><sub>safe</sub>:</span>
+              <input type="number" step="0.001" id="safeApexH" placeholder="0.000" style="width: 120px; height: 40px; text-align: center; font-size: 17px; padding: 4px 10px; border-radius: 8px; background: #F8FAFC; border: 2px solid #059669; color: #0F172A; font-family: var(--font-mono); font-weight: 900; outline: none;" oninput="onSafeApexHChange()" />
               <span style="font-weight: 900; color: #047857; font-size: 15.5px;">m</span>
               <span id="safeApex_cm_badge" style="background: rgba(16, 185, 129, 0.18); color: #065F46; padding: 5px 10px; border-radius: 6px; font-size: 13.5px; font-weight: 800; font-family: var(--font-mono);">-- cm</span>
             </div>
           </div>
 
-          <!-- CANVAS FBD #2 (PERFECT SAFE HEIGHT APEX CLEARANCE FBD) -->
-          <div class="fbd-box" style="background: #FFFFFF; border: 1.5px solid #A7F3D0; border-radius: 10px; padding: 12px; gap: 8px;">
-            <div style="font-size: 13px; font-weight: 900; color: #064E3B; text-align: center; text-transform: uppercase; letter-spacing: 0.03em;">
-              FBD at Perfect Height (<span style="text-transform: none;"><i>h</i><sub>safe</sub></span>)
+          <!-- CANVAS FBD (SAFE HEIGHT APEX CLEARANCE FBD - ZERO DIRECTIONAL SPOILERS) -->
+          <div class="fbd-box" style="background: #FFFFFF; border: 1.5px solid #A7F3D0; border-radius: 10px; padding: 14px; gap: 10px;">
+            <div style="font-size: 14px; font-weight: 900; color: #064E3B; text-align: center; text-transform: uppercase; letter-spacing: 0.03em;">
+              Free-Body Diagram (<span style="text-transform: none;"><i>h</i><sub>safe</sub></span>)
             </div>
-            <div style="font-size: 11.5px; color: #475569; text-align: center; line-height: 1.3;">
-              Select label &amp; drag from dot for bare-minimum apex pass:
+            <div style="font-size: 12px; color: #475569; text-align: center; line-height: 1.35;">
+              Select a force label below, then click the <strong>fat dot</strong> and drag in the direction that force acts at the apex:
             </div>
-            <div class="canvas-fat-dot-wrap" style="width: 210px; height: 210px;">
-              <canvas id="fbdSafeCanvas" width="210" height="210"></canvas>
+            <div class="canvas-fat-dot-wrap" style="width: 240px; height: 240px;">
+              <canvas id="fbdSafeCanvas" width="240" height="240"></canvas>
             </div>
             <div class="fbd-tools">
               <button type="button" class="btn-fbd-tool active" id="fbd2_lbl_Fg" onclick="selectFbdLabel(2, 'Fg')">✏️ Fg</button>
@@ -3894,6 +3802,7 @@
     barKeys.forEach(k => {
       let count = worksheetState.lol[k];
       let stack = document.getElementById(`stack_${k}`);
+      if (!stack) return;
       let cells = stack.querySelectorAll(".cell-box");
       cells.forEach((cell, idx) => {
         cell.className = "cell-box";
@@ -3908,10 +3817,10 @@
     let initialTot = worksheetState.lol.ki + worksheetState.lol.ugi;
     let apexTot = worksheetState.lol.ugf + worksheetState.lol.kf + worksheetState.lol.diss;
 
-    document.getElementById("initialTotalLbl").textContent = `Total: ${initialTot} bars`;
-    document.getElementById("apexTotalLbl").textContent = `Total: ${apexTot} bars`;
-
-
+    let initLbl = document.getElementById("initialTotalLbl");
+    if (initLbl) initLbl.textContent = `Total: ${initialTot} bars`;
+    let apexLbl = document.getElementById("apexTotalLbl");
+    if (apexLbl) apexLbl.textContent = `Total: ${apexTot} bars`;
   }
 
   // ==========================================
@@ -5297,11 +5206,11 @@
       renderLolBars();
     }
 
-    // RESTORE SYSTEM OBJECTS
+    // RESTORE SYSTEM OBJECTS (IF PRESENT)
     if (saved.sysObjs) {
-      if (saved.sysObjs.obj1) document.getElementById("sysObj1").value = saved.sysObjs.obj1;
-      if (saved.sysObjs.obj2) document.getElementById("sysObj2").value = saved.sysObjs.obj2;
-      if (saved.sysObjs.obj3) document.getElementById("sysObj3").value = saved.sysObjs.obj3;
+      if (saved.sysObjs.obj1 && document.getElementById("sysObj1")) document.getElementById("sysObj1").value = saved.sysObjs.obj1;
+      if (saved.sysObjs.obj2 && document.getElementById("sysObj2")) document.getElementById("sysObj2").value = saved.sysObjs.obj2;
+      if (saved.sysObjs.obj3 && document.getElementById("sysObj3")) document.getElementById("sysObj3").value = saved.sysObjs.obj3;
     }
 
     // RESTORE PREDICTIONS

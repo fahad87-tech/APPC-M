@@ -2309,12 +2309,10 @@
         ? (isMasked ? `<span class="val-chip cyan">LOGGED 🔒</span>` : `<strong style="color: #059669; font-family: var(--font-mono);">${(normSafeM * 100).toFixed(1)} cm (${normSafeM.toFixed(3)} m)</strong>`)
         : `<span style="color: #94A3B8;">Pending</span>`;
 
-      let lolObj = st.lol || { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 };
-      let lolInitSum = (lolObj.ki || 0) + (lolObj.ugi || 0);
-      let lolApexSum = (lolObj.ugf || 0) + (lolObj.kf || 0) + (lolObj.diss || 0);
-      let hasLol = (lolInitSum + lolApexSum) > 0;
-      let lolCardChip = hasLol
-        ? (isMasked ? `<span class="val-chip slate">DRAWN ✓ 🔒</span>` : `<strong style="color: #0F172A; font-family: var(--font-mono);">Ki:${lolObj.ki||0} Ugi:${lolObj.ugi||0} ➔ Ugf:${lolObj.ugf||0} K:${lolObj.kf||0} Myst:${lolObj.diss||0}</strong>`)
+      let safeFbdVecs = (st.fbdSafeVectors && st.fbdSafeVectors.length > 0) ? st.fbdSafeVectors : (st.fbdVectors || []);
+      let hasSafeFbd = safeFbdVecs.length > 0;
+      let fbdCardChip = hasSafeFbd
+        ? (isMasked ? `<span class="val-chip slate">DRAWN ✓ 🔒</span>` : `<strong style="font-family: var(--font-mono);">${formatFbdVectorList(safeFbdVecs)}</strong>`)
         : `<span style="color: #94A3B8;">Pending</span>`;
 
       let pinDisplay = isRosterPinRevealMode ? `🔑 PIN: ${st.pin}` : (isMasked ? `🔒 PIN PROTECTED` : `PIN: ${st.pin}`);
@@ -2389,8 +2387,8 @@
           </div>
         </div>
 
-        <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 8px 12px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer;" onclick="toggleCardPrivacy('${key}')" title="Section 1: 2.5R LOL Chart & Safe Apex Clearance Height">
-          <span><strong>2.5<i>R</i> LOL:</strong> ${lolCardChip}</span>
+        <div style="background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 8px; padding: 8px 12px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; font-size: 12.5px; cursor: pointer;" onclick="toggleCardPrivacy('${key}')" title="Section 1: Safe Apex Clearance Height & Free-Body Diagram">
+          <span><strong>Safe Apex FBD:</strong> ${fbdCardChip}</span>
           <span><strong>Safe Apex <i>h</i><sub>safe</sub>:</strong> ${safeApexCardChip}</span>
         </div>
 
@@ -2647,50 +2645,20 @@
           </div>
         </div>
 
-        <!-- SECTION 1: 2.5R LOL ENERGY CHART (MYSTERY ENERGY) & REHEARSAL TELEMETRY -->
+        <!-- SECTION 1: SAFE APEX CLEARANCE FBD & REHEARSAL TELEMETRY -->
         <div style="background: #F8FAFC; border: 1.5px solid #CBD5E1; border-radius: 8px; padding: 16px;">
           <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px;">
             <div style="font-size: 13px; font-weight: 900; color: #0F172A; text-transform: uppercase; letter-spacing: 0.05em;">
-              ⚡ Section 1 Telemetry: 2.5<i>R</i> LOL Energy Chart &amp; Safe Apex Clearance
+              ⚡ Section 1 Telemetry: Safe Apex Clearance &amp; Free-Body Diagram
             </div>
             <span style="background: #ECFDF5; border: 1.5px solid #10B981; color: #065F46; font-size: 13px; font-weight: 800; padding: 3px 10px; border-radius: 14px; font-family: var(--font-mono);">
               🛡️ Safe Apex <i>h</i><sub>safe</sub>: ${st.safeApexH ? (parseFloat(st.safeApexH) > 1.5 ? (parseFloat(st.safeApexH)/100).toFixed(3) : parseFloat(st.safeApexH).toFixed(3)) + ' m (' + ((parseFloat(st.safeApexH) > 1.5 ? parseFloat(st.safeApexH) : parseFloat(st.safeApexH)*100)).toFixed(1) + ' cm)' : 'Pending'}
             </span>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 12px;">
-            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; padding: 10px 12px;">
-              <div style="font-size: 12px; font-weight: 900; color: #059669; text-transform: uppercase; margin-bottom: 4px;">Initial Release (<span style="text-transform: none;"><i>h</i> = 2.5<i>R</i></span>)</div>
-              <div style="font-size: 14px; font-weight: 700; color: #0F172A; font-family: var(--font-mono);">
-                Ki: <strong>${(st.lol && st.lol.ki) || 0}</strong>/5 &nbsp;•&nbsp; Ugi: <strong>${(st.lol && st.lol.ugi) || 0}</strong>/5
-                <span style="color: #64748B; font-size: 12.5px;">(Tot: ${((st.lol && st.lol.ki) || 0) + ((st.lol && st.lol.ugi) || 0)})</span>
-              </div>
-            </div>
-
-            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; padding: 10px 12px;">
-              <div style="font-size: 12px; font-weight: 900; color: #0284C7; text-transform: uppercase; margin-bottom: 4px;">System Circle (<span style="text-transform: none;"><i>W</i><sub>ext</sub> = 0</span>)</div>
-              <div style="font-size: 14px; font-weight: 700; color: #0F172A;">
-                ${(st.sysObjs && [st.sysObjs.obj1, st.sysObjs.obj2, st.sysObjs.obj3].filter(x => x && x.trim()).map(escapeHtml).join(", ")) || '<span style="color: #94A3B8; font-style: italic;">Empty</span>'}
-              </div>
-            </div>
-
-            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; padding: 10px 12px;">
-              <div style="font-size: 12px; font-weight: 900; color: #D97706; text-transform: uppercase; margin-bottom: 4px;">Apex Reality (<span style="text-transform: none;"><i>y</i> = 2<i>R</i></span>)</div>
-              <div style="font-size: 14px; font-weight: 700; color: #0F172A; font-family: var(--font-mono);">
-                Ugf: <strong>${(st.lol && st.lol.ugf) || 0}</strong> • Ktrans: <strong>${(st.lol && st.lol.kf) || 0}</strong> • Mystery Energy: <strong style="color: #D97706;">${(st.lol && st.lol.diss) || 0}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px;">
-            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; padding: 8px 12px; font-size: 13.5px;">
-              <strong style="color: #0F172A;">FBD #1 (at <span style="text-transform: none;"><i>h</i> = 2.5<i>R</i></span>):</strong>
-              <div style="margin-top: 3px; font-family: var(--font-mono);">${formatFbdVectorList(st.fbdVectors)}</div>
-            </div>
-            <div style="background: #FFFFFF; border: 1.5px solid #A7F3D0; border-radius: 6px; padding: 8px 12px; font-size: 13.5px;">
-              <strong style="color: #064E3B;">FBD #2 (at Perfect Safe Height <span style="text-transform: none;"><i>h</i><sub>safe</sub></span>):</strong>
-              <div style="margin-top: 3px; font-family: var(--font-mono);">${formatFbdVectorList(st.fbdSafeVectors)}</div>
-            </div>
+          <div style="background: #FFFFFF; border: 1.5px solid #A7F3D0; border-radius: 6px; padding: 10px 14px; font-size: 14px; margin-bottom: 10px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+            <strong style="color: #064E3B;">Apex Free-Body Diagram (at Safe Height <span style="text-transform: none;"><i>h</i><sub>safe</sub></span>):</strong>
+            <div style="font-family: var(--font-mono); font-size: 14.5px;">${formatFbdVectorList((st.fbdSafeVectors && st.fbdSafeVectors.length > 0) ? st.fbdSafeVectors : st.fbdVectors)}</div>
           </div>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; font-size: 13.5px;">

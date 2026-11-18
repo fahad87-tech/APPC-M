@@ -2698,3 +2698,19 @@ Per instructor instruction (*"do not provide both of this to students...let them
    - Configured `AddEffect(..., Level=1)` (`msoAnimateTextByFirstLevel`) across every card so base images, Card Titles (`P1`), and `❓ Questions` (`P2`) appear immediately on slide load (`WithPrevious`), while every bullet (`P3..PN`) and trailing diagram overlay (`Slides 5, 6, 10, 19`) clicks in strictly one-by-one (`OnPageClick`).
 
 - **User Custom Design Preservation:** Preserved the instructor's custom-authored slide wording, colors, and `28pt` layouts verbatim on Slides 2, 4 (`ACT 1 • The Basics`), 16, 17, 18, 20, and 21, restricting text edits on Slides 18 and 20 strictly to the single-token swaps (`X* = 1.00 m` → `Assigned Station Target X*` and `/m` → `/a`).
+
+
+## 72. Streamlined Section 1: Removed 2.5R LOL & 2.5R FBD from Student Portal (PPT-Led) and Retained Only the Safe-Height Apex FBD
+
+### 1. User Directive & Classroom Pacing Rationale
+- **User Directive:** *"possible to remove the 2.5r LOL diagram and free body diagram totally on student portal as I would do this on my PPT. just make them draw the free body diagram for safe height."*
+- **Rationale:** Because the instructor walks the whole class through the $h = 2.5R$ FBD and LOL Energy Ledger live on the presentation deck (`AP1_U3S5_Stunt_Calibration_Deck.pptx`), removing the duplicate `.fbd-lol-container` (`#fbdCanvas` + LOL bar stacks + System Circle) from `index.html` keeps Section 1 brisk and focused on finding the empirical safe apex clearance height $h_{\text{safe}}$ and drawing the **Free-Body Diagram ($h_{\text{safe}}$)** (`#fbdSafeCanvas`).
+
+### 2. Student Portal & Teacher Dashboard Updates
+1. **Student Portal (`index.html`):**
+   - Removed `.fbd-lol-container` (`#fbdCanvas` and the `2.5R` LOL diagram) completely from `#sec_1`.
+   - Updated `#sec_1` header to `Predict Before Rehearsal & Safe Apex Clearance FBD` and enlarged `#fbdSafeCanvas` (`240 × 240 px`) as the single Section 1 Free-Body Diagram alongside `#safeApexH`.
+   - Added null-safe DOM guards inside `renderLolBars()` and `restoreWorksheetState()` (`sysObj1..3`) so legacy saved states load with zero errors.
+2. **Teacher Dashboard (`dashboard.html`):**
+   - Updated Live Leaderboard cards to display `Safe Apex FBD` (`DRAWN ✓ 🔒` when masked, live vector list e.g. `Fg(↓)` when unmasked) alongside `Safe Apex h_safe`.
+   - Streamlined the Submission Queue Section 1 Telemetry card to display `Safe Apex h_safe`, `Apex Free-Body Diagram (at Safe Height h_safe)`, and the $2.5R$ rehearsal prediction/observation responses without obsolete LOL/FBD#1 panels.
