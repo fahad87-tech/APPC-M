@@ -1270,7 +1270,7 @@
     <!-- VIEW SWITCHER -->
     <div class="view-switcher">
       <button class="view-btn active" onclick="switchView('leaderboardView')">📊 Live Leaderboard</button>
-      <button class="view-btn" onclick="switchView('multiGraphView')">📈 30% Haircut Wall</button>
+      <button class="view-btn" onclick="switchView('multiGraphView')">📈 Calibration Slope Wall</button>
       <button class="view-btn" onclick="switchView('gradingView')">📝 Submission Queue</button>
     </div>
 
@@ -1288,9 +1288,13 @@
         🚀 Officially Start Lab!
       </button>
 
-      <button class="btn-action" id="btnRevealRange" onclick="toggleRevealTargetRange()" style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); border-color: #F59E0B; color: #FFFFFF; font-weight: 800;" title="Broadcast the surprise target landing range (X* = 0.780 m) to all student stations for reverse engineering">
-        🎯 Reveal Target Range
-      </button>
+      <div style="display: inline-flex; align-items: center; gap: 6px; background: #FFFBEB; border: 1.5px solid #F59E0B; border-radius: 10px; padding: 3px 6px 3px 10px;">
+        <label for="teacherCustomTargetInput" style="font-size: 12px; font-weight: 900; color: #92400E; white-space: nowrap;"><i>X</i>* (m):</label>
+        <input type="number" step="0.005" min="0.10" max="3.00" id="teacherCustomTargetInput" value="0.780" title="Type custom target landing range X* in meters before clicking Reveal" style="width: 74px; padding: 5px 6px; font-size: 14px; font-weight: 900; font-family: var(--font-mono); color: #0F172A; background: #FFFFFF; border: 1.5px solid #D97706; border-radius: 6px; text-align: center; outline: none;" />
+        <button class="btn-action" id="btnRevealRange" onclick="toggleRevealTargetRange()" style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); border-color: #F59E0B; color: #FFFFFF; font-weight: 800; margin: 0;" title="Broadcast the typed target landing range X* to all student stations for reverse engineering">
+          🎯 Reveal Target Range
+        </button>
+      </div>
 
       <button class="btn-privacy" id="btnPrivacyToggle" onclick="togglePrivacyMode()" title="Mask sensitive slope and target height values when projecting to classroom">
         📽️ Projector Privacy: ON
@@ -1386,17 +1390,17 @@
     <div class="multi-graph-card">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <h2 style="font-size: 24px; font-weight: 900; color: #0F172A; margin-bottom: 4px;">The 30% Haircut Wall • Whole-Class Linear Convergence</h2>
+          <h2 style="font-size: 24px; font-weight: 900; color: #0F172A; margin-bottom: 4px;">Calibration Slope Wall • Real Track vs. Ideal Conservation</h2>
           <p style="font-size: 15px; color: var(--text-muted);">
-            Comparing each station's empirical calibration slope $v^2 = ah + b$ against the ideal frictionless line ($2g = 19.6\text{ m/s}^2$).
+            Comparing each station's empirical calibration line (<i>v</i>² = <i>ah</i> + <i>b</i>) against the ideal point-mass conservation line (2<i>g</i> = 19.6 m/s²).
           </p>
         </div>
-        <div style="display: flex; gap: 16px; font-size: 15px; font-family: var(--font-mono); font-weight: 700;">
-          <span style="color: #334155; font-weight: 800;">⚪ Ideal: 2g = 19.6</span>
-          <span style="color: var(--cyan);">🔵 Station 1</span>
-          <span style="color: var(--emerald);">🟢 Station 2</span>
-          <span style="color: var(--gold);">🟡 Station 3</span>
-          <span style="color: var(--violet);">🟣 Station 4</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 14px; font-size: 14.5px; font-family: var(--font-mono); font-weight: 700; flex-shrink: 0;">
+          <span style="color: #334155; font-weight: 800; white-space: nowrap;">⚪ Ideal: 2g = 19.6</span>
+          <span style="color: var(--cyan); white-space: nowrap;">🔵 Station 1</span>
+          <span style="color: var(--emerald); white-space: nowrap;">🟢 Station 2</span>
+          <span style="color: var(--gold); white-space: nowrap;">🟡 Station 3</span>
+          <span style="color: var(--violet); white-space: nowrap;">🟣 Station 4</span>
         </div>
       </div>
 
@@ -1469,6 +1473,8 @@
       lol: { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 },
       sysObjs: { obj1: "", obj2: "", obj3: "" },
       fbdVectors: [],
+      fbdSafeVectors: [],
+      tablePoints: [],
       predictions: { testH: "", predChoice: "", predExplain: "", obsResult: "" },
       rawPayload: {}
     };
@@ -1557,7 +1563,88 @@
     if (fp.lol) st.lol = fp.lol;
     if (fp.sysObjs) st.sysObjs = fp.sysObjs;
     if (fp.fbdVectors && Array.isArray(fp.fbdVectors)) st.fbdVectors = fp.fbdVectors;
+    if (fp.fbdSafeVectors && Array.isArray(fp.fbdSafeVectors)) st.fbdSafeVectors = fp.fbdSafeVectors;
+    if (fp.tablePoints && Array.isArray(fp.tablePoints)) st.tablePoints = fp.tablePoints;
     if (fp.predictions) st.predictions = fp.predictions;
+  }
+
+  function formatFbdVectorList(vecs) {
+    if (!vecs || !Array.isArray(vecs) || vecs.length === 0) {
+      return '<span style="color: #94A3B8; font-style: italic;">None drawn</span>';
+    }
+    return vecs.map(v => {
+      let dx = Number(v.dx) || 0;
+      let dy = Number(v.dy) || 0;
+      let dir = "↓";
+      let isUp = false;
+      if (Math.abs(dy) >= Math.abs(dx)) {
+        if (dy < -10) { dir = "↑"; isUp = true; }
+        else dir = "↓";
+      } else {
+        dir = dx >= 0 ? "→" : "←";
+      }
+      let col = isUp ? "#DC2626" : "#059669";
+      return `<span style="color: ${col}; font-weight: 800;">${escapeHtml(v.name || 'F')}(${dir})</span>`;
+    }).join(", ");
+  }
+
+  function computeStationDiagnostics(st) {
+    let alerts = [];
+    let fbd1 = st.fbdVectors || [];
+    let fbd2 = st.fbdSafeVectors || [];
+    let hasUpward1 = fbd1.some(v => (Number(v.dy) || 0) < -12);
+    let hasUpward2 = fbd2.some(v => (Number(v.dy) || 0) < -12);
+    if (hasUpward1 || hasUpward2) {
+      alerts.push({ type: "warn", text: "⚠️ Upward FBD Vector (Centrifugal Trap)" });
+    }
+
+    let safeVal = parseFloat(st.safeApexH);
+    if (!isNaN(safeVal) && safeVal > 0) {
+      let sM = safeVal > 1.5 ? safeVal / 100.0 : safeVal;
+      if (sM <= 0.232) {
+        alerts.push({ type: "warn", text: "⚠️ Safe Apex h ≤ 2.5R (Check Detachment)" });
+      }
+    }
+
+    let pts = (st.tablePoints || []).filter(p => p && p.h !== null && p.x !== null && !isNaN(parseFloat(p.h)) && !isNaN(parseFloat(p.x)) && parseFloat(p.h) > 0 && parseFloat(p.x) > 0);
+    if (pts.length > 0 && (!st.dropH || isNaN(parseFloat(st.dropH)))) {
+      alerts.push({ type: "warn", text: "⚠️ Missing Table Drop H" });
+    }
+    if (pts.some(p => {
+      let hm = parseFloat(p.h);
+      return hm > 0.65 || (p.h_raw && Math.abs(parseFloat(p.h_raw) - hm * 100) < 0.5);
+    })) {
+      alerts.push({ type: "warn", text: "⚠️ Check 3.7 cm Riser Offset" });
+    }
+
+    if (pts.length >= 3) {
+      let validV2 = pts.filter(p => p.v2 !== null && !isNaN(parseFloat(p.v2)));
+      if (validV2.length >= 3) {
+        let n = validV2.length;
+        let sx = 0, sy = 0, sxy = 0, sxx = 0, syy = 0;
+        validV2.forEach(p => {
+          let x = parseFloat(p.h), y = parseFloat(p.v2);
+          sx += x; sy += y; sxy += x * y; sxx += x * x; syy += y * y;
+        });
+        let denom = Math.sqrt((n * sxx - sx * sx) * (n * syy - sy * sy));
+        let r2 = denom > 1e-9 ? Math.pow((n * sxy - sx * sy) / denom, 2) : 1;
+        if (r2 < 0.94) {
+          alerts.push({ type: "warn", text: `⚠️ Scatter Alert (R² = ${r2.toFixed(2)})` });
+        } else if (alerts.length === 0) {
+          alerts.push({ type: "ok", text: `✅ Clean Linear Data (${validV2.length} pts, R² = ${r2.toFixed(3)})` });
+        }
+      }
+    }
+
+    if (alerts.length === 0 && (fbd1.length > 0 || fbd2.length > 0 || hasSafeVal(st))) {
+      alerts.push({ type: "ok", text: "✅ Section 1 Checks Clear" });
+    }
+    return alerts;
+  }
+
+  function hasSafeVal(st) {
+    let v = parseFloat(st.safeApexH);
+    return !isNaN(v) && v > 0;
   }
 
   function applyLocalStationState(stationKey, fullState) {
@@ -1831,18 +1918,40 @@
     });
   }
 
+  function getTeacherTargetRangeStr() {
+    let inp = document.getElementById("teacherCustomTargetInput");
+    let raw = inp && inp.value ? parseFloat(inp.value) : parseFloat(localStorage.getItem("stunt_target_x_m"));
+    if (!isNaN(raw) && raw > 0.05) {
+      if (raw > 5.0) raw = raw / 100.0; // e.g. 85 -> 0.850 m
+      return raw.toFixed(3);
+    }
+    return "0.780";
+  }
+
+  function syncRevealRangeButtonUI() {
+    let rBtn = document.getElementById("btnRevealRange");
+    let inp = document.getElementById("teacherCustomTargetInput");
+    let savedX = localStorage.getItem("stunt_target_x_m");
+    if (inp && savedX && document.activeElement !== inp) {
+      inp.value = savedX;
+    }
+    if (!rBtn) return;
+    if (localStorage.getItem("stunt_target_revealed") === "true") {
+      let xStr = savedX || getTeacherTargetRangeStr();
+      rBtn.style.background = "#059669";
+      rBtn.style.borderColor = "#10B981";
+      rBtn.innerHTML = `✅ Revealed (X* = ${xStr} m)`;
+    } else {
+      rBtn.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
+      rBtn.style.borderColor = "#F59E0B";
+      rBtn.innerHTML = "🎯 Reveal Target Range";
+    }
+  }
+
   function init() {
     hydrateLocalStorageStations();
     renderLeaderboard();
-
-    if (localStorage.getItem("stunt_target_revealed") === "true") {
-      let rBtn = document.getElementById("btnRevealRange");
-      if (rBtn) {
-        rBtn.style.background = "#059669";
-        rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
-      }
-    }
+    syncRevealRangeButtonUI();
 
     renderMultiGraph();
     renderGradingQueue();
@@ -1880,15 +1989,7 @@
     }
 
     renderLeaderboard();
-
-    if (localStorage.getItem("stunt_target_revealed") === "true") {
-      let rBtn = document.getElementById("btnRevealRange");
-      if (rBtn) {
-        rBtn.style.background = "#059669";
-        rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
-      }
-    }
+    syncRevealRangeButtonUI();
   }
 
   function renderPinsFocusGrid() {
@@ -1956,24 +2057,24 @@
 
   
   async function toggleRevealTargetRange() {
-    let btn = document.getElementById("btnRevealRange");
     let isCurrentlyRevealed = localStorage.getItem("stunt_target_revealed") === "true";
+    let customX = getTeacherTargetRangeStr();
+    let customCm = (parseFloat(customX) * 100).toFixed(1).replace(/\.0$/, '');
+    let prevX = localStorage.getItem("stunt_target_x_m");
 
-    if (!isCurrentlyRevealed) {
-      if (!confirm("🎯 SURPRISE REVEAL: Broadcast the Scene 42 contracted target landing range (X* = 0.780 m) to all student stations right now?")) {
+    // If not revealed yet, OR if teacher typed a brand-new range while revealed, broadcast the typed range!
+    if (!isCurrentlyRevealed || (prevX && prevX !== customX)) {
+      if (!confirm(`🎯 SURPRISE REVEAL: Broadcast the contracted target landing range X* = ${customX} m (${customCm} cm) to all student stations right now?`)) {
         return;
       }
+      localStorage.setItem("stunt_target_x_m", customX);
       localStorage.setItem("stunt_target_revealed", "true");
-      if (btn) {
-        btn.style.background = "#059669";
-        btn.style.borderColor = "#10B981";
-        btn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
-      }
+      syncRevealRangeButtonUI();
 
       // 1. BroadcastChannel for instant local cross-tab sync
       if (classroomChannel) {
         try {
-          classroomChannel.postMessage({ type: "TARGET_RANGE_REVEALED", range: "0.780" });
+          classroomChannel.postMessage({ type: "TARGET_RANGE_REVEALED", range: customX });
         } catch(e) {
           console.warn("BroadcastChannel error:", e);
         }
@@ -1984,7 +2085,7 @@
         try {
           await supabaseClient.from("classroom_control").update({
             target_range_revealed: true,
-            target_x_m: 0.780,
+            target_x_m: parseFloat(customX),
             updated_at: new Date().toISOString()
           }).eq("id", "global");
         } catch(e) {
@@ -1995,14 +2096,13 @@
       if (typeof confetti === "function") {
         confetti({ particleCount: 160, spread: 90, origin: { y: 0.4 } });
       }
-      alert("🎬 DIRECTOR'S SURPRISE TARGET RANGE REVEALED!\n\nX* = 0.780 m (78.0 cm) has been broadcasted to all student stations. Students can now perform reverse-engineering!");
+      alert(`🎬 DIRECTOR'S SURPRISE TARGET RANGE REVEALED!\n\nX* = ${customX} m (${customCm} cm) has been broadcasted to all student stations. Students can now perform reverse-engineering!`);
     } else {
       if (confirm("Reset target range back to Classified (Hidden)?")) {
         localStorage.removeItem("stunt_target_revealed");
-        if (btn) {
-          btn.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
-          btn.style.borderColor = "#F59E0B";
-          btn.innerHTML = "🎯 Reveal Target Range";
+        syncRevealRangeButtonUI();
+        if (classroomChannel) {
+          try { classroomChannel.postMessage({ type: "TARGET_RANGE_HIDDEN" }); } catch(e) {}
         }
         if (supabaseClient) {
           try {
@@ -2025,6 +2125,27 @@
       btn.innerHTML = "✅ Lab In Session";
     }
 
+    let pinMap = {
+      station_1: stations.station_1.pin,
+      station_2: stations.station_2.pin,
+      station_3: stations.station_3.pin,
+      station_4: stations.station_4.pin
+    };
+    try {
+      localStorage.setItem("stunt_teacher_online", "true");
+      localStorage.setItem("stunt_active_pins", JSON.stringify(pinMap));
+    } catch(e) {}
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({
+          type: "LAB_OFFICIALLY_STARTED",
+          teacher_online: true,
+          pins: pinMap,
+          timestamp: Date.now()
+        });
+      } catch(e) {}
+    }
+
     if (supabaseClient) {
       try {
         await supabaseClient
@@ -2042,16 +2163,7 @@
 
     alert("🚀 SCENE 42 STUNT LAB OFFICIALLY STARTED!\n\nAll stations are active and telemetry recording is rolling.");
     renderLeaderboard();
-
-    if (localStorage.getItem("stunt_target_revealed") === "true") {
-      let rBtn = document.getElementById("btnRevealRange");
-      if (rBtn) {
-        rBtn.style.background = "#059669";
-        rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
-      }
-    }
-
+    syncRevealRangeButtonUI();
   }
 
   function togglePrivacyMode() {
@@ -2067,31 +2179,13 @@
       }
     }
     renderLeaderboard();
-
-    if (localStorage.getItem("stunt_target_revealed") === "true") {
-      let rBtn = document.getElementById("btnRevealRange");
-      if (rBtn) {
-        rBtn.style.background = "#059669";
-        rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
-      }
-    }
-
+    syncRevealRangeButtonUI();
   }
 
   function toggleCardPrivacy(stationKey) {
     revealedCards[stationKey] = !revealedCards[stationKey];
     renderLeaderboard();
-
-    if (localStorage.getItem("stunt_target_revealed") === "true") {
-      let rBtn = document.getElementById("btnRevealRange");
-      if (rBtn) {
-        rBtn.style.background = "#059669";
-        rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
-      }
-    }
-
+    syncRevealRangeButtonUI();
   }
 
   async function fetchInitialSubmissions() {
@@ -2143,16 +2237,7 @@
           }
         });
         renderLeaderboard();
-
-    if (localStorage.getItem("stunt_target_revealed") === "true") {
-      let rBtn = document.getElementById("btnRevealRange");
-      if (rBtn) {
-        rBtn.style.background = "#059669";
-        rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
-      }
-    }
-
+        syncRevealRangeButtonUI();
         renderMultiGraph();
         renderGradingQueue();
       }
@@ -2309,6 +2394,14 @@
           <span><strong>Safe Apex <i>h</i><sub>safe</sub>:</strong> ${safeApexCardChip}</span>
         </div>
 
+        ${!isMasked ? (() => {
+          let diags = computeStationDiagnostics(st);
+          if (!diags.length) return '';
+          return '<div style="display: flex; flex-wrap: wrap; gap: 6px;">' + diags.map(d =>
+            `<span style="font-size: 11.5px; font-weight: 800; padding: 3px 8px; border-radius: 12px; background: ${d.type === 'warn' ? '#FEF2F2' : '#ECFDF5'}; color: ${d.type === 'warn' ? '#991B1B' : '#065F46'}; border: 1px solid ${d.type === 'warn' ? '#FECACA' : '#A7F3D0'};">${d.text}</span>`
+          ).join('') + '</div>';
+        })() : ''}
+
         <div class="card-footer-action">
           <div style="font-size: 14.5px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
             ${st.accuracy_pct !== null && !isNaN(st.accuracy_pct)
@@ -2332,16 +2425,19 @@
   async function approveInspection(stationKey) {
     stations[stationKey].status = 'ready_for_drop';
     renderLeaderboard();
+    syncRevealRangeButtonUI();
 
-    if (localStorage.getItem("stunt_target_revealed") === "true") {
-      let rBtn = document.getElementById("btnRevealRange");
-      if (rBtn) {
-        rBtn.style.background = "#059669";
-        rBtn.style.borderColor = "#10B981";
-        rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
-      }
+    // 1. Offline / Cross-tab BroadcastChannel & localStorage sync
+    try {
+      localStorage.setItem("stunt_clamp_approved_" + stationKey, "true");
+    } catch(e) {}
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({ type: "CLAMP_INSPECTION_APPROVED", station_id: stationKey, timestamp: Date.now() });
+      } catch(e) {}
     }
 
+    // 2. Supabase sync
     if (supabaseClient) {
       const { error } = await supabaseClient
         .from("station_submissions")
@@ -2353,9 +2449,7 @@
         .eq('station_id', stationKey);
 
       if (error) {
-        console.error("Approval save error:", error);
-        alert("⚠️ Failed to update database approval: " + error.message);
-        return;
+        console.warn("Approval DB sync notice:", error.message);
       }
     }
     alert(`✅ Authorized Clamp Height for ${stations[stationKey].name}!\n\nStation is officially cleared for the live stunt drop.`);
@@ -2365,61 +2459,70 @@
     let svg = document.getElementById("multiGraphSvg");
     if (!svg) return;
     let w = 850, h = 460;
-    let padL = 75, padR = 40, padT = 40, padB = 60;
+    let padL = 75, padR = 55, padT = 40, padB = 60;
+    let maxH = 0.65;
+    let maxV2 = 12.5;
 
-    let mapX = val => padL + (val / 0.45) * (w - padL - padR);
-    let mapY = val => (h - padB) - (val / 9.0) * (h - padT - padB);
+    let mapX = val => padL + (val / maxH) * (w - padL - padR);
+    let mapY = val => (h - padB) - (val / maxV2) * (h - padT - padB);
 
     let html = `
       <line x1="${padL}" y1="${h - padB}" x2="${w - padR}" y2="${h - padB}" stroke="#64748B" stroke-width="2.5" />
       <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${h - padB}" stroke="#64748B" stroke-width="2.5" />
       
-      <text x="${w - padR}" y="${h - padB + 40}" fill="#94A3B8" font-size="15" font-weight="700" text-anchor="end">Release Height h (m)</text>
-      <text x="${padL}" y="${padT - 15}" fill="#94A3B8" font-size="15" font-weight="700" text-anchor="start">Exit Speed Squared v² (m²/s²)</text>
+      <text x="${w - padR}" y="${h - padB + 42}" fill="#475569" font-size="15" font-weight="800" text-anchor="end">Release Height h (m)</text>
+      <text x="${padL}" y="${padT - 15}" fill="#475569" font-size="15" font-weight="800" text-anchor="start">Exit Speed Squared v² (m²/s²)</text>
     `;
 
-    for (let th = 0.05; th <= 0.40; th += 0.05) {
+    for (let th = 0.10; th <= 0.601; th += 0.10) {
       let gx = mapX(th);
       html += `
-        <line x1="${gx}" y1="${padT}" x2="${gx}" y2="${h - padB}" stroke="rgba(255,255,255,0.08)" />
-        <text x="${gx}" y="${h - padB + 22}" fill="#64748B" font-size="13" text-anchor="middle">${th.toFixed(2)}</text>
+        <line x1="${gx}" y1="${padT}" x2="${gx}" y2="${h - padB}" stroke="rgba(15, 23, 42, 0.08)" />
+        <text x="${gx}" y="${h - padB + 22}" fill="#64748B" font-size="13" font-weight="700" text-anchor="middle">${th.toFixed(2)}</text>
       `;
     }
 
-    for (let tv = 2; tv <= 8; tv += 2) {
+    for (let tv = 2; tv <= 12; tv += 2) {
       let gy = mapY(tv);
       html += `
-        <line x1="${padL}" y1="${gy}" x2="${w - padR}" y2="${gy}" stroke="rgba(255,255,255,0.08)" />
-        <text x="${padL - 14}" y="${gy + 6}" fill="#64748B" font-size="14" text-anchor="end">${tv}</text>
+        <line x1="${padL}" y1="${gy}" x2="${w - padR}" y2="${gy}" stroke="rgba(15, 23, 42, 0.08)" />
+        <text x="${padL - 14}" y="${gy + 5}" fill="#64748B" font-size="13.5" font-weight="700" text-anchor="end">${tv}</text>
       `;
     }
 
-    // Ideal Line (2g = 19.6 m/s²)
+    // Ideal Line (2g = 19.6 m/s²) up to 0.60 m (11.76 m²/s²)
     html += `
-      <line x1="${mapX(0)}" y1="${mapY(0)}" x2="${mapX(0.40)}" y2="${mapY(19.6 * 0.40)}" 
-            stroke="#94A3B8" stroke-width="2.5" stroke-dasharray="8,5" />
-      <text x="${mapX(0.36)}" y="${mapY(19.6 * 0.36) - 14}" fill="#94A3B8" font-size="14" font-weight="700">Ideal 2g (19.6)</text>
+      <line x1="${mapX(0)}" y1="${mapY(0)}" x2="${mapX(0.60)}" y2="${mapY(19.6 * 0.60)}" 
+            stroke="#64748B" stroke-width="2.5" stroke-dasharray="8,5" />
+      <text x="${mapX(0.56)}" y="${mapY(19.6 * 0.56) - 10}" fill="#475569" font-size="13.5" font-weight="800" text-anchor="end">Ideal 2g (19.6)</text>
     `;
 
     const colors = {
-      station_1: "#00F0FF",
-      station_2: "#10B981",
-      station_3: "#F59E0B",
-      station_4: "#A855F7"
+      station_1: "#0284C7",
+      station_2: "#059669",
+      station_3: "#D97706",
+      station_4: "#7C3AED"
     };
 
     Object.keys(stations).forEach(key => {
       let st = stations[key];
       let col = colors[key];
       if (st.slope && st.slope > 0) {
-        let lx1 = 0.05, ly1 = st.slope * lx1 + (st.intercept || 0);
-        let lx2 = 0.42, ly2 = st.slope * lx2 + (st.intercept || 0);
+        let b = st.intercept || 0;
+        let lx1 = 0.05;
+        let ly1 = st.slope * lx1 + b;
+        if (ly1 < 0) { ly1 = 0; lx1 = -b / st.slope; }
+        let lx2 = 0.60;
+        let ly2 = st.slope * lx2 + b;
+        if (ly2 > maxV2) { ly2 = maxV2; lx2 = (maxV2 - b) / st.slope; }
 
-        html += `
-          <line x1="${mapX(lx1)}" y1="${mapY(ly1)}" x2="${mapX(lx2)}" y2="${mapY(ly2)}" 
-                stroke="${col}" stroke-width="4" stroke-linecap="round" />
-          <text x="${mapX(lx2) + 8}" y="${mapY(ly2) + 6}" fill="${col}" font-size="14" font-weight="900">a=${st.slope.toFixed(2)}</text>
-        `;
+        if (lx1 < lx2) {
+          html += `
+            <line x1="${mapX(lx1)}" y1="${mapY(ly1)}" x2="${mapX(lx2)}" y2="${mapY(ly2)}" 
+                  stroke="${col}" stroke-width="4" stroke-linecap="round" />
+            <text x="${mapX(lx2) + 6}" y="${mapY(ly2) + 5}" fill="${col}" font-size="13" font-weight="900">a=${st.slope.toFixed(2)}</text>
+          `;
+        }
       }
     });
 
@@ -2462,11 +2565,19 @@
 
       let statusBadge = isVerified
         ? `<span style="background: #ECFDF5; border: 2px solid #10B981; color: #065F46; font-size: 14.5px; font-weight: 800; padding: 5px 14px; border-radius: 20px; font-family: var(--font-mono);">
-            🎯 Accuracy: ${st.accuracy_pct.toFixed(1)}% (Δ = ${st.delta !== undefined && st.delta !== null ? (st.delta * 100).toFixed(1) + ' cm' : '0.0 cm'})
+            🎯 Accuracy: ${st.accuracy_pct.toFixed(1)}% (Δ = ${st.delta !== undefined && st.delta !== null ? Number(st.delta).toFixed(1) + ' cm' : '0.0 cm'})
           </span>`
         : `<span style="background: #FFFBEB; border: 2px solid #F59E0B; color: #92400E; font-size: 14px; font-weight: 800; padding: 5px 14px; border-radius: 20px;">
-            ⏱️ Working on Lab • Step ${st.step || 1} of 6
+            ⏱️ Working on Lab • Step ${st.step || 1} of 7
           </span>`;
+
+      let stationDiags = computeStationDiagnostics(st);
+      let diagsRowHtml = stationDiags.length > 0
+        ? `<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+            <span style="font-size: 12px; font-weight: 900; color: #475569; text-transform: uppercase;">🧭 Roaming Diagnostics:</span>
+            ${stationDiags.map(d => `<span style="font-size: 12.5px; font-weight: 800; padding: 4px 10px; border-radius: 14px; background: ${d.type === 'warn' ? '#FEF2F2' : '#ECFDF5'}; color: ${d.type === 'warn' ? '#991B1B' : '#065F46'}; border: 1.5px solid ${d.type === 'warn' ? '#FCA5A5' : '#6EE7B7'};">${d.text}</span>`).join('')}
+          </div>`
+        : '';
 
       let row = document.createElement("div");
       row.style.background = "#FFFFFF";
@@ -2493,6 +2604,7 @@
           </div>
           <div>${statusBadge}</div>
         </div>
+        ${diagsRowHtml}
 
         <!-- TELEMETRY SNAPSHOT -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
@@ -2570,6 +2682,17 @@
             </div>
           </div>
 
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 10px;">
+            <div style="background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 6px; padding: 8px 12px; font-size: 13.5px;">
+              <strong style="color: #0F172A;">FBD #1 (at <span style="text-transform: none;"><i>h</i> = 2.5<i>R</i></span>):</strong>
+              <div style="margin-top: 3px; font-family: var(--font-mono);">${formatFbdVectorList(st.fbdVectors)}</div>
+            </div>
+            <div style="background: #FFFFFF; border: 1.5px solid #A7F3D0; border-radius: 6px; padding: 8px 12px; font-size: 13.5px;">
+              <strong style="color: #064E3B;">FBD #2 (at Perfect Safe Height <span style="text-transform: none;"><i>h</i><sub>safe</sub></span>):</strong>
+              <div style="margin-top: 3px; font-family: var(--font-mono);">${formatFbdVectorList(st.fbdSafeVectors)}</div>
+            </div>
+          </div>
+
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; font-size: 13.5px;">
             <div style="background: #FFFFFF; border: 1px solid #CBD5E1; border-radius: 6px; padding: 8px 12px;">
               <strong style="color: #475569;">2.5<i>R</i> Test Height &amp; Prediction:</strong>
@@ -2608,7 +2731,7 @@
           </div>
 
           <div>
-            <span style="font-size: 13.5px; font-weight: 800; color: #475569;">Q2 (28–30% Slope Deficit &amp; Mystery Energy Partition):</span>
+            <span style="font-size: 13.5px; font-weight: 800; color: #475569;">Q2 (Measured Slope Deficit &amp; Mystery Energy):</span>
             <div style="font-size: 15px; color: #0F172A; font-weight: 600; line-height: 1.5; background: #FFFFFF; border: 1.5px solid #CBD5E1; border-radius: 6px; padding: 8px 12px; margin-top: 4px;">
               ${st.q2 && st.q2.trim() ? escapeHtml(st.q2) : '<span style="color: #94A3B8; font-style: italic;">No answer submitted yet for Q2</span>'}
             </div>
@@ -2655,6 +2778,15 @@
     stations[stationKey].grade = score;
     stations[stationKey].feedback = feedback;
 
+    try {
+      localStorage.setItem("stunt_official_grade_" + stationKey, JSON.stringify({ score: score, feedback: feedback, timestamp: Date.now() }));
+    } catch(e) {}
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({ type: "OFFICIAL_GRADE_RETURNED", station_id: stationKey, score: score, feedback: feedback, timestamp: Date.now() });
+      } catch(e) {}
+    }
+
     if (supabaseClient) {
       const { error } = await supabaseClient
         .from("station_submissions")
@@ -2666,21 +2798,27 @@
         .eq("station_id", stationKey);
 
       if (error) {
-        console.error("Grading save error:", error);
-        alert("⚠️ Failed to save grade to database: " + error.message);
-        return;
+        console.warn("Grading DB save notice:", error.message);
       }
     }
 
-    confetti({ particleCount: 70, spread: 60 });
+    if (typeof confetti === "function") confetti({ particleCount: 70, spread: 60 });
     alert(`🎉 Official Grade (${score}/100) returned to ${stations[stationKey].name}!`);
     renderGradingQueue();
   }
 
-  // GLOBAL BROADCAST COUNTDOWN WITH PRECISE SERVER TIMESTAMP
+  // GLOBAL BROADCAST COUNTDOWN WITH PRECISE SERVER TIMESTAMP + OFFLINE FALLBACK
   async function broadcastCountdown() {
     if (confirm("Initiate Global 'Quiet on the Set' 5-Second Stunt Countdown across all student stations?")) {
       let targetMs = Date.now() + 5000;
+      try {
+        localStorage.setItem("stunt_countdown_target_ms", targetMs.toString());
+      } catch(e) {}
+      if (classroomChannel) {
+        try {
+          classroomChannel.postMessage({ type: "GLOBAL_COUNTDOWN_START", targetMs: targetMs });
+        } catch(e) {}
+      }
       if (supabaseClient) {
         const { error } = await supabaseClient.from("classroom_control").update({
           countdown_active: true,
@@ -2690,7 +2828,7 @@
 
         if (error) console.warn("Countdown broadcast error:", error.message);
       }
-      confetti({ particleCount: 160, spread: 90, origin: { y: 0.4 } });
+      if (typeof confetti === "function") confetti({ particleCount: 160, spread: 90, origin: { y: 0.4 } });
       alert("🎬 'QUIET ON THE SET' Synchronized Countdown Broadcasted!");
     }
   }
@@ -2747,7 +2885,7 @@
     });
 
     document.getElementById("revealModal").classList.add("active");
-    confetti({ particleCount: 220, spread: 100, origin: { y: 0.5 } });
+    if (typeof confetti === "function") confetti({ particleCount: 220, spread: 100, origin: { y: 0.5 } });
   }
 
   function closeRevealCeremony() {
@@ -2796,16 +2934,7 @@
           }
 
           renderLeaderboard();
-
-          if (localStorage.getItem("stunt_target_revealed") === "true") {
-            let rBtn = document.getElementById("btnRevealRange");
-            if (rBtn) {
-              rBtn.style.background = "#059669";
-              rBtn.style.borderColor = "#10B981";
-              rBtn.innerHTML = "✅ Target Range Revealed (X* = 0.780 m)";
-            }
-          }
-
+          syncRevealRangeButtonUI();
           renderMultiGraph();
           renderGradingQueue();
         }
@@ -3004,8 +3133,13 @@
       stations[key].grade = null;
       stations[key].feedback = "";
       Object.assign(stations[key], makeEmptySection1());
-      try { localStorage.removeItem("stunt_lab_state_" + key); } catch(e) {}
+      try {
+        localStorage.removeItem("stunt_lab_state_" + key);
+        localStorage.removeItem("stunt_clamp_approved_" + key);
+        localStorage.removeItem("stunt_official_grade_" + key);
+      } catch(e) {}
     });
+    try { localStorage.removeItem("stunt_target_x_m"); } catch(e) {}
 
     // Reset UI buttons
     let btnStart = document.getElementById("btnStartLab");

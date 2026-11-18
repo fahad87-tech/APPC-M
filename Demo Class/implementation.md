@@ -2637,3 +2637,64 @@ Per instructor instruction (*"do not provide both of this to students...let them
 2. **Cockpit Visualizations:**
    - **Live Leaderboard Cards (`renderLeaderboard`):** Added a privacy-aware Section 1 strip displaying `2.5R LOL` status/bars and `Safe Apex h_safe` (masked under Projector Privacy Mode, live values when revealed).
    - **Submission & Telemetry Queue (`renderGradingQueue`):** Added `Safe Apex Height h_safe` to Station Physical Geometry and a dedicated **Section 1 Telemetry: 2.5R LOL Energy Chart & Safe Apex Clearance** panel showing `Ki`, `Ugi`, System Circle objects, `Ugf`, `Ktrans`, **Mystery Energy**, all four $2.5R$ prediction/observation responses, and `h_safe`.
+
+
+## 71. Slide 12 2.5R LOL Diagram (`Mystery Energy`, Zero Kinetic Energy, Safe Height Challenge) & Deck-Wide / SVG Classroom Typography Upgrade
+
+### 1. User Directives & Pedagogical Objectives
+1. **Slide 12 First LOL Diagram (`h = 2.5R` Only — Zero Kinetic Energy, `U_g` + `Mystery Energy` Only):**
+   - At $h = 2.5R$ (5 initial bars of $U_g$, $K_i = 0$), reaching the top of the loop ($y = 2R$) requires 4 bars of $U_g$. The 5th bar goes into **1 bar of Mystery Energy** (strictly labeled **Mystery Energy**, zero `Ediss` references), leaving **$K = 0\text{ bars}$** (no kinetic energy at the apex), causing detachment.
+   - **3-Stage Animation Choreography Kept & Extended:**
+     - *On Slide Entry:* Blank LOL scaffold (`Picture LOL Blank`) is immediately visible so students fill in their own bars first.
+     - *Click 1 (`OnPageClick`):* Filled LOL (`Picture LOL Answer`) reveals $U_{gi} = 5 \to U_{gf} = 4 + K = 0 + \text{Mystery Energy} = 1$.
+     - *Click 2 (`OnPageClick`):* Challenge banner (`TextBox LOL Question`, $27\text{pt}$ Bold Gold on Dark Navy) appears beneath the diagram: `❓ Find the safe height beyond 2.5R where the ball passes through the apex instead of detaching!`
+2. **PPT & SVG Classroom Typography Upgrade (`check text size for PPT and SVG......too smalll`):**
+   - Rebuilt `deck_lol_blank.png` and `deck_lol_answer.png` at **1:1 physical inches** ($12.333\text{ in} \times 4.222\text{ in} = 888\text{ pt} \times 304\text{ pt}$) with true $18.5\text{--}28\text{pt}$ labels so zero downscaling occurs on projection.
+   - Regenerated all embedded matplotlib vector diagrams (`Slide 10 Crash`, `Slide 14 Ideal-Only Graph`, `Slide 17 Calibration Fit`, `Slide 19 Inversion Roadmap`, `Slide 20 Target Trajectory`) at 1:1 physical inches with $16\text{--}20\text{pt}$ bold classroom typography.
+   - Upgraded text cards and callout badges across Slides 1, 2, 3, 5, 6, 7, 11, 12, 14, 22, and 23 from $13\text{--}22\text{pt}$ up to $18.5\text{--}28\text{pt}$ bold, verifying `0` boundary violations past $490\text{ pt}$.
+   - Upgraded SVG text sizes inside `.apparatus-diagram` (`index.html` and `AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html`, replacing microscopic $8\text{--}10.5\text{px}$ riser/callout labels with bold $13\text{--}16.5\text{px}$ callout pills) and `#studentGraphSvg` (`index.html`, upgrading ticks to $15\text{px}$, axis titles to $18\text{px}$, and point coordinate tooltips to $14.5\text{px}$ inside widened $162 \times 30\text{ px}$ pills).
+
+### 2. Synchronization & Verification
+- Updated Slide 12 dialogue and 23-slide pacing summary in [`AP1_Stunt_Calibration_Classroom_Script.md`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_Stunt_Calibration_Classroom_Script.md) and recompiled [`AP1_Stunt_Calibration_Classroom_Script.pdf`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_Stunt_Calibration_Classroom_Script.pdf) and [`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf) (verified 3 pages) using an isolated headless Chrome profile (`--user-data-dir`).
+- Verified visual artifacts: `slide_12_bigfont_blank.png`, `slide_12_bigfont.png`, `slide_10_bigfont.png`, `slide_14_bigfont.png`, `slide_19_bigfont.png`, `student_svg_bigfont.png`.
+
+
+## 71. Dual Apex FBD (`h = 2.5R` & Perfect Safe Height `h_safe`), On-the-Spot Teacher Target Range Input, Calibration Wall Scaling, Offline Sync Resilience, and Roaming Diagnostics
+
+### 1. User Directives & Scope
+- **Dual Free-Body Diagrams (`index.html` & `dashboard.html`):**
+  - Keep FBD #1 (`#fbdCanvas`) at $h = 2.5R$ with direction-neutral prompt and label selector pills (`Fg`, `FN`, `+ Label`, `↺ Clear`) so zero directional spoiler is given prior to class discussion.
+  - Added **FBD #2 (`#fbdSafeCanvas`)** directly inside the **Empirical Apex Clearance Check** card alongside `#safeApexH`, asking students to draw a second Free-Body Diagram showing the force(s) acting on the ball at the apex at the exact minimum safe clearance height $h_{\text{safe}}$ where it smoothly clears the loop without detaching.
+  - Preserved whole-integer (`0..5`) LOL bar stepping (`ignore 2`).
+- **On-the-Spot Editable Target Range $X^*$ (`dashboard.html` & `index.html`):**
+  - Added an inline `#teacherCustomTargetInput` numeric box (`X* (m)`) next to `🎯 Reveal Target Range` on `dashboard.html` so the instructor can enter any target range in meters live before broadcasting (or update and re-broadcast on the spot).
+  - Removed hardcoded `value="0.780"` from `#targetXDisplay` prior to reveal (`placeholder="Classified"`) and removed the legacy `rangeVal !== "0.900"` guard so any custom target range syncs cleanly across `BroadcastChannel`, `localStorage`, and Supabase `classroom_control`.
+- **Spoiler Removal & Physical-Track Alignment (Item 4):**
+  - Renamed View 2 tab from `📈 30% Haircut Wall` to **`📈 Calibration Slope Wall`** (`Calibration Slope Wall • Real Track vs. Ideal Conservation`).
+  - Updated Section 7 Exit Question 2 (`#exitQ2`) to ask what the station's *measured slope deficit* (compared to $2g = 19.6\text{ m/s}^2$) proves about where the **Mystery Energy** went.
+- **Technical Bug Fixes, Offline Sync & Roaming Diagnostics (Items 5–9):**
+  - **Item 5:** Expanded `renderMultiGraph()` axes on `dashboard.html` from `0.45 m × 9.0 m²/s²` to **`0.65 m × 12.5 m²/s²`** so physical bench tracks up to $0.60\text{ m}$ and the Ideal $2g$ reference line render without clipping.
+  - **Item 6:** Fixed the `(st.delta * 100)` double-multiply unit bug in `renderGradingQueue()` so `Δ` displays accurately in `cm`.
+  - **Item 7:** Fixed light-on-light contrast in `#stuntSuccessBanner` (`δ ≤ 2.0 cm`) and `#officialGradeCard`, and updated Section 3 `#graphStatusBadge` to display green `✅` for `validPts.length >= 4` (supporting 4 or 5 calibration launches).
+  - **Item 8:** Added `BroadcastChannel` + `localStorage` offline sync fallbacks for `Officially Start Lab`, `Approve Clamp`, `Initiate Stunt Countdown`, `Return Grade`, and `Hide Target Range`.
+  - **Item 9:** Added `computeStationDiagnostics(st)` surfacing live **Roaming Diagnostics** pills (`⚠️ Upward FBD Vector (Centrifugal Trap)`, `⚠️ Safe Apex h ≤ 2.5R`, `⚠️ Missing Table Drop H`, `⚠️ Check 3.7 cm Riser Offset`, `⚠️ Scatter Alert`, and `✅ Clean Linear Data`) on both Submission Queue cards and unmasked Leaderboard cards.
+
+
+## 72. Full 23-Slide Pedagogical Vision Audit & Master Deck Standardization
+
+### 1. Audit Findings & Confirmed User Decisions
+1. **Symbolic Variables + Physical Apparatus Alignment (`2R = 18.4 cm`, `2.5R = 23.0 cm`):**
+   - Replaced inconsistent `r = 10 cm` / `25.0 cm` / `0.99 m/s` references on Slides 5, 6, and 10 with universal symbolic physics (`R`, `v_crit = √(gR)`, `h = 2.5R`) paired with exact physical bench apparatus parentheticals (`2R = 18.4 cm → 2.5R = 23.0 cm`).
+2. **Removed Premature Spoiler on Slide 10 (`Failed Rehearsal: 2.5R Crash`):**
+   - Replaced Bullet 3 (`Lost mechanical energy to track friction & spin!`, which prematurely spoiled both Slide 11's Mass Trap inquiry and Slide 12/23's Mystery Energy reveal) with an inquiry cliffhanger (`• Stunt Crisis: Why did it run out of speed?`).
+3. **Station-Assigned Target `X*` on Slide 18 & Slope Symbol `a` on Slide 20:**
+   - Replaced hardcoded `X* = 1.00 m` (which exceeded Track 1's physical max range of `88.8 cm`) with **Station-Assigned Target `X*`** across both Slide 18's visual asset (`deck_slide18_station_target.png`) and card text, synchronized with `AP1_Stunt_Calibration_Classroom_Script.md`.
+   - Standardized Slide 20's inversion formula from `h* = (v*² - b)/m` to `h* = (v*² − b) / a` to match Slide 19 and student sheets without confusing slope with mass `m`.
+4. **Coherent Act Progression, Single-Line Timers & Sequential Counters (`01 / 22` .. `22 / 22`):**
+   - Eliminated the `Act 1 → Act 2 → Act 1` regression by grouping Slides 2–9 as **ACT 1** (Setup, Physics Brief & Scale Rigging), Slides 10–12 as **ACT 2** (2.5R Crash, Mass Trap & Energy Ledger), Slides 13–14 as **ACT 3** (Datum & Graph Prediction), Slides 15–17 as **ACT 4** (Kinematics, Calibration Sprint & Fit Verdict), and Slides 18–23 as **ACT 5** (Target Contract, Inversion, Take 1, Closing & Mystery Energy Extension).
+   - Fixed wrapped `EXTEN / SION` counter box on Slide 23 (`22 / 22`) and standardized all 22 timer pills to crisp single-line `26.5pt` Bold badges.
+5. **Giant-Font Overlays on Slides 5 & 6 + True Per-Paragraph Click Choreography Across All 23 Slides:**
+   - Regenerated `deck_slide05_vectors_large.png` and `deck_slide06_vcrit_large.png` directly over the pixel-exact clean base photos with high-contrast `16–23pt` vector callout badges.
+   - Configured `AddEffect(..., Level=1)` (`msoAnimateTextByFirstLevel`) across every card so base images, Card Titles (`P1`), and `❓ Questions` (`P2`) appear immediately on slide load (`WithPrevious`), while every bullet (`P3..PN`) and trailing diagram overlay (`Slides 5, 6, 10, 19`) clicks in strictly one-by-one (`OnPageClick`).
+
+- **User Custom Design Preservation:** Preserved the instructor's custom-authored slide wording, colors, and `28pt` layouts verbatim on Slides 2, 4 (`ACT 1 • The Basics`), 16, 17, 18, 20, and 21, restricting text edits on Slides 18 and 20 strictly to the single-token swaps (`X* = 1.00 m` → `Assigned Station Target X*` and `/m` → `/a`).
