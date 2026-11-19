@@ -2882,3 +2882,23 @@ Per instructor instruction (*"do not provide both of this to students...let them
 - **Stage 6 (Live Custom Target `X* = 0.845 m` & Stop-Block Gate):** Passed (`Target broadcast: 1014 ms`, `Approve Clamp -> Section 6 unlock: 1238 ms`).
 - **Stage 7 (5s Countdown, Live Drop `δ = 0.7 cm`, Queue Grading & Podium):** Passed (`Countdown: 1284 ms`, `Official Grade Card: 1376 ms`, `99.2% Podium`).
 - **Stage 8 (Clean Pre-Class Production Reset):** Passed — all test data wiped and live Supabase database left clean and ready for class.
+
+
+## 77. Two-Step `Set Target Range` $\rightarrow$ `Reveal Range` Projector Workflow
+
+### 1. User Directive & Projector Privacy Requirement
+- **User Directive:** *"this thing shows by default. when i reset the lab this thing should not show unless i click reveal reveal button. so first should be set range and then reveal. during set i should be abel to see it"*
+- **Problem:** Previously, the `X* (m): [ 0.780 ]` input box was rendered visibly on the top command bar of [`dashboard.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/dashboard.html) by default and after resets, exposing a target range value on the classroom projector before the reveal stage.
+
+### 2. Three-State Target Range Control (`dashboard.html`)
+1. **State 1 — Default & Post-Reset (`Classified / Hidden`):**
+   - Renders only the **`🎯 Set Target Range`** button (`#btnOpenSetRange`); both `#targetRangeSetupPanel` and `#btnRevealedRangeBadge` remain hidden (`display: none`) with zero target range digits shown on the projector.
+   - Clicking **`🔄 Reset Lab Session`** (`confirmResetLabSession()`) or **`🔒 Hide`** (`hideTargetRangeToClassified()`) immediately clears `#teacherCustomTargetInput`, sets `isSetRangePanelOpen = false`, and returns the bar to **`🎯 Set Target Range`**.
+2. **State 2 — Set Mode (`openSetTargetRangePanel()`):**
+   - Clicking **`🎯 Set Target Range`** opens `#targetRangeSetupPanel` (`X* (m): [ input ]` + **`🎯 Reveal Range`** + **`✕`**), allowing the instructor to visibly type and inspect their chosen target distance (`type="number"`, `placeholder="m"`) without broadcasting anything to student portals yet.
+3. **State 3 — Revealed Mode (`revealConfiguredTargetRange()`):**
+   - Clicking **`🎯 Reveal Range`** (or pressing `Enter`) broadcasts the configured `X*` to all Student Portals via `BroadcastChannel`, `global_pins` Realtime, and `classroom_control`, collapses the input box, and displays **`✅ Revealed (X* = ... m)`** (`#btnRevealedRangeBadge`, clickable to update or re-hide).
+   - Also upgraded `.btn-roster` (`🔑 Reveal Station PINs & Roster`) contrast (`#1D4ED8` on `#EFF6FF`) for crisp projector legibility.
+
+### 3. Verification
+- Verified all 4 transitions (`Default Hidden` $\rightarrow$ `Set Mode Visible` $\rightarrow$ `Revealed to Students` $\rightarrow$ `Post-Reset Hidden` leaving live Supabase clean) via Playwright (`verify_set_then_reveal.py`, [`verify_v6_step1_default_hidden.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v6_step1_default_hidden.png), [`verify_v6_step2_set_mode.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v6_step2_set_mode.png), [`verify_v6_step3_revealed.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v6_step3_revealed.png)).

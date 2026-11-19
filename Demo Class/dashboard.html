@@ -184,9 +184,9 @@
     }
 
     .btn-roster {
-      background: #F1F5F9;
-      border: 1px solid var(--card-border);
-      color: #CBD5E1;
+      background: #EFF6FF;
+      border: 1.5px solid #93C5FD;
+      color: #1D4ED8;
       font-weight: 800;
       font-size: 15px;
       padding: 10px 18px;
@@ -199,14 +199,14 @@
     }
 
     .btn-roster:hover {
-      background: #2D3748;
-      color: #0F172A;
+      background: #DBEAFE;
+      color: #1E3A8A;
     }
 
     .btn-roster.active {
       background: #2563EB;
-      border-color: #3B82F6;
-      color: #0F172A;
+      border-color: #1D4ED8;
+      color: #FFFFFF;
     }
 
     .btn-start-lab {
@@ -1290,13 +1290,30 @@
         🚀 Officially Start Lab!
       </button>
 
-      <div style="display: inline-flex; align-items: center; gap: 6px; background: #FFFBEB; border: 1.5px solid #F59E0B; border-radius: 10px; padding: 3px 6px 3px 10px;">
+      <!-- STEP 1 (DEFAULT / AFTER RESET): HIDDEN RANGE — ONLY SHOWS 'SET TARGET RANGE' BUTTON -->
+      <button class="btn-action" id="btnOpenSetRange" onclick="openSetTargetRangePanel()" style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); border-color: #F59E0B; color: #FFFFFF; font-weight: 800;" title="Step 1: Set your custom target landing range X* before revealing to students">
+        🎯 Set Target Range
+      </button>
+
+      <!-- STEP 2 (SET MODE): TEACHER SEES & TYPES X* BEFORE CLICKING REVEAL -->
+      <div id="targetRangeSetupPanel" style="display: none; align-items: center; gap: 6px; background: #FFFBEB; border: 1.5px solid #F59E0B; border-radius: 10px; padding: 3px 6px 3px 10px;">
         <label for="teacherCustomTargetInput" style="font-size: 12px; font-weight: 900; color: #92400E; white-space: nowrap;"><i>X</i>* (m):</label>
-        <input type="number" step="0.005" min="0.10" max="3.00" id="teacherCustomTargetInput" value="0.780" title="Type custom target landing range X* in meters before clicking Reveal" style="width: 74px; padding: 5px 6px; font-size: 14px; font-weight: 900; font-family: var(--font-mono); color: #0F172A; background: #FFFFFF; border: 1.5px solid #D97706; border-radius: 6px; text-align: center; outline: none;" />
-        <button class="btn-action" id="btnRevealRange" onclick="toggleRevealTargetRange()" style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); border-color: #F59E0B; color: #FFFFFF; font-weight: 800; margin: 0;" title="Broadcast the typed target landing range X* to all student stations for reverse engineering">
-          🎯 Reveal Target Range
+        <input type="number" step="0.005" min="0.10" max="3.00" id="teacherCustomTargetInput" value="" placeholder="m" onkeydown="if(event.key==='Enter') revealConfiguredTargetRange()" title="Type custom target landing range X* in meters (visible while setting) then click Reveal" style="width: 78px; padding: 5px 6px; font-size: 14px; font-weight: 900; font-family: var(--font-mono); color: #0F172A; background: #FFFFFF; border: 1.5px solid #D97706; border-radius: 6px; text-align: center; outline: none;" />
+        <button class="btn-action" id="btnRevealRange" onclick="revealConfiguredTargetRange()" style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); border-color: #F59E0B; color: #FFFFFF; font-weight: 800; margin: 0;" title="Step 2: Broadcast this target landing range X* to all student portals">
+          🎯 Reveal Range
+        </button>
+        <button type="button" id="btnReclassifyRange" onclick="hideTargetRangeToClassified()" style="display: none; background: #FEF2F2; border: 1.5px solid #F87171; color: #991B1B; font-size: 12px; font-weight: 800; padding: 5px 8px; border-radius: 6px; cursor: pointer;" title="Hide target range back to Classified on all student portals">
+          🔒 Hide
+        </button>
+        <button type="button" onclick="cancelSetTargetRangePanel()" style="background: transparent; border: none; color: #92400E; font-size: 15px; font-weight: 900; padding: 2px 5px; cursor: pointer; line-height: 1;" title="Close Set Range box without broadcasting">
+          ✕
         </button>
       </div>
+
+      <!-- STEP 3 (REVEALED BADGE): SHOWN ONLY AFTER TEACHER CLICKS REVEAL -->
+      <button class="btn-action" id="btnRevealedRangeBadge" onclick="openSetTargetRangePanel()" style="display: none; background: #059669; border-color: #10B981; color: #FFFFFF; font-weight: 800;" title="Target range is live on student portals — click to edit X* or hide">
+        ✅ Revealed (X* = -- m)
+      </button>
 
       <button class="btn-privacy" id="btnPrivacyToggle" onclick="togglePrivacyMode()" title="Mask sensitive slope and target height values when projecting to classroom">
         📽️ Projector Privacy: ON
@@ -2026,33 +2043,69 @@
     });
   }
 
+  let isSetRangePanelOpen = false;
+
   function getTeacherTargetRangeStr() {
     let inp = document.getElementById("teacherCustomTargetInput");
-    let raw = inp && inp.value ? parseFloat(inp.value) : parseFloat(localStorage.getItem("stunt_target_x_m"));
+    let raw = (inp && inp.value !== "") ? parseFloat(inp.value) : parseFloat(localStorage.getItem("stunt_target_x_m"));
     if (!isNaN(raw) && raw > 0.05) {
       if (raw > 5.0) raw = raw / 100.0; // e.g. 85 -> 0.850 m
       return raw.toFixed(3);
     }
-    return "0.780";
+    return "";
+  }
+
+  function openSetTargetRangePanel() {
+    isSetRangePanelOpen = true;
+    let inp = document.getElementById("teacherCustomTargetInput");
+    let savedX = localStorage.getItem("stunt_target_x_m");
+    let isRev = localStorage.getItem("stunt_target_revealed") === "true";
+    if (inp) {
+      inp.value = (isRev && savedX) ? savedX : (inp.value || "");
+      setTimeout(() => { inp.focus(); inp.select(); }, 50);
+    }
+    syncRevealRangeButtonUI();
+  }
+
+  function cancelSetTargetRangePanel() {
+    isSetRangePanelOpen = false;
+    let isRev = localStorage.getItem("stunt_target_revealed") === "true";
+    let inp = document.getElementById("teacherCustomTargetInput");
+    if (!isRev && inp) inp.value = "";
+    syncRevealRangeButtonUI();
   }
 
   function syncRevealRangeButtonUI() {
-    let rBtn = document.getElementById("btnRevealRange");
+    let btnOpenSet = document.getElementById("btnOpenSetRange");
+    let setupPanel = document.getElementById("targetRangeSetupPanel");
+    let btnReveal = document.getElementById("btnRevealRange");
+    let btnReclass = document.getElementById("btnReclassifyRange");
+    let btnRevBadge = document.getElementById("btnRevealedRangeBadge");
     let inp = document.getElementById("teacherCustomTargetInput");
-    let savedX = localStorage.getItem("stunt_target_x_m");
-    if (inp && savedX && document.activeElement !== inp) {
-      inp.value = savedX;
-    }
-    if (!rBtn) return;
-    if (localStorage.getItem("stunt_target_revealed") === "true") {
-      let xStr = savedX || getTeacherTargetRangeStr();
-      rBtn.style.background = "#059669";
-      rBtn.style.borderColor = "#10B981";
-      rBtn.innerHTML = `✅ Revealed (X* = ${xStr} m)`;
+
+    let isRev = localStorage.getItem("stunt_target_revealed") === "true";
+    let savedX = localStorage.getItem("stunt_target_x_m") || "";
+
+    if (isSetRangePanelOpen) {
+      if (btnOpenSet) btnOpenSet.style.display = "none";
+      if (btnRevBadge) btnRevBadge.style.display = "none";
+      if (setupPanel) setupPanel.style.display = "inline-flex";
+      if (btnReclass) btnReclass.style.display = isRev ? "inline-flex" : "none";
+      if (btnReveal) btnReveal.innerHTML = isRev ? "🎯 Update Range" : "🎯 Reveal Range";
+    } else if (isRev && savedX) {
+      if (btnOpenSet) btnOpenSet.style.display = "none";
+      if (setupPanel) setupPanel.style.display = "none";
+      if (btnRevBadge) {
+        btnRevBadge.style.display = "inline-flex";
+        btnRevBadge.innerHTML = `✅ Revealed (X* = ${savedX} m)`;
+      }
+      if (inp && document.activeElement !== inp) inp.value = savedX;
     } else {
-      rBtn.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
-      rBtn.style.borderColor = "#F59E0B";
-      rBtn.innerHTML = "🎯 Reveal Target Range";
+      // DEFAULT & POST-RESET: Zero target numbers visible on projector!
+      if (setupPanel) setupPanel.style.display = "none";
+      if (btnRevBadge) btnRevBadge.style.display = "none";
+      if (btnOpenSet) btnOpenSet.style.display = "inline-flex";
+      if (inp && document.activeElement !== inp) inp.value = "";
     }
   }
 
@@ -2176,69 +2229,91 @@
   }
 
   
+  async function revealConfiguredTargetRange() {
+    let inp = document.getElementById("teacherCustomTargetInput");
+    let rawVal = inp ? parseFloat(inp.value) : NaN;
+    if (isNaN(rawVal) || rawVal <= 0.05) {
+      alert("⚠️ Please enter your desired target landing range X* in meters first (e.g., 0.780 or 0.850), then click Reveal Range!");
+      if (inp) inp.focus();
+      return;
+    }
+    if (rawVal > 5.0) rawVal = rawVal / 100.0; // auto-convert cm -> m if e.g. 78 typed
+    let customX = rawVal.toFixed(3);
+    let customCm = (rawVal * 100).toFixed(1).replace(/\.0$/, '');
+
+    if (!confirm(`🎯 SURPRISE REVEAL: Broadcast the contracted target landing range X* = ${customX} m (${customCm} cm) to all student stations right now?`)) {
+      return;
+    }
+
+    localStorage.setItem("stunt_target_x_m", customX);
+    localStorage.setItem("stunt_target_revealed", "true");
+    isSetRangePanelOpen = false;
+    syncRevealRangeButtonUI();
+
+    // 1. BroadcastChannel for instant local cross-tab sync
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({ type: "TARGET_RANGE_REVEALED", range: customX });
+      } catch(e) {
+        console.warn("BroadcastChannel error:", e);
+      }
+    }
+
+    // 2. Instant Realtime broadcast via global_pins (in supabase_realtime!) + classroom_control
+    await upsertGlobalClassroomRegistry({
+      target_range_revealed: true,
+      target_x_m: parseFloat(customX)
+    });
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("classroom_control").update({
+          target_range_revealed: true,
+          target_x_m: parseFloat(customX),
+          updated_at: new Date().toISOString()
+        }).eq("id", "global");
+      } catch(e) {
+        console.warn("Supabase target reveal error:", e);
+      }
+    }
+
+    if (typeof confetti === "function") {
+      confetti({ particleCount: 160, spread: 90, origin: { y: 0.4 } });
+    }
+    alert(`🎬 DIRECTOR'S SURPRISE TARGET RANGE REVEALED!\n\nX* = ${customX} m (${customCm} cm) has been broadcasted to all student stations. Students can now perform reverse-engineering!`);
+  }
+
+  async function hideTargetRangeToClassified() {
+    if (!confirm("Reset target range back to Classified (Hidden) on the projector and all student portals?")) {
+      return;
+    }
+    localStorage.removeItem("stunt_target_revealed");
+    localStorage.removeItem("stunt_target_x_m");
+    isSetRangePanelOpen = false;
+    let inp = document.getElementById("teacherCustomTargetInput");
+    if (inp) inp.value = "";
+    syncRevealRangeButtonUI();
+
+    if (classroomChannel) {
+      try { classroomChannel.postMessage({ type: "TARGET_RANGE_HIDDEN" }); } catch(e) {}
+    }
+    await upsertGlobalClassroomRegistry({ target_range_revealed: false, target_x_m: undefined });
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("classroom_control").update({
+          target_range_revealed: false,
+          updated_at: new Date().toISOString()
+        }).eq("id", "global");
+      } catch(e) {}
+    }
+    alert("🔒 Target range hidden and reset to Classified.");
+  }
+
+  // Legacy alias if called externally
   async function toggleRevealTargetRange() {
-    let isCurrentlyRevealed = localStorage.getItem("stunt_target_revealed") === "true";
-    let customX = getTeacherTargetRangeStr();
-    let customCm = (parseFloat(customX) * 100).toFixed(1).replace(/\.0$/, '');
-    let prevX = localStorage.getItem("stunt_target_x_m");
-
-    // If not revealed yet, OR if teacher typed a brand-new range while revealed, broadcast the typed range!
-    if (!isCurrentlyRevealed || (prevX && prevX !== customX)) {
-      if (!confirm(`🎯 SURPRISE REVEAL: Broadcast the contracted target landing range X* = ${customX} m (${customCm} cm) to all student stations right now?`)) {
-        return;
-      }
-      localStorage.setItem("stunt_target_x_m", customX);
-      localStorage.setItem("stunt_target_revealed", "true");
-      syncRevealRangeButtonUI();
-
-      // 1. BroadcastChannel for instant local cross-tab sync
-      if (classroomChannel) {
-        try {
-          classroomChannel.postMessage({ type: "TARGET_RANGE_REVEALED", range: customX });
-        } catch(e) {
-          console.warn("BroadcastChannel error:", e);
-        }
-      }
-
-      // 2. Instant Realtime broadcast via global_pins (in supabase_realtime!) + classroom_control
-      await upsertGlobalClassroomRegistry({
-        target_range_revealed: true,
-        target_x_m: parseFloat(customX)
-      });
-      if (supabaseClient) {
-        try {
-          await supabaseClient.from("classroom_control").update({
-            target_range_revealed: true,
-            target_x_m: parseFloat(customX),
-            updated_at: new Date().toISOString()
-          }).eq("id", "global");
-        } catch(e) {
-          console.warn("Supabase target reveal error:", e);
-        }
-      }
-
-      if (typeof confetti === "function") {
-        confetti({ particleCount: 160, spread: 90, origin: { y: 0.4 } });
-      }
-      alert(`🎬 DIRECTOR'S SURPRISE TARGET RANGE REVEALED!\n\nX* = ${customX} m (${customCm} cm) has been broadcasted to all student stations. Students can now perform reverse-engineering!`);
+    if (!isSetRangePanelOpen && localStorage.getItem("stunt_target_revealed") !== "true") {
+      openSetTargetRangePanel();
     } else {
-      if (confirm("Reset target range back to Classified (Hidden)?")) {
-        localStorage.removeItem("stunt_target_revealed");
-        syncRevealRangeButtonUI();
-        if (classroomChannel) {
-          try { classroomChannel.postMessage({ type: "TARGET_RANGE_HIDDEN" }); } catch(e) {}
-        }
-        await upsertGlobalClassroomRegistry({ target_range_revealed: false, target_x_m: undefined });
-        if (supabaseClient) {
-          try {
-            await supabaseClient.from("classroom_control").update({
-              target_range_revealed: false,
-              updated_at: new Date().toISOString()
-            }).eq("id", "global");
-          } catch(e) {}
-        }
-        alert("Target range status reset to Classified.");
-      }
+      await revealConfiguredTargetRange();
     }
   }
 
@@ -2324,6 +2399,15 @@
           }
           if (gfp.station_resets && typeof gfp.station_resets === "object") {
             stationResetTimestamps = Object.assign({}, gfp.station_resets, stationResetTimestamps);
+          }
+          if (gfp.target_range_revealed !== undefined && !isSetRangePanelOpen) {
+            if (gfp.target_range_revealed && gfp.target_x_m) {
+              localStorage.setItem("stunt_target_revealed", "true");
+              localStorage.setItem("stunt_target_x_m", Number(gfp.target_x_m).toFixed(3));
+            } else {
+              localStorage.removeItem("stunt_target_revealed");
+              localStorage.removeItem("stunt_target_x_m");
+            }
           }
         }
 
@@ -3296,17 +3380,16 @@
       await syncPinsToClassroom();
     }
 
-    // Reset UI buttons
+    // Reset UI buttons & collapse Set Target Range back to hidden Classified button!
+    isSetRangePanelOpen = false;
+    let customInp = document.getElementById("teacherCustomTargetInput");
+    if (customInp) customInp.value = "";
     let btnStart = document.getElementById("btnStartLab");
     if (btnStart) {
       btnStart.style.background = "linear-gradient(135deg, #10B981 0%, #059669 100%)";
       btnStart.innerHTML = "✅ Lab In Session";
     }
-    let btnRev = document.getElementById("btnRevealRange");
-    if (btnRev) {
-      btnRev.innerHTML = "🎯 Reveal Target Range";
-      btnRev.style.background = "linear-gradient(135deg, #D97706 0%, #B45309 100%)";
-    }
+    syncRevealRangeButtonUI();
 
     renderLeaderboard();
     renderMultiGraph();
