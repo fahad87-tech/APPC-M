@@ -1606,15 +1606,46 @@
       }
     }
 
-    let pts = (st.tablePoints || []).filter(p => p && p.h !== null && p.x !== null && !isNaN(parseFloat(p.h)) && !isNaN(parseFloat(p.x)) && parseFloat(p.h) > 0 && parseFloat(p.x) > 0);
-    if (pts.length > 0 && (!st.dropH || isNaN(parseFloat(st.dropH)))) {
+    let rawRows = (st.tablePoints || []).filter(p => p && (
+      (p.h_raw !== undefined && p.h_raw !== null && !isNaN(parseFloat(p.h_raw))) ||
+      (p.h !== null && !isNaN(parseFloat(p.h))) ||
+      (p.x !== null && !isNaN(parseFloat(p.x))) ||
+      (p.v !== null && !isNaN(parseFloat(p.v)))
+    ));
+    let pts = (st.tablePoints || []).filter(p => p && p.h !== null && !isNaN(parseFloat(p.h)) && parseFloat(p.h) > 0 && (
+      (p.x !== null && !isNaN(parseFloat(p.x)) && parseFloat(p.x) > 0) ||
+      (p.v !== null && !isNaN(parseFloat(p.v)) && parseFloat(p.v) > 0)
+    ));
+    let dropHm = parseFloat(st.dropH);
+    if (!isNaN(dropHm) && dropHm > 1.5) dropHm = dropHm / 100.0;
+
+    if (rawRows.length > 0 && (isNaN(dropHm) || dropHm <= 0.05)) {
       alerts.push({ type: "warn", text: "⚠️ Missing Table Drop H" });
     }
-    if (pts.some(p => {
+    if (rawRows.some(p => p.h !== null && !isNaN(parseFloat(p.h)) && parseFloat(p.h) > 1.0)) {
+      alerts.push({ type: "warn", text: "⚠️ Height Unit Alert (Entered cm instead of m)" });
+    } else if (rawRows.some(p => {
       let hm = parseFloat(p.h);
-      return hm > 0.65 || (p.h_raw && Math.abs(parseFloat(p.h_raw) - hm * 100) < 0.5);
+      if (isNaN(hm) || hm <= 0) return false;
+      if (p.h_raw !== undefined && p.h_raw !== null && !isNaN(parseFloat(p.h_raw))) {
+        let expectedH = (parseFloat(p.h_raw) - 3.7) / 100.0;
+        return Math.abs(hm - expectedH) > 0.008;
+      }
+      return hm > 0.65;
     })) {
-      alerts.push({ type: "warn", text: "⚠️ Check 3.7 cm Riser Offset" });
+      alerts.push({ type: "warn", text: "⚠️ Check Corrected h Math (3.7 cm Riser Offset)" });
+    }
+    if (!isNaN(dropHm) && dropHm > 0.05) {
+      let tFl = Math.sqrt(2 * dropHm / 9.80);
+      if (rawRows.some(p => {
+        let xm = parseFloat(p.x);
+        let vm = parseFloat(p.v);
+        if (isNaN(xm) || xm <= 0 || isNaN(vm) || vm <= 0) return false;
+        let xMeters = xm > 3.0 ? xm / 100.0 : xm;
+        return Math.abs(vm - (xMeters / tFl)) > 0.08;
+      })) {
+        alerts.push({ type: "warn", text: "⚠️ Check Exit Speed Math (v = X / t_flight)" });
+      }
     }
 
     if (pts.length >= 3) {

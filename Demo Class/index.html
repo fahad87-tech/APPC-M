@@ -2851,7 +2851,7 @@
 
     <div class="section-body">
       <p style="color: var(--text-muted); font-size: 17px;">
-        Test 4 to 5 different marked release heights. Measure landing range <i>X</i> on the floor from the plumb line. Write your calculated launch speed <i>v</i>; the last column automatically squares it (<i>v</i>²)! <i>(Due to timed lab sprint constraints, completing 4 valid launches is fully accepted).</i>
+        Test 4 to 5 different marked release heights. Record raw tabletop height <i>h</i><sub>raw</sub> (cm) and calculate your riser-corrected height <i>h</i> (m). Measure landing range <i>X</i> (m) on the floor from the plumb line and calculate your exit speed <i>v</i> (m/s) — only the last column automatically squares it (<i>v</i>²)! <i>(Due to timed lab sprint constraints, completing 4 valid launches is fully accepted).</i>
       </p>
 
       <table class="worksheet-table">
@@ -2916,11 +2916,11 @@
       </table>
 
       <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 14px; color: var(--emerald); font-weight: 700; gap: 8px;">
-        <span>✓ Live Graph Telemetry: Corrected <i>h</i> immediately syncs to Section 3 millimeter grid!</span>
+        <span>✓ Live Graph Telemetry: Calculated <i>h</i> (m) and <i>v</i>² (m²/s²) immediately plot on Section 3 millimeter grid!</span>
         <span style="color: #64748B; font-size: 13.5px; font-weight: 600;">
           📏 Table Launch Drop <i>H</i>: <span id="sec2_display_H" style="color: #059669; font-weight: 800;">-- m</span> &nbsp;|&nbsp; 
           <i>t</i><sub>flight</sub> = <span id="sec2_display_t" style="color: #0284C7; font-weight: 800;">-- s</span> &nbsp;|&nbsp; 
-          Wooden Riser Offset = 3.7 cm [<i>h</i> = (<i>h</i><sub>raw</sub> − 3.7 cm)/100]
+          Wooden Riser Offset = 3.7 cm
         </span>
       </div>
 
@@ -3338,11 +3338,11 @@
     fbdSafeVectors: [], // FBD #2 (at perfect safe apex clearance height h_safe)
     lol: { ki: 0, ugi: 0, ugf: 0, kf: 0, diss: 0 },
     tablePoints: [
-      { h: null, x: null, v: null, v2: null },
-      { h: null, x: null, v: null, v2: null },
-      { h: null, x: null, v: null, v2: null },
-      { h: null, x: null, v: null, v2: null },
-      { h: null, x: null, v: null, v2: null }
+      { h_raw: null, h: null, x: null, v: null, v2: null },
+      { h_raw: null, h: null, x: null, v: null, v2: null },
+      { h_raw: null, h: null, x: null, v: null, v2: null },
+      { h_raw: null, h: null, x: null, v: null, v2: null },
+      { h_raw: null, h: null, x: null, v: null, v2: null }
     ],
     status: 'in_progress',
     progress: 14
@@ -3911,39 +3911,16 @@
   }
 
   function onRawHeightInput(rowIdx) {
-    let rawEl = document.getElementById(`tbl_hraw_${rowIdx}`);
-    let hEl = document.getElementById(`tbl_h_${rowIdx}`);
-    if (rawEl && hEl) {
-      let rawVal = parseFloat(rawEl.value);
-      if (!isNaN(rawVal)) {
-        // Auto-compute corrected h in meters: h = (h_raw - 3.7) / 100
-        let corrH = (rawVal - WOODEN_RISER_OFFSET_CM) / 100.0;
-        hEl.value = (corrH > 0) ? corrH.toFixed(3) : "0.000";
-      }
-    }
+    // Students calculate Corrected h (m) manually; do NOT auto-fill tbl_h_
     syncAndRenderGraph();
   }
 
   function onCorrectedHeightInput(rowIdx) {
-    let rawEl = document.getElementById(`tbl_hraw_${rowIdx}`);
-    let hEl = document.getElementById(`tbl_h_${rowIdx}`);
-    if (hEl && rawEl) {
-      let hVal = parseFloat(hEl.value);
-      if (!isNaN(hVal)) {
-        if (hVal > 1.0) { // Student typed in cm e.g. 37.3 cm
-          hVal = hVal / 100.0;
-          if (document.activeElement !== hEl) hEl.value = hVal.toFixed(3);
-        }
-        // Back-compute raw tabletop cm: h_raw = h*100 + 3.7
-        let rawVal = (hVal * 100.0) + WOODEN_RISER_OFFSET_CM;
-        rawEl.value = rawVal.toFixed(1);
-      }
-    }
+    // Preserve exact student-calculated Corrected h (m); do NOT auto-convert or back-fill tbl_hraw_
     syncAndRenderGraph();
   }
 
   function syncTablePointsFromDom() {
-    const T_FLIGHT = getTFlight();
     let points = [];
 
     for (let i = 0; i < 5; i++) {
@@ -3958,38 +3935,12 @@
       let x = xEl ? parseFloat(xEl.value) : NaN;
       let v = vEl ? parseFloat(vEl.value) : NaN;
 
-      // Ensure h is in meters
-      if (!isNaN(h) && h > 1.0) {
-        h = h / 100.0;
-        if (hEl && document.activeElement !== hEl) hEl.value = h.toFixed(3);
-      }
-      // Ensure x is in meters
-      if (!isNaN(x) && x > 2.0) {
-        x = x / 100.0;
-        if (xEl && document.activeElement !== xEl) xEl.value = x.toFixed(3);
-      }
-
-      // If raw is entered but h is blank, compute h
-      if (!isNaN(rawVal) && (isNaN(h) || h <= 0)) {
-        h = (rawVal - WOODEN_RISER_OFFSET_CM) / 100.0;
-        if (hEl) hEl.value = (h > 0) ? h.toFixed(3) : "0.000";
-      }
-
-      // Auto-compute exit speed v from measured landing range X: v = X / t_flight
-      if ((isNaN(v) || v <= 0) && !isNaN(x) && x > 0) {
-        v = x / T_FLIGHT;
-        if (vEl && !vEl.value) vEl.value = v.toFixed(2);
-      } else if (!isNaN(v) && v > 0 && (isNaN(x) || x <= 0)) {
-        x = v * T_FLIGHT;
-        if (xEl && !xEl.value) xEl.value = x.toFixed(3);
-      }
-
-      // Compute v^2
+      // Only auto-square v -> v^2 AFTER the student manually calculates and enters v!
       let v2 = null;
       if (!isNaN(v) && v > 0) {
         v2 = v * v;
         if (v2Cell) v2Cell.textContent = v2.toFixed(2);
-      } else if (v2Cell && (isNaN(v) || v <= 0)) {
+      } else if (v2Cell) {
         v2Cell.textContent = "--";
       }
 
@@ -4396,32 +4347,32 @@
 
     let html = "";
 
-    // 3. AP PHYSICS LAB MILLIMETER GRID
-    // Minor grid lines
-    let xMinorStep = currentXMax <= 0.5 ? 0.01 : 0.02;
+    // 3. AP PHYSICS LAB MILLIMETER GRID (Adaptive step sizing prevents crowded lines if student forgets cm->m conversion)
+    let xMajorStep = currentXMax <= 0.5 ? 0.05 : (currentXMax <= 1.5 ? 0.10 : Math.ceil(currentXMax / 8));
+    let xMinorStep = xMajorStep / 5;
     for (let th = xMinorStep; th <= currentXMax; th += xMinorStep) {
       let gx = dynMapX(th);
       html += `<line x1="${gx}" y1="${padT}" x2="${gx}" y2="${h - padB}" stroke="rgba(0,0,0,0.05)" stroke-width="1" />`;
     }
-    let yMinorStep = currentYMax <= 10.0 ? 0.25 : 0.5;
+    let yMajorStep = currentYMax <= 10.0 ? 1.0 : (currentYMax <= 24.0 ? 2.0 : Math.ceil(currentYMax / 8));
+    let yMinorStep = yMajorStep / 4;
     for (let tv = yMinorStep; tv <= currentYMax; tv += yMinorStep) {
       let gy = dynMapY(tv);
       html += `<line x1="${padL}" y1="${gy}" x2="${w - padR}" y2="${gy}" stroke="rgba(0,0,0,0.05)" stroke-width="1" />`;
     }
 
-    // Major grid lines & X ticks (every 0.05 m or 0.1 m)
-    let xMajorStep = currentXMax <= 0.5 ? 0.05 : 0.10;
+    // Major grid lines & X ticks
     for (let th = xMajorStep; th <= currentXMax; th += xMajorStep) {
       let gx = dynMapX(th);
+      let xTickStr = currentXMax <= 1.5 ? th.toFixed(2) : th.toFixed(0);
       html += `
         <line x1="${gx}" y1="${padT}" x2="${gx}" y2="${h - padB}" stroke="rgba(0,0,0,0.12)" stroke-width="1.2" />
         <line x1="${gx}" y1="${h - padB}" x2="${gx}" y2="${h - padB + 6}" stroke="#94A3B8" stroke-width="1.8" />
-        <text x="${gx}" y="${h - padB + 24}" fill="#1E293B" font-size="15" font-family="var(--font-mono)" font-weight="800" text-anchor="middle">${th.toFixed(2)}</text>
+        <text x="${gx}" y="${h - padB + 24}" fill="#1E293B" font-size="15" font-family="var(--font-mono)" font-weight="800" text-anchor="middle">${xTickStr}</text>
       `;
     }
 
-    // Major grid lines & Y ticks (every 1.0 m^2/s^2)
-    let yMajorStep = currentYMax <= 10.0 ? 1.0 : 2.0;
+    // Major grid lines & Y ticks
     for (let tv = yMajorStep; tv <= currentYMax; tv += yMajorStep) {
       let gy = dynMapY(tv);
       html += `
@@ -4456,7 +4407,7 @@
       html += `
         <rect x="${padL + 30}" y="${(h + padT)/2 - 28}" width="${w - padL - padR - 60}" height="46" rx="8" fill="#FEF2F2" stroke="#DC2626" stroke-width="1.5" />
         <text x="${(w + padL)/2}" y="${(h + padT)/2}" fill="#991B1B" font-size="15" font-weight="800" text-anchor="middle">
-          📌 No points plotted yet — Enter Release Height h and Landing Range X in Section 2 table above!
+          📌 No points plotted yet — Enter your calculated Corrected h (m) and Exit Speed v (m/s) in Section 2 above!
         </text>
       `;
     } else {
@@ -5241,16 +5192,11 @@
         let vEl = document.getElementById(`tbl_v_${idx}`);
         let v2El = document.getElementById(`tbl_v2_cell_${idx}`);
 
-        if (rawEl && p.h_raw !== undefined && p.h_raw !== null) {
-          rawEl.value = p.h_raw;
-        } else if (rawEl && p.h !== null && !isNaN(p.h)) {
-          rawEl.value = ((parseFloat(p.h) * 100.0) + WOODEN_RISER_OFFSET_CM).toFixed(1);
-        }
-
-        if (hEl && p.h !== null) hEl.value = p.h;
-        if (xEl && p.x !== null) xEl.value = p.x;
-        if (vEl && p.v !== null) vEl.value = p.v;
-        if (v2El && p.v2 !== null) v2El.textContent = Number(p.v2).toFixed(2);
+        if (rawEl) rawEl.value = (p.h_raw !== undefined && p.h_raw !== null) ? p.h_raw : "";
+        if (hEl) hEl.value = (p.h !== undefined && p.h !== null) ? p.h : "";
+        if (xEl) xEl.value = (p.x !== undefined && p.x !== null) ? p.x : "";
+        if (vEl) vEl.value = (p.v !== undefined && p.v !== null) ? p.v : "";
+        if (v2El) v2El.textContent = (p.v2 !== undefined && p.v2 !== null) ? Number(p.v2).toFixed(2) : "--";
       });
     }
 
@@ -5555,13 +5501,12 @@
     if (peerState.tablePoints && Array.isArray(peerState.tablePoints)) {
       worksheetState.tablePoints = peerState.tablePoints;
       peerState.tablePoints.forEach((p, idx) => {
-        if (p.h !== null) safeSet(`tbl_h_${idx}`, p.h);
-        if (p.x !== null) safeSet(`tbl_x_${idx}`, p.x);
-        if (p.v !== null) safeSet(`tbl_v_${idx}`, p.v);
-        if (p.v2 !== null) {
-          let c = document.getElementById(`tbl_v2_cell_${idx}`);
-          if (c) c.textContent = Number(p.v2).toFixed(2);
-        }
+        safeSet(`tbl_hraw_${idx}`, (p.h_raw !== undefined && p.h_raw !== null) ? p.h_raw : "");
+        safeSet(`tbl_h_${idx}`, (p.h !== undefined && p.h !== null) ? p.h : "");
+        safeSet(`tbl_x_${idx}`, (p.x !== undefined && p.x !== null) ? p.x : "");
+        safeSet(`tbl_v_${idx}`, (p.v !== undefined && p.v !== null) ? p.v : "");
+        let c = document.getElementById(`tbl_v2_cell_${idx}`);
+        if (c) c.textContent = (p.v2 !== undefined && p.v2 !== null) ? Number(p.v2).toFixed(2) : "--";
       });
     }
 
@@ -5666,11 +5611,11 @@
       if (c) c.textContent = "--";
     }
     worksheetState.tablePoints = [
-      { h: null, x: null, v: null, v2: null },
-      { h: null, x: null, v: null, v2: null },
-      { h: null, x: null, v: null, v2: null },
-      { h: null, x: null, v: null, v2: null },
-      { h: null, x: null, v: null, v2: null }
+      { h_raw: null, h: null, x: null, v: null, v2: null },
+      { h_raw: null, h: null, x: null, v: null, v2: null },
+      { h_raw: null, h: null, x: null, v: null, v2: null },
+      { h_raw: null, h: null, x: null, v: null, v2: null },
+      { h_raw: null, h: null, x: null, v: null, v2: null }
     ];
 
     // 7. Clear FBD Canvas

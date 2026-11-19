@@ -2735,3 +2735,30 @@ Per instructor instruction (*"do not provide both of this to students...let them
 
 ### 3. Compilation & 3-Page Verification
 - Recompiled via Google Chrome headless to [`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf) (`317,886 bytes`), verified **strictly 3 pages** via `pypdf`, and visually audited via PyMuPDF renders (`handout_v3_page_1.png`, `handout_v3_page_2.png`, `handout_v3_page_3.png`).
+
+
+## 74. Manual Student Calculation Enforcement for Corrected Height (`h`) & Exit Speed (`v`)
+
+### 1. User Directive & Pedagogical Goal
+- **User Directive:** *"exit velocity should not automatically calculate dude on student portal fix it. also let them calculate corrected height."*
+- **Goal:** Ensure students actively perform both core data-reduction steps in Section 2 (`Test: Calibration Practice Launches`) instead of having the Student Portal compute them automatically:
+  1. **Riser-Corrected Release Height (`h` in m):** Students record `Raw Table Height h_raw (cm)` (`#tbl_hraw_0..4`) and manually subtract the `3.7 cm` wooden riser offset and convert to meters (`#tbl_h_0..4`).
+  2. **Horizontal Exit Speed (`v` in m/s):** Students record `Landing Range X (m)` (`#tbl_x_0..4`) and manually calculate launch speed $v = X / t_{\text{flight}}$ (`#tbl_v_0..4`).
+  3. **Auto-Squared Column (`v²` in m²/s²):** Only `#tbl_v2_cell_0..4` (`Auto-Squared v²`) calculates automatically once the student enters their manually calculated `v`.
+
+### 2. Student Portal (`index.html`), Teacher Dashboard (`dashboard.html`) & Handout Updates
+1. **Removed Auto-Calculation Hooks in [`index.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/index.html):**
+   - Updated `onRawHeightInput(rowIdx)` and `onCorrectedHeightInput(rowIdx)` so typing `h_raw` never auto-populates `tbl_h_${rowIdx}` and typing `h` never back-populates `tbl_hraw_${rowIdx}` or silently divides `cm` values by `100`.
+   - Updated `syncTablePointsFromDom()` to remove automatic `h = (rawVal - 3.7)/100` population, remove automatic `v = x / T_FLIGHT` and `x = v * T_FLIGHT` cross-calculations, and remove silent DOM unit conversions—retaining only `v2 = v * v` after `v` is manually entered.
+   - Updated `restoreWorksheetState()` and `applyPeerSyncData()` to persist and sync `h_raw`, `h`, `x`, `v`, and `v2` independently without back-computing blank cells on page reload or peer Chromebook sync.
+   - Added adaptive major/minor tick step sizing in `renderStudentGraph()` so accidental student unit mistakes (e.g., typing `37` cm instead of `0.370` m) render cleanly without SVG grid crowding.
+2. **Enhanced Teacher Roaming Diagnostics in [`dashboard.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/dashboard.html):**
+   - Upgraded `computeStationDiagnostics(st)` to flag three manual-calculation errors in real time on both Live Leaderboard cards and the Submission Queue:
+     - `⚠️ Height Unit Alert (Entered cm instead of m)` when `p.h > 1.0`.
+     - `⚠️ Check Corrected h Math (3.7 cm Riser Offset)` when `|h - (h_raw - 3.7)/100| > 0.008 m`.
+     - `⚠️ Check Exit Speed Math (v = X / t_flight)` when `|v - X / √(2H/9.80)| > 0.08 m/s`.
+3. **Aligned Printable Student Handout ([`AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.html) & [`.pdf`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Graph_Lab_Student.pdf)):**
+   - Added the `Exit v (m/s)` column to the Page 1 calibration table to match the 7-column Student Portal table and updated the calculation note (`397,637 bytes`, strictly 3 pages verified via `pypdf`).
+
+### 3. Verification
+- Verified via headless Playwright (`verify_manual_calc.py` & `verify_v4_sec2_no_autocalc.png`) that entering `h_raw = 40.7` and `X = 0.705` leaves `Corrected h` (`""`), `Exit Speed v` (`""`), and `Auto-Squared v²` (`"--"`) completely blank, while subsequently entering `h = 0.370` and `v = 1.78` computes `v² = 3.17` and plots `L1: (0.37, 3.17)` on Section 3's graph with zero console errors.
