@@ -2762,3 +2762,54 @@ Per instructor instruction (*"do not provide both of this to students...let them
 
 ### 3. Verification
 - Verified via headless Playwright (`verify_manual_calc.py` & `verify_v4_sec2_no_autocalc.png`) that entering `h_raw = 40.7` and `X = 0.705` leaves `Corrected h` (`""`), `Exit Speed v` (`""`), and `Auto-Squared v²` (`"--"`) completely blank, while subsequently entering `h = 0.370` and `v = 1.78` computes `v² = 3.17` and plots `L1: (0.37, 3.17)` on Section 3's graph with zero console errors.
+
+
+## 73. Inserted Slide 17 (After Slide 16): Crew Sprint Roles & Real-Time Synced Digital Lab
+
+### 1. User Directive & Strict Scope
+- **Directive:** *"add anotther slide after 16 add roles for each member and what they can do. also tell them that their labs are synced so they can measure/calculate whatever is assigned to them."*
+- **Zero-Disruption Guarantee:** Duplicated Slide 16 to insert **Slide 17** (`ACT 4 • CREW ROLES & LIVE SYNC — Divide, Measure & Sync Live!`) immediately after Slide 16 (`Calibration Sprint: Data`), leaving all other slides' custom ordering, wording, colors, and animations 100% untouched (updating only the sequential `XX / 22` counters).
+
+### 2. Visual & Pedagogical Design of New Slide 17
+- **Left Card Visual (`assets/deck_slide17_synced_roles.png`, 1:1 physical inches `5.71" × 4.67"`):**
+  - Top banner: `LIVE-SYNCED DIGITAL LAB — Same Station PIN = Instant Real-Time Sync!`
+  - Central `LIVE SYNC` hub linked via bidirectional sync arrows to all 4 crew role cards:
+    1. `1. RELEASER`: `Measure h_raw / Release (v0 = 0)`
+    2. `2. MEASURER`: `Measure drop H / & floor range X`
+    3. `3. SCRIBE`: `Input (h, X) live / Place fit line`
+    4. `4. CHECKER`: `Check v² & h−3.7 / Catch steel ball`
+  - Bottom callout strip: `Every screen updates live — work on your assigned part in parallel!`
+- **Right Card (`TextBox 10`, `24.5pt–30pt` Bold Classroom Typography & Click-by-Click Animation):**
+  - Visible on Slide Load:
+    - `Your Role & Live Lab Sync` (`30pt` Bold Navy)
+    - `⚡ Labs are SYNCED: measure & calculate your assigned part!` (`24.5pt` Bold Emerald)
+  - Sequential `OnPageClick` Reveals (Clicks 1–4):
+    - `• Releaser: Set h, subtract 3.7 cm, release (v0 = 0).`
+    - `• Measurer: Measure drop H & landing range X.`
+    - `• Data Scribe: Log (h, X) & fit line v² = ah + b.`
+    - `• Checker: Calculate v², verify apex & catch ball!`
+- **Verification:** Confirmed all shapes sit strictly `<= 482.4 pt` (`> 10.8 pt` clearance above the `493.2 pt` footer divider) in [`slide_17_synced_perfected.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/829d9617-6a5b-410d-84d9-748e3f0fb0da/qa_deck_slides/slide_17_synced_perfected.png).
+
+
+## 75. Authoritative Teacher-to-Student PIN Registry & Mandatory Post-Reset PIN Re-Entry
+
+### 1. User Directive & Root-Cause Diagnosis
+- **User Directive:** *"When i reset the lab, make sure you re ask pin from the students to join it again and whatever the PIN is setup for the lab on teacher dashboard works with the student portal."*
+- **Live Database & Telemetry Root Causes Identified:**
+  1. **Student `saveAndSync()` Wiping `pin` & `reset_timestamp`:** Inspecting live `station_submissions` rows revealed that once a student joined a station and ran `saveAndSync()`, `packWorksheetState()` overwrote `full_payload` without `pin`, `teacher_online`, or `reset_timestamp`, causing subsequent students on that station to fall back to legacy default PINs (`1111..4444`) and reject the Teacher Dashboard PIN.
+  2. **Closed/Reloaded Chromebook Bypass After Reset:** `checkInitialTeacherAndPins()` only queried `classroom_control.lab_started` (ignoring `reset_session_ms`), so a Chromebook locked into a station during an earlier class period bypassed `#stationModal` on reload after a reset.
+  3. **Reset Write-Order & Modal Refresh Races:** `confirmResetLabSession()` updated `classroom_control.reset_session_ms` before updating `station_submissions` PINs, `rollNewRandomPins()` / `confirmResetLabSession()` did not re-render `#pinsFocusGrid` while the Whole-Class Projector modal was open, and reloading `dashboard.html` generated new in-memory PINs without syncing them if `sessionStorage` already held teacher auth.
+  4. **CDN Blocking Resilience:** If `cdn.jsdelivr.net` stalled on school Wi-Fi, `#modalStationPin` remained disabled (`LOCKED`) and `supabaseClient` was unavailable.
+
+### 2. Architecture & Code Fixes (`dashboard.html` & `index.html`)
+1. **Dedicated Authoritative `global_pins` Registry (`station_submissions.station_id = 'global_pins'`) in [`dashboard.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/dashboard.html):**
+   - Added `syncPinsToClassroom()` upserting `station_id: 'global_pins'` (which student portals read-only and never overwrite) containing `{ pins, teacher_online, global_reset_ms, station_resets, updated_at_ms }`, alongside parallel `.upsert()`s to `station_1..4`, `classroom_control`, `BroadcastChannel`, and `localStorage`.
+   - Persisted active Teacher Dashboard PINs across `dashboard.html` reloads via `loadInitialStationPin()`, removed student-to-teacher `st.pin` overwrites inside `hydrateStationFullPayload()`, and added `setCustomStationPin(stationKey)` (`✏️ Edit` on both `#pinsFocusModal` cards and unmasked Leaderboard PIN badges) so custom teacher-typed 4-digit PINs immediately sync to all Student Portals.
+   - Re-ordered `confirmResetLabSession()` and `confirmResetIndividualStation()` to commit fresh PINs (`global_pins` + `station_1..4` + `localStorage`) **before** firing `classroom_control.reset_session_ms` / `stunt_classroom_reset_trigger`, and refreshed `#pinsFocusGrid` whenever open.
+2. **Mandatory Post-Reset PIN Re-Entry & Live Cloud Verification in [`index.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/index.html):**
+   - Preserved `pin`, `teacher_online`, and `reset_timestamp` inside `packWorksheetState()` and guarded `saveAndSync()` with `isExecutingReset`.
+   - Recorded `stunt_join_ts_<station>` and `stunt_locked_pin_<station>` upon check-in, comparing `joinTs` against `reset_session_ms`, `global_reset_ms`, `station_resets[station]`, `reset_timestamp`, and `localStorage` triggers across `validateLocalJoinFreshness()`, `checkInitialTeacherAndPins()`, `listenToGlobalStationPins()`, `listenToClassroomControl()`, `listenToStationUpdates()`, and a 5-second background heartbeat—forcing both active tabs and closed/reopened Chromebooks back to `#stationModal` to re-enter the new PIN after any lab or station reset.
+   - Upgraded `verifyAndLockStation()` to perform an instant live parallel query (`checkInitialTeacherAndPins(true)`, with native `fetch()` PostgREST fallback when third-party CDNs are blocked) before rejecting any PIN, guaranteeing that whatever PIN is set on the Teacher Dashboard always works on the Student Portal.
+
+### 3. Multi-Device Live Cloud Verification
+- Verified across 4 isolated headless Chromium contexts (`verify_pin_and_reset.py`, [`verify_v5_teacher_pins_synced.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v5_teacher_pins_synced.png), [`verify_v5_student_reask_pin.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v5_student_reask_pin.png)) covering initial Teacher login PIN check-in, second-device check-in after student `saveAndSync()`, custom Teacher PIN (`2468`), Global Lab Reset forcing both live and reopened Chromebooks back to `#stationModal`, post-reset PIN check-in, and Individual Station Reset.

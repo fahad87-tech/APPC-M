@@ -2316,7 +2316,7 @@
     </div>
     <h2 style="font-size: 26px; font-weight: 900; color: #0F172A; margin-top: -6px;">Calibrate Bench Station</h2>
     <p style="font-size: 16px; color: var(--text-muted); line-height: 1.55;">
-      Each station is locked to its own physical track apparatus. Enter the 4-digit security PIN physically engraved on your station clamp block:
+      Each station is locked to its own physical track apparatus. Select your assigned station and enter the 4-digit security PIN shown on the Teacher Dashboard:
     </p>
 
     <!-- INSTRUCTOR SESSION GATE BANNER -->
@@ -2349,10 +2349,10 @@
 
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; margin: 6px 0; text-align: center;">
       <label class="field-lbl" style="text-align: center; margin-bottom: 0;">Station Security PIN:</label>
-      <input type="password" id="modalStationPin" maxlength="4" inputmode="numeric" placeholder="••••" style="font-size: 34px; text-align: center; letter-spacing: 0.4em; width: 220px; padding: 12px 14px; border-radius: 12px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; box-shadow: 0 1px 3px rgba(0,0,0,0.06); outline: none;" />
-      <span style="font-size: 13.5px; color: var(--text-muted);">🔑 Enter the 4-digit PIN found on your physical lab station bench block</span>
+      <input type="password" id="modalStationPin" maxlength="4" inputmode="numeric" placeholder="••••" onkeydown="if(event.key==='Enter') verifyAndLockStation()" style="font-size: 34px; text-align: center; letter-spacing: 0.4em; width: 220px; padding: 12px 14px; border-radius: 12px; background: #FFFFFF; border: 2px solid #CBD5E1; color: #0F172A; box-shadow: 0 1px 3px rgba(0,0,0,0.06); outline: none;" />
+      <span style="font-size: 13.5px; color: var(--text-muted);">🔑 Enter the 4-digit PIN displayed for your station on the Teacher Dashboard</span>
       <div id="pinErrorBanner" style="display: none; color: var(--crimson); font-size: 14.5px; font-weight: 800; background: rgba(244, 63, 94, 0.15); border: 1px solid var(--crimson); padding: 8px 16px; border-radius: 8px;">
-        ⚠️ Incorrect PIN for selected station! Check your bench block.
+        ⚠️ Incorrect PIN for selected station! Check the Teacher Dashboard.
       </div>
     </div>
 
@@ -3331,6 +3331,50 @@
   } catch(e) {}
 
   let currentStation = localStorage.getItem("stunt_locked_station") || null;
+  let activeStationChannel = null;
+  let isExecutingReset = false;
+  let lastExecutedResetTs = 0;
+
+  function syncPinsFromLocalStorage() {
+    try {
+      let storedTeacher = localStorage.getItem("stunt_teacher_online");
+      if (storedTeacher !== null) isTeacherOnline = (storedTeacher === "true");
+      let storedPins = localStorage.getItem("stunt_active_pins");
+      if (storedPins) {
+        let parsed = JSON.parse(storedPins);
+        if (parsed && typeof parsed === "object") {
+          ["station_1", "station_2", "station_3", "station_4"].forEach(k => {
+            if (parsed[k]) dynamicStationPins[k] = String(parsed[k]);
+          });
+        }
+      }
+    } catch(e) {}
+  }
+
+  function validateLocalJoinFreshness() {
+    if (!currentStation) return;
+    syncPinsFromLocalStorage();
+    let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
+    let localGlobalReset = Math.max(
+      Number(localStorage.getItem("stunt_classroom_reset_trigger") || 0),
+      Number(localStorage.getItem("stunt_global_reset_ms") || 0)
+    );
+    let localStReset = Number(localStorage.getItem("stunt_reset_trigger_" + currentStation) || 0);
+    try {
+      let mapRaw = JSON.parse(localStorage.getItem("stunt_station_resets_map") || "{}");
+      if (mapRaw && mapRaw[currentStation]) localStReset = Math.max(localStReset, Number(mapRaw[currentStation]) || 0);
+    } catch(e) {}
+    let maxReset = Math.max(localGlobalReset, localStReset);
+    if (!joinTs || (maxReset > 0 && maxReset > joinTs)) {
+      try {
+        localStorage.removeItem("stunt_lab_state_" + currentStation);
+        localStorage.removeItem("stunt_locked_station");
+        localStorage.removeItem("stunt_locked_pin_" + currentStation);
+        localStorage.removeItem("stunt_join_ts_" + currentStation);
+      } catch(e) {}
+      currentStation = null;
+    }
+  }
 
   let worksheetState = {
     unlockedStep: 1,
@@ -3350,6 +3394,8 @@
 
   function init() {
     initStudentSprintHUD();
+    syncPinsFromLocalStorage();
+    validateLocalJoinFreshness();
     updateTeacherStatusInModal(isTeacherOnline);
     checkStationLock();
     initFbdCanvas();
@@ -3375,52 +3421,110 @@
 
     if (offEl) offEl.style.display = isTeacherOnline ? "none" : "flex";
     if (onEl) onEl.style.display = isTeacherOnline ? "flex" : "none";
+    // Keep PIN input & Verify button enabled so clicking Verify always triggers a live PIN & session check even on slow Wi-Fi!
     if (pinInput) {
-      pinInput.disabled = !isTeacherOnline;
-      pinInput.placeholder = isTeacherOnline ? "••••" : "LOCKED";
-      pinInput.style.opacity = isTeacherOnline ? "1" : "0.55";
-      pinInput.style.cursor = isTeacherOnline ? "text" : "not-allowed";
+      pinInput.disabled = false;
+      pinInput.placeholder = "••••";
+      pinInput.style.opacity = "1";
+      pinInput.style.cursor = "text";
     }
     if (btnVerify) {
-      btnVerify.disabled = !isTeacherOnline;
-      btnVerify.style.opacity = isTeacherOnline ? "1" : "0.55";
-      btnVerify.style.cursor = isTeacherOnline ? "pointer" : "not-allowed";
+      btnVerify.disabled = false;
+      btnVerify.style.opacity = "1";
+      btnVerify.style.cursor = "pointer";
     }
   }
 
-  async function checkInitialTeacherAndPins() {
+  async function checkInitialTeacherAndPins(skipResetCheck) {
+    syncPinsFromLocalStorage();
     updateTeacherStatusInModal(isTeacherOnline);
 
-    if (!supabaseClient) return;
-
     try {
-      // 1. Fetch classroom control status from Supabase
-      const { data: ctrl, error: ctrlErr } = await supabaseClient
-        .from("classroom_control")
-        .select("lab_started")
-        .eq("id", "global")
-        .single();
-      if (!ctrlErr && ctrl) {
-        isTeacherOnline = !!ctrl.lab_started;
-        updateTeacherStatusInModal(isTeacherOnline);
+      let ctrl = null, ctrlErr = null, subs = null, subsErr = null;
+      if (supabaseClient) {
+        const [ctrlRes, subsRes] = await Promise.all([
+          supabaseClient.from("classroom_control").select("lab_started, reset_session_ms").eq("id", "global").single(),
+          supabaseClient.from("station_submissions").select("station_id, full_payload")
+        ]);
+        ctrl = ctrlRes.data; ctrlErr = ctrlRes.error;
+        subs = subsRes.data; subsErr = subsRes.error;
+      } else if (typeof fetch === "function" && SUPABASE_URL.startsWith("https://")) {
+        // Direct PostgREST fallback if CDN script was blocked on school Wi-Fi
+        let hdrs = { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + SUPABASE_ANON_KEY };
+        const [r1, r2] = await Promise.all([
+          fetch(SUPABASE_URL + "/rest/v1/classroom_control?id=eq.global&select=lab_started,reset_session_ms", { headers: hdrs }),
+          fetch(SUPABASE_URL + "/rest/v1/station_submissions?select=station_id,full_payload", { headers: hdrs })
+        ]);
+        if (r1.ok) { let arr = await r1.json(); ctrl = Array.isArray(arr) ? arr[0] : null; }
+        if (r2.ok) { subs = await r2.json(); }
+      } else {
+        return;
       }
 
-      // 2. Fetch station submissions for active dynamic PINs
-      const { data: subs, error: subsErr } = await supabaseClient
-        .from("station_submissions")
-        .select("station_id, full_payload");
+      let ctrlResetMs = 0;
+      if (!ctrlErr && ctrl) {
+        if (ctrl.lab_started !== undefined) {
+          isTeacherOnline = !!ctrl.lab_started;
+          updateTeacherStatusInModal(isTeacherOnline);
+        }
+        if (ctrl.reset_session_ms) ctrlResetMs = Number(ctrl.reset_session_ms) || 0;
+      }
+      let globalPinPayload = null;
+      let stationResetMap = {};
       if (!subsErr && Array.isArray(subs)) {
+        // First apply station_1..4 fallback PINs
         subs.forEach(row => {
-          if (row.station_id && row.full_payload) {
+          if (row.station_id && row.station_id !== "global_pins" && row.full_payload) {
             if (row.full_payload.pin) {
-              dynamicStationPins[row.station_id] = row.full_payload.pin.toString();
+              dynamicStationPins[row.station_id] = String(row.full_payload.pin);
             }
-            if (row.full_payload.teacher_online !== undefined) {
-              isTeacherOnline = !!row.full_payload.teacher_online;
-              updateTeacherStatusInModal(isTeacherOnline);
+            if (row.full_payload.reset_timestamp) {
+              stationResetMap[row.station_id] = Math.max(stationResetMap[row.station_id] || 0, Number(row.full_payload.reset_timestamp) || 0);
             }
           }
         });
+
+        // Override with authoritative global_pins registry from Teacher Dashboard
+        let globalRow = subs.find(r => r.station_id === "global_pins");
+        if (globalRow && globalRow.full_payload) {
+          globalPinPayload = globalRow.full_payload;
+          if (globalPinPayload.pins && typeof globalPinPayload.pins === "object") {
+            ["station_1", "station_2", "station_3", "station_4"].forEach(stK => {
+              if (globalPinPayload.pins[stK]) {
+                dynamicStationPins[stK] = String(globalPinPayload.pins[stK]);
+              }
+            });
+          }
+          if (globalPinPayload.teacher_online !== undefined) {
+            isTeacherOnline = !!globalPinPayload.teacher_online;
+            updateTeacherStatusInModal(isTeacherOnline);
+          }
+          if (globalPinPayload.global_reset_ms) {
+            ctrlResetMs = Math.max(ctrlResetMs, Number(globalPinPayload.global_reset_ms) || 0);
+          }
+          if (globalPinPayload.station_resets && typeof globalPinPayload.station_resets === "object") {
+            Object.keys(globalPinPayload.station_resets).forEach(stK => {
+              stationResetMap[stK] = Math.max(stationResetMap[stK] || 0, Number(globalPinPayload.station_resets[stK]) || 0);
+            });
+          }
+        }
+
+        try {
+          localStorage.setItem("stunt_active_pins", JSON.stringify(dynamicStationPins));
+          localStorage.setItem("stunt_teacher_online", isTeacherOnline ? "true" : "false");
+        } catch(e) {}
+      }
+
+      // 3. Enforce re-asking PIN if lab or current station was reset after this Chromebook joined!
+      if (!skipResetCheck && currentStation) {
+        let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
+        let stResetMs = stationResetMap[currentStation] || 0;
+        let maxCloudReset = Math.max(ctrlResetMs, stResetMs);
+        if (!joinTs || (maxCloudReset > 0 && maxCloudReset > joinTs)) {
+          if (ctrlResetMs > 0) localStorage.setItem("stunt_last_handled_global_reset", String(ctrlResetMs));
+          if (stResetMs > 0) localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(stResetMs));
+          executeSessionReset("Lab session was reset by the instructor. Please enter your station PIN to join again.", maxCloudReset);
+        }
       }
     } catch(e) {
       console.warn("Notice checking initial teacher status and PINs:", e);
@@ -3437,12 +3541,47 @@
         table: "station_submissions"
       }, payload => {
         let rec = payload.new;
-        if (!rec) return;
-        if (rec.station_id && rec.full_payload && rec.full_payload.pin) {
-          dynamicStationPins[rec.station_id] = rec.full_payload.pin.toString();
-        }
-        if (rec.full_payload && rec.full_payload.teacher_online !== undefined) {
-          updateTeacherStatusInModal(rec.full_payload.teacher_online);
+        if (!rec || !rec.full_payload) return;
+        let fp = rec.full_payload;
+
+        if (rec.station_id === "global_pins") {
+          if (fp.pins && typeof fp.pins === "object") {
+            ["station_1", "station_2", "station_3", "station_4"].forEach(stK => {
+              if (fp.pins[stK]) dynamicStationPins[stK] = String(fp.pins[stK]);
+            });
+            try { localStorage.setItem("stunt_active_pins", JSON.stringify(dynamicStationPins)); } catch(e) {}
+          }
+          if (fp.teacher_online !== undefined) {
+            updateTeacherStatusInModal(fp.teacher_online);
+          }
+          if (currentStation) {
+            let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
+            let gReset = Number(fp.global_reset_ms || 0);
+            let sReset = (fp.station_resets && fp.station_resets[currentStation]) ? Number(fp.station_resets[currentStation]) : 0;
+            let latestReset = Math.max(gReset, sReset);
+            if (latestReset > 0 && latestReset > joinTs) {
+              if (gReset > 0) localStorage.setItem("stunt_last_handled_global_reset", String(gReset));
+              if (sReset > 0) localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(sReset));
+              executeSessionReset("Lab session has been reset by the instructor. Please enter your station PIN to join again.", latestReset);
+              return;
+            }
+          }
+        } else if (rec.station_id) {
+          if (fp.pin) {
+            dynamicStationPins[rec.station_id] = String(fp.pin);
+          }
+          if (fp.teacher_online !== undefined) {
+            updateTeacherStatusInModal(fp.teacher_online);
+          }
+          if (rec.station_id === currentStation && fp.reset_timestamp) {
+            let rTs = Number(fp.reset_timestamp) || 0;
+            let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
+            let lastReset = Number(localStorage.getItem("stunt_last_handled_reset_" + currentStation) || 0);
+            if (rTs > Math.max(joinTs, lastReset)) {
+              localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(rTs));
+              executeSessionReset("Your station was reset by your instructor. Please enter the new station PIN to join again.", rTs);
+            }
+          }
         }
       })
       .subscribe();
@@ -3459,52 +3598,84 @@
     }
   }
 
-  function verifyAndLockStation() {
+  let isVerifyingPin = false;
+
+  async function verifyAndLockStation() {
+    if (isVerifyingPin) return;
     let sel = document.getElementById("modalStationSelect").value;
     let pinInput = document.getElementById("modalStationPin");
-    let pin = pinInput.value.trim();
+    let btnVerify = document.getElementById("btnVerifyStation");
+    let pin = pinInput ? pinInput.value.trim() : "";
     let errBanner = document.getElementById("pinErrorBanner");
     let modalEl = document.getElementById("stationModalCard");
 
-    // 1. HARD GATE: Teacher must be online
-    if (!isTeacherOnline) {
-      if (errBanner) {
-        errBanner.textContent = "⏳ Wait for your instructor to launch the session before entering!";
-        errBanner.style.display = "block";
-      }
-      if (modalEl) {
-        modalEl.classList.remove("shake-error");
-        void modalEl.offsetWidth;
-        modalEl.classList.add("shake-error");
-      }
-      return;
+    isVerifyingPin = true;
+    if (btnVerify) {
+      btnVerify.disabled = true;
+      btnVerify.textContent = "⏳ Verifying PIN...";
     }
 
-    // 2. Validate PIN against dynamic random PIN or Teacher Master PIN
-    let expectedPin = dynamicStationPins[sel] || DEFAULT_STATION_PINS[sel];
-    if (pin === expectedPin || pin === TEACHER_MASTER_PIN) {
-      currentStation = sel;
-      localStorage.setItem("stunt_locked_station", currentStation);
-      document.getElementById("stationModal").style.display = "none";
-      if (errBanner) errBanner.style.display = "none";
-      if (modalEl) modalEl.classList.remove("shake-error");
-      updateStationBadge();
-      restoreWorksheetState();
-      saveAndSync();
-      listenToStationUpdates();
-      checkTargetRangeReveal(false);
-    } else {
-      if (errBanner) {
-        errBanner.textContent = "⚠️ Incorrect PIN for selected station! Check your bench block or ask instructor.";
-        errBanner.style.display = "block";
+    try {
+      // Refresh latest PINs from localStorage first
+      syncPinsFromLocalStorage();
+
+      // If teacher appears offline OR PIN doesn't match local cache yet, fetch live authoritative PINs from Supabase before deciding!
+      let initialExpected = String(dynamicStationPins[sel] || DEFAULT_STATION_PINS[sel]);
+      if (!isTeacherOnline || (pin !== initialExpected && pin !== TEACHER_MASTER_PIN)) {
+        await checkInitialTeacherAndPins(true);
       }
-      if (modalEl) {
-        modalEl.classList.remove("shake-error");
-        void modalEl.offsetWidth; // trigger reflow
-        modalEl.classList.add("shake-error");
+
+      // 1. HARD GATE: Teacher must be online
+      if (!isTeacherOnline && pin !== TEACHER_MASTER_PIN) {
+        if (errBanner) {
+          errBanner.textContent = "⏳ Wait for your instructor to launch the session before entering!";
+          errBanner.style.display = "block";
+        }
+        if (modalEl) {
+          modalEl.classList.remove("shake-error");
+          void modalEl.offsetWidth;
+          modalEl.classList.add("shake-error");
+        }
+        return;
       }
-      pinInput.value = "";
-      pinInput.focus();
+
+      // 2. Validate PIN against Teacher Dashboard's active station PIN or Teacher Master PIN
+      let expectedPin = String(dynamicStationPins[sel] || DEFAULT_STATION_PINS[sel]);
+      if (pin === expectedPin || pin === TEACHER_MASTER_PIN) {
+        let joinNow = Date.now();
+        currentStation = sel;
+        localStorage.setItem("stunt_locked_station", currentStation);
+        localStorage.setItem("stunt_locked_pin_" + currentStation, expectedPin);
+        localStorage.setItem("stunt_join_ts_" + currentStation, String(joinNow));
+        if (errBanner) errBanner.style.display = "none";
+        if (modalEl) modalEl.classList.remove("shake-error");
+        updateStationBadge();
+        await restoreWorksheetState();
+        document.getElementById("stationModal").style.display = "none";
+        await saveAndSync();
+        listenToStationUpdates();
+        checkTargetRangeReveal(false);
+      } else {
+        if (errBanner) {
+          errBanner.textContent = "⚠️ Incorrect PIN for selected station! Check the PIN shown on your instructor's dashboard.";
+          errBanner.style.display = "block";
+        }
+        if (modalEl) {
+          modalEl.classList.remove("shake-error");
+          void modalEl.offsetWidth; // trigger reflow
+          modalEl.classList.add("shake-error");
+        }
+        if (pinInput) {
+          pinInput.value = "";
+          pinInput.focus();
+        }
+      }
+    } finally {
+      isVerifyingPin = false;
+      if (btnVerify) {
+        btnVerify.disabled = false;
+        btnVerify.textContent = "🔒 Verify PIN & Lock Station";
+      }
     }
   }
 
@@ -4637,7 +4808,11 @@
   // COMPLETE STATE PACKING & PERSISTENCE
   // ==========================================
   function packWorksheetState() {
+    let lastStReset = currentStation ? Number(localStorage.getItem("stunt_last_handled_reset_" + currentStation) || 0) : 0;
     return {
+      pin: currentStation ? String(dynamicStationPins[currentStation] || "") : undefined,
+      teacher_online: isTeacherOnline,
+      reset_timestamp: lastStReset > 0 ? lastStReset : undefined,
       unlockedStep: worksheetState.unlockedStep,
       progress: worksheetState.progress,
       status: worksheetState.status,
@@ -4706,6 +4881,7 @@
   // SUPABASE REALTIME SYNC & LOCAL PERSISTENCE
   // ==========================================
   async function saveAndSync() {
+    if (isExecutingReset) return;
     updateProgress();
     if (!currentStation) return;
 
@@ -4737,9 +4913,7 @@
 
     setTimeout(() => updateSaveIndicator("saved"), 350);
 
-    // 2. SAVE TO SUPABASE (SAFE NUMERICAL ZERO HANDLING)
-    if (!supabaseClient) return;
-
+    // 2. SAVE TO SUPABASE (SAFE NUMERICAL ZERO HANDLING + DIRECT REST FALLBACK)
     let slopeVal = parseFloat(fullState.calibratedParams.slopeA);
     let interceptVal = parseFloat(fullState.calibratedParams.interceptB);
     let calcHVal = parseFloat(fullState.inversion.calcH);
@@ -4776,9 +4950,20 @@
     };
 
     try {
-      const { error } = await supabaseClient.from("station_submissions").upsert(payload);
-      if (error) {
-        console.warn("Supabase upsert warning:", error.message);
+      if (supabaseClient) {
+        const { error } = await supabaseClient.from("station_submissions").upsert(payload);
+        if (error) console.warn("Supabase upsert warning:", error.message);
+      } else if (typeof fetch === "function" && SUPABASE_URL.startsWith("https://")) {
+        await fetch(SUPABASE_URL + "/rest/v1/station_submissions?on_conflict=station_id", {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify(payload)
+        });
       }
     } catch(e) {
       console.warn("Sync err", e);
@@ -4814,7 +4999,11 @@
       } else if (data.type === 'TEACHER_LOGGED_OUT') {
         updateTeacherStatusInModal(false);
       } else if (data.type === 'STATION_PINS_UPDATED') {
-        if (data.pins) Object.assign(dynamicStationPins, data.pins);
+        if (data.pins) {
+          Object.assign(dynamicStationPins, data.pins);
+          try { localStorage.setItem("stunt_active_pins", JSON.stringify(dynamicStationPins)); } catch(e) {}
+        }
+        if (data.teacher_online !== undefined) updateTeacherStatusInModal(data.teacher_online);
       } else if (data.type === 'SPRINT_TIMER_SYNC') {
         updateStudentSprintTimerHUD(data.timer || data);
       } else if (data.type === 'TARGET_RANGE_REVEALED') {
@@ -4833,14 +5022,26 @@
           if (typeof confetti === 'function') confetti({ particleCount: 150, spread: 90 });
         }
       } else if (data.type === 'RESET_ALL_STATIONS') {
-        if (data.pins) Object.assign(dynamicStationPins, data.pins);
-        executeSessionReset("Lab session has been reset by the instructor for a new class session.");
-      } else if (data.type === 'RESET_INDIVIDUAL_STATION') {
-        if (data.new_pin && data.station_id) {
-          dynamicStationPins[data.station_id] = data.new_pin;
+        if (data.pins) {
+          Object.assign(dynamicStationPins, data.pins);
+          try { localStorage.setItem("stunt_active_pins", JSON.stringify(dynamicStationPins)); } catch(e) {}
         }
+        if (data.teacher_online !== undefined) updateTeacherStatusInModal(data.teacher_online);
+        else updateTeacherStatusInModal(true);
+        if (data.timestamp) localStorage.setItem("stunt_last_handled_global_reset", String(data.timestamp));
+        executeSessionReset("Lab session has been reset by the instructor. Please enter your station PIN to join again.", data.timestamp);
+      } else if (data.type === 'RESET_INDIVIDUAL_STATION') {
+        if (data.pins) {
+          Object.assign(dynamicStationPins, data.pins);
+        }
+        if (data.new_pin && data.station_id) {
+          dynamicStationPins[data.station_id] = String(data.new_pin);
+        }
+        try { localStorage.setItem("stunt_active_pins", JSON.stringify(dynamicStationPins)); } catch(e) {}
+        if (data.teacher_online !== undefined) updateTeacherStatusInModal(data.teacher_online);
         if (data.station_id === currentStation) {
-          executeSessionReset("Your station was reset by your instructor.");
+          if (data.timestamp) localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(data.timestamp));
+          executeSessionReset("Your station was reset by your instructor. Please enter the new station PIN to join again.", data.timestamp);
         }
       } else if (data.type === 'PEER_SYNC_STATION_DATA') {
         if (data.station_id === currentStation && data.sender_id !== myClientSessionId) {
@@ -4864,10 +5065,17 @@
         let p = JSON.parse(e.newValue);
         if (p) updateStudentSprintTimerHUD(p);
       } catch(err) {}
-    } else if (e.key === "stunt_classroom_reset_trigger") {
-      executeSessionReset("Lab session has been reset by the instructor for a new class session.");
-    } else if (currentStation && e.key === ("stunt_reset_trigger_" + currentStation)) {
-      executeSessionReset("Your station was reset by your instructor.");
+    } else if (e.key === "stunt_classroom_reset_trigger" && e.newValue) {
+      syncPinsFromLocalStorage();
+      updateTeacherStatusInModal(true);
+      let rTs = Number(e.newValue) || Date.now();
+      localStorage.setItem("stunt_last_handled_global_reset", String(rTs));
+      executeSessionReset("Lab session has been reset by the instructor. Please enter your station PIN to join again.", rTs);
+    } else if (currentStation && e.key === ("stunt_reset_trigger_" + currentStation) && e.newValue) {
+      syncPinsFromLocalStorage();
+      let rTs = Number(e.newValue) || Date.now();
+      localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(rTs));
+      executeSessionReset("Your station was reset by your instructor. Please enter the new station PIN to join again.", rTs);
     } else if (e.key === "stunt_target_revealed") {
       if (e.newValue === "true") {
         applyTargetRangeReveal(false, localStorage.getItem("stunt_target_x_m"));
@@ -5092,37 +5300,40 @@
       console.warn("localStorage parse err", e);
     }
 
-    // If Supabase is connected, check remote full_payload
-    if (supabaseClient) {
-      try {
-        const { data, error } = await supabaseClient
-          .from("station_submissions")
-          .select("*")
-          .eq("station_id", currentStation)
-          .single();
+    // Check remote full_payload via Supabase SDK or direct PostgREST fallback
+    try {
+      let data = null;
+      if (supabaseClient) {
+        const res = await supabaseClient.from("station_submissions").select("*").eq("station_id", currentStation).single();
+        data = res.data;
+      } else if (typeof fetch === "function" && SUPABASE_URL.startsWith("https://")) {
+        let r = await fetch(SUPABASE_URL + "/rest/v1/station_submissions?station_id=eq." + encodeURIComponent(currentStation) + "&select=*", {
+          headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + SUPABASE_ANON_KEY }
+        });
+        if (r.ok) { let arr = await r.json(); data = Array.isArray(arr) ? arr[0] : null; }
+      }
 
-        if (data) {
-          if (data.inspection_approved) {
-            worksheetState.inspectionApproved = true;
-            let btn = document.getElementById("btnClampCheck");
-            if (btn) {
-              btn.textContent = "✅ Stop-Block Approved by Instructor!";
-              btn.style.background = "var(--emerald)";
-              btn.style.color = "#000";
-            }
-          }
-
-          if (data.teacher_grade !== null && !isNaN(data.teacher_grade)) {
-            displayTeacherGrade(data.teacher_grade, data.teacher_feedback);
-          }
-
-          if (data.full_payload && Object.keys(data.full_payload).length > 0) {
-            saved = data.full_payload;
+      if (data) {
+        if (data.inspection_approved) {
+          worksheetState.inspectionApproved = true;
+          let btn = document.getElementById("btnClampCheck");
+          if (btn) {
+            btn.textContent = "✅ Stop-Block Approved by Instructor!";
+            btn.style.background = "var(--emerald)";
+            btn.style.color = "#000";
           }
         }
-      } catch(e) {
-        console.warn("Remote hydration err", e);
+
+        if (data.teacher_grade !== null && !isNaN(data.teacher_grade)) {
+          displayTeacherGrade(data.teacher_grade, data.teacher_feedback);
+        }
+
+        if (data.full_payload && Object.keys(data.full_payload).length > 0) {
+          saved = data.full_payload;
+        }
       }
+    } catch(e) {
+      console.warn("Remote hydration err", e);
     }
 
     if (!saved) return;
@@ -5268,8 +5479,13 @@
   function listenToStationUpdates() {
     if (!supabaseClient || !currentStation) return;
 
-    supabaseClient
-      .channel("public:station_" + currentStation)
+    if (activeStationChannel) {
+      try { supabaseClient.removeChannel(activeStationChannel); } catch(e) {}
+      activeStationChannel = null;
+    }
+
+    activeStationChannel = supabaseClient
+      .channel("public:station_" + currentStation + "_" + Date.now())
       .on("postgres_changes", {
         event: "UPDATE",
         schema: "public",
@@ -5279,12 +5495,18 @@
         let rec = payload.new;
         if (!rec) return;
 
+        if (rec.full_payload && rec.full_payload.pin) {
+          dynamicStationPins[currentStation] = String(rec.full_payload.pin);
+        }
+
         // Check if this station was individually reset by instructor
         if (rec.full_payload && rec.full_payload.reset_timestamp) {
-          let lastReset = localStorage.getItem("stunt_last_handled_reset_" + currentStation);
-          if (!lastReset || Number(lastReset) < Number(rec.full_payload.reset_timestamp)) {
-            localStorage.setItem("stunt_last_handled_reset_" + currentStation, rec.full_payload.reset_timestamp.toString());
-            executeSessionReset("Your station was reset by your instructor.");
+          let rTs = Number(rec.full_payload.reset_timestamp) || 0;
+          let lastReset = Number(localStorage.getItem("stunt_last_handled_reset_" + currentStation) || 0);
+          let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
+          if (rTs > Math.max(lastReset, joinTs)) {
+            localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(rTs));
+            executeSessionReset("Your station was reset by your instructor. Please enter the new station PIN to join again.", rTs);
             return;
           }
         }
@@ -5367,10 +5589,13 @@
         if (!rec) return;
 
         if (rec.reset_session_ms) {
-          let lastReset = localStorage.getItem("stunt_last_handled_global_reset");
-          if (!lastReset || Number(lastReset) < Number(rec.reset_session_ms)) {
-            localStorage.setItem("stunt_last_handled_global_reset", rec.reset_session_ms.toString());
-            executeSessionReset("Lab session has been reset by the instructor for a new class session.");
+          let rTs = Number(rec.reset_session_ms) || 0;
+          let lastReset = Number(localStorage.getItem("stunt_last_handled_global_reset") || 0);
+          let joinTs = currentStation ? Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0) : 0;
+          if (rTs > lastReset || (currentStation && rTs > joinTs)) {
+            localStorage.setItem("stunt_last_handled_global_reset", String(rTs));
+            if (rec.lab_started !== undefined) updateTeacherStatusInModal(rec.lab_started);
+            executeSessionReset("Lab session has been reset by the instructor. Please enter your station PIN to join again.", rTs);
             return;
           }
         }
@@ -5559,7 +5784,20 @@
   }
 
   // COMPLETE CLASSROOM SESSION RESET (TRIGGERED BY INSTRUCTOR FOR ALL OR SINGLE STATION)
-  function executeSessionReset(msg) {
+  function executeSessionReset(msg, resetTs) {
+    let tsNum = Number(resetTs) || Date.now();
+    if (lastExecutedResetTs > 0 && Math.abs(tsNum - lastExecutedResetTs) < 2500) {
+      return;
+    }
+    lastExecutedResetTs = tsNum;
+    isExecutingReset = true;
+
+    let previousStation = currentStation;
+    if (activeStationChannel && supabaseClient) {
+      try { supabaseClient.removeChannel(activeStationChannel); } catch(e) {}
+      activeStationChannel = null;
+    }
+
     if (currentStation) {
       // 1. SAFETY NET: Take an emergency backup snapshot before clearing
       try {
@@ -5569,13 +5807,21 @@
         }
       } catch(e) {}
 
-      // 2. Wipe station-specific state
-      localStorage.removeItem("stunt_lab_state_" + currentStation);
-      localStorage.removeItem("stunt_locked_station");
+      // 2. Wipe station-specific state & join lock so PIN MUST be re-entered!
+      try {
+        localStorage.removeItem("stunt_lab_state_" + currentStation);
+        localStorage.removeItem("stunt_clamp_approved_" + currentStation);
+        localStorage.removeItem("stunt_official_grade_" + currentStation);
+        localStorage.removeItem("stunt_locked_pin_" + currentStation);
+        localStorage.removeItem("stunt_join_ts_" + currentStation);
+      } catch(e) {}
     }
 
-    localStorage.removeItem("stunt_target_revealed");
-    localStorage.removeItem("stunt_target_x_m");
+    try {
+      localStorage.removeItem("stunt_locked_station");
+      localStorage.removeItem("stunt_target_revealed");
+      localStorage.removeItem("stunt_target_x_m");
+    } catch(e) {}
     hideTargetRangeReveal();
     currentStation = null;
 
@@ -5699,17 +5945,30 @@
     // 14. Update progress bar
     updateProgress();
 
-    // 15. Re-show Station Check-In Modal
+    // 15. Re-show Station Check-In Modal & force PIN re-entry
     let modal = document.getElementById("stationModal");
     if (modal) modal.style.display = "flex";
+
+    if (previousStation) {
+      let selEl = document.getElementById("modalStationSelect");
+      if (selEl) selEl.value = previousStation;
+    }
 
     let pinInput = document.getElementById("modalStationPin");
     if (pinInput) pinInput.value = "";
     let pinErr = document.getElementById("pinErrorBanner");
     if (pinErr) pinErr.style.display = "none";
-    updateTeacherStatusInModal(isTeacherOnline);
+
+    syncPinsFromLocalStorage();
+    updateTeacherStatusInModal(true);
+    checkInitialTeacherAndPins(true);
+
+    isExecutingReset = false;
 
     alert("🔄 " + (msg || "Lab session has been reset by the instructor. Please select your station and enter your PIN."));
+    if (pinInput && !pinInput.disabled) {
+      setTimeout(() => pinInput.focus(), 100);
+    }
   }
 
   // =========================================================
@@ -5761,10 +6020,13 @@
     saveAndSync();
   });
 
-  // Rolling 5-second resilient background backup heartbeat
+  // Rolling 5-second resilient background heartbeat (auto-saves when joined; syncs PINs/reset if modal open or joined)
   setInterval(() => {
     if (currentStation) {
       saveAndSync();
+      checkInitialTeacherAndPins(false);
+    } else {
+      checkInitialTeacherAndPins(true);
     }
   }, 5000);
 

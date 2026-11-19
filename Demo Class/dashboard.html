@@ -1460,9 +1460,30 @@
 
   const TEACHER_MASTER_PIN = "9999";
   let isTeacherAuthorized = false;
+  let hasSavedLocalPinsOnBoot = false;
+  let lastGlobalResetMs = Number(localStorage.getItem("stunt_global_reset_ms") || 0) || 0;
+  let stationResetTimestamps = {};
+  try {
+    let savedResetMap = JSON.parse(localStorage.getItem("stunt_station_resets_map") || "{}");
+    if (savedResetMap && typeof savedResetMap === "object") stationResetTimestamps = savedResetMap;
+  } catch(e) {}
 
   function generateRandomPin() {
     return Math.floor(1000 + Math.random() * 9000).toString();
+  }
+
+  function loadInitialStationPin(stKey) {
+    try {
+      let raw = localStorage.getItem("stunt_active_pins");
+      if (raw) {
+        let parsed = JSON.parse(raw);
+        if (parsed && parsed[stKey] && /^\d{4}$/.test(String(parsed[stKey])) && !["1111","2222","3333","4444"].includes(String(parsed[stKey]))) {
+          hasSavedLocalPinsOnBoot = true;
+          return String(parsed[stKey]);
+        }
+      }
+    } catch(e) {}
+    return generateRandomPin();
   }
 
   function makeEmptySection1() {
@@ -1483,7 +1504,7 @@
   let stations = {
     station_1: Object.assign({
       name: "Station 1: Speed Demons",
-      pin: generateRandomPin(),
+      pin: loadInitialStationPin("station_1"),
       rank: "🥇",
       progress: 0,
       slope: null,
@@ -1500,7 +1521,7 @@
     }, makeEmptySection1()),
     station_2: Object.assign({
       name: "Station 2: Vector Vanguard",
-      pin: generateRandomPin(),
+      pin: loadInitialStationPin("station_2"),
       rank: "🥈",
       progress: 0,
       slope: null,
@@ -1517,7 +1538,7 @@
     }, makeEmptySection1()),
     station_3: Object.assign({
       name: "Station 3: Quantum Riders",
-      pin: generateRandomPin(),
+      pin: loadInitialStationPin("station_3"),
       rank: "🥉",
       progress: 0,
       slope: null,
@@ -1534,7 +1555,7 @@
     }, makeEmptySection1()),
     station_4: Object.assign({
       name: "Station 4: Apex Phoenix",
-      pin: generateRandomPin(),
+      pin: loadInitialStationPin("station_4"),
       rank: "4th",
       progress: 0,
       slope: null,
@@ -1554,7 +1575,7 @@
   function hydrateStationFullPayload(st, fp) {
     if (!st || !fp) return;
     st.rawPayload = Object.assign({}, st.rawPayload || {}, fp);
-    if (fp.pin) st.pin = fp.pin.toString();
+    // NOTE: Never overwrite Teacher Dashboard's authoritative st.pin from student payloads!
     if (fp.crew) st.crew = fp.crew;
     if (fp.dropH !== undefined) st.dropH = fp.dropH;
     if (fp.maxRampH !== undefined) st.maxRampH = fp.maxRampH;
@@ -1745,12 +1766,20 @@
     }
   });
 
-  function checkTeacherAuth() {
+  function checkTeacherAuth(skipPinSync) {
     if (sessionStorage.getItem("stunt_teacher_auth") === "true") {
       isTeacherAuthorized = true;
       let modal = document.getElementById("teacherAuthModal");
       if (modal) modal.style.display = "none";
       updateTeacherAuthStatusUI(true);
+      let btnStart = document.getElementById("btnStartLab");
+      if (btnStart) {
+        btnStart.style.background = "linear-gradient(135deg, #10B981 0%, #059669 100%)";
+        btnStart.innerHTML = "✅ Lab In Session";
+      }
+      if (!skipPinSync) {
+        syncPinsToClassroom();
+      }
       return true;
     } else {
       isTeacherAuthorized = false;
@@ -1827,59 +1856,133 @@
     if (isPinsFocusMode) renderPinsFocusGrid();
   }
 
-  async function syncPinsToClassroom() {
-    let pinMap = {
-      station_1: stations.station_1.pin,
-      station_2: stations.station_2.pin,
-      station_3: stations.station_3.pin,
-      station_4: stations.station_4.pin
+  function getPinMapObject() {
+    return {
+      station_1: String(stations.station_1.pin),
+      station_2: String(stations.station_2.pin),
+      station_3: String(stations.station_3.pin),
+      station_4: String(stations.station_4.pin)
     };
+  }
 
-    // 1. Supabase classroom_control update
+  async function syncPinsToClassroom() {
+    let pinMap = getPinMapObject();
+    let nowMs = Date.now();
+
+    // 1. LocalStorage FIRST (instant same-browser sync)
+    try {
+      localStorage.setItem("stunt_teacher_online", isTeacherAuthorized ? "true" : "false");
+      localStorage.setItem("stunt_active_pins", JSON.stringify(pinMap));
+    } catch(e) {}
+
+    // 2. BroadcastChannel (instant cross-tab sync)
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({
+          type: isTeacherAuthorized ? "TEACHER_LOGGED_IN" : "TEACHER_LOGGED_OUT",
+          teacher_online: isTeacherAuthorized,
+          pins: pinMap,
+          timestamp: nowMs
+        });
+        classroomChannel.postMessage({
+          type: "STATION_PINS_UPDATED",
+          teacher_online: isTeacherAuthorized,
+          pins: pinMap,
+          timestamp: nowMs
+        });
+      } catch(e) {}
+    }
+
+    // 3. Supabase Cloud Sync (authoritative global_pins row + station_1..4 + classroom_control)
     if (supabaseClient) {
       try {
+        await supabaseClient.from("station_submissions").upsert({
+          station_id: "global_pins",
+          group_name: "System PIN Registry",
+          stunt_status: "system",
+          full_payload: {
+            pins: pinMap,
+            teacher_online: isTeacherAuthorized,
+            global_reset_ms: lastGlobalResetMs,
+            station_resets: stationResetTimestamps,
+            updated_at_ms: nowMs
+          },
+          updated_at: new Date().toISOString()
+        }, { onConflict: "station_id" });
+      } catch(e) {
+        console.warn("Supabase global_pins sync notice:", e);
+      }
+
+      try {
         await supabaseClient.from("classroom_control").update({
-          lab_started: true,
-          started_at_ms: Date.now(),
+          lab_started: isTeacherAuthorized,
+          started_at_ms: nowMs,
           updated_at: new Date().toISOString()
         }).eq("id", "global");
       } catch(e) {
         console.warn("Supabase classroom_control pin sync notice:", e);
       }
 
-      // Update station_submissions with active PINs and teacher_online
-      for (let stKey of Object.keys(stations)) {
+      await Promise.all(Object.keys(stations).map(async (stKey) => {
         try {
-          await supabaseClient.from("station_submissions").update({
+          await supabaseClient.from("station_submissions").upsert({
+            station_id: stKey,
             full_payload: Object.assign({}, stations[stKey].rawPayload || {}, {
-              pin: stations[stKey].pin,
+              pin: String(stations[stKey].pin),
               teacher_online: isTeacherAuthorized,
-              updated_at_ms: Date.now()
-            })
-          }).eq("station_id", stKey);
+              reset_timestamp: stationResetTimestamps[stKey] || lastGlobalResetMs || undefined,
+              updated_at_ms: nowMs
+            }),
+            updated_at: new Date().toISOString()
+          }, { onConflict: "station_id" });
         } catch(e) {
           console.warn(`Supabase pin sync notice for ${stKey}:`, e);
         }
-      }
-    }
-
-    // 2. BroadcastChannel
-    if (classroomChannel) {
+      }));
+    } else if (typeof fetch === "function" && SUPABASE_URL.startsWith("https://")) {
+      // Direct PostgREST fallback if CDN script was blocked on school Wi-Fi
       try {
-        classroomChannel.postMessage({
-          type: "TEACHER_LOGGED_IN",
-          teacher_online: isTeacherAuthorized,
-          pins: pinMap,
-          timestamp: Date.now()
+        await fetch(SUPABASE_URL + "/rest/v1/station_submissions?on_conflict=station_id", {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            station_id: "global_pins",
+            group_name: "System PIN Registry",
+            stunt_status: "system",
+            full_payload: {
+              pins: pinMap,
+              teacher_online: isTeacherAuthorized,
+              global_reset_ms: lastGlobalResetMs,
+              station_resets: stationResetTimestamps,
+              updated_at_ms: nowMs
+            },
+            updated_at: new Date().toISOString()
+          })
         });
       } catch(e) {}
     }
+  }
 
-    // 3. LocalStorage
-    try {
-      localStorage.setItem("stunt_teacher_online", isTeacherAuthorized ? "true" : "false");
-      localStorage.setItem("stunt_active_pins", JSON.stringify(pinMap));
-    } catch(e) {}
+  async function setCustomStationPin(stationKey) {
+    let st = stations[stationKey];
+    if (!st) return;
+    let entered = prompt(`🔑 Set Custom 4-Digit PIN for ${st.name}:\n\nType any 4-digit PIN (e.g., 1234, 2026) — it will immediately sync to all Student Portals:`, st.pin);
+    if (entered === null) return;
+    let cleaned = entered.trim();
+    if (!/^\d{4}$/.test(cleaned)) {
+      alert("⚠️ Please enter an exact 4-digit numeric PIN (0000–9999).");
+      return;
+    }
+    st.pin = cleaned;
+    await syncPinsToClassroom();
+    renderLeaderboard();
+    renderGradingQueue();
+    if (isPinsFocusMode) renderPinsFocusGrid();
   }
 
   async function rollNewRandomPins() {
@@ -1894,6 +1997,7 @@
     await syncPinsToClassroom();
     renderLeaderboard();
     renderGradingQueue();
+    if (isPinsFocusMode) renderPinsFocusGrid();
 
     let pinSummary = Object.keys(stations).map(k => `${stations[k].name}: ${stations[k].pin}`).join("\n");
     alert("🎲 NEW RANDOM STATION PINs GENERATED & SYNCED!\n\n" + pinSummary + "\n\nClick 'Reveal Station PINs & Roster' to display them on the classroom projector.");
@@ -1905,38 +2009,8 @@
     }
     sessionStorage.removeItem("stunt_teacher_auth");
     isTeacherAuthorized = false;
-
-    if (supabaseClient) {
-      try {
-        await supabaseClient.from("classroom_control").update({
-          lab_started: false,
-          updated_at: new Date().toISOString()
-        }).eq("id", "global");
-
-        for (let stKey of Object.keys(stations)) {
-          await supabaseClient.from("station_submissions").update({
-            full_payload: Object.assign({}, stations[stKey].rawPayload || {}, {
-              pin: stations[stKey].pin,
-              teacher_online: false,
-              updated_at_ms: Date.now()
-            })
-          }).eq("station_id", stKey);
-        }
-      } catch(e) {}
-    }
-
-    if (classroomChannel) {
-      try {
-        classroomChannel.postMessage({
-          type: "TEACHER_LOGGED_OUT",
-          teacher_online: false,
-          timestamp: Date.now()
-        });
-      } catch(e) {}
-    }
-
-    localStorage.setItem("stunt_teacher_online", "false");
-    checkTeacherAuth();
+    await syncPinsToClassroom();
+    checkTeacherAuth(true);
     initSprintTimer();
   }
 
@@ -1979,17 +2053,23 @@
     }
   }
 
-  function init() {
+  async function init() {
     hydrateLocalStorageStations();
     renderLeaderboard();
     syncRevealRangeButtonUI();
 
     renderMultiGraph();
     renderGradingQueue();
-    fetchInitialSubmissions();
     setupRealtime();
-    checkTeacherAuth();
     initSprintTimer();
+    checkTeacherAuth(true);
+    await fetchInitialSubmissions();
+    if (isTeacherAuthorized) {
+      await syncPinsToClassroom();
+      renderLeaderboard();
+      renderGradingQueue();
+      if (isPinsFocusMode) renderPinsFocusGrid();
+    }
   }
 
   let isPinsFocusMode = false;
@@ -2067,8 +2147,8 @@
           </div>
         </div>
 
-        <div class="pin-focus-code-box">
-          <span class="pin-focus-label">Station Security PIN</span>
+        <div class="pin-focus-code-box" onclick="setCustomStationPin('${key}')" style="cursor: pointer;" title="Click to customize this station's 4-digit PIN">
+          <span class="pin-focus-label">Station Security PIN <span style="font-size: 11px; color: #2563EB; font-weight: 800; margin-left: 4px;">✏️ Edit</span></span>
           <span class="pin-focus-digits">${st.pin}</span>
         </div>
 
@@ -2150,51 +2230,29 @@
 
   async function officiallyStartLab() {
     isLabStarted = true;
+    isTeacherAuthorized = true;
     let btn = document.getElementById("btnStartLab");
     if (btn) {
       btn.style.background = "linear-gradient(135deg, #10B981 0%, #059669 100%)";
       btn.innerHTML = "✅ Lab In Session";
     }
 
-    let pinMap = {
-      station_1: stations.station_1.pin,
-      station_2: stations.station_2.pin,
-      station_3: stations.station_3.pin,
-      station_4: stations.station_4.pin
-    };
-    try {
-      localStorage.setItem("stunt_teacher_online", "true");
-      localStorage.setItem("stunt_active_pins", JSON.stringify(pinMap));
-    } catch(e) {}
+    await syncPinsToClassroom();
     if (classroomChannel) {
       try {
         classroomChannel.postMessage({
           type: "LAB_OFFICIALLY_STARTED",
           teacher_online: true,
-          pins: pinMap,
+          pins: getPinMapObject(),
           timestamp: Date.now()
         });
       } catch(e) {}
     }
 
-    if (supabaseClient) {
-      try {
-        await supabaseClient
-          .from("classroom_control")
-          .update({
-            lab_started: true,
-            started_at_ms: Date.now(),
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", "global");
-      } catch(e) {
-        console.warn("Supabase start lab notice:", e);
-      }
-    }
-
-    alert("🚀 SCENE 42 STUNT LAB OFFICIALLY STARTED!\n\nAll stations are active and telemetry recording is rolling.");
+    alert("🚀 SCENE 42 STUNT LAB OFFICIALLY STARTED!\n\nAll stations are active and station PINs are synced across all student portals.");
     renderLeaderboard();
     syncRevealRangeButtonUI();
+    if (isPinsFocusMode) renderPinsFocusGrid();
   }
 
   function togglePrivacyMode() {
@@ -2232,9 +2290,31 @@
       }
 
       if (data && data.length > 0) {
+        // Hydrate global_pins registry on cold boot if local browser had no saved PINs
+        let globalPinRec = data.find(r => r.station_id === "global_pins");
+        if (globalPinRec && globalPinRec.full_payload) {
+          let gfp = globalPinRec.full_payload;
+          if (!hasSavedLocalPinsOnBoot && gfp.pins && typeof gfp.pins === "object") {
+            Object.keys(stations).forEach(stK => {
+              if (gfp.pins[stK] && /^\d{4}$/.test(String(gfp.pins[stK]))) {
+                stations[stK].pin = String(gfp.pins[stK]);
+              }
+            });
+          }
+          if (gfp.global_reset_ms && Number(gfp.global_reset_ms) > lastGlobalResetMs) {
+            lastGlobalResetMs = Number(gfp.global_reset_ms);
+          }
+          if (gfp.station_resets && typeof gfp.station_resets === "object") {
+            stationResetTimestamps = Object.assign({}, gfp.station_resets, stationResetTimestamps);
+          }
+        }
+
         data.forEach(rec => {
           if (stations[rec.station_id]) {
             let st = stations[rec.station_id];
+            if (!hasSavedLocalPinsOnBoot && (!globalPinRec || !globalPinRec.full_payload || !globalPinRec.full_payload.pins) && rec.full_payload && rec.full_payload.pin && /^\d{4}$/.test(String(rec.full_payload.pin))) {
+              st.pin = String(rec.full_payload.pin);
+            }
             if (rec.full_payload) {
               hydrateStationFullPayload(st, rec.full_payload);
             }
@@ -2360,7 +2440,7 @@
             <div class="station-name-wrap">
               <div class="station-name-row">
                 <span class="station-name">${st.name}</span>
-                <span class="${pinBadgeClass}" title="Physical Station Passcode">${pinDisplay}</span>
+                <span class="${pinBadgeClass}" ${(!isMasked || isRosterPinRevealMode) ? `onclick="event.stopPropagation(); setCustomStationPin('${key}')" style="cursor: pointer;" title="Click to customize ${st.name} 4-digit PIN"` : `title="Physical Station Passcode"`}>${pinDisplay}</span>
                 <span class="rank-pill rank-${idx+1}">${rankEmoji} #${idx+1}</span>
               </div>
             </div>
@@ -2947,67 +3027,17 @@
   async function confirmResetIndividualStation(stationKey) {
     let st = stations[stationKey];
     let stName = st ? st.name : stationKey;
-    if (!confirm(`⚠️ RESET ${stName.toUpperCase()}?\n\nThis will completely wipe all entered data, graph calibration, crew check-ins, and calculations back to blank for ${stName}.\n\nA fresh randomized PIN will be assigned to this station.\n\nOther stations will NOT be affected.\n\nProceed with individual station reset?`)) {
+    if (!confirm(`⚠️ RESET ${stName.toUpperCase()}?\n\nThis will completely wipe all entered data, graph calibration, crew check-ins, and calculations back to blank for ${stName}.\n\nStudents on this station will be asked to re-enter the station PIN to join again.\n\nOther stations will NOT be affected.\n\nProceed with individual station reset?`)) {
       return;
     }
 
     let timestamp = Date.now();
     let newPin = generateRandomPin();
     if (stations[stationKey]) stations[stationKey].pin = newPin;
+    stationResetTimestamps[stationKey] = timestamp;
+    let pinMap = getPinMapObject();
 
-    // 1. Cross-tab BroadcastChannel notification targeted to this station
-    if (classroomChannel) {
-      try {
-        classroomChannel.postMessage({
-          type: "RESET_INDIVIDUAL_STATION",
-          station_id: stationKey,
-          new_pin: newPin,
-          timestamp: timestamp
-        });
-      } catch(e) {
-        console.warn("BroadcastChannel individual reset notice:", e);
-      }
-    }
-
-    // 2. localStorage trigger for cross-tab sync if on same browser
-    try {
-      localStorage.setItem("stunt_reset_trigger_" + stationKey, timestamp.toString());
-      localStorage.removeItem("stunt_lab_state_" + stationKey);
-      localStorage.removeItem("stunt_locked_station");
-      let activePins = JSON.parse(localStorage.getItem("stunt_active_pins") || "{}");
-      activePins[stationKey] = newPin;
-      localStorage.setItem("stunt_active_pins", JSON.stringify(activePins));
-    } catch(e) {}
-
-    // 3. Supabase Database Update for this specific station
-    if (supabaseClient) {
-      try {
-        await supabaseClient.from("station_submissions").update({
-          crew_members: "",
-          progress_pct: 0,
-          current_step: 1,
-          points: [],
-          slope: 0,
-          intercept: 0,
-          calc_h: 0,
-          actual_x: null,
-          delta: null,
-          accuracy_pct: null,
-          stunt_status: "calibrating",
-          inspection_approved: false,
-          teacher_grade: null,
-          teacher_feedback: "",
-          graded_at: null,
-          exit_answers: {},
-          full_payload: { reset_timestamp: timestamp, pin: newPin, teacher_online: isTeacherAuthorized },
-          updated_at: new Date().toISOString()
-        }).eq("station_id", stationKey);
-      } catch(e) {
-        console.warn("Supabase station reset notice:", e);
-      }
-    }
-
-    // 4. Reset in-memory state for this station
+    // 1. Reset in-memory state for this station
     if (stations[stationKey]) {
       stations[stationKey].status = 'calibrating';
       stations[stationKey].progress = 0;
@@ -3026,27 +3056,105 @@
       stations[stationKey].feedback = "";
       Object.assign(stations[stationKey], makeEmptySection1());
     }
-
     delete revealedCards[stationKey];
+
+    // 2. localStorage update (write new PINs BEFORE reset trigger so student storage listener reads fresh PINs!)
+    try {
+      localStorage.setItem("stunt_teacher_online", isTeacherAuthorized ? "true" : "false");
+      localStorage.setItem("stunt_active_pins", JSON.stringify(pinMap));
+      localStorage.setItem("stunt_station_resets_map", JSON.stringify(stationResetTimestamps));
+      localStorage.removeItem("stunt_lab_state_" + stationKey);
+      localStorage.removeItem("stunt_clamp_approved_" + stationKey);
+      localStorage.removeItem("stunt_official_grade_" + stationKey);
+      localStorage.removeItem("stunt_locked_pin_" + stationKey);
+      localStorage.removeItem("stunt_join_ts_" + stationKey);
+      if (localStorage.getItem("stunt_locked_station") === stationKey) {
+        localStorage.removeItem("stunt_locked_station");
+      }
+      localStorage.setItem("stunt_reset_trigger_" + stationKey, timestamp.toString());
+    } catch(e) {}
+
+    // 3. Cross-tab BroadcastChannel notification targeted to this station
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({
+          type: "RESET_INDIVIDUAL_STATION",
+          station_id: stationKey,
+          new_pin: newPin,
+          pins: pinMap,
+          teacher_online: isTeacherAuthorized,
+          timestamp: timestamp
+        });
+      } catch(e) {
+        console.warn("BroadcastChannel individual reset notice:", e);
+      }
+    }
+
+    // 4. Supabase Database Upsert (global_pins FIRST, then station row)
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("station_submissions").upsert({
+          station_id: "global_pins",
+          group_name: "System PIN Registry",
+          stunt_status: "system",
+          full_payload: {
+            pins: pinMap,
+            teacher_online: isTeacherAuthorized,
+            global_reset_ms: lastGlobalResetMs,
+            station_resets: stationResetTimestamps,
+            updated_at_ms: timestamp
+          },
+          updated_at: new Date().toISOString()
+        }, { onConflict: "station_id" });
+
+        await supabaseClient.from("station_submissions").upsert({
+          station_id: stationKey,
+          crew_members: "",
+          progress_pct: 0,
+          current_step: 1,
+          points: [],
+          slope: 0,
+          intercept: 0,
+          calc_h: 0,
+          actual_x: null,
+          delta: null,
+          accuracy_pct: null,
+          stunt_status: "calibrating",
+          inspection_approved: false,
+          teacher_grade: null,
+          teacher_feedback: "",
+          graded_at: null,
+          exit_answers: {},
+          full_payload: { reset_timestamp: timestamp, pin: newPin, teacher_online: isTeacherAuthorized },
+          updated_at: new Date().toISOString()
+        }, { onConflict: "station_id" });
+      } catch(e) {
+        console.warn("Supabase station reset notice:", e);
+      }
+    } else {
+      await syncPinsToClassroom();
+    }
 
     renderLeaderboard();
     renderMultiGraph();
-    if (document.getElementById("gradingView") && document.getElementById("gradingView").classList.contains("active")) {
-      renderGradingQueue();
-    }
+    renderGradingQueue();
+    if (isPinsFocusMode) renderPinsFocusGrid();
 
-    alert(`✅ ${stName} has been reset to blank!\n\nNew Station PIN: ${newPin}`);
+    alert(`✅ ${stName} has been reset to blank!\n\nStudents on this station must re-enter the new PIN to join:\nNew Station PIN: ${newPin}`);
   }
 
   // GLOBAL CLASSROOM SESSION RESET & RESTART LOGIC (ALL STATIONS)
   async function confirmResetLabSession() {
-    let code = prompt("⚠️ DANGER: RESTART LAB FOR ALL GROUPS\n\nThis will wipe all entered student data across ALL stations, clear all student portals back to the Check-In screen, and generate fresh randomized PINs for all groups.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
+    let code = prompt("⚠️ DANGER: RESTART LAB FOR ALL GROUPS\n\nThis will wipe all entered student data across ALL stations, lock all student portals back to the PIN Check-In screen, and generate fresh randomized PINs for all groups.\n\nEnter Teacher Master PIN (9999) to confirm reset:");
     if (code !== "9999") {
       if (code !== null) alert("Incorrect PIN. Reset aborted.");
       return;
     }
 
     let timestamp = Date.now();
+    lastGlobalResetMs = timestamp;
+    isTeacherAuthorized = true;
+    isLabStarted = true;
 
     // Generate fresh randomized PINs for each group
     let newPinMap = {};
@@ -3054,67 +3162,10 @@
       let p = generateRandomPin();
       stations[key].pin = p;
       newPinMap[key] = p;
+      stationResetTimestamps[key] = timestamp;
     });
 
-    // 1. BroadcastChannel reset to all connected student screens
-    if (classroomChannel) {
-      try {
-        classroomChannel.postMessage({
-          type: "RESET_ALL_STATIONS",
-          pins: newPinMap,
-          teacher_online: isTeacherAuthorized,
-          timestamp: timestamp
-        });
-      } catch(e) {
-        console.warn("BroadcastChannel reset notice:", e);
-      }
-    }
-
-    // 2. localStorage reset trigger
-    localStorage.setItem("stunt_classroom_reset_trigger", timestamp.toString());
-    localStorage.setItem("stunt_active_pins", JSON.stringify(newPinMap));
-    localStorage.removeItem("stunt_target_revealed");
-    revealedCards = {};
-    isLabStarted = true;
-
-    // 3. Supabase reset if connected
-    if (supabaseClient) {
-      try {
-        await supabaseClient.from("classroom_control").update({
-          lab_started: true,
-          target_range_revealed: false,
-          reset_session_ms: timestamp,
-          updated_at: new Date().toISOString()
-        }).eq("id", "global");
-
-        for (let key of Object.keys(stations)) {
-          await supabaseClient.from("station_submissions").update({
-            crew_members: "",
-            progress_pct: 0,
-            current_step: 1,
-            points: [],
-            slope: 0,
-            intercept: 0,
-            calc_h: 0,
-            actual_x: null,
-            delta: null,
-            accuracy_pct: null,
-            stunt_status: "calibrating",
-            inspection_approved: false,
-            teacher_grade: null,
-            teacher_feedback: "",
-            graded_at: null,
-            exit_answers: {},
-            full_payload: { reset_timestamp: timestamp, pin: stations[key].pin, teacher_online: true },
-            updated_at: new Date().toISOString()
-          }).eq("station_id", key);
-        }
-      } catch(e) {
-        console.warn("Supabase reset notice:", e);
-      }
-    }
-
-    // 4. Reset local stations state
+    // 1. Reset local stations state first
     Object.keys(stations).forEach(key => {
       stations[key].status = 'calibrating';
       stations[key].progress = 0;
@@ -3136,9 +3187,92 @@
         localStorage.removeItem("stunt_lab_state_" + key);
         localStorage.removeItem("stunt_clamp_approved_" + key);
         localStorage.removeItem("stunt_official_grade_" + key);
+        localStorage.removeItem("stunt_locked_pin_" + key);
+        localStorage.removeItem("stunt_join_ts_" + key);
       } catch(e) {}
     });
-    try { localStorage.removeItem("stunt_target_x_m"); } catch(e) {}
+    revealedCards = {};
+
+    // 2. Write fresh PINs to localStorage BEFORE firing reset trigger
+    try {
+      localStorage.setItem("stunt_teacher_online", "true");
+      localStorage.setItem("stunt_active_pins", JSON.stringify(newPinMap));
+      localStorage.setItem("stunt_global_reset_ms", timestamp.toString());
+      localStorage.setItem("stunt_station_resets_map", JSON.stringify(stationResetTimestamps));
+      localStorage.removeItem("stunt_locked_station");
+      localStorage.removeItem("stunt_target_revealed");
+      localStorage.removeItem("stunt_target_x_m");
+      localStorage.setItem("stunt_classroom_reset_trigger", timestamp.toString());
+    } catch(e) {}
+
+    // 3. BroadcastChannel reset to all connected student screens (carries fresh newPinMap!)
+    if (classroomChannel) {
+      try {
+        classroomChannel.postMessage({
+          type: "RESET_ALL_STATIONS",
+          pins: newPinMap,
+          teacher_online: true,
+          timestamp: timestamp
+        });
+      } catch(e) {
+        console.warn("BroadcastChannel reset notice:", e);
+      }
+    }
+
+    // 4. Supabase reset: commit global_pins & station_1..4 FIRST so new PINs are live before classroom_control fires!
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("station_submissions").upsert({
+          station_id: "global_pins",
+          group_name: "System PIN Registry",
+          stunt_status: "system",
+          full_payload: {
+            pins: newPinMap,
+            teacher_online: true,
+            global_reset_ms: timestamp,
+            station_resets: stationResetTimestamps,
+            updated_at_ms: timestamp
+          },
+          updated_at: new Date().toISOString()
+        }, { onConflict: "station_id" });
+
+        await Promise.all(Object.keys(stations).map(key =>
+          supabaseClient.from("station_submissions").upsert({
+            station_id: key,
+            crew_members: "",
+            progress_pct: 0,
+            current_step: 1,
+            points: [],
+            slope: 0,
+            intercept: 0,
+            calc_h: 0,
+            actual_x: null,
+            delta: null,
+            accuracy_pct: null,
+            stunt_status: "calibrating",
+            inspection_approved: false,
+            teacher_grade: null,
+            teacher_feedback: "",
+            graded_at: null,
+            exit_answers: {},
+            full_payload: { reset_timestamp: timestamp, pin: newPinMap[key], teacher_online: true },
+            updated_at: new Date().toISOString()
+          }, { onConflict: "station_id" })
+        ));
+
+        await supabaseClient.from("classroom_control").update({
+          lab_started: true,
+          target_range_revealed: false,
+          countdown_active: false,
+          reset_session_ms: timestamp,
+          updated_at: new Date().toISOString()
+        }).eq("id", "global");
+      } catch(e) {
+        console.warn("Supabase reset notice:", e);
+      }
+    } else {
+      await syncPinsToClassroom();
+    }
 
     // Reset UI buttons
     let btnStart = document.getElementById("btnStartLab");
@@ -3154,12 +3288,11 @@
 
     renderLeaderboard();
     renderMultiGraph();
-    if (document.getElementById("gradingView") && document.getElementById("gradingView").classList.contains("active")) {
-      renderGradingQueue();
-    }
+    renderGradingQueue();
+    if (isPinsFocusMode) renderPinsFocusGrid();
 
     let pinSummary = Object.keys(stations).map(k => `${stations[k].name}: ${stations[k].pin}`).join("\n");
-    alert("✅ Complete lab session reset!\n\nAll student portals have been cleared for all groups, and fresh random PINs have been generated:\n\n" + pinSummary);
+    alert("✅ Complete lab session reset!\n\nAll student portals now require students to re-enter their station PIN to join:\n\n" + pinSummary);
   }
 
 
