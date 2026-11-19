@@ -2813,3 +2813,72 @@ Per instructor instruction (*"do not provide both of this to students...let them
 
 ### 3. Multi-Device Live Cloud Verification
 - Verified across 4 isolated headless Chromium contexts (`verify_pin_and_reset.py`, [`verify_v5_teacher_pins_synced.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v5_teacher_pins_synced.png), [`verify_v5_student_reask_pin.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v5_student_reask_pin.png)) covering initial Teacher login PIN check-in, second-device check-in after student `saveAndSync()`, custom Teacher PIN (`2468`), Global Lab Reset forcing both live and reopened Chromebooks back to `#stationModal`, post-reset PIN check-in, and Individual Station Reset.
+
+
+## 76. Simple-English (ELL / Non-Native Friendly) Classroom Teacher Script Synchronized with Final 23-Slide Deck
+
+### 1. User Directive & Strict Constraints
+- **User Directive:** *"can you update the teacher script for class and keep it simple simple english sa it is for non native students."*
+- **Zero-Modification Deck Protection:** Inspected [`AP1_U3S5_Stunt_Calibration_Deck.pptx`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Deck.pptx) strictly read-only to extract the user's finalized 23-slide order, custom jokes/puns, on-screen banners, and exact PowerPoint `OnPageClick` animation counts without touching a single byte of the `.pptx` file.
+
+### 2. Pedagogical & Linguistic Overhaul ([`AP1_Stunt_Calibration_Classroom_Script.md`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_Stunt_Calibration_Classroom_Script.md))
+- **ELL / Non-Native Language Design:**
+  - Rewrote every spoken teacher line into short, concrete 8–12 word sentences with high-frequency vocabulary, explicit visual pointing gestures (*point to apex, plumb line, wooden riser board*), 5-second silent reading wait time, and 15-second partner turn-and-talk prompts before whole-class cold calls.
+  - Preserved full **Charlotte Danielson Framework (Domains 1–4)** alignment tags across all 23 slides for demonstration lesson evaluation at Beijing Haidian Kaiwen Academy.
+- **Exact 1-to-1 Synchronization with Current 23 Slides (`S01`–`S23`):**
+  - **Part 1 (`S01`–`S07`):** Title & 3 measurable goals (*Quantify, Model, Invert*), Meet Dave (*Drivers 1–41 quit*), 4 Crews / 1 Contract, Live Water Bucket Demo, Critical Speed ($v_{\text{crit}} = \sqrt{gR}$), Apex FBD (both arrows down), and 4-Panel Storyboard (8 clicks).
+  - **Part 2 (`S08`–`S12`):** 2.5R Energy Ledger (Blank LOL on load $\to$ Click 1 Answer LOL with 1 bar Mystery Energy $\to$ Click 2 `h > 2.5R` challenge), Scale Model Rigging ($3.7\text{ cm}$ riser board, $h, H, X$ — 5 clicks), Plumb Line ($X = 0$), Zero-Push Release Rule, and Live $2.5R$ ($23.0\text{ cm}$) Crash Demo.
+  - **Part 3 (`S13`–`S16`):** Ideal Graph Prediction ($2g = 19.6$), Stopwatch-Free Gravity Clock, 5-Height Calibration Protocol (`A`–`E`), and **Slide 16: Crew Roles & Live Sync** (explaining that all 4 team screens are live-synced by Station PIN before starting the 10-minute sprint timer).
+  - **Part 4 (`S17`–`S23`):** One-Take Impact Protocol, Broadcasting Station Target $X^*$, 2-Step Inversion Roadmap, Calculating $h^* = ((v^*)^2 - b)/a$ + $3.7\text{ cm}$ Riser Offset & Live Single Drop, Evidence-Based Closing ($a < 19.6$), Mystery Energy Reveal ($28.6\%$ rotational spin previewing Unit 6), and Slide 23 Optional Mass-Cancellation Backup Slide.
+  - Included a tear-off **Quick 1-Page Pacing Cheat Sheet** formatted to fit cleanly on the final clipboard page.
+
+### 3. PDF Compilation & Visual Verification ([`AP1_Stunt_Calibration_Classroom_Script.pdf`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_Stunt_Calibration_Classroom_Script.pdf))
+- Updated [`.build/build_pdfs.py`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/.build/build_pdfs.py) to strip duplicate markdown title headers under the PDF masthead and apply `page-break-inside: avoid` styling to fenced `<pre>` blocks.
+- Compiled and visually audited `AP1_Stunt_Calibration_Classroom_Script.pdf` (`968,551 bytes`, 12 pages, KaTeX math rendered cleanly, Page 12 standalone clipboard cheat sheet verified).
+
+
+## 77. Surgical OOXML Presenter Speaker Notes Sync (SHA-256 Verified Zero-Slide-Change Guarantee)
+
+### 1. User Directive & Strict Constraints
+- **User Directive:** *"can you update the script on PPT as well. DO NOT CHANGE PPT ORDER OR ANYTHING ELSE ON THE PPT!!!!!!!!!!!!!!!!!!!!!! DONT YOU DARE"*
+- **Zero-Touch Slide & Order Guarantee:** Built [`.build/sync_ppt_speaker_notes_only.py`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/.build/sync_ppt_speaker_notes_only.py) using surgical OOXML ZIP-entry replacement: every single entry in the `.pptx` archive (`ppt/presentation.xml`, `ppt/slides/slide1.xml`–`slide23.xml`, `ppt/slides/_rels/*`, `ppt/media/*`, `ppt/slideLayouts/*`, `ppt/slideMasters/*`) was copied **byte-for-byte** from the user's latest saved deck, replacing **only** `ppt/notesSlides/notesSlide1.xml`–`notesSlide23.xml`.
+
+### 2. Presenter View Speaker Notes Updated (`S01`–`S23`)
+- Populated all 23 slides' Presenter View Speaker Notes with the Simple-English (ELL-friendly) spoken script, exact `[Click 1..N]` cues matching each slide's live `clickEffect` count, wait-time reminders, live demo cues (Slide 04 Water Bucket, Slide 12 `2.5R` Crash), Teacher Dashboard triggers (Slide 16 `Start Sprint` 10-min synced roles timer, Slide 18 `Broadcast Target`), and Slide 23 optional mass-cancellation backup script.
+
+### 3. Cryptographic & PowerPoint COM Verification
+- **SHA-256 Archive Audit:**
+  - `Identical slide XMLs (ppt/slides/slide*.xml): 23 / 23` (`100%` byte-for-byte identical)
+  - `ppt/presentation.xml identical: True` (`100%` identical slide order and presentation properties)
+  - `Total changed entries inside .pptx: 23` (strictly `ppt/notesSlides/notesSlide1.xml` through `notesSlide23.xml`)
+- **Open-File Safety:** Because `AP1_U3S5_Stunt_Calibration_Deck.pptx` was actively open/locked in Microsoft PowerPoint (`~$AP1_U3S5_Stunt_Calibration_Deck.pptx`), saved the verified deck alongside it as [`AP1_U3S5_Stunt_Calibration_Deck_With_Notes.pptx`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/AP1_U3S5_Stunt_Calibration_Deck_With_Notes.pptx) (verified clean open and notes readback via PowerPoint COM) without disturbing the user's open PowerPoint window. Running `sync_ppt_speaker_notes_only.py` once PowerPoint is closed overwrites `AP1_U3S5_Stunt_Calibration_Deck.pptx` in-place.
+
+
+## 76. Pre-Class Full 8-Stage Live Dress Rehearsal & Zero-Latency Realtime Hardening
+
+### 1. User Directive & Pre-Class Audit Scope
+- **User Directive:** *"check if everything is working with teacher dashboard and student portal.......i will run it live soon"*
+- **Objective:** Conduct an end-to-end, multi-device live dress rehearsal of the entire 45-minute classroom sequence (`Stage 1` through `Stage 8`) over the live Supabase production database, eliminate any remaining network, Realtime, or race-condition hazards, and leave the production database freshly reset and spotless for class.
+
+### 2. Critical Live-Classroom Issues Caught & Fixed During Dress Rehearsal
+1. **Self-Hosted Vendor Bundle (`vendor/supabase.min.js` & `vendor/confetti.browser.min.js`):**
+   - Observed intermittent 25–30s timeouts loading `cdn.jsdelivr.net` in `+08:00` network conditions. Bundled local copies in [`vendor/`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/vendor) with automatic CDN fallback in both [`index.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/index.html) and [`dashboard.html`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/dashboard.html) so both apps boot in `<20ms` offline or online.
+2. **Sub-Second Realtime Delivery for Target Reveal, 5s Countdown & Sprint Timer (`upsertGlobalClassroomRegistry()`):**
+   - Discovered `classroom_control` was not streaming over `supabase_realtime` (nor did it contain a `sprint_timer` column). Routed `target_range_revealed`, `target_x_m`, `countdown_target_ms`, and `sprint_timer` through the `supabase_realtime`-enabled `station_submissions` `global_pins` row (`upsertGlobalClassroomRegistry()`), achieving ~`1.0–1.3s` end-to-end delivery across isolated devices plus a smooth 1-second local countdown tick on Student Chromebooks.
+3. **PostgreSQL TOAST-Safe `Approve Clamp` & `Return Grade` Handling:**
+   - Handled `rec.inspection_approved` and `rec.teacher_grade` at the top of the unfiltered `station_submissions` listener (`listenToGlobalStationPins()`) before checking `rec.full_payload` (which Postgres omits when unchanged/TOASTed), and ordered `unlockSection(6)` before `alert(...)` inside `onLocalClampApproved()`.
+4. **Eliminated Countdown False-Reset Trigger (`listenToClassroomControl()`):**
+   - Fixed a critical condition (`rTs > lastReset || ...` $\to$ `rTs > Math.max(lastReset, joinTs)`) and initialized `stunt_last_handled_global_reset` on student check-in (`verifyAndLockStation()`) so clicking `🎬 Initiate Stunt Countdown!` never mistakes an earlier pre-class `reset_session_ms` for a new reset.
+5. **Eliminated Startup-Sync vs. Reset Race (`dashboardResetEpoch`):**
+   - Isolated `syncPinsToClassroom()` to `global_pins` + `classroom_control` (never overwriting `station_1..4` student `full_payload`) and guarded `fetchInitialSubmissions()` with `dashboardResetEpoch` so an immediate post-boot reset cannot be overwritten by an in-flight startup fetch.
+6. **UI Contrast & Peer-Sync Polish (`index.html` & `dashboard.html`):**
+   - Fixed `#daveSpeechTxt` span inside `#daveDialogue`, upgraded Section 3 graph hint banner contrast (`#92400E` on `#FEF3C7` and `#075985` on `#E0F2FE`), fixed Section 6 peer-sync input IDs (`deviationDelta`, `percentErrorVal`), and added a focus guard in `renderGradingQueue()` (`grade_*`) alongside a resilient 5-second background sync on both apps.
+
+### 3. Full 8-Stage Dress Rehearsal Results (`full_live_dress_rehearsal.py`)
+- **Stage 1 (Cockpit Auth & PIN Sync):** Passed (`local Supabase SDK loaded`).
+- **Stage 2 & 3 (Check-In, Setup Constants, Safe Apex `h_safe` & FBD):** Passed (`synced to Leaderboard`).
+- **Stage 4 (Manual Section 2 `h` & `v`, Auto-Squared `v²`):** Passed (`4 launches verified`).
+- **Stage 5 (Section 3 Best-Fit Line & Section 4 Mystery Energy):** Passed (`synced to Calibration Slope Wall`).
+- **Stage 6 (Live Custom Target `X* = 0.845 m` & Stop-Block Gate):** Passed (`Target broadcast: 1014 ms`, `Approve Clamp -> Section 6 unlock: 1238 ms`).
+- **Stage 7 (5s Countdown, Live Drop `δ = 0.7 cm`, Queue Grading & Podium):** Passed (`Countdown: 1284 ms`, `Official Grade Card: 1376 ms`, `99.2% Podium`).
+- **Stage 8 (Clean Pre-Class Production Reset):** Passed — all test data wiped and live Supabase database left clean and ready for class.

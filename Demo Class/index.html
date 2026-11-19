@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LAB: Scene 42 Stunt Calibration • Official Lab Sheet</title>
   
-  <!-- Supabase JS Client & Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Local Self-Hosted Supabase JS & Canvas Confetti (Zero CDN Hang on School Wi-Fi) with CDN Fallback -->
+  <script src="./vendor/supabase.min.js"></script>
+  <script>if (!window.supabase) document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');</script>
+  <script src="./vendor/confetti.browser.min.js"></script>
+  <script>if (typeof window.confetti !== "function") document.write('<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"><\/script>');</script>
 
   <style>
     :root {
@@ -2439,7 +2441,7 @@
 
     <div class="hud-speech">
       <div class="dave-bubble" id="daveDialogue">
-        <strong>Dave:</strong> "Welcome crew! 4 stations are competing for the Lead Stunt Physics Coordinator contract on Scene 42. Calibrate your track, calculate the exact release height <i>h</i>*, and hit the Director's surprise target range when revealed!"
+        <strong>Dave:</strong> <span id="daveSpeechTxt">"Welcome crew! 4 stations are competing for the Lead Stunt Physics Coordinator contract on Scene 42. Calibrate your track, calculate the exact release height <i>h</i>*, and hit the Director's surprise target range when revealed!"</span>
       </div>
 
       <div class="progress-wrap">
@@ -3443,8 +3445,8 @@
       let ctrl = null, ctrlErr = null, subs = null, subsErr = null;
       if (supabaseClient) {
         const [ctrlRes, subsRes] = await Promise.all([
-          supabaseClient.from("classroom_control").select("lab_started, reset_session_ms").eq("id", "global").single(),
-          supabaseClient.from("station_submissions").select("station_id, full_payload")
+          supabaseClient.from("classroom_control").select("lab_started, reset_session_ms, target_range_revealed, target_x_m, countdown_active, countdown_target_ms").eq("id", "global").single(),
+          supabaseClient.from("station_submissions").select("station_id, inspection_approved, teacher_grade, teacher_feedback, full_payload")
         ]);
         ctrl = ctrlRes.data; ctrlErr = ctrlRes.error;
         subs = subsRes.data; subsErr = subsRes.error;
@@ -3452,8 +3454,8 @@
         // Direct PostgREST fallback if CDN script was blocked on school Wi-Fi
         let hdrs = { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + SUPABASE_ANON_KEY };
         const [r1, r2] = await Promise.all([
-          fetch(SUPABASE_URL + "/rest/v1/classroom_control?id=eq.global&select=lab_started,reset_session_ms", { headers: hdrs }),
-          fetch(SUPABASE_URL + "/rest/v1/station_submissions?select=station_id,full_payload", { headers: hdrs })
+          fetch(SUPABASE_URL + "/rest/v1/classroom_control?id=eq.global&select=lab_started,reset_session_ms,target_range_revealed,target_x_m,countdown_active,countdown_target_ms", { headers: hdrs }),
+          fetch(SUPABASE_URL + "/rest/v1/station_submissions?select=station_id,inspection_approved,teacher_grade,teacher_feedback,full_payload", { headers: hdrs })
         ]);
         if (r1.ok) { let arr = await r1.json(); ctrl = Array.isArray(arr) ? arr[0] : null; }
         if (r2.ok) { subs = await r2.json(); }
@@ -3468,6 +3470,19 @@
           updateTeacherStatusInModal(isTeacherOnline);
         }
         if (ctrl.reset_session_ms) ctrlResetMs = Number(ctrl.reset_session_ms) || 0;
+        if (!skipResetCheck && currentStation) {
+          if (ctrl.target_range_revealed) {
+            let rStr = (ctrl.target_x_m && !isNaN(ctrl.target_x_m)) ? Number(ctrl.target_x_m).toFixed(3) : undefined;
+            if (!isTargetRangeRevealed || (rStr && document.getElementById("targetXDisplay") && document.getElementById("targetXDisplay").value !== rStr)) {
+              applyTargetRangeReveal(!isTargetRangeRevealed, rStr);
+            }
+          } else if (isTargetRangeRevealed) {
+            hideTargetRangeReveal();
+          }
+          if (ctrl.countdown_active && ctrl.countdown_target_ms && Number(ctrl.countdown_target_ms) > Date.now() - 1000) {
+            triggerSynchronizedCountdown(Number(ctrl.countdown_target_ms));
+          }
+        }
       }
       let globalPinPayload = null;
       let stationResetMap = {};
@@ -3507,23 +3522,51 @@
               stationResetMap[stK] = Math.max(stationResetMap[stK] || 0, Number(globalPinPayload.station_resets[stK]) || 0);
             });
           }
+          if (globalPinPayload.sprint_timer) {
+            updateStudentSprintTimerHUD(globalPinPayload.sprint_timer);
+          }
+          if (!skipResetCheck && currentStation) {
+            if (globalPinPayload.target_range_revealed !== undefined) {
+              if (globalPinPayload.target_range_revealed) {
+                let gRange = (globalPinPayload.target_x_m && !isNaN(globalPinPayload.target_x_m)) ? Number(globalPinPayload.target_x_m).toFixed(3) : undefined;
+                if (!isTargetRangeRevealed || (gRange && document.getElementById("targetXDisplay") && document.getElementById("targetXDisplay").value !== gRange)) {
+                  applyTargetRangeReveal(!isTargetRangeRevealed, gRange);
+                }
+              } else if (isTargetRangeRevealed) {
+                hideTargetRangeReveal();
+              }
+            }
+            if (globalPinPayload.countdown_active && globalPinPayload.countdown_target_ms && Number(globalPinPayload.countdown_target_ms) > Date.now() - 1000) {
+              triggerSynchronizedCountdown(Number(globalPinPayload.countdown_target_ms));
+            }
+          }
         }
 
         try {
           localStorage.setItem("stunt_active_pins", JSON.stringify(dynamicStationPins));
           localStorage.setItem("stunt_teacher_online", isTeacherOnline ? "true" : "false");
         } catch(e) {}
-      }
 
-      // 3. Enforce re-asking PIN if lab or current station was reset after this Chromebook joined!
-      if (!skipResetCheck && currentStation) {
-        let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
-        let stResetMs = stationResetMap[currentStation] || 0;
-        let maxCloudReset = Math.max(ctrlResetMs, stResetMs);
-        if (!joinTs || (maxCloudReset > 0 && maxCloudReset > joinTs)) {
-          if (ctrlResetMs > 0) localStorage.setItem("stunt_last_handled_global_reset", String(ctrlResetMs));
-          if (stResetMs > 0) localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(stResetMs));
-          executeSessionReset("Lab session was reset by the instructor. Please enter your station PIN to join again.", maxCloudReset);
+        // Enforce re-asking PIN if lab or current station was reset, otherwise sync Clamp Approval & Grade fallback!
+        if (!skipResetCheck && currentStation) {
+          let myRow = subs.find(r => r.station_id === currentStation);
+          let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
+          let stResetMs = stationResetMap[currentStation] || 0;
+          let maxCloudReset = Math.max(ctrlResetMs, stResetMs);
+          if (!joinTs || (maxCloudReset > 0 && maxCloudReset > joinTs)) {
+            if (ctrlResetMs > 0) localStorage.setItem("stunt_last_handled_global_reset", String(ctrlResetMs));
+            if (stResetMs > 0) localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(stResetMs));
+            executeSessionReset("Lab session was reset by the instructor. Please enter your station PIN to join again.", maxCloudReset);
+            return;
+          }
+          if (myRow) {
+            if (myRow.inspection_approved && !worksheetState.inspectionApproved) {
+              onLocalClampApproved();
+            }
+            if (myRow.teacher_grade !== null && myRow.teacher_grade !== undefined && !isNaN(myRow.teacher_grade)) {
+              displayTeacherGrade(myRow.teacher_grade, myRow.teacher_feedback);
+            }
+          }
         }
       }
     } catch(e) {
@@ -3541,7 +3584,19 @@
         table: "station_submissions"
       }, payload => {
         let rec = payload.new;
-        if (!rec || !rec.full_payload) return;
+        if (!rec) return;
+
+        // Immediately handle Clamp Approval & Grade Return for currentStation even if full_payload was unchanged/TOASTed!
+        if (currentStation && rec.station_id === currentStation) {
+          if (rec.inspection_approved && !worksheetState.inspectionApproved) {
+            onLocalClampApproved();
+          }
+          if (rec.teacher_grade !== null && rec.teacher_grade !== undefined && !isNaN(rec.teacher_grade)) {
+            displayTeacherGrade(rec.teacher_grade, rec.teacher_feedback);
+          }
+        }
+
+        if (!rec.full_payload) return;
         let fp = rec.full_payload;
 
         if (rec.station_id === "global_pins") {
@@ -3554,6 +3609,9 @@
           if (fp.teacher_online !== undefined) {
             updateTeacherStatusInModal(fp.teacher_online);
           }
+          if (fp.sprint_timer) {
+            updateStudentSprintTimerHUD(fp.sprint_timer);
+          }
           if (currentStation) {
             let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
             let gReset = Number(fp.global_reset_ms || 0);
@@ -3564,6 +3622,19 @@
               if (sReset > 0) localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(sReset));
               executeSessionReset("Lab session has been reset by the instructor. Please enter your station PIN to join again.", latestReset);
               return;
+            }
+            if (fp.target_range_revealed !== undefined) {
+              if (fp.target_range_revealed) {
+                let rStr = (fp.target_x_m && !isNaN(fp.target_x_m)) ? Number(fp.target_x_m).toFixed(3) : undefined;
+                if (!isTargetRangeRevealed || (rStr && document.getElementById("targetXDisplay") && document.getElementById("targetXDisplay").value !== rStr)) {
+                  applyTargetRangeReveal(true, rStr);
+                }
+              } else if (isTargetRangeRevealed) {
+                hideTargetRangeReveal();
+              }
+            }
+            if (fp.countdown_active && fp.countdown_target_ms && Number(fp.countdown_target_ms) > Date.now() - 1000) {
+              triggerSynchronizedCountdown(Number(fp.countdown_target_ms));
             }
           }
         } else if (rec.station_id) {
@@ -3647,6 +3718,8 @@
         localStorage.setItem("stunt_locked_station", currentStation);
         localStorage.setItem("stunt_locked_pin_" + currentStation, expectedPin);
         localStorage.setItem("stunt_join_ts_" + currentStation, String(joinNow));
+        localStorage.setItem("stunt_last_handled_global_reset", String(joinNow));
+        localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(joinNow));
         if (errBanner) errBanner.style.display = "none";
         if (modalEl) modalEl.classList.remove("shake-error");
         updateStationBadge();
@@ -4618,15 +4691,15 @@
     if (!graphLine.active) {
       if (validPts.length >= 2) {
         html += `
-          <rect x="${padL + 16}" y="${padT + 10}" width="${w - padL - padR - 32}" height="32" rx="6" fill="rgba(245, 158, 11, 0.15)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1" />
-          <text x="${(w + padL)/2}" y="${padT + 31}" fill="#FCD34D" font-size="15" font-weight="800" text-anchor="middle">
+          <rect x="${padL + 16}" y="${padT + 10}" width="${w - padL - padR - 32}" height="32" rx="6" fill="#FEF3C7" stroke="#D97706" stroke-width="1.4" />
+          <text x="${(w + padL)/2}" y="${padT + 31}" fill="#92400E" font-size="15" font-weight="800" text-anchor="middle">
             💡 ${validPts.length} points plotted! Click "📐 Place / Center Line" above to draw your best-fit line
           </text>
         `;
       } else if (validPts.length === 1) {
         html += `
-          <rect x="${padL + 16}" y="${padT + 10}" width="${w - padL - padR - 32}" height="32" rx="6" fill="rgba(0, 240, 255, 0.15)" stroke="rgba(0, 240, 255, 0.4)" stroke-width="1" />
-          <text x="${(w + padL)/2}" y="${padT + 31}" fill="#38BDF8" font-size="15" font-weight="800" text-anchor="middle">
+          <rect x="${padL + 16}" y="${padT + 10}" width="${w - padL - padR - 32}" height="32" rx="6" fill="#E0F2FE" stroke="#0284C7" stroke-width="1.4" />
+          <text x="${(w + padL)/2}" y="${padT + 31}" fill="#075985" font-size="15" font-weight="800" text-anchor="middle">
             📍 1 data point plotted (${validPts[0].h.toFixed(2)} m, ${validPts[0].v2.toFixed(2)} m²/s²). Enter remaining launches in Section 2.
           </text>
         `;
@@ -4670,7 +4743,7 @@
 
       // ACTIVE SEGMENT BETWEEN HANDLES
       html += `
-        <line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#00F0FF" stroke-width="4.5" stroke-linecap="round" />
+        <line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="#0284C7" stroke-width="4.5" stroke-linecap="round" />
         <line id="graphLineBodyHit" class="line-hit" x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}" stroke="transparent" stroke-width="34" cursor="grab" />
       `;
 
@@ -5098,6 +5171,7 @@
   });
 
   function onLocalClampApproved() {
+    if (worksheetState.inspectionApproved) return;
     worksheetState.inspectionApproved = true;
     worksheetState.status = "ready_for_drop";
     let btn = document.getElementById("btnClampCheck");
@@ -5106,9 +5180,9 @@
       btn.style.background = "var(--emerald)";
       btn.style.color = "#000";
     }
-    alert("🎉 Stop-Block Approved by Instructor! You are now authorized to unlock Section 6 and perform the Live Stunt Drop.");
     unlockSection(6);
     if (typeof confetti === "function") confetti({ particleCount: 120, spread: 80 });
+    alert("🎉 Stop-Block Approved by Instructor! Section 6 is now unlocked for your Live Stunt Drop.");
   }
 
   async function checkTargetRangeReveal(userTriggered) {
@@ -5158,8 +5232,12 @@
     }
   }
 
+  let activeSprintTimerData = null;
+
   function updateStudentSprintTimerHUD(data) {
     if (!data) return;
+    activeSprintTimerData = data;
+    try { localStorage.setItem("stunt_sprint_timer", JSON.stringify(data)); } catch(e) {}
     let clockEl = document.getElementById("studentSprintTimerClock");
     let statusEl = document.getElementById("studentSprintStatus");
     let stageEl = document.getElementById("studentSprintStage");
@@ -5200,6 +5278,11 @@
         if (p) updateStudentSprintTimerHUD(p);
       }
     } catch(e) {}
+    setInterval(() => {
+      if (activeSprintTimerData && activeSprintTimerData.running && activeSprintTimerData.endMs) {
+        updateStudentSprintTimerHUD(activeSprintTimerData);
+      }
+    }, 1000);
   }
 
   window.checkTargetRangeReveal = checkTargetRangeReveal;
@@ -5513,16 +5596,7 @@
 
         // Teacher Gate: Clamp Approval
         if (rec.inspection_approved && !worksheetState.inspectionApproved) {
-          worksheetState.inspectionApproved = true;
-          let btn = document.getElementById("btnClampCheck");
-          if (btn) {
-            btn.textContent = "✅ Stop-Block Approved by Instructor!";
-            btn.style.background = "var(--emerald)";
-            btn.style.color = "#000";
-          }
-          alert("🎉 Stop-Block Approved by Instructor! You are now authorized to unlock Section 6 and perform the Live Stunt Drop.");
-          unlockSection(6);
-          if (typeof confetti === "function") confetti({ particleCount: 120, spread: 80 });
+          onLocalClampApproved();
         }
 
         // Teacher Grade Returned
@@ -5592,11 +5666,13 @@
           let rTs = Number(rec.reset_session_ms) || 0;
           let lastReset = Number(localStorage.getItem("stunt_last_handled_global_reset") || 0);
           let joinTs = currentStation ? Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0) : 0;
-          if (rTs > lastReset || (currentStation && rTs > joinTs)) {
+          if (currentStation ? (rTs > Math.max(lastReset, joinTs)) : (lastReset > 0 && rTs > lastReset)) {
             localStorage.setItem("stunt_last_handled_global_reset", String(rTs));
             if (rec.lab_started !== undefined) updateTeacherStatusInModal(rec.lab_started);
             executeSessionReset("Lab session has been reset by the instructor. Please enter your station PIN to join again.", rTs);
             return;
+          } else if (!lastReset && rTs > 0) {
+            localStorage.setItem("stunt_last_handled_global_reset", String(rTs));
           }
         }
 
@@ -5617,15 +5693,18 @@
             hideTargetRangeReveal();
           }
         }
-        if (rec.countdown_active) {
-          let targetMs = rec.countdown_target_ms || (Date.now() + 5000);
-          triggerSynchronizedCountdown(targetMs);
+        if (rec.countdown_active && rec.countdown_target_ms && Number(rec.countdown_target_ms) > Date.now() - 1000) {
+          triggerSynchronizedCountdown(Number(rec.countdown_target_ms));
         }
       })
       .subscribe();
   }
 
+  let lastHandledCountdownMs = 0;
+
   function triggerSynchronizedCountdown(targetMs) {
+    if (!targetMs || targetMs <= Date.now() - 1000 || targetMs === lastHandledCountdownMs) return;
+    lastHandledCountdownMs = targetMs;
     let overlay = document.getElementById("syncCountdownOverlay");
     let num = document.getElementById("countdownBigNum");
     overlay.classList.add("active");
@@ -5764,8 +5843,8 @@
     if (peerState.stunt) {
       safeSet("clampedH", peerState.stunt.clampedH);
       safeSet("actualLandingX", peerState.stunt.actualX);
-      safeSet("landingDelta", peerState.stunt.delta);
-      safeSet("stuntPctError", peerState.stunt.pctError);
+      safeSet("deviationDelta", peerState.stunt.delta);
+      safeSet("percentErrorVal", peerState.stunt.pctError);
     }
 
     // Exit work
@@ -6020,11 +6099,11 @@
     saveAndSync();
   });
 
-  // Rolling 5-second resilient background heartbeat (auto-saves when joined; syncs PINs/reset if modal open or joined)
-  setInterval(() => {
+  // Rolling 5-second resilient background heartbeat (checks teacher gates/reset FIRST, then auto-saves)
+  setInterval(async () => {
     if (currentStation) {
-      saveAndSync();
-      checkInitialTeacherAndPins(false);
+      await checkInitialTeacherAndPins(false);
+      if (currentStation && !isExecutingReset) saveAndSync();
     } else {
       checkInitialTeacherAndPins(true);
     }

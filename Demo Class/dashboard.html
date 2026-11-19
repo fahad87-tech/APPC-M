@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mission Control • Scene 42 Teacher Command Telemetry</title>
   
-  <!-- Supabase JS Client & Canvas Confetti -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Local Self-Hosted Supabase JS & Canvas Confetti (Zero CDN Hang on School Wi-Fi) with CDN Fallback -->
+  <script src="./vendor/supabase.min.js"></script>
+  <script>if (!window.supabase) document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');</script>
+  <script src="./vendor/confetti.browser.min.js"></script>
+  <script>if (typeof window.confetti !== "function") document.write('<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"><\/script>');</script>
 
   <style>
     :root {
@@ -1856,6 +1858,8 @@
     if (isPinsFocusMode) renderPinsFocusGrid();
   }
 
+  let activeCountdownTargetMs = 0;
+
   function getPinMapObject() {
     return {
       station_1: String(stations.station_1.pin),
@@ -1863,6 +1867,64 @@
       station_3: String(stations.station_3.pin),
       station_4: String(stations.station_4.pin)
     };
+  }
+
+  function buildGlobalRegistryPayload(overrides) {
+    let isRev = localStorage.getItem("stunt_target_revealed") === "true";
+    let tRange = isRev ? getTeacherTargetRangeStr() : undefined;
+    let timerObj = null;
+    try {
+      let rawT = localStorage.getItem("stunt_sprint_timer");
+      if (rawT) timerObj = JSON.parse(rawT);
+    } catch(e) {}
+    return Object.assign({
+      pins: getPinMapObject(),
+      teacher_online: isTeacherAuthorized,
+      global_reset_ms: lastGlobalResetMs,
+      station_resets: stationResetTimestamps,
+      target_range_revealed: isRev,
+      target_x_m: tRange ? parseFloat(tRange) : undefined,
+      countdown_active: activeCountdownTargetMs > Date.now() - 1000,
+      countdown_target_ms: activeCountdownTargetMs > Date.now() - 1000 ? activeCountdownTargetMs : undefined,
+      sprint_timer: timerObj || undefined,
+      updated_at_ms: Date.now()
+    }, overrides || {});
+  }
+
+  async function upsertGlobalClassroomRegistry(overrides) {
+    let fp = buildGlobalRegistryPayload(overrides);
+    if (supabaseClient) {
+      try {
+        await supabaseClient.from("station_submissions").upsert({
+          station_id: "global_pins",
+          group_name: "System PIN Registry",
+          stunt_status: "system",
+          full_payload: fp,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "station_id" });
+      } catch(e) {
+        console.warn("Supabase global_pins upsert notice:", e);
+      }
+    } else if (typeof fetch === "function" && SUPABASE_URL.startsWith("https://")) {
+      try {
+        await fetch(SUPABASE_URL + "/rest/v1/station_submissions?on_conflict=station_id", {
+          method: "POST",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates"
+          },
+          body: JSON.stringify({
+            station_id: "global_pins",
+            group_name: "System PIN Registry",
+            stunt_status: "system",
+            full_payload: fp,
+            updated_at: new Date().toISOString()
+          })
+        });
+      } catch(e) {}
+    }
   }
 
   async function syncPinsToClassroom() {
@@ -1893,26 +1955,10 @@
       } catch(e) {}
     }
 
-    // 3. Supabase Cloud Sync (authoritative global_pins row + station_1..4 + classroom_control)
-    if (supabaseClient) {
-      try {
-        await supabaseClient.from("station_submissions").upsert({
-          station_id: "global_pins",
-          group_name: "System PIN Registry",
-          stunt_status: "system",
-          full_payload: {
-            pins: pinMap,
-            teacher_online: isTeacherAuthorized,
-            global_reset_ms: lastGlobalResetMs,
-            station_resets: stationResetTimestamps,
-            updated_at_ms: nowMs
-          },
-          updated_at: new Date().toISOString()
-        }, { onConflict: "station_id" });
-      } catch(e) {
-        console.warn("Supabase global_pins sync notice:", e);
-      }
+    // 3. Supabase Cloud Sync (authoritative global_pins row + classroom_control — never overwrites student station_1..4 full_payload!)
+    await upsertGlobalClassroomRegistry({ pins: pinMap, teacher_online: isTeacherAuthorized, updated_at_ms: nowMs });
 
+    if (supabaseClient) {
       try {
         await supabaseClient.from("classroom_control").update({
           lab_started: isTeacherAuthorized,
@@ -1922,49 +1968,6 @@
       } catch(e) {
         console.warn("Supabase classroom_control pin sync notice:", e);
       }
-
-      await Promise.all(Object.keys(stations).map(async (stKey) => {
-        try {
-          await supabaseClient.from("station_submissions").upsert({
-            station_id: stKey,
-            full_payload: Object.assign({}, stations[stKey].rawPayload || {}, {
-              pin: String(stations[stKey].pin),
-              teacher_online: isTeacherAuthorized,
-              reset_timestamp: stationResetTimestamps[stKey] || lastGlobalResetMs || undefined,
-              updated_at_ms: nowMs
-            }),
-            updated_at: new Date().toISOString()
-          }, { onConflict: "station_id" });
-        } catch(e) {
-          console.warn(`Supabase pin sync notice for ${stKey}:`, e);
-        }
-      }));
-    } else if (typeof fetch === "function" && SUPABASE_URL.startsWith("https://")) {
-      // Direct PostgREST fallback if CDN script was blocked on school Wi-Fi
-      try {
-        await fetch(SUPABASE_URL + "/rest/v1/station_submissions?on_conflict=station_id", {
-          method: "POST",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": "Bearer " + SUPABASE_ANON_KEY,
-            "Content-Type": "application/json",
-            "Prefer": "resolution=merge-duplicates"
-          },
-          body: JSON.stringify({
-            station_id: "global_pins",
-            group_name: "System PIN Registry",
-            stunt_status: "system",
-            full_payload: {
-              pins: pinMap,
-              teacher_online: isTeacherAuthorized,
-              global_reset_ms: lastGlobalResetMs,
-              station_resets: stationResetTimestamps,
-              updated_at_ms: nowMs
-            },
-            updated_at: new Date().toISOString()
-          })
-        });
-      } catch(e) {}
     }
   }
 
@@ -2070,6 +2073,12 @@
       renderGradingQueue();
       if (isPinsFocusMode) renderPinsFocusGrid();
     }
+    // Resilient 5-second background sync in case classroom Wi-Fi briefly drops WebSockets
+    setInterval(() => {
+      if (isTeacherAuthorized) {
+        fetchInitialSubmissions();
+      }
+    }, 5000);
   }
 
   let isPinsFocusMode = false;
@@ -2191,7 +2200,11 @@
         }
       }
 
-      // 2. Supabase classroom_control sync
+      // 2. Instant Realtime broadcast via global_pins (in supabase_realtime!) + classroom_control
+      await upsertGlobalClassroomRegistry({
+        target_range_revealed: true,
+        target_x_m: parseFloat(customX)
+      });
       if (supabaseClient) {
         try {
           await supabaseClient.from("classroom_control").update({
@@ -2215,6 +2228,7 @@
         if (classroomChannel) {
           try { classroomChannel.postMessage({ type: "TARGET_RANGE_HIDDEN" }); } catch(e) {}
         }
+        await upsertGlobalClassroomRegistry({ target_range_revealed: false, target_x_m: undefined });
         if (supabaseClient) {
           try {
             await supabaseClient.from("classroom_control").update({
@@ -2277,12 +2291,16 @@
     syncRevealRangeButtonUI();
   }
 
+  let dashboardResetEpoch = 0;
+
   async function fetchInitialSubmissions() {
     if (!supabaseClient) return;
+    let myEpoch = dashboardResetEpoch;
     try {
       const { data, error } = await supabaseClient
         .from("station_submissions")
         .select("*");
+      if (myEpoch !== dashboardResetEpoch) return;
       
       if (error) {
         console.warn("Supabase fetch notice:", error.message);
@@ -2641,6 +2659,10 @@
     function renderGradingQueue() {
     let container = document.getElementById("gradingQueueList");
     if (!container) return;
+    // Do not steal focus while teacher is actively typing a score or feedback comment!
+    if (document.activeElement && document.activeElement.id && document.activeElement.id.startsWith("grade_")) {
+      return;
+    }
     container.innerHTML = "";
 
     const stationColors = {
@@ -2890,6 +2912,7 @@
   async function broadcastCountdown() {
     if (confirm("Initiate Global 'Quiet on the Set' 5-Second Stunt Countdown across all student stations?")) {
       let targetMs = Date.now() + 5000;
+      activeCountdownTargetMs = targetMs;
       try {
         localStorage.setItem("stunt_countdown_target_ms", targetMs.toString());
       } catch(e) {}
@@ -2898,6 +2921,10 @@
           classroomChannel.postMessage({ type: "GLOBAL_COUNTDOWN_START", targetMs: targetMs });
         } catch(e) {}
       }
+      await upsertGlobalClassroomRegistry({
+        countdown_active: true,
+        countdown_target_ms: targetMs
+      });
       if (supabaseClient) {
         const { error } = await supabaseClient.from("classroom_control").update({
           countdown_active: true,
@@ -3032,6 +3059,7 @@
     }
 
     let timestamp = Date.now();
+    dashboardResetEpoch++;
     let newPin = generateRandomPin();
     if (stations[stationKey]) stations[stationKey].pin = newPin;
     stationResetTimestamps[stationKey] = timestamp;
@@ -3093,19 +3121,13 @@
     // 4. Supabase Database Upsert (global_pins FIRST, then station row)
     if (supabaseClient) {
       try {
-        await supabaseClient.from("station_submissions").upsert({
-          station_id: "global_pins",
-          group_name: "System PIN Registry",
-          stunt_status: "system",
-          full_payload: {
-            pins: pinMap,
-            teacher_online: isTeacherAuthorized,
-            global_reset_ms: lastGlobalResetMs,
-            station_resets: stationResetTimestamps,
-            updated_at_ms: timestamp
-          },
-          updated_at: new Date().toISOString()
-        }, { onConflict: "station_id" });
+        await upsertGlobalClassroomRegistry({
+          pins: pinMap,
+          teacher_online: isTeacherAuthorized,
+          global_reset_ms: lastGlobalResetMs,
+          station_resets: stationResetTimestamps,
+          updated_at_ms: timestamp
+        });
 
         await supabaseClient.from("station_submissions").upsert({
           station_id: stationKey,
@@ -3152,6 +3174,7 @@
     }
 
     let timestamp = Date.now();
+    dashboardResetEpoch++;
     lastGlobalResetMs = timestamp;
     isTeacherAuthorized = true;
     isLabStarted = true;
@@ -3222,19 +3245,18 @@
     // 4. Supabase reset: commit global_pins & station_1..4 FIRST so new PINs are live before classroom_control fires!
     if (supabaseClient) {
       try {
-        await supabaseClient.from("station_submissions").upsert({
-          station_id: "global_pins",
-          group_name: "System PIN Registry",
-          stunt_status: "system",
-          full_payload: {
-            pins: newPinMap,
-            teacher_online: true,
-            global_reset_ms: timestamp,
-            station_resets: stationResetTimestamps,
-            updated_at_ms: timestamp
-          },
-          updated_at: new Date().toISOString()
-        }, { onConflict: "station_id" });
+        activeCountdownTargetMs = 0;
+        await upsertGlobalClassroomRegistry({
+          pins: newPinMap,
+          teacher_online: true,
+          global_reset_ms: timestamp,
+          station_resets: stationResetTimestamps,
+          target_range_revealed: false,
+          target_x_m: undefined,
+          countdown_active: false,
+          countdown_target_ms: undefined,
+          updated_at_ms: timestamp
+        });
 
         await Promise.all(Object.keys(stations).map(key =>
           supabaseClient.from("station_submissions").upsert({
@@ -3370,13 +3392,15 @@
             btn.style.background = "linear-gradient(135deg, #059669 0%, #047857 100%)";
           }
           playSprintChime();
+          broadcastSprintTimer(true);
+          return;
         }
-        broadcastSprintTimer();
+        broadcastSprintTimer(false);
       }, 1000);
     }
 
     updateSprintTimerDisplay();
-    broadcastSprintTimer();
+    broadcastSprintTimer(true);
   }
 
   function setSprintPreset(mins) {
@@ -3422,7 +3446,7 @@
     broadcastSprintTimer();
   }
 
-  function broadcastSprintTimer() {
+  function broadcastSprintTimer(pushToCloud = true) {
     let payload = {
       remaining: sprintRemainingSec,
       running: sprintIsRunning,
@@ -3443,14 +3467,9 @@
       ch.close();
     } catch(e) {}
 
-    // 3. Supabase Cloud Sync
-    if (supabaseClient) {
-      supabaseClient
-        .from("classroom_control")
-        .update({ sprint_timer: payload })
-        .eq("id", "global")
-        .then(() => {})
-        .catch(err => console.warn("Sprint timer cloud sync notice:", err));
+    // 3. Supabase Cloud Sync via global_pins Realtime registry (only on state transitions, not every 1s!)
+    if (pushToCloud) {
+      upsertGlobalClassroomRegistry({ sprint_timer: payload });
     }
   }
 
