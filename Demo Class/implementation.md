@@ -3104,3 +3104,45 @@ We searched the local browser LevelDB files (`Edge 000328.log` and `Chrome 02219
 2. **Built-in Checkpoints:** 5 trials, floor range measurement, calculating exit speed, plotting graph, with the software locking the target until completion, plus real-time teacher dashboard monitoring.
 3. **Heavy Scaffolding & Differentiation:** Single manual calculation during trials (exit speed), automated squaring/graphing, 4 team roles, dual-pathway inversion (visual graph vs algebra), unique station targets, and 28.6% spin energy extension for Unit 6.
 4. **Ad-hoc Safety Helper (Mr. Nicky):** Mr. Nicky was not an assigned TA, was called in ad-hoc strictly for student safety with steel balls, and was instructed to speak English upon entry.
+
+---
+
+## 81. Complete Station Roster Alignment, Mandatory PIN Re-Prompt on Refresh & Zero-Data-Loss Hardening (November 20, 2026)
+
+### 1. Authentic Classroom Station Rosters
+The student rosters across all 4 stations have been aligned with the real classroom participants and persisted to Supabase and local storage:
+- **Station 1 (Speed Demons):** `Bill Ma` (releaser), `Carl Wu` (measurer), `Ray Dong` (scribe), `Connie Yang` (checker). PIN: `2338`.
+  - Calibration Data: 5 points ($h_{\text{raw}} = 0.43, 0.45, 0.47, 0.50, 0.54\text{ m}$, $X = 0.720, 0.750, 0.764, 0.770, 0.832\text{ m}$).
+  - Line of Best Fit: Slope $18.42$, Intercept $0.652$, Target $h^* = 0.413\text{ m}$. Unlocked Step 5 (71%).
+- **Station 2 (Vector Vanguard):** `Garland` (measurer), `Leo` (releaser), `Chris` (scribe). PIN: `2405`.
+  - Calibration Data: 5 points ($h_{\text{raw}} = 0.28, 0.33, 0.38, 0.43, 0.48\text{ m}$, $X = 0.780, 0.850, 0.940, 1.020, 1.110\text{ m}$).
+  - Line of Best Fit: Slope $13.12$, Intercept $0.150$, Target $h^* = 0.450\text{ m}$. Unlocked Step 5 (71%).
+- **Station 3 (Quantum Riders):** `Kevin` (releaser), `Michael` (measurer). PIN: `4489`.
+  - Calibration Data: 5 points ($h_{\text{raw}} = 0.36, 0.41, 0.46, 0.51, 0.56\text{ m}$, $X = 0.700, 0.770, 0.830, 0.890, 0.940\text{ m}$).
+  - Line of Best Fit: Slope $12.60$, Intercept $0.200$, Target $h^* = 0.440\text{ m}$. Unlocked Step 5 (71%).
+- **Station 4 (Apex Phoenix):** `Molly` (releaser), `Kun` (measurer), `Allen` (scribe). PIN: `6046`.
+  - Calibration Data: 5 points ($h_{\text{raw}} = 0.34, 0.39, 0.44, 0.49, 0.54\text{ m}$, $X = 0.680, 0.750, 0.810, 0.870, 0.920\text{ m}$).
+  - Line of Best Fit: Slope $12.30$, Intercept $0.350$, Target $h^* = 0.460\text{ m}$. Unlocked Step 5 (71%).
+
+### 2. Mandatory PIN Re-Entry on Every Page Refresh (`index.html`)
+- **Initialization State:** `let currentStation = null;` at top-level initialization ensures that no session auto-bypasses authentication on page load or browser reload.
+- **Station Modal Trigger:** `checkStationLock()` pre-selects the previously locked station in `#modalStationSelect` from `stunt_last_station`, clears `#modalStationPin.value = ""`, and displays `#stationModal` (`display: flex`).
+- **Student Authentication & Hydration:** When the student enters their active 4-digit station PIN, `verifyAndLockStation()` validates the PIN against `dynamicStationPins[sel]` (authoritatively fetched from Supabase `global_pins`), sets `currentStation = sel`, executes `restoreWorksheetState()`, and reveals the worksheet with all 5 points, crew names, regression parameters, and unlocked steps intact.
+- **Reload Security:** Refreshing the page immediately re-prompts for the PIN without losing or overwriting any group data.
+
+### 3. Dual-Column Fallback & Blank-Overwrite Prevention
+- `restoreWorksheetState()` automatically merges primary columns (`data.crew_members`, `data.points`, `data.slope`, `data.intercept`, `data.calc_h`) if `full_payload` holds unpopulated or template objects.
+- `packWorksheetState()` and `saveAndSync()` are guarded with `isRestoringWorksheet = true`:
+  - `saveAndSync()` skips execution while the worksheet state is being hydrated.
+  - `saveAndSync()` never overwrites non-empty database crew members with empty strings (`if (crewNames) payload.crew_members = crewNames;`).
+  - `saveAndSync()` includes `points: fullState.tablePoints || []` in the payload for continuous dual-column database synchronization.
+
+### 4. Verification & Testing
+- Automated Playwright browser tests executed across all 4 stations:
+  1. Initial page load displays `#stationModal`.
+  2. Entering Station 1 PIN `2338` unlocks Station 1 (`Bill Ma`, `Carl Wu`, `Ray Dong`, `Connie Yang`, 5 points, Step 5 unlocked).
+  3. Browser reload (`page.reload()`) displays `#stationModal` again with Station 1 pre-selected and PIN field cleared.
+  4. Entering Station 2 PIN `2405` unlocks Station 2 (`Garland`, `Leo`, `Chris`, 5 points, Step 5 unlocked).
+  5. Browser reload re-prompts for PIN; entering Station 3 PIN `4489` unlocks Station 3 (`Kevin`, `Michael`, 5 points, Step 5 unlocked).
+  6. Browser reload re-prompts for PIN; entering Station 4 PIN `6046` unlocks Station 4 (`Molly`, `Kun`, `Allen`, 5 points, Step 5 unlocked).
+- All assertions passed with 100% data fidelity.

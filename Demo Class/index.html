@@ -3332,7 +3332,8 @@
     }
   } catch(e) {}
 
-  let currentStation = localStorage.getItem("stunt_locked_station") || null;
+  let currentStation = null; // Enforce PIN entry on every page load / refresh
+  let isRestoringWorksheet = false;
   let activeStationChannel = null;
   let isExecutingReset = false;
   let lastExecutedResetTs = 0;
@@ -3664,9 +3665,20 @@
 
   // STATION LOCK / SAFEGUARD
   function checkStationLock() {
+    let lastSt = localStorage.getItem("stunt_locked_station") || localStorage.getItem("stunt_last_station");
+    if (lastSt && document.getElementById("modalStationSelect")) {
+      document.getElementById("modalStationSelect").value = lastSt;
+    }
+    let pinInput = document.getElementById("modalStationPin");
+    if (pinInput) pinInput.value = "";
+
     if (!currentStation) {
       document.getElementById("stationModal").style.display = "flex";
       updateTeacherStatusInModal(isTeacherOnline);
+      setTimeout(() => {
+        let pInp = document.getElementById("modalStationPin");
+        if (pInp) pInp.focus();
+      }, 50);
     } else {
       document.getElementById("stationModal").style.display = "none";
       updateStationBadge();
@@ -3720,6 +3732,7 @@
         let joinNow = Date.now();
         currentStation = sel;
         localStorage.setItem("stunt_locked_station", currentStation);
+        localStorage.setItem("stunt_last_station", currentStation);
         localStorage.setItem("stunt_locked_pin_" + currentStation, expectedPin);
         localStorage.setItem("stunt_join_ts_" + currentStation, String(joinNow));
         localStorage.setItem("stunt_last_handled_global_reset", String(joinNow));
@@ -4898,10 +4911,10 @@
       dropH: document.getElementById("measuredDropH") ? document.getElementById("measuredDropH").value : "",
       maxRampH: document.getElementById("measuredMaxRampH") ? document.getElementById("measuredMaxRampH").value : "",
       crew: {
-        releaser: document.getElementById("crewReleaser") ? document.getElementById("crewReleaser").value : "",
-        measurer: document.getElementById("crewMeasurer") ? document.getElementById("crewMeasurer").value : "",
-        scribe: document.getElementById("crewScribe") ? document.getElementById("crewScribe").value : "",
-        checker: document.getElementById("crewChecker") ? document.getElementById("crewChecker").value : ""
+        releaser: (document.getElementById("crewReleaser") && document.getElementById("crewReleaser").value.trim()) || (worksheetState.crew && worksheetState.crew.releaser) || "",
+        measurer: (document.getElementById("crewMeasurer") && document.getElementById("crewMeasurer").value.trim()) || (worksheetState.crew && worksheetState.crew.measurer) || "",
+        scribe: (document.getElementById("crewScribe") && document.getElementById("crewScribe").value.trim()) || (worksheetState.crew && worksheetState.crew.scribe) || "",
+        checker: (document.getElementById("crewChecker") && document.getElementById("crewChecker").value.trim()) || (worksheetState.crew && worksheetState.crew.checker) || ""
       },
       safeApexH: document.getElementById("safeApexH") ? document.getElementById("safeApexH").value : "",
       checkedReleaseLimit: document.getElementById("safeApexH") ? document.getElementById("safeApexH").value : "",
@@ -4958,7 +4971,7 @@
   // SUPABASE REALTIME SYNC & LOCAL PERSISTENCE
   // ==========================================
   async function saveAndSync() {
-    if (isExecutingReset) return;
+    if (isExecutingReset || isRestoringWorksheet) return;
     updateProgress();
     if (!currentStation) return;
 
@@ -5013,9 +5026,9 @@
 
     let payload = {
       station_id: currentStation,
-      crew_members: crewNames,
       progress_pct: fullState.progress,
       current_step: fullState.unlockedStep,
+      points: fullState.tablePoints || [],
       slope: !isNaN(slopeVal) ? slopeVal : 0,
       intercept: !isNaN(interceptVal) ? interceptVal : 0,
       calc_h: !isNaN(calcHVal) ? calcHVal : 0,
@@ -5031,6 +5044,9 @@
       full_payload: fullState,
       updated_at: new Date().toISOString()
     };
+    if (crewNames) {
+      payload.crew_members = crewNames;
+    }
 
     try {
       if (supabaseClient) {
@@ -5384,6 +5400,7 @@
 
   async function restoreWorksheetState() {
     if (!currentStation) return;
+    isRestoringWorksheet = true;
 
     let saved = null;
     try {
@@ -5466,6 +5483,17 @@
         if (saved && data.calc_h && (!saved.inversion || !saved.inversion.calcH)) {
           if (!saved.inversion) saved.inversion = {};
           saved.inversion.calcH = String(data.calc_h);
+        }
+
+        // Zero-Data-Loss Safety: Merge primary crew_members column if saved.crew is missing or empty
+        if (data && data.crew_members) {
+          let members = data.crew_members.split(",").map(s => s.trim()).filter(Boolean);
+          if (!saved.crew) saved.crew = { releaser: "", measurer: "", scribe: "", checker: "" };
+          if (!saved.crew.releaser && members[0]) saved.crew.releaser = members[0];
+          if (!saved.crew.measurer && members[1]) saved.crew.measurer = members[1];
+          if (!saved.crew.scribe && members[2]) saved.crew.scribe = members[2];
+          if (!saved.crew.checker && members[3]) saved.crew.checker = members[3];
+          worksheetState.crew = saved.crew;
         }
       }
     } catch(e) {
@@ -5607,6 +5635,7 @@
       }
     }
     updateProgress();
+    isRestoringWorksheet = false;
   }
 
   // ==========================================
@@ -5927,6 +5956,7 @@
     }
 
     updateProgress();
+    isRestoringWorksheet = false;
   }
 
   // COMPLETE CLASSROOM SESSION RESET (TRIGGERED BY INSTRUCTOR FOR ALL OR SINGLE STATION)
