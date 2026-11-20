@@ -4964,6 +4964,12 @@
 
     let fullState = packWorksheetState();
 
+    // Zero-Data-Loss Protection: Never overwrite populated table points with empty array
+    if ((!fullState.tablePoints || !Array.isArray(fullState.tablePoints) || !fullState.tablePoints.some(p => p && (p.h_raw || p.x || p.v))) &&
+        worksheetState.tablePoints && Array.isArray(worksheetState.tablePoints) && worksheetState.tablePoints.some(p => p && (p.h_raw || p.x || p.v))) {
+      fullState.tablePoints = worksheetState.tablePoints;
+    }
+
     updateSaveIndicator("saving");
 
     // 1. SAVE TO LOCAL STORAGE (RESILIENT TO RELOADS & ACCIDENTAL CLOSURE)
@@ -5444,6 +5450,22 @@
           if (hasRemoteWork || !saved) {
             saved = fp;
           }
+        }
+
+        // Zero-Data-Loss Safety: Merge primary table points column if full_payload had empty points
+        if (saved && data.points && Array.isArray(data.points) && data.points.length > 0 && data.points.some(p => p && (p.h_raw || p.x || p.v))) {
+          if (!saved.tablePoints || !Array.isArray(saved.tablePoints) || !saved.tablePoints.some(p => p && (p.h_raw || p.x || p.v))) {
+            saved.tablePoints = data.points;
+          }
+        }
+        if (saved && data.slope && (!saved.calibratedParams || !saved.calibratedParams.slopeA)) {
+          if (!saved.calibratedParams) saved.calibratedParams = {};
+          saved.calibratedParams.slopeA = String(data.slope);
+          if (data.intercept) saved.calibratedParams.interceptB = String(data.intercept);
+        }
+        if (saved && data.calc_h && (!saved.inversion || !saved.inversion.calcH)) {
+          if (!saved.inversion) saved.inversion = {};
+          saved.inversion.calcH = String(data.calc_h);
         }
       }
     } catch(e) {
@@ -6144,11 +6166,10 @@
     saveAndSync();
   });
 
-  // Rolling 5-second resilient background heartbeat (checks teacher gates/reset FIRST, then auto-saves)
+  // Rolling 5-second resilient background heartbeat (checks teacher gates/resets)
   setInterval(async () => {
     if (currentStation) {
       await checkInitialTeacherAndPins(false);
-      if (currentStation && !isExecutingReset) saveAndSync();
     } else {
       checkInitialTeacherAndPins(true);
     }
