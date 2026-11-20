@@ -3004,3 +3004,103 @@ A multi-context Playwright test script (`test_multi_student.py`) was executed ac
   - `verify_v7_student4_active.png`
   - `verify_v7_post_reset_reask_pin.png`
 
+---
+
+## 80. Forensic Recovery of Authentic Student Data & Hardening of Background Auto-Save
+
+### 1. Root Cause of Missing Student Calibration Data
+When users or students logged into the student portal, their names were present, but their Section 2 calibration tables, regression lines, and inversions appeared blank. Investigation revealed:
+1. **The Silent 5-Second `setInterval` Overwrite:** At the bottom of `index.html`, a background heartbeat timer ran every 5 seconds (`setInterval`) which called `saveAndSync()`. If a user opened the page and the DOM had not yet finished populating the table inputs, this heartbeat packed empty DOM inputs and blindly upserted them to Supabase, replacing valid table points with null arrays.
+2. **Column vs. `full_payload` Discrepancy:** In `restoreWorksheetState()`, the code only inspected `data.full_payload.tablePoints` and ignored the first-class `data.points` column, which still contained the students' recorded measurements.
+
+### 2. Forensic LevelDB Data Recovery
+We searched the local browser LevelDB files (`Edge 000328.log` and `Chrome 022199.ldb`) and extracted the exact, authentic student calibration sessions recorded this morning:
+
+#### Station 1: Speed Demons (`Bill Ma`, `Carl Wu`, `Ray Dong`, `Connie Yang` — PIN `2338`)
+- **Predictions:** 2.5R height = `23` cm
+- **5-Point Calibration Table:**
+  1. $h_{\text{raw}} = 0.43\text{ m}$, $h = 0.41\text{ m}$, $X = 0.72\text{ m}$, $v = 1.70\text{ m/s}$, $v^2 = 2.89\text{ m}^2/\text{s}^2$
+  2. $h_{\text{raw}} = 0.45\text{ m}$, $h = 0.43\text{ m}$, $X = 0.75\text{ m}$, $v = 1.77\text{ m/s}$, $v^2 = 3.13\text{ m}^2/\text{s}^2$
+  3. $h_{\text{raw}} = 0.47\text{ m}$, $h = 0.45\text{ m}$, $X = 0.764\text{ m}$, $v = 1.80\text{ m/s}$, $v^2 = 3.24\text{ m}^2/\text{s}^2$
+  4. $h_{\text{raw}} = 0.50\text{ m}$, $h = 0.48\text{ m}$, $X = 0.77\text{ m}$, $v = 1.82\text{ m/s}$, $v^2 = 3.31\text{ m}^2/\text{s}^2$
+  5. $h_{\text{raw}} = 0.54\text{ m}$, $h = 0.52\text{ m}$, $X = 0.832\text{ m}$, $v = 1.96\text{ m/s}$, $v^2 = 3.84\text{ m}^2/\text{s}^2$
+- **Section 3 Calibration Regression:** Slope $a = 18.42\text{ m/s}^2$, Intercept $b = 0.652\text{ m}^2/\text{s}^2$, Comparison: `"smaller"`.
+- **Section 5 Target Inversion:** $v^2_{\text{req}} = 8.63\text{ m}^2/\text{s}^2$, $h^* = 0.413\text{ m}$.
+- **Progress:** Step 5 Unlocked (71%).
+
+#### Station 2: Vector Vanguard (`Leo`, `Garland`, `Chris` — PIN `2405`)
+- **5-Point Calibration Table:**
+  1. $h = 0.28\text{ m}$, $X = 0.78\text{ m}$, $v = 1.96\text{ m/s}$, $v^2 = 3.84\text{ m}^2/\text{s}^2$
+  2. $h = 0.33\text{ m}$, $X = 0.85\text{ m}$, $v = 2.14\text{ m/s}$, $v^2 = 4.58\text{ m}^2/\text{s}^2$
+  3. $h = 0.38\text{ m}$, $X = 0.94\text{ m}$, $v = 2.37\text{ m/s}$, $v^2 = 5.62\text{ m}^2/\text{s}^2$
+  4. $h = 0.43\text{ m}$, $X = 1.02\text{ m}$, $v = 2.57\text{ m/s}$, $v^2 = 6.60\text{ m}^2/\text{s}^2$
+  5. $h = 0.48\text{ m}$, $X = 1.11\text{ m}$, $v = 2.80\text{ m/s}$, $v^2 = 7.84\text{ m}^2/\text{s}^2$
+- **Section 3 Calibration Regression:** Slope $a = 13.12\text{ m/s}^2$, Intercept $b = 0.15\text{ m}^2/\text{s}^2$, Comparison: `"similar"`.
+- **Section 4 Energy Check:** Retained: 70%, Gap: 30%, Explanation: `"Rotational Kinetic Energy"`.
+- **Section 5 Target Inversion:** $v^2_{\text{req}} = 6.85\text{ m}^2/\text{s}^2$, $h^* = 0.45\text{ m}$.
+
+### 3. Architecture Hardening & Cloud Synchronization
+1. **Purged Blind Background `setInterval` Auto-Save:** Removed `saveAndSync()` from the 5-second polling loop. Saving now occurs strictly upon genuine user input/change events.
+2. **Dual-Column Restoration Engine:** Updated `restoreWorksheetState()` to check both `data.points` and `data.full_payload.tablePoints`, merging any existing points so blank payloads cannot wipe recorded student numbers.
+3. **Save-Time Blank Protection:** Added a guard in `saveAndSync()` preventing empty DOM table arrays from overwriting non-empty points in `worksheetState.tablePoints`.
+4. **Live Verification on GitHub Pages:** Tested live on GitHub Pages with Playwright:
+   - Station 1 loaded all 5 calibration rows, regression line, slope 18.42, and target $h^* = 0.413\text{ m}$.
+   - Station 2 loaded all 5 calibration rows, regression line, slope 13.12, and target $h^* = 0.45\text{ m}$.
+   - Artifacts: `verify_github_pages_restored.png` and `verify_github_pages_station2_restored.png`.
+
+
+
+
+## 79. Formal Post-Observation Clarification Statement (Paragraph Format in Markdown)
+
+### 1. User Directive & Context
+- **User Directive:** Format the simplified 4-point response in complete paragraphs (no bullet points) and export as clean Markdown (`.md`) to prevent copying and formatting glitches.
+- **File Saved:** [`Lesson_Observation_Response.md`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/Lesson_Observation_Response.md).
+
+### 2. Core Clarifications Addressed
+1. **Curricular Context & Discrepant Event (Intro Length):** Clarified that the first 20 minutes tested a prior AP Physics 1 Free-Response Question (FRQ) where students had theoretically solved $h = 2.5R$ for a sliding mass. Testing it live with a rolling sphere caused the intended crash, bridging theory with authentic empirical calibration.
+2. **Software-Embedded Checkpoints:** Documented that structural checkpoints were hardcoded directly in `index.html` (apparatus dimension lock, plumb line $X=0$ origin calibration, auto-regression) and monitored via real-time red alerts on `dashboard.html`.
+3. **Multi-Tiered Differentiation:** Outlined the 4-crew role specialization, Section 5 two-step inversion scaffolding, Unit 6 rotational energy extension ($28.6\%$), and distinct station-specific targets ($X^*$).
+4. **Ad-Hoc Safety Support (Mr. Nicky):** Clarified that Mr. Nicky was not an assigned course TA, but rather an ad-hoc staff member invited during the practical purely to assist with equipment safety around live falling steel balls, and was verbally instructed upon arrival to use English.
+
+
+## 80. Refined Assessment Checkpoints Paragraph in Formal Response
+
+### 1. User Directive & Context
+- **User Directive:** Refine the second paragraph of [`Lesson_Observation_Response.md`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/Lesson_Observation_Response.md) to directly highlight the sequential experimental checkpoints built into the digital lab:
+  - 5 calibration trials across release heights $A$ through $E$.
+  - Measuring and recording landing range $X$ for each drop.
+  - Determining horizontal exit velocity $v$ and $v^2$ via projectile kinematics ($v = X/\sqrt{2H/g}$).
+  - Real-time plotting and line-fitting on the empirical graph ($v^2$ vs $h$).
+  - System requirement to complete this 5-point sequence before receiving the director's target prediction ($X^*$).
+  - Teacher dashboard telemetry streaming all trials and graphs live for roaming verification.
+
+### 2. Verification
+- Updated and verified [`Lesson_Observation_Response.md`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/Lesson_Observation_Response.md) with clean paragraph formatting.
+
+
+## 81. Comprehensive Scaffolding & Multi-Tiered Differentiation Documentation
+
+### 1. User Directive & Context
+- **User Directive:** Update the third paragraph of [`Lesson_Observation_Response.md`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/Lesson_Observation_Response.md) to explicitly highlight the extensive scaffolding and differentiation features engineered into the lab:
+  - Cognitive load reduction during trials (measuring all physical dimensions, calculating *only* horizontal exit speed $v = X / t_{\text{flight}}$, with automated $v^2$ squaring and graph plotting).
+  - Kinesthetic vs. analytical role differentiation (Releaser/Measurer for apparatus alignment vs. Scribe/Checker for data entry and unit verification).
+  - Dual-pathway problem solving in Section 5 (visual graph reading with a straightedge vs. algebraic 2-step inversion).
+  - Individually calibrated station target distances ($X^*$) matching each group's physical table drop height ($H$).
+  - Built-in extension for advanced finishers (calculating the 28.6% rotational kinetic energy loss $K_{\text{rot}} = \frac{2}{5}K_{\text{trans}}$ for AP Unit 6).
+
+### 2. Verification
+- Updated and verified [`Lesson_Observation_Response.md`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/Lesson_Observation_Response.md).
+
+
+## 82. Short & Simplified Formal Post-Observation Clarification Statement
+
+### 1. User Directive & Context
+- **User Directive:** Drastically shorten and simplify the English in [`Lesson_Observation_Response.md`](file:///D:/HW%20FIx/AP%20Physics%201/05_Labs/LABS/Lab4_Stunt_Calibration/Lesson_Observation_Response.md), keeping the 4 essential factual points in short, simple paragraph form.
+- **Word Count Reduced:** From ~650 words down to ~350 punchy, easily readable words.
+
+### 2. Summary of 4 Shortened Paragraphs
+1. **Pacing / Prior FRQ:** 20-min intro was testing their prior theoretical AP FRQ ($h = 2.5R$ sliding block $\to$ live crash with rolling ball), creating the scientific question.
+2. **Built-in Checkpoints:** 5 trials, floor range measurement, calculating exit speed, plotting graph, with the software locking the target until completion, plus real-time teacher dashboard monitoring.
+3. **Heavy Scaffolding & Differentiation:** Single manual calculation during trials (exit speed), automated squaring/graphing, 4 team roles, dual-pathway inversion (visual graph vs algebra), unique station targets, and 28.6% spin energy extension for Unit 6.
+4. **Ad-hoc Safety Helper (Mr. Nicky):** Mr. Nicky was not an assigned TA, was called in ad-hoc strictly for student safety with steel balls, and was instructed to speak English upon entry.
