@@ -3493,9 +3493,8 @@
             if (row.full_payload.pin) {
               dynamicStationPins[row.station_id] = String(row.full_payload.pin);
             }
-            if (row.full_payload.reset_timestamp) {
-              stationResetMap[row.station_id] = Math.max(stationResetMap[row.station_id] || 0, Number(row.full_payload.reset_timestamp) || 0);
-            }
+            // Resets are never read from student station submissions;
+            // authoritative session & station resets come strictly from the teacher's global_pins registry below.
           }
         });
 
@@ -3644,13 +3643,18 @@
           if (fp.teacher_online !== undefined) {
             updateTeacherStatusInModal(fp.teacher_online);
           }
-          if (rec.station_id === currentStation && fp.reset_timestamp) {
-            let rTs = Number(fp.reset_timestamp) || 0;
-            let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
-            let lastReset = Number(localStorage.getItem("stunt_last_handled_reset_" + currentStation) || 0);
-            if (rTs > Math.max(joinTs, lastReset)) {
-              localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(rTs));
-              executeSessionReset("Your station was reset by your instructor. Please enter the new station PIN to join again.", rTs);
+          if (rec.station_id === currentStation) {
+            if (fp.reset_timestamp) {
+              let rTs = Number(fp.reset_timestamp) || 0;
+              let joinTs = Number(localStorage.getItem("stunt_join_ts_" + currentStation) || 0);
+              let lastReset = Number(localStorage.getItem("stunt_last_handled_reset_" + currentStation) || 0);
+              if (rTs > Math.max(joinTs, lastReset)) {
+                localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(rTs));
+                executeSessionReset("Your station was reset by your instructor. Please enter the new station PIN to join again.", rTs);
+                return;
+              }
+            } else if (fp.sender_id && fp.sender_id !== myClientSessionId) {
+              applyPeerSyncData(fp);
             }
           }
         }
@@ -3725,7 +3729,7 @@
         updateStationBadge();
         await restoreWorksheetState();
         document.getElementById("stationModal").style.display = "none";
-        await saveAndSync();
+        // Do NOT call saveAndSync() immediately on join: let existing group work persist!
         listenToStationUpdates();
         checkTargetRangeReveal(false);
       } else {
@@ -4807,7 +4811,7 @@
   // ==========================================
   // PROGRESSIVE DROPDOWN UNLOCKING & GATES
   // ==========================================
-  function unlockSection(stepNum) {
+  function unlockSection(stepNum, skipSave = false) {
     // ENFORCE TEACHER GATE BEFORE LIVE DROP (SECTION 6)
     if (stepNum === 6 && !worksheetState.inspectionApproved) {
       alert("⚠️ Stop-Block Inspection Required!\n\nYour instructor must verify Dave on your physical stop-block clamp on the apparatus and click 'Approve Clamp' on the Teacher Cockpit before you can unlock Section 6 for the live drop.");
@@ -4835,7 +4839,7 @@
     }
 
     updateProgress();
-    saveAndSync();
+    if (!skipSave) saveAndSync();
   }
 
   function calcStuntResults() {
@@ -4881,11 +4885,11 @@
   // COMPLETE STATE PACKING & PERSISTENCE
   // ==========================================
   function packWorksheetState() {
-    let lastStReset = currentStation ? Number(localStorage.getItem("stunt_last_handled_reset_" + currentStation) || 0) : 0;
     return {
       pin: currentStation ? String(dynamicStationPins[currentStation] || "") : undefined,
       teacher_online: isTeacherOnline,
-      reset_timestamp: lastStReset > 0 ? lastStReset : undefined,
+      sender_id: myClientSessionId,
+      last_edit_time: Date.now(),
       unlockedStep: worksheetState.unlockedStep,
       progress: worksheetState.progress,
       status: worksheetState.status,
@@ -5383,6 +5387,27 @@
       console.warn("localStorage parse err", e);
     }
 
+    // Zero-Data-Loss Safety: check continuous rolling backup if state is missing
+    if (!saved) {
+      try {
+        let bkp = localStorage.getItem("stunt_backup_" + currentStation);
+        if (bkp) saved = JSON.parse(bkp);
+      } catch(e) {}
+    }
+
+    // Zero-Data-Loss Safety: check latest emergency backup snapshot
+    if (!saved) {
+      try {
+        let keys = Object.keys(localStorage).filter(k => k.startsWith("stunt_emergency_backup_" + currentStation));
+        if (keys.length > 0) {
+          keys.sort();
+          let latestKey = keys[keys.length - 1];
+          let bkp = localStorage.getItem(latestKey);
+          if (bkp) saved = JSON.parse(bkp);
+        }
+      } catch(e) {}
+    }
+
     // Check remote full_payload via Supabase SDK or direct PostgREST fallback
     try {
       let data = null;
@@ -5412,7 +5437,13 @@
         }
 
         if (data.full_payload && Object.keys(data.full_payload).length > 0) {
-          saved = data.full_payload;
+          let fp = data.full_payload;
+          let hasRemoteWork = (fp.crew && (fp.crew.releaser || fp.crew.measurer || fp.crew.scribe || fp.crew.checker)) ||
+                              (fp.tablePoints && Array.isArray(fp.tablePoints) && fp.tablePoints.some(p => p && (p.h_raw || p.x || p.v))) ||
+                              fp.dropH || fp.safeApexH;
+          if (hasRemoteWork || !saved) {
+            saved = fp;
+          }
         }
       }
     } catch(e) {
@@ -5603,6 +5634,11 @@
         if (rec.teacher_grade !== null && !isNaN(rec.teacher_grade)) {
           displayTeacherGrade(rec.teacher_grade, rec.teacher_feedback);
           if (typeof confetti === "function") confetti({ particleCount: 150, spread: 90 });
+        }
+
+        // Realtime intra-group peer sync across all group members at this station
+        if (rec.full_payload && rec.full_payload.sender_id && rec.full_payload.sender_id !== myClientSessionId) {
+          applyPeerSyncData(rec.full_payload);
         }
       })
       .subscribe();
@@ -5819,10 +5855,17 @@
       safeSet("yAxisLabel", peerState.graphLabels.yAxis);
       safeSet("xAxisLabel", peerState.graphLabels.xAxis);
     }
+    if (peerState.graphLine) {
+      graphLine = peerState.graphLine;
+    }
     if (peerState.calibratedParams) {
       safeSet("calcSlopeA", peerState.calibratedParams.slopeA);
       safeSet("calcInterceptB", peerState.calibratedParams.interceptB);
       safeSet("slopeComparison", peerState.calibratedParams.comparison);
+    }
+    if (worksheetState.unlockedStep >= 3) {
+      updateLineEquationAndInputs();
+      renderStudentGraph();
     }
 
     // Section 4 Energy check
@@ -5856,7 +5899,9 @@
 
     // Unlocked steps
     if (peerState.unlockedStep && peerState.unlockedStep > worksheetState.unlockedStep) {
-      unlockSection(peerState.unlockedStep);
+      for (let s = worksheetState.unlockedStep + 1; s <= peerState.unlockedStep; s++) {
+        unlockSection(s, true);
+      }
     }
 
     updateProgress();

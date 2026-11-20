@@ -2902,3 +2902,105 @@ Per instructor instruction (*"do not provide both of this to students...let them
 
 ### 3. Verification
 - Verified all 4 transitions (`Default Hidden` $\rightarrow$ `Set Mode Visible` $\rightarrow$ `Revealed to Students` $\rightarrow$ `Post-Reset Hidden` leaving live Supabase clean) via Playwright (`verify_set_then_reveal.py`, [`verify_v6_step1_default_hidden.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v6_step1_default_hidden.png), [`verify_v6_step2_set_mode.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v6_step2_set_mode.png), [`verify_v6_step3_revealed.png`](file:///C:/Users/fahad/.gemini/antigravity/brain/a4882eb3-9894-4ffc-863b-198c9aed6b07/verify_v6_step3_revealed.png)).
+
+
+## 78. 5-Minute Demonstration Class Presentation Script & Danielson Framework Briefing
+
+### 1. User Directive & Context
+- **User Directive:** Provide a tight, high-impact 5-minute presentation/reflection script explaining the demonstration class (*"Scene 42: The Full-Throttle Loop"* / AP Physics 1 Lab 4: Stunt Calibration) to evaluators/observers, keeping Danielson Framework objectives ultra-concise, punchy, and clear.
+
+### 2. Core Structure & Time Breakdown (300 Seconds Total)
+1. **Minute 1 [00:00 – 01:00] — The Hook & Core Philosophy:**
+   - Shifting from traditional "cookbook verification labs" to authentic engineering calibration.
+   - Narrative premise: Stunt Driver Dave cannot afford a crash; textbook sliding physics ($h = 2.5R$) fails in reality due to rolling inertia and track dissipation.
+2. **Minute 2 [01:00 – 02:00] — Objectives & Danielson Domain 1 (Planning & Preparation):**
+   - Ultra-short 3-verb objective: **Quantify** (projectile flight), **Model** (linearize $v^2$ vs $h$), **Invert** (solve backward for $h^*$ given target $X^*$).
+   - AP Physics 1 misconceptions proactively resolved: normal force points *downward* at the apex, mass cancels out ($m$ in every term).
+3. **Minute 3 [02:00 – 03:00] — Classroom Environment & ELL Strategy (Danielson Domain 2):**
+   - 4-person simultaneous role delegation: Releaser, Measurer, Scribe, Checker.
+   - Synchronized digital lab: same station PIN = zero bystander effect.
+   - ELL / Non-native accommodation: short 8–12 word sentences, physical pointing cues, 15-second partner turn-and-talk before whole-group sharing.
+4. **Minute 4 [03:00 – 04:00] — Active Instruction & Assessment (Danielson Domain 3):**
+   - Discrepant event demos: bucket demo ($F_N \to 0$), $2.5R$ crash demo to spark inquiry.
+   - High-DOK questioning: withholding answers until students predict and discuss.
+   - Real-time formative roaming telemetry via Teacher Dashboard (`dashboard.html`).
+5. **Minute 5 [04:00 – 05:00] — The Live Take & Reflection (Danielson Domain 4):**
+   - The Climax: Single live filming take on secret target $X^*$, measuring percentage error ($|X_{\text{actual}} - X^*| / X^* \times 100\% \le 3\%$).
+   - Physics synthesis: Accounting for the slope deficit ($a \approx 8.8\text{--}14.0\text{ m/s}^2$ vs ideal $19.6\text{ m/s}^2$) via rotational kinetic energy ($28.6\%$), seamlessly previewing AP Unit 6 (Rotation).
+
+---
+
+## 79. Multi-Student Simultaneous Group Login & Zero-Wipe Intra-Group Realtime Sync
+
+### 1. The Catastrophic Mutual-Reset Bug & Root Cause
+During live classroom testing with multiple students in the same lab group logging into the same station (e.g., Station 1) on separate Chromebooks, only 1 student could remain logged in: as soon as a 2nd, 3rd, or 4th student joined, the previous students' portals were immediately wiped blank and kicked back to the Station PIN Check-In modal (`#stationModal`).
+
+#### Root Cause Analysis
+1. **Student Login Emitting Fake Teacher Resets:** In `verifyAndLockStation()`, when Student 2 logged in at timestamp $T_2$, the code stored $T_2$ in `localStorage.setItem("stunt_last_handled_reset_" + currentStation, String(joinNow))`. Then in `packWorksheetState()`, the state was packaged with:
+   ```javascript
+   let lastStReset = currentStation ? Number(localStorage.getItem("stunt_last_handled_reset_" + currentStation) || 0) : 0;
+   return {
+     ...
+     reset_timestamp: lastStReset > 0 ? lastStReset : undefined, // <-- FATAL BUG
+   ```
+2. **Cascading Supabase Realtime Wipes:** Student 2 auto-saved upon login, sending `reset_timestamp = T2` to Supabase `station_submissions`. Student 1 (who logged in at $T_1 < T_2$) received this update via Supabase Realtime. Because $T_2 > T_1$, Student 1's browser falsely evaluated:
+   ```javascript
+   if (rTs > Math.max(joinTs, lastReset)) {
+     executeSessionReset("Your station was reset by your instructor...", rTs);
+   }
+   ```
+   Student 1 was kicked out! If Student 1 re-logged in at $T_3 > T_2$, Student 1 sent $T_3$, which then kicked Student 2 out in an infinite mutual-reset loop.
+3. **Missing Cross-Device Peer Sync:** `applyPeerSyncData()` was only wired to same-browser `BroadcastChannel`, meaning students on separate Chromebooks never received each other's live inputs over Supabase.
+
+---
+
+### 2. Architecture Fixes Applied
+
+1. **Purged `reset_timestamp` from Student Submissions (`index.html`):**
+   Students have zero instructor authority and must **never** emit a reset timestamp. `packWorksheetState()` was updated to completely omit `reset_timestamp` and instead pack `sender_id: myClientSessionId` and `last_edit_time: Date.now()`:
+   ```javascript
+   function packWorksheetState() {
+     return {
+       pin: currentStation ? String(dynamicStationPins[currentStation] || "") : undefined,
+       teacher_online: isTeacherOnline,
+       sender_id: myClientSessionId,
+       last_edit_time: Date.now(),
+       unlockedStep: worksheetState.unlockedStep,
+       ...
+   ```
+
+2. **Supabase Realtime Intra-Group Peer Sync (`index.html`):**
+   In `listenToStationUpdates()`, live updates from Supabase for `currentStation` are now routed directly through `applyPeerSyncData(rec.full_payload)` whenever `rec.full_payload.sender_id !== myClientSessionId`. Because `applyPeerSyncData()` uses `safeSet(id, val)` (which checks `document.activeElement !== el`), local active typing is protected while peer crew names, table measurements, and graph parameters sync seamlessly.
+
+3. **Elimination of Premature Auto-Save on Join (`verifyAndLockStation`):**
+   Removed `await saveAndSync()` upon PIN verification. Incoming students hydrate existing group progress directly from Supabase via `await restoreWorksheetState()` without emitting unneeded writes before making actual edits.
+
+4. **Authoritative Teacher-Only Reset Registry (`checkInitialTeacherAndPins`):**
+   Station resets are now populated strictly from `global_pins.full_payload.station_resets` (managed exclusively by `dashboard.html`), ensuring no stale student submission can poison reset timestamps.
+
+5. **Sanitization of Remote Database Rows:**
+   Patched existing `station_submissions` records (`station_1` through `station_4`) to remove all legacy `reset_timestamp` fields.
+
+---
+
+### 3. Automated Playwright 4-Device Test Verification
+
+A multi-context Playwright test script (`test_multi_student.py`) was executed across 4 isolated browser contexts simulating 4 students on separate Chromebooks:
+- **Step 1:** Student 1 logs into Station 1 with PIN `2338`. Enters Releaser: `"Alice Wonder"` and Launch 1 measurements ($h_{raw}=18.7$, $h=0.150$, $X=0.450$, $v=1.25$).
+- **Step 2:** Student 2 logs into Station 1 simultaneously.
+  - **Result:** Student 1 remains logged in (`stationModal.style.display === "none"`).
+  - Student 2 hydrates `"Alice Wonder"` and enters Measurer: `"Bob Builder"`.
+- **Step 3:** Student 3 logs into Station 1 simultaneously.
+  - **Result:** Neither Student 1 nor Student 2 is kicked out. Student 3 enters Scribe: `"Charlie Chaplin"`.
+- **Step 4:** Student 4 logs into Station 1 simultaneously.
+  - **Result:** All 4 students are logged in simultaneously. Student 4 enters Checker: `"Dana Scully"`.
+  - All 4 students show the complete 4-member crew: `Alice Wonder`, `Bob Builder`, `Charlie Chaplin`, `Dana Scully`.
+- **Step 5:** Teacher opens Mission Control on `dashboard.html`, enters Master PIN `9999`, and clicks `🔄 Reset Lab Session`.
+  - **Result:** All 4 student portals receive the genuine instructor reset signal, clear their worksheets, and return to `#stationModal` to re-enter their station PIN.
+
+**Automated Test Result:** `ALL MULTI-STUDENT SIMULTANEOUS LOGIN & SYNC TESTS PASSED!`
+- Artifacts:
+  - `verify_v7_student1_active.png`
+  - `verify_v7_student4_active.png`
+  - `verify_v7_post_reset_reask_pin.png`
+
