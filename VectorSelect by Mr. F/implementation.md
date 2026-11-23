@@ -2051,3 +2051,52 @@ flowchart TD
    - `node scripts/test_stepper_and_student_paced.js`: 6/6 tests passed.
    - `node scripts/test_multi_select.js`: 6/6 tests passed.
    - `node scripts/test_supabase.js`: 6/6 core database tables active and responsive.
+
+---
+
+## 31. Movable Question Card Annotation Pencil Tool
+
+### A. Background & User Directive
+On question cards where problem text, formulas, equations, or diagrams extend near the top-right corner, the floating annotation badge (`#q-canvas-tool-wrapper`) previously sat at a static position (`top-3 right-3`), occasionally obscuring question content. The user requested:
+> *"make the pencil tool at the top right of each question movable. sometimes it blocks question text."*
+
+### B. Engineering Architecture
+To make the pencil tool freely movable across the card canvas without interfering with question card drawing or clicking:
+
+```mermaid
+flowchart TD
+    User["Pointer / Touch Event on Pencil Tool"] --> Threshold{"Pointer Movement Distance > 4px?"}
+    Threshold -- "No (Displacement ≤ 4px)" --> Click["Standard Click Action<br/>toggleCardDrawingMode(e)<br/>(Activate / Deactivate Drawing)"]
+    Threshold -- "Yes (Displacement > 4px)" --> Drag["Interactive Dragging Active<br/>suppressClick = true<br/>Direct 1:1 Pointer Follow"]
+    Drag --> Clamp["Boundary Clamping<br/>minX, maxX = 6..boxWidth - wWidth - 6<br/>minY, maxY = 6..boxHeight - wHeight - 6"]
+    Clamp --> SmartMenu["Dynamic Popout Menu Alignment<br/>left < 220px: Align Menu Left<br/>top > boxHeight - 250px: Open Menu Upward"]
+    SmartMenu --> Store["Save Position Ratio (xRatio, yRatio)<br/>Persist in localStorage('vs_canvas_tool_pos')"]
+    Store --> Sync["Sync on Resize & Question Navigation<br/>applySavedCanvasToolPosition()"]
+    Click --> Redraw["Canvas Overlay Active<br/>Vector Sketches & Highlights"]
+```
+
+1. **Dual Drag Handles (Grab Pill + Button Dragging)**:
+   - Added a visible top pill handle (`#q-canvas-drag-handle` with `⋮⋮ MOVE` label, `cursor: grab / active:cursor-grabbing`).
+   - Enabled pointer drag listeners on both the handle AND `#btn-toggle-canvas` directly.
+2. **Intent Discrimination (Click vs. Drag)**:
+   - Uses Pointer Events (`pointerdown`, `pointermove`, `pointerup`, `pointercancel`) with `setPointerCapture`.
+   - Tracks displacement $d = \sqrt{\Delta x^2 + \Delta y^2}$.
+   - If $d > 4\text{ px}$, it enters active drag mode, sets cursor to `grabbing`, and sets `suppressCanvasToolClick = true`.
+   - If released with $d \le 4\text{ px}$, `toggleCardDrawingMode` toggles the drawing tool cleanly without movement.
+3. **Boundary Clamping**:
+   - Clamps wrapper position within `#q-card-white-box` with a $6\text{ px}$ inner safety margin:
+     $$\text{left} = \max(6, \min(\text{boxWidth} - \text{toolWidth} - 6, \text{initialLeft} + \Delta x))$$
+     $$\text{top} = \max(6, \min(\text{boxHeight} - \text{toolHeight} - 6, \text{initialTop} + \Delta y))$$
+4. **Smart Popout Menu Alignment (`adjustCanvasMenuPlacement`)**:
+   - When dragged near the left edge ($\text{left} < 220\text{ px}$), the popout menu switches from `right: 0` to `left: 0`, preventing it from clipping off-screen.
+   - When dragged near the bottom ($\text{boxHeight} - \text{top} < 250\text{ px}$), the menu opens upward (`bottom: 48px; top: auto;`).
+5. **Persistence Across Sessions & Question Navigation**:
+   - Normalized position ratios ($\frac{\text{left}}{\text{boxWidth}}, \frac{\text{top}}{\text{boxHeight}}$) are saved to `localStorage` under `vs_canvas_tool_pos`.
+   - `applySavedCanvasToolPosition()` repositions the tool on question changes (`renderCurrentQuestion`), image loads (`cardImg.onload`), and viewport resizing (`resizeCanvasToCard`).
+6. **One-Click Reset Position**:
+   - Added a "↺ Reset Position (Top-Right)" button in the popout menu (`#q-canvas-menu`), allowing students to instantly return the pencil to its default top-right corner.
+
+### C. Verification & Quality Assurance
+- `scripts/test_movable_pencil.js`: Verified DOM structure, reset button presence, boundary clamping calculations, menu alignment heuristics, and click vs drag discrimination.
+- `scripts/_syntax_check.js`: Verified clean parsing of `index.html` inline script blocks (4,938 lines).
+- `scripts/_runtime_check.js`, `test_stepper_and_student_paced.js`, `test_multi_select.js`: 100% passed with zero regressions.

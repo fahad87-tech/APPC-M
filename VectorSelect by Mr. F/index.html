@@ -581,14 +581,21 @@
               <img id="q-card-img" src="" alt="AP Physics Question Card" class="mx-auto w-full h-auto cursor-zoom-in transition-transform duration-200 hover:scale-[1.005]" onclick="onQuestionCardClick(event)" title="Click to zoom question card (125%+ vector inspector)">
               <canvas id="q-card-canvas" class="absolute inset-0 pointer-events-none z-10 w-full h-full touch-none"></canvas>
 
-              <!-- Floating Canvas Annotation Badge Tool (Top-Right of Question Card) -->
-              <div id="q-canvas-tool-wrapper" class="absolute top-3 right-3 z-30 group flex flex-col items-end">
-                <!-- Small Circular Activation Button -->
-                <button type="button" id="btn-toggle-canvas" onclick="toggleCardDrawingMode(event)" class="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-cyan-300 shadow-2xl flex items-center justify-center transition-all duration-200 cursor-pointer backdrop-blur-md" title="Toggle Drawing Tool (Click to activate/deactivate)">
+              <!-- Floating Canvas Annotation Badge Tool (Movable Anywhere on Question Card) -->
+              <div id="q-canvas-tool-wrapper" class="absolute top-3 right-3 z-30 group flex flex-col items-end select-none touch-none">
+                <!-- Drag/Move Grip Pill Handle -->
+                <div id="q-canvas-drag-handle" class="flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-400 hover:text-cyan-300 select-none pb-1 transition-colors" title="Drag to move pencil anywhere on question card">
+                  <span class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-700/80 hover:border-cyan-400/60 rounded-full px-2 py-0.5 shadow-md">
+                    <span class="text-[10px]">⋮⋮</span> MOVE
+                  </span>
+                </div>
+
+                <!-- Small Circular Activation Button (Click to draw, Drag to move) -->
+                <button type="button" id="btn-toggle-canvas" onclick="toggleCardDrawingMode(event)" class="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-cyan-300 shadow-2xl flex items-center justify-center transition-all duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md" title="Click to draw • Drag to move anywhere">
                   <span id="canvas-tool-icon" class="text-base sm:text-lg">✏️</span>
                 </button>
 
-                <!-- Hover Popout Menu (Marker / Eraser / Brush / Colors) -->
+                <!-- Hover Popout Menu (Marker / Eraser / Brush / Colors / Reset Position) -->
                 <div id="q-canvas-menu" class="absolute right-0 top-12 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 bg-slate-900/95 border border-slate-700/80 rounded-2xl p-3 shadow-2xl space-y-2.5 min-w-[210px] text-xs backdrop-blur-md z-40 text-left">
                   <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 px-0.5">
                     <span class="font-extrabold text-cyan-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
@@ -632,10 +639,13 @@
                     </div>
                   </div>
 
-                  <!-- Clear Button -->
-                  <div class="border-t border-slate-800 pt-1.5">
+                  <!-- Actions: Clear Button & Reset Position -->
+                  <div class="border-t border-slate-800 pt-1.5 space-y-1.5">
                     <button type="button" onclick="clearCurrentCardCanvas()" class="w-full py-1.5 rounded-xl border border-rose-500/30 hover:border-rose-500/60 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer">
                       <span>🗑️</span> Clear Drawing
+                    </button>
+                    <button type="button" onclick="resetCanvasToolPosition(event)" class="w-full py-1 rounded-xl border border-slate-700/70 hover:border-slate-600 bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-[10px] flex items-center justify-center gap-1.5 transition cursor-pointer" title="Reset pencil badge back to top-right corner">
+                      <span>↺</span> Reset Position (Top-Right)
                     </button>
                   </div>
                 </div>
@@ -5708,6 +5718,9 @@
         canvas.height = h;
         redrawCardCanvas();
       }
+      if (typeof applySavedCanvasToolPosition === 'function') {
+        applySavedCanvasToolPosition();
+      }
     }
 
     function redrawCardCanvas() {
@@ -5825,11 +5838,14 @@
       window.addEventListener("resize", () => {
         resizeCanvasToCard();
         redrawCardCanvas();
+        if (typeof applySavedCanvasToolPosition === 'function') applySavedCanvasToolPosition();
       });
 
+      if (typeof initCanvasToolDraggable === 'function') initCanvasToolDraggable();
       resizeCanvasToCard();
       redrawCardCanvas();
       updateCardCanvasUI();
+      if (typeof applySavedCanvasToolPosition === 'function') applySavedCanvasToolPosition();
     }
 
     function updateCardCanvasUI() {
@@ -5854,9 +5870,9 @@
 
       if (circleBtn) {
         if (isCardDrawingActive) {
-          circleBtn.className = "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-cyan-950 border-2 border-cyan-400 text-cyan-300 shadow-2xl ring-2 ring-cyan-400/50 flex items-center justify-center transition-all duration-200 cursor-pointer backdrop-blur-md";
+          circleBtn.className = "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-cyan-950 border-2 border-cyan-400 text-cyan-300 shadow-2xl ring-2 ring-cyan-400/50 flex items-center justify-center transition-all duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md";
         } else {
-          circleBtn.className = "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 shadow-2xl flex items-center justify-center transition-all duration-200 cursor-pointer backdrop-blur-md";
+          circleBtn.className = "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 shadow-2xl flex items-center justify-center transition-all duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md";
         }
       }
 
@@ -5885,8 +5901,229 @@
       }
     }
 
+    // ============================================================================
+    // MOVABLE PENCIL TOOL DRAG & REPOSITIONING CONTROLLER
+    // ============================================================================
+    let isCanvasToolDragging = false;
+    let canvasToolDragStartX = 0;
+    let canvasToolDragStartY = 0;
+    let canvasToolInitialLeft = 0;
+    let canvasToolInitialTop = 0;
+    let canvasToolDragDistance = 0;
+    let suppressCanvasToolClick = false;
+
+    function initCanvasToolDraggable() {
+      const wrapper = document.getElementById("q-canvas-tool-wrapper");
+      const handle = document.getElementById("q-canvas-drag-handle");
+      const btn = document.getElementById("btn-toggle-canvas");
+      const whiteBox = document.getElementById("q-card-white-box");
+      if (!wrapper || !whiteBox) return;
+
+      const startToolDrag = (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        
+        isCanvasToolDragging = false;
+        canvasToolDragDistance = 0;
+        canvasToolDragStartX = e.clientX;
+        canvasToolDragStartY = e.clientY;
+
+        const boxRect = whiteBox.getBoundingClientRect();
+        const wrapperRect = wrapper.getBoundingClientRect();
+        
+        canvasToolInitialLeft = wrapperRect.left - boxRect.left;
+        canvasToolInitialTop = wrapperRect.top - boxRect.top;
+
+        const targetEl = e.currentTarget || wrapper;
+        try {
+          targetEl.setPointerCapture(e.pointerId);
+        } catch (_) {}
+
+        const menu = document.getElementById("q-canvas-menu");
+
+        const onPointerMove = (moveEvt) => {
+          const dx = moveEvt.clientX - canvasToolDragStartX;
+          const dy = moveEvt.clientY - canvasToolDragStartY;
+          canvasToolDragDistance = Math.hypot(dx, dy);
+
+          if (canvasToolDragDistance > 4) {
+            isCanvasToolDragging = true;
+            suppressCanvasToolClick = true;
+            document.body.style.userSelect = 'none';
+            wrapper.style.cursor = 'grabbing';
+            if (btn) btn.style.cursor = 'grabbing';
+            if (handle) handle.style.cursor = 'grabbing';
+            if (menu) {
+              menu.style.pointerEvents = 'none';
+              menu.style.opacity = '0';
+            }
+
+            const currentBoxRect = whiteBox.getBoundingClientRect();
+            const wWidth = wrapper.offsetWidth || 50;
+            const wHeight = wrapper.offsetHeight || 60;
+
+            const minX = 6;
+            const maxX = Math.max(minX, currentBoxRect.width - wWidth - 6);
+            const minY = 6;
+            const maxY = Math.max(minY, currentBoxRect.height - wHeight - 6);
+
+            const newLeft = Math.max(minX, Math.min(maxX, canvasToolInitialLeft + dx));
+            const newTop = Math.max(minY, Math.min(maxY, canvasToolInitialTop + dy));
+
+            wrapper.style.left = `${Math.round(newLeft)}px`;
+            wrapper.style.top = `${Math.round(newTop)}px`;
+            wrapper.style.right = 'auto';
+            wrapper.style.bottom = 'auto';
+
+            adjustCanvasMenuPlacement(newLeft, newTop, currentBoxRect.width, currentBoxRect.height);
+          }
+        };
+
+        const onPointerUp = (upEvt) => {
+          try {
+            targetEl.releasePointerCapture(upEvt.pointerId);
+          } catch (_) {}
+
+          targetEl.removeEventListener("pointermove", onPointerMove);
+          targetEl.removeEventListener("pointerup", onPointerUp);
+          targetEl.removeEventListener("pointercancel", onPointerUp);
+
+          document.body.style.userSelect = '';
+          wrapper.style.cursor = '';
+          if (btn) btn.style.cursor = '';
+          if (handle) handle.style.cursor = '';
+          if (menu) {
+            menu.style.pointerEvents = '';
+            menu.style.opacity = '';
+          }
+
+          if (isCanvasToolDragging) {
+            const currentBoxRect = whiteBox.getBoundingClientRect();
+            const currentLeft = wrapper.offsetLeft;
+            const currentTop = wrapper.offsetTop;
+            const xRatio = Math.max(0, Math.min(1, currentLeft / (currentBoxRect.width || 1)));
+            const yRatio = Math.max(0, Math.min(1, currentTop / (currentBoxRect.height || 1)));
+
+            try {
+              localStorage.setItem("vs_canvas_tool_pos", JSON.stringify({ xRatio, yRatio }));
+            } catch (_) {}
+
+            setTimeout(() => {
+              isCanvasToolDragging = false;
+              suppressCanvasToolClick = false;
+            }, 80);
+          } else {
+            isCanvasToolDragging = false;
+            suppressCanvasToolClick = false;
+          }
+        };
+
+        targetEl.addEventListener("pointermove", onPointerMove);
+        targetEl.addEventListener("pointerup", onPointerUp);
+        targetEl.addEventListener("pointercancel", onPointerUp);
+      };
+
+      if (handle) {
+        handle.onpointerdown = startToolDrag;
+      }
+      if (btn) {
+        btn.onpointerdown = startToolDrag;
+      }
+    }
+
+    function adjustCanvasMenuPlacement(currentLeft, currentTop, boxWidth, boxHeight) {
+      const wrapper = document.getElementById("q-canvas-tool-wrapper");
+      const menu = document.getElementById("q-canvas-menu");
+      const whiteBox = document.getElementById("q-card-white-box");
+      if (!wrapper || !menu) return;
+
+      if (currentLeft === undefined || currentTop === undefined) {
+        const boxRect = whiteBox ? whiteBox.getBoundingClientRect() : { width: 800, height: 600 };
+        currentLeft = wrapper.offsetLeft;
+        currentTop = wrapper.offsetTop;
+        boxWidth = boxRect.width;
+        boxHeight = boxRect.height;
+      }
+
+      // Horizontal orientation:
+      if (currentLeft < 220) {
+        wrapper.classList.remove("items-end");
+        wrapper.classList.add("items-start");
+        menu.style.left = "0px";
+        menu.style.right = "auto";
+      } else {
+        wrapper.classList.remove("items-start");
+        wrapper.classList.add("items-end");
+        menu.style.left = "auto";
+        menu.style.right = "0px";
+      }
+
+      // Vertical orientation:
+      if (boxHeight && (boxHeight - currentTop < 250)) {
+        menu.style.top = "auto";
+        menu.style.bottom = "48px";
+      } else {
+        menu.style.bottom = "auto";
+        menu.style.top = "48px";
+      }
+    }
+
+    function applySavedCanvasToolPosition() {
+      const wrapper = document.getElementById("q-canvas-tool-wrapper");
+      const whiteBox = document.getElementById("q-card-white-box");
+      if (!wrapper || !whiteBox) return;
+
+      let saved = null;
+      try {
+        const raw = localStorage.getItem("vs_canvas_tool_pos");
+        if (raw) saved = JSON.parse(raw);
+      } catch (_) {}
+
+      if (!saved || typeof saved.xRatio !== 'number' || typeof saved.yRatio !== 'number') {
+        wrapper.style.left = '';
+        wrapper.style.top = '12px';
+        wrapper.style.right = '12px';
+        wrapper.style.bottom = 'auto';
+        adjustCanvasMenuPlacement(undefined, undefined);
+        return;
+      }
+
+      const boxRect = whiteBox.getBoundingClientRect();
+      if (!boxRect.width || !boxRect.height) return;
+
+      const wWidth = wrapper.offsetWidth || 50;
+      const wHeight = wrapper.offsetHeight || 60;
+
+      const minX = 6;
+      const maxX = Math.max(minX, boxRect.width - wWidth - 6);
+      const minY = 6;
+      const maxY = Math.max(minY, boxRect.height - wHeight - 6);
+
+      const targetLeft = Math.max(minX, Math.min(maxX, saved.xRatio * boxRect.width));
+      const targetTop = Math.max(minY, Math.min(maxY, saved.yRatio * boxRect.height));
+
+      wrapper.style.left = `${Math.round(targetLeft)}px`;
+      wrapper.style.top = `${Math.round(targetTop)}px`;
+      wrapper.style.right = 'auto';
+      wrapper.style.bottom = 'auto';
+
+      adjustCanvasMenuPlacement(targetLeft, targetTop, boxRect.width, boxRect.height);
+    }
+
+    function resetCanvasToolPosition(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      try {
+        localStorage.removeItem("vs_canvas_tool_pos");
+      } catch (_) {}
+      applySavedCanvasToolPosition();
+      showToast("Pencil Reset", "Returned to top-right corner", "slate", 1500);
+    }
+
     function toggleCardDrawingMode(e) {
       if (e && e.stopPropagation) e.stopPropagation();
+      if (suppressCanvasToolClick) {
+        if (e && e.preventDefault) e.preventDefault();
+        return;
+      }
       isCardDrawingActive = !isCardDrawingActive;
       updateCardCanvasUI();
       if (isCardDrawingActive) {
@@ -5983,6 +6220,9 @@
     window.initQuestionCanvas = initQuestionCanvas;
     window.resizeCanvasToCard = resizeCanvasToCard;
     window.redrawCardCanvas = redrawCardCanvas;
+    window.resetCanvasToolPosition = resetCanvasToolPosition;
+    window.applySavedCanvasToolPosition = applySavedCanvasToolPosition;
+    window.initCanvasToolDraggable = initCanvasToolDraggable;
 
     window.onload = initStudentApp;
   </script>
