@@ -2057,46 +2057,64 @@ flowchart TD
 ## 31. Movable Question Card Annotation Pencil Tool
 
 ### A. Background & User Directive
-On question cards where problem text, formulas, equations, or diagrams extend near the top-right corner, the floating annotation badge (`#q-canvas-tool-wrapper`) previously sat at a static position (`top-3 right-3`), occasionally obscuring question content. The user requested:
+On question cards where problem text, formulas, equations, or diagrams extend near the top-right corner, the floating annotation badge (`#q-canvas-tool-wrapper` in `index.html` and `#lc-canvas-tool-wrapper` in `teacher.html`) previously sat at a static position (`top-3 right-3`), occasionally obscuring question content. The user requested:
 > *"make the pencil tool at the top right of each question movable. sometimes it blocks question text."*
 
-### B. Engineering Architecture
-To make the pencil tool freely movable across the card canvas without interfering with question card drawing or clicking:
+Upon initial testing, the tool remained static because:
+1. The pencil badge was present in **both** the Student Portal (`index.html`) and Teacher Portal live stage (`teacher.html`), requiring synchronized movable implementations.
+2. Element-scoped pointer listeners lost tracking when the pointer moved faster than the button bounding box.
+3. Default button click events fired following pointer releases unless explicitly guarded in the capturing phase.
+
+### B. Dual-Portal Engineering Architecture
+Both `index.html` (student portal) and `teacher.html` (teacher live stage) now share an identical rock-solid drag controller:
 
 ```mermaid
 flowchart TD
-    User["Pointer / Touch Event on Pencil Tool"] --> Threshold{"Pointer Movement Distance > 4px?"}
-    Threshold -- "No (Displacement ≤ 4px)" --> Click["Standard Click Action<br/>toggleCardDrawingMode(e)<br/>(Activate / Deactivate Drawing)"]
-    Threshold -- "Yes (Displacement > 4px)" --> Drag["Interactive Dragging Active<br/>suppressClick = true<br/>Direct 1:1 Pointer Follow"]
-    Drag --> Clamp["Boundary Clamping<br/>minX, maxX = 6..boxWidth - wWidth - 6<br/>minY, maxY = 6..boxHeight - wHeight - 6"]
-    Clamp --> SmartMenu["Dynamic Popout Menu Alignment<br/>left < 220px: Align Menu Left<br/>top > boxHeight - 250px: Open Menu Upward"]
-    SmartMenu --> Store["Save Position Ratio (xRatio, yRatio)<br/>Persist in localStorage('vs_canvas_tool_pos')"]
-    Store --> Sync["Sync on Resize & Question Navigation<br/>applySavedCanvasToolPosition()"]
-    Click --> Redraw["Canvas Overlay Active<br/>Vector Sketches & Highlights"]
+    User["Pointer / Mouse / Touch Down on Grip or Button"] --> WindowListeners["Attach Window Capture Listeners<br/>(pointermove, mousemove, touchmove on window with capture:true)"]
+    WindowListeners --> Threshold{"Displacement > 3px?"}
+    Threshold -- "No (Tap / Click)" --> ClickHandler["toggleCardDrawingMode(e) / toggleTeacherCardDrawing(e)<br/>(Drawing Mode Toggled)"]
+    Threshold -- "Yes (Intentional Drag)" --> Dragging["Active Dragging State<br/>suppressClickUntil = now + 500ms<br/>cursor: grabbing"]
+    Dragging --> Clamp["Boundary Clamping within Card Box<br/>minX, maxX = 6..boxWidth - toolWidth - 6<br/>minY, maxY = 6..boxHeight - toolHeight - 6"]
+    Clamp --> SmartMenu["Dynamic Menu Alignment<br/>left < 220px: Menu Flips to Left<br/>top > boxHeight - 250px: Menu Flips Upward"]
+    SmartMenu --> StoreRatio["Persist Relative Ratio (xRatio, yRatio)<br/>localStorage('vs_canvas_tool_pos' / 'vs_teacher_canvas_tool_pos')"]
+    StoreRatio --> PointerUp["Pointer Up / Touch End on Window"]
+    PointerUp --> ClickGuard["Capture Click Guard Cancels Synthetic Button Click<br/>Drawing Mode Stays Untouched"]
 ```
 
-1. **Dual Drag Handles (Grab Pill + Button Dragging)**:
-   - Added a visible top pill handle (`#q-canvas-drag-handle` with `⋮⋮ MOVE` label, `cursor: grab / active:cursor-grabbing`).
-   - Enabled pointer drag listeners on both the handle AND `#btn-toggle-canvas` directly.
-2. **Intent Discrimination (Click vs. Drag)**:
-   - Uses Pointer Events (`pointerdown`, `pointermove`, `pointerup`, `pointercancel`) with `setPointerCapture`.
-   - Tracks displacement $d = \sqrt{\Delta x^2 + \Delta y^2}$.
-   - If $d > 4\text{ px}$, it enters active drag mode, sets cursor to `grabbing`, and sets `suppressCanvasToolClick = true`.
-   - If released with $d \le 4\text{ px}$, `toggleCardDrawingMode` toggles the drawing tool cleanly without movement.
-3. **Boundary Clamping**:
-   - Clamps wrapper position within `#q-card-white-box` with a $6\text{ px}$ inner safety margin:
-     $$\text{left} = \max(6, \min(\text{boxWidth} - \text{toolWidth} - 6, \text{initialLeft} + \Delta x))$$
-     $$\text{top} = \max(6, \min(\text{boxHeight} - \text{toolHeight} - 6, \text{initialTop} + \Delta y))$$
-4. **Smart Popout Menu Alignment (`adjustCanvasMenuPlacement`)**:
-   - When dragged near the left edge ($\text{left} < 220\text{ px}$), the popout menu switches from `right: 0` to `left: 0`, preventing it from clipping off-screen.
-   - When dragged near the bottom ($\text{boxHeight} - \text{top} < 250\text{ px}$), the menu opens upward (`bottom: 48px; top: auto;`).
-5. **Persistence Across Sessions & Question Navigation**:
-   - Normalized position ratios ($\frac{\text{left}}{\text{boxWidth}}, \frac{\text{top}}{\text{boxHeight}}$) are saved to `localStorage` under `vs_canvas_tool_pos`.
-   - `applySavedCanvasToolPosition()` repositions the tool on question changes (`renderCurrentQuestion`), image loads (`cardImg.onload`), and viewport resizing (`resizeCanvasToCard`).
-6. **One-Click Reset Position**:
-   - Added a "↺ Reset Position (Top-Right)" button in the popout menu (`#q-canvas-menu`), allowing students to instantly return the pencil to its default top-right corner.
+1. **Global Capture Event Binding**:
+   - `window.addEventListener("pointermove", onMove, { capture: true, passive: false })`
+   - `window.addEventListener("mousemove", onMove, { capture: true, passive: false })`
+   - `window.addEventListener("touchmove", onMove, { capture: true, passive: false })`
+   - Guarantees 1:1 responsive movement even if the pointer flies across the screen at high velocity.
+2. **Dual Drag Handles (Grab Pill + Button Dragging)**:
+   - Added a visible top pill handle (`#q-canvas-drag-handle` / `#lc-canvas-drag-handle` with `⋮⋮ MOVE` label, `cursor: grab / active:cursor-grabbing`).
+   - Enabled pointer drag listeners on both the handle AND the circular button directly.
+3. **Rock-Solid Click Guard**:
+   - Capture phase click listener on buttons:
+     ```javascript
+     btn.addEventListener("click", function(e) {
+       if (Date.now() < suppressClickUntil) {
+         e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault();
+         return false;
+       }
+     }, true);
+     ```
+   - Prevents the button from toggling drawing mode when released after dragging.
+4. **Boundary Clamping & CSS Cleansing**:
+   - Removed conflicting Tailwind classes `top-3 right-3` from wrapper `class` attributes, relying purely on inline coordinates (`style="top: 12px; right: 12px;"`).
+   - Clamps wrapper within card container with safety buffer:
+     $$\text{left} = \max(6, \min(\text{boxWidth} - \text{toolWidth} - 6, \text{startLeft} + \Delta x))$$
+     $$\text{top} = \max(6, \min(\text{boxHeight} - \text{toolHeight} - 6, \text{startTop} + \Delta y))$$
+5. **Smart Popout Menu Heuristics**:
+   - Horizontal: If $\text{left} < 220\text{ px}$, popout menu flips to `left: 0; right: auto;`.
+   - Vertical: If $\text{boxHeight} - \text{top} < 250\text{ px}$, menu opens upward (`bottom: 48px; top: auto;`).
+6. **Persistence & Lifecycle Integration**:
+   - Saved as normalized ratios in `localStorage` (`vs_canvas_tool_pos` and `vs_teacher_canvas_tool_pos`).
+   - Reapplied on card image load (`cardImg.onload`, `lcCardImg.onload`), viewport resizing (`resizeCanvasToCard`, `resizeTeacherCanvas`), and initial load.
+7. **One-Click Reset**:
+   - Added "↺ Reset Position (Top-Right)" button in both menus to return the tool to its initial corner.
 
 ### C. Verification & Quality Assurance
-- `scripts/test_movable_pencil.js`: Verified DOM structure, reset button presence, boundary clamping calculations, menu alignment heuristics, and click vs drag discrimination.
-- `scripts/_syntax_check.js`: Verified clean parsing of `index.html` inline script blocks (4,938 lines).
-- `scripts/_runtime_check.js`, `test_stepper_and_student_paced.js`, `test_multi_select.js`: 100% passed with zero regressions.
+- `scripts/test_movable_pencil.js`: Comprehensive verification suite testing DOM elements, drag handles, functions, boundary math, and click suppression across both `index.html` and `teacher.html`.
+- `scripts/_syntax_check.js`: Verified clean parsing of both `index.html` (4,940 lines) and `teacher.html` (4,257 lines).
+- `scripts/_runtime_check.js`, `test_stepper_and_student_paced.js`, `test_multi_select.js`: 100% passed.
