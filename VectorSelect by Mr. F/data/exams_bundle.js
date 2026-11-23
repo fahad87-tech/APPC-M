@@ -751,15 +751,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "No, because the student, bus, and observer are all included in Earth\u2019s reference frame so the student and\r\nbus must be traveling at the same speed."
+                      "text": "No, because the student, bus, and observer are all included in Earth’s reference frame so the student and\r\nbus must be traveling at the same speed."
                     },
                     {
                       "letter": "C",
-                      "text": "Yes, because according to the stationary observer, the student\u2019s velocity is the velocity of the bus plus\r\nthe velocity of the student relative to the bus."
+                      "text": "Yes, because according to the stationary observer, the student’s velocity is the velocity of the bus plus\r\nthe velocity of the student relative to the bus."
                     },
                     {
                       "letter": "D",
-                      "text": "Yes, because according to the stationary observer, the student\u2019s velocity is the difference between the\r\nvelocity of the bus and the velocity of the student relative to the bus."
+                      "text": "Yes, because according to the stationary observer, the student’s velocity is the difference between the\r\nvelocity of the bus and the velocity of the student relative to the bus."
                     }
                   ],
                   "question_id": "app1_unit1_1_4_q2",
@@ -784,7 +784,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Yes, because both observers are external to the rowboat\u2019s frame of reference and will therefore measure\r\nzero acceleration."
+                      "text": "Yes, because both observers are external to the rowboat’s frame of reference and will therefore measure\r\nzero acceleration."
                     }
                   ],
                   "question_id": "app1_unit1_1_4_q3",
@@ -1676,11 +1676,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "\u221a2 m/s"
+                      "text": "√2 m/s"
                     },
                     {
                       "letter": "C",
-                      "text": "3\r\n\u221a2\r\nm/s"
+                      "text": "3\r\n√2\r\nm/s"
                     },
                     {
                       "letter": "D",
@@ -1709,7 +1709,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "at\r\n2\r\n2 \u2212\r\na\r\n2t\r\n2\r\n2g"
+                      "text": "at\r\n2\r\n2 −\r\na\r\n2t\r\n2\r\n2g"
                     }
                   ],
                   "question_id": "app1_unit1_unit_1_practice_exam_q6",
@@ -1797,7 +1797,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "\u221ahv0"
+                      "text": "√hv0"
                     },
                     {
                       "letter": "B",
@@ -1809,7 +1809,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "2h/g\r\n(E) \u221a2h/g\r\no\r\n0\r\n0\nUnit 1 - TEST\r\nScoring Guide"
+                      "text": "2h/g\r\n(E) √2h/g\r\no\r\n0\r\n0\nUnit 1 - TEST\r\nScoring Guide"
                     },
                     {
                       "letter": "E",
@@ -2846,7 +2846,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "No, because the step exerts a force on the person greater than the person\u2019s weight."
+                      "text": "No, because the step exerts a force on the person greater than the person’s weight."
                     },
                     {
                       "letter": "C",
@@ -2979,7 +2979,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": ", because the chain links are an interacting Newton\u2019s third law pair."
+                      "text": ", because the chain links are an interacting Newton’s third law pair."
                     }
                   ],
                   "question_id": "app1_unit2_2_3_q6",
@@ -3080,7 +3080,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Yes, because the astronaut\u2019s vertical velocity is instantaneously zero."
+                      "text": "Yes, because the astronaut’s vertical velocity is instantaneously zero."
                     },
                     {
                       "letter": "C",
@@ -3619,7 +3619,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Because Earth\u2019s radius is constant."
+                      "text": "Because Earth’s radius is constant."
                     },
                     {
                       "letter": "B",
@@ -3631,7 +3631,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Because distance scales near Earth\u2019s surface are very small compared to Earth\u2019s radius."
+                      "text": "Because distance scales near Earth’s surface are very small compared to Earth’s radius."
                     }
                   ],
                   "question_id": "app1_unit2_2_6_q4",
@@ -3644,7 +3644,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The scale reading is between and , because the scale is not precise enough to read the\r\nexact value of the object\u2019s weight."
+                      "text": "The scale reading is between and , because the scale is not precise enough to read the\r\nexact value of the object’s weight."
                     },
                     {
                       "letter": "B",
@@ -3656,7 +3656,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "The scale reading is between and , because weight is an intrinsic property of an object\r\nwhich doesn\u2019t change even when the gravitational field changes."
+                      "text": "The scale reading is between and , because weight is an intrinsic property of an object\r\nwhich doesn’t change even when the gravitational field changes."
                     }
                   ],
                   "question_id": "app1_unit2_2_6_q5",
@@ -3786,11 +3786,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "increases and decreases as the board\u2019s angle is increased"
+                      "text": "increases and decreases as the board’s angle is increased"
                     },
                     {
                       "letter": "D",
-                      "text": "decreases and increases as the board\u2019s angle is increased"
+                      "text": "decreases and increases as the board’s angle is increased"
                     }
                   ],
                   "question_id": "app1_unit2_2_7_q1",
@@ -3965,7 +3965,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "There is not enough information to make a claim about the direction of the object\u2019s acceleration."
+                      "text": "There is not enough information to make a claim about the direction of the object’s acceleration."
                     }
                   ],
                   "question_id": "app1_unit2_2_7_q8",
@@ -4162,19 +4162,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The weight\u2019s acceleration is downward."
+                      "text": "The weight’s acceleration is downward."
                     },
                     {
                       "letter": "B",
-                      "text": "The weight\u2019s acceleration is upward."
+                      "text": "The weight’s acceleration is upward."
                     },
                     {
                       "letter": "C",
-                      "text": "The weight\u2019s velocity is downward."
+                      "text": "The weight’s velocity is downward."
                     },
                     {
                       "letter": "D",
-                      "text": "The weight\u2019s velocity is upward."
+                      "text": "The weight’s velocity is upward."
                     }
                   ],
                   "question_id": "app1_unit2_2_8_q7",
@@ -4446,7 +4446,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "At the topmost point, because the tension force and gravitational force are both directed toward the\r\ncenter of the ball\u2019s motion."
+                      "text": "At the topmost point, because the tension force and gravitational force are both directed toward the\r\ncenter of the ball’s motion."
                     },
                     {
                       "letter": "B",
@@ -6291,7 +6291,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "The magnitude of the gravitational force should be equal to the magnitude of the normal force because\r\nthe normal force on an object is always equal to the object\u2019s weight."
+                      "text": "The magnitude of the gravitational force should be equal to the magnitude of the normal force because\r\nthe normal force on an object is always equal to the object’s weight."
                     },
                     {
                       "letter": "C",
@@ -6576,19 +6576,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The object\u2019s kinetic energy decreases, then increases."
+                      "text": "The object’s kinetic energy decreases, then increases."
                     },
                     {
                       "letter": "B",
-                      "text": "The object\u2019s kinetic energy increases, then decreases."
+                      "text": "The object’s kinetic energy increases, then decreases."
                     },
                     {
                       "letter": "C",
-                      "text": "The object\u2019s kinetic energy increases throughout the entire time interval."
+                      "text": "The object’s kinetic energy increases throughout the entire time interval."
                     },
                     {
                       "letter": "D",
-                      "text": "The object\u2019s kinetic energy decreases throughout the entire time interval."
+                      "text": "The object’s kinetic energy decreases throughout the entire time interval."
                     }
                   ],
                   "question_id": "app1_unit3a_3_1_q6",
@@ -6897,7 +6897,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Non-zero net work could be done on the block either when it is accelerating or when it is moving with\r\nconstant speed, depending on the values of the block\u2019s mass, acceleration, and maximum speed."
+                      "text": "Non-zero net work could be done on the block either when it is accelerating or when it is moving with\r\nconstant speed, depending on the values of the block’s mass, acceleration, and maximum speed."
                     }
                   ],
                   "question_id": "app1_unit3a_3_2_q9",
@@ -8139,11 +8139,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "0.02 N\u22c5s"
+                      "text": "0.02 N⋅s"
                     },
                     {
                       "letter": "C",
-                      "text": "0.03 N\u22c5s"
+                      "text": "0.03 N⋅s"
                     },
                     {
                       "letter": "D",
@@ -8260,19 +8260,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "4.0 \u00d7 10\r\n2 N \u22c5 s"
+                      "text": "4.0 × 10\r\n2 N ⋅ s"
                     },
                     {
                       "letter": "B",
-                      "text": "4.0 \u00d7 10\r\n3 N \u22c5 s"
+                      "text": "4.0 × 10\r\n3 N ⋅ s"
                     },
                     {
                       "letter": "C",
-                      "text": "5.5 \u00d7 10\r\n3 N \u22c5 s"
+                      "text": "5.5 × 10\r\n3 N ⋅ s"
                     },
                     {
                       "letter": "D",
-                      "text": "2.2 \u00d7 10\r\n5 N \u22c5 s"
+                      "text": "2.2 × 10\r\n5 N ⋅ s"
                     }
                   ],
                   "question_id": "app1_unit4_4_1_q8",
@@ -8323,15 +8323,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "ma\u0394t"
+                      "text": "maΔt"
                     },
                     {
                       "letter": "C",
-                      "text": "m (v0 + a\u0394t)"
+                      "text": "m (v0 + aΔt)"
                     },
                     {
                       "letter": "D",
-                      "text": "v0\u0394t + 1\r\n2\r\na(\u0394t)\r\n2"
+                      "text": "v0Δt + 1\r\n2\r\na(Δt)\r\n2"
                     }
                   ],
                   "question_id": "app1_unit4_4_2_q1",
@@ -8348,15 +8348,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "m (vi \u2212 vf)"
+                      "text": "m (vi − vf)"
                     },
                     {
                       "letter": "C",
-                      "text": "\u03bckg"
+                      "text": "μkg"
                     },
                     {
                       "letter": "D",
-                      "text": "\u03bckmg"
+                      "text": "μkmg"
                     }
                   ],
                   "question_id": "app1_unit4_4_2_q2",
@@ -8369,11 +8369,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "F\u0394t"
+                      "text": "FΔt"
                     },
                     {
                       "letter": "B",
-                      "text": "F\u0394t\r\nm"
+                      "text": "FΔt\r\nm"
                     },
                     {
                       "letter": "C",
@@ -8381,7 +8381,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Fm\u0394t"
+                      "text": "FmΔt"
                     }
                   ],
                   "question_id": "app1_unit4_4_2_q3",
@@ -8711,7 +8711,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "(m2\u2212m1)\r\nm2\r\nv0"
+                      "text": "(m2−m1)\r\nm2\r\nv0"
                     },
                     {
                       "letter": "D",
@@ -8849,7 +8849,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "It can\u2019t be determined without knowing the relative masses of the carts."
+                      "text": "It can’t be determined without knowing the relative masses of the carts."
                     }
                   ],
                   "question_id": "app1_unit4_4_4_q3",
@@ -8912,19 +8912,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "(\u0394K1 = \u0394K2) > \u0394K3"
+                      "text": "(ΔK1 = ΔK2) > ΔK3"
                     },
                     {
                       "letter": "B",
-                      "text": "\u0394K3 > (\u0394K1 = \u0394K2)"
+                      "text": "ΔK3 > (ΔK1 = ΔK2)"
                     },
                     {
                       "letter": "C",
-                      "text": "\u0394K2 > \u0394K3 > \u0394K1"
+                      "text": "ΔK2 > ΔK3 > ΔK1"
                     },
                     {
                       "letter": "D",
-                      "text": "\u0394K3 > \u0394K2 > \u0394K1"
+                      "text": "ΔK3 > ΔK2 > ΔK1"
                     }
                   ],
                   "question_id": "app1_unit4_4_4_q6",
@@ -9021,19 +9021,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "12 kg \u22c5 m/s"
+                      "text": "12 kg ⋅ m/s"
                     },
                     {
                       "letter": "B",
-                      "text": "20 kg \u22c5 m/s"
+                      "text": "20 kg ⋅ m/s"
                     },
                     {
                       "letter": "C",
-                      "text": "24 kg \u22c5 m/s"
+                      "text": "24 kg ⋅ m/s"
                     },
                     {
                       "letter": "D",
-                      "text": "30 kg \u22c5 m/s"
+                      "text": "30 kg ⋅ m/s"
                     }
                   ],
                   "question_id": "app1_unit4_unit_4_progress_check_q1",
@@ -9050,15 +9050,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "F2\u2212F1\r\ntf"
+                      "text": "F2−F1\r\ntf"
                     },
                     {
                       "letter": "C",
-                      "text": "(\r\nF2\u2212F1\r\n2 )tf"
+                      "text": "(\r\nF2−F1\r\n2 )tf"
                     },
                     {
                       "letter": "D",
-                      "text": "(F1 +\r\nF2\u2212F1\r\n2 )tf"
+                      "text": "(F1 +\r\nF2−F1\r\n2 )tf"
                     }
                   ],
                   "question_id": "app1_unit4_unit_4_progress_check_q2",
@@ -9071,7 +9071,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "(\r\n2mc\r\nmc\u2212mb\r\n)v0"
+                      "text": "(\r\n2mc\r\nmc−mb\r\n)v0"
                     },
                     {
                       "letter": "B",
@@ -9079,7 +9079,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "(\r\n2mc\u2212mb\r\nmc+mb\r\n)v0"
+                      "text": "(\r\n2mc−mb\r\nmc+mb\r\n)v0"
                     },
                     {
                       "letter": "D",
@@ -9171,11 +9171,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "\u22122.7 m/s"
+                      "text": "−2.7 m/s"
                     },
                     {
                       "letter": "B",
-                      "text": "\u22120.4 m/s"
+                      "text": "−0.4 m/s"
                     },
                     {
                       "letter": "C",
@@ -9271,7 +9271,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The momentum doesn\u2019t change in either system."
+                      "text": "The momentum doesn’t change in either system."
                     },
                     {
                       "letter": "B",
@@ -10028,15 +10028,15 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "\u03b8 \u03b8 \u03b8"
+                      "text": "θ θ θ"
                     },
                     {
                       "letter": "B",
-                      "text": "\u03b8 \u03b8"
+                      "text": "θ θ"
                     },
                     {
                       "letter": "C",
-                      "text": "\u03b8 \u03b8"
+                      "text": "θ θ"
                     },
                     {
                       "letter": "D",
@@ -10337,19 +10337,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The rod and the disk both contribute the same amount to the system\u2019s rotational inertia."
+                      "text": "The rod and the disk both contribute the same amount to the system’s rotational inertia."
                     },
                     {
                       "letter": "B",
-                      "text": "The rod contributes more to the system\u2019s rotational inertia than the disk."
+                      "text": "The rod contributes more to the system’s rotational inertia than the disk."
                     },
                     {
                       "letter": "C",
-                      "text": "The disk contributes more to the system\u2019s rotational inertia than the rod."
+                      "text": "The disk contributes more to the system’s rotational inertia than the rod."
                     },
                     {
                       "letter": "D",
-                      "text": "The faster the system spins, the more the disk contributes to the system\u2019s rotational inertia."
+                      "text": "The faster the system spins, the more the disk contributes to the system’s rotational inertia."
                     }
                   ],
                   "question_id": "app1_unit5_5_4_q7",
@@ -11779,7 +11779,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "The cube, because the cube\u2019s kinetic energy will all be in the form of translational kinetic energy, while\r\nsome of the sphere\u2019s kinetic energy will be in the form of rotational kinetic energy."
+                      "text": "The cube, because the cube’s kinetic energy will all be in the form of translational kinetic energy, while\r\nsome of the sphere’s kinetic energy will be in the form of rotational kinetic energy."
                     },
                     {
                       "letter": "D",
@@ -11913,11 +11913,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": ", because the gravitational potential energy increases with increasing distance from Earth\u2019s\r\ncenter."
+                      "text": ", because the gravitational potential energy increases with increasing distance from Earth’s\r\ncenter."
                     },
                     {
                       "letter": "D",
-                      "text": ", because the total mechanical energy of the system is proportional to the distance between\r\nthe satellite and Earth\u2019s center."
+                      "text": ", because the total mechanical energy of the system is proportional to the distance between\r\nthe satellite and Earth’s center."
                     }
                   ],
                   "question_id": "app1_unit6_6_5_q4",
@@ -12364,7 +12364,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The magnitude of the comet\u2019s angular momentum increases."
+                      "text": "The magnitude of the comet’s angular momentum increases."
                     },
                     {
                       "letter": "B",
@@ -12536,7 +12536,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "Location , because the spring exerts a force opposite to the block\u2019s displacement from equilibrium."
+                      "text": "Location , because the spring exerts a force opposite to the block’s displacement from equilibrium."
                     },
                     {
                       "letter": "D",
@@ -12682,7 +12682,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "because the force on the block is constant throughout the block\u2019s motion."
+                      "text": "because the force on the block is constant throughout the block’s motion."
                     },
                     {
                       "letter": "C",
@@ -12728,11 +12728,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The force exerted on the object is in the direction of the object\u2019s displacement."
+                      "text": "The force exerted on the object is in the direction of the object’s displacement."
                     },
                     {
                       "letter": "B",
-                      "text": "The magnitude of the force exerted on the object is proportional to the object\u2019s displacement from\r\nequilibrium."
+                      "text": "The magnitude of the force exerted on the object is proportional to the object’s displacement from\r\nequilibrium."
                     },
                     {
                       "letter": "C",
@@ -12812,7 +12812,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Yes, because the amplitude of the pendulum\u2019s oscillation will be smaller."
+                      "text": "Yes, because the amplitude of the pendulum’s oscillation will be smaller."
                     },
                     {
                       "letter": "B",
@@ -13776,7 +13776,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "No, because the restoring force exerted by the component of the gravitational force parallel to the ramp\r\nis not proportional to the block\u2019s displacement from equilibrium.\r\nScoring Guide\r\nUnit 7 Progress Check: MCQ"
+                      "text": "No, because the restoring force exerted by the component of the gravitational force parallel to the ramp\r\nis not proportional to the block’s displacement from equilibrium.\r\nScoring Guide\r\nUnit 7 Progress Check: MCQ"
                     }
                   ],
                   "question_id": "app1_unit7_unit_7_progress_check_q13",
@@ -15742,19 +15742,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The student\u2019s equation does not account for the initial position of the object."
+                      "text": "The student’s equation does not account for the initial position of the object."
                     },
                     {
                       "letter": "B",
-                      "text": "The student\u2019s equation does not account for the initial velocity of the object."
+                      "text": "The student’s equation does not account for the initial velocity of the object."
                     },
                     {
                       "letter": "C",
-                      "text": "The student\u2019s equation does not substitute in the term."
+                      "text": "The student’s equation does not substitute in the term."
                     },
                     {
                       "letter": "D",
-                      "text": "The student\u2019s equation should not have a term, as integrating the acceleration function twice yields\r\n."
+                      "text": "The student’s equation should not have a term, as integrating the acceleration function twice yields\r\n."
                     }
                   ],
                   "question_id": "appc_unit1_1_2_q8",
@@ -15851,11 +15851,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "One time because the graph indicates that there is a single point where the object\u2019s velocity is zero and\r\nits acceleration is zero."
+                      "text": "One time because the graph indicates that there is a single point where the object’s velocity is zero and\r\nits acceleration is zero."
                     },
                     {
                       "letter": "B",
-                      "text": "One time because the graph indicates that there is a single point where the object\u2019s velocity is zero and\r\nits acceleration is nonzero."
+                      "text": "One time because the graph indicates that there is a single point where the object’s velocity is zero and\r\nits acceleration is nonzero."
                     },
                     {
                       "letter": "C",
@@ -16356,7 +16356,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Boat takes less time because the current increases the boat\u2019s speed relative to the ground."
+                      "text": "Boat takes less time because the current increases the boat’s speed relative to the ground."
                     }
                   ],
                   "question_id": "appc_unit1_1_5_q4",
@@ -17320,19 +17320,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Toward Point because the -component of the boat\u2019s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water."
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water."
                     },
                     {
                       "letter": "B",
-                      "text": "Toward Point because the -component of the boat\u2019s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water but in the opposite direction."
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water needs to be\r\nequal in magnitude to the velocity of the water but in the opposite direction."
                     },
                     {
                       "letter": "C",
-                      "text": "Toward Point because the magnitude of the boat\u2019s velocity with respect to the water is greater than the\r\nmagnitude of the velocity of the water."
+                      "text": "Toward Point because the magnitude of the boat’s velocity with respect to the water is greater than the\r\nmagnitude of the velocity of the water."
                     },
                     {
                       "letter": "D",
-                      "text": "Toward Point because the -component of the boat\u2019s velocity with respect to the water is not affected\r\nby the motion of the water."
+                      "text": "Toward Point because the -component of the boat’s velocity with respect to the water is not affected\r\nby the motion of the water."
                     }
                   ],
                   "question_id": "appc_unit1_unit_1_progress_check_q13",
@@ -17345,11 +17345,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "No, because the object\u2019s speed is increasing, the acceleration should be positive."
+                      "text": "No, because the object’s speed is increasing, the acceleration should be positive."
                     },
                     {
                       "letter": "B",
-                      "text": "No, because the object\u2019s speed is increasing, the acceleration should be increasing in magnitude."
+                      "text": "No, because the object’s speed is increasing, the acceleration should be increasing in magnitude."
                     },
                     {
                       "letter": "C",
@@ -18453,7 +18453,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "because Newton\u2019s third law states that every action has an equal and opposite reaction."
+                      "text": "because Newton’s third law states that every action has an equal and opposite reaction."
                     },
                     {
                       "letter": "D",
@@ -18662,11 +18662,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "It decreases with increasing distance from the planet\u2019s center."
+                      "text": "It decreases with increasing distance from the planet’s center."
                     },
                     {
                       "letter": "D",
-                      "text": "It increases with increasing distance from the planet\u2019s center."
+                      "text": "It increases with increasing distance from the planet’s center."
                     }
                   ],
                   "question_id": "appc_unit2_2_6_q1",
@@ -18683,15 +18683,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Between the center of the shell and the shell\u2019s inner surface"
+                      "text": "Between the center of the shell and the shell’s inner surface"
                     },
                     {
                       "letter": "C",
-                      "text": "Between the shell\u2019s inner surface and the object\u2019s original location"
+                      "text": "Between the shell’s inner surface and the object’s original location"
                     },
                     {
                       "letter": "D",
-                      "text": "Between the object\u2019s original location and the shell\u2019s outer surface\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.6\r\nAP Physics C: Mechanics Page 1 of 6"
+                      "text": "Between the object’s original location and the shell’s outer surface\r\nAP PHYSICS C: MECHANICS Scoring Guide\r\n2.6\r\nAP Physics C: Mechanics Page 1 of 6"
                     }
                   ],
                   "question_id": "appc_unit2_2_6_q2",
@@ -19272,19 +19272,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The effective spring constant is less than because the force exerted by the combination is the same as\r\nexerted by any individual spring and the stretched distance is the sum of each of the spring\u2019s individual\r\nstretch."
+                      "text": "The effective spring constant is less than because the force exerted by the combination is the same as\r\nexerted by any individual spring and the stretched distance is the sum of each of the spring’s individual\r\nstretch."
                     },
                     {
                       "letter": "B",
-                      "text": "The effective spring constant is less than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring\u2019s\r\nindividual stretch."
+                      "text": "The effective spring constant is less than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring’s\r\nindividual stretch."
                     },
                     {
                       "letter": "C",
-                      "text": "The effective spring constant is more than because the force exerted by the combination is the same\r\nas exerted by any individual spring and the stretched distance is the sum of each of the spring\u2019s\r\nindividual stretch."
+                      "text": "The effective spring constant is more than because the force exerted by the combination is the same\r\nas exerted by any individual spring and the stretched distance is the sum of each of the spring’s\r\nindividual stretch."
                     },
                     {
                       "letter": "D",
-                      "text": "The effective spring constant is more than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring\u2019s\r\nindividual stretch."
+                      "text": "The effective spring constant is more than because the force exerted by the combination is the sum of\r\nthe forces exerted by any individual spring and the stretched distance is equal to each of the spring’s\r\nindividual stretch."
                     }
                   ],
                   "question_id": "appc_unit2_2_8_q7",
@@ -19493,7 +19493,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "The object will not reach its terminal velocity before reaching the ground because the weight of the\r\nobject increases as the object approaches Earth\u2019s surface."
+                      "text": "The object will not reach its terminal velocity before reaching the ground because the weight of the\r\nobject increases as the object approaches Earth’s surface."
                     }
                   ],
                   "question_id": "appc_unit2_2_9_q6",
@@ -19539,7 +19539,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "Yes, because Newton\u2019s second law indicates that acceleration is inversely proportional to mass."
+                      "text": "Yes, because Newton’s second law indicates that acceleration is inversely proportional to mass."
                     },
                     {
                       "letter": "D",
@@ -19744,11 +19744,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Car . The car\u2019s acceleration is the vector sum of both tangential and centripetal accelerations."
+                      "text": "Car . The car’s acceleration is the vector sum of both tangential and centripetal accelerations."
                     },
                     {
                       "letter": "C",
-                      "text": "Car . The centripetal acceleration of Car is less than that Car \u2019s because Car is slowing down."
+                      "text": "Car . The centripetal acceleration of Car is less than that Car ’s because Car is slowing down."
                     },
                     {
                       "letter": "D",
@@ -21284,11 +21284,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Group because the slope of an object\u2019s kinetic energy graph is proportional to its acceleration."
+                      "text": "Group because the slope of an object’s kinetic energy graph is proportional to its acceleration."
                     },
                     {
                       "letter": "B",
-                      "text": "Group because the object\u2019s speed is increasing at a decreasing rate, so its kinetic energy is also\r\nincreasing at a decreasing rate."
+                      "text": "Group because the object’s speed is increasing at a decreasing rate, so its kinetic energy is also\r\nincreasing at a decreasing rate."
                     },
                     {
                       "letter": "C",
@@ -21438,7 +21438,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": ", because half of the block\u2019s kinetic energy is converted into gravitational potential energy."
+                      "text": ", because half of the block’s kinetic energy is converted into gravitational potential energy."
                     },
                     {
                       "letter": "C",
@@ -22166,7 +22166,7 @@ window.EXAM_DATA = {
               "questions": [
                 {
                   "number": 1,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q1.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q1.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22187,11 +22187,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q1",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "B",
+                  "explanation": "Correct. The kinetic energy is determined by the equation . Correctly substituting the mass\nand velocity of each car yields this ranking."
                 },
                 {
                   "number": 2,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q2.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q2.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22212,11 +22214,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q2",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "A",
+                  "explanation": "Correct. The object’s final kinetic energy is equal to the amount the net force changes the object’s kinetic\nenergy plus the initial kinetic energy of the object. This expression correctly relates the change in kinetic\nenergy to the area under the force versus displacement graph and correctly evaluates the initial kinetic\nenergy of the object."
                 },
                 {
                   "number": 3,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q3.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q3.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22237,11 +22241,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q3",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "B",
+                  "explanation": "Correct. The magnitude of the force is correctly calculated using the equation . The\nderivative of the potential energy function is evaluated at .\nUnit 3 Progress Check: MCQ"
                 },
                 {
                   "number": 4,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q4.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q4.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22262,11 +22268,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q4",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "B",
+                  "explanation": "Correct. This answer correctly applies the conservation of energy by identifying that the initial energy is\nentirely elastic potential, and the final energy is entirely gravitational potential energy for the mass￾spring-Earth system."
                 },
                 {
                   "number": 5,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q5.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q5.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22287,11 +22295,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q5",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "A",
+                  "explanation": "Correct. The energy of the block-spring-Earth system when the block is at rest against the compressed\nspring is elastic potential energy. The energy while it is moving at on the ramp is the sum of the\nkinetic energy of the block and the gravitational potential energy of the system. By applying the\nconservation of energy, one can solve for the height of the object. Taking the block’s initial height to be\nzero, the initial total energy of the system is . When the block is a distance above its initial\nposition and moving with speed the total energy of the system is . Since energy is\nconserved, the initial and final energies are equal and the height can be calculated."
                 },
                 {
                   "number": 6,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q6.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q6.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22312,11 +22322,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q6",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "D",
+                  "explanation": "Correct. The work done on an object by a force which varies with the object’s -position is determined\nusing . Substituting the force function and limits of integration when the object\nmoves from to yields . When the final position is changed to\n, the work increases by a factor of ."
                 },
                 {
                   "number": 7,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q7.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q7.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22337,11 +22349,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q7",
                   "concept": "energy_kinetic",
-                  "concept_label": "Kinetic Energy"
+                  "concept_label": "Kinetic Energy",
+                  "correct_answer": "C",
+                  "explanation": "Correct. The kinetic energy of the object is determined by the relative velocity of the object with respect\nto the observer. The object has a speed of relative to Observer . This speed is greater than the\nspeed as measured by the other two observers."
                 },
                 {
                   "number": 8,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q8.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q8.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22362,11 +22376,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q8",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "D",
+                  "explanation": "Correct. Since power can be shown to be equal to the force exerted on the box times the speed of the box,\nthe force exerted on the box is equal to the power delivered to the box divided by the speed of the box."
                 },
                 {
                   "number": 9,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q9.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q9.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22387,15 +22403,17 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q9",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "A",
+                  "explanation": "Correct. The instantaneous power delivered to the object is equal to the slope of the graph of work as a\nfunction of time. At seconds the slope of the graph of work as a function of time for Object is the\ngreatest and so the instantaneous power is also the greatest."
                 },
                 {
                   "number": 10,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q10.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q10.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "and are the same because the direction of velocity does not affect an object\u2019s kinetic energy."
+                      "text": "and are the same because the direction of velocity does not affect an object’s kinetic energy."
                     },
                     {
                       "letter": "B",
@@ -22412,11 +22430,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q10",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "A",
+                  "explanation": "Correct. Kinetic energy is a scalar quantity, and therefore the magnitude of an object’s velocity is\nappropriate to use in calculating its kinetic energy. The slope of the graph has the same magnitude at the\ntwo times, so the speed of the object is the same at those times.\nUnit 3 Progress Check: MCQ"
                 },
                 {
                   "number": 11,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q11.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q11.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22437,11 +22457,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q11",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "C",
+                  "explanation": "Correct. Applying the law conservation of energy, the change in the gravitational potential energy of the\nsphere-Earth system at the sphere’s initial and final positions is equal to into kinetic energy of the sphere.\nSo, Sphere gains a kinetic energy ."
                 },
                 {
                   "number": 12,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q12.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q12.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22462,11 +22484,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q12",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "B",
+                  "explanation": "Correct. The instantaneous power delivered to the ball by the force of gravity is equal to the force of\ngravity times the speed of the ball. Because the force of gravity is the same at both points, the change in\npower is only due to the change in the speed of the ball. Since the speed is now , the instantaneous\npower is .\nUnit 3 Progress Check: MCQ"
                 },
                 {
                   "number": 13,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q13.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q13.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22487,11 +22511,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q13",
                   "concept": "spring",
-                  "concept_label": "Springs & Elasticity"
+                  "concept_label": "Springs & Elasticity",
+                  "correct_answer": "D",
+                  "explanation": "Correct. For both systems, the total mechanical energy of the system when the block comes to rest is\nequal to the work done by the gravitational force on the system (because Earth is external to the system).\nHowever, the work done by the gravitational force depends on the masses of the blocks and the distances\nthey fall, which also depend on the block masses as well as the spring constants. Therefore, the ratio of\nthe masses and the ratio of the spring constants must be known to compare the total mechanical energies\nof the systems."
                 },
                 {
                   "number": 14,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q14.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q14.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22512,11 +22538,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q14",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "C",
+                  "explanation": "Correct. A force acting perpendicular to the direction of motion does no work on the object, and\ntherefore the object’s kinetic energy remains constant.\nUnit 3 Progress Check: MCQ\nTwo particles of a certain type interact with each other with a repulsive conservative force with magnitude where\nis a constant and is the distance between the particles. A system of four such particles is held together to form a\ntriangular pyramid with a distance between each pair of particles, as shown in the figure."
                 },
                 {
                   "number": 15,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q15.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q15.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22537,11 +22565,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q15",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "B",
+                  "explanation": "Correct. The equation for the change in potential energy for each object pair can be solved as:\n. There are 6 different object pairs therefore multiplying the energy per pair\nby 6 yields the answer.\nUnit 3 Progress Check: MCQ"
                 },
                 {
                   "number": 16,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q16.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q16.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22562,11 +22592,13 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q16",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "A",
+                  "explanation": "Correct. The potential energy of the system of particles repelling each other has an initial positive value\nand approaches zero when the particles are infinitely far from each other, therefore the potential energy is\ndecreasing as the particles move farther apart. The net force exerted on each particle is decreasing\nbecause the interaction described is inversely related to the distance cubed, therefore the acceleration also\ndecreases.\nUnit 3 Progress Check: MCQ"
                 },
                 {
                   "number": 17,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q17.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q17.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
@@ -22587,15 +22619,17 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q17",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "C",
+                  "explanation": "Correct. The component of the force exerted by the ramp's surface on the block parallel to the ramp is the\nfrictional force exerted on the block by the ramp. Friction will dissipate mechanical energy from the\nblock-Earth system.\nUnit 3 Progress Check: MCQ"
                 },
                 {
                   "number": 18,
-                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q18.png",
+                  "card_image": "assets/cards/appc_unit3_unit_3_progress_check_q18.png?v=20261123_v1",
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The claim is correct. At , the slope of the velocity curve for Object \u2019s is greater than the\r\nslope of the velocity curve for Object ."
+                      "text": "The claim is correct. At , the slope of the velocity curve for Object ’s is greater than the\r\nslope of the velocity curve for Object ."
                     },
                     {
                       "letter": "B",
@@ -22612,7 +22646,9 @@ window.EXAM_DATA = {
                   ],
                   "question_id": "appc_unit3_unit_3_progress_check_q18",
                   "concept": "energy_conservation",
-                  "concept_label": "Conservation of Energy"
+                  "concept_label": "Conservation of Energy",
+                  "correct_answer": "C",
+                  "explanation": "Correct. Power is the product of force and velocity.\nUnit 3 Progress Check: MCQ"
                 }
               ]
             }
@@ -22868,7 +22904,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Both students have the same final speed because the student-chair system and the ball\ufffestudent-chair system have the same mass and experience impulses of the same magnitude."
+                      "text": "Both students have the same final speed because the student-chair system and the ball￾student-chair system have the same mass and experience impulses of the same magnitude."
                     },
                     {
                       "letter": "B",
@@ -23770,19 +23806,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The cart\u2019s momentum changes direction at exactly one instant."
+                      "text": "The cart’s momentum changes direction at exactly one instant."
                     },
                     {
                       "letter": "B",
-                      "text": "The cart\u2019s momentum changes direction at exactly two different instants."
+                      "text": "The cart’s momentum changes direction at exactly two different instants."
                     },
                     {
                       "letter": "C",
-                      "text": "The cart\u2019s momentum is constant."
+                      "text": "The cart’s momentum is constant."
                     },
                     {
                       "letter": "D",
-                      "text": "The cart\u2019s momentum is not constant and does not change directions at any point in this interval."
+                      "text": "The cart’s momentum is not constant and does not change directions at any point in this interval."
                     }
                   ],
                   "question_id": "appc_unit4_unit_4_progress_check_q9",
@@ -23970,7 +24006,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Object because its momentum is greater in magnitude than Object \u2019s momentum at all times shown."
+                      "text": "Object because its momentum is greater in magnitude than Object ’s momentum at all times shown."
                     },
                     {
                       "letter": "B",
@@ -23982,7 +24018,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Both objects have the same net force because the slope of each object\u2019s momentum versus time graph is\r\nthe same."
+                      "text": "Both objects have the same net force because the slope of each object’s momentum versus time graph is\r\nthe same."
                     }
                   ],
                   "question_id": "appc_unit4_unit_4_progress_check_q17",
@@ -24272,15 +24308,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "It has magnitude and is directed tangent to the coin\u2019s circular path."
+                      "text": "It has magnitude and is directed tangent to the coin’s circular path."
                     },
                     {
                       "letter": "C",
-                      "text": "It has magnitude . It is initially directed toward the center of the platform, with an\r\nincreasing component tangent to the coin\u2019s circular path."
+                      "text": "It has magnitude . It is initially directed toward the center of the platform, with an\r\nincreasing component tangent to the coin’s circular path."
                     },
                     {
                       "letter": "D",
-                      "text": "It has magnitude . It is initially tangent to the coin\u2019s circular path, with an increasing\r\ncomponent directed toward the center of the platform."
+                      "text": "It has magnitude . It is initially tangent to the coin’s circular path, with an increasing\r\ncomponent directed toward the center of the platform."
                     }
                   ],
                   "question_id": "appc_unit5_5_2_q1",
@@ -26002,7 +26038,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "is zero. The velocity of the disk\u2019s center of mass is zero."
+                      "text": "is zero. The velocity of the disk’s center of mass is zero."
                     },
                     {
                       "letter": "B",
@@ -26010,11 +26046,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "is greater than zero. The disk\u2019s mass and rotational inertia are both greater than zero."
+                      "text": "is greater than zero. The disk’s mass and rotational inertia are both greater than zero."
                     },
                     {
                       "letter": "D",
-                      "text": "is greater than zero. Except for the disk\u2019s center, all parts of the disk are moving."
+                      "text": "is greater than zero. Except for the disk’s center, all parts of the disk are moving."
                     }
                   ],
                   "question_id": "appc_unit6_6_1_q5",
@@ -26190,15 +26226,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Divide by the slope of the \u2010 graph."
+                      "text": "Divide by the slope of the ‐ graph."
                     },
                     {
                       "letter": "C",
-                      "text": "Determine the area under the \u2010 graph."
+                      "text": "Determine the area under the ‐ graph."
                     },
                     {
                       "letter": "D",
-                      "text": "Multiply the area under the \u2010 graph by ."
+                      "text": "Multiply the area under the ‐ graph by ."
                     }
                   ],
                   "question_id": "appc_unit6_6_2_q3",
@@ -26370,7 +26406,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "is greater than . The bar\u2019s angular momentum changes by a greater amount in Collision ."
+                      "text": "is greater than . The bar’s angular momentum changes by a greater amount in Collision ."
                     },
                     {
                       "letter": "B",
@@ -26424,7 +26460,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "The cylinder. The torque has the same sign as the cylinder\u2019s angular velocity."
+                      "text": "The cylinder. The torque has the same sign as the cylinder’s angular velocity."
                     },
                     {
                       "letter": "C",
@@ -26432,7 +26468,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "The sphere. The torque has the opposite sign to the sphere\u2019s angular velocity."
+                      "text": "The sphere. The torque has the opposite sign to the sphere’s angular velocity."
                     }
                   ],
                   "question_id": "appc_unit6_6_3_q3",
@@ -26449,7 +26485,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Counterclockwise. When an object\u2019s rotational motion is slowing down, the angular impulse has the\r\nopposite direction as the torque."
+                      "text": "Counterclockwise. When an object’s rotational motion is slowing down, the angular impulse has the\r\nopposite direction as the torque."
                     },
                     {
                       "letter": "C",
@@ -26457,7 +26493,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "Clockwise. When an object\u2019s rotational motion is slowing down, the angular impulse has the same\r\ndirection as the angular displacement.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 3 of 8"
+                      "text": "Clockwise. When an object’s rotational motion is slowing down, the angular impulse has the same\r\ndirection as the angular displacement.\r\nScoring Guide\r\n3\r\nAP Physics C: Mechanics Page 3 of 8"
                     }
                   ],
                   "question_id": "appc_unit6_6_3_q4",
@@ -26687,7 +26723,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "The rest of the bicycle rotates clockwise because there is an external torque exerted on the bicycle\ufffecyclist system."
+                      "text": "The rest of the bicycle rotates clockwise because there is an external torque exerted on the bicycle￾cyclist system."
                     },
                     {
                       "letter": "D",
@@ -26779,19 +26815,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The skater\u2019s angular speed is increasing in magnitude."
+                      "text": "The skater’s angular speed is increasing in magnitude."
                     },
                     {
                       "letter": "B",
-                      "text": "The skater\u2019s angular speed is decreasing in magnitude."
+                      "text": "The skater’s angular speed is decreasing in magnitude."
                     },
                     {
                       "letter": "C",
-                      "text": "The skater\u2019s angular momentum is increasing in magnitude."
+                      "text": "The skater’s angular momentum is increasing in magnitude."
                     },
                     {
                       "letter": "D",
-                      "text": "The skater\u2019s angular momentum is decreasing in magnitude."
+                      "text": "The skater’s angular momentum is decreasing in magnitude."
                     }
                   ],
                   "question_id": "appc_unit6_6_4_q8",
@@ -26863,19 +26899,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "Wheel is more massive and on average, its mass is distributed closer to the wheel\u2019s center."
+                      "text": "Wheel is more massive and on average, its mass is distributed closer to the wheel’s center."
                     },
                     {
                       "letter": "B",
-                      "text": "Wheel is more massive and on average, its mass is distributed farther from the wheel\u2019s center."
+                      "text": "Wheel is more massive and on average, its mass is distributed farther from the wheel’s center."
                     },
                     {
                       "letter": "C",
-                      "text": "Wheel is less massive and on average, its mass is distributed closer to the wheel\u2019s center."
+                      "text": "Wheel is less massive and on average, its mass is distributed closer to the wheel’s center."
                     },
                     {
                       "letter": "D",
-                      "text": "Wheel is less massive and on average, its mass is distributed farther from the wheel\u2019s center."
+                      "text": "Wheel is less massive and on average, its mass is distributed farther from the wheel’s center."
                     }
                   ],
                   "question_id": "appc_unit6_6_5_q2",
@@ -27080,7 +27116,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "C",
-                      "text": "has a maximum magnitude when the asteroids are at points and . These are the locations where\r\nthe asteroids\u2019 speeds are greatest."
+                      "text": "has a maximum magnitude when the asteroids are at points and . These are the locations where\r\nthe asteroids’ speeds are greatest."
                     },
                     {
                       "letter": "D",
@@ -27172,11 +27208,11 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The satellite\u2019s angular momentum has a nonzero magnitude."
+                      "text": "The satellite’s angular momentum has a nonzero magnitude."
                     },
                     {
                       "letter": "B",
-                      "text": "The satellite\u2019s angular momentum has the same direction throughout the orbit."
+                      "text": "The satellite’s angular momentum has the same direction throughout the orbit."
                     },
                     {
                       "letter": "C",
@@ -27731,7 +27767,7 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "It decreases because the satellite\u2019s speed decreases."
+                      "text": "It decreases because the satellite’s speed decreases."
                     },
                     {
                       "letter": "B",
@@ -27832,7 +27868,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "No. The net force on the ball is in the same direction as the ball\u2019s displacement from equilibrium."
+                      "text": "No. The net force on the ball is in the same direction as the ball’s displacement from equilibrium."
                     }
                   ],
                   "question_id": "appc_unit7_7_1_q3",
@@ -27857,7 +27893,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "There is an equilibrium position and a restoring force in both directions from equilibrium, but the\r\nrestoring force is not proportional to the cart\u2019s displacement from equilibrium."
+                      "text": "There is an equilibrium position and a restoring force in both directions from equilibrium, but the\r\nrestoring force is not proportional to the cart’s displacement from equilibrium."
                     }
                   ],
                   "question_id": "appc_unit7_7_1_q4",
@@ -27882,7 +27918,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "D",
-                      "text": "No. The net force is not in the opposite direction from the object\u2019s displacement from equilibrium."
+                      "text": "No. The net force is not in the opposite direction from the object’s displacement from equilibrium."
                     }
                   ],
                   "question_id": "appc_unit7_7_1_q5",
@@ -28413,19 +28449,19 @@ window.EXAM_DATA = {
                   "choices": [
                     {
                       "letter": "A",
-                      "text": "The object\u2019s displacement from equilibrium and its velocity are both in the positive direction."
+                      "text": "The object’s displacement from equilibrium and its velocity are both in the positive direction."
                     },
                     {
                       "letter": "B",
-                      "text": "The object\u2019s displacement from equilibrium and its velocity are both in the negative direction."
+                      "text": "The object’s displacement from equilibrium and its velocity are both in the negative direction."
                     },
                     {
                       "letter": "C",
-                      "text": "The object\u2019s displacement from equilibrium is in the positive direction, and its velocity is in the negative\r\ndirection."
+                      "text": "The object’s displacement from equilibrium is in the positive direction, and its velocity is in the negative\r\ndirection."
                     },
                     {
                       "letter": "D",
-                      "text": "The object\u2019s displacement from equilibrium is in the negative direction, and its velocity is in the positive\r\ndirection."
+                      "text": "The object’s displacement from equilibrium is in the negative direction, and its velocity is in the positive\r\ndirection."
                     }
                   ],
                   "question_id": "appc_unit7_7_3_q8",
@@ -28626,15 +28662,15 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Yes. Most of the system\u2019s total mechanical energy is in the form of potential energy, which is true\r\nwhenever the object\u2019s distance from equilibrium is a maximum."
+                      "text": "Yes. Most of the system’s total mechanical energy is in the form of potential energy, which is true\r\nwhenever the object’s distance from equilibrium is a maximum."
                     },
                     {
                       "letter": "C",
-                      "text": "No. The system still has kinetic energy that must be completely converted to potential energy when the\r\nobject\u2019s distance from equilibrium is a maximum."
+                      "text": "No. The system still has kinetic energy that must be completely converted to potential energy when the\r\nobject’s distance from equilibrium is a maximum."
                     },
                     {
                       "letter": "D",
-                      "text": "No. When the kinetic energy is less than half of the system\u2019s total mechanical energy, the object is\r\napproaching the equilibrium position."
+                      "text": "No. When the kinetic energy is less than half of the system’s total mechanical energy, the object is\r\napproaching the equilibrium position."
                     }
                   ],
                   "question_id": "appc_unit7_7_4_q7",
@@ -28651,7 +28687,7 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "It is closer to the surface. The potential energy of the rock-moon system is proportional to the square of\r\nthe rock\u2019s distance from the center."
+                      "text": "It is closer to the surface. The potential energy of the rock-moon system is proportional to the square of\r\nthe rock’s distance from the center."
                     },
                     {
                       "letter": "C",
@@ -29194,11 +29230,11 @@ window.EXAM_DATA = {
                     },
                     {
                       "letter": "B",
-                      "text": "Yes. The force exerted on Object O is in the opposite direction of Object O\u2019s displacement from\r\nequilibrium."
+                      "text": "Yes. The force exerted on Object O is in the opposite direction of Object O’s displacement from\r\nequilibrium."
                     },
                     {
                       "letter": "C",
-                      "text": "No. The force exerted on Object O is not proportional to Object O\u2019s displacement from equilibrium."
+                      "text": "No. The force exerted on Object O is not proportional to Object O’s displacement from equilibrium."
                     },
                     {
                       "letter": "D",
