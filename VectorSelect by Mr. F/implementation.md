@@ -2065,56 +2065,42 @@ Upon initial testing, the tool remained static because:
 2. Element-scoped pointer listeners lost tracking when the pointer moved faster than the button bounding box.
 3. Default button click events fired following pointer releases unless explicitly guarded in the capturing phase.
 
-### B. Dual-Portal Engineering Architecture
-Both `index.html` (student portal) and `teacher.html` (teacher live stage) now share an identical rock-solid drag controller:
+### B. Root Cause of Hover-Intercepted Drag Failure & Dual-Portal Engineering Fix
+Real Chrome DevTools Protocol (`Input.dispatchMouseEvent`) hardware-input tracing uncovered why the initial `::: MOVE` pill appeared visually static in live Chrome:
+1. **CSS `.group` Hover Popout Overlay Collision (`z-40` intercepting `pointerdown`)**:
+   - Because `#q-canvas-drag-handle` (`::: MOVE`) was previously nested inside `#q-canvas-tool-wrapper.group`, hovering over `::: MOVE` immediately triggered `group-hover:pointer-events-auto` on `#q-canvas-menu` (`z-40`).
+   - Worse, `#q-canvas-menu` used `top: 48px` (overlapping the `30..74px` pencil button) and flipped to `bottom: 48px` on cards shorter than `262px` (overlapping the `0..30px` `::: MOVE` pill). Thus, the instant the cursor hovered `::: MOVE`, the invisible fading-in `#q-canvas-menu` (`z-40`) covered `::: MOVE` and swallowed every `pointerdown` event before `initCanvasToolDraggable` could receive it!
+2. **Simultaneous `pointerdown` + `mousedown` Double-Binding & Missing Pointer Capture**:
+   - Assigning `onpointerdown` and `onmousedown` simultaneously caused Chrome to invoke the drag initializer twice per click without `setPointerCapture(pointerId)` or `preventDefault()` on the dedicated grip handle.
+3. **Mid-Drag Flex Alignment Jump & Teacher Stage Clipping**:
+   - Switching `items-end` to `items-start` when crossing `x = 220px` shifted the circular button inside the wider `::: MOVE` wrapper mid-drag, and `overflow-hidden` on `#lc-card-box` clipped menus near card edges.
+
+Both `index.html` (Student Portal) and `teacher.html` (Teacher Live Stage) now implement a unified, Chrome-verified architecture:
 
 ```mermaid
 flowchart TD
-    User["Pointer / Mouse / Touch Down on Grip or Button"] --> WindowListeners["Attach Window Capture Listeners<br/>(pointermove, mousemove, touchmove on window with capture:true)"]
-    WindowListeners --> Threshold{"Displacement > 3px?"}
-    Threshold -- "No (Tap / Click)" --> ClickHandler["toggleCardDrawingMode(e) / toggleTeacherCardDrawing(e)<br/>(Drawing Mode Toggled)"]
-    Threshold -- "Yes (Intentional Drag)" --> Dragging["Active Dragging State<br/>suppressClickUntil = now + 500ms<br/>cursor: grabbing"]
-    Dragging --> Clamp["Boundary Clamping within Card Box<br/>minX, maxX = 6..boxWidth - toolWidth - 6<br/>minY, maxY = 6..boxHeight - toolHeight - 6"]
-    Clamp --> SmartMenu["Dynamic Menu Alignment<br/>left < 220px: Menu Flips to Left<br/>top > boxHeight - 250px: Menu Flips Upward"]
-    SmartMenu --> StoreRatio["Persist Relative Ratio (xRatio, yRatio)<br/>localStorage('vs_canvas_tool_pos' / 'vs_teacher_canvas_tool_pos')"]
-    StoreRatio --> PointerUp["Pointer Up / Touch End on Window"]
-    PointerUp --> ClickGuard["Capture Click Guard Cancels Synthetic Button Click<br/>Drawing Mode Stays Untouched"]
+    Hover["User Hovers ::: MOVE Pill"] --> NoMenu["Isolated Outside .group<br/>Menu Stays Closed & Never Covers Handle"]
+    Down["PointerDown on ::: MOVE (threshold 1px) or Pencil Button (threshold 4px)"] --> Capture["e.stopPropagation() + setPointerCapture(pointerId)<br/>ondragstart = false + Menu Hidden During Drag"]
+    Capture --> Threshold{"Displacement >= Threshold?"}
+    Threshold -- "No (Stationary Click on Pencil)" --> ClickHandler["toggleCardDrawingMode / toggleTeacherCardDrawing"]
+    Threshold -- "Yes (Active Drag)" --> RectMath["Bounding-Rect Coordinate Math<br/>startLeft = wrapRect.left - boxRect.left - clientLeft<br/>Clamped to [6, boxW - toolW - 6] x [6, boxH - toolH - 6]"]
+    RectMath --> SmartMenu["Non-Overlapping Menu Bridge (#q-canvas-menu-wrap)<br/>Default: top: 100% + 6px pad (Strictly Below Button)<br/>Lower Half (top > 220 & > 50% H): bottom: calc(100% + 26px) (Strictly Above ::: MOVE)"]
+    SmartMenu --> Persist["Persist Normalized { xRatio, yRatio } to localStorage<br/>Suppress Post-Drag Synthetic Click for 500ms"]
 ```
 
-1. **Global Capture Event Binding**:
-   - `window.addEventListener("pointermove", onMove, { capture: true, passive: false })`
-   - `window.addEventListener("mousemove", onMove, { capture: true, passive: false })`
-   - `window.addEventListener("touchmove", onMove, { capture: true, passive: false })`
-   - Guarantees 1:1 responsive movement even if the pointer flies across the screen at high velocity.
-2. **Dual Drag Handles (Grab Pill + Button Dragging)**:
-   - Added a visible top pill handle (`#q-canvas-drag-handle` / `#lc-canvas-drag-handle` with `⋮⋮ MOVE` label, `cursor: grab / active:cursor-grabbing`).
-   - Enabled pointer drag listeners on both the handle AND the circular button directly.
-3. **Rock-Solid Click Guard**:
-   - Capture phase click listener on buttons:
-     ```javascript
-     btn.addEventListener("click", function(e) {
-       if (Date.now() < suppressClickUntil) {
-         e.stopPropagation(); e.stopImmediatePropagation(); e.preventDefault();
-         return false;
-       }
-     }, true);
-     ```
-   - Prevents the button from toggling drawing mode when released after dragging.
-4. **Boundary Clamping & CSS Cleansing**:
-   - Removed conflicting Tailwind classes `top-3 right-3` from wrapper `class` attributes, relying purely on inline coordinates (`style="top: 12px; right: 12px;"`).
-   - Clamps wrapper within card container with safety buffer:
-     $$\text{left} = \max(6, \min(\text{boxWidth} - \text{toolWidth} - 6, \text{startLeft} + \Delta x))$$
-     $$\text{top} = \max(6, \min(\text{boxHeight} - \text{toolHeight} - 6, \text{startTop} + \Delta y))$$
-5. **Smart Popout Menu Heuristics**:
-   - Horizontal: If $\text{left} < 220\text{ px}$, popout menu flips to `left: 0; right: auto;`.
-   - Vertical: If $\text{boxHeight} - \text{top} < 250\text{ px}$, menu opens upward (`bottom: 48px; top: auto;`).
-6. **Persistence & Lifecycle Integration**:
-   - Saved as normalized ratios in `localStorage` (`vs_canvas_tool_pos` and `vs_teacher_canvas_tool_pos`).
-   - Reapplied on card image load (`cardImg.onload`, `lcCardImg.onload`), viewport resizing (`resizeCanvasToCard`, `resizeTeacherCanvas`), and initial load.
-7. **One-Click Reset**:
-   - Added "↺ Reset Position (Top-Right)" button in both menus to return the tool to its initial corner.
+1. **Menu Hover Isolation & Stacking Protection (`z-50` Controls vs `z-40` Menu)**:
+   - Removed `group` from `#q-canvas-tool-wrapper` / `#lc-canvas-tool-wrapper` and wrapped **only** the circular pencil button + `#q-canvas-menu-wrap` / `#lc-canvas-menu-wrap` inside `<div class="relative group flex flex-col items-center">`.
+   - Hovering `::: MOVE` never opens the menu, both `#q-canvas-drag-handle` and `#btn-toggle-canvas` carry `relative z-50` (above the `z-40` menu), inner `<span>` icons/text carry `pointer-events-none`, and `#lc-card-box` uses `overflow-visible`.
+2. **Exclusive PointerEvent Pipeline with `setPointerCapture`**:
+   - Uses `PointerEvent` (`pointerdown`, `pointermove`, `pointerup`, `pointercancel`) exclusively when supported (falling back to mouse/touch only in legacy environments) so listeners never double-bind.
+   - Calls `e.preventDefault()` + `targetEl.setPointerCapture(pointerId)` immediately on `::: MOVE` (`1px` threshold) and upon `4px` motion on `#btn-toggle-canvas` / `#btn-toggle-teacher-canvas`, while temporarily setting `menuWrap.style.display = 'none'` during active drag.
+3. **Subpixel-Accurate `getBoundingClientRect()` Positioning & Clamping**:
+   - Computes exact container-relative coordinates (`wrapRect.left - boxRect.left - clientLeft`) and clamps within `[6, boxW - wW - 6]` and `[6, boxH - wH - 6]`.
+   - Keeps wrapper `items-center` at all times so flipping the menu horizontally (`left: 0` vs `right: 0` when `currentLeft < 220`) never shifts the button under the cursor.
+4. **1-Click Corner Snap Shortcuts + Reset**:
+   - Added 4 instant corner snap buttons (`↖ TL`, `↗ TR`, `↙ BL`, `↘ BR`) via `snapCanvasToolCorner(corner, event)` and `snapTeacherCanvasToolCorner(corner, event)`, alongside `↺ Reset Position (Top-Right)`, persisting normalized `{ xRatio, yRatio }` in `localStorage` (`vs_canvas_tool_pos` and `vs_teacher_canvas_tool_pos`).
 
 ### C. Verification & Quality Assurance
-- `scripts/test_movable_pencil.js`: Comprehensive verification suite testing DOM elements, drag handles, functions, boundary math, and click suppression across both `index.html` and `teacher.html`.
-- `scripts/_syntax_check.js`: Verified clean parsing of both `index.html` (4,940 lines) and `teacher.html` (4,257 lines).
-- `scripts/_runtime_check.js`, `test_stepper_and_student_paced.js`, `test_multi_select.js`: 100% passed.
+- **Real Chrome Hardware Mouse Verification (CDP `Input.dispatchMouseEvent`)**: Verified live on both `index.html` and `teacher.html` with real hover states enabled — dragging `::: MOVE` by `(-210, +90)` moved wrapper by exact `dx=-210, dy=90` with `status=Off`; dragging the pencil button itself by `(-150, -40)` moved wrapper by exact `dx=-150, dy=-40` with `status=Off`; stationary click on the pencil button cleanly toggled `status=Active`.
+- `scripts/test_movable_pencil.js`: Passed 100% across Student and Teacher portals (DOM handles, isolated menu wrappers, corner snap functions, clamping math, and click suppression guard).
+- `scripts/_syntax_check.js`, `scripts/_runtime_check.js`, `scripts/test_stepper_and_student_paced.js`, `scripts/test_multi_select.js`: 100% passed.

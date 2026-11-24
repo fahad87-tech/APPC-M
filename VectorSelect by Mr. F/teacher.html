@@ -1435,65 +1435,75 @@
             <!-- Left Stage: High-Resolution Question Display -->
             <div id="lc-stage-pane" class="flex-1 min-w-0 min-h-0 bg-slate-950/80 rounded-2xl p-2 sm:p-4 border border-slate-800 shadow-inner relative transition-all duration-300 flex flex-col items-center justify-start overflow-y-auto overscroll-contain">
               <div class="min-h-full flex items-start justify-center w-full py-2">
-                <div id="lc-card-box" class="bg-white p-2 sm:p-4 rounded-2xl shadow-2xl flex flex-col items-center justify-center max-w-full transition-all shrink-0 relative overflow-hidden">
+                <div id="lc-card-box" class="bg-white p-2 sm:p-4 rounded-2xl shadow-2xl flex flex-col items-center justify-center max-w-full transition-all shrink-0 relative overflow-visible">
                   <img id="lc-card-img" src="" alt="Active Question Card" class="max-w-full h-auto object-contain mx-auto block transition-transform">
                   <canvas id="lc-card-canvas" class="absolute inset-0 pointer-events-none z-10 w-full h-full touch-none"></canvas>
 
                   <!-- Floating Canvas Annotation Tool on Teacher Stage (Movable Anywhere) -->
-                  <div id="lc-canvas-tool-wrapper" class="absolute z-30 group flex flex-col items-end select-none touch-none" style="top: 12px; right: 12px;">
-                    <!-- Drag/Move Grip Handle -->
-                    <div id="lc-canvas-drag-handle" class="flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-400 hover:text-cyan-300 select-none pb-1 transition-colors" title="Drag to reposition tool anywhere on question stage">
-                      <span class="flex items-center gap-1 text-[9px] font-black uppercase tracking-wider bg-slate-900/90 hover:bg-slate-800 text-slate-300 border border-slate-700/80 hover:border-cyan-400/60 rounded-full px-2 py-0.5 shadow-md">
+                  <div id="lc-canvas-tool-wrapper" class="absolute z-30 flex flex-col items-center select-none touch-none" style="top: 12px; right: 12px; touch-action: none; user-select: none; -webkit-user-select: none;">
+                    <!-- Drag/Move Grip Handle (Isolated from menu hover group so menu never covers handle) -->
+                    <div id="lc-canvas-drag-handle" draggable="false" class="relative z-50 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-300 hover:text-cyan-300 select-none pb-1.5 transition-colors" style="touch-action: none; user-select: none; -webkit-user-select: none;" title="Drag to reposition tool anywhere on question stage">
+                      <span class="pointer-events-none flex items-center gap-1 text-[9px] font-black uppercase tracking-wider bg-slate-900/95 text-slate-200 border border-slate-700/90 rounded-full px-2.5 py-0.5 shadow-md">
                         <span class="text-[10px]">⋮⋮</span> MOVE
                       </span>
                     </div>
 
-                    <button type="button" id="btn-toggle-teacher-canvas" onclick="toggleTeacherCardDrawing(event)" class="h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-cyan-300 shadow-2xl flex items-center justify-center transition-all duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md" title="Click to draw • Drag to move anywhere">
-                      <span id="lc-canvas-tool-icon" class="text-base sm:text-lg">✏️</span>
-                    </button>
-                    <!-- Hover Popout Menu -->
-                    <div id="lc-canvas-menu" class="absolute right-0 top-12 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 bg-slate-900/95 border border-slate-700/80 rounded-2xl p-3 shadow-2xl space-y-2.5 min-w-[210px] text-xs backdrop-blur-md z-40 text-left">
-                      <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 px-0.5">
-                        <span class="font-extrabold text-cyan-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                          <span>✏️</span> Drawing Tools
-                        </span>
-                        <span id="lc-canvas-status-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Off</span>
-                      </div>
-                      <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                        <button type="button" id="btn-tc-mode-marker" onclick="setTeacherCanvasMode('marker')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition cursor-pointer">
-                          <span>✏️</span> Marker
-                        </button>
-                        <button type="button" id="btn-tc-mode-eraser" onclick="setTeacherCanvasMode('eraser')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 text-slate-400 hover:text-white border border-transparent transition cursor-pointer">
-                          <span>🧹</span> Eraser
-                        </button>
-                      </div>
-                      <div id="lc-canvas-marker-settings" class="space-y-2 pt-0.5">
-                        <div class="flex items-center justify-between px-0.5">
-                          <span class="text-[10px] uppercase font-bold text-slate-400">Color:</span>
-                          <div class="flex items-center gap-1.5">
-                            <button type="button" onclick="setTeacherCanvasColor('#ef4444')" class="tc-color-dot h-5 w-5 rounded-full bg-rose-500 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#ef4444" title="Red"></button>
-                            <button type="button" onclick="setTeacherCanvasColor('#06b6d4')" class="tc-color-dot h-5 w-5 rounded-full bg-cyan-400 ring-2 ring-cyan-300 hover:scale-110 transition scale-110 cursor-pointer" data-color="#06b6d4" title="Cyan"></button>
-                            <button type="button" onclick="setTeacherCanvasColor('#eab308')" class="tc-color-dot h-5 w-5 rounded-full bg-amber-400 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#eab308" title="Yellow"></button>
-                            <button type="button" onclick="setTeacherCanvasColor('#22c55e')" class="tc-color-dot h-5 w-5 rounded-full bg-emerald-400 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#22c55e" title="Green"></button>
-                            <button type="button" onclick="setTeacherCanvasColor('#a855f7')" class="tc-color-dot h-5 w-5 rounded-full bg-purple-400 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#a855f7" title="Purple"></button>
+                    <div class="relative group flex flex-col items-center">
+                      <button type="button" id="btn-toggle-teacher-canvas" draggable="false" onclick="toggleTeacherCardDrawing(event)" class="relative z-50 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-cyan-300 shadow-2xl flex items-center justify-center transition-colors duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md" style="touch-action: none; user-select: none; -webkit-user-select: none;" title="Click to draw • Drag to move anywhere">
+                        <span id="lc-canvas-tool-icon" class="pointer-events-none text-base sm:text-lg">✏️</span>
+                      </button>
+                      <!-- Hover Popout Menu Wrapper (Positioned strictly outside handle & button bounds) -->
+                      <div id="lc-canvas-menu-wrap" class="absolute right-0 top-full pt-1.5 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-opacity duration-150 z-40">
+                        <div id="lc-canvas-menu" class="bg-slate-900/95 border border-slate-700/80 rounded-2xl p-3 shadow-2xl space-y-2.5 min-w-[215px] text-xs backdrop-blur-md text-left">
+                          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 px-0.5">
+                            <span class="font-extrabold text-cyan-300 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                              <span>✏️</span> Drawing Tools
+                            </span>
+                            <span id="lc-canvas-status-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Off</span>
+                          </div>
+                          <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                            <button type="button" id="btn-tc-mode-marker" onclick="setTeacherCanvasMode('marker')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 transition cursor-pointer">
+                              <span>✏️</span> Marker
+                            </button>
+                            <button type="button" id="btn-tc-mode-eraser" onclick="setTeacherCanvasMode('eraser')" class="px-2.5 py-1.5 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 text-slate-400 hover:text-white border border-transparent transition cursor-pointer">
+                              <span>🧹</span> Eraser
+                            </button>
+                          </div>
+                          <div id="lc-canvas-marker-settings" class="space-y-2 pt-0.5">
+                            <div class="flex items-center justify-between px-0.5">
+                              <span class="text-[10px] uppercase font-bold text-slate-400">Color:</span>
+                              <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="setTeacherCanvasColor('#ef4444')" class="tc-color-dot h-5 w-5 rounded-full bg-rose-500 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#ef4444" title="Red"></button>
+                                <button type="button" onclick="setTeacherCanvasColor('#06b6d4')" class="tc-color-dot h-5 w-5 rounded-full bg-cyan-400 ring-2 ring-cyan-300 hover:scale-110 transition scale-110 cursor-pointer" data-color="#06b6d4" title="Cyan"></button>
+                                <button type="button" onclick="setTeacherCanvasColor('#eab308')" class="tc-color-dot h-5 w-5 rounded-full bg-amber-400 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#eab308" title="Yellow"></button>
+                                <button type="button" onclick="setTeacherCanvasColor('#22c55e')" class="tc-color-dot h-5 w-5 rounded-full bg-emerald-400 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#22c55e" title="Green"></button>
+                                <button type="button" onclick="setTeacherCanvasColor('#a855f7')" class="tc-color-dot h-5 w-5 rounded-full bg-purple-400 ring-2 ring-transparent hover:scale-110 transition cursor-pointer" data-color="#a855f7" title="Purple"></button>
+                              </div>
+                            </div>
+                            <div class="flex items-center justify-between px-0.5">
+                              <span class="text-[10px] uppercase font-bold text-slate-400">Size:</span>
+                              <div class="flex items-center gap-1">
+                                <button type="button" onclick="setTeacherCanvasSize(2)" id="btn-tc-size-2" class="tc-brush-btn px-2 py-0.5 rounded-lg border border-slate-800 text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer">Thin</button>
+                                <button type="button" onclick="setTeacherCanvasSize(4)" id="btn-tc-size-4" class="tc-brush-btn px-2 py-0.5 rounded-lg border border-cyan-500/40 bg-cyan-500/20 text-[11px] font-bold text-cyan-300 transition cursor-pointer">Med</button>
+                                <button type="button" onclick="setTeacherCanvasSize(8)" id="btn-tc-size-8" class="tc-brush-btn px-2 py-0.5 rounded-lg border border-slate-800 text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer">Thick</button>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="border-t border-slate-800 pt-1.5 space-y-1.5">
+                            <div class="grid grid-cols-4 gap-1">
+                              <button type="button" onclick="snapTeacherCanvasToolCorner('tl', event)" class="py-1 rounded-lg border border-slate-700/70 hover:border-cyan-400/60 bg-slate-800/70 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 font-bold text-[10px] transition cursor-pointer" title="Move to Top-Left">↖ TL</button>
+                              <button type="button" onclick="snapTeacherCanvasToolCorner('tr', event)" class="py-1 rounded-lg border border-slate-700/70 hover:border-cyan-400/60 bg-slate-800/70 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 font-bold text-[10px] transition cursor-pointer" title="Move to Top-Right">↗ TR</button>
+                              <button type="button" onclick="snapTeacherCanvasToolCorner('bl', event)" class="py-1 rounded-lg border border-slate-700/70 hover:border-cyan-400/60 bg-slate-800/70 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 font-bold text-[10px] transition cursor-pointer" title="Move to Bottom-Left">↙ BL</button>
+                              <button type="button" onclick="snapTeacherCanvasToolCorner('br', event)" class="py-1 rounded-lg border border-slate-700/70 hover:border-cyan-400/60 bg-slate-800/70 hover:bg-slate-800 text-slate-300 hover:text-cyan-300 font-bold text-[10px] transition cursor-pointer" title="Move to Bottom-Right">↘ BR</button>
+                            </div>
+                            <button type="button" onclick="clearTeacherCardCanvas()" class="w-full py-1.5 rounded-xl border border-rose-500/30 hover:border-rose-500/60 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer">
+                              <span>🗑️</span> Clear Drawing
+                            </button>
+                            <button type="button" onclick="resetTeacherCanvasToolPosition(event)" class="w-full py-1 rounded-xl border border-slate-700/70 hover:border-slate-600 bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-[10px] flex items-center justify-center gap-1.5 transition cursor-pointer" title="Reset pencil badge back to top-right corner">
+                              <span>↺</span> Reset Position (Top-Right)
+                            </button>
                           </div>
                         </div>
-                        <div class="flex items-center justify-between px-0.5">
-                          <span class="text-[10px] uppercase font-bold text-slate-400">Size:</span>
-                          <div class="flex items-center gap-1">
-                            <button type="button" onclick="setTeacherCanvasSize(2)" id="btn-tc-size-2" class="tc-brush-btn px-2 py-0.5 rounded-lg border border-slate-800 text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer">Thin</button>
-                            <button type="button" onclick="setTeacherCanvasSize(4)" id="btn-tc-size-4" class="tc-brush-btn px-2 py-0.5 rounded-lg border border-cyan-500/40 bg-cyan-500/20 text-[11px] font-bold text-cyan-300 transition cursor-pointer">Med</button>
-                            <button type="button" onclick="setTeacherCanvasSize(8)" id="btn-tc-size-8" class="tc-brush-btn px-2 py-0.5 rounded-lg border border-slate-800 text-[11px] font-bold text-slate-400 hover:text-white transition cursor-pointer">Thick</button>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="border-t border-slate-800 pt-1.5 space-y-1.5">
-                        <button type="button" onclick="clearTeacherCardCanvas()" class="w-full py-1.5 rounded-xl border border-rose-500/30 hover:border-rose-500/60 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer">
-                          <span>🗑️</span> Clear Drawing
-                        </button>
-                        <button type="button" onclick="resetTeacherCanvasToolPosition(event)" class="w-full py-1 rounded-xl border border-slate-700/70 hover:border-slate-600 bg-slate-800/60 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-[10px] flex items-center justify-center gap-1.5 transition cursor-pointer" title="Reset pencil badge back to top-right corner">
-                          <span>↺</span> Reset Position (Top-Right)
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -5642,9 +5652,9 @@
 
       if (circleBtn) {
         if (isTeacherDrawingActive) {
-          circleBtn.className = "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-cyan-950 border-2 border-cyan-400 text-cyan-300 shadow-2xl ring-2 ring-cyan-400/50 flex items-center justify-center transition-all duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md";
+          circleBtn.className = "relative z-50 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-cyan-950 border-2 border-cyan-400 text-cyan-300 shadow-2xl ring-2 ring-cyan-400/50 flex items-center justify-center transition-colors duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md";
         } else {
-          circleBtn.className = "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 shadow-2xl flex items-center justify-center transition-all duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md";
+          circleBtn.className = "relative z-50 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-slate-300 hover:text-cyan-300 shadow-2xl flex items-center justify-center transition-colors duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md";
         }
       }
 
@@ -5673,8 +5683,12 @@
       const handle = document.getElementById("lc-canvas-drag-handle");
       const btn = document.getElementById("btn-toggle-teacher-canvas");
       const box = document.getElementById("lc-card-box");
-      const menu = document.getElementById("lc-canvas-menu");
+      const menuWrap = document.getElementById("lc-canvas-menu-wrap") || document.getElementById("lc-canvas-menu");
       if (!wrapper || !box) return;
+
+      wrapper.ondragstart = function() { return false; };
+      if (handle) handle.ondragstart = function() { return false; };
+      if (btn) btn.ondragstart = function() { return false; };
 
       if (btn && !btn._hasDragClickGuard) {
         btn._hasDragClickGuard = true;
@@ -5688,150 +5702,177 @@
         }, true);
       }
 
-      const startToolDrag = function(e) {
-        if (e.button !== undefined && e.button !== 0) return;
-        
-        const startX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-        const startY = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
-        const startLeft = wrapper.offsetLeft;
-        const startTop = wrapper.offsetTop;
-        let isDragging = false;
+      const bindDragTarget = function(targetEl, isDedicatedHandle) {
+        if (!targetEl) return;
 
-        const onMove = function(moveEvt) {
-          const curX = (moveEvt.clientX !== undefined) ? moveEvt.clientX : (moveEvt.touches && moveEvt.touches[0] ? moveEvt.touches[0].clientX : 0);
-          const curY = (moveEvt.clientY !== undefined) ? moveEvt.clientY : (moveEvt.touches && moveEvt.touches[0] ? moveEvt.touches[0].clientY : 0);
-          const dx = curX - startX;
-          const dy = curY - startY;
+        const beginDrag = function(e) {
+          if (e.button !== undefined && e.button !== 0) return;
+          if (e.stopPropagation) e.stopPropagation();
+          if (isDedicatedHandle && e.preventDefault) e.preventDefault();
 
-          if (!isDragging && Math.hypot(dx, dy) > 3) {
-            isDragging = true;
-            suppressTeacherCanvasToolClickUntil = Date.now() + 500;
-            document.body.style.userSelect = 'none';
-            document.body.style.cursor = 'grabbing';
-            wrapper.style.cursor = 'grabbing';
-            if (btn) btn.style.cursor = 'grabbing';
-            if (handle) handle.style.cursor = 'grabbing';
-            if (menu) {
-              menu.style.opacity = '0';
-              menu.style.pointerEvents = 'none';
+          const startX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+          const startY = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+          const boxRect = box.getBoundingClientRect();
+          const wrapRect = wrapper.getBoundingClientRect();
+          const startLeft = wrapRect.left - boxRect.left - (box.clientLeft || 0);
+          const startTop = wrapRect.top - boxRect.top - (box.clientTop || 0);
+          const wW = wrapRect.width || wrapper.offsetWidth || 58;
+          const wH = wrapRect.height || wrapper.offsetHeight || 78;
+
+          let lastLeft = startLeft;
+          let lastTop = startTop;
+          let isDragging = false;
+          const threshold = isDedicatedHandle ? 1 : 4;
+          const pointerId = e.pointerId;
+
+          if (isDedicatedHandle && pointerId !== undefined && targetEl.setPointerCapture) {
+            try { targetEl.setPointerCapture(pointerId); } catch (_) {}
+          }
+
+          const onMove = function(moveEvt) {
+            const curX = (moveEvt.clientX !== undefined) ? moveEvt.clientX : (moveEvt.touches && moveEvt.touches[0] ? moveEvt.touches[0].clientX : startX);
+            const curY = (moveEvt.clientY !== undefined) ? moveEvt.clientY : (moveEvt.touches && moveEvt.touches[0] ? moveEvt.touches[0].clientY : startY);
+            const dx = curX - startX;
+            const dy = curY - startY;
+
+            if (!isDragging && Math.hypot(dx, dy) >= threshold) {
+              isDragging = true;
+              suppressTeacherCanvasToolClickUntil = Date.now() + 500;
+              if (pointerId !== undefined && targetEl.setPointerCapture) {
+                try { targetEl.setPointerCapture(pointerId); } catch (_) {}
+              }
+              document.body.style.userSelect = 'none';
+              document.body.style.cursor = 'grabbing';
+              wrapper.style.cursor = 'grabbing';
+              if (btn) btn.style.cursor = 'grabbing';
+              if (handle) handle.style.cursor = 'grabbing';
+              if (menuWrap) menuWrap.style.display = 'none';
             }
-          }
 
-          if (isDragging) {
-            if (moveEvt.preventDefault) moveEvt.preventDefault();
-            const boxW = box.clientWidth || 800;
-            const boxH = box.clientHeight || 600;
-            const wW = wrapper.offsetWidth || 50;
-            const wH = wrapper.offsetHeight || 60;
+            if (isDragging) {
+              if (moveEvt.preventDefault) moveEvt.preventDefault();
+              const curBoxRect = box.getBoundingClientRect();
+              const boxW = box.clientWidth || curBoxRect.width || 800;
+              const boxH = box.clientHeight || curBoxRect.height || 600;
 
-            const minX = 6;
-            const maxX = Math.max(minX, boxW - wW - 6);
-            const minY = 6;
-            const maxY = Math.max(minY, boxH - wH - 6);
+              const minX = 6;
+              const maxX = Math.max(minX, boxW - wW - 6);
+              const minY = 6;
+              const maxY = Math.max(minY, boxH - wH - 6);
 
-            const newLeft = Math.max(minX, Math.min(maxX, startLeft + dx));
-            const newTop = Math.max(minY, Math.min(maxY, startTop + dy));
+              lastLeft = Math.max(minX, Math.min(maxX, startLeft + dx));
+              lastTop = Math.max(minY, Math.min(maxY, startTop + dy));
 
-            wrapper.style.left = `${Math.round(newLeft)}px`;
-            wrapper.style.top = `${Math.round(newTop)}px`;
-            wrapper.style.right = 'auto';
-            wrapper.style.bottom = 'auto';
+              wrapper.style.right = 'auto';
+              wrapper.style.bottom = 'auto';
+              wrapper.style.left = `${Math.round(lastLeft)}px`;
+              wrapper.style.top = `${Math.round(lastTop)}px`;
 
-            adjustTeacherCanvasMenuPlacement(newLeft, newTop, boxW, boxH);
+              adjustTeacherCanvasMenuPlacement(lastLeft, lastTop, boxW, boxH);
+            }
+          };
+
+          const onEnd = function() {
+            window.removeEventListener("pointermove", onMove, true);
+            window.removeEventListener("pointerup", onEnd, true);
+            window.removeEventListener("pointercancel", onEnd, true);
+            window.removeEventListener("mousemove", onMove, true);
+            window.removeEventListener("mouseup", onEnd, true);
+            window.removeEventListener("touchmove", onMove, true);
+            window.removeEventListener("touchend", onEnd, true);
+
+            if (pointerId !== undefined && targetEl.releasePointerCapture) {
+              try { targetEl.releasePointerCapture(pointerId); } catch (_) {}
+            }
+
+            document.body.style.userSelect = '';
+            document.body.style.cursor = '';
+            wrapper.style.cursor = '';
+            if (btn) btn.style.cursor = '';
+            if (handle) handle.style.cursor = '';
+            if (menuWrap) menuWrap.style.display = '';
+
+            if (isDragging) {
+              suppressTeacherCanvasToolClickUntil = Date.now() + 500;
+              const curBoxRect = box.getBoundingClientRect();
+              const boxW = box.clientWidth || curBoxRect.width || 1;
+              const boxH = box.clientHeight || curBoxRect.height || 1;
+              const xRatio = Math.max(0, Math.min(1, lastLeft / boxW));
+              const yRatio = Math.max(0, Math.min(1, lastTop / boxH));
+              try {
+                localStorage.setItem("vs_teacher_canvas_tool_pos", JSON.stringify({ xRatio, yRatio }));
+              } catch (_) {}
+            }
+          };
+
+          if (window.PointerEvent) {
+            window.addEventListener("pointermove", onMove, { capture: true, passive: false });
+            window.addEventListener("pointerup", onEnd, { capture: true, passive: false });
+            window.addEventListener("pointercancel", onEnd, { capture: true, passive: false });
+          } else {
+            window.addEventListener("mousemove", onMove, { capture: true, passive: false });
+            window.addEventListener("mouseup", onEnd, { capture: true, passive: false });
+            window.addEventListener("touchmove", onMove, { capture: true, passive: false });
+            window.addEventListener("touchend", onEnd, { capture: true, passive: false });
           }
         };
 
-        const onEnd = function() {
-          window.removeEventListener("pointermove", onMove, true);
-          window.removeEventListener("pointerup", onEnd, true);
-          window.removeEventListener("pointercancel", onEnd, true);
-          window.removeEventListener("mousemove", onMove, true);
-          window.removeEventListener("mouseup", onEnd, true);
-          window.removeEventListener("touchmove", onMove, true);
-          window.removeEventListener("touchend", onEnd, true);
-
-          document.body.style.userSelect = '';
-          document.body.style.cursor = '';
-          wrapper.style.cursor = '';
-          if (btn) btn.style.cursor = '';
-          if (handle) handle.style.cursor = '';
-          if (menu) {
-            menu.style.opacity = '';
-            menu.style.pointerEvents = '';
-          }
-
-          if (isDragging) {
-            suppressTeacherCanvasToolClickUntil = Date.now() + 500;
-            const boxW = box.clientWidth || 1;
-            const boxH = box.clientHeight || 1;
-            const xRatio = Math.max(0, Math.min(1, wrapper.offsetLeft / boxW));
-            const yRatio = Math.max(0, Math.min(1, wrapper.offsetTop / boxH));
-            try {
-              localStorage.setItem("vs_teacher_canvas_tool_pos", JSON.stringify({ xRatio, yRatio }));
-            } catch (_) {}
-          }
-        };
-
-        window.addEventListener("pointermove", onMove, { capture: true, passive: false });
-        window.addEventListener("pointerup", onEnd, { capture: true, passive: false });
-        window.addEventListener("pointercancel", onEnd, { capture: true, passive: false });
-        window.addEventListener("mousemove", onMove, { capture: true, passive: false });
-        window.addEventListener("mouseup", onEnd, { capture: true, passive: false });
-        window.addEventListener("touchmove", onMove, { capture: true, passive: false });
-        window.addEventListener("touchend", onEnd, { capture: true, passive: false });
+        if (window.PointerEvent) {
+          targetEl.onpointerdown = beginDrag;
+          targetEl.onmousedown = null;
+          targetEl.ontouchstart = null;
+        } else {
+          targetEl.onpointerdown = null;
+          targetEl.onmousedown = beginDrag;
+          targetEl.ontouchstart = beginDrag;
+        }
       };
 
-      if (handle) {
-        handle.onpointerdown = startToolDrag;
-        handle.onmousedown = startToolDrag;
-        handle.ontouchstart = startToolDrag;
-      }
-      if (btn) {
-        btn.onpointerdown = startToolDrag;
-        btn.onmousedown = startToolDrag;
-        btn.ontouchstart = startToolDrag;
-      }
+      bindDragTarget(handle, true);
+      bindDragTarget(btn, false);
     }
 
     function adjustTeacherCanvasMenuPlacement(currentLeft, currentTop, boxWidth, boxHeight) {
       const wrapper = document.getElementById("lc-canvas-tool-wrapper");
-      const menu = document.getElementById("lc-canvas-menu");
+      const menuWrap = document.getElementById("lc-canvas-menu-wrap") || document.getElementById("lc-canvas-menu");
       const box = document.getElementById("lc-card-box");
-      if (!wrapper || !menu) return;
+      if (!wrapper || !menuWrap) return;
 
       if (currentLeft === undefined || currentTop === undefined) {
-        const boxRect = box ? box.getBoundingClientRect() : { width: 800, height: 600 };
-        currentLeft = wrapper.offsetLeft;
-        currentTop = wrapper.offsetTop;
+        const boxRect = box ? box.getBoundingClientRect() : { left: 0, top: 0, width: 800, height: 600 };
+        const wrapRect = wrapper.getBoundingClientRect();
+        if (!boxRect.width || !boxRect.height) return;
+        currentLeft = wrapRect.left - boxRect.left - (box ? (box.clientLeft || 0) : 0);
+        currentTop = wrapRect.top - boxRect.top - (box ? (box.clientTop || 0) : 0);
         boxWidth = boxRect.width;
         boxHeight = boxRect.height;
       }
 
       if (currentLeft < 220) {
-        wrapper.classList.remove("items-end");
-        wrapper.classList.add("items-start");
-        menu.style.left = "0px";
-        menu.style.right = "auto";
+        menuWrap.style.left = "0px";
+        menuWrap.style.right = "auto";
       } else {
-        wrapper.classList.remove("items-start");
-        wrapper.classList.add("items-end");
-        menu.style.left = "auto";
-        menu.style.right = "0px";
+        menuWrap.style.left = "auto";
+        menuWrap.style.right = "0px";
       }
 
-      if (boxHeight && (boxHeight - currentTop < 250)) {
-        menu.style.top = "auto";
-        menu.style.bottom = "48px";
+      if (boxHeight && currentTop > 220 && currentTop > boxHeight * 0.5) {
+        menuWrap.style.top = "auto";
+        menuWrap.style.bottom = "calc(100% + 26px)";
+        menuWrap.style.paddingTop = "0px";
+        menuWrap.style.paddingBottom = "6px";
       } else {
-        menu.style.bottom = "auto";
-        menu.style.top = "48px";
+        menuWrap.style.bottom = "auto";
+        menuWrap.style.top = "100%";
+        menuWrap.style.paddingTop = "6px";
+        menuWrap.style.paddingBottom = "0px";
       }
     }
 
     function applySavedTeacherCanvasToolPosition() {
       const wrapper = document.getElementById("lc-canvas-tool-wrapper");
       const box = document.getElementById("lc-card-box");
-      const menu = document.getElementById("lc-canvas-menu");
       if (!wrapper || !box) return;
 
       let saved = null;
@@ -5840,28 +5881,24 @@
         if (raw) saved = JSON.parse(raw);
       } catch (_) {}
 
-      const boxW = box.clientWidth;
-      const boxH = box.clientHeight;
-      if (!boxW || !boxH) return;
+      const boxRect = box.getBoundingClientRect();
+      const boxW = box.clientWidth || boxRect.width;
+      const boxH = box.clientHeight || boxRect.height;
 
       if (!saved || typeof saved.xRatio !== 'number' || typeof saved.yRatio !== 'number') {
-        wrapper.style.left = 'auto';
+        wrapper.style.left = '';
         wrapper.style.right = '12px';
         wrapper.style.top = '12px';
         wrapper.style.bottom = 'auto';
-        if (menu) {
-          wrapper.classList.remove("items-start");
-          wrapper.classList.add("items-end");
-          menu.style.left = "auto";
-          menu.style.right = "0px";
-          menu.style.top = "48px";
-          menu.style.bottom = "auto";
-        }
+        if (boxW && boxH) adjustTeacherCanvasMenuPlacement(undefined, undefined);
         return;
       }
 
-      const wW = wrapper.offsetWidth || 50;
-      const wH = wrapper.offsetHeight || 60;
+      if (!boxW || !boxH) return;
+
+      const wrapRect = wrapper.getBoundingClientRect();
+      const wW = wrapRect.width || wrapper.offsetWidth || 58;
+      const wH = wrapRect.height || wrapper.offsetHeight || 78;
 
       const minX = 6;
       const maxX = Math.max(minX, boxW - wW - 6);
@@ -5871,12 +5908,47 @@
       const targetX = Math.max(minX, Math.min(maxX, saved.xRatio * boxW));
       const targetY = Math.max(minY, Math.min(maxY, saved.yRatio * boxH));
 
-      wrapper.style.left = Math.round(targetX) + 'px';
-      wrapper.style.top = Math.round(targetY) + 'px';
       wrapper.style.right = 'auto';
       wrapper.style.bottom = 'auto';
+      wrapper.style.left = Math.round(targetX) + 'px';
+      wrapper.style.top = Math.round(targetY) + 'px';
 
       adjustTeacherCanvasMenuPlacement(targetX, targetY, boxW, boxH);
+    }
+
+    function snapTeacherCanvasToolCorner(corner, e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      const wrapper = document.getElementById("lc-canvas-tool-wrapper");
+      const box = document.getElementById("lc-card-box");
+      if (!wrapper || !box) return;
+
+      if (corner === 'tr') {
+        resetTeacherCanvasToolPosition(e);
+        return;
+      }
+
+      const boxRect = box.getBoundingClientRect();
+      const boxW = box.clientWidth || boxRect.width || 800;
+      const boxH = box.clientHeight || boxRect.height || 500;
+      const wrapRect = wrapper.getBoundingClientRect();
+      const wW = wrapRect.width || wrapper.offsetWidth || 58;
+      const wH = wrapRect.height || wrapper.offsetHeight || 78;
+
+      const left = (corner === 'tl' || corner === 'bl') ? 12 : Math.max(6, boxW - wW - 12);
+      const top = (corner === 'tl' || corner === 'tr') ? 12 : Math.max(6, boxH - wH - 12);
+
+      wrapper.style.right = 'auto';
+      wrapper.style.bottom = 'auto';
+      wrapper.style.left = Math.round(left) + 'px';
+      wrapper.style.top = Math.round(top) + 'px';
+
+      adjustTeacherCanvasMenuPlacement(left, top, boxW, boxH);
+      try {
+        localStorage.setItem("vs_teacher_canvas_tool_pos", JSON.stringify({
+          xRatio: Math.max(0, Math.min(1, left / boxW)),
+          yRatio: Math.max(0, Math.min(1, top / boxH))
+        }));
+      } catch (_) {}
     }
 
     function resetTeacherCanvasToolPosition(e) {
@@ -5972,6 +6044,7 @@
     window.resizeTeacherCanvas = resizeTeacherCanvas;
     window.redrawTeacherCanvas = redrawTeacherCanvas;
     window.resetTeacherCanvasToolPosition = resetTeacherCanvasToolPosition;
+    window.snapTeacherCanvasToolCorner = snapTeacherCanvasToolCorner;
     window.applySavedTeacherCanvasToolPosition = applySavedTeacherCanvasToolPosition;
     window.initTeacherCanvasToolDraggable = initTeacherCanvasToolDraggable;
 

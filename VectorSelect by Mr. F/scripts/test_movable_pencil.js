@@ -15,14 +15,18 @@ const studentRequired = [
   'id="q-canvas-tool-wrapper"',
   'id="q-canvas-drag-handle"',
   'id="btn-toggle-canvas"',
+  'id="q-canvas-menu-wrap"',
   'id="q-canvas-menu"',
   'resetCanvasToolPosition(event)',
+  'snapCanvasToolCorner(',
   'function initCanvasToolDraggable',
   'function adjustCanvasMenuPlacement',
   'function applySavedCanvasToolPosition',
+  'function snapCanvasToolCorner',
   'function resetCanvasToolPosition',
   'suppressCanvasToolClickUntil',
-  'window.resetCanvasToolPosition = resetCanvasToolPosition'
+  'window.resetCanvasToolPosition = resetCanvasToolPosition',
+  'window.snapCanvasToolCorner = snapCanvasToolCorner'
 ];
 
 for (const req of studentRequired) {
@@ -39,14 +43,18 @@ const teacherRequired = [
   'id="lc-canvas-tool-wrapper"',
   'id="lc-canvas-drag-handle"',
   'id="btn-toggle-teacher-canvas"',
+  'id="lc-canvas-menu-wrap"',
   'id="lc-canvas-menu"',
   'resetTeacherCanvasToolPosition(event)',
+  'snapTeacherCanvasToolCorner(',
   'function initTeacherCanvasToolDraggable',
   'function adjustTeacherCanvasMenuPlacement',
   'function applySavedTeacherCanvasToolPosition',
+  'function snapTeacherCanvasToolCorner',
   'function resetTeacherCanvasToolPosition',
   'suppressTeacherCanvasToolClickUntil',
-  'window.resetTeacherCanvasToolPosition = resetTeacherCanvasToolPosition'
+  'window.resetTeacherCanvasToolPosition = resetTeacherCanvasToolPosition',
+  'window.snapTeacherCanvasToolCorner = snapTeacherCanvasToolCorner'
 ];
 
 for (const req of teacherRequired) {
