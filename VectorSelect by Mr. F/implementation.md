@@ -2074,6 +2074,9 @@ Real Chrome DevTools Protocol (`Input.dispatchMouseEvent`) hardware-input tracin
    - Assigning `onpointerdown` and `onmousedown` simultaneously caused Chrome to invoke the drag initializer twice per click without `setPointerCapture(pointerId)` or `preventDefault()` on the dedicated grip handle.
 3. **Mid-Drag Flex Alignment Jump & Teacher Stage Clipping**:
    - Switching `items-end` to `items-start` when crossing `x = 220px` shifted the circular button inside the wider `::: MOVE` wrapper mid-drag, and `overflow-hidden` on `#lc-card-box` clipped menus near card edges.
+4. **Uncalled `initTeacherCanvas()` in Teacher Live Control (`#live-control-modal`)**:
+   - `initTeacherCanvas()` was defined in `teacher.html` (line 5608) and exported on `window.initTeacherCanvas`, **but never invoked anywhere in `teacher.html`** (`openLiveControl`, `renderLiveControl`, or page startup), leaving `#lc-canvas-drag-handle`, `#btn-toggle-teacher-canvas`, and `#lc-card-canvas` with zero runtime listeners during live sessions!
+   - **Triple-Redundant Binding**: Wired `onpointerdown="startTeacherCanvasToolDrag(event, true/false)"` and `onpointerdown="startStudentCanvasToolDrag(event, true/false)"` directly inline on the HTML handle and button elements, AND invoked `initTeacherCanvas()` / `initQuestionCanvas()` on DOM startup, `openLiveControl()`, `renderLiveControl()`, and `toggleTeacherCardDrawing()`.
 
 Both `index.html` (Student Portal) and `teacher.html` (Teacher Live Stage) now implement a unified, Chrome-verified architecture:
 

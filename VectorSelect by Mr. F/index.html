@@ -584,7 +584,7 @@
               <!-- Floating Canvas Annotation Badge Tool (Movable Anywhere on Question Card) -->
               <div id="q-canvas-tool-wrapper" class="absolute z-30 flex flex-col items-center select-none touch-none" style="top: 12px; right: 12px; touch-action: none; user-select: none; -webkit-user-select: none;">
                 <!-- Drag/Move Grip Pill Handle (Isolated from menu hover group so menu never covers handle) -->
-                <div id="q-canvas-drag-handle" draggable="false" class="relative z-50 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-300 hover:text-cyan-300 select-none pb-1.5 transition-colors" style="touch-action: none; user-select: none; -webkit-user-select: none;" title="Drag to move pencil anywhere on question card">
+                <div id="q-canvas-drag-handle" draggable="false" onpointerdown="startStudentCanvasToolDrag(event, true)" class="relative z-50 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-300 hover:text-cyan-300 select-none pb-1.5 transition-colors" style="touch-action: none; user-select: none; -webkit-user-select: none;" title="Drag to move pencil anywhere on question card">
                   <span class="pointer-events-none flex items-center gap-1 text-[9px] font-black uppercase tracking-wider bg-slate-900/95 text-slate-200 border border-slate-700/90 rounded-full px-2.5 py-0.5 shadow-md">
                     <span class="text-[10px]">⋮⋮</span> MOVE
                   </span>
@@ -593,7 +593,7 @@
                 <!-- Button + Hover Popout Group -->
                 <div class="relative group flex flex-col items-center">
                   <!-- Small Circular Activation Button (Click to draw, Drag to move) -->
-                  <button type="button" id="btn-toggle-canvas" draggable="false" onclick="toggleCardDrawingMode(event)" class="relative z-50 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-cyan-300 shadow-2xl flex items-center justify-center transition-colors duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md" style="touch-action: none; user-select: none; -webkit-user-select: none;" title="Click to draw • Drag to move anywhere">
+                  <button type="button" id="btn-toggle-canvas" draggable="false" onpointerdown="startStudentCanvasToolDrag(event, false)" onclick="toggleCardDrawingMode(event)" class="relative z-50 h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-slate-900/95 border-2 border-slate-700 hover:border-cyan-400 text-cyan-300 shadow-2xl flex items-center justify-center transition-colors duration-200 cursor-grab active:cursor-grabbing backdrop-blur-md" style="touch-action: none; user-select: none; -webkit-user-select: none;" title="Click to draw • Drag to move anywhere">
                     <span id="canvas-tool-icon" class="pointer-events-none text-base sm:text-lg">✏️</span>
                   </button>
 
@@ -5834,23 +5834,27 @@
 
     function initQuestionCanvas() {
       const canvas = document.getElementById("q-card-canvas");
-      if (!canvas) return;
+      if (canvas) {
+        canvas.removeEventListener("pointerdown", handleCardPointerDown);
+        canvas.removeEventListener("pointermove", handleCardPointerMove);
+        canvas.removeEventListener("pointerup", handleCardPointerUp);
+        canvas.removeEventListener("pointercancel", handleCardPointerUp);
 
-      canvas.removeEventListener("pointerdown", handleCardPointerDown);
-      canvas.removeEventListener("pointermove", handleCardPointerMove);
-      canvas.removeEventListener("pointerup", handleCardPointerUp);
-      canvas.removeEventListener("pointercancel", handleCardPointerUp);
+        canvas.addEventListener("pointerdown", handleCardPointerDown);
+        canvas.addEventListener("pointermove", handleCardPointerMove);
+        canvas.addEventListener("pointerup", handleCardPointerUp);
+        canvas.addEventListener("pointercancel", handleCardPointerUp);
+        canvas._studentCanvasReady = true;
+      }
 
-      canvas.addEventListener("pointerdown", handleCardPointerDown);
-      canvas.addEventListener("pointermove", handleCardPointerMove);
-      canvas.addEventListener("pointerup", handleCardPointerUp);
-      canvas.addEventListener("pointercancel", handleCardPointerUp);
-
-      window.addEventListener("resize", () => {
-        resizeCanvasToCard();
-        redrawCardCanvas();
-        if (typeof applySavedCanvasToolPosition === 'function') applySavedCanvasToolPosition();
-      });
+      if (!window._studentCanvasResizeBound) {
+        window._studentCanvasResizeBound = true;
+        window.addEventListener("resize", () => {
+          resizeCanvasToCard();
+          redrawCardCanvas();
+          if (typeof applySavedCanvasToolPosition === 'function') applySavedCanvasToolPosition();
+        });
+      }
 
       if (typeof initCanvasToolDraggable === 'function') initCanvasToolDraggable();
       resizeCanvasToCard();
@@ -5917,20 +5921,8 @@
     // ============================================================================
     let suppressCanvasToolClickUntil = 0;
 
-    function initCanvasToolDraggable() {
-      const wrapper = document.getElementById("q-canvas-tool-wrapper");
-      const handle = document.getElementById("q-canvas-drag-handle");
+    function ensureStudentToolClickGuard() {
       const btn = document.getElementById("btn-toggle-canvas");
-      const whiteBox = document.getElementById("q-card-white-box");
-      const menuWrap = document.getElementById("q-canvas-menu-wrap") || document.getElementById("q-canvas-menu");
-      if (!wrapper || !whiteBox) return;
-
-      // Prevent native HTML5 drag ghosting on wrapper, handle, and button
-      wrapper.ondragstart = function() { return false; };
-      if (handle) handle.ondragstart = function() { return false; };
-      if (btn) btn.ondragstart = function() { return false; };
-
-      // Prevent click toggle immediately following an intentional drag
       if (btn && !btn._hasDragClickGuard) {
         btn._hasDragClickGuard = true;
         btn.addEventListener("click", function(e) {
@@ -5942,136 +5934,171 @@
           }
         }, true);
       }
+    }
 
-      const bindDragTarget = function(targetEl, isDedicatedHandle) {
-        if (!targetEl) return;
+    function startStudentCanvasToolDrag(e, isDedicatedHandle) {
+      if (!e || window._studentToolDragActive) return;
+      if (e.button !== undefined && e.button !== 0) return;
 
-        const beginDrag = function(e) {
-          if (e.button !== undefined && e.button !== 0) return;
-          if (e.stopPropagation) e.stopPropagation();
-          if (isDedicatedHandle && e.preventDefault) e.preventDefault();
+      const wrapper = document.getElementById("q-canvas-tool-wrapper");
+      const handle = document.getElementById("q-canvas-drag-handle");
+      const btn = document.getElementById("btn-toggle-canvas");
+      const whiteBox = document.getElementById("q-card-white-box");
+      const menuWrap = document.getElementById("q-canvas-menu-wrap") || document.getElementById("q-canvas-menu");
+      if (!wrapper || !whiteBox) return;
 
-          const startX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
-          const startY = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+      ensureStudentToolClickGuard();
+      const targetEl = isDedicatedHandle ? (handle || wrapper) : (btn || wrapper);
 
-          const boxRect = whiteBox.getBoundingClientRect();
-          const wrapRect = wrapper.getBoundingClientRect();
-          const startLeft = wrapRect.left - boxRect.left - (whiteBox.clientLeft || 0);
-          const startTop = wrapRect.top - boxRect.top - (whiteBox.clientTop || 0);
-          const wW = wrapRect.width || wrapper.offsetWidth || 58;
-          const wH = wrapRect.height || wrapper.offsetHeight || 78;
+      if (e.stopPropagation) e.stopPropagation();
+      if (isDedicatedHandle && e.preventDefault) e.preventDefault();
 
-          let lastLeft = startLeft;
-          let lastTop = startTop;
-          let isDragging = false;
-          const threshold = isDedicatedHandle ? 1 : 4;
-          const pointerId = e.pointerId;
+      window._studentToolDragActive = true;
 
-          if (isDedicatedHandle && pointerId !== undefined && targetEl.setPointerCapture) {
+      const startX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const startY = (e.clientY !== undefined) ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+
+      const boxRect = whiteBox.getBoundingClientRect();
+      const wrapRect = wrapper.getBoundingClientRect();
+      const startLeft = wrapRect.left - boxRect.left - (whiteBox.clientLeft || 0);
+      const startTop = wrapRect.top - boxRect.top - (whiteBox.clientTop || 0);
+      const wW = wrapRect.width || wrapper.offsetWidth || 58;
+      const wH = wrapRect.height || wrapper.offsetHeight || 78;
+
+      let lastLeft = startLeft;
+      let lastTop = startTop;
+      let isDragging = false;
+      const threshold = isDedicatedHandle ? 1 : 4;
+      const pointerId = e.pointerId;
+
+      if (isDedicatedHandle && pointerId !== undefined && targetEl.setPointerCapture) {
+        try { targetEl.setPointerCapture(pointerId); } catch (_) {}
+      }
+
+      const onMove = function(moveEvt) {
+        const curX = (moveEvt.clientX !== undefined) ? moveEvt.clientX : (moveEvt.touches && moveEvt.touches[0] ? moveEvt.touches[0].clientX : startX);
+        const curY = (moveEvt.clientY !== undefined) ? moveEvt.clientY : (moveEvt.touches && moveEvt.touches[0] ? moveEvt.touches[0].clientY : startY);
+        const dx = curX - startX;
+        const dy = curY - startY;
+
+        if (!isDragging && Math.hypot(dx, dy) >= threshold) {
+          isDragging = true;
+          suppressCanvasToolClickUntil = Date.now() + 500;
+          if (pointerId !== undefined && targetEl.setPointerCapture) {
             try { targetEl.setPointerCapture(pointerId); } catch (_) {}
           }
+          document.body.style.userSelect = 'none';
+          document.body.style.cursor = 'grabbing';
+          wrapper.style.cursor = 'grabbing';
+          if (btn) btn.style.cursor = 'grabbing';
+          if (handle) handle.style.cursor = 'grabbing';
+          if (menuWrap) menuWrap.style.display = 'none';
+        }
 
-          const onMove = function(moveEvt) {
-            const curX = (moveEvt.clientX !== undefined) ? moveEvt.clientX : (moveEvt.touches && moveEvt.touches[0] ? moveEvt.touches[0].clientX : startX);
-            const curY = (moveEvt.clientY !== undefined) ? moveEvt.clientY : (moveEvt.touches && moveEvt.touches[0] ? moveEvt.touches[0].clientY : startY);
-            const dx = curX - startX;
-            const dy = curY - startY;
+        if (isDragging) {
+          if (moveEvt.preventDefault) moveEvt.preventDefault();
+          const curBoxRect = whiteBox.getBoundingClientRect();
+          const boxW = whiteBox.clientWidth || curBoxRect.width || 800;
+          const boxH = whiteBox.clientHeight || curBoxRect.height || 600;
 
-            if (!isDragging && Math.hypot(dx, dy) >= threshold) {
-              isDragging = true;
-              suppressCanvasToolClickUntil = Date.now() + 500;
-              if (pointerId !== undefined && targetEl.setPointerCapture) {
-                try { targetEl.setPointerCapture(pointerId); } catch (_) {}
-              }
-              document.body.style.userSelect = 'none';
-              document.body.style.cursor = 'grabbing';
-              wrapper.style.cursor = 'grabbing';
-              if (btn) btn.style.cursor = 'grabbing';
-              if (handle) handle.style.cursor = 'grabbing';
-              if (menuWrap) menuWrap.style.display = 'none';
-            }
+          const minX = 6;
+          const maxX = Math.max(minX, boxW - wW - 6);
+          const minY = 6;
+          const maxY = Math.max(minY, boxH - wH - 6);
 
-            if (isDragging) {
-              if (moveEvt.preventDefault) moveEvt.preventDefault();
-              const curBoxRect = whiteBox.getBoundingClientRect();
-              const boxW = whiteBox.clientWidth || curBoxRect.width || 800;
-              const boxH = whiteBox.clientHeight || curBoxRect.height || 600;
+          lastLeft = Math.max(minX, Math.min(maxX, startLeft + dx));
+          lastTop = Math.max(minY, Math.min(maxY, startTop + dy));
 
-              const minX = 6;
-              const maxX = Math.max(minX, boxW - wW - 6);
-              const minY = 6;
-              const maxY = Math.max(minY, boxH - wH - 6);
+          wrapper.style.right = 'auto';
+          wrapper.style.bottom = 'auto';
+          wrapper.style.left = `${Math.round(lastLeft)}px`;
+          wrapper.style.top = `${Math.round(lastTop)}px`;
 
-              lastLeft = Math.max(minX, Math.min(maxX, startLeft + dx));
-              lastTop = Math.max(minY, Math.min(maxY, startTop + dy));
-
-              wrapper.style.right = 'auto';
-              wrapper.style.bottom = 'auto';
-              wrapper.style.left = `${Math.round(lastLeft)}px`;
-              wrapper.style.top = `${Math.round(lastTop)}px`;
-
-              adjustCanvasMenuPlacement(lastLeft, lastTop, boxW, boxH);
-            }
-          };
-
-          const onEnd = function() {
-            window.removeEventListener("pointermove", onMove, true);
-            window.removeEventListener("pointerup", onEnd, true);
-            window.removeEventListener("pointercancel", onEnd, true);
-            window.removeEventListener("mousemove", onMove, true);
-            window.removeEventListener("mouseup", onEnd, true);
-            window.removeEventListener("touchmove", onMove, true);
-            window.removeEventListener("touchend", onEnd, true);
-
-            if (pointerId !== undefined && targetEl.releasePointerCapture) {
-              try { targetEl.releasePointerCapture(pointerId); } catch (_) {}
-            }
-
-            document.body.style.userSelect = '';
-            document.body.style.cursor = '';
-            wrapper.style.cursor = '';
-            if (btn) btn.style.cursor = '';
-            if (handle) handle.style.cursor = '';
-            if (menuWrap) menuWrap.style.display = '';
-
-            if (isDragging) {
-              suppressCanvasToolClickUntil = Date.now() + 500;
-              const curBoxRect = whiteBox.getBoundingClientRect();
-              const boxW = whiteBox.clientWidth || curBoxRect.width || 1;
-              const boxH = whiteBox.clientHeight || curBoxRect.height || 1;
-              const xRatio = Math.max(0, Math.min(1, lastLeft / boxW));
-              const yRatio = Math.max(0, Math.min(1, lastTop / boxH));
-              try {
-                localStorage.setItem("vs_canvas_tool_pos", JSON.stringify({ xRatio, yRatio }));
-              } catch (_) {}
-            }
-          };
-
-          if (window.PointerEvent) {
-            window.addEventListener("pointermove", onMove, { capture: true, passive: false });
-            window.addEventListener("pointerup", onEnd, { capture: true, passive: false });
-            window.addEventListener("pointercancel", onEnd, { capture: true, passive: false });
-          } else {
-            window.addEventListener("mousemove", onMove, { capture: true, passive: false });
-            window.addEventListener("mouseup", onEnd, { capture: true, passive: false });
-            window.addEventListener("touchmove", onMove, { capture: true, passive: false });
-            window.addEventListener("touchend", onEnd, { capture: true, passive: false });
-          }
-        };
-
-        if (window.PointerEvent) {
-          targetEl.onpointerdown = beginDrag;
-          targetEl.onmousedown = null;
-          targetEl.ontouchstart = null;
-        } else {
-          targetEl.onpointerdown = null;
-          targetEl.onmousedown = beginDrag;
-          targetEl.ontouchstart = beginDrag;
+          adjustCanvasMenuPlacement(lastLeft, lastTop, boxW, boxH);
         }
       };
 
-      bindDragTarget(handle, true);
-      bindDragTarget(btn, false);
+      const onEnd = function() {
+        window._studentToolDragActive = false;
+        window.removeEventListener("pointermove", onMove, true);
+        window.removeEventListener("pointerup", onEnd, true);
+        window.removeEventListener("pointercancel", onEnd, true);
+        window.removeEventListener("mousemove", onMove, true);
+        window.removeEventListener("mouseup", onEnd, true);
+        window.removeEventListener("touchmove", onMove, true);
+        window.removeEventListener("touchend", onEnd, true);
+
+        if (pointerId !== undefined && targetEl.releasePointerCapture) {
+          try { targetEl.releasePointerCapture(pointerId); } catch (_) {}
+        }
+
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+        wrapper.style.cursor = '';
+        if (btn) btn.style.cursor = '';
+        if (handle) handle.style.cursor = '';
+        if (menuWrap) menuWrap.style.display = '';
+
+        if (isDragging) {
+          suppressCanvasToolClickUntil = Date.now() + 500;
+          const curBoxRect = whiteBox.getBoundingClientRect();
+          const boxW = whiteBox.clientWidth || curBoxRect.width || 1;
+          const boxH = whiteBox.clientHeight || curBoxRect.height || 1;
+          const xRatio = Math.max(0, Math.min(1, lastLeft / boxW));
+          const yRatio = Math.max(0, Math.min(1, lastTop / boxH));
+          try {
+            localStorage.setItem("vs_canvas_tool_pos", JSON.stringify({ xRatio, yRatio }));
+          } catch (_) {}
+        }
+      };
+
+      if (window.PointerEvent) {
+        window.addEventListener("pointermove", onMove, { capture: true, passive: false });
+        window.addEventListener("pointerup", onEnd, { capture: true, passive: false });
+        window.addEventListener("pointercancel", onEnd, { capture: true, passive: false });
+      } else {
+        window.addEventListener("mousemove", onMove, { capture: true, passive: false });
+        window.addEventListener("mouseup", onEnd, { capture: true, passive: false });
+        window.addEventListener("touchmove", onMove, { capture: true, passive: false });
+        window.addEventListener("touchend", onEnd, { capture: true, passive: false });
+      }
+    }
+
+    function initCanvasToolDraggable() {
+      const wrapper = document.getElementById("q-canvas-tool-wrapper");
+      const handle = document.getElementById("q-canvas-drag-handle");
+      const btn = document.getElementById("btn-toggle-canvas");
+      const whiteBox = document.getElementById("q-card-white-box");
+      if (!wrapper || !whiteBox) return;
+
+      wrapper.ondragstart = function() { return false; };
+      if (handle) handle.ondragstart = function() { return false; };
+      if (btn) btn.ondragstart = function() { return false; };
+
+      ensureStudentToolClickGuard();
+
+      if (handle) {
+        if (window.PointerEvent) {
+          handle.onpointerdown = function(ev) { startStudentCanvasToolDrag(ev, true); };
+          handle.onmousedown = null;
+          handle.ontouchstart = null;
+        } else {
+          handle.onpointerdown = null;
+          handle.onmousedown = function(ev) { startStudentCanvasToolDrag(ev, true); };
+          handle.ontouchstart = function(ev) { startStudentCanvasToolDrag(ev, true); };
+        }
+      }
+      if (btn) {
+        if (window.PointerEvent) {
+          btn.onpointerdown = function(ev) { startStudentCanvasToolDrag(ev, false); };
+          btn.onmousedown = null;
+          btn.ontouchstart = null;
+        } else {
+          btn.onpointerdown = null;
+          btn.onmousedown = function(ev) { startStudentCanvasToolDrag(ev, false); };
+          btn.ontouchstart = function(ev) { startStudentCanvasToolDrag(ev, false); };
+        }
+      }
     }
 
     function adjustCanvasMenuPlacement(currentLeft, currentTop, boxWidth, boxHeight) {
@@ -6309,7 +6336,13 @@
     window.snapCanvasToolCorner = snapCanvasToolCorner;
     window.applySavedCanvasToolPosition = applySavedCanvasToolPosition;
     window.initCanvasToolDraggable = initCanvasToolDraggable;
+    window.startStudentCanvasToolDrag = startStudentCanvasToolDrag;
 
+    if (document.readyState !== 'loading') {
+      initQuestionCanvas();
+    } else {
+      document.addEventListener('DOMContentLoaded', initQuestionCanvas);
+    }
     window.onload = initStudentApp;
   </script>
 
