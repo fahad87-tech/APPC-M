@@ -608,7 +608,7 @@ export function createSheet(mech, { layout: forcedLayout } = {}) {
       fy = (head ? head.bottom : card.top) - r.top + 8;
       fh = (foot ? foot.top : card.bottom) - r.top - 8 - fy;
     } else if (innerWidth > 960) {
-      const left = rect('.phase-panel'), right = rect('.instr-panel'), head = rect('.topbar'), foot = rect('.chart-panel');
+      const left = rect('#leftDrawer') || rect('.phase-panel'), right = rect('.instr-panel'), head = rect('.topbar'), foot = rect('.chart-panel');
       fx = left.right + 10; fw = right.left - 10 - fx;
       fy = head.bottom + 4; fh = foot.top - 8 - fy;
     }
@@ -627,6 +627,36 @@ export function createSheet(mech, { layout: forcedLayout } = {}) {
   }
   addEventListener('resize', layout);
   if (document.fonts) document.fonts.ready.then(layout);
+
+  const leftDrawer = $('leftDrawer');
+  const leftDrawerBtn = $('leftDrawerBtn');
+  const leftDrawerLbl = $('leftDrawerLbl');
+  let drawerAnimRaf = 0;
+  function syncDrawerLayout() {
+    cancelAnimationFrame(drawerAnimRaf);
+    const t0 = performance.now();
+    const tick = () => {
+      layout();
+      if (performance.now() - t0 < 340) drawerAnimRaf = requestAnimationFrame(tick);
+    };
+    drawerAnimRaf = requestAnimationFrame(tick);
+  }
+  function toggleLeftDrawer(forceCollapsed) {
+    if (!leftDrawer || !leftDrawerBtn) return;
+    const collapsed = typeof forceCollapsed === 'boolean' ? forceCollapsed : !leftDrawer.classList.contains('collapsed');
+    leftDrawer.classList.toggle('collapsed', collapsed);
+    document.querySelector('.layout')?.classList.toggle('left-collapsed', collapsed);
+    leftDrawerBtn.setAttribute('aria-expanded', String(!collapsed));
+    leftDrawerBtn.title = collapsed ? 'Reveal section panel ( [ )' : 'Hide section panel ( [ )';
+    if (leftDrawerLbl) leftDrawerLbl.textContent = collapsed ? 'Panel' : 'Hide';
+    syncDrawerLayout();
+  }
+  if (leftDrawerBtn) {
+    leftDrawerBtn.addEventListener('click', () => toggleLeftDrawer());
+    addEventListener('keydown', (e) => {
+      if (e.key === '[' && !e.target.closest('input, textarea, select')) toggleLeftDrawer();
+    });
+  }
 
   /* ---------------- loop ---------------- */
   const clock = new THREE.Clock();
@@ -783,19 +813,30 @@ function buildDom(mech, figure) {
         <div class="fig-tag"><b>${esc(m.fig)}</b><span>${esc(m.caption)}</span></div>
         <div class="toggles" role="group" aria-label="Layers"><span class="lbl">Show</span>${layerBtns}</div>
       </header>
-      <section class="masthead"><h1>${m.title}</h1><p class="lede">${esc(m.lede)}</p></section>
-      <section class="block phase-panel" aria-live="polite">
-        <div class="block-head"><span class="ph-n">A</span><span>${esc(mech.instances.label)}</span>${focusSeg}</div>
-        <div class="phase-now">
-          <div class="phase-num" id="phaseNum">01</div>
-          <div><div class="phase-name" id="phaseName">${esc(P[0].name)}</div><div class="phase-nick" id="phaseNick"></div></div>
+      <aside class="left-drawer" id="leftDrawer">
+        <div class="left-drawer-body" id="leftDrawerBody">
+          <div class="left-drawer-inner">
+            <section class="masthead"><h1>${m.title}</h1><p class="lede">${esc(m.lede)}</p></section>
+            <section class="block phase-panel" aria-live="polite">
+              <div class="block-head"><span class="ph-n">A</span><span>${esc(mech.instances.label)}</span>${focusSeg}</div>
+              <div class="phase-now">
+                <div class="phase-num" id="phaseNum">01</div>
+                <div><div class="phase-name" id="phaseName">${esc(P[0].name)}</div><div class="phase-nick" id="phaseNick"></div></div>
+              </div>
+              <p class="phase-text" id="phaseText"></p>
+              <ol class="phase-list" id="phaseList" style="grid-template-columns: repeat(${P.length}, 1fr)">
+                ${P.map((p, k) => `<li data-s="${k}" title="${esc(p.name)}"><i style="background:${p.color}"></i>${esc(p.list || p.nick)}</li>`).join('')}
+              </ol>
+              <dl class="readout" id="readout"></dl>
+            </section>
+          </div>
         </div>
-        <p class="phase-text" id="phaseText"></p>
-        <ol class="phase-list" id="phaseList" style="grid-template-columns: repeat(${P.length}, 1fr)">
-          ${P.map((p, k) => `<li data-s="${k}" title="${esc(p.name)}"><i style="background:${p.color}"></i>${esc(p.list || p.nick)}</li>`).join('')}
-        </ol>
-        <dl class="readout" id="readout"></dl>
-      </section>
+        <button type="button" class="drawer-arrow-bar" id="leftDrawerBtn" aria-expanded="true" aria-controls="leftDrawerBody" title="Hide section panel ( [ )">
+          <svg class="drawer-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg>
+          <span class="drawer-bar-label" id="leftDrawerLbl">Hide</span>
+          <svg class="drawer-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 3.5 5.5 8l5 4.5"/></svg>
+        </button>
+      </aside>
       <section class="block instr-panel">
         <div class="block-head"><span class="ph-n">B</span><span>${esc(mech.instrLabel || 'Instruments')}</span></div>
         ${mech.gauge ? `<div class="gauge-wrap"><svg class="gauge" id="gauge" viewBox="0 0 200 150"></svg><div class="gauge-read"><b id="gaugeVal"></b><span>${esc(mech.gauge.unit)}</span></div></div>` : ''}

@@ -194,3 +194,15 @@ python "D:\APPS\Everything 3D\electric-fields\serve.py" 9085
   - Deferred mounting `<script type="module" src="js/main.js">` via `bootSimulation()` until after `pbkdf2Verify` succeeds so unauthorized visitors never load or render the 3D scene and Three.js initializes against an unlocked, fully visible viewport.
   - Added `pageshow` (`event.persisted`) bfcache re-locking and configured `Cancel` / failed attempts to navigate cleanly back to `../../index.html`.
   - Updated the Electrostatics dashboard card badge in `Beyond Physics SIMS/index.html` to `Simulation 🔒`.
+
+
+## Step 11: Collapsible Left Section Panel with Persistent Arrow Bar
+
+- **Files updated:**
+  - `Beyond Physics SIMS/electrostatics/electric-fields/js/sheet.js`
+  - `Beyond Physics SIMS/electrostatics/electric-fields/css/sheet.css`
+- **Implementation details:**
+  - Wrapped `.masthead` (title & lede) and `.phase-panel` (Block A: section title, description, section selector pills, and live readouts) inside `<aside class="left-drawer" id="leftDrawer">` with a sliding `.left-drawer-body` (`308px` wide) and a persistent `24px` vertical `.drawer-arrow-bar` (`#leftDrawerBtn`).
+  - Clicking `#leftDrawerBtn` (or pressing `[`) smoothly collapses `.left-drawer-body` to `width: 0` while keeping the `24px` vertical arrow bar (`▶` / `PANEL`) docked along the left sheet border so one click reveals the panel again.
+  - Updated `layout()` in `js/sheet.js` to measure `rect('#leftDrawer')` and run a `340ms` `requestAnimationFrame` layout sync during the CSS slide transition so the Three.js camera (`camera.setViewOffset` and `fitDist`), callouts, and voltage badges smoothly re-center and expand into the ~308px of newly freed horizontal stage width.
+  - Preserved stacked full-width behavior on narrow/mobile viewports (`@media (max-width: 960px)`).
