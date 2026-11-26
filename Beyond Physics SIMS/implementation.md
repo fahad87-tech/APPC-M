@@ -271,3 +271,13 @@ node_modules/
    - Included interactive draggable SVG measurement rulers (`0.1R` ticks), signed potential/kinetic/total energy bar charts and time-series plots, 5E inquiry scaffold, trial table, and zero-dependency client-side `.docx` report exporter.
    - Added dashboard card to the Circular Motion section in `index.html` and pushed to GitHub (`origin/main`).
    - Integrated PBKDF2 SHA-256 classroom password gate (`beyondphysics`, `100,000` iterations) with `pageshow` bfcache protection and updated the card badge to `Simulation 🔒` in `index.html`.
+
+
+13. **How Electric Fields Work — 3D Electrostatics Lab (`electrostatics/electric-fields/`)**:
+   - Deployed a clean zero-build ES module static bundle from `D:\APPS\Everything 3D\electric-fields` into `Beyond Physics SIMS/electrostatics/electric-fields/`.
+   - Included runtime files (`index.html`, `css/sheet.css`, `js/kit.js`, `js/main.js`, `js/sheet.js`, `js/mechanisms/electric-fields.js`, `vendor/three/three.module.js`, `vendor/three/LICENSE`, `vendor/three/addons/controls/OrbitControls.js`, `implementation.md`, `.nojekyll`, and `.gitignore` excluding local dev/recording scripts).
+   - Added root `.nojekyll` (`APPC-M/.nojekyll`) so GitHub Pages serves ES module imports and vendored Three.js assets directly without Jekyll filtering.
+   - Linked under the **Electrostatics** section in `Beyond Physics SIMS/index.html`.
+   - **Replication in Any IDE**:
+     1. Run any static HTTP server inside `Beyond Physics SIMS/` (e.g., `python -m http.server 8000` or VS Code Live Server).
+     2. Open `http://localhost:8000/electrostatics/electric-fields/?layout=sheet` for the full interactive drafting sheet or `?layout=figure` for the clean projector card.
