@@ -182,3 +182,15 @@ python "D:\APPS\Everything 3D\electric-fields\serve.py" 9085
 - **Live Classroom Links:**
   - Full interactive lab (`?layout=sheet`): `https://fahad87-tech.github.io/APPC-M/Beyond%20Physics%20SIMS/electrostatics/electric-fields/?layout=sheet`
   - Clean projector card (`?layout=figure`): `https://fahad87-tech.github.io/APPC-M/Beyond%20Physics%20SIMS/electrostatics/electric-fields/?layout=figure`
+
+
+## Step 10: Classroom Password Gate (`beyondphysics`)
+
+- **Files updated:**
+  - `Beyond Physics SIMS/electrostatics/electric-fields/index.html`
+  - `Beyond Physics SIMS/index.html`
+- **Implementation details:**
+  - Added the suite-standard Web Crypto PBKDF2 SHA-256 verification gate (`SIM_AUTH`, `100,000` iterations, salt `371b341008c326c55780b3fab691c8c0`, hash `11479c7493d51324cfd86082a9d5c255ba9ce02399839f4dc4f21d9a47d0ab7d` matching classroom password `beyondphysics`).
+  - Deferred mounting `<script type="module" src="js/main.js">` via `bootSimulation()` until after `pbkdf2Verify` succeeds so unauthorized visitors never load or render the 3D scene and Three.js initializes against an unlocked, fully visible viewport.
+  - Added `pageshow` (`event.persisted`) bfcache re-locking and configured `Cancel` / failed attempts to navigate cleanly back to `../../index.html`.
+  - Updated the Electrostatics dashboard card badge in `Beyond Physics SIMS/index.html` to `Simulation 🔒`.

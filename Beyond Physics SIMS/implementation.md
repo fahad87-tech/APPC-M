@@ -281,3 +281,4 @@ node_modules/
    - **Replication in Any IDE**:
      1. Run any static HTTP server inside `Beyond Physics SIMS/` (e.g., `python -m http.server 8000` or VS Code Live Server).
      2. Open `http://localhost:8000/electrostatics/electric-fields/?layout=sheet` for the full interactive drafting sheet or `?layout=figure` for the clean projector card.
+   - Integrated the suite-standard PBKDF2 SHA-256 classroom password gate (`beyondphysics`, `100,000` iterations) in `electrostatics/electric-fields/index.html` with deferred ES module boot (`bootSimulation()`), `pageshow` bfcache protection, `../../index.html` fallback navigation, and updated the card badge in `index.html` to `Simulation 🔒`.
